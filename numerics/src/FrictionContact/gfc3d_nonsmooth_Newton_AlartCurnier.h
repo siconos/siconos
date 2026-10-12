@@ -19,10 +19,108 @@
 #ifndef gfc3d_nonsmooth_Newton_AlartCurnier_h
 #define gfc3d_nonsmooth_Newton_AlartCurnier_h
 
-#include "NumericsFwd.h"  // for SolverOptions
+/*!\file gfc3d_nonsmooth_Newton_AlartCurnier.h
+ *
+ * \brief Public interface of the sparse global Alart--Curnier non-smooth
+ *        Newton solver for 3D frictional contact problems.
+ *
+ * The solver addresses the global 3D frictional contact problem
+ *
+ * \f[
+ *   \begin{cases}
+ *     M \, v = H \, r + q, \\
+ *     u = H^\top v + b, \\
+ *     (u_N, r_N, r_T) \text{ satisfy Signorini--Coulomb conditions},
+ *   \end{cases}
+ * \f]
+ *
+ * where \f$v\f$ is the global velocity, \f$u\f$ the local contact velocity,
+ * \f$r\f$ the contact reaction, \f$M\f$ the mass matrix, \f$H\f$ the
+ * contact Jacobian and \f$q, b\f$ data vectors.
+ *
+ * The contact conditions are reformulated as a semi-smooth residual using the
+ * Alart--Curnier function.  A non-smooth Newton iteration is applied to the
+ * concatenated residual
+ *
+ * \f[
+ *   \Psi(v, u, r) =
+ *   \begin{pmatrix}
+ *     M v - H r - q \\
+ *     u - H^\top v - b \\
+ *     \Phi_{\mathrm{AC}}(u, r, \rho)
+ *   \end{pmatrix},
+ * \f]
+ *
+ * with \f$\Phi_{\mathrm{AC}}\f$ the Alart--Curnier residual and
+ * \f$\rho\f$ a vector of contact scaling parameters.
+ */
 
-int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(SolverOptions* options);
+#include "NumericsFwd.h"  // for SolverOptions, GlobalFrictionContactProblem
 
-void gfc3d_sparseGlobalAlartCurnierInit(SolverOptions* SO);
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+/**
+ * \brief Solve a sparse global 3D friction contact problem with the
+ *        Alart--Curnier non-smooth Newton method.
+ *
+ * \param[in] problem the global friction contact problem
+ * \param[in,out] reaction on input, initial guess for the contact reaction;
+ *                 on output, the computed reaction (size: 3 x numberOfContacts)
+ * \param[in,out] velocity on input, initial guess for the local contact
+ *                 velocity; on output, the computed velocity
+ *                 (size: 3 x numberOfContacts)
+ * \param[in,out] globalVelocity on input, initial guess for the global
+ *                 velocity; on output, the computed global velocity
+ *                 (size: M->size0)
+ * \param[out] info solver status: 0 on success, nonzero otherwise
+ * \param[in,out] options solver options and parameters
+ */
+void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
+                                         double* reaction, double* velocity,
+                                         double* globalVelocity, int* info,
+                                         SolverOptions* options);
+
+/**
+ * \brief Run a VI-FPP warm start for GFC3D_NSN_AC.
+ *
+ * This function can be called before the Newton solver (it is called
+ * automatically by gfc3d_nonsmooth_Newton_AlartCurnier when the warm-start
+ * option is set to YES) or as a standalone fallback/preconditioner.
+ *
+ * \param[in] problem the global 3D friction contact problem
+ * \param[in,out] reaction initial guess / warm-started reaction
+ * \param[in,out] velocity initial guess / warm-started local velocity
+ * \param[in,out] globalVelocity initial guess / warm-started global velocity
+ * \param[in,out] options GFC3D_NSN_AC solver options; on output the rho
+ *                        parameter may be overwritten with the VI-FPP rho
+ * \return 0 if the warm start ran (or was disabled), nonzero on error
+ */
+int gfc3d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* reaction,
+                            double* velocity, double* globalVelocity, SolverOptions* options);
+
+/**
+ * \brief Set default solver options for GFC3D_NSN_AC.
+ *
+ * \param[in,out] options the solver options structure to initialize
+ */
+void gfc3d_nsn_ac_set_default(SolverOptions* options);
+
+/**
+ * \brief No-op initialization hook for the sparse global Alart--Curnier
+ *        solver.
+ *
+ * This function is part of the solver registration interface.  It currently
+ * performs no operation because all internal allocations are handled lazily
+ * inside gfc3d_nonsmooth_Newton_AlartCurnier.
+ *
+ * \param[in,out] options the solver options structure
+ */
+void gfc3d_sparseGlobalAlartCurnierInit(SolverOptions* options);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

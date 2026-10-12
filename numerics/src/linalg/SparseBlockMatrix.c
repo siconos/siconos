@@ -3001,7 +3001,7 @@ int SBM_from_csparse_2(size_t blocksize, CSparseMatrix* sparseMat,
 
 int SBM_from_csparse(size_t blocksize, const CSparseMatrix* const sparseMat,
                      SparseBlockStructuredMatrix* A) {
-  DEBUG_PRINT("SBM_from_csparse start\n")
+  DEBUG_PRINT("SBM_from_csparse start\n");
   CHECK_NULL(sparseMat);
   assert(sparseMat->p);
   assert(sparseMat->i);
@@ -3203,7 +3203,7 @@ int SBM_from_csparse(size_t blocksize, const CSparseMatrix* const sparseMat,
   /* 9: free temp memory */
   free(blocknum);
   free(blockline);
-  DEBUG_PRINT("SBM_from_csparse end\n")
+  DEBUG_PRINT("SBM_from_csparse end\n");
 
   return 0;
 }

@@ -175,7 +175,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction
     }
 
     /* **** Criterium convergence **** */
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
     if (options->callback) {
       options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,

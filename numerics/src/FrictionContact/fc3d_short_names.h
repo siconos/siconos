@@ -96,6 +96,13 @@
 #define OC_CYLINDER_LI SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration
 
 /* ===========================================================================
+ * Global Friction Contact 2D Solvers (GFC2D_*)
+ * =========================================================================== */
+#define GFC2D_NSN_AC        SICONOS_GLOBAL_FRICTION_2D_NSN_AC
+#define GFC2D_VI_FPP        SICONOS_GLOBAL_FRICTION_2D_VI_FPP
+#define GFC2D_VI_EG         SICONOS_GLOBAL_FRICTION_2D_VI_EG
+
+/* ===========================================================================
  * Global Friction Contact 3D Solvers (GFC3D_*)
  * =========================================================================== */
 #define GFC3D_NSGS_WR SICONOS_GLOBAL_FRICTION_3D_NSGS_WR

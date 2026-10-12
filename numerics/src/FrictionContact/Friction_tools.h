@@ -30,7 +30,7 @@ extern "C" {
 
 /** pointer to function used to update velocity and compute error */
 typedef int (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double,
-                               SolverOptions*, double, double*);
+                               SolverOptions*, double*);
 
 /** pointer to function used to call internal solver for proximal point solver
  */

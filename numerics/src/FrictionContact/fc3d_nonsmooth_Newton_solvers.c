@@ -627,7 +627,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       fc3d_compute_error(
           problem, reaction, velocity,
           //      fc3d_FischerBurmeister_compute_error(problem, reaction, velocity,
-          tolerance, options, norm_q, &SOLVER_RESIDUAL(options));
+          tolerance, options, &SOLVER_RESIDUAL(options));
 
       DEBUG_EXPR_WE(equation->function(equation->data, problemSize, reaction, velocity,
                                        equation->problem->mu, rho, F, NULL, NULL));

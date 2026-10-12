@@ -142,7 +142,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
       }
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       if (options->callback) {
         options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,
@@ -276,7 +276,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
       });
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
       DEBUG_PRINTF("error = %12.8e\t error_k = %12.8e\n", error, error_k);
       /*Update rho*/
       if ((rho_k * a1 < Lmin * a2) && (error < error_k)) {

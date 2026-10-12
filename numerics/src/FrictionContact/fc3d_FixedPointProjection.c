@@ -196,7 +196,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
       };);
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
       DEBUG_EXPR_WE(if ((error < error_k)) { printf("(error < error_k) is satisfied\n"); });
       /*Update rho*/
       if ((rho_k * a1 < Lmin * a2) && (error < error_k)) {

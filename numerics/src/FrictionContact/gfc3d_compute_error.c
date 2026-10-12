@@ -127,20 +127,30 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   double norm_u = cblas_dnrm2(m, velocity, 1);
   DEBUG_PRINTF("norm of velocity %e\n", norm_u);
 
-  double worktmp[3];
-  for (int ic = 0; ic < nc; ic++) {
-    fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
-                                       &error_complementarity, worktmp);
+  int norm = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  int scope = SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE;
+  int reduction = SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX;
+  double alpha = 1.0;
+  if (options != NULL) {
+    norm = options->iparam[SICONOS_FRICTION_3D_SCALING_NORM];
+    scope = options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE];
+    reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
+    alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
   }
+  double* comp_work = (double*)malloc(nc * sizeof(double));
+  double* comp_tmp = (double*)malloc(m * sizeof(double));
+  if (comp_work == NULL || comp_tmp == NULL) {
+    free(comp_work);
+    free(comp_tmp);
+    return numerics_error("gfc3d_compute_error", "bad alloc");
+  }
+  error_complementarity = fc3d_compute_complementarity_error(nc, reaction, velocity, mu,
+                                                             norm, scope, reduction, alpha,
+                                                             comp_work, comp_tmp);
+  free(comp_work);
+  free(comp_tmp);
 
-  error_complementarity = sqrt(error_complementarity);
-
-  DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
-
-  relative_scaling = fmax(norm_u, norm_r);
-  if (fabs(relative_scaling) > MIN_RELATIVE_SCALING)
-    error_complementarity = error_complementarity / relative_scaling;
-  DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
+  DEBUG_PRINTF("scaled error in complementarity= %e\n", error_complementarity);
 
   *error += error_complementarity;
   DEBUG_PRINTF("relative error = %e\n", *error);

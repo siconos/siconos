@@ -393,7 +393,7 @@ static double calculateFullErrorAdaptiveInterval(FrictionContactProblem* problem
   double error = 1e+24;
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] > 0) {
     if (iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0) {
-      (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      (*computeError)(problem, reaction, velocity, tolerance, options, &error);
       if (error > tolerance && options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                                    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
@@ -405,7 +405,7 @@ static double calculateFullErrorAdaptiveInterval(FrictionContactProblem* problem
         iter, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY],
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]);
   } else
-    (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    (*computeError)(problem, reaction, velocity, tolerance, options, &error);
 
   return error;
 }
@@ -414,7 +414,7 @@ static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOpt
                                       ComputeErrorPtr computeError, double* reaction,
                                       double* velocity, double tolerance, double norm_q) {
   double absolute_error;
-  (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &absolute_error);
+  (*computeError)(problem, reaction, velocity, tolerance, options, &absolute_error);
 
   if (verbose > 0) {
     if (absolute_error > SOLVER_TOL(options)) {

@@ -42,6 +42,10 @@ void Function_VI_GFC3D(void* self, int n, double* x, double* F);
 
 void Projection_VI_GFC3D(void* viIn, double* x, double* PX);
 
+void Function_VI_GFC2D(void *self, int n, double *x, double *F);
+
+void Projection_VI_GFC2D(void *viIn, double *x, double *PX);
+
 #if defined(__cplusplus)
 }
 #endif

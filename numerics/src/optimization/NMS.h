@@ -27,6 +27,8 @@
  *
  */
 
+#include <stdio.h>           // for fprintf, stderr
+
 #include "Newton_methods.h"  // for functions_LSA
 #include "NumericsFwd.h"     // for NumericsMatrix
 #include "line_search.h"     // for search_data

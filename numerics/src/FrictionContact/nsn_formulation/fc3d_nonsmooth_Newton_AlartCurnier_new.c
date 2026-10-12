@@ -67,7 +67,7 @@ static void FC3D_compute_error(void* data_opaque, double* reaction, double* velo
   FC3D_Newton_data* dat = (FC3D_Newton_data*)data_opaque;
   FrictionContactProblem* problem = dat->problem;
 
-  fc3d_compute_error(problem, reaction, velocity, tol, NULL, dat->normq, err);
+  fc3d_compute_error(problem, reaction, velocity, tol, NULL, err);
 }
 
 static void FC3D_compute_F_merit(void* data_opaque, double* reaction, double* velocity,

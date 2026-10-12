@@ -181,6 +181,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   dparam[SICONOS_DPARAM_TOL] = tolerance;
   dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /***** Free memory *****/
   (*freeSolver)(problem);

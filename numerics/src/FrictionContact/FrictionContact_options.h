@@ -203,6 +203,20 @@ enum FRICTION_SOLVER {
   /** IPM-SNM with proximal regularization */
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX = 620,
 
+  /* -----------------------------------------------------------------------
+   * Global 2D Frictional Contact solvers (IDs 700-799)
+   * -----------------------------------------------------------------------
+   * These solvers work on the global (aggregated) formulation of the
+   * 2D friction contact problem.
+   */
+
+  /** Non-smooth Newton Alart-Curnier, global 2D formulation */
+  SICONOS_GLOBAL_FRICTION_2D_NSN_AC = 720,
+  /** VI formulation, Fixed Point Projection, global 2D formulation */
+  SICONOS_GLOBAL_FRICTION_2D_VI_FPP = 721,
+  /** VI formulation, Extra Gradient, global 2D formulation */
+  SICONOS_GLOBAL_FRICTION_2D_VI_EG = 722,
+
 }; /* end of enum FRICTION_SOLVER */
 
 /* ===========================================================================
@@ -230,6 +244,105 @@ enum SICONOS_FRICTION_3D_IPARAM {
   SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER = 5,
   /** Number of contacts in the problem */
   SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
+  /** Norm used when computing the FC3D/GFC3D complementarity error
+   *  (see SICONOS_FRICTION_3D_SCALING) */
+  SICONOS_FRICTION_3D_SCALING_NORM = 24,
+  /** Scope over which the error scaling is computed:
+   *  per cone or over the whole vector (see SICONOS_FRICTION_3D_SCALING_SCOPE) */
+  SICONOS_FRICTION_3D_SCALING_SCOPE = 25,
+  /** Reduction used to combine the two vector norms in the scaling:
+   *  max, geometric mean, or sum (see SICONOS_FRICTION_3D_SCALING_REDUCTION) */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION = 26,
+};
+
+/** Backward-compatibility alias for the old error-scaling option name. */
+#define SICONOS_FRICTION_3D_ERROR_SCALING SICONOS_FRICTION_3D_SCALING_NORM
+
+/** Norm selection for the FC3D/GFC3D complementarity-error scaling.
+ *  The actual scaling is obtained by combining the norm with a scope
+ *  (SICONOS_FRICTION_3D_SCALING_SCOPE) and a reduction
+ *  (SICONOS_FRICTION_3D_SCALING_REDUCTION). */
+enum SICONOS_FRICTION_3D_SCALING {
+  /** Default norm value.
+   *  Zero-initialized options use Euclidean scaling. */
+  SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = 0,
+  /** No scaling of the complementarity residual. */
+  SICONOS_FRICTION_3D_SCALING_NO = 1,
+  /** Second-order cone (spectral) norm */
+  SICONOS_FRICTION_3D_SCALING_CONE = 3,
+  /** Friction-cone norm weighted by mu */
+  SICONOS_FRICTION_3D_SCALING_CONE_MU = 5,
+  /** Weighted cone norm (parameter SICONOS_FRICTION_3D_SCALING_ALPHA) */
+  SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED = 6,
+};
+
+/** Scope of the complementarity-error scaling. */
+enum SICONOS_FRICTION_3D_SCALING_SCOPE {
+  /** Per-contact (per-cone) scaling. */
+  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE = 0,
+  /** Scaling computed over the whole stacked vector. */
+  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR = 1,
+};
+
+/** Reduction used to combine the two single-vector norms in the scaling. */
+enum SICONOS_FRICTION_3D_SCALING_REDUCTION {
+  /** Safeguarded maximum (min of the two safeguarded norms). */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX = 0,
+  /** Safeguarded geometric mean. */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN = 1,
+  /** Safeguarded sum of the two norms. */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED = 2,
+};
+
+/* -------------------------------------------------------------------------- */
+/* 2D complementarity-error scaling options                                   */
+/* -------------------------------------------------------------------------- */
+
+/** Indices for FC2D/GFC2D integer parameters. */
+enum SICONOS_FRICTION_2D_IPARAM {
+  /** Norm used when computing the FC2D/GFC2D complementarity error
+   *  (see SICONOS_FRICTION_2D_SCALING) */
+  SICONOS_FRICTION_2D_SCALING_NORM = 24,
+  /** Scope over which the error scaling is computed:
+   *  per cone or over the whole vector (see SICONOS_FRICTION_2D_SCALING_SCOPE) */
+  SICONOS_FRICTION_2D_SCALING_SCOPE = 25,
+  /** Reduction used to combine the two vector norms in the scaling:
+   *  max, geometric mean, or sum (see SICONOS_FRICTION_2D_SCALING_REDUCTION) */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION = 26,
+};
+
+/** Norm selection for the FC2D/GFC2D complementarity-error scaling. */
+enum SICONOS_FRICTION_2D_SCALING {
+  /** Default norm value.
+   *  Zero-initialized options use Euclidean scaling. */
+  SICONOS_FRICTION_2D_SCALING_EUCLIDEAN = 0,
+  /** No scaling of the complementarity residual (legacy relative scaling
+   *  is applied in FC2D/GFC2D error computation). */
+  SICONOS_FRICTION_2D_SCALING_NO = 1,
+  /** Second-order cone (spectral) norm */
+  SICONOS_FRICTION_2D_SCALING_CONE = 3,
+  /** Friction-cone norm weighted by mu */
+  SICONOS_FRICTION_2D_SCALING_CONE_MU = 5,
+  /** Weighted cone norm (parameter SICONOS_FRICTION_2D_SCALING_ALPHA) */
+  SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED = 6,
+};
+
+/** Scope of the FC2D/GFC2D complementarity-error scaling. */
+enum SICONOS_FRICTION_2D_SCALING_SCOPE {
+  /** Per-contact (per-cone) scaling. */
+  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE = 0,
+  /** Scaling computed over the whole stacked vector. */
+  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_VECTOR = 1,
+};
+
+/** Reduction used to combine the two single-vector norms in the FC2D/GFC2D scaling. */
+enum SICONOS_FRICTION_2D_SCALING_REDUCTION {
+  /** Safeguarded maximum (min of the two safeguarded norms). */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX = 0,
+  /** Safeguarded geometric mean. */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN = 1,
+  /** Safeguarded sum of the two norms. */
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MIXED = 2,
 };
 
 /** Matrix rescaling strategies for friction contact problems */
@@ -301,8 +414,78 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM {
   /** Flag: internal work array allocated (1=yes, 0=no) */
   SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED = 17,
   /** MPI communicator for distributed solving */
-  SICONOS_FRICTION_3D_NSN_MPI_COM = 18
+  SICONOS_FRICTION_3D_NSN_MPI_COM = 18,
+  /** Warm-start strategy for GFC3D_NSN_AC (see SICONOS_FRICTION_3D_NSN_WARM_START) */
+  SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY = 20,
+  /** Maximum number of warm-start iterations for GFC3D_NSN_AC */
+  SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER = 21,
+  /** Jacobian regularization strategy for GFC3D_NSN_AC
+   *  (see SICONOS_FRICTION_3D_NSN_REGULARIZATION)
+   */
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION = 22
 
+};
+
+/** Indices for global 2D NSN solver integer parameters */
+enum SICONOS_FRICTION_2D_NSN_IPARAM {
+  /** Warm-start strategy: run a few GFC2D_VI_FPP iterations before NSN
+   *  (see SICONOS_FRICTION_2D_NSN_WARM_START)
+   */
+  SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY = 20,
+  /** Maximum number of warm-start iterations */
+  SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER = 21,
+  /** Jacobian regularization strategy (see SICONOS_FRICTION_2D_NSN_REGULARIZATION) */
+  SICONOS_FRICTION_2D_NSN_REGULARIZATION = 22,
+  /** Complementarity formulation for the 2D NSN solver
+   *  (see SICONOS_FRICTION_2D_NSN_FORMULATION_ENUM)
+   */
+  SICONOS_FRICTION_2D_NSN_FORMULATION = 23,
+};
+
+/** Warm-start strategy values for GFC2D_NSN_AC */
+enum SICONOS_FRICTION_2D_NSN_WARM_START {
+  /** No warm start: use the user-provided initial guess */
+  SICONOS_FRICTION_2D_NSN_WARM_START_NO = 0,
+  /** Run GFC2D_VI_FPP for a few iterations to build the initial guess */
+  SICONOS_FRICTION_2D_NSN_WARM_START_YES = 1,
+  /** Run GFC2D_VI_FPP only if the first Newton linear solve fails */
+  SICONOS_FRICTION_2D_NSN_WARM_START_AUTO = 2,
+};
+
+/** Warm-start strategy values for GFC3D_NSN_AC */
+enum SICONOS_FRICTION_3D_NSN_WARM_START {
+  /** No warm start: use the user-provided initial guess */
+  SICONOS_FRICTION_3D_NSN_WARM_START_NO = 0,
+  /** Run GFC3D_VI_FPP for a few iterations to build the initial guess */
+  SICONOS_FRICTION_3D_NSN_WARM_START_YES = 1,
+  /** Run GFC3D_VI_FPP only if the first Newton linear solve fails */
+  SICONOS_FRICTION_3D_NSN_WARM_START_AUTO = 2,
+};
+
+/** Jacobian regularization values for GFC3D_NSN_AC */
+enum SICONOS_FRICTION_3D_NSN_REGULARIZATION {
+  /** No Jacobian regularization */
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION_NO = 0,
+  /** Add regul * I to the Jacobian before each linear solve */
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES = 1,
+};
+
+
+
+/** Jacobian regularization values for GFC2D_NSN_AC */
+enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
+  /** No Jacobian regularization */
+  SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO = 0,
+  /** Add regul * I to the Jacobian before each linear solve */
+  SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES = 1,
+};
+
+/** Formulation variants for the GFC2D NSN solver */
+enum SICONOS_FRICTION_2D_NSN_FORMULATION {
+  /** Alart--Curnier radius mu * max(0, r_N - rho_N u_N) */
+  SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER = 0,
+  /** Jean--Moreau radius mu * r_N */
+  SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU = 1,
 };
 
 enum SICONOS_FC3D_NSN_LINEAR_SOLVER {
@@ -313,6 +496,18 @@ enum SICONOS_FC3D_NSN_LINEAR_SOLVER {
 enum SICONOS_FRICTION_3D_NSN_DPARAM {
   /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_NSN_RHO = 3,
+  /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
+  SICONOS_FRICTION_3D_NSN_REGUL = 4,
+  /** Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0) */
+  SICONOS_FRICTION_3D_SCALING_ALPHA = 5,
+};
+
+/** Double parameters for global 2D NSN solver */
+enum SICONOS_FRICTION_2D_NSN_DPARAM {
+  /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
+  SICONOS_FRICTION_2D_NSN_REGUL = 4,
+  /** Weight for SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED (default 1.0) */
+  SICONOS_FRICTION_2D_SCALING_ALPHA = 5,
 };
 
 enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY {

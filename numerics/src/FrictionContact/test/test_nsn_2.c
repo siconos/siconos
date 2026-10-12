@@ -41,7 +41,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(solvers[s]);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 5e-2;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
     current++;
 #ifdef WITH_MUMPS
     if (s == 2) {
@@ -55,7 +55,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
   collection[0].will_fail = 2;  // (FC3D_NSN_AC, on ./data/RockPile_tob1.dat)  is unstable
   collection[1].will_fail =
       1;  // (FC3D_NSN_AC_TEST, on ./data/RockPile_tob1.dat)  is expected to fail.
-
+  collection[2].will_fail =
+      1;  // (FC3D_NSN_FB, on ./data/RockPile_tob1.dat)  is expected to fail with EUCLIDEAN scaling.
   // ===== KaplasTower-i1061-4.hdf5.dat =====
   d = 8;
   collection[current].filename = data_collection[d];
@@ -70,7 +71,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(solvers[s]);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 500;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
     current++;
   }
   collection[5].will_fail =

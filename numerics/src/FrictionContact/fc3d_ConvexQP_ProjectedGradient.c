@@ -84,7 +84,7 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem,
   /* **** Criterium convergence **** */
   // Warning: the function below uses options->dWork
   fc3d_Tresca_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
-                            options, norm_q, &error);
+                            options, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */

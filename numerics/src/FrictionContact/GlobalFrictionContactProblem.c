@@ -306,6 +306,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
   NumericsMatrix* M = problem->M;
   NumericsMatrix* H = problem->H;
 
+  NM_display(M);
+  NM_display(H);
   const size_t n = to_size_t(M->size0);
   const size_t m = to_size_t(H->size1);
   const blasint n_blas = to_blasint(n);
@@ -319,7 +321,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
 
   if (H->storageType != M->storageType) {
     //     if(verbose==1)
-    printf(" ->storageType != M->storageType :This case is not taken into account\n");
+    printf(" H->storageType (%i) != M->storageType (%i) : This case is not taken into account\n", H->storageType, M->storageType);
+    
     return NULL;
   }
 #ifdef OUTPUT_DEBUG
@@ -444,7 +447,13 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     free(MinvH);
     free(Htrans);
     free(qtmp);
-  } else if (M->storageType == NM_SPARSE) {
+  }
+
+
+
+
+
+  else if (M->storageType == NM_SPARSE) {
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataM.py", "w");
     NM_write_in_file_python(M, fileout);

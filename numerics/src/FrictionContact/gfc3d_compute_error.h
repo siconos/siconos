@@ -47,6 +47,7 @@ extern "C" {
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
                         double* velocity, double* globalVelocity, double tolerance,
                         SolverOptions* options, double norm_q, double norm_b, double* error);
+
 int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* reaction,
                                double* velocity, double* globalVelocity, double tolerance,
                                SolverOptions* options, double norm_q, double norm_b,
@@ -70,6 +71,16 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* re
  *  \return 0 if successfull
  */
 int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* problem,
+                                            double* reaction, double* velocity,
+                                            double* globalVelocity, double tolerance,
+                                            SolverOptions* options, double norm_q,
+                                            double norm_b, double* error);
+
+/** Function-pointer type for GFC3D error computations.
+ *
+ *  This allows solvers to plug in different GFC3D error computations.
+ */
+typedef int (*GFC3D_compute_error_function)(GlobalFrictionContactProblem* problem,
                                             double* reaction, double* velocity,
                                             double* globalVelocity, double tolerance,
                                             SolverOptions* options, double norm_q,

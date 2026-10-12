@@ -139,7 +139,7 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
     cumul_iter += internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
     /* **** Criterium convergence **** */
 
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
     if (options->callback) {
       options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,

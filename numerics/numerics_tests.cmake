@@ -19,6 +19,11 @@ if(WITH_TESTING)
   new_test(SOURCES test_graph.c)
 
   new_test(NAME tools_projection SOURCES test_projection.c)
+  new_test(NAME tools_natural_map_cone SOURCES test_natural_map_cone.c)
+  new_test(NAME tools_projection_3d_cone_vector SOURCES test_projectionOnCone_vector.c)
+  new_test(NAME tools_projection_3d_cone_perf SOURCES test_projectionOnCone_vector_perf.c)
+  new_test(NAME tools_modified_local_velocity SOURCES test_modified_local_velocity.c)
+  new_test(NAME tools_SOC_scaling SOURCES test_SOC_scaling.c)
 
   new_test(SOURCES NumericsArrays.c)
 
@@ -172,7 +177,7 @@ if(WITH_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_2
     EXTRA_SOURCES data_collection_2.c test_nsgs_1.c)
   new_tests_collection(
-    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FREEZE_2
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FREEZE_1
     EXTRA_SOURCES data_collection_2.c test_nsgs_freeze_1.c)
 
   new_tests_collection(
@@ -293,12 +298,38 @@ if(WITH_TESTING)
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_admm_gfc3d_1.c )
 
+  # Comparison of old vs normalized complementarity error on a selection of
+  # GFC3D problems solved with NSGS.
+  new_test(NAME test_compare_gfc3d_error SOURCES test_compare_gfc3d_error.c)
+
+  # Closed-form academic FC3D regimes: compare all scaling options under
+  # exact/perturbed, balanced/extreme-magnitude conditions.
+  new_test(NAME test_scaling_regimes SOURCES test_scaling_regimes.c)
+
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
+  new_tests_collection(
+    DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_NSN_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc2d_1.c test_nsn_gfc2d_1.c )
+
+  # Minimal sanity test for the 2D global nonsmooth Newton Alart-Curnier solver
+  new_test(NAME test_nsn_gfc2d_single_particle SOURCES test_nsn_gfc2d_single_particle.c)
+
+  # Comparison of Alart--Curnier vs Jean--Moreau formulations for GFC2D_NSN_AC
+  new_test(NAME test_nsn_gfc2d_ac_vs_jm SOURCES test_nsn_gfc2d_ac_vs_jm.c)
+
+  # Minimal sanity test for the 2D global VI fixed point projection solver
+  new_test(NAME test_vi_fpp_gfc2d_single_particle SOURCES test_vi_fpp_gfc2d_single_particle.c)
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
+
+  # Vectorized complementarity error vs scalar reference
+  new_test(NAME test_compute_error_vectorized SOURCES test_compute_error_vectorized.c)
+
+  # Vectorized 2D complementarity error vs scalar reference
+  new_test(NAME test_compute_error_2d SOURCES test_compute_error_2d.c)
 
   # ---------------------------------------------------
   # --- Rolling friction contact problem formulation ---

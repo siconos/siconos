@@ -760,7 +760,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
     NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
     double norm_q = cblas_dnrm2(blasnd, problem->q, 1);
     (*computeError)(problem, data->tmp_point->t_reaction, data->tmp_point->t_velocity, tol,
-                    options, norm_q, &projerr);
+                    options, &projerr);
 
     totalresidual = fmax(fmax(fmax(pinfeas, diff_fixp), 2. * max_uor_2mu), 4. * barr_param);
     totalresidual_mu = fmax(fmax(pinfeas, uor_mu), diff_fixp);

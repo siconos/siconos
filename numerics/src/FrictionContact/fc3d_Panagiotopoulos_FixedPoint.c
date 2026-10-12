@@ -208,7 +208,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
       reaction[contact * 3] = r_n[contact];
     }
 
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
     if (error < tolerance) {
       hasNotConverged = 0;
@@ -228,7 +228,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
 
       /* if (verbose>0) */
       /*   printf("norm of mu = %10.5e \n", cblas_dnrm2(nc , mu , 1)); */
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       (*internalsolver_tangent)(tangent_cqp, r_t, velocity, info, internalsolver_options[1]);
       cumul_internal += internalsolver_options[1]->iparam[SICONOS_IPARAM_ITER_DONE];
@@ -239,7 +239,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
       }
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       if (options->callback) {
         options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,
