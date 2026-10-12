@@ -112,7 +112,7 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
 
     /* **** Criterium convergence **** */
 
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
     if (options->callback) {
       options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,

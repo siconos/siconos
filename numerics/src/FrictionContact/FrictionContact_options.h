@@ -244,31 +244,55 @@ enum SICONOS_FRICTION_3D_IPARAM {
   SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER = 5,
   /** Number of contacts in the problem */
   SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
-  /** Scaling used when computing the FC3D/GFC3D complementarity error
-   *  (see SICONOS_FRICTION_3D_SCALING)
-   */
-  SICONOS_FRICTION_3D_ERROR_SCALING = 24,
+  /** Norm used when computing the FC3D/GFC3D complementarity error
+   *  (see SICONOS_FRICTION_3D_SCALING) */
+  SICONOS_FRICTION_3D_SCALING_NORM = 24,
+  /** Scope over which the error scaling is computed:
+   *  per cone or over the whole vector (see SICONOS_FRICTION_3D_SCALING_SCOPE) */
+  SICONOS_FRICTION_3D_SCALING_SCOPE = 25,
+  /** Reduction used to combine the two vector norms in the scaling:
+   *  max, geometric mean, or sum (see SICONOS_FRICTION_3D_SCALING_REDUCTION) */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION = 26,
 };
 
-/** Scaling selection for FC3D/GFC3D complementarity error */
+/** Backward-compatibility alias for the old error-scaling option name. */
+#define SICONOS_FRICTION_3D_ERROR_SCALING SICONOS_FRICTION_3D_SCALING_NORM
+
+/** Norm selection for the FC3D/GFC3D complementarity-error scaling.
+ *  The actual scaling is obtained by combining the norm with a scope
+ *  (SICONOS_FRICTION_3D_SCALING_SCOPE) and a reduction
+ *  (SICONOS_FRICTION_3D_SCALING_REDUCTION). */
 enum SICONOS_FRICTION_3D_SCALING {
-  /** Default/unset scaling value.
+  /** Default/unset norm value.
    *  In FC3D/GFC3D complementarity error computation this is interpreted
    *  as SICONOS_FRICTION_3D_SCALING_EUCLIDEAN (zero-initialized options). */
   SICONOS_FRICTION_3D_SCALING_NO = 0,
-  /** Per-variable Euclidean safeguarded scaling:
-   *  σ = min(max(1,‖r‖_2), max(1,‖u_mod‖_2)) */
+  /** Euclidean norm */
   SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = 2,
-  /** Per-variable cone-norm safeguarded scaling */
+  /** Second-order cone (spectral) norm */
   SICONOS_FRICTION_3D_SCALING_CONE = 3,
-  /** Per-variable friction-cone safeguarded scaling */
+  /** Friction-cone norm weighted by mu */
   SICONOS_FRICTION_3D_SCALING_CONE_MU = 5,
-  /** Per-variable weighted cone safeguarded scaling */
+  /** Weighted cone norm (parameter SICONOS_FRICTION_3D_SCALING_ALPHA) */
   SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED = 6,
-  /** Per-variable worst-case relative scaling */
-  SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_MAX = 7,
-  /** Per-variable geometric-mean relative scaling */
-  SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_GEOM = 8,
+};
+
+/** Scope of the complementarity-error scaling. */
+enum SICONOS_FRICTION_3D_SCALING_SCOPE {
+  /** Per-contact (per-cone) scaling. */
+  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE = 0,
+  /** Scaling computed over the whole stacked vector. */
+  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR = 1,
+};
+
+/** Reduction used to combine the two single-vector norms in the scaling. */
+enum SICONOS_FRICTION_3D_SCALING_REDUCTION {
+  /** Safeguarded maximum (min of the two safeguarded norms). */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX = 0,
+  /** Safeguarded geometric mean. */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN = 1,
+  /** Safeguarded sum of the two norms. */
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED = 2,
 };
 
 /** Matrix rescaling strategies for friction contact problems */

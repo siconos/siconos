@@ -127,14 +127,18 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   double norm_u = cblas_dnrm2(m, velocity, 1);
   DEBUG_PRINTF("norm of velocity %e\n", norm_u);
 
-  int scaling = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  int norm = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  int scope = SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE;
+  int reduction = SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX;
   double alpha = 1.0;
   if (options != NULL) {
-    scaling = options->iparam[SICONOS_FRICTION_3D_ERROR_SCALING];
+    norm = options->iparam[SICONOS_FRICTION_3D_SCALING_NORM];
+    scope = options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE];
+    reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
     alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
   }
-  if (scaling == SICONOS_FRICTION_3D_SCALING_NO) {
-    scaling = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  if (norm == SICONOS_FRICTION_3D_SCALING_NO) {
+    norm = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
   }
 
   double* comp_work = (double*)malloc(nc * sizeof(double));
@@ -145,7 +149,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
     return numerics_error("gfc3d_compute_error", "bad alloc");
   }
   error_complementarity = fc3d_compute_complementarity_error(nc, reaction, velocity, mu,
-                                                             scaling, alpha, norm_q,
+                                                             norm, scope, reduction, alpha,
                                                              comp_work, comp_tmp);
   free(comp_work);
   free(comp_tmp);

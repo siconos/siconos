@@ -748,7 +748,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   const double norm_b = cblas_dnrm2(num_contact_dofs, problem->b, 1);
 
   /* The error function now uses the scaling selected in options->iparam
-   * [SICONOS_FRICTION_3D_ERROR_SCALING]. */
+   * [SICONOS_FRICTION_3D_SCALING_NORM]. */
 
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - Problem information");
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - 1-norm of M = %g norm of q = %g ",

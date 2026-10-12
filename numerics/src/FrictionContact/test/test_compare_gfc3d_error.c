@@ -33,7 +33,9 @@ typedef struct {
 } TestCaseConfig;
 
 typedef struct {
-  int scaling;
+  int norm;
+  int scope;
+  int reduction;
   const char* label;
 } ScalingCase;
 
@@ -66,13 +68,22 @@ int main(void) {
   const int n_presets = (int)(sizeof(presets) / sizeof(presets[0]));
 
   ScalingCase scalings[] = {
-      {SICONOS_FRICTION_3D_SCALING_NO, "no"},
-      {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN, "euclidean"},
-      {SICONOS_FRICTION_3D_SCALING_CONE, "cone"},
-      {SICONOS_FRICTION_3D_SCALING_CONE_MU, "cone_mu"},
-      {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, "weighted"},
-      {SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_MAX, "per_var_max"},
-      {SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_GEOM, "per_var_geo"}};
+      {SICONOS_FRICTION_3D_SCALING_NO, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "no"},
+      {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "euc_pc_max"},
+      {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "euc_pv_max"},
+      {SICONOS_FRICTION_3D_SCALING_CONE, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "cone_pc_max"},
+      {SICONOS_FRICTION_3D_SCALING_CONE_MU, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "cmu_pc_max"},
+      {SICONOS_FRICTION_3D_SCALING_CONE_MU, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN, "cmu_pv_mean"},
+      {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED, "wgt_pc_mix"},
+      {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
+       SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "wgt_pv_max"}};
   const int n_scalings = (int)(sizeof(scalings) / sizeof(scalings[0]));
 
   printf("--------------------------------------------------------------------------------------------------"
@@ -131,9 +142,11 @@ int main(void) {
                           /* tolerance = */ 1.0, options, norm_q, norm_b, &error_standard);
 
       /* Error with each explicit scaling choice. */
-      double errors[9];
+      double errors[n_scalings];
       for (int s = 0; s < n_scalings; ++s) {
-        options->iparam[SICONOS_FRICTION_3D_ERROR_SCALING] = scalings[s].scaling;
+        options->iparam[SICONOS_FRICTION_3D_SCALING_NORM] = scalings[s].norm;
+        options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE] = scalings[s].scope;
+        options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION] = scalings[s].reduction;
         options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA] = 1.0;
         errors[s] = 0.0;
         gfc3d_compute_error(problem, reaction, velocity, globalvelocity,

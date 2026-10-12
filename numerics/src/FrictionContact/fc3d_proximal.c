@@ -83,7 +83,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   double sigma = 0.0;
   double nu = 0.0;
 
-  fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+  fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
   if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
 
@@ -214,7 +214,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       /* substract proximal regularization on M */
       NM_add_to_diag3(M, -alpha);
 
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       numerics_printf_verbose(1,
                               "---- FC3D - PROXIMAL - | %3d | %14.7e | %7.3e | alpha = %12.8e",
@@ -259,7 +259,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   /*     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options); */
 
   /*     /\* **** Criterium convergence **** *\/ */
-  /*     fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
+  /*     fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
    */
 
   /*     int iter_internalsolver = internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE]; */
@@ -326,7 +326,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1);
       /* substract proximal regularization on M */
       NM_add_to_diag3(M, -alpha);
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       if (*info) {
         numerics_printf_verbose(1, "---- FC3D - PROXIMAL - internalsolver no convergence");

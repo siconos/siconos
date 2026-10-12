@@ -95,7 +95,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velo
   error = options->dparam[SICONOS_DPARAM_RESIDU];
   double real_error = 0.0;
 
-  fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &real_error);
+  fc3d_compute_error(problem, reaction, velocity, tolerance, options, &real_error);
 
   if (options->callback) {
     options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,

@@ -132,7 +132,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
     }
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    (*computeError)(problem, reaction, velocity, tolerance, options, &error);
 
     if (verbose > 0)
       numerics_printf("---- FC3D - NSGS_VELOCITY - | %3d | %14.7e | %7.3e |", iter, error,

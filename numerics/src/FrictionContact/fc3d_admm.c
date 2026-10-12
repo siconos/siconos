@@ -244,7 +244,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
     cblas_dcopy(m, q, 1, q_s, 1);
     DEBUG_EXPR(
-        fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error););
+        fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
     DEBUG_EXPR(NV_display(velocity, m););
     DEBUG_EXPR(NV_display(xi, m););
 
@@ -472,7 +472,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
           SICONOS_FRICTION_3D_RESCALING_SCALAR) {
         norm_q = cblas_dnrm2(m, problem->q, 1);
       }
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
       DEBUG_EXPR(NV_display(velocity, m));
       if (error < dparam[SICONOS_DPARAM_TOL]) {
         hasNotConverged = 0;
@@ -507,7 +507,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   if (iter == itermax) {
     norm_q = cblas_dnrm2(m, problem->q, 1);
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
     if (error < dparam[SICONOS_DPARAM_TOL]) {
       *info = 0;
     }
@@ -648,7 +648,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
 
     cblas_dcopy(m, q, 1, q_s, 1);
     DEBUG_EXPR(
-        fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error););
+        fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
     DEBUG_EXPR(NV_display(velocity, m););
     DEBUG_EXPR(NV_display(&xi[m], m););
 
@@ -906,7 +906,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
      * tolerance * s1); */
 
     if (admm_has_converged) {
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
       DEBUG_EXPR(NV_display(velocity, m));
       if (error < dparam[SICONOS_DPARAM_TOL]) {
         hasNotConverged = 0;
@@ -928,7 +928,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   }
 
   if (iter == itermax) {
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
     numerics_printf_verbose(
         1, "---- FC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho,
         error);

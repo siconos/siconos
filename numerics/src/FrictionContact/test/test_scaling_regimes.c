@@ -57,18 +57,29 @@ typedef enum {
 } Perturbation;
 
 typedef struct {
-  int scaling;
+  int norm;
+  int scope;
+  int reduction;
   const char* label;
 } ScalingCase;
 
 static const ScalingCase SCALINGS[] = {
-    {SICONOS_FRICTION_3D_SCALING_NO, "no"},
-    {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN, "euclidean"},
-    {SICONOS_FRICTION_3D_SCALING_CONE, "cone"},
-    {SICONOS_FRICTION_3D_SCALING_CONE_MU, "cone_mu"},
-    {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, "weighted"},
-    {SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_MAX, "per_var_max"},
-    {SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_GEOM, "per_var_geo"}};
+    {SICONOS_FRICTION_3D_SCALING_NO, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "no"},
+    {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "euc_pc_max"},
+    {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "euc_pv_max"},
+    {SICONOS_FRICTION_3D_SCALING_CONE, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "cone_pc_max"},
+    {SICONOS_FRICTION_3D_SCALING_CONE_MU, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "cmu_pc_max"},
+    {SICONOS_FRICTION_3D_SCALING_CONE_MU, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN, "cmu_pv_mean"},
+    {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED, "wgt_pc_mix"},
+    {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
+     SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "wgt_pv_max"}};
 static const int N_SCALINGS = (int)(sizeof(SCALINGS) / sizeof(SCALINGS[0]));
 
 static const char* REGIME_NAMES[] = {"sticking", "separation", "sliding"};
@@ -171,41 +182,65 @@ static void free_problem(FrictionContactProblem* problem) {
   free(problem);
 }
 
-/* Compute the per-contact scale used for the given scaling option.
-   For a single contact the per-contact scale is the same as the scalar scale
-   that appears in the error formula. */
-static double compute_sigma(const double r[3], const double u[3], int scaling, double alpha,
-                            double norm_q) {
-  (void)norm_q; /* unused: RELATIVE scaling removed */
+/* Compute the per-contact scale for a single cone.
+   The scope is ignored because with one contact per-vector and per-cone coincide. */
+static double compute_sigma(const double r[3], const double u[3], int norm, int scope,
+                            int reduction, double alpha, double norm_q) {
+  (void)scope;
+  (void)norm_q;
   double u_mod[3];
   double work[1];
   fc3d_compute_modified_local_velocity(1, u, &MU, u_mod, work);
 
-  switch (scaling) {
+  switch (norm) {
     case SICONOS_FRICTION_3D_SCALING_NO:
       return 1.0;
 
     case SICONOS_FRICTION_3D_SCALING_EUCLIDEAN:
-      return SOC_scaling_euclidean(r, u_mod, 1, 3);
+      switch (reduction) {
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
+          return SOC_scaling_euclidean(r, u_mod, 1, 3);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
+          return SOC_geom_scaling_euclidean(r, u_mod, 1, 3);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
+          return SOC_mixed_scaling_euclidean(r, u_mod, 1, 3);
+      }
+      break;
 
     case SICONOS_FRICTION_3D_SCALING_CONE:
-      return SOC_scaling_cone(r, u_mod, 1, 3);
+      switch (reduction) {
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
+          return SOC_scaling_cone(r, u_mod, 1, 3);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
+          return SOC_geom_scaling_cone(r, u_mod, 1, 3);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
+          return SOC_mixed_scaling_cone(r, u_mod, 1, 3);
+      }
+      break;
 
     case SICONOS_FRICTION_3D_SCALING_CONE_MU:
-      return SOC_scaling_cone_mu(r, u_mod, 1, &MU, 3);
+      switch (reduction) {
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
+          return SOC_scaling_cone_mu(r, u_mod, 1, &MU, 3);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
+          return SOC_geom_scaling_cone_mu(r, u_mod, 1, &MU, 3);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
+          return SOC_mixed_scaling_cone_mu(r, u_mod, 1, &MU, 3);
+      }
+      break;
 
     case SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED:
-      return SOC_scaling_cone_weighted(r, u_mod, 1, 3, alpha);
-
-    case SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_MAX:
-      return SOC_scaling_cone_mu(r, u_mod, 1, &MU, 3);
-
-    case SICONOS_FRICTION_3D_SCALING_PER_VARIABLE_GEOM:
-      return SOC_geom_scaling_cone_mu(r, u_mod, 1, &MU, 3);
-
-    default:
-      return 1.0;
+      switch (reduction) {
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
+          return SOC_scaling_cone_weighted(r, u_mod, 1, 3, alpha);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
+          return SOC_geom_scaling_cone_weighted(r, u_mod, 1, 3, alpha);
+        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
+          return SOC_mixed_scaling_cone_weighted(r, u_mod, 1, 3, alpha);
+      }
+      break;
   }
+  return 1.0;
 }
 
 static void print_separator(void) {
@@ -246,12 +281,14 @@ int main(void) {
         double norm_q = cblas_dnrm2(3, problem->q, 1);
         double w[3];
 
-        double errors[9];
+        double errors[N_SCALINGS];
         for (int s = 0; s < N_SCALINGS; ++s) {
-          options.iparam[SICONOS_FRICTION_3D_ERROR_SCALING] = SCALINGS[s].scaling;
+          options.iparam[SICONOS_FRICTION_3D_SCALING_NORM] = SCALINGS[s].norm;
+          options.iparam[SICONOS_FRICTION_3D_SCALING_SCOPE] = SCALINGS[s].scope;
+          options.iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION] = SCALINGS[s].reduction;
           options.dparam[SICONOS_FRICTION_3D_SCALING_ALPHA] = 1.0;
           errors[s] = 0.0;
-          fc3d_compute_error(problem, rp, w, /* tolerance */ 1.0, &options, norm_q, &errors[s]);
+          fc3d_compute_error(problem, rp, w, /* tolerance */ 1.0, &options, &errors[s]);
         }
 
         printf("| %-14s | %-8s | %-7s |", REGIME_NAMES[regime_i], MAGN_NAMES[magn_i],
@@ -301,7 +338,8 @@ int main(void) {
         printf("| %-14s | %-8s | %-7s |", REGIME_NAMES[regime_i], MAGN_NAMES[magn_i],
                PERT_NAMES[pert_i]);
         for (int s = 0; s < N_SCALINGS; ++s) {
-          double sigma = compute_sigma(rp, up, SCALINGS[s].scaling, 1.0, norm_q);
+          double sigma = compute_sigma(rp, up, SCALINGS[s].norm, SCALINGS[s].scope,
+                                       SCALINGS[s].reduction, 1.0, norm_q);
           printf(" %12.4e |", sigma);
         }
         printf("\n");
