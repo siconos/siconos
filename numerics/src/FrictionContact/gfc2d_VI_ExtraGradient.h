@@ -49,6 +49,8 @@ void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* react
                             double* velocity, double* globalVelocity, int* info,
                             SolverOptions* options);
 
+void gfc2d_vi_eg_set_default(SolverOptions* options);
+
 #if defined(__cplusplus)
 }
 #endif
