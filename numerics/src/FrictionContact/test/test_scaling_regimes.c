@@ -37,24 +37,11 @@ static const double DELTA = 1.0e-6;
 static const double V_R[3] = {1.0, 0.5, -0.3};
 static const double V_U[3] = {0.2, -0.7, 0.4};
 
-typedef enum {
-  REGIME_STICKING = 0,
-  REGIME_SEPARATION,
-  REGIME_SLIDING
-} Regime;
+typedef enum { REGIME_STICKING = 0, REGIME_SEPARATION, REGIME_SLIDING } Regime;
 
-typedef enum {
-  MAGN_BALANCED = 0,
-  MAGN_R_LARGE,
-  MAGN_U_LARGE
-} Magnitude;
+typedef enum { MAGN_BALANCED = 0, MAGN_R_LARGE, MAGN_U_LARGE } Magnitude;
 
-typedef enum {
-  PERT_NONE = 0,
-  PERT_R,
-  PERT_U,
-  PERT_RU
-} Perturbation;
+typedef enum { PERT_NONE = 0, PERT_R, PERT_U, PERT_RU } Perturbation;
 
 typedef struct {
   int norm;
@@ -86,7 +73,9 @@ static const char* REGIME_NAMES[] = {"sticking", "separation", "sliding"};
 static const char* MAGN_NAMES[] = {"balanced", "r_large", "u_large"};
 static const char* PERT_NAMES[] = {"none", "dr", "du", "dr+du"};
 
-static double norm3(const double v[3]) { return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); }
+static double norm3(const double v[3]) {
+  return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
 
 static void normalize3(const double v[3], double out[3]) {
   double n = norm3(v);
@@ -305,8 +294,7 @@ int main(void) {
           double tol = 1e-10 * scale;
           for (int s = 0; s < N_SCALINGS; ++s) {
             if (errors[s] > tol) {
-              fprintf(stderr,
-                      "FAIL: exact state %s/%s/%s has error %e with scaling %s\n",
+              fprintf(stderr, "FAIL: exact state %s/%s/%s has error %e with scaling %s\n",
                       REGIME_NAMES[regime_i], MAGN_NAMES[magn_i], PERT_NAMES[pert_i],
                       errors[s], SCALINGS[s].label);
               info += 1;

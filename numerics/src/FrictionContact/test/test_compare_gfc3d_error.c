@@ -49,22 +49,19 @@ typedef struct {
  *        on each available problem.
  */
 int main(void) {
-  const char* filenames[] = {
-      "./data/GFC3D_Example0.dat",
-      "./data/GFC3D_Example00.dat",
-      "./data/GFC3D_Example00_badly_scaled.dat",
-      "./data/GFC3D_Example1.dat",
-      "./data/GFC3D_OneContact.dat",
-      "./data/GFC3D_TwoRods1.dat",
-      "./data/GFC3D_Example0_SBM.dat"};
+  const char* filenames[] = {"./data/GFC3D_Example0.dat",
+                             "./data/GFC3D_Example00.dat",
+                             "./data/GFC3D_Example00_badly_scaled.dat",
+                             "./data/GFC3D_Example1.dat",
+                             "./data/GFC3D_OneContact.dat",
+                             "./data/GFC3D_TwoRods1.dat",
+                             "./data/GFC3D_Example0_SBM.dat"};
 
   const int n_files = (int)(sizeof(filenames) / sizeof(filenames[0]));
 
   /* A few NSGS presets to give around 20 test cases. */
   TestCaseConfig presets[] = {
-      {"default", 100, 1e-3},
-      {"tight", 200, 1e-5},
-      {"fast", 50, 1e-2}};
+      {"default", 100, 1e-3}, {"tight", 200, 1e-5}, {"fast", 50, 1e-2}};
   const int n_presets = (int)(sizeof(presets) / sizeof(presets[0]));
 
   ScalingCase scalings[] = {
@@ -86,15 +83,19 @@ int main(void) {
        SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "wgt_pv_max"}};
   const int n_scalings = (int)(sizeof(scalings) / sizeof(scalings[0]));
 
-  printf("--------------------------------------------------------------------------------------------------"
-         "------------------------------------------------\n");
+  printf(
+      "---------------------------------------------------------------------------------------"
+      "-----------"
+      "------------------------------------------------\n");
   printf("| %-46s | info | iter |   standard   ", "problem (preset)");
   for (int s = 0; s < n_scalings; ++s) {
     printf("| %10s   ", scalings[s].label);
   }
   printf("|\n");
-  printf("--------------------------------------------------------------------------------------------------"
-         "------------------------------------------------\n");
+  printf(
+      "---------------------------------------------------------------------------------------"
+      "-----------"
+      "------------------------------------------------\n");
 
   for (int i = 0; i < n_files; ++i) {
     const char* filename = filenames[i];
@@ -172,8 +173,10 @@ int main(void) {
     globalFrictionContact_free(problem);
   }
 
-  printf("--------------------------------------------------------------------------------------------------"
-         "------------------------------------------------\n");
+  printf(
+      "---------------------------------------------------------------------------------------"
+      "-----------"
+      "------------------------------------------------\n");
 
   return 0;
 }

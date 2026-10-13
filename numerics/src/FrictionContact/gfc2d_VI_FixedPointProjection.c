@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+#include "gfc2d_VI_FixedPointProjection.h"
+
 #include <math.h>    // for fabs
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc, calloc
@@ -23,21 +25,20 @@
 
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
-#include "gfc2d_VI_FixedPointProjection.h"
 #include "NumericsFwd.h"                         // for VariationalInequality
 #include "NumericsMatrix.h"                      // for NumericsMatrix
 #include "SiconosBlas.h"                         // for cblas_dnrm2
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
-#include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
 #include "fc3d_short_names.h"                    // for GFC2D_VI_FPP
+#include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
 #include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -98,9 +99,8 @@ static void gfc2d_vi_fpp_status_callback(void* env, size_t size, double* x, doub
   unsigned int stabilized = 0;
 
   for (int i = 0; i < nc; ++i) {
-    const int status =
-        gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1], local_velocity[2 * i + 1],
-                                problem->mu[i]);
+    const int status = gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1],
+                                               local_velocity[2 * i + 1], problem->mu[i]);
     status_env->current_status[i] = status;
     if (status == 0)
       no_contact++;
@@ -122,15 +122,15 @@ static void gfc2d_vi_fpp_status_callback(void* env, size_t size, double* x, doub
     if (status_env->iteration == 1) {
       printf("Contact status: no-c | stick | slip+ | slip- | stab%%\n");
     }
-    printf("                %4u | %5u | %5u | %5u | %5.1f%%\n", no_contact, stick,
-           slip_right, slip_left, stabilized_pct);
+    printf("                %4u | %5u | %5u | %5u | %5.1f%%\n", no_contact, stick, slip_right,
+           slip_left, stabilized_pct);
   }
   status_env->iteration++;
 }
 
-void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double *reaction,
-                                   double *velocity, double *globalVelocity, int *info,
-                                   SolverOptions *options) {
+void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double* reaction,
+                                   double* velocity, double* globalVelocity, int* info,
+                                   SolverOptions* options) {
   DEBUG_BEGIN("gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n");
   DEBUG_EXPR(verbose = 1;);
   /* Number of contacts */
@@ -143,15 +143,15 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
   DEBUG_EXPR(NM_vector_display(velocity, m););
   DEBUG_EXPR(NM_vector_display(globalVelocity, n););
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   vi->F = &Function_VI_GFC2D;
   vi->ProjectionOnX = &Projection_VI_GFC2D;
 
   double error = 1e24;
 
-  GlobalFrictionContactProblem_as_VI *gfc2d_as_vi =
-      (GlobalFrictionContactProblem_as_VI *)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
+  GlobalFrictionContactProblem_as_VI* gfc2d_as_vi =
+      (GlobalFrictionContactProblem_as_VI*)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
   vi->env = gfc2d_as_vi;
   vi->size = n + m;
 
@@ -165,8 +165,8 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
   DEBUG_EXPR(NV_display(reaction, m););
   DEBUG_EXPR(NV_display(globalVelocity, n););
 
-  double *z = (double *)malloc((n + m) * sizeof(double));
-  double *Fz = (double *)calloc((n + m), sizeof(double));
+  double* z = (double*)malloc((n + m) * sizeof(double));
+  double* Fz = (double*)calloc((n + m), sizeof(double));
 
   memcpy(z, globalVelocity, n * sizeof(double));
   memcpy(&z[n], reaction, m * sizeof(double));
@@ -230,9 +230,10 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
       else
         slip_left++;
     }
-    printf("---- GFC2D - VI_FPP - contact status: "
-           "no-contact=%u, stick=%u, slip+=%u, slip-=%u\n",
-           no_contact, stick, slip_right, slip_left);
+    printf(
+        "---- GFC2D - VI_FPP - contact status: "
+        "no-contact=%u, stick=%u, slip+=%u, slip-=%u\n",
+        no_contact, stick, slip_right, slip_left);
     printf(
         "--------------- GFC2D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final "
         "Residual = %14.7e\n",
@@ -253,37 +254,39 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem *problem, double
  * - Elimination of giant switch statements in drivers
  */
 
-void gfc2d_vi_fpp_set_default(SolverOptions *options) {
-  /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper initialization */
+void gfc2d_vi_fpp_set_default(SolverOptions* options) {
+  /* VI_FPP doesn't use internal solvers, but we call the VI set_default for proper
+   * initialization */
   variationalInequality_FixedPointProjection_set_default(options);
 }
 
-static int gfc2d_vi_fpp_init_wrap(void *problem, SolverOptions *options) {
+static int gfc2d_vi_fpp_init_wrap(void* problem, SolverOptions* options) {
   /* set_default already called by solver_options_create */
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int gfc2d_vi_fpp_solve_wrap(void *problem, double *reaction, double *velocity,
-                                   double *globalVelocity, SolverOptions *options) {
+static int gfc2d_vi_fpp_solve_wrap(void* problem, double* reaction, double* velocity,
+                                   double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc2d_VI_FixedPointProjection((GlobalFrictionContactProblem *)problem, reaction, velocity,
+  gfc2d_VI_FixedPointProjection((GlobalFrictionContactProblem*)problem, reaction, velocity,
                                 globalVelocity, &info, options);
   return info;
 }
 
-static void gfc2d_vi_fpp_free_wrap(void *problem, SolverOptions *options) {
+static void gfc2d_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC2D_VI_FPP, "GFC2D_VI_FPP",
-                     "Variational Inequality Fixed Point Projection for 2D Global Friction Contact",
-                     gfc2d_vi_fpp_init_wrap, gfc2d_vi_fpp_solve_wrap, gfc2d_vi_fpp_free_wrap,
-                     NULL,                       /* error function */
-                     gfc2d_vi_fpp_set_default,   /* set_default */
-                     1000,                       /* default_max_iter */
-                     1e-4,                       /* default_tol */
-                     0                           /* is_local_solver */);
+REGISTER_SOLVER_3VAR(
+    GFC2D_VI_FPP, "GFC2D_VI_FPP",
+    "Variational Inequality Fixed Point Projection for 2D Global Friction Contact",
+    gfc2d_vi_fpp_init_wrap, gfc2d_vi_fpp_solve_wrap, gfc2d_vi_fpp_free_wrap,
+    NULL,                     /* error function */
+    gfc2d_vi_fpp_set_default, /* set_default */
+    1000,                     /* default_max_iter */
+    1e-4,                     /* default_tol */
+    0 /* is_local_solver */);

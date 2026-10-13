@@ -67,7 +67,8 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double* react
   variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 
   /* **** Criterium convergence **** */
-  fc3d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &error);
+  fc3d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options,
+                     &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */

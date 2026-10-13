@@ -18,9 +18,8 @@
 
 #include "fc2d_AlartCurnier_functions.h"
 
-#include <stdio.h>
-
 #include <math.h>  // for fabs
+#include <stdio.h>
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 /**
@@ -33,9 +32,8 @@
  * which gives \f$\rho_N u_N\f$ when \f$r_N - \rho_N u_N \ge 0\f$ and
  * \f$r_N\f$ otherwise.
  */
-static void alart_curnier_2d_normal(double rN, double uN, double rhoN,
-                                    double* residual, double* jacobian_u,
-                                    double* jacobian_r) {
+static void alart_curnier_2d_normal(double rN, double uN, double rhoN, double* residual,
+                                    double* jacobian_u, double* jacobian_r) {
   const double RVN = rN - rhoN * uN;
   if (RVN >= 0.0) {
     if (residual) residual[0] = rhoN * uN;
@@ -241,8 +239,9 @@ void computeAlartCurnier2D_AC(double* reaction, double* velocity, double mu, dou
  * With this choice the tangential residual does not depend on \f$u_N\f$ in
  * the slip branches.
  */
-void computeAlartCurnier2D_JeanMoreau(double* reaction, double* velocity, double mu, double* rho,
-                                      double* residual, double* jacobian_u, double* jacobian_r) {
+void computeAlartCurnier2D_JeanMoreau(double* reaction, double* velocity, double mu,
+                                      double* rho, double* residual, double* jacobian_u,
+                                      double* jacobian_r) {
   const double rN = reaction[0];
   const double rT = reaction[1];
   const double uN = velocity[0];

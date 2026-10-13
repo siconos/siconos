@@ -48,8 +48,7 @@ extern "C" {
  */
 int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
                         double* velocity, double* globalVelocity, double tolerance,
-                        SolverOptions* options, double norm_q, double norm_b,
-                        double* error);
+                        SolverOptions* options, double norm_q, double norm_b, double* error);
 
 #if defined(__cplusplus)
 }

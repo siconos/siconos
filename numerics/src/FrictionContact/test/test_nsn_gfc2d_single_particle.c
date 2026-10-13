@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
   (void)argv;
 
   /* Problem sizes */
-  const int n = 2;     /* global degrees of freedom */
-  const int nc = 1;    /* number of contacts */
-  const int dim = 2;   /* 2D contact space */
+  const int n = 2;   /* global degrees of freedom */
+  const int nc = 1;  /* number of contacts */
+  const int dim = 2; /* 2D contact space */
 
   /* Physical data */
   const double g = 1.0;
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
   printf("Local velocity       = [% e, % e]\n", velocity[0], velocity[1]);
   printf("Iterations done      = %d\n", options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
-  int test_ok = 1; 
+  int test_ok = 1;
   if (info != 0) test_ok = 0;
   if (err_info != 0) test_ok = 0;
   if (error > 1e-8) test_ok = 0;

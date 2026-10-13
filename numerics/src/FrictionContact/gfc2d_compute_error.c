@@ -22,26 +22,25 @@
 #include <math.h>    // for fabs, sqrt
 #include <stdlib.h>  // for NULL, realloc
 
-#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "fc2d_compute_error.h"
 #include "FrictionContact_options.h"
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_daxpy
 #include "SolverOptions.h"                 // for SolverOptions
+#include "fc2d_compute_error.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 
-//#define DEBUG_MESSAGES
-#include "siconos_debug.h"
+// #define DEBUG_MESSAGES
 #include "numerics_errors.h"
+#include "siconos_debug.h"
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 
 int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
                         double* velocity, double* globalVelocity, double tolerance,
-                        SolverOptions* options, double norm_q, double norm_b,
-                        double* error) {
+                        SolverOptions* options, double norm_q, double norm_b, double* error) {
   (void)velocity;
   (void)tolerance;
   (void)norm_b;
@@ -103,15 +102,14 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   const double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
   *error = cblas_dnrm2(n, rhs, 1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
-  
- /* we re-compute local velocity */
+
+  /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1, problem->H, globalVelocity, 1.0, velocity);
   double norm_u = cblas_dnrm2(m, velocity, 1);
   DEBUG_PRINTF("norm of velocity %e\n", norm_u);
-
 
   double error_complementarity = 0.0;
   if (nc == 0) {
@@ -134,9 +132,8 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
       free(comp_tmp);
       return numerics_error("gfc2d_compute_error", "bad alloc");
     }
-    error_complementarity = fc2d_compute_complementarity_error(nc, reaction, velocity, mu,
-                                                               norm, scope, reduction, alpha,
-                                                               comp_work, comp_tmp);
+    error_complementarity = fc2d_compute_complementarity_error(
+        nc, reaction, velocity, mu, norm, scope, reduction, alpha, comp_work, comp_tmp);
     free(comp_work);
     free(comp_tmp);
   }

@@ -71,7 +71,8 @@ static double scalar_norm_cone_weighted(const double* x, int m, int dim, double 
   return sqrt(s);
 }
 
-static double scalar_mixed_scaling_euclidean(const double* x, const double* y, int m, int dim) {
+static double scalar_mixed_scaling_euclidean(const double* x, const double* y, int m,
+                                             int dim) {
   return scalar_norm_euclidean(x, m, dim) + scalar_norm_euclidean(y, m, dim);
 }
 
@@ -84,8 +85,8 @@ static double scalar_mixed_scaling_cone_mu(const double* x, const double* y, int
   return scalar_norm_cone_mu(x, m, mu, dim) + scalar_norm_cone_mu(y, m, mu, dim);
 }
 
-static double scalar_mixed_scaling_cone_weighted(const double* x, const double* y, int m, int dim,
-                                                 double alpha) {
+static double scalar_mixed_scaling_cone_weighted(const double* x, const double* y, int m,
+                                                 int dim, double alpha) {
   return scalar_norm_cone_weighted(x, m, dim, alpha) +
          scalar_norm_cone_weighted(y, m, dim, alpha);
 }
@@ -137,8 +138,8 @@ static double scalar_geom_scaling_cone_mu(const double* x, const double* y, int 
   return sqrt(sx * sy);
 }
 
-static double scalar_geom_scaling_cone_weighted(const double* x, const double* y, int m, int dim,
-                                                double alpha) {
+static double scalar_geom_scaling_cone_weighted(const double* x, const double* y, int m,
+                                                int dim, double alpha) {
   const double sx = safeguard(scalar_norm_cone_weighted(x, m, dim, alpha));
   const double sy = safeguard(scalar_norm_cone_weighted(y, m, dim, alpha));
   return sqrt(sx * sy);
@@ -381,30 +382,35 @@ static int test_homogeneity(void) {
                                   SOC_norm_cone(xs, m, dim), lambda);
     info += check_homogeneity_one("SOC_norm_cone_mu", SOC_norm_cone_mu(x, m, mu, dim),
                                   SOC_norm_cone_mu(xs, m, mu, dim), lambda);
-    info += check_homogeneity_one("SOC_norm_cone_weighted", SOC_norm_cone_weighted(x, m, dim, alpha),
+    info += check_homogeneity_one("SOC_norm_cone_weighted",
+                                  SOC_norm_cone_weighted(x, m, dim, alpha),
                                   SOC_norm_cone_weighted(xs, m, dim, alpha), lambda);
 
     info += check_homogeneity_one("SOC_mixed_scaling_euclidean",
                                   SOC_mixed_scaling_euclidean(x, y, m, dim),
                                   SOC_mixed_scaling_euclidean(xs, ys, m, dim), lambda);
-    info += check_homogeneity_one("SOC_mixed_scaling_cone", SOC_mixed_scaling_cone(x, y, m, dim),
-                                  SOC_mixed_scaling_cone(xs, ys, m, dim), lambda);
+    info +=
+        check_homogeneity_one("SOC_mixed_scaling_cone", SOC_mixed_scaling_cone(x, y, m, dim),
+                              SOC_mixed_scaling_cone(xs, ys, m, dim), lambda);
     info += check_homogeneity_one("SOC_mixed_scaling_cone_mu",
                                   SOC_mixed_scaling_cone_mu(x, y, m, mu, dim),
                                   SOC_mixed_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
-    info += check_homogeneity_one("SOC_mixed_scaling_cone_weighted",
-                                  SOC_mixed_scaling_cone_weighted(x, y, m, dim, alpha),
-                                  SOC_mixed_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
+    info +=
+        check_homogeneity_one("SOC_mixed_scaling_cone_weighted",
+                              SOC_mixed_scaling_cone_weighted(x, y, m, dim, alpha),
+                              SOC_mixed_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
 
     /* Per-variable scalings are safeguarded (max(1, ·)) and therefore are
        homogeneous only when the underlying norms are larger than 1. */
     if (lambda >= 1.0) {
-      info += check_homogeneity_one("SOC_scaling_euclidean", SOC_scaling_euclidean(x, y, m, dim),
-                                    SOC_scaling_euclidean(xs, ys, m, dim), lambda);
+      info +=
+          check_homogeneity_one("SOC_scaling_euclidean", SOC_scaling_euclidean(x, y, m, dim),
+                                SOC_scaling_euclidean(xs, ys, m, dim), lambda);
       info += check_homogeneity_one("SOC_scaling_cone", SOC_scaling_cone(x, y, m, dim),
                                     SOC_scaling_cone(xs, ys, m, dim), lambda);
-      info += check_homogeneity_one("SOC_scaling_cone_mu", SOC_scaling_cone_mu(x, y, m, mu, dim),
-                                    SOC_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
+      info +=
+          check_homogeneity_one("SOC_scaling_cone_mu", SOC_scaling_cone_mu(x, y, m, mu, dim),
+                                SOC_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
       info += check_homogeneity_one("SOC_scaling_cone_weighted",
                                     SOC_scaling_cone_weighted(x, y, m, dim, alpha),
                                     SOC_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
@@ -412,14 +418,16 @@ static int test_homogeneity(void) {
       info += check_homogeneity_one("SOC_geom_scaling_euclidean",
                                     SOC_geom_scaling_euclidean(x, y, m, dim),
                                     SOC_geom_scaling_euclidean(xs, ys, m, dim), lambda);
-      info += check_homogeneity_one("SOC_geom_scaling_cone", SOC_geom_scaling_cone(x, y, m, dim),
-                                    SOC_geom_scaling_cone(xs, ys, m, dim), lambda);
+      info +=
+          check_homogeneity_one("SOC_geom_scaling_cone", SOC_geom_scaling_cone(x, y, m, dim),
+                                SOC_geom_scaling_cone(xs, ys, m, dim), lambda);
       info += check_homogeneity_one("SOC_geom_scaling_cone_mu",
                                     SOC_geom_scaling_cone_mu(x, y, m, mu, dim),
                                     SOC_geom_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
-      info += check_homogeneity_one("SOC_geom_scaling_cone_weighted",
-                                    SOC_geom_scaling_cone_weighted(x, y, m, dim, alpha),
-                                    SOC_geom_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
+      info +=
+          check_homogeneity_one("SOC_geom_scaling_cone_weighted",
+                                SOC_geom_scaling_cone_weighted(x, y, m, dim, alpha),
+                                SOC_geom_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
     }
   }
 

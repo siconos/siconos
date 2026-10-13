@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SiconosBlas.h"             // for cblas_dnrm2
-#include "SOC_scaling.h"             // for SOC_scaling_*
-#include "fc2d_compute_error.h"
 #include "FrictionContact_options.h"
+#include "SOC_scaling.h"  // for SOC_scaling_*
+#include "SiconosBlas.h"  // for cblas_dnrm2
+#include "fc2d_compute_error.h"
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
@@ -46,8 +46,8 @@ static double scalar_norm(int norm, const double x[2], double mu, double alpha) 
   }
 }
 
-static double scalar_scale(int norm, int reduction, const double r[2],
-                           const double u_mod[2], double mu, double alpha) {
+static double scalar_scale(int norm, int reduction, const double r[2], const double u_mod[2],
+                           double mu, double alpha) {
   const double nr = scalar_norm(norm, r, mu, alpha);
   const double nu = scalar_norm(norm, u_mod, mu, alpha);
   switch (reduction) {
@@ -95,30 +95,30 @@ static double scalar_complementarity_error(int nc, const double* r, const double
       case SICONOS_FRICTION_2D_SCALING_EUCLIDEAN:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
                            ? SOC_scaling_euclidean(r, u_mod, nc, 2)
-                           : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                                 ? SOC_geom_scaling_euclidean(r, u_mod, nc, 2)
-                                 : SOC_mixed_scaling_euclidean(r, u_mod, nc, 2);
+                       : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
+                           ? SOC_geom_scaling_euclidean(r, u_mod, nc, 2)
+                           : SOC_mixed_scaling_euclidean(r, u_mod, nc, 2);
         break;
       case SICONOS_FRICTION_2D_SCALING_CONE:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
                            ? SOC_scaling_cone(r, u_mod, nc, 2)
-                           : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                                 ? SOC_geom_scaling_cone(r, u_mod, nc, 2)
-                                 : SOC_mixed_scaling_cone(r, u_mod, nc, 2);
+                       : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
+                           ? SOC_geom_scaling_cone(r, u_mod, nc, 2)
+                           : SOC_mixed_scaling_cone(r, u_mod, nc, 2);
         break;
       case SICONOS_FRICTION_2D_SCALING_CONE_MU:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
                            ? SOC_scaling_cone_mu(r, u_mod, nc, mu, 2)
-                           : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                                 ? SOC_geom_scaling_cone_mu(r, u_mod, nc, mu, 2)
-                                 : SOC_mixed_scaling_cone_mu(r, u_mod, nc, mu, 2);
+                       : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
+                           ? SOC_geom_scaling_cone_mu(r, u_mod, nc, mu, 2)
+                           : SOC_mixed_scaling_cone_mu(r, u_mod, nc, mu, 2);
         break;
       case SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
                            ? SOC_scaling_cone_weighted(r, u_mod, nc, 2, alpha)
-                           : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                                 ? SOC_geom_scaling_cone_weighted(r, u_mod, nc, 2, alpha)
-                                 : SOC_mixed_scaling_cone_weighted(r, u_mod, nc, 2, alpha);
+                       : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
+                           ? SOC_geom_scaling_cone_weighted(r, u_mod, nc, 2, alpha)
+                           : SOC_mixed_scaling_cone_weighted(r, u_mod, nc, 2, alpha);
         break;
     }
     global_scale = safeguard_scale(global_scale);
@@ -177,8 +177,8 @@ int main(void) {
   double* work = (double*)malloc(nc * sizeof(double));
   double* tmp = (double*)malloc(n * sizeof(double));
 
-  int norms[] = {SICONOS_FRICTION_2D_SCALING_NO,       SICONOS_FRICTION_2D_SCALING_EUCLIDEAN,
-                 SICONOS_FRICTION_2D_SCALING_CONE,    SICONOS_FRICTION_2D_SCALING_CONE_MU,
+  int norms[] = {SICONOS_FRICTION_2D_SCALING_NO, SICONOS_FRICTION_2D_SCALING_EUCLIDEAN,
+                 SICONOS_FRICTION_2D_SCALING_CONE, SICONOS_FRICTION_2D_SCALING_CONE_MU,
                  SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED};
   const char* norm_names[] = {"NO", "EUCLIDEAN", "CONE", "CONE_MU", "WEIGHTED"};
   const int nnorms = sizeof(norms) / sizeof(norms[0]);
@@ -202,9 +202,8 @@ int main(void) {
                  reduction_names[ir]);
         fprintf(stderr, "  scaling %s\n", label);
 
-        double err_vec =
-            fc2d_compute_complementarity_error(nc, r, u, mu, norms[in], scopes[is],
-                                               reductions[ir], /*alpha=*/2.0, work, tmp);
+        double err_vec = fc2d_compute_complementarity_error(
+            nc, r, u, mu, norms[in], scopes[is], reductions[ir], /*alpha=*/2.0, work, tmp);
         double err_ref = scalar_complementarity_error(nc, r, u, mu, norms[in], scopes[is],
                                                       reductions[ir], /*alpha=*/2.0);
         double rd = rel_diff(err_vec, err_ref);
@@ -223,9 +222,9 @@ int main(void) {
             r_scaled[k] = lambda * r[k];
             u_scaled[k] = lambda * u[k];
           }
-          double err_scaled = fc2d_compute_complementarity_error(nc, r_scaled, u_scaled, mu,
-                                                                 norms[in], scopes[is],
-                                                                 reductions[ir], 2.0, work, tmp);
+          double err_scaled =
+              fc2d_compute_complementarity_error(nc, r_scaled, u_scaled, mu, norms[in],
+                                                 scopes[is], reductions[ir], 2.0, work, tmp);
           double rd_scale = rel_diff(err_vec, err_scaled);
           printf("fc2d %-40s scale invariance = %e\n", label, rd_scale);
           if (rd_scale > 1e-12) {

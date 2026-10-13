@@ -310,7 +310,7 @@ NumericsMatrix* set_matrix_sparse_new(T& self, py::object scipy_matrix,
   auto* nsm = new NumericsSparseMatrix;
   nsm->csc = csc;
   nsm->origin = NSM_CSC;
-  auto *nm = new NumericsMatrix;
+  auto* nm = new NumericsMatrix;
 
   nm->size0 = csc->m;
   nm->size1 = csc->n;

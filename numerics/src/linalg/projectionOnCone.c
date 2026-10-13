@@ -19,10 +19,11 @@
 
 #include "op3x3.h"   // for SET3, eig_3x3
                      //
-#include "SiconosBlas.h"
 #include <math.h>    // for sqrt
 #include <stdio.h>   // for fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE, malloc, free
+
+#include "SiconosBlas.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -49,7 +50,8 @@ unsigned projectionOnCone(double* r, double mu) {
     return PROJCONE_BOUNDARY;
   }
 }
-void naturalMapOnCone(const double r[3], const double u[3], double rho, double mu, double F[3]) {
+void naturalMapOnCone(const double r[3], const double u[3], double rho, double mu,
+                      double F[3]) {
   double w[3];
   w[0] = r[0] - rho * u[0];
   w[1] = r[1] - rho * u[1];

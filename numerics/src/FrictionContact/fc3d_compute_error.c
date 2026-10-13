@@ -26,16 +26,16 @@
 
 #include "FrictionContactProblem.h"  // IWYU pragma: keep - For FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "NumericsMatrix.h"          // for NM_prod_mv_3x3, NM_gemv
-#include "SolverOptions.h"           // IWYU pragma: keep - for SolverOptions
+#include "NumericsMatrix.h"  // for NM_prod_mv_3x3, NM_gemv
+#include "SolverOptions.h"   // IWYU pragma: keep - for SolverOptions
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
+#include "SOC_scaling.h"  // for SOC_scaling_*
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"      // for projectionOnCone, projectionOnConeVector
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
-#include "SOC_scaling.h"           // for SOC_scaling_*
 #include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -89,8 +89,7 @@ static double safeguard_scale(double s) { return (s > 1.0) ? s : 1.0; }
 /* Helpers for the single-contact (3D cone) case.  These inline functions
    reproduce the per-variable scalings implemented in SOC_scaling.c for m=1
    without the overhead of a function call or BLAS on a 3-vector. */
-static inline double fc3d_unitary_norm(int norm, const double x[3], double mu,
-                                       double alpha) {
+static inline double fc3d_unitary_norm(int norm, const double x[3], double mu, double alpha) {
   const double t = sqrt(x[1] * x[1] + x[2] * x[2]);
   switch (norm) {
     case SICONOS_FRICTION_3D_SCALING_EUCLIDEAN:
@@ -108,8 +107,7 @@ static inline double fc3d_unitary_norm(int norm, const double x[3], double mu,
 }
 
 static inline double fc3d_unitary_scale(int norm, int reduction, const double r[3],
-                                        const double u_mod[3], double mu,
-                                        double alpha) {
+                                        const double u_mod[3], double mu, double alpha) {
   const double nr = fc3d_unitary_norm(norm, r, mu, alpha);
   const double nu = fc3d_unitary_norm(norm, u_mod, mu, alpha);
 
@@ -132,8 +130,8 @@ static inline double fc3d_unitary_scale(int norm, int reduction, const double r[
    selected norm, scope and reduction.  Safeguarding (max(1, σ)) is applied
    to the final scale. */
 static double fc3d_compute_vector_scale(int norm, int reduction, const double* x,
-                                        const double* y, int m, int dim,
-                                        const double* mu, double alpha) {
+                                        const double* y, int m, int dim, const double* mu,
+                                        double alpha) {
   double s = 1.0;
 
   switch (norm) {
@@ -237,8 +235,8 @@ double fc3d_compute_complementarity_error(int nc, const double* r, const double*
       const double* r_i = &r[pos];
       const double* u_mod_i = &tmp[pos];
 
-      const double s = safeguard_scale(
-          fc3d_unitary_scale(norm, reduction, r_i, u_mod_i, mu[i], alpha));
+      const double s =
+          safeguard_scale(fc3d_unitary_scale(norm, reduction, r_i, u_mod_i, mu[i], alpha));
       const double inv = 1.0 / s;
 
       /* w = r_i - u_mod_i, projection of w on the cone, residual = r_i - proj. */

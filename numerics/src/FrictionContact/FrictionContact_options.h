@@ -470,8 +470,6 @@ enum SICONOS_FRICTION_3D_NSN_REGULARIZATION {
   SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES = 1,
 };
 
-
-
 /** Jacobian regularization values for GFC2D_NSN_AC */
 enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
   /** No Jacobian regularization */

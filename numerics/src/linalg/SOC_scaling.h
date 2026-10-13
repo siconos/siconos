@@ -219,7 +219,8 @@ double SOC_scaling_cone_mu(const double* x, const double* y, int m, const double
     \param[in] alpha weight on the tangential part (must be positive)
     \return the weighted cone per-variable scale
 */
-double SOC_scaling_cone_weighted(const double* x, const double* y, int m, int dim, double alpha);
+double SOC_scaling_cone_weighted(const double* x, const double* y, int m, int dim,
+                                 double alpha);
 
 /* -------------------------------------------------------------------------- */
 /* Geometric per-variable scalings                                            */

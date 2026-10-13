@@ -29,9 +29,9 @@
 #include "SiconosLapack.h"   // for lapack_int, DGETRF, DGETRS
 #include "lumod_dense.h"     // for LUmod_dense, Lprod_dense, Usolve_dense
 #include "numerics_errors.h"
+#include "pivot-utils.h"  // for basis_to_name, basis_to_number
 #include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
-#include "pivot-utils.h"    // for basis_to_name, basis_to_number
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 

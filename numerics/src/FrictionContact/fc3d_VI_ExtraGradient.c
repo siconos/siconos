@@ -66,7 +66,8 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double* reaction, do
 
   /* **** Criterium convergence **** */
   double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
-  fc3d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &error);
+  fc3d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options,
+                     &error);
 
   if (verbose > 0) {
     printf(

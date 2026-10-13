@@ -38,13 +38,12 @@ int main(void) {
   const int n = 3 * nc;
 
   /* Local velocities covering various tangential/normal magnitudes. */
-  double u[] = {
-      1.0, 0.0, 0.0,    /* pure normal */
-      -0.5, 0.3, 0.4,   /* negative normal with tangential part */
-      0.2, 1.0, 0.0,    /* boundary-like */
-      2.0, 0.2, -0.3,   /* inside-like */
-      -1.0, 0.5, 0.5,   /* dual-like */
-      0.0, 0.1, 0.1};
+  double u[] = {1.0,  0.0, 0.0,  /* pure normal */
+                -0.5, 0.3, 0.4,  /* negative normal with tangential part */
+                0.2,  1.0, 0.0,  /* boundary-like */
+                2.0,  0.2, -0.3, /* inside-like */
+                -1.0, 0.5, 0.5,  /* dual-like */
+                0.0,  0.1, 0.1};
   double mu[] = {0.1, 0.3, 0.5, 0.7, 0.5, 0.2};
 
   double u_mod[3 * 6];
@@ -75,19 +74,15 @@ int main(void) {
   err = max_abs_diff(expected, u_mod, n);
   printf("fc3d_compute_modified_local_velocity (work=NULL) max diff = %e\n", err);
   if (err > 1e-14) {
-    fprintf(stderr, "Vectorized modified velocity (NULL work) differs from cone-wise reference!\n");
+    fprintf(stderr,
+            "Vectorized modified velocity (NULL work) differs from cone-wise reference!\n");
     info += 1;
   }
 
   /* Consistency check: r - u_modified must equal the worktmp used in
      fc3d_unitary_compute_and_add_error before projection. */
-  double r[] = {
-      0.5, 0.1, 0.0,
-      0.2, -0.1, 0.2,
-      1.0, 0.0, 0.0,
-      -0.3, 0.2, 0.1,
-      0.0, 0.5, -0.5,
-      0.7, 0.0, 0.0};
+  double r[] = {0.5,  0.1, 0.0, 0.2, -0.1, 0.2,  1.0, 0.0, 0.0,
+                -0.3, 0.2, 0.1, 0.0, 0.5,  -0.5, 0.7, 0.0, 0.0};
   double diff_expected[3 * 6];
   for (int i = 0; i < nc; ++i) {
     const int pos = 3 * i;
