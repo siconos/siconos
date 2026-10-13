@@ -30,8 +30,6 @@
 #include "CohesiveFrictionContact_options.h"
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
-#include "fclib_interface.h"
-#include "gfc2d_nonsmooth_Newton_AlartCurnier.h"
 #include "GenericMechanicalProblem.h"
 #include "GlobalFrictionContactProblem.h"
 #include "GlobalRollingFrictionContactProblem.h"
@@ -41,12 +39,10 @@
 #include "NumericsMatrix_pybind11.h"
 #include "RollingFrictionContactProblem.h"
 #include "RollingFrictionContact_options.h"
-
-#include "CohesiveFrictionContactProblem.h"
-#include "CohesiveFrictionContact_options.h"
 #include "SiconosBlas.h"
-
 #include "SolverOptions.h"
+#include "fclib_interface.h"
+#include "gfc2d_nonsmooth_Newton_AlartCurnier.h"
 #include "numerics_errors.h"
 
 namespace py = pybind11;
@@ -293,8 +289,7 @@ struct GlobalFrictionContactProblemWrapper {
 
   GlobalFrictionContactProblemWrapper(int dimension, int nc, py::object matrixM,
                                       py::object matrixH, py::array_t<double> q,
-                                      py::array_t<double> mu,
-                                      py::object b_obj = py::none()) {
+                                      py::array_t<double> mu, py::object b_obj = py::none()) {
     // Check input vectors and matrices sizes
     if (q.ndim() != 1) throw std::runtime_error("q must be a 1D array");
 
@@ -439,8 +434,9 @@ struct GlobalFrictionContactProblemWrapper {
       solver_options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_NSN_AC);
       default_solver_options = 1;
     }
-    int info = gfc2d_nsn_ac_warm_start(problem, reaction.mutable_data(), velocity.mutable_data(),
-                                       globalVelocity.mutable_data(), solver_options);
+    int info =
+        gfc2d_nsn_ac_warm_start(problem, reaction.mutable_data(), velocity.mutable_data(),
+                                globalVelocity.mutable_data(), solver_options);
     if (default_solver_options) {
       solver_options_delete(solver_options);
       solver_options = nullptr;
@@ -450,10 +446,10 @@ struct GlobalFrictionContactProblemWrapper {
 
   static std::unique_ptr<GlobalFrictionContactProblemWrapper> from_file(
       const std::string& fname) {
-    GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(fname.c_str());
+    GlobalFrictionContactProblem* problem =
+        globalFrictionContact_new_from_filename(fname.c_str());
     if (!problem)
-      throw std::runtime_error(
-          "Failed to read global friction contact problem from file");
+      throw std::runtime_error("Failed to read global friction contact problem from file");
 
     const int dim = problem->dimension;
     const int nc = problem->numberOfContacts;
@@ -485,7 +481,7 @@ struct GlobalFrictionContactProblemWrapper {
     globalFrictionContact_free(problem);
 
     return std::make_unique<GlobalFrictionContactProblemWrapper>(dim, nc, matrixM, matrixH,
-                                                                  qarray, muarray, barray);
+                                                                 qarray, muarray, barray);
   }
 
   int write_to_file(const std::string& fname) const {
@@ -736,8 +732,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
 
   py::class_<GlobalFrictionContactProblemWrapper, py::smart_holder>(
       m, "GlobalFrictionContactProblem")
-      .def(py::init<int, int, py::object, py::object, py::array_t<double>,
-                    py::array_t<double>, py::object>(),
+      .def(py::init<int, int, py::object, py::object, py::array_t<double>, py::array_t<double>,
+                    py::object>(),
            py::arg("dimension"), py::arg("number_of_contacts"), py::arg("M"), py::arg("H"),
            py::arg("q"), py::arg("mu"), py::arg("b") = py::none(),
            "Build with all operators/parameters (H, M, ...)")
@@ -785,15 +781,16 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
            })
       .def("somefunc", &GlobalFrictionContactProblemWrapper::somefunc)
       .def("solve", &GlobalFrictionContactProblemWrapper::solve, py::arg("reaction"),
-           py::arg("velocity"), py::arg("global_velocity"), py::arg("solver_options") = nullptr,
-           "Solve the global friction contact problem")
+           py::arg("velocity"), py::arg("global_velocity"),
+           py::arg("solver_options") = nullptr, "Solve the global friction contact problem")
       .def("warm_start", &GlobalFrictionContactProblemWrapper::warm_start, py::arg("reaction"),
-           py::arg("velocity"), py::arg("global_velocity"), py::arg("solver_options") = nullptr,
+           py::arg("velocity"), py::arg("global_velocity"),
+           py::arg("solver_options") = nullptr,
            "Run a VI-FPP warm start / fallback for the NSN solver")
-      .def_static("from_file", &GlobalFrictionContactProblemWrapper::from_file, py::arg("fname"),
-                  "Read a global friction contact problem from a file")
-      .def("write_to_file", &GlobalFrictionContactProblemWrapper::write_to_file, py::arg("fname"),
-           "Write the problem to a text file")
+      .def_static("from_file", &GlobalFrictionContactProblemWrapper::from_file,
+                  py::arg("fname"), "Read a global friction contact problem from a file")
+      .def("write_to_file", &GlobalFrictionContactProblemWrapper::write_to_file,
+           py::arg("fname"), "Write the problem to a text file")
 #if defined(WITH_FCLIB)
       .def("write_to_fclib", &GlobalFrictionContactProblemWrapper::write_to_fclib,
            py::arg("fname"), py::arg("title") = "", py::arg("description") = "",
@@ -1214,8 +1211,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY)
       .value("SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER",
              SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER)
-      .value("SICONOS_FRICTION_3D_NSN_REGULARIZATION",
-             SICONOS_FRICTION_3D_NSN_REGULARIZATION)
+      .value("SICONOS_FRICTION_3D_NSN_REGULARIZATION", SICONOS_FRICTION_3D_NSN_REGULARIZATION)
       .export_values();
 
   py::enum_<SICONOS_FC3D_NSN_LINEAR_SOLVER>(params, "SICONOS_FC3D_NSN_LINEAR_SOLVER_enum")
@@ -1226,8 +1222,7 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
   py::enum_<SICONOS_FRICTION_3D_NSN_DPARAM>(params, "SICONOS_FRICTION_3D_NSN_DPARAM_enum")
       .value("SICONOS_FRICTION_3D_NSN_RHO", SICONOS_FRICTION_3D_NSN_RHO)
       .value("SICONOS_FRICTION_3D_NSN_REGUL", SICONOS_FRICTION_3D_NSN_REGUL)
-      .value("SICONOS_FRICTION_3D_SCALING_ALPHA",
-             SICONOS_FRICTION_3D_SCALING_ALPHA)
+      .value("SICONOS_FRICTION_3D_SCALING_ALPHA", SICONOS_FRICTION_3D_SCALING_ALPHA)
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY>(
@@ -1244,12 +1239,10 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE)
       .export_values();
 
-  py::enum_<enum SICONOS_FRICTION_3D_NSN_WARM_START>(
-      params, "SICONOS_FRICTION_3D_NSN_WARM_START_enum")
-      .value("SICONOS_FRICTION_3D_NSN_WARM_START_NO",
-             SICONOS_FRICTION_3D_NSN_WARM_START_NO)
-      .value("SICONOS_FRICTION_3D_NSN_WARM_START_YES",
-             SICONOS_FRICTION_3D_NSN_WARM_START_YES)
+  py::enum_<enum SICONOS_FRICTION_3D_NSN_WARM_START>(params,
+                                                     "SICONOS_FRICTION_3D_NSN_WARM_START_enum")
+      .value("SICONOS_FRICTION_3D_NSN_WARM_START_NO", SICONOS_FRICTION_3D_NSN_WARM_START_NO)
+      .value("SICONOS_FRICTION_3D_NSN_WARM_START_YES", SICONOS_FRICTION_3D_NSN_WARM_START_YES)
       .value("SICONOS_FRICTION_3D_NSN_WARM_START_AUTO",
              SICONOS_FRICTION_3D_NSN_WARM_START_AUTO)
       .export_values();
@@ -1262,20 +1255,17 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES)
       .export_values();
 
-  py::enum_<enum SICONOS_FRICTION_3D_SCALING>(
-      params, "SICONOS_FRICTION_3D_SCALING_enum")
+  py::enum_<enum SICONOS_FRICTION_3D_SCALING>(params, "SICONOS_FRICTION_3D_SCALING_enum")
       .value("SICONOS_FRICTION_3D_SCALING_NO", SICONOS_FRICTION_3D_SCALING_NO)
-      .value("SICONOS_FRICTION_3D_SCALING_EUCLIDEAN",
-             SICONOS_FRICTION_3D_SCALING_EUCLIDEAN)
+      .value("SICONOS_FRICTION_3D_SCALING_EUCLIDEAN", SICONOS_FRICTION_3D_SCALING_EUCLIDEAN)
       .value("SICONOS_FRICTION_3D_SCALING_CONE", SICONOS_FRICTION_3D_SCALING_CONE)
-      .value("SICONOS_FRICTION_3D_SCALING_CONE_MU",
-             SICONOS_FRICTION_3D_SCALING_CONE_MU)
+      .value("SICONOS_FRICTION_3D_SCALING_CONE_MU", SICONOS_FRICTION_3D_SCALING_CONE_MU)
       .value("SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED",
              SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED)
       .export_values();
 
-  py::enum_<enum SICONOS_FRICTION_3D_SCALING_SCOPE>(
-      params, "SICONOS_FRICTION_3D_SCALING_SCOPE_enum")
+  py::enum_<enum SICONOS_FRICTION_3D_SCALING_SCOPE>(params,
+                                                    "SICONOS_FRICTION_3D_SCALING_SCOPE_enum")
       .value("SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE",
              SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE)
       .value("SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR",
@@ -1301,8 +1291,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED)
       .export_values();
 
-  py::enum_<enum SICONOS_FRICTION_2D_SCALING_SCOPE>(
-      params, "SICONOS_FRICTION_2D_SCALING_SCOPE_enum")
+  py::enum_<enum SICONOS_FRICTION_2D_SCALING_SCOPE>(params,
+                                                    "SICONOS_FRICTION_2D_SCALING_SCOPE_enum")
       .value("SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE",
              SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE)
       .value("SICONOS_FRICTION_2D_SCALING_SCOPE_PER_VECTOR",
@@ -1358,16 +1348,13 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY)
       .value("SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER",
              SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER)
-      .value("SICONOS_FRICTION_2D_NSN_REGULARIZATION",
-             SICONOS_FRICTION_2D_NSN_REGULARIZATION)
+      .value("SICONOS_FRICTION_2D_NSN_REGULARIZATION", SICONOS_FRICTION_2D_NSN_REGULARIZATION)
       .export_values();
 
-  py::enum_<enum SICONOS_FRICTION_2D_NSN_WARM_START>(
-      params, "SICONOS_FRICTION_2D_NSN_WARM_START_enum")
-      .value("SICONOS_FRICTION_2D_NSN_WARM_START_NO",
-             SICONOS_FRICTION_2D_NSN_WARM_START_NO)
-      .value("SICONOS_FRICTION_2D_NSN_WARM_START_YES",
-             SICONOS_FRICTION_2D_NSN_WARM_START_YES)
+  py::enum_<enum SICONOS_FRICTION_2D_NSN_WARM_START>(params,
+                                                     "SICONOS_FRICTION_2D_NSN_WARM_START_enum")
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_NO", SICONOS_FRICTION_2D_NSN_WARM_START_NO)
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_YES", SICONOS_FRICTION_2D_NSN_WARM_START_YES)
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_2D_NSN_REGULARIZATION>(
@@ -1379,10 +1366,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .export_values();
 
   py::enum_<SICONOS_FRICTION_2D_NSN_DPARAM>(params, "SICONOS_FRICTION_2D_NSN_DPARAM_enum")
-      .value("SICONOS_FRICTION_2D_NSN_REGUL",
-             SICONOS_FRICTION_2D_NSN_REGUL)
-      .value("SICONOS_FRICTION_2D_SCALING_ALPHA",
-             SICONOS_FRICTION_2D_SCALING_ALPHA)
+      .value("SICONOS_FRICTION_2D_NSN_REGUL", SICONOS_FRICTION_2D_NSN_REGUL)
+      .value("SICONOS_FRICTION_2D_SCALING_ALPHA", SICONOS_FRICTION_2D_SCALING_ALPHA)
       .export_values();
 
   py::enum_<SICONOS_FRICTION_3D_PROXIMAL_IPARAM>(params,

@@ -243,8 +243,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     /********************/
 
     cblas_dcopy(m, q, 1, q_s, 1);
-    DEBUG_EXPR(
-        fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
+    DEBUG_EXPR(fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
     DEBUG_EXPR(NV_display(velocity, m););
     DEBUG_EXPR(NV_display(xi, m););
 
@@ -647,8 +646,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     /*******************************/
 
     cblas_dcopy(m, q, 1, q_s, 1);
-    DEBUG_EXPR(
-        fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
+    DEBUG_EXPR(fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
     DEBUG_EXPR(NV_display(velocity, m););
     DEBUG_EXPR(NV_display(&xi[m], m););
 
@@ -691,16 +689,15 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     int info_cholesly = NM_Cholesky_solve(W, reaction, 1);
 
     if (info_cholesly) {
-      
       NM_free(Atrans);
       NM_free(A);
       NM_free(M_s);
       NM_free(W);
       dparam[SICONOS_DPARAM_RESIDU] = error;
-      iparam[SICONOS_IPARAM_ITER_DONE] = iter;      
+      iparam[SICONOS_IPARAM_ITER_DONE] = iter;
       *info = NUMERICS_ERR_LINEAR_SOLVER;
       return;
-      }
+    }
     DEBUG_PRINT("reaction:");
     DEBUG_EXPR(NV_display(reaction, m));
 

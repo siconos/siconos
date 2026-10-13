@@ -67,11 +67,12 @@ extern "C" {
 void computeAlartCurnier2D(double* reaction, double* velocity, double mu, double* rho,
                            double* residual, double* jacobian_u, double* jacobian_r);
 void computeAlartCurnier2D_new(double* reaction, double* velocity, double mu, double* rho,
-                           double* residual, double* jacobian_u, double* jacobian_r);
+                               double* residual, double* jacobian_u, double* jacobian_r);
 void computeAlartCurnier2D_AC(double* reaction, double* velocity, double mu, double* rho,
                               double* residual, double* jacobian_u, double* jacobian_r);
-void computeAlartCurnier2D_JeanMoreau(double* reaction, double* velocity, double mu, double* rho,
-                                      double* residual, double* jacobian_u, double* jacobian_r);
+void computeAlartCurnier2D_JeanMoreau(double* reaction, double* velocity, double mu,
+                                      double* rho, double* residual, double* jacobian_u,
+                                      double* jacobian_r);
 
 #if defined(__cplusplus)
 }

@@ -316,7 +316,7 @@ update_checkpoint:
 
 accept_z_N:
   DEBUG_PRINT("z_N z_0\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i){DEBUG_PRINTF("%e %e\n", z_N[i], z[i]);});
+  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i) { DEBUG_PRINTF("%e %e\n", z_N[i], z[i]); });
 
   cblas_dcopy(n, z_N, 1, z, 1);
 

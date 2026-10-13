@@ -37,10 +37,9 @@
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
 
 /* Solver registration system */
+#include "NumericsVector.h"
 #include "numerics_errors.h"
 #include "solver_registry.h"
-
-#include "NumericsVector.h"
 
 /**
  * \brief Classify a single 3D contact into a discrete status.
@@ -93,8 +92,8 @@ static void gfc3d_vi_fpp_status_callback(void* env, size_t size, double* x, doub
   NV_cone_tangential_norms_3d(reaction, nc, status_env->rT_norm);
   NV_cone_tangential_norms_3d(local_velocity, nc, status_env->uT_norm);
   for (int i = 0; i < nc; ++i) {
-    const int status = gfc3d_contact_status_3d(
-        reaction[3 * i], status_env->rT_norm[i], status_env->uT_norm[i], problem->mu[i]);
+    const int status = gfc3d_contact_status_3d(reaction[3 * i], status_env->rT_norm[i],
+                                               status_env->uT_norm[i], problem->mu[i]);
     status_env->current_status[i] = status;
     if (status == 0)
       no_contact++;
@@ -241,8 +240,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
     NV_cone_tangential_norms_3d(reaction, nc, rT_norm);
     NV_cone_tangential_norms_3d(velocity, nc, uT_norm);
     for (int i = 0; i < nc; ++i) {
-      const int status = gfc3d_contact_status_3d(
-          reaction[3 * i], rT_norm[i], uT_norm[i], problem->mu[i]);
+      const int status =
+          gfc3d_contact_status_3d(reaction[3 * i], rT_norm[i], uT_norm[i], problem->mu[i]);
       if (status == 0)
         no_contact++;
       else if (status == 1)
@@ -252,9 +251,10 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
     }
     free(rT_norm);
     free(uT_norm);
-    printf("---- GFC3D - VI_FPP - contact status: "
-           "no-contact=%u, stick=%u, slip=%u\n",
-           no_contact, stick, slip);
+    printf(
+        "---- GFC3D - VI_FPP - contact status: "
+        "no-contact=%u, stick=%u, slip=%u\n",
+        no_contact, stick, slip);
     printf(
         "--------------- GFC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final "
         "Residual = %14.7e\n",

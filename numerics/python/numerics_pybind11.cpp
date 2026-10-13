@@ -125,7 +125,8 @@ PYBIND11_MODULE(_numerics, m) {
         if (v.ndim() != 1) throw std::runtime_error("Input must be a 1-D array");
         const int n = static_cast<int>(v.size());
         if (n % 3 != 0)
-          throw std::runtime_error("Input size must be a multiple of 3 (3 components per cone)");
+          throw std::runtime_error(
+              "Input size must be a multiple of 3 (3 components per cone)");
         const int nc = n / 3;
         py::array_t<double> out = py::array_t<double>(nc);
         NV_cone_norms_3d(v.data(), nc, out.mutable_data());
@@ -139,7 +140,8 @@ PYBIND11_MODULE(_numerics, m) {
         if (v.ndim() != 1) throw std::runtime_error("Input must be a 1-D array");
         const int n = static_cast<int>(v.size());
         if (n % 3 != 0)
-          throw std::runtime_error("Input size must be a multiple of 3 (3 components per cone)");
+          throw std::runtime_error(
+              "Input size must be a multiple of 3 (3 components per cone)");
         const int nc = n / 3;
         py::array_t<double> out = py::array_t<double>(nc);
         NV_cone_tangential_norms_3d(v.data(), nc, out.mutable_data());

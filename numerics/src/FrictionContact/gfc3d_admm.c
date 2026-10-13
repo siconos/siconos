@@ -41,9 +41,8 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "siconos_debug.h"
-
 #include "NumericsVector.h"
+#include "siconos_debug.h"
 
 // Short name for solver ID
 #ifndef GFC3D_ADMM
@@ -171,7 +170,7 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int* i
 }
 
 static inline void compute_sliding_direction(int nc, double* u, double* sliding_direction,
-                                              double* normUT_work) {
+                                             double* normUT_work) {
   NV_cone_tangential_norms_3d(u, nc, normUT_work);
   for (int contact = 0; contact < nc; contact++) {
     int pos = contact * 3;

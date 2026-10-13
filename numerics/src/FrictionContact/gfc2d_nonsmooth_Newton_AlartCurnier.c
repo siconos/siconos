@@ -22,8 +22,6 @@
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs, INFINITY
 
-
-
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif
@@ -31,22 +29,21 @@
 #include <stdlib.h>  // for calloc, free, malloc, realloc
 #include <string.h>  // for memcpy
 
-#include "CSparseMatrix.h"                       // for CSparseMatrix, CSpar...
-#include "FrictionContact_options.h"             // for SICONOS_FRICTION_3D_...
-#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContactProblem
-#include "NumericsMatrix.h"                      // for NM_triplet, Numerics...
-#include "NumericsSparseMatrix.h"                // for NSM_new, NumericsSpa...
-#include "NumericsVector.h"                      // for NV_display
-#include "SiconosBlas.h"                         // for cblas_daxpy, cblas_d...
-#include "SolverOptions.h"                       // for SolverOptions, SICON...
-#include "fc2d_AlartCurnier_functions.h"         // for computeAlartCurnier2D
-#include "fc3d_short_names.h"                    // for GFC2D_NSN_AC
-#include "VI_cst.h"                              // for SICONOS_VI_DPARAM_RHO
-#include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
-#include "gfc2d_VI_FixedPointProjection.h"       // for warm-start
+#include "CSparseMatrix.h"                  // for CSparseMatrix, CSpar...
+#include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_...
+#include "GlobalFrictionContactProblem.h"   // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                 // for NM_triplet, Numerics...
+#include "NumericsSparseMatrix.h"           // for NSM_new, NumericsSpa...
+#include "NumericsVector.h"                 // for NV_display
+#include "SiconosBlas.h"                    // for cblas_daxpy, cblas_d...
+#include "SolverOptions.h"                  // for SolverOptions, SICON...
+#include "VI_cst.h"                         // for SICONOS_VI_DPARAM_RHO
+#include "fc2d_AlartCurnier_functions.h"    // for computeAlartCurnier2D
+#include "fc3d_short_names.h"               // for GFC2D_NSN_AC
+#include "gfc2d_VI_FixedPointProjection.h"  // for warm-start
+#include "gfc2d_compute_error.h"            // for gfc2d_compute_error
 #include "numerics_verbose.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
-
 
 /* Solver registration system */
 #include "numerics_errors.h"
@@ -54,12 +51,11 @@
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include"siconos_debug.h"
+#include "siconos_debug.h"
 
 /** Function pointer type for 2D Alart--Curnier/Jean--Moreau contact function. */
-typedef void (*GFC2D_AC_Function)(double* reaction, double* velocity, double mu,
-                                  double* rho, double* residual,
-                                  double* jacobian_u, double* jacobian_r);
+typedef void (*GFC2D_AC_Function)(double* reaction, double* velocity, double mu, double* rho,
+                                  double* residual, double* jacobian_u, double* jacobian_r);
 
 /*!
  * \file gfc2d_nonsmooth_Newton_AlartCurnier.c
@@ -119,17 +115,16 @@ static const double GFC2D_NSN_AC_LS_SLOPE_UPPER = 0.99;
  */
 static size_t compute_dwork_size(unsigned int num_global_dofs, unsigned int num_contact_dofs,
                                  unsigned int system_size) {
-  return (size_t)(2 * num_global_dofs +
-                  num_contact_dofs +      /* contact_ac_values */
-                  2 * num_contact_dofs +  /* jac_A: 2x2 blocks -> 4 entries per contact */
-                  2 * num_contact_dofs +  /* jac_B */
-                  num_contact_dofs +      /* rho */
-                  system_size +           /* system_residual */
-                  system_size +           /* newton_direction */
-                  system_size +           /* linesearch_workspace (trial point) */
-                  system_size +           /* linesearch_residual */
-                  system_size +           /* linear_residual_workspace */
-                  system_size);           /* current_solution */
+  return (size_t)(2 * num_global_dofs + num_contact_dofs + /* contact_ac_values */
+                  2 * num_contact_dofs + /* jac_A: 2x2 blocks -> 4 entries per contact */
+                  2 * num_contact_dofs + /* jac_B */
+                  num_contact_dofs +     /* rho */
+                  system_size +          /* system_residual */
+                  system_size +          /* newton_direction */
+                  system_size +          /* linesearch_workspace (trial point) */
+                  system_size +          /* linesearch_residual */
+                  system_size +          /* linear_residual_workspace */
+                  system_size);          /* current_solution */
 }
 
 /**
@@ -137,10 +132,10 @@ static size_t compute_dwork_size(unsigned int num_global_dofs, unsigned int num_
  *        2D solver.
  */
 static size_t compute_iwork_size(unsigned int num_contact_dofs) {
-  return (size_t)(2 * num_contact_dofs +  /* jac_A rows: 2 per contact */
-                  2 * num_contact_dofs +  /* jac_B rows */
-                  2 * num_contact_dofs +  /* jac_A cols */
-                  2 * num_contact_dofs)   /* jac_B cols */
+  return (size_t)(2 * num_contact_dofs + /* jac_A rows: 2 per contact */
+                  2 * num_contact_dofs + /* jac_B rows */
+                  2 * num_contact_dofs + /* jac_A cols */
+                  2 * num_contact_dofs)  /* jac_B cols */
          * sizeof(CS_INT);
 }
 
@@ -148,8 +143,8 @@ static size_t compute_iwork_size(unsigned int num_contact_dofs) {
  * \brief Evaluate the global residual \f$\Psi(v, u, r)\f$.
  */
 static void compute_system_residual(GlobalFrictionContactProblem* problem,
-                                    double* global_velocity, double* reaction, double* velocity,
-                                    double* rho, double* residual,
+                                    double* global_velocity, double* reaction,
+                                    double* velocity, double* rho, double* residual,
                                     GFC2D_AC_Function compute_ac) {
   assert(problem->H->size1 == problem->dimension * problem->numberOfContacts);
 
@@ -166,15 +161,16 @@ static void compute_system_residual(GlobalFrictionContactProblem* problem,
   NM_gemv(-1., problem->M, global_velocity, 1, residual);
 
   /* Kinematic residual: residual[n:n+m] = b - u + H^T*v */
-  cblas_daxpy(num_contact_dofs, -1., velocity, 1, residual + num_global_dofs, 1); // a copy of b would have been better
+  cblas_daxpy(num_contact_dofs, -1., velocity, 1, residual + num_global_dofs,
+              1);  // a copy of b would have been better
   cblas_daxpy(num_contact_dofs, 1., problem->b, 1, residual + num_global_dofs, 1);
   NM_tgemv(1., problem->H, global_velocity, 1, residual + num_global_dofs);
 
   /* Contact residual: residual[n+m:n+2m] = Phi_AC(u, r, rho) */
   for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
     compute_ac(reaction + 2 * contact, velocity + 2 * contact, problem->mu[contact],
-               rho + 2 * contact,
-               residual + num_global_dofs + num_contact_dofs + 2 * contact, NULL, NULL);
+               rho + 2 * contact, residual + num_global_dofs + num_contact_dofs + 2 * contact,
+               NULL, NULL);
   }
 }
 
@@ -249,9 +245,8 @@ static CS_INT build_jacobian_pattern(CSparseMatrix* mass_matrix, CSparseMatrix* 
  * \brief Refresh the contact blocks \f$A\f$ and \f$B\f$ of the Jacobian.
  */
 static void update_jacobian_blocks(CSparseMatrix* mass_matrix, CSparseMatrix* contact_matrix,
-                                   CSparseMatrix* contact_jac_A,
-                                   CSparseMatrix* contact_jac_B, CSparseMatrix* jacobian,
-                                   CS_INT contact_block_start) {
+                                   CSparseMatrix* contact_jac_A, CSparseMatrix* contact_jac_B,
+                                   CSparseMatrix* jacobian, CS_INT contact_block_start) {
   assert(mass_matrix->nz >= 0);
   assert(contact_matrix->nz >= 0);
   assert(contact_jac_A->nz >= 0);
@@ -270,8 +265,8 @@ static void update_jacobian_blocks(CSparseMatrix* mass_matrix, CSparseMatrix* co
 
   /* Ensure enough room for the refreshed contact blocks. */
   if ((contact_block_start + contact_jac_A->nz + contact_jac_B->nz) > jacobian->nzmax) {
-    CHECK_RETURN(cs_sprealloc(jacobian, contact_block_start + contact_jac_A->nz +
-                                            contact_jac_B->nz));
+    CHECK_RETURN(
+        cs_sprealloc(jacobian, contact_block_start + contact_jac_A->nz + contact_jac_B->nz));
   }
 
   /* Overwrite A. */
@@ -326,14 +321,11 @@ static void setup_contact_jacobian_blocks(int num_contacts, double* block_values
 /**
  * \brief Goldstein--Price line search on the sparse global residual.
  */
-static int global_linesearch_goldstein_price(GlobalFrictionContactProblem* problem,
-                                             double* current_solution, double* search_direction,
-                                             double* rho, double* residual,
-                                             CSparseMatrix* jacobian_csc,
-                                             double* trial_point, double* trial_residual,
-                                             double* step_length,
-                                             unsigned int max_ls_iterations,
-                                             GFC2D_AC_Function compute_ac) {
+static int global_linesearch_goldstein_price(
+    GlobalFrictionContactProblem* problem, double* current_solution, double* search_direction,
+    double* rho, double* residual, CSparseMatrix* jacobian_csc, double* trial_point,
+    double* trial_residual, double* step_length, unsigned int max_ls_iterations,
+    GFC2D_AC_Function compute_ac) {
   double alpha_min = GFC2D_NSN_AC_LS_INITIAL_ALPHA_MIN;
   double alpha_max = GFC2D_NSN_AC_LS_INITIAL_ALPHA_MAX;
 
@@ -416,15 +408,14 @@ static int global_linesearch_goldstein_price(GlobalFrictionContactProblem* probl
  */
 static int gfc2d_nsn_ac_warm_start_internal(GlobalFrictionContactProblem* problem,
                                             double* reaction, double* velocity,
-                                            double* globalVelocity,
-                                            SolverOptions* options) {
+                                            double* globalVelocity, SolverOptions* options) {
   const int warm_start_max_iter = options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER];
   if (warm_start_max_iter <= 0) return 0;
 
   const double tolerance = options->dparam[SICONOS_DPARAM_TOL];
-  numerics_printf_verbose(
-      1, "---- GFC2D - NSN_AC - Warm start with GFC2D_VI_FPP (%d iterations)",
-      warm_start_max_iter);
+  numerics_printf_verbose(1,
+                          "---- GFC2D - NSN_AC - Warm start with GFC2D_VI_FPP (%d iterations)",
+                          warm_start_max_iter);
 
   SolverOptions* vi_options = solver_options_create(GFC2D_VI_FPP);
   if (!vi_options) {
@@ -474,7 +465,8 @@ int gfc2d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* react
     return 0;
   }
 
-  return gfc2d_nsn_ac_warm_start_internal(problem, reaction, velocity, globalVelocity, options);
+  return gfc2d_nsn_ac_warm_start_internal(problem, reaction, velocity, globalVelocity,
+                                          options);
 }
 
 /* Forward declarations for contact-status helpers used by the solver. */
@@ -490,10 +482,6 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                          double* reaction, double* velocity,
                                          double* globalVelocity, int* info,
                                          SolverOptions* options) {
-
-
-
- 
   assert(problem);
   assert(reaction);
   assert(velocity);
@@ -672,8 +660,7 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   /* Optional Jacobian regularization matrix (regul * I). */
   NumericsMatrix* reg_eye = NULL;
-  const int regularization =
-      options->iparam[SICONOS_FRICTION_2D_NSN_REGULARIZATION];
+  const int regularization = options->iparam[SICONOS_FRICTION_2D_NSN_REGULARIZATION];
   const double regul = options->dparam[SICONOS_FRICTION_2D_NSN_REGUL];
   if (regularization == SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES) {
     reg_eye = NM_eye(nm_jacobian->size0);
@@ -700,13 +687,12 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   /* Automatic warm start: only run VI-FPP if the first Newton linear solve
    * fails.  Warm start is applied at most once. */
-  const int warm_start_auto =
-      (options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] ==
-       SICONOS_FRICTION_2D_NSN_WARM_START_AUTO);
+  const int warm_start_auto = (options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] ==
+                               SICONOS_FRICTION_2D_NSN_WARM_START_AUTO);
   int warm_start_done = 0;
 
 restart:
-  info[0] = 1;  /* Default to non-convergence. */
+  info[0] = 1; /* Default to non-convergence. */
   iteration = 0;
 
   /* Initialize rho from the current NSN rho parameter. */
@@ -743,12 +729,14 @@ restart:
   else
     numerics_printf_verbose(1, "---- GFC2D - NSN_AC - Start with tolerance = %g", tolerance);
 
-  numerics_printf_verbose(1,
-                          "| iter |   residual   | error gfc3d  |    tol      | ls step | ls info | "
-                          "no-c | stick | slip+ | slip- | stab%% |");
-  numerics_printf_verbose(1,
-                          "--------------------------------------------------------------------------------"
-                          "---------------------------");
+  numerics_printf_verbose(
+      1,
+      "| iter |   residual   | error gfc3d  |    tol      | ls step | ls info | "
+      "no-c | stick | slip+ | slip- | stab%% |");
+  numerics_printf_verbose(
+      1,
+      "--------------------------------------------------------------------------------"
+      "---------------------------");
 
   for (unsigned int i = 0; i < problem->numberOfContacts; ++i) {
     previous_contact_status[i] = -1;
@@ -760,17 +748,16 @@ restart:
   double residual_norm = 0.0;
   while (iteration++ < max_iterations) {
     /* Evaluate the residual Psi(x_k). */
-    compute_system_residual(problem, current_global_velocity, current_reaction, current_velocity,
-                            rho, system_residual, compute_ac);
+    compute_system_residual(problem, current_global_velocity, current_reaction,
+                            current_velocity, rho, system_residual, compute_ac);
 
     residual_norm = cblas_dnrm2(system_size, system_residual, 1);
 
     /* Evaluate the contact Jacobians A(x_k) and B(x_k). */
     for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
       compute_ac(current_reaction + 2 * contact, current_velocity + 2 * contact,
-               problem->mu[contact], rho + 2 * contact,
-               contact_ac_values + 2 * contact,
-               jac_A + 4 * contact, jac_B + 4 * contact);
+                 problem->mu[contact], rho + 2 * contact, contact_ac_values + 2 * contact,
+                 jac_A + 4 * contact, jac_B + 4 * contact);
     }
 
     /* Refresh the contact blocks of the global Jacobian. */
@@ -782,17 +769,15 @@ restart:
     cblas_dscal(system_size, -1., newton_direction, 1);
 
     /* Convert to compressed-column format and solve J(x_k) d = -Psi(x_k). */
-    //CSparseMatrix* jacobian_csc = cs_compress(jacobian_triplet);
+    // CSparseMatrix* jacobian_csc = cs_compress(jacobian_triplet);
 
     NM_clearCSC(nm_jacobian);
     NM_clearCSCTranspose(nm_jacobian);
     NM_clearCSR(nm_jacobian);
-    
-    
+
     DEBUG_PRINTF("norm of jacobian = %e\n", NM_norm_1(nm_jacobian));
     DEBUG_EXPR(NM_display(nm_jacobian););
-    DEBUG_EXPR(NV_display(newton_direction, num_global_dofs + num_contact_dofs*2 ););
-
+    DEBUG_EXPR(NV_display(newton_direction, num_global_dofs + num_contact_dofs * 2););
 
     NumericsMatrix* J_to_solve = nm_jacobian;
     if (regularization == SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES) {
@@ -819,8 +804,9 @@ restart:
       /* Automatic warm start: if this is the first linear-solve failure and
        * the AUTO strategy is active, run VI-FPP once and restart Newton. */
       if (warm_start_auto && !warm_start_done) {
-        numerics_printf_verbose(
-            1, "---- GFC2D - NSN_AC - first linear solve failed, triggering automatic warm start");
+        numerics_printf_verbose(1,
+                                "---- GFC2D - NSN_AC - first linear solve failed, triggering "
+                                "automatic warm start");
         warm_start_done = 1;
         gfc2d_nsn_ac_warm_start_internal(problem, reaction, velocity, globalVelocity, options);
         memcpy(current_global_velocity, globalVelocity, num_global_dofs * sizeof(double));
@@ -847,10 +833,8 @@ restart:
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
         line_search_status = global_linesearch_goldstein_price(
             problem, current_solution, newton_direction, rho, system_residual,
-            NM_csc(nm_jacobian),
-            linesearch_workspace, linesearch_residual, &step_length,
-            options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER],
-            compute_ac);
+            NM_csc(nm_jacobian), linesearch_workspace, linesearch_residual, &step_length,
+            options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER], compute_ac);
         break;
 
       default:
@@ -875,7 +859,8 @@ restart:
     /* Update the iterate: x_{k+1} = x_k + alpha * d_k. */
     cblas_daxpy(system_size, step_length, newton_direction, 1, current_solution, 1);
 
-    DEBUG_PRINTF("norm of the solution  = %e\n", cblas_dnrm2(system_size, current_solution, 1));
+    DEBUG_PRINTF("norm of the solution  = %e\n",
+                 cblas_dnrm2(system_size, current_solution, 1));
     DEBUG_EXPR(NV_display(current_global_velocity, num_global_dofs););
     DEBUG_EXPR(NV_display(current_velocity, num_contact_dofs););
     DEBUG_EXPR(NV_display(current_reaction, num_contact_dofs););
@@ -883,10 +868,9 @@ restart:
     /* ====================================================================== *
      * Convergence test
      * ====================================================================== */
-    const int error_status =
-        gfc2d_compute_error(problem, current_reaction, current_velocity, current_global_velocity,
-                            tolerance, options, norm_q, norm_b,
-                            &(options->dparam[SICONOS_DPARAM_RESIDU]));
+    const int error_status = gfc2d_compute_error(
+        problem, current_reaction, current_velocity, current_global_velocity, tolerance,
+        options, norm_q, norm_b, &(options->dparam[SICONOS_DPARAM_RESIDU]));
     if (error_status != 0) {
       numerics_printf_verbose(-1,
                               "---- GFC2D - NSN_AC iteration %d, error computation "
@@ -920,10 +904,9 @@ restart:
       }
       previous_contact_status[contact] = status;
     }
-    const double stabilized_pct =
-        (problem->numberOfContacts > 0)
-            ? (100.0 * stabilized) / problem->numberOfContacts
-            : 0.0;
+    const double stabilized_pct = (problem->numberOfContacts > 0)
+                                      ? (100.0 * stabilized) / problem->numberOfContacts
+                                      : 0.0;
 
     numerics_printf_verbose(1,
                             "| %4u | %12.4e | %12.4e | %10.2e | %4.2e | %5d | "
@@ -936,7 +919,6 @@ restart:
       info[0] = 0;
       break;
     }
-
   }
 
   /* ====================================================================== *
@@ -1043,12 +1025,12 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
    * By default the warm start is automatic: it is triggered only if the
    * first Newton Jacobian factorization fails. */
   options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
-    SICONOS_FRICTION_2D_NSN_WARM_START_AUTO;
+      SICONOS_FRICTION_2D_NSN_WARM_START_AUTO;
   options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER] = 50;
 
   /* Jacobian regularization: disabled by default. */
   options->iparam[SICONOS_FRICTION_2D_NSN_REGULARIZATION] =
-    SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO;
+      SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO;
   options->dparam[SICONOS_FRICTION_2D_NSN_REGUL] = 1e-6;
 
   /* Default to the Alart--Curnier formulation (mu * max(0, r_N - rho_N u_N)). */
@@ -1075,8 +1057,8 @@ static int gfc2d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
 static int gfc2d_nsn_ac_solve_wrap(void* problem, double* reaction, double* velocity,
                                    double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc2d_nonsmooth_Newton_AlartCurnier((GlobalFrictionContactProblem*)problem, reaction, velocity,
-                                      globalVelocity, &info, options);
+  gfc2d_nonsmooth_Newton_AlartCurnier((GlobalFrictionContactProblem*)problem, reaction,
+                                      velocity, globalVelocity, &info, options);
   return info;
 }
 

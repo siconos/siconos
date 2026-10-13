@@ -281,7 +281,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
             determine_convergence(error, &tolerance, iter, options, problem, x, w, rho);
 
         if (options->callback) {
-          options->callback->collectStatsIteration(options->callback->env, n, x, w, error, NULL);
+          options->callback->collectStatsIteration(options->callback->env, n, x, w, error,
+                                                   NULL);
         }
 
         DEBUG_EXPR_WE(if ((error < error_k)) { printf("(error < error_k) is satisfied\n"); };);
@@ -381,7 +382,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
             determine_convergence(error, &tolerance, iter, options, problem, x, w, rho);
 
         if (options->callback) {
-          options->callback->collectStatsIteration(options->callback->env, n, x, w, error, NULL);
+          options->callback->collectStatsIteration(options->callback->env, n, x, w, error,
+                                                   NULL);
         }
 
         DEBUG_EXPR_WE(if ((error < error_k)) { printf("(error < error_k) is satisfied\n"); };);
@@ -480,7 +482,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
             determine_convergence(error, &tolerance, iter, options, problem, x, w, rho);
 
         if (options->callback) {
-          options->callback->collectStatsIteration(options->callback->env, n, x, w, error, NULL);
+          options->callback->collectStatsIteration(options->callback->env, n, x, w, error,
+                                                   NULL);
         }
 
         DEBUG_EXPR_WE(if ((error < error_k)) { printf("(error < error_k) is satisfied\n"); };);

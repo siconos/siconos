@@ -144,9 +144,8 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
     free(comp_tmp);
     return numerics_error("gfc3d_compute_error", "bad alloc");
   }
-  error_complementarity = fc3d_compute_complementarity_error(nc, reaction, velocity, mu,
-                                                             norm, scope, reduction, alpha,
-                                                             comp_work, comp_tmp);
+  error_complementarity = fc3d_compute_complementarity_error(
+      nc, reaction, velocity, mu, norm, scope, reduction, alpha, comp_work, comp_tmp);
   free(comp_work);
   free(comp_tmp);
 

@@ -53,7 +53,8 @@ unsigned projectionOnCone(double* r, double mu);
    \param[in] mu the friction coefficient (angle of the cone)
    \param[out] F the natural-map residual of size 3
 */
-void naturalMapOnCone(const double r[3], const double u[3], double rho, double mu, double F[3]);
+void naturalMapOnCone(const double r[3], const double u[3], double rho, double mu,
+                      double F[3]);
 
 /**
    Compute an element of the the subdifferential of the

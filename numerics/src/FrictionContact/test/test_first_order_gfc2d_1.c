@@ -43,7 +43,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_VI_FPP);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;    
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
     current++;
   }
   for (int d = 0; d < n_data; d++) {
@@ -51,7 +51,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_VI_EG);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-2;    
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-2;
     current++;
   }
   /* The VI extra-gradient solver does not reach the requested tolerance on

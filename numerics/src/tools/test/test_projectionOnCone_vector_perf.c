@@ -85,9 +85,10 @@ int main(void) {
   double t_vec_proj = (now() - t0) / nrep;
 
   double err_proj = max_abs_diff(r_loop, r_vec, n);
-  printf("projectionOnConeVector: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  err=%e\n",
-         nc, t_loop_proj, t_vec_proj,
-         t_loop_proj / fmax(t_vec_proj, 1e-12), err_proj);
+  printf(
+      "projectionOnConeVector: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  "
+      "err=%e\n",
+      nc, t_loop_proj, t_vec_proj, t_loop_proj / fmax(t_vec_proj, 1e-12), err_proj);
   if (err_proj > 1e-12) {
     fprintf(stderr, "projectionOnConeVector correctness check failed!\n");
     info += 1;
@@ -109,9 +110,10 @@ int main(void) {
   double t_vec_nat = (now() - t0) / nrep;
 
   double err_nat = max_abs_diff(F_loop, F_vec, n);
-  printf("naturalMapOnConeVector: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  err=%e\n",
-         nc, t_loop_nat, t_vec_nat,
-         t_loop_nat / fmax(t_vec_nat, 1e-12), err_nat);
+  printf(
+      "naturalMapOnConeVector: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  "
+      "err=%e\n",
+      nc, t_loop_nat, t_vec_nat, t_loop_nat / fmax(t_vec_nat, 1e-12), err_nat);
   if (err_nat > 1e-12) {
     fprintf(stderr, "naturalMapOnConeVector correctness check failed!\n");
     info += 1;

@@ -45,9 +45,9 @@ extern "C" {
  * \param[out] info convergence info (0 if converged)
  * \param[in,out] options solver options
  */
-void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem *problem, double *reaction,
-                            double *velocity, double *globalVelocity, int *info,
-                            SolverOptions *options);
+void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* reaction,
+                            double* velocity, double* globalVelocity, int* info,
+                            SolverOptions* options);
 
 #if defined(__cplusplus)
 }

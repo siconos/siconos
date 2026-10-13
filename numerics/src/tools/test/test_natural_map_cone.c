@@ -40,26 +40,20 @@ int main(void) {
   const double rho = 1.5;
 
   /* reaction and velocity stacked by contact */
-  double r[] = {
-      /* contact 0: w inside cone */
-      2.0, 0.01, 0.0,
-      /* contact 1: w in dual cone */
-      0.0, 0.5, 0.0,
-      /* contact 2: w on cone boundary */
-      1.2, 1.0, 0.0,
-      /* contact 3: w inside, nonzero tangential u */
-      3.0, 0.2, -0.1,
-      /* contact 4: w on boundary, nonzero normal u */
-      1.5, 1.0, 0.0,
-      /* contact 5: w in dual, nonzero u */
-      1.0, 0.5, 0.5};
-  double u[] = {
-      1.0, 0.0, 0.0,
-      1.0, 0.0, 0.0,
-      1.0, 0.0, 0.0,
-      1.0, 0.1, 0.0,
-      0.5, 0.0, 0.0,
-      2.0, 0.0, 0.0};
+  double r[] = {/* contact 0: w inside cone */
+                2.0, 0.01, 0.0,
+                /* contact 1: w in dual cone */
+                0.0, 0.5, 0.0,
+                /* contact 2: w on cone boundary */
+                1.2, 1.0, 0.0,
+                /* contact 3: w inside, nonzero tangential u */
+                3.0, 0.2, -0.1,
+                /* contact 4: w on boundary, nonzero normal u */
+                1.5, 1.0, 0.0,
+                /* contact 5: w in dual, nonzero u */
+                1.0, 0.5, 0.5};
+  double u[] = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                1.0, 0.1, 0.0, 0.5, 0.0, 0.0, 2.0, 0.0, 0.0};
   double mu[] = {0.1, 0.3, 0.5, 0.7, 0.5, 0.2};
 
   double F_loop[3 * 6];

@@ -653,8 +653,7 @@ static void rolling_friction_3d_admm_asymmetric(
     /*******************************/
 
     cblas_dcopy(m, q, 1, q_s, 1);
-    DEBUG_EXPR(
-        fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
+    DEBUG_EXPR(fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
     DEBUG_EXPR(NV_display(velocity, m););
     DEBUG_EXPR(NV_display(&xi[m], m););
 

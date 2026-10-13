@@ -18,8 +18,8 @@
 
 #include "SOC_scaling.h"
 
-#include <math.h>   // for sqrt, fabs, fmax
-#include <stddef.h> // for NULL
+#include <math.h>    // for sqrt, fabs, fmax
+#include <stddef.h>  // for NULL
 
 #include "SiconosBlas.h"  // for cblas_dnrm2, cblas_dasum, cblas_ddot
 
@@ -110,13 +110,15 @@ double SOC_scaling_cone(const double* x, const double* y, int m, int dim) {
   return (sx < sy) ? sx : sy;
 }
 
-double SOC_scaling_cone_mu(const double* x, const double* y, int m, const double* mu, int dim) {
+double SOC_scaling_cone_mu(const double* x, const double* y, int m, const double* mu,
+                           int dim) {
   const double sx = safeguard_scale(SOC_norm_cone_mu(x, m, mu, dim));
   const double sy = safeguard_scale(SOC_norm_cone_mu(y, m, mu, dim));
   return (sx < sy) ? sx : sy;
 }
 
-double SOC_scaling_cone_weighted(const double* x, const double* y, int m, int dim, double alpha) {
+double SOC_scaling_cone_weighted(const double* x, const double* y, int m, int dim,
+                                 double alpha) {
   const double sx = safeguard_scale(SOC_norm_cone_weighted(x, m, dim, alpha));
   const double sy = safeguard_scale(SOC_norm_cone_weighted(y, m, dim, alpha));
   return (sx < sy) ? sx : sy;

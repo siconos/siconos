@@ -99,7 +99,7 @@ void Projection_VI_GFC3D(void* viIn, double* x, double* PX) {
 /** Projection on the 2D Coulomb cone:
  *  K = { (r_N, r_T) | r_N >= 0, |r_T| <= mu * r_N }
  */
-static void projectionOn2DCone(double *r, double mu) {
+static void projectionOn2DCone(double* r, double mu) {
   double absT = fabs(r[1]);
   if (mu * absT <= -r[0]) {
     r[0] = 0.0;
@@ -113,19 +113,19 @@ static void projectionOn2DCone(double *r, double mu) {
   }
 }
 
-void Function_VI_GFC2D(void *self, int n_notused, double *x, double *F) {
+void Function_VI_GFC2D(void* self, int n_notused, double* x, double* F) {
   DEBUG_BEGIN("Function_VI_GFC2D(void * self, double *x, double *F)\n")
-  VariationalInequality *vi = (VariationalInequality *)self;
-  GlobalFrictionContactProblem_as_VI *pb = (GlobalFrictionContactProblem_as_VI *)vi->env;
-  GlobalFrictionContactProblem *gfc2d = pb->gfc3d;
+  VariationalInequality* vi = (VariationalInequality*)self;
+  GlobalFrictionContactProblem_as_VI* pb = (GlobalFrictionContactProblem_as_VI*)vi->env;
+  GlobalFrictionContactProblem* gfc2d = pb->gfc3d;
 
-  int nLocal = gfc2d->dimension;                  /* should be 2 */
+  int nLocal = gfc2d->dimension; /* should be 2 */
   int m = gfc2d->numberOfContacts * nLocal;
   int n = gfc2d->M->size0;
   DEBUG_EXPR(NM_vector_display(x, n + m));
 
-  double *globalVelocity = &x[0];
-  double *reaction = &x[n];
+  double* globalVelocity = &x[0];
+  double* reaction = &x[n];
 
   cblas_dcopy(n, gfc2d->q, 1, F, 1);
   for (int i = 0; i < n; i++) F[i] *= -1.0; /* F = -q */
@@ -133,7 +133,7 @@ void Function_VI_GFC2D(void *self, int n_notused, double *x, double *F) {
   NM_gemv(1.0, gfc2d->M, globalVelocity, 1.0, F); /* F = M v - q */
   NM_gemv(-1.0, gfc2d->H, reaction, 1.0, F);      /* F = M v - q - H r */
 
-  double *localvelocity = &F[n];
+  double* localvelocity = &F[n];
   cblas_dcopy(m, gfc2d->b, 1, localvelocity, 1);             /* localvelocity = b */
   NM_tgemv(1., gfc2d->H, globalVelocity, 1., localvelocity); /* localvelocity = b + H^T v */
 
@@ -146,12 +146,12 @@ void Function_VI_GFC2D(void *self, int n_notused, double *x, double *F) {
   DEBUG_END("Function_VI_GFC2D(void * self, double *x, double *F)\n")
 }
 
-void Projection_VI_GFC2D(void *viIn, double *x, double *PX) {
+void Projection_VI_GFC2D(void* viIn, double* x, double* PX) {
   DEBUG_BEGIN("Projection_VI_GFC2D(void *viIn, double *x, double *PX)\n");
 
-  VariationalInequality *vi = (VariationalInequality *)viIn;
-  GlobalFrictionContactProblem_as_VI *pb = (GlobalFrictionContactProblem_as_VI *)vi->env;
-  GlobalFrictionContactProblem *gfc2d = pb->gfc3d;
+  VariationalInequality* vi = (VariationalInequality*)viIn;
+  GlobalFrictionContactProblem_as_VI* pb = (GlobalFrictionContactProblem_as_VI*)vi->env;
+  GlobalFrictionContactProblem* gfc2d = pb->gfc3d;
 
   int nLocal = gfc2d->dimension;
   int m = gfc2d->numberOfContacts * nLocal;
@@ -159,7 +159,7 @@ void Projection_VI_GFC2D(void *viIn, double *x, double *PX) {
   DEBUG_EXPR(NM_vector_display(x, n + m));
   cblas_dcopy(n + m, x, 1, PX, 1);
 
-  double *reaction = &PX[n];
+  double* reaction = &PX[n];
 
   for (int contact = 0; contact < gfc2d->numberOfContacts; ++contact) {
     projectionOn2DCone(&reaction[contact * nLocal], gfc2d->mu[contact]);

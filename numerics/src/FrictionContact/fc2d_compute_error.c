@@ -18,17 +18,17 @@
 #include "fc2d_compute_error.h"
 
 #include <assert.h>
-#include <float.h>  // for DBL_EPSILON
-#include <math.h>   // for fabs, sqrt
-#include <stdio.h>  // for printf
-#include <stdlib.h> // for malloc, free
+#include <float.h>   // for DBL_EPSILON
+#include <math.h>    // for fabs, sqrt
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for malloc, free
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "NumericsMatrix.h"          // for NM_gemv
-#include "SiconosBlas.h"             // for cblas_dcopy, cblas_dnrm2, cblas_dscal
-#include "SOC_scaling.h"             // for SOC_scaling_*
-#include "SolverOptions.h"           // for SolverOptions
+#include "NumericsMatrix.h"  // for NM_gemv
+#include "SOC_scaling.h"     // for SOC_scaling_*
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dnrm2, cblas_dscal
+#include "SolverOptions.h"   // for SolverOptions
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_error, verbose
 
@@ -82,8 +82,7 @@ void fc2d_compute_modified_local_velocity(int nc, const double* u, const double*
 static double safeguard_scale(double s) { return (s > 1.0) ? s : 1.0; }
 
 /* Single-contact (2D cone) norm helpers. */
-static inline double fc2d_unitary_norm(int norm, const double x[2], double mu,
-                                       double alpha) {
+static inline double fc2d_unitary_norm(int norm, const double x[2], double mu, double alpha) {
   const double t = fabs(x[1]);
   switch (norm) {
     case SICONOS_FRICTION_2D_SCALING_EUCLIDEAN:
@@ -101,8 +100,7 @@ static inline double fc2d_unitary_norm(int norm, const double x[2], double mu,
 }
 
 static inline double fc2d_unitary_scale(int norm, int reduction, const double r[2],
-                                        const double u_mod[2], double mu,
-                                        double alpha) {
+                                        const double u_mod[2], double mu, double alpha) {
   const double nr = fc2d_unitary_norm(norm, r, mu, alpha);
   const double nu = fc2d_unitary_norm(norm, u_mod, mu, alpha);
 
@@ -250,8 +248,8 @@ double fc2d_compute_complementarity_error(int nc, const double* r, const double*
       const double* r_i = &r[pos];
       const double* u_mod_i = &tmp[pos];
 
-      const double s = safeguard_scale(
-          fc2d_unitary_scale(norm, reduction, r_i, u_mod_i, mu[i], alpha));
+      const double s =
+          safeguard_scale(fc2d_unitary_scale(norm, reduction, r_i, u_mod_i, mu[i], alpha));
       const double inv = 1.0 / s;
 
       const double w[2] = {r_i[0] - u_mod_i[0], r_i[1] - u_mod_i[1]};

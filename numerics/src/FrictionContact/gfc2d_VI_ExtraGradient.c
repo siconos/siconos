@@ -16,35 +16,36 @@
  * limitations under the License.
  */
 
+#include "gfc2d_VI_ExtraGradient.h"
+
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
 
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
-#include "gfc2d_VI_ExtraGradient.h"
 #include "NumericsFwd.h"                         // for VariationalInequality
 #include "NumericsMatrix.h"                      // for NumericsMatrix
 #include "SiconosBlas.h"                         // for cblas_dnrm2
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
-#include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
 #include "fc3d_short_names.h"                    // for GFC2D_VI_EG
+#include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
 #include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
 
-void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem *problem, double *reaction,
-                            double *velocity, double *globalVelocity, int *info,
-                            SolverOptions *options) {
+void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* reaction,
+                            double* velocity, double* globalVelocity, int* info,
+                            SolverOptions* options) {
   DEBUG_BEGIN("gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, ... \n");
   DEBUG_EXPR(verbose = 1;);
   /* Number of contacts */
@@ -57,15 +58,15 @@ void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem *problem, double *react
   DEBUG_EXPR(NM_vector_display(velocity, m););
   DEBUG_EXPR(NM_vector_display(globalVelocity, n););
 
-  VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
+  VariationalInequality* vi = (VariationalInequality*)malloc(sizeof(VariationalInequality));
 
   vi->F = &Function_VI_GFC2D;
   vi->ProjectionOnX = &Projection_VI_GFC2D;
 
   double error = 1e24;
 
-  GlobalFrictionContactProblem_as_VI *gfc2d_as_vi =
-      (GlobalFrictionContactProblem_as_VI *)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
+  GlobalFrictionContactProblem_as_VI* gfc2d_as_vi =
+      (GlobalFrictionContactProblem_as_VI*)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
   vi->env = gfc2d_as_vi;
   vi->size = n + m;
 
@@ -78,8 +79,8 @@ void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem *problem, double *react
 
   DEBUG_EXPR(NV_display(reaction, m););
   DEBUG_EXPR(NV_display(globalVelocity, n););
-  double *z = (double *)malloc((n + m) * sizeof(double));
-  double *Fz = (double *)calloc((n + m), sizeof(double));
+  double* z = (double*)malloc((n + m) * sizeof(double));
+  double* Fz = (double*)calloc((n + m), sizeof(double));
 
   memcpy(z, globalVelocity, n * sizeof(double));
   memcpy(&z[n], reaction, m * sizeof(double));
@@ -128,27 +129,28 @@ void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem *problem, double *react
  * - Elimination of giant switch statements in drivers
  */
 
-void gfc2d_vi_eg_set_default(SolverOptions *options) {
-  /* VI_EG doesn't use internal solvers, but we call the VI set_default for proper initialization */
+void gfc2d_vi_eg_set_default(SolverOptions* options) {
+  /* VI_EG doesn't use internal solvers, but we call the VI set_default for proper
+   * initialization */
   variationalInequality_ExtraGradient_set_default(options);
 }
 
-static int gfc2d_vi_eg_init_wrap(void *problem, SolverOptions *options) {
+static int gfc2d_vi_eg_init_wrap(void* problem, SolverOptions* options) {
   /* set_default already called by solver_options_create */
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int gfc2d_vi_eg_solve_wrap(void *problem, double *reaction, double *velocity,
-                                  double *globalVelocity, SolverOptions *options) {
+static int gfc2d_vi_eg_solve_wrap(void* problem, double* reaction, double* velocity,
+                                  double* globalVelocity, SolverOptions* options) {
   int info = NUMERICS_OK;
-  gfc2d_VI_ExtraGradient((GlobalFrictionContactProblem *)problem, reaction, velocity,
+  gfc2d_VI_ExtraGradient((GlobalFrictionContactProblem*)problem, reaction, velocity,
                          globalVelocity, &info, options);
   return info;
 }
 
-static void gfc2d_vi_eg_free_wrap(void *problem, SolverOptions *options) {
+static void gfc2d_vi_eg_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
@@ -157,8 +159,8 @@ static void gfc2d_vi_eg_free_wrap(void *problem, SolverOptions *options) {
 REGISTER_SOLVER_3VAR(GFC2D_VI_EG, "GFC2D_VI_EG",
                      "Variational Inequality Extra Gradient for 2D Global Friction Contact",
                      gfc2d_vi_eg_init_wrap, gfc2d_vi_eg_solve_wrap, gfc2d_vi_eg_free_wrap,
-                     NULL,                      /* error function */
-                     gfc2d_vi_eg_set_default,   /* set_default */
-                     1000,                      /* default_max_iter */
-                     1e-4,                      /* default_tol */
-                     0                          /* is_local_solver */);
+                     NULL,                    /* error function */
+                     gfc2d_vi_eg_set_default, /* set_default */
+                     1000,                    /* default_max_iter */
+                     1e-4,                    /* default_tol */
+                     0 /* is_local_solver */);

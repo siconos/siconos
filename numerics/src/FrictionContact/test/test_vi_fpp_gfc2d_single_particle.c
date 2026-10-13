@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
   (void)argv;
 
   /* Problem sizes */
-  const int n = 2;    /* global degrees of freedom */
-  const int nc = 1;   /* number of contacts */
-  const int dim = 2;  /* 2D contact space */
+  const int n = 2;   /* global degrees of freedom */
+  const int nc = 1;  /* number of contacts */
+  const int dim = 2; /* 2D contact space */
 
   /* Physical data */
   const double g = 1.0;
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
   options->isSet = 1;
-  
+
   /* Solve */
   int info = gfc2d_driver(problem, reaction, velocity, globalvelocity, options);
 

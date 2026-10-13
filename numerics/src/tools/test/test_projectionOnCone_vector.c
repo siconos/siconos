@@ -41,17 +41,16 @@ int main(void) {
   /* Stacked reactions covering the three possible projection statuses.
      Contacts are chosen so that the vectorized code exercises inside,
      dual and boundary branches with different mu values. */
-  double r_ori[] = {
-      /* contact 0: inside */
-      1.0, 0.05, 0.0,
-      /* contact 1: dual */
-      -1.0, 0.5, 0.0,
-      /* contact 2: boundary */
-      0.2, 1.0, 0.0,
-      /* contact 3: inside, nonzero tangential component */
-      2.0, 0.2, 0.3,
-      /* contact 4: boundary, large normal */
-      5.0, 3.0, 4.0};
+  double r_ori[] = {/* contact 0: inside */
+                    1.0, 0.05, 0.0,
+                    /* contact 1: dual */
+                    -1.0, 0.5, 0.0,
+                    /* contact 2: boundary */
+                    0.2, 1.0, 0.0,
+                    /* contact 3: inside, nonzero tangential component */
+                    2.0, 0.2, 0.3,
+                    /* contact 4: boundary, large normal */
+                    5.0, 3.0, 4.0};
   double mu[] = {0.1, 0.3, 0.5, 0.7, 0.8};
 
   double r_loop[3 * 5];

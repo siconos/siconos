@@ -24,7 +24,7 @@
 
 */
 
-#include "NumericsFwd.h"  // for FrictionContactProblem
+#include "NumericsFwd.h"    // for FrictionContactProblem
 #include "SolverOptions.h"  // for SolverOptions
 #if defined(__cplusplus)
 extern "C" {
