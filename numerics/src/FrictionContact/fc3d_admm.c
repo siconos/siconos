@@ -145,8 +145,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
           SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE &&
       problem->M->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
-    M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
+    M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
     NSM_diag_indices(M);
   } else {
     M = problem->M;
@@ -234,7 +233,8 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     if (has_rho_changed) {
       /* NM_clear(W); */
       /* W= NM_new(); */
-      NM_copy(M, W);
+      NM_free(W);
+      W = NM_copy(M);
       NM_add_to_diag3(W, rho);
     }
 
@@ -573,8 +573,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   double* b_s = data->b;
 
   /*  constraints matrix */
-  NumericsMatrix* A = NM_new();
-  NM_copy(M, A);
+  NumericsMatrix* A = NM_copy(M);
   CSparseMatrix* A_triplet = NM_triplet(A);
 
   A->storageType = NM_SPARSE;
@@ -636,7 +635,8 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     if (has_rho_changed) {
       /* NM_clear(W); */
       /* W= NM_new(); */
-      NM_copy(M_s, W);
+      NM_free(W);
+      W = NM_copy(M_s);
       NM_gemm(rho, Atrans, A, 1.0, W);
       DEBUG_EXPR(NM_display(W));
     }

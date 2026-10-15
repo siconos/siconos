@@ -2296,8 +2296,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
     printf(
         "\n\n\n######################### FORCE SPARSE STORAGE "
         "#########################\n\n\n");
-    M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
+    M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
   } else {
     M = problem->M;
   }
@@ -2310,8 +2309,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
       problem->H->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
-    H_origin = NM_create(NM_SPARSE, problem->H->size1, problem->H->size0);
-    NM_copy_to_sparse(NM_transpose(problem->H), H_origin, DBL_EPSILON);
+    H_origin = NM_copy_to_sparse(NM_transpose(problem->H), DBL_EPSILON);
   } else {
     H_origin = NM_transpose(
         problem->H);  // H <== H' because some different storages in fclib and paper
@@ -2512,8 +2510,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
       rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));
       rhs_dx = (double*)calloc(m + nd + n_dplus1, sizeof(double));
 
-      minus_H = NM_create(H->storageType, H->size0, H->size1);  // -H
-      NM_copy(H, minus_H);
+      minus_H = NM_copy(H);  // -H
       NM_scal(-1.0, minus_H);
 
       minus_Ht = NM_transpose(minus_H);  // -H'
@@ -2544,8 +2541,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
 
       rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));  // for printing
 
-      minus_H = NM_create(H->storageType, H->size0, H->size1);  // -H
-      NM_copy(H, minus_H);
+      minus_H = NM_copy(H);  // -H
       NM_scal(-1.0, minus_H);
 
       minus_Ht = NM_transpose(minus_H);  // -H'
@@ -2573,8 +2569,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
 
       rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));  // for printing
 
-      minus_H = NM_create(H->storageType, H->size0, H->size1);  // -H
-      NM_copy(H, minus_H);
+      minus_H = NM_copy(H);  // -H
       NM_scal(-1.0, minus_H);
 
       minus_Ht = NM_transpose(minus_H);  // -H'
@@ -2605,8 +2600,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
       rhs_save = (double*)calloc(m + nd, sizeof(double));  // for printing
 
       Ht = NM_transpose(H);  // H'
-      minus_M = NM_create(M->storageType, M->size0, M->size1);
-      NM_copy(M, minus_M);
+      minus_M = NM_copy(M);
       NM_scal(-1.0, minus_M);
       break;
 
@@ -2634,8 +2628,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
 
       rhs_save = (double*)calloc(m + nd, sizeof(double));  // for printing
 
-      minus_M = NM_create(M->storageType, M->size0, M->size1);
-      NM_copy(M, minus_M);
+      minus_M = NM_copy(M);
       NM_scal(-1.0, minus_M);
       identity = NM_eye(nd);
       break;

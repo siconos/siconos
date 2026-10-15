@@ -249,10 +249,8 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
   GlobalFrictionContactProblem* new = globalFrictionContactProblem_new();
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
-  new->M = NM_new();
-  NM_copy(problem->M, new->M);
-  new->H = NM_new();
-  NM_copy(problem->H, new->H);
+  new->M = NM_copy(problem->M);
+  new->H = NM_copy(problem->H);
   new->q = (double*)malloc(n * sizeof(double));
   memcpy(new->q, problem->q, n * sizeof(double));
   new->b = (double*)malloc(m * sizeof(double));
@@ -260,7 +258,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
   new->mu = (double*)malloc(nc * sizeof(double));
   memcpy(new->mu, problem->mu, nc * sizeof(double));
   if (problem->M_inverse) {
-    NM_copy(problem->M_inverse, new->M_inverse);
+    new->M_inverse = NM_copy(problem->M_inverse);
   }
   if (problem->name) new->name = problem->name;
   new->env = NULL;

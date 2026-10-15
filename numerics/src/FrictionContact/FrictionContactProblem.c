@@ -369,8 +369,7 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem) {
       (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
-  new->M = NM_new();
-  NM_copy(problem->M, new->M);
+  new->M = NM_copy(problem->M);
   new->q = (double*)malloc(to_size_t(n) * sizeof(double));
   memcpy(new->q, problem->q, to_size_t(n) * sizeof(double));
   new->mu = (double*)malloc(to_size_t(nc) * sizeof(double));

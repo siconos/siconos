@@ -203,9 +203,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   }
 
   /* Compute M + rho A^T A (storage in W)*/
-  NumericsMatrix* W = NM_new();
-
-  NM_copy(M, W);
+  NumericsMatrix* W = NM_copy(M);
 
   if (AisIdentity) {
     NM_add_to_diag3(W, rho);
@@ -241,7 +239,8 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     ++iter;
 
     if (has_rho_changed) {
-      NM_copy(M, W);
+      NM_free(W);
+      W = NM_copy(M);
       DEBUG_PRINT("copy of M: ");
       DEBUG_EXPR(NM_display(W));
       if (AisIdentity) {

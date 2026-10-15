@@ -330,14 +330,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE) {
     if (problem->M->storageType == NM_SPARSE_BLOCK) {
       DEBUG_PRINT("Force a copy to sparse storage type\n");
-      problem->M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-      NM_copy_to_sparse(M_original, problem->M, DBL_EPSILON);
+      problem->M = NM_copy_to_sparse(M_original, DBL_EPSILON);
     }
 
     if (problem->H->storageType == NM_SPARSE_BLOCK) {
       DEBUG_PRINT("Force a copy to sparse storage type\n");
-      problem->H = NM_create(NM_SPARSE, problem->H->size0, problem->H->size1);
-      NM_copy_to_sparse(H_original, problem->H, DBL_EPSILON);
+      problem->H = NM_copy_to_sparse(H_original, DBL_EPSILON);
     }
   }
 
@@ -431,11 +429,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     }
     P = NM_free(P);
     NumericsMatrix* Htrans = NM_transpose(problem->H);
-    NumericsMatrix* H = problem->H;
-    H = NM_create(NM_SPARSE, n, m);
-    NM_triplet_alloc(H, n);
-    H->matrix2->origin = NSM_TRIPLET;
-    NM_copy(problem->H, H);
+    NumericsMatrix* H = NM_copy(problem->H);
     NM_gemm(1.0, P, Htrans, 0.0, Htrans);
     NM_gemm(1.0, H, P, 0.0, H);
     Htrans = NM_free(Htrans);
@@ -615,12 +609,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
           has_full_H_changed = 0;
         }
         if (has_full_H_changed || has_rho_changed) {
-          NM_copy(M, W);
+          NM_free(W);
+          W = NM_copy(M);
           NM_unpreserve(W);
           NM_gemm(rho, H_full, Htrans, 1.0, W);
         }
       } else {
-        NM_copy(M, W);
+        NM_free(W);
+        W = NM_copy(M);
         NM_unpreserve(W); /* if not unpreserve, the follwing operations are
                              not made on the destructible pointer */
         NM_gemm(rho, H, Htrans, 1.0, W);

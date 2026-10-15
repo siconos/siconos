@@ -92,7 +92,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   int size = problem->dimension * problem->numberOfContacts;
 
-  NumericsMatrix* Htmat = NM_create(NM_SPARSE, problem->H->size0, problem->H->size1);
+  NumericsMatrix* Htmat = NM_copy_to_sparse(problem->H, DBL_EPSILON);
   NumericsMatrix Emat;
   NM_null(&Emat);
   Emat.storageType = NM_SPARSE;
@@ -176,7 +176,6 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   optSetIntStr(Optr, "Keep", 0);
 
-  NM_copy_to_sparse(problem->H, Htmat);
   cs_fkeep(NM_csc(Htmat), &SN_rm_normal_part_on_H, NULL);
 
   cblas_dcopy(size, problem->b, 1, reaction, 1);

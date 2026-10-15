@@ -125,9 +125,7 @@ static int test_NM_conversion(NumericsMatrix* M) {
 };
 
 static int test_read_write_sparse(NumericsMatrix* M_orig) {
-  NumericsMatrix* M = NM_new();
-
-  NM_copy(M_orig, M);
+  NumericsMatrix* M = NM_copy(M_orig);
 
   FILE* foutput = fopen("matrix_sparse_triplet.dat", "w");
   NM_write_in_file(M, foutput);

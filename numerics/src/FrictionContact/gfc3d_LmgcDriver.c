@@ -133,11 +133,8 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
   CHECK_NULL(M);
   CHECK_NULL(H);
 
-  NumericsMatrix* MMtmp = NM_new();
-  NumericsMatrix* HHtmp = NM_new();
-
-  NM_copy(M, MMtmp);
-  NM_copy(H, HHtmp);
+  NumericsMatrix* MMtmp = NM_copy(M);
+  NumericsMatrix* HHtmp = NM_copy(H);
 
   NM_clearSparse(M);
   NM_clearSparse(H);

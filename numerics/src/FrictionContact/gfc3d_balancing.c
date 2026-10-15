@@ -123,7 +123,11 @@ void gfc3d_balancing_M(GlobalFrictionContactProblem* problem, BalancingMatrices*
   NumericsMatrix* H_tmp = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(H_tmp, n);
   NM_gemm(1.0, B_for_M->D2, problem->H, 0.0, H_tmp);
-  NM_copy(H_tmp, problem->H);
+  NumericsMatrix* H_tmp_copy = NM_copy(H_tmp);
+  NM_clear(problem->H);
+  *problem->H = *H_tmp_copy;
+  problem->H->destructible = problem->H;
+  free(H_tmp_copy);
 
   /* scaling of q */
   /* cblas_dscal(n,alpha*gamma,problem->q,1); */

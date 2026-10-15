@@ -387,26 +387,25 @@ void NM_set_LDLT_factorized(NumericsMatrix* A, bool flag);
  */
 int NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B);
 
-/** Copy a NumericsMatrix inside another NumericsMatrix (deep).
- *  Reallocations are performed if B cannot hold a copy of A
+/** Copy a NumericsMatrix (deep).
+ *  A new NumericsMatrix is allocated and returned; the caller owns the
+ *  returned matrix and must free it with NM_free.
  *
- *  \param[in] A a NumericsMatrix
- *  \param[in,out] B a NumericsMatrix
- *  \return error code
+ *  \param[in] A a NumericsMatrix (unchanged)
+ *  \return a pointer to a newly allocated NumericsMatrix, or NULL on error
  */
-int NM_copy(const NumericsMatrix* const A, NumericsMatrix* B);
+NumericsMatrix* NM_copy(const NumericsMatrix* A);
 
-/** Copy a NumericsMatrix to s sparse one.
- *  Allocation or reallocation are performed on B
- *  \warning It is assumed that B has been properly initialized: its storageType must
- *  be set to NM_SPARSE.
+/** Copy a NumericsMatrix to a sparse one.
+ *  A new NumericsMatrix with storage type NM_SPARSE is allocated and returned;
+ *  the caller owns the returned matrix and must free it with NM_free.
  *
- *  \param[in] A a NumericsMatrix
- *  \param[in,out] B a NumericsMatrix
+ *  \param[in] A a NumericsMatrix (unchanged)
  *  \param threshold if the original matrix is dense, a threshold can be applied
  *  on the absolute value of the entries
+ *  \return a pointer to a newly allocated sparse NumericsMatrix, or NULL on error
  */
-void NM_copy_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold);
+NumericsMatrix* NM_copy_to_sparse(const NumericsMatrix* A, double threshold);
 
 /**
    PrintInFile  of the matrix content

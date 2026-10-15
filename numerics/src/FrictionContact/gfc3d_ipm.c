@@ -1143,8 +1143,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     printf(
         "\n\n\n######################### FORCE SPARSE STORAGE "
         "#########################\n\n\n");
-    M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
+    M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
   } else {
     M = problem->M;
   }
@@ -1164,8 +1163,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
           SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
       problem->H->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
-    H_tilde = NM_create(NM_SPARSE, problem->H->size1, problem->H->size0);
-    NM_copy_to_sparse(NM_transpose(problem->H), H_tilde, DBL_EPSILON);
+    H_tilde = NM_copy_to_sparse(NM_transpose(problem->H), DBL_EPSILON);
   } else {
     H_tilde = NM_transpose(problem->H);
   }
@@ -1200,8 +1198,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   // NV_norm_2(f,m));
 
   // compute -H
-  NumericsMatrix* minus_H = NM_create(H->storageType, H->size0, H->size1);
-  NM_copy(H, minus_H);
+  NumericsMatrix* minus_H = NM_copy(H);
   NM_scal(-1.0, minus_H);
   NumericsMatrix* minus_Ht = NM_transpose(minus_H);
 
@@ -1218,12 +1215,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
-  NumericsMatrix* minus_M = NM_create(
-      M->storageType, M->size0,
-      M->size1);  // store the matrix -M to build the matrix of the Newton linear system
+  NumericsMatrix* minus_M =
+      NM_copy(M);  // store the matrix -M to build the matrix of the Newton linear system
 
   /* Create the matrix -M to build the matrix of the reduced linear system */
-  NM_copy(M, minus_M);
   NM_scal(-1.0, minus_M);
 
   /* COMPUTATION OF A NEW STARTING POINT */
@@ -2583,8 +2578,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   M = problem->M;
   H_tilde = NM_transpose(problem->H);
 
-  NumericsMatrix* minus_M = NM_create(M->storageType, M->size0, M->size1);
-  NM_copy(M, minus_M);
+  NumericsMatrix* minus_M = NM_copy(M);
   NM_scal(-1.0, minus_M);
 
   // initialize solver if it is not set

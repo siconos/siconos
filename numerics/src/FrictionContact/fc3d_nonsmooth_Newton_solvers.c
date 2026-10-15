@@ -119,7 +119,12 @@ static void computeSparseBlockAWpB(double* A, NumericsMatrix* W, double* B,
 
   /* Check for not allocated matrix  */
   if (result->nbblocks != Wb->nbblocks) {
-    NM_copy(W, AWpB);
+    NumericsMatrix* W_copy = NM_copy(W);
+    NM_clear(AWpB);
+    *AWpB = *W_copy;
+    AWpB->destructible = AWpB;
+    free(W_copy);
+    result = AWpB->matrix1;
   }
 
   assert((unsigned)W->size0 >= 3);
@@ -163,7 +168,11 @@ static void computeSparseAWpB(double* A, NumericsMatrix* W, double* B, NumericsM
   NM_dense_to_sparse_diag_t(B, Bmat, 3, 3);
 
   /* AWpB = B */
-  NM_copy(Bmat, AWpB);
+  NumericsMatrix* Bmat_copy = NM_copy(Bmat);
+  NM_clear(AWpB);
+  *AWpB = *Bmat_copy;
+  AWpB->destructible = AWpB;
+  free(Bmat_copy);
 
   /*  AWpB += AW */
   NM_gemm(1., Amat, W, 1., AWpB);
@@ -463,7 +472,16 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   }
 
   /* just for allocations, mumps_id and mpi communicator may be passed also */
-  NM_copy(problem->M, AWpB);
+  NumericsMatrix* M_copy = NM_copy(problem->M);
+  if (!options->dWork) {
+    NM_free(AWpB);
+    AWpB = M_copy;
+  } else {
+    NM_clear(AWpB);
+    *AWpB = *M_copy;
+    AWpB->destructible = AWpB;
+    free(M_copy);
+  }
 
   if (problem->M->storageType != NM_DENSE) {
     switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER]) {

@@ -386,11 +386,10 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
   unsigned size = (unsigned)problem->dimension * problem->numberOfContacts;
 
-  NumericsMatrix Wtmat;
+  NumericsMatrix* Wtmat = NULL;
   NumericsMatrix Emat;
   NumericsMatrix Akmat;
 
-  NM_null(&Wtmat);
   NM_null(&Emat);
   NM_null(&Akmat);
 
@@ -480,9 +479,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
   optSetIntStr(Optr, "Keep", 0);
 
-  Wtmat.storageType = NM_SPARSE;
-  NM_copy_to_sparse(problem->M, &Wtmat);
-  cs_fkeep(NM_csc(&Wtmat), &SN_rm_normal_part, NULL);
+  Wtmat = NM_copy_to_sparse(problem->M, DBL_EPSILON);
+  cs_fkeep(NM_csc(Wtmat), &SN_rm_normal_part, NULL);
   DEBUG_PRINT("FC3D_AVI_GAMS :: Wt matrix constructed\n");
 
   Emat.storageType = NM_SPARSE;
@@ -555,7 +553,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
     int solverStat = FC3D_gams_inner_loop_condensed(
         iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, reaction, velocity,
-        tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat, options);
+        tmpq, lambda_r, lambda_y, problem->M, problem->q, Wtmat, &Emat, &Akmat, options);
     // DEBUG_PRINT_VEC(reaction, size);
     // DEBUG_PRINT_VEC(velocity, size);
 
@@ -1100,7 +1098,7 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  NM_clear(&Wtmat);
+  Wtmat = NM_free(Wtmat);
   NM_clear(&Emat);
   NM_clear(&Akmat);
 

@@ -425,8 +425,7 @@ PlasticityProblem* plasticity_copy(PlasticityProblem* problem) {
   new_problem->dimension = problem->dimension;
   new_problem->numberOfCones = problem->numberOfCones;
   new_problem->model_type = problem->model_type;
-  new_problem->M = NM_new();
-  NM_copy(problem->M, new_problem->M);
+  new_problem->M = NM_copy(problem->M);
   new_problem->q = (double*)malloc(n * sizeof(double));
   memcpy(new_problem->q, problem->q, n * sizeof(double));
 

@@ -265,8 +265,7 @@ vec<T> copy(vec<T>& v)
 {
   vec<T> new_vec;
 
-  auto* new_v = NM_new();
-  NM_copy(v._v, new_v);
+  auto* new_v = NM_copy(v._v);
 
   // new_vec destructor will free new_v
   new_vec._v = new_v;
@@ -398,8 +397,7 @@ mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B)
     nm = NM_add(alpha, A._m, beta, B._m);
   }
   else {
-    nm = NM_new();
-    NM_copy(A._m, nm);
+    nm = NM_copy(A._m);
   }
   mat<M> rm;
   rm._m = nm;
@@ -415,8 +413,7 @@ void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B,
     C._m = NM_add(alpha, A._m, beta, B._m);
   }
   else {
-    NumericsMatrix* nm = NM_new();
-    NM_copy(A._m, nm);
+    NumericsMatrix* nm = NM_copy(A._m);
     C._m = nm;
   }
   C._mt = nullptr;

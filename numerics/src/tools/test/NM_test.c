@@ -120,8 +120,7 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha) {
   /***********************************************************/
   int n = M->size0;
   int m = M->size1;
-  NumericsMatrix* C1 = NM_new();
-  NM_copy(M, C1);
+  NumericsMatrix* C1 = NM_copy(M);
 
   NumericsMatrix* Cref = NM_create_with_data(NM_DENSE, n, m, calloc(n * m, sizeof(double)));
   SBM_to_dense(M->matrix1, Cref->matrix0);
@@ -147,8 +146,7 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha) {
   /***********************************************************/
   /* C = C + alpha +I NM_SPARSE storage, square matrix  */
   /***********************************************************/
-  NumericsMatrix* C2 = NM_create(NM_SPARSE, n, m);
-  NM_copy_to_sparse(M, C2, 1e-16);
+  NumericsMatrix* C2 = NM_copy_to_sparse(M, 1e-16);
   NM_add_to_diag3(C2, alpha);
 
   info = NM_dense_equal(C2, Cref->matrix0, 1e-14);
@@ -1430,9 +1428,7 @@ static int NM_insert_dense_test() {
     for (size_t j = 0; j < Bsize1; ++j) NM_entry(B_dense, i, j, 999.0);
 
   /* create an expected result */
-  NumericsMatrix* AB_dense = NM_create_with_data(
-      NM_DENSE, Asize0, Asize1, calloc((size_t)(Asize0) * (Asize1), sizeof(double)));
-  NM_copy(A_dense, AB_dense);
+  NumericsMatrix* AB_dense = NM_copy(A_dense);
   for (size_t i = start_i; i < end_i; ++i)
     for (size_t j = start_j; j < end_j; ++j) NM_entry(AB_dense, i, j, 999.0);
 
@@ -1473,8 +1469,7 @@ static int NM_insert_sparse_test() {
     for (size_t j = 0; j < Bsize1; j += 2) NM_entry(B_sparse, i, j, 999.0);
 
   /* create an expected result */
-  NumericsMatrix* AB_sparse = NM_create(NM_SPARSE, Asize0, Asize1);
-  NM_copy(A_sparse, AB_sparse);
+  NumericsMatrix* AB_sparse = NM_copy(A_sparse);
   for (size_t i = start_i; i < end_i; i += 2)
     for (size_t j = start_j; j < end_j; j += 2) NM_entry(AB_sparse, i, j, 999.0);
 
@@ -2595,8 +2590,7 @@ static int test_NM_posv_expert_unit(NumericsMatrix* M, double* b) {
     b[j] = y_save[j];
     y[j] = b[j];
   }
-  NumericsMatrix* M_copy = NM_create(NM_SPARSE, M->size0, M->size1);
-  NM_copy(M, M_copy);
+  NumericsMatrix* M_copy = NM_copy(M);
   NM_posv_expert(M, b, NM_KEEP_FACTORS);
   NV_display(b, n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
@@ -2817,8 +2811,7 @@ static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix* M1, NumericsMatrix* 
   int n = M1->size0;
   int info = -1;
 
-  NumericsMatrix* B_backup = NM_new();
-  NM_copy(B, B_backup);
+  NumericsMatrix* B_backup = NM_copy(B);
 
   /* We can also write:
      NM_preserve(M1);
@@ -2826,8 +2819,7 @@ static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix* M1, NumericsMatrix* 
 
   NM_LU_solve_matrix_rhs(NM_preserve(M1), B);
   NM_display(B);
-  NumericsMatrix* MB = NM_new();
-  NM_copy(B, MB); /* in order to get to same allocation */
+  NumericsMatrix* MB = NM_copy(B); /* in order to get to same allocation */
   NM_gemm(1.0, M1, B, 0.0, MB);
 
   NumericsMatrix* RES = NM_add(1.0, MB, -1.0, B_backup);
@@ -2960,8 +2952,7 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix* M, double* b) {
     b[j] = y_save[j];
     y[j] = b[j];
   }
-  NumericsMatrix* M_copy = NM_create(NM_SPARSE, M->size0, M->size1);
-  NM_copy(M, M_copy);
+  NumericsMatrix* M_copy = NM_copy(M);
   NM_Cholesky_solve(M, b, 1);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
   res = cblas_dnrm2(n, y, 1);
@@ -3118,8 +3109,7 @@ static int test_NM_Cholesky_solve_matrix_rhs_unit(NumericsMatrix* M1, NumericsMa
   int n = M1->size0;
   int info = -1;
 
-  NumericsMatrix* B_backup = NM_new();
-  NM_copy(B, B_backup);
+  NumericsMatrix* B_backup = NM_copy(B);
 
   /* We can also write:
      NM_preserve(M1);
@@ -3127,8 +3117,7 @@ static int test_NM_Cholesky_solve_matrix_rhs_unit(NumericsMatrix* M1, NumericsMa
 
   NM_Cholesky_solve_matrix_rhs(NM_preserve(M1), B);
   // NM_display(B);
-  NumericsMatrix* MB = NM_new();
-  NM_copy(B, MB); /* in order to get to same allocation */
+  NumericsMatrix* MB = NM_copy(B); /* in order to get to same allocation */
   NM_gemm(1.0, M1, B, 0.0, MB);
 
   NumericsMatrix* RES = NM_add(1.0, MB, -1.0, B_backup);
@@ -3273,8 +3262,7 @@ static int test_NM_Cholesky_solve_vs_posv_expert(void) {
   double* x = (double*)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) x[j] = 1.0;
 
-  NumericsMatrix* W_copy = NM_create(NM_SPARSE, W->size0, W->size1);
-  NM_copy(W, W_copy);
+  NumericsMatrix* W_copy = NM_copy(W);
   double* x_copy = (double*)malloc(n * sizeof(double));
   for (int j = 0; j < n; j++) x_copy[j] = x[j];
 
@@ -3345,8 +3333,7 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix* M, double* b) {
     b[j] = y_save[j];
     y[j] = b[j];
   }
-  NumericsMatrix* M_copy = NM_create(NM_SPARSE, M->size0, M->size1);
-  NM_copy(M, M_copy);
+  NumericsMatrix* M_copy = NM_copy(M);
   NM_LDLT_solve(M, b, 1);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
   res = cblas_dnrm2(n, y, 1);
@@ -3743,8 +3730,7 @@ static int test_NM_LDLT_refine_unit(NumericsMatrix* M, double* b) {
     b[j] = y_save[j];
     y[j] = b[j];
   }
-  NumericsMatrix* M_copy = NM_create(NM_SPARSE, M->size0, M->size1);
-  NM_copy(M, M_copy);
+  NumericsMatrix* M_copy = NM_copy(M);
   NM_LDLT_refine(M, b, y_save, 1, 1e-12, 10, 0);
   NV_display(b, n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
@@ -3949,8 +3935,7 @@ static int test_NM_LU_refine_unit(NumericsMatrix* M, double* b) {
     b[j] = y_save[j];
     y[j] = b[j];
   }
-  NumericsMatrix* M_copy = NM_create(NM_SPARSE, M->size0, M->size1);
-  NM_copy(M, M_copy);
+  NumericsMatrix* M_copy = NM_copy(M);
   NM_LU_refine(M, b, 1e-12, 10, &res);
   // NV_display(b,n);
   NM_gemv(-1.0, M_copy, b, 1.0, y);
