@@ -301,7 +301,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   NumericsMatrix* mat_E = NM_create(NM_SPARSE, to_int(nd), to_int(n));
   int mat_E_nzmax = to_int(n);
   NM_triplet_alloc(mat_E, mat_E_nzmax);
-  // NM_fill(mat_E, NM_SPARSE, nd, n, mat_E->matrix2); // Useless?
+  // NM_fill(mat_E, NM_SPARSE, nd, n, mat_E->sparse); // Useless?
   for (size_t i = 0; i < n; ++i) {
     NM_entry(mat_E, i * d, i, 1.);
   }
@@ -457,7 +457,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
         NumericsMatrix* subdiff_u = NM_create(NM_SPARSE, to_int(n), to_int(nd));
         CS_INT subdiff_u_nzmax = to_csint(2 * n);
         NM_triplet_alloc(subdiff_u, subdiff_u_nzmax);
-        // NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->matrix2); // useless?
+        // NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->sparse); // useless?
 
         /* Matrix filling */
         size_t pos;

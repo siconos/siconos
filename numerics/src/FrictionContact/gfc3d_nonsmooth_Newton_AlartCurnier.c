@@ -749,8 +749,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   DEBUG_EXPR(
       NumericsMatrix* Mdense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
-      NM_to_dense(problem->M, Mdense); printf(
-          "conditioning = %g\n", cond(Mdense->matrix0, problem->M->size0, problem->M->size1));
+      NM_to_dense(problem->M, Mdense);
+      printf("conditioning = %g\n", cond(Mdense->dense, problem->M->size0, problem->M->size1));
       Mdense = NM_free(Mdense););
 
   assert((int)num_contact_dofs == problem->numberOfContacts * problem->dimension);

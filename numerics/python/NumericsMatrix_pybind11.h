@@ -66,7 +66,7 @@ template <typename T>
 py::array_t<double> get_matrix(const T& self, NumericsMatrix* T::* matrix_attr) {
   NumericsMatrix* matrix = self.*matrix_attr;
 
-  if (!matrix || !matrix->matrix0) {
+  if (!matrix || !matrix->dense) {
     throw std::runtime_error("Input matrix has not been allocated.");
   }
 
@@ -74,17 +74,17 @@ py::array_t<double> get_matrix(const T& self, NumericsMatrix* T::* matrix_attr) 
   auto cols = matrix->size1;
   return py::array_t<double>({rows, cols},                             // Shape
                              {sizeof(double), sizeof(double) * rows},  // Strides
-                             matrix->matrix0, py::capsule(matrix->matrix0));
+                             matrix->dense, py::capsule(matrix->dense));
 }
 
 template <typename T>
 py::object get_matrix_sparse(const T& self, NumericsMatrix* T::* matrix_attr) {
   NumericsMatrix* matrix = self.*matrix_attr;
-  if (!matrix || !matrix->matrix2 || !matrix->matrix2->csc) {
+  if (!matrix || !matrix->sparse || !matrix->sparse->csc) {
     throw std::runtime_error("input matrix is not allocated.");
   }
 
-  CSparseMatrix* csc = matrix->matrix2->csc;
+  CSparseMatrix* csc = matrix->sparse->csc;
   // py::capsule data_capsule(csc->x, [](void *) {});
   // py::capsule indices_capsule(csc->i, [](void *) {});
   // py::capsule indptr_capsule(csc->p, [](void *) {});
@@ -133,7 +133,7 @@ void set_matrix(T& self, NumericsMatrix* T::* matrix_attr, py::array_t<double> a
   }
   NumericsMatrix*& matrix = self.*matrix_attr;
   if (matrix) {
-    matrix->matrix0 = nullptr;  // data is borrowed from numpy
+    matrix->dense = nullptr;  // data is borrowed from numpy
     NM_free(matrix);
   }
   matrix = NM_create_with_data(NM_DENSE, array.shape(0), array.shape(1),
@@ -202,7 +202,7 @@ void set_matrix_sparse(T& self, NumericsMatrix* T::* matrix_attr, py::object pym
     matrix = NM_create(NM_SPARSE, shape.first, shape.second);
   }
 
-  NumericsSparseMatrix* sparseMat = matrix->matrix2;
+  NumericsSparseMatrix* sparseMat = matrix->sparse;
   sparseMat->origin = NSM_CSC;
   sparseMat->csc = csc;
 

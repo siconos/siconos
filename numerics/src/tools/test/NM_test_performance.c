@@ -50,13 +50,13 @@ static double test_NM_row_prod_no_diag3(NumericsMatrix* A, int number_of_prod) {
     printf("test_NM_row_prod_no_diag3 for a storage SBM. n =%i, number_of_prod= %i\n",
            A->size0, number_of_prod);
   } else if (A->storageType == NM_SPARSE) {
-    if (A->matrix2->origin == NSM_CSR)
+    if (A->sparse->origin == NSM_CSR)
       printf("test_NM_row_prod_no_diag3 for a storage CSR. n =%i, number_of_prod= %i\n",
              A->size0, number_of_prod);
-    if (A->matrix2->origin == NSM_CSC)
+    if (A->sparse->origin == NSM_CSC)
       printf("test_NM_row_prod_no_diag3 for a storage CSC. n =%i, number_of_prod= %i\n",
              A->size0, number_of_prod);
-    if (A->matrix2->origin == NSM_TRIPLET)
+    if (A->sparse->origin == NSM_TRIPLET)
       printf("test_NM_row_prod_no_diag3 for a storage COO. n =%i, number_of_prod= %i\n",
              A->size0, number_of_prod);
   }
@@ -101,13 +101,13 @@ static double test_NM_prod_mv_3x3(NumericsMatrix* A, int number_of_prod) {
     printf("test_NM_prod_mv_3x3 for a storage SBM. n =%i, number_of_prod= %i\n", A->size0,
            number_of_prod);
   } else if (A->storageType == NM_SPARSE) {
-    if (A->matrix2->origin == NSM_CSR)
+    if (A->sparse->origin == NSM_CSR)
       printf("test_NM_prod_mv_3x3 for a storage CSR. n =%i, number_of_prod= %i\n", A->size0,
              number_of_prod);
-    if (A->matrix2->origin == NSM_CSC)
+    if (A->sparse->origin == NSM_CSC)
       printf("test_NM_prod_mv_3x3 for a storage CSC. n =%i, number_of_prod= %i\n", A->size0,
              number_of_prod);
-    if (A->matrix2->origin == NSM_TRIPLET)
+    if (A->sparse->origin == NSM_TRIPLET)
       printf("test_NM_prod_mv_3x3 for a storage COO. n =%i, number_of_prod= %i\n", A->size0,
              number_of_prod);
   }
@@ -148,8 +148,8 @@ int main(int argc, char* argv[]) {
   test_NM_row_prod_no_diag3(A_sparse, number_of_prod);
 
   /* NumericsMatrix * A_sparse_csc = NM_new_from_filename("./data/matrix_sparse.dat"); */
-  /* A_sparse_csc->matrix2->csc = NM_csc(A_sparse_csc); */
-  /* A_sparse_csc->matrix2->origin = NSM_CSC; */
+  /* A_sparse_csc->sparse->csc = NM_csc(A_sparse_csc); */
+  /* A_sparse_csc->sparse->origin = NSM_CSC; */
   /* //NM_display(A_sparse_csc); */
   /* test_NM_row_prod_no_diag3(A_sparse_csc,number_of_prod); */
 
@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
   /* CSparseMatrix * a_remove = NSM_remove_diagonal_blocks(A_sparse_remove, 3); */
 
   /* NM_clearSparseStorage(A_sparse_remove); */
-  /* A_sparse_remove->matrix2->triplet= a_remove; */
-  /* A_sparse_remove->matrix2->origin = NSM_TRIPLET; */
+  /* A_sparse_remove->sparse->triplet= a_remove; */
+  /* A_sparse_remove->sparse->origin = NSM_TRIPLET; */
 
   /* //NM_display(A_sparse_remove); */
 

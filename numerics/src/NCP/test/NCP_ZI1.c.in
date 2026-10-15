@@ -67,7 +67,7 @@ static void Fncp_ZI(void* env, int n, double* restrict z, double* restrict F)
 
 static void nabla_Fncp_ZI(void* env, int n, double* restrict z, NumericsMatrix* restrict nabla_Fncp)
 {
-  double* restrict nabla_Fncp_dense = nabla_Fncp->matrix0;
+  double* restrict nabla_Fncp_dense = nabla_Fncp->dense;
 
   data_ZI* d = (data_ZI*) env;
   double l0 = 2.0*z[0] - 1.0;

@@ -82,7 +82,7 @@ int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const s
     assert(0);
   }
 
-  if (!Arw_mat || !Arw_mat->matrix2 || Arw_mat->matrix2->origin != NSM_TRIPLET) {
+  if (!Arw_mat || !Arw_mat->sparse || Arw_mat->sparse->origin != NSM_TRIPLET) {
     assert(0);
   }
 
@@ -98,7 +98,7 @@ int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const s
 
   /* Arrow matrix filling */
   size_t pos;
-  CSparseMatrix* cs = Arw_mat->matrix2->triplet;
+  CSparseMatrix* cs = Arw_mat->sparse->triplet;
 
   size_t memSize = (dimension * 3 - 2) * varsCount;  // same pb as above, size_t to int ...
   if (!(memSize <= LLONG_MAX)) {
@@ -158,7 +158,7 @@ NumericsMatrix* Quad_repr(const double* const vec, const size_t vecSize,
   size_t dimension = vecSize / varsCount;
   NumericsMatrix* out = NM_create(NM_SPARSE, to_int(vecSize), to_int(vecSize));
   NM_triplet_alloc(out, to_csint(dimension * dimension * varsCount));
-  // NM_fill(out, NM_SPARSE, to_int(vecSize), to_int(vecSize), out->matrix2);
+  // NM_fill(out, NM_SPARSE, to_int(vecSize), to_int(vecSize), out->sparse);
 
   NumericsMatrix* quad_tmp =
       NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
@@ -174,7 +174,7 @@ NumericsMatrix* Quad_repr(const double* const vec, const size_t vecSize,
 
     for (size_t j = 0; j < dimension; ++j) {
       for (size_t k = 0; k < dimension; ++k)
-        quad_tmp->matrix0[j + k * to_size_t(quad_tmp->size0)] *= 2.0;
+        quad_tmp->dense[j + k * to_size_t(quad_tmp->size0)] *= 2.0;
       NM_entry(quad_tmp, j, j,
                NM_get_value(quad_tmp, to_int(j), to_int(j)) -
                    dets[(int)(i / dimension)] * NM_get_value(R, to_int(j), to_int(j)));
@@ -838,7 +838,7 @@ NumericsMatrix* QRmat(const double* const vec, const size_t vecSize, const size_
   size_t dimension = vecSize / varsCount;
   NumericsMatrix* out = NM_create(NM_SPARSE, to_int(vecSize), to_int(vecSize));
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
-  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->sparse);
 
   NumericsMatrix* quad_tmp =
       NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
@@ -849,14 +849,14 @@ NumericsMatrix* QRmat(const double* const vec, const size_t vecSize, const size_
   for (size_t i = 0; i < vecSize; i += dimension) {
     for (size_t j = 0; j < dimension; ++j) {
       for (size_t k = 0; k < dimension; ++k)
-        quad_tmp->matrix0[j + k * dimension] = 2.0 * vec[i + j] * vec[i + k];
+        quad_tmp->dense[j + k * dimension] = 2.0 * vec[i + j] * vec[i + k];
     }
     nvec = dnrm2l(dimension, vec + i);
     nvecb = dnrm2l(dimension - 1, vec + i + 1);
     dvec = (vec[i] + nvecb) * (vec[i] - nvecb);
-    quad_tmp->matrix0[0] = (double)(nvec * nvec);
+    quad_tmp->dense[0] = (double)(nvec * nvec);
     for (size_t j = 1; j < dimension; ++j)
-      quad_tmp->matrix0[j * (1 + dimension)] += (double)dvec;
+      quad_tmp->dense[j * (1 + dimension)] += (double)dvec;
     NM_insert(out, quad_tmp, i, i);
   }
   NM_clear(quad_tmp);
@@ -891,7 +891,7 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const size_t
   size_t dimension = (size_t)(vecSize / varsCount);
   NumericsMatrix* out = NM_create(NM_SPARSE, to_int(vecSize), to_int(vecSize));
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
-  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->sparse);
 
   NumericsMatrix* G =
       NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
@@ -912,14 +912,14 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const size_t
     for (size_t j = 0; j < dimension; ++j) {
       t[j] = t[j] / (double)gamt;
     }
-    G->matrix0[0] = t[0] * w;
+    G->dense[0] = t[0] * w;
     for (size_t j = 1; j < dimension; ++j) {
-      G->matrix0[j] = t[j] * w;
-      G->matrix0[j * dimension] = G->matrix0[j];
+      G->dense[j] = t[j] * w;
+      G->dense[j * dimension] = G->dense[j];
     }
     for (size_t j = 1; j < dimension; ++j) {
       for (size_t k = 1; k < dimension; ++k)
-        G->matrix0[j + dimension * k] =
+        G->dense[j + dimension * k] =
             (j == k) ? (1 + t[j] * t[k] / (1 + t[0])) * w : t[j] * t[k] / (1 + t[0]) * w;
     }
     NM_insert(out, G, i, i);
@@ -939,7 +939,7 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const siz
   size_t dimension = (size_t)(vecSize / varsCount);
   NumericsMatrix* out = NM_create(NM_SPARSE, to_int(vecSize), to_int(vecSize));
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
-  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->sparse);
 
   NumericsMatrix* G =
       NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
@@ -960,14 +960,14 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const siz
     for (size_t j = 0; j < dimension; ++j) {
       t[j] = t[j] / (double)gamt;
     }
-    G->matrix0[0] = t[0] / w;
+    G->dense[0] = t[0] / w;
     for (size_t j = 1; j < dimension; ++j) {
-      G->matrix0[j] = -t[j] / w;
-      G->matrix0[j * dimension] = G->matrix0[j];
+      G->dense[j] = -t[j] / w;
+      G->dense[j * dimension] = G->dense[j];
     }
     for (size_t j = 1; j < dimension; ++j) {
       for (size_t k = 1; k < dimension; ++k)
-        G->matrix0[j + dimension * k] =
+        G->dense[j + dimension * k] =
             (j == k) ? (1 + t[j] * t[k] / (1 + t[0])) / w : t[j] * t[k] / (1 + t[0]) / w;
     }
     NM_insert(out, G, i, i);
@@ -987,7 +987,7 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const siz
   size_t dimension = (size_t)(vecSize / varsCount);
   NumericsMatrix* out = NM_create(NM_SPARSE, to_int(vecSize), to_int(vecSize));
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
-  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+  // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->sparse);
 
   NumericsMatrix* G =
       NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
@@ -1009,14 +1009,14 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const siz
     for (size_t j = 0; j < dimension; ++j) {
       t[j] = t[j] / (double)gamt;
     }
-    G->matrix0[0] = w2 * cblas_ddot(to_blasint(dimension), t, 1, t, 1);
+    G->dense[0] = w2 * cblas_ddot(to_blasint(dimension), t, 1, t, 1);
     for (size_t j = 1; j < dimension; ++j) {
-      G->matrix0[j] = 2 * t[0] * t[j] * w2;
-      G->matrix0[j * dimension] = G->matrix0[j];
+      G->dense[j] = 2 * t[0] * t[j] * w2;
+      G->dense[j * dimension] = G->dense[j];
     }
     for (size_t j = 1; j < dimension; ++j) {
       for (size_t k = 1; k < dimension; ++k)
-        G->matrix0[j + dimension * k] =
+        G->dense[j + dimension * k] =
             (j == k) ? (1 + 2 * t[j] * t[k]) * w2 : 2 * t[j] * t[k] * w2;
     }
     NM_insert(out, G, i, i);

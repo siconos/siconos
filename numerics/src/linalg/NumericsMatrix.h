@@ -71,15 +71,15 @@ typedef struct {
     See NM_* functions for linear algebra operations on dense, sparse block and sparse storage.
 */
 struct NumericsMatrix {
-  NM_types storageType;                 /**< the type of storage:
-                                      0: dense (double*),
-                                      1: SparseBlockStructuredMatrix,
-                                      2: classical sparse (csc, csr or triplet) via CSparse (from T. Davis)*/
-  int size0;                            /**< number of rows */
-  int size1;                            /**< number of columns */
-  double* matrix0;                      /**< dense storage */
-  SparseBlockStructuredMatrix* matrix1; /**< sparse block storage */
-  NumericsSparseMatrix* matrix2;        /**< csc, csr or triplet storage */
+  NM_types storageType;                      /**< the type of storage:
+                                           0: dense (double*),
+                                           1: SparseBlockStructuredMatrix,
+                                           2: classical sparse (csc, csr or triplet) via CSparse (from T. Davis)*/
+  int size0;                                 /**< number of rows */
+  int size1;                                 /**< number of columns */
+  double* dense;                             /**< dense storage */
+  SparseBlockStructuredMatrix* sparse_block; /**< sparse block storage */
+  NumericsSparseMatrix* sparse;              /**< csc, csr or triplet storage */
 
   NumericsMatrixInternalData*
       internalData; /**< internal storage, used for workspace among other things */
@@ -127,8 +127,8 @@ RawNumericsMatrix* NM_scalar(size_t size, double s);
 /** create a NumericsMatrix as an empty shell
  *
  *  No actual matrix values are allocated. For NM_DENSE no buffer is allocated
- *  (matrix0 is NULL); for NM_SPARSE and NM_SPARSE_BLOCK the wrapper structs
- *  (matrix1/matrix2) are allocated but contain no entries yet. The caller may
+ *  (dense is NULL); for NM_SPARSE and NM_SPARSE_BLOCK the wrapper structs
+ *  (sparse_block/sparse) are allocated but contain no entries yet. The caller may
  *  also provide its own data through NM_create_with_data.
  *
  *  \param storageType the type of storage

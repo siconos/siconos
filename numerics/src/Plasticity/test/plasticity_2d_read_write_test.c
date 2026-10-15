@@ -62,7 +62,7 @@ int main(void) {
   plasticity2DProblem_free(PLASTICITY_2D_r);
 
   NM_clear(W);
-  tmpM->matrix0 = NULL;
+  tmpM->dense = NULL;
   NM_clear(tmpM);
   free(W);
   free(tmpM);

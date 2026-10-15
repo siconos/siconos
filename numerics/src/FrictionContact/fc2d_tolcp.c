@@ -40,10 +40,10 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem* lc
   lcp_problem->M->size1 = 3 * nc;
 
   lcp_problem->M->storageType = 0;
-  lcp_problem->M->matrix1 = NULL;
-  lcp_problem->M->matrix2 = NULL;
+  lcp_problem->M->sparse_block = NULL;
+  lcp_problem->M->sparse = NULL;
   lcp_problem->M->internalData = NULL;
-  lcp_problem->M->matrix0 =
+  lcp_problem->M->dense =
       (double*)malloc(lcp_problem->size * lcp_problem->size * sizeof(double));
   ;
   lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
@@ -52,45 +52,44 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem* lc
   for (i = 0; i < nc; i++) {
     for (j = 0; j < nc; j++) {
       /* first Column */
-      lcp_problem->M->matrix0[3 * i + 3 * j * lcp_problem->size] =
-          problem->M->matrix0[2 * i + 2 * j * n] -
-          problem->mu[i] *
-              problem->M->matrix0[2 * i + (2 * j + 1) * n];  // compute W_NN-mu W_NT
+      lcp_problem->M->dense[3 * i + 3 * j * lcp_problem->size] =
+          problem->M->dense[2 * i + 2 * j * n] -
+          problem->mu[i] * problem->M->dense[2 * i + (2 * j + 1) * n];  // compute W_NN-mu W_NT
 
-      lcp_problem->M->matrix0[3 * i + 1 + 3 * j * lcp_problem->size] =
-          problem->M->matrix0[(2 * i + 1) + 2 * j * n] -
+      lcp_problem->M->dense[3 * i + 1 + 3 * j * lcp_problem->size] =
+          problem->M->dense[(2 * i + 1) + 2 * j * n] -
           problem->mu[i] *
-              problem->M->matrix0[(2 * i + 1) + (2 * j + 1) * n];  // compute W_TN-mu W_TT
+              problem->M->dense[(2 * i + 1) + (2 * j + 1) * n];  // compute W_TN-mu W_TT
 
       if (i == j) {
-        lcp_problem->M->matrix0[3 * i + 2 + 3 * j * lcp_problem->size] = 2.0 * problem->mu[i];
+        lcp_problem->M->dense[3 * i + 2 + 3 * j * lcp_problem->size] = 2.0 * problem->mu[i];
       } else {
-        lcp_problem->M->matrix0[3 * i + 2 + 3 * j * lcp_problem->size] = 0.0;
+        lcp_problem->M->dense[3 * i + 2 + 3 * j * lcp_problem->size] = 0.0;
       }
 
       /* second Column */
-      lcp_problem->M->matrix0[3 * i + (3 * j + 1) * lcp_problem->size] =
-          problem->M->matrix0[2 * i + (2 * j + 1) * n];  // set W_NT
+      lcp_problem->M->dense[3 * i + (3 * j + 1) * lcp_problem->size] =
+          problem->M->dense[2 * i + (2 * j + 1) * n];  // set W_NT
 
-      lcp_problem->M->matrix0[3 * i + 1 + (3 * j + 1) * lcp_problem->size] =
-          problem->M->matrix0[(2 * i + 1) + (2 * j + 1) * n];  // set WTT
+      lcp_problem->M->dense[3 * i + 1 + (3 * j + 1) * lcp_problem->size] =
+          problem->M->dense[(2 * i + 1) + (2 * j + 1) * n];  // set WTT
 
       if (i == j) {
-        lcp_problem->M->matrix0[3 * i + 2 + (3 * j + 1) * lcp_problem->size] = -1.0;
+        lcp_problem->M->dense[3 * i + 2 + (3 * j + 1) * lcp_problem->size] = -1.0;
       } else {
-        lcp_problem->M->matrix0[3 * i + 2 + (3 * j + 1) * lcp_problem->size] = 0.0;
+        lcp_problem->M->dense[3 * i + 2 + (3 * j + 1) * lcp_problem->size] = 0.0;
       }
 
       /* Third Column */
-      lcp_problem->M->matrix0[3 * i + (3 * j + 2) * lcp_problem->size] = 0.0;
+      lcp_problem->M->dense[3 * i + (3 * j + 2) * lcp_problem->size] = 0.0;
 
       if (i == j) {
-        lcp_problem->M->matrix0[3 * i + 1 + (3 * j + 2) * lcp_problem->size] = 1.0;
+        lcp_problem->M->dense[3 * i + 1 + (3 * j + 2) * lcp_problem->size] = 1.0;
       } else {
-        lcp_problem->M->matrix0[3 * i + 1 + (3 * j + 2) * lcp_problem->size] = 0.0;
+        lcp_problem->M->dense[3 * i + 1 + (3 * j + 2) * lcp_problem->size] = 0.0;
       }
 
-      lcp_problem->M->matrix0[3 * i + 2 + (3 * j + 2) * lcp_problem->size] = 0.0;
+      lcp_problem->M->dense[3 * i + 2 + (3 * j + 2) * lcp_problem->size] = 0.0;
     }
   }
 

@@ -246,7 +246,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert() {
       _numericsMatrix.get()->storageType = _storageType;
       _numericsMatrix.get()->size0 = _dimRow;
       _numericsMatrix.get()->size1 = _dimColumn;
-      _numericsMatrix->matrix0 = _M1->data();  // Pointer link, be careful when freed.
+      _numericsMatrix->dense = _M1->data();  // Pointer link, be careful when freed.
       DEBUG_EXPR(NM_display(_numericsMatrix.get()););
       DEBUG_EXPR(_M1->display(););
       break;
@@ -257,7 +257,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert() {
       _numericsMatrix.get()->storageType = _storageType;
       _numericsMatrix.get()->size0 = _dimRow;
       _numericsMatrix.get()->size1 = _dimColumn;
-      _numericsMatrix->matrix1 =
+      _numericsMatrix->sparse_block =
           &*_M2->getNumericsMatSparse();  // Pointer link, be careful when freed.
       break;
     }

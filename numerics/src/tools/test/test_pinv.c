@@ -42,10 +42,10 @@ int main(void) {
   Wnum->storageType = 0;
   Wnum->size0 = n;
   Wnum->size1 = m;
-  Wnum->matrix1 = NULL;
-  Wnum->matrix2 = NULL;
+  Wnum->sparse_block = NULL;
+  Wnum->sparse = NULL;
   Wnum->internalData = NULL;
-  Wnum->matrix0 = W;
+  Wnum->dense = W;
 
   FILE* file1 = fopen("dataW.dat", "w");
   NM_write_in_file_scilab(Wnum, file1);
@@ -55,10 +55,10 @@ int main(void) {
   WnumpInv->storageType = 0;
   WnumpInv->size0 = n;
   WnumpInv->size1 = m;
-  WnumpInv->matrix1 = NULL;
-  WnumpInv->matrix2 = NULL;
+  WnumpInv->sparse_block = NULL;
+  WnumpInv->sparse = NULL;
   WnumpInv->internalData = NULL;
-  WnumpInv->matrix0 = Wpinv;
+  WnumpInv->dense = Wpinv;
 
   double tol = 1e-24;
   memcpy(Wpinv, W, n * m * sizeof(double));

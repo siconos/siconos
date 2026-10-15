@@ -39,12 +39,12 @@ void relay_path(RelayProblem* problem, double* z, double* w, int* info,
   *info = 1;
 #ifdef HAVE_PATHFERRIS
   /* matrix M/vector q of the relay */
-  if (!problem->M->matrix0) {
+  if (!problem->M->dense) {
     printf("relay_path only implemented for dense storage\n");
     //      return info;
   }
 
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* q = problem->q;
 
   int nnz, i, j;

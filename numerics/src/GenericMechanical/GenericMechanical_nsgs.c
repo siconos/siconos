@@ -86,7 +86,7 @@ static int gmp_equality_solve_local(GMP_LocalProblem* local, double* diag_block,
 
   int info = NM_LU_solve(NM_preserve(M), sol, 1);
   NM_unpreserve(M);
-  M->matrix0 = NULL;
+  M->dense = NULL;
   NM_free(M);
   return info;
 }
@@ -110,7 +110,7 @@ static void gmp_equality_detach_diag_block(GMP_LocalProblem* local) { (void)loca
 static int gmp_lcp_solve_local(GMP_LocalProblem* local, double* diag_block, double* sol,
                                double* w, SolverOptions* options) {
   LinearComplementarityProblem* lcpProblem = (LinearComplementarityProblem*)local->problem;
-  lcpProblem->M->matrix0 = diag_block;
+  lcpProblem->M->dense = diag_block;
   return linearComplementarity_driver(lcpProblem, sol, w, options);
 }
 
@@ -126,14 +126,14 @@ static int gmp_lcp_compute_error(GMP_LocalProblem* local, const double* reaction
 
 static void gmp_lcp_detach_diag_block(GMP_LocalProblem* local) {
   LinearComplementarityProblem* lcpProblem = (LinearComplementarityProblem*)local->problem;
-  lcpProblem->M->matrix0 = NULL;
+  lcpProblem->M->dense = NULL;
 }
 
 /* RELAY */
 static int gmp_relay_solve_local(GMP_LocalProblem* local, double* diag_block, double* sol,
                                  double* w, SolverOptions* options) {
   RelayProblem* relayProblem = (RelayProblem*)local->problem;
-  relayProblem->M->matrix0 = diag_block;
+  relayProblem->M->dense = diag_block;
   return relay_driver(relayProblem, sol, w, options);
 }
 
@@ -149,7 +149,7 @@ static int gmp_relay_compute_error(GMP_LocalProblem* local, const double* reacti
 
 static void gmp_relay_detach_diag_block(GMP_LocalProblem* local) {
   RelayProblem* relayProblem = (RelayProblem*)local->problem;
-  relayProblem->M->matrix0 = NULL;
+  relayProblem->M->dense = NULL;
 }
 
 /* FC3D */
@@ -159,7 +159,7 @@ static int gmp_fc3d_solve_local(GMP_LocalProblem* local, double* diag_block, dou
   assert(fcProblem);
   assert(fcProblem->M);
   assert(fcProblem->q);
-  fcProblem->M->matrix0 = diag_block;
+  fcProblem->M->dense = diag_block;
   return fc3d_driver(fcProblem, sol, w, options);
 }
 
@@ -178,7 +178,7 @@ static int gmp_fc3d_compute_error(GMP_LocalProblem* local, const double* reactio
 
 static void gmp_fc3d_detach_diag_block(GMP_LocalProblem* local) {
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
-  fcProblem->M->matrix0 = NULL;
+  fcProblem->M->dense = NULL;
 }
 
 /* FC2D */
@@ -188,7 +188,7 @@ static int gmp_fc2d_solve_local(GMP_LocalProblem* local, double* diag_block, dou
   assert(fcProblem);
   assert(fcProblem->M);
   assert(fcProblem->q);
-  fcProblem->M->matrix0 = diag_block;
+  fcProblem->M->dense = diag_block;
   return fc2d_driver(fcProblem, sol, w, options);
 }
 
@@ -207,7 +207,7 @@ static int gmp_fc2d_compute_error(GMP_LocalProblem* local, const double* reactio
 
 static void gmp_fc2d_detach_diag_block(GMP_LocalProblem* local) {
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
-  fcProblem->M->matrix0 = NULL;
+  fcProblem->M->dense = NULL;
 }
 
 /** Lookup table of operations, indexed by SICONOS_NUMERICS_PROBLEM_TYPE. */

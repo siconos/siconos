@@ -77,7 +77,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
 
   siconos_find_vertex(problem->poly.split, n, basis);
   DEBUG_PRINT_VEC_INT(basis, nrows + 1);
-  const double* H = problem->poly.split->H->matrix0;
+  const double* H = problem->poly.split->H->dense;
   CHECK_NULL(H);
   const double* K = problem->poly.split->K;
   /* Set of active constraints */
@@ -115,7 +115,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
   }
   assert(indx_B_A_T == n && "there were not enough active constraints");
   DEBUG_PRINT_VEC_STR("K_A", d_vec, n);
-  cblas_dcopy(n * n, problem->M->matrix0, 1, copyA, 1);
+  cblas_dcopy(n * n, problem->M->dense, 1, copyA, 1);
 
   DEBUG_PRINT_MAT(B_A_T, n, n);
   DEBUG_PRINT_MAT(B_I_T, n, n_I);
@@ -153,7 +153,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
   DEBUG_PRINT_VEC_STR("B_A_T{-1}q_{AVI}", a_bar, n);
 
   /* Do the transpose of B_A_T^{-1} A */
-  double* basepointer = &num_mat->matrix0[nrows * nrows - n * n];
+  double* basepointer = &num_mat->dense[nrows * nrows - n * n];
   for (unsigned i = 0; i < n; ++i) cblas_dcopy(n, &copyA[i * n], 1, &basepointer[i], n);
 
   /* Compute B_A_T^{-1}(B_A_T^{-1}M)_T */
@@ -190,9 +190,9 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
   /* q is now ready, let's deal with M */
 
   /* set some pointers to sub-matrices */
-  double* upper_left_mat = num_mat->matrix0;
-  double* upper_right_mat = &num_mat->matrix0[n * nrows];
-  double* lower_left_mat = &num_mat->matrix0[n];
+  double* upper_left_mat = num_mat->dense;
+  double* upper_right_mat = &num_mat->dense[n * nrows];
+  double* lower_left_mat = &num_mat->dense[n];
   double* lower_right_mat = &upper_right_mat[n];
 
   /* copy the B_A_T^{-1} B_I_T (twice) and set the lower-left part to 0*/
@@ -207,7 +207,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double* z, double* w,
     memset(&lower_left_mat[k], 0, sizeof(double) * (n_I)); /* set the lower-left block to 0 */
   }
 
-  DEBUG_PRINT_MAT(num_mat->matrix0, nrows, nrows);
+  DEBUG_PRINT_MAT(num_mat->dense, nrows, nrows);
 
   /* Matrix M is now ready */
 
@@ -293,7 +293,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   /* matrix M of the avi */
   CHECK_NULL(problem);
   assert(problem->M);
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   CHECK_NULL(M);
   /* size of the AVI */
 

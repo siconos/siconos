@@ -43,7 +43,7 @@ void mlcp_path(MixedLinearComplementarityProblem* problem, double* z, double* w,
   MCP_Termination termination;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* q = problem->q;
   int nnz, i, j, n, m, dim, numLine;
   n = problem->n;

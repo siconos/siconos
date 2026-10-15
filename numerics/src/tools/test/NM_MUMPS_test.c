@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 #endif
   NM_MUMPS_set_control_params(M);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   NM_MUMPS(M, -1);
 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 #endif
   NM_MUMPS_set_control_params(M);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
   NM_MUMPS_set_sym(M, 1);
 
   NM_MUMPS(M, -1);

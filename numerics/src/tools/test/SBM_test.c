@@ -74,11 +74,11 @@ static int SBM_add_test2(double tol, double alpha, double beta) {
          alpha, beta);
   int info = 0;
   NumericsMatrix* M2 = test_matrix_2();
-  SparseBlockStructuredMatrix* SBM2 = M2->matrix1;
+  SparseBlockStructuredMatrix* SBM2 = M2->sparse_block;
   DEBUG_EXPR(SBM_print(SBM2););
 
   NumericsMatrix* M10 = test_matrix_10();
-  SparseBlockStructuredMatrix* SBM10 = M10->matrix1;
+  SparseBlockStructuredMatrix* SBM10 = M10->sparse_block;
   DEBUG_EXPR(SBM_print(SBM10););
 
   SparseBlockStructuredMatrix* C2 = SBM_add(SBM2, SBM10, alpha, beta);
@@ -386,8 +386,8 @@ static int SBM_gemm_without_allocation_test_1(NumericsMatrix** MM, double alpha,
   C.storageType = NM_DENSE;
   C.size0 = M1->size0;
   C.size1 = M1->size1;
-  C.matrix0 = (double*)calloc(C.size0 * C.size1, sizeof(double));
-  MSAN_INIT_VAR(C.matrix0, C.size0 * C.size1);
+  C.dense = (double*)calloc(C.size0 * C.size1, sizeof(double));
+  MSAN_INIT_VAR(C.dense, C.size0 * C.size1);
   add_initial_value_square_1(&C);
   DEBUG_EXPR(NM_display(&C));
 
@@ -397,9 +397,9 @@ static int SBM_gemm_without_allocation_test_1(NumericsMatrix** MM, double alpha,
       NM_DENSE, C.size0, C.size1, calloc((size_t)(C.size0) * (C.size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
-  dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
-                     Cref->matrix0);
-  double err = dense_comparison(C.matrix0, C.size0, C.size1, Cref->matrix0);
+  dense_gemm_by_hand(alpha, M1->dense, M1->dense, M1->size0, M1->size1, M1->size0, beta,
+                     Cref->dense);
+  double err = dense_comparison(C.dense, C.size0, C.size1, Cref->dense);
 
   if (err < tol) {
     info = 0;
@@ -436,8 +436,8 @@ static int SBM_gemm_without_allocation_test_2(NumericsMatrix** MM, double alpha,
   C2.storageType = NM_DENSE;
   C2.size0 = M1->size0;
   C2.size1 = M3->size1;
-  C2.matrix0 = (double*)calloc(C2.size0 * C2.size1, sizeof(double));
-  MSAN_INIT_VAR(C2.matrix0, C2.size0 * C2.size1);
+  C2.dense = (double*)calloc(C2.size0 * C2.size1, sizeof(double));
+  MSAN_INIT_VAR(C2.dense, C2.size0 * C2.size1);
   add_initial_value_rectangle_1(&C2);
 
   NM_gemm(alpha, M1, M3, beta, &C2);
@@ -446,9 +446,9 @@ static int SBM_gemm_without_allocation_test_2(NumericsMatrix** MM, double alpha,
       NM_DENSE, C2.size0, C2.size1, calloc((size_t)(C2.size0) * (C2.size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
-  dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
-                     C2ref->matrix0);
-  double err = dense_comparison(C2.matrix0, C2.size0, C2.size1, C2ref->matrix0);
+  dense_gemm_by_hand(alpha, M1->dense, M3->dense, M1->size0, M3->size1, M1->size1, beta,
+                     C2ref->dense);
+  double err = dense_comparison(C2.dense, C2.size0, C2.size1, C2ref->dense);
 
   if (err < tol) {
     info = 0;
@@ -486,32 +486,33 @@ static int SBM_gemm_without_allocation_test_3(NumericsMatrix** MM, double alpha,
   C3.size1 = M2->size1;
   /* This step is not necessary for NM_gemm but conveniently creates a zero matrix with the
    * right structure */
-  C3.matrix1 = SBM_zero_matrix_for_multiply(M2->matrix1, M2->matrix1);
+  C3.sparse_block = SBM_zero_matrix_for_multiply(M2->sparse_block, M2->sparse_block);
   add_initial_value_square_1(&C3);
-  DEBUG_EXPR(SBM_print(C3.matrix1););
+  DEBUG_EXPR(SBM_print(C3.sparse_block););
 
   NM_gemm(alpha, M2, M2, beta, &C3);
   DEBUG_EXPR(NM_display(&C3));
-  DEBUG_EXPR(NM_dense_display(Cref->matrix0, M2->size0, M2->size1, M2->size0));
+  DEBUG_EXPR(NM_dense_display(Cref->dense, M2->size0, M2->size1, M2->size0));
 
   NumericsMatrix* Cref =
       NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
                           calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
-  dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
-                     Cref->matrix0);
+  dense_gemm_by_hand(alpha, M1->dense, M1->dense, M1->size0, M1->size1, M1->size0, beta,
+                     Cref->dense);
 
-  dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
-                     Cref->matrix0);
+  dense_gemm_by_hand(alpha, M1->dense, M1->dense, M1->size0, M1->size1, M1->size0, beta,
+                     Cref->dense);
 
-  SBM_gemm_without_allocation(alpha, M2->matrix1, M2->matrix1, beta, C3.matrix1);
+  SBM_gemm_without_allocation(alpha, M2->sparse_block, M2->sparse_block, beta,
+                              C3.sparse_block);
   DEBUG_EXPR(NM_display(&C3));
-  DEBUG_EXPR(NM_dense_display(Cref->matrix0, M2->size0, M2->size1, M2->size0));
+  DEBUG_EXPR(NM_dense_display(Cref->dense, M2->size0, M2->size1, M2->size0));
 
   /*  Check if it is correct */
   /* C3 and CRef must have the same values.*/
-  info = SBM_dense_equal(C3.matrix1, Cref->matrix0, tol);
+  info = SBM_dense_equal(C3.sparse_block, Cref->dense, tol);
 
   NM_free(Cref);
   NM_clear(&C3);
@@ -549,13 +550,13 @@ static int SBM_gemm_without_allocation_test_4(NumericsMatrix** MM, double alpha,
   C4.size1 = M4->size1;
   /* This step is not necessary for NM_gemm but conveniently creates a zero matrix with the
    * right structure */
-  C4.matrix1 = SBM_zero_matrix_for_multiply(M2->matrix1, M4->matrix1);
+  C4.sparse_block = SBM_zero_matrix_for_multiply(M2->sparse_block, M4->sparse_block);
   add_initial_value_rectangle_1(&C4);
 
   NM_gemm(alpha, M2, M4, beta, &C4);
 
   DEBUG_EXPR(NM_display(&C4));
-  DEBUG_EXPR(NM_dense_display(C2ref->matrix0, M2->size0, M4->size1, M2->size0));
+  DEBUG_EXPR(NM_dense_display(C2ref->dense, M2->size0, M4->size1, M2->size0));
   /*     Check if it is correct */
   /* C4 and C2Ref must have the same values.*/
   NumericsMatrix* C2ref =
@@ -563,20 +564,21 @@ static int SBM_gemm_without_allocation_test_4(NumericsMatrix** MM, double alpha,
                           calloc((size_t)(M1->size0) * (M3->size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
-  dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
-                     C2ref->matrix0);
+  dense_gemm_by_hand(alpha, M1->dense, M3->dense, M1->size0, M3->size1, M1->size1, beta,
+                     C2ref->dense);
 
-  info = SBM_dense_equal(C4.matrix1, C2ref->matrix0, tol);
+  info = SBM_dense_equal(C4.sparse_block, C2ref->dense, tol);
   if (info == 0) printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage, non square) ok ...\n");
 
-  SBM_gemm_without_allocation(alpha, M2->matrix1, M4->matrix1, beta, C4.matrix1);
-  dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
-                     C2ref->matrix0);
+  SBM_gemm_without_allocation(alpha, M2->sparse_block, M4->sparse_block, beta,
+                              C4.sparse_block);
+  dense_gemm_by_hand(alpha, M1->dense, M3->dense, M1->size0, M3->size1, M1->size1, beta,
+                     C2ref->dense);
 
   DEBUG_EXPR(NM_display(&C4));
-  DEBUG_EXPR(NM_dense_display(C2ref->matrix0, M2->size0, M4->size1, M2->size0));
+  DEBUG_EXPR(NM_dense_display(C2ref->dense, M2->size0, M4->size1, M2->size0));
 
-  info = SBM_dense_equal(C4.matrix1, C2ref->matrix0, tol);
+  info = SBM_dense_equal(C4.sparse_block, C2ref->dense, tol);
 
   NM_clear(&C4);
   NM_free(C2ref);
@@ -609,7 +611,7 @@ static int SBM_gemm_without_allocation_test_5(NumericsMatrix** MM, double alpha,
   NumericsMatrix* C7 =
       NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
                           calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
-  MSAN_INIT_VAR(C7->matrix0, C7->size0 * C7->size1);
+  MSAN_INIT_VAR(C7->dense, C7->size0 * C7->size1);
 
   add_initial_value_square_2(C7);
 
@@ -620,11 +622,11 @@ static int SBM_gemm_without_allocation_test_5(NumericsMatrix** MM, double alpha,
                           calloc((size_t)(C7->size0) * (C7->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
-  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
-                     C3ref->matrix0);
+  dense_gemm_by_hand(alpha, M9->dense, M9->dense, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->dense);
   DEBUG_EXPR(NM_display(C7));
-  DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M9->size0, M9->size1, M9->size0));
-  double err = dense_comparison(C7->matrix0, C7->size0, C7->size1, C3ref->matrix0);
+  DEBUG_EXPR(NM_dense_display(C3ref->dense, M9->size0, M9->size1, M9->size0));
+  double err = dense_comparison(C7->dense, C7->size0, C7->size1, C3ref->dense);
 
   NM_free(C7);
   NM_free(M9);
@@ -670,8 +672,8 @@ static int SBM_gemm_without_allocation_test_6(NumericsMatrix** MM, double alpha,
   NumericsMatrix* C8 = NM_create(NM_SPARSE_BLOCK, M10->size0, M10->size1);
   /* This step is not necessary for NM_gemm but conveniently creates a zero matrix with the
    * right structure */
-  SBM_free(C8->matrix1, SBM_FREE_ALL);
-  C8->matrix1 = SBM_zero_matrix_for_multiply(M10->matrix1, M10->matrix1);
+  SBM_free(C8->sparse_block, SBM_FREE_ALL);
+  C8->sparse_block = SBM_zero_matrix_for_multiply(M10->sparse_block, M10->sparse_block);
 
   add_initial_value_square_2(C8);
 
@@ -681,17 +683,18 @@ static int SBM_gemm_without_allocation_test_6(NumericsMatrix** MM, double alpha,
                           calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
-  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
-                     C3ref->matrix0);
-  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
-                     C3ref->matrix0);
+  dense_gemm_by_hand(alpha, M9->dense, M9->dense, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->dense);
+  dense_gemm_by_hand(alpha, M9->dense, M9->dense, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->dense);
 
-  SBM_gemm_without_allocation(alpha, M10->matrix1, M10->matrix1, beta, C8->matrix1);
+  SBM_gemm_without_allocation(alpha, M10->sparse_block, M10->sparse_block, beta,
+                              C8->sparse_block);
 
   DEBUG_EXPR(NM_display(C8));
-  DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
+  DEBUG_EXPR(NM_dense_display(C3ref->dense, M10->size0, M10->size1, M10->size0));
 
-  info = NM_dense_equal(C8, C3ref->matrix0, tol);
+  info = NM_dense_equal(C8, C3ref->dense, tol);
 
   NM_free(C8);
   NM_free(M9);
@@ -734,21 +737,22 @@ static int SBM_gemm_without_allocation_test_7(NumericsMatrix** MM, double alpha,
 
   NM_gemm(alpha, M10, M10, beta, C20);
 
-  SBM_gemm_without_allocation(alpha, M10->matrix1, M10->matrix1, beta, C20->matrix1);
+  SBM_gemm_without_allocation(alpha, M10->sparse_block, M10->sparse_block, beta,
+                              C20->sparse_block);
 
   DEBUG_EXPR(NM_display(C20));
-  DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
+  DEBUG_EXPR(NM_dense_display(C3ref->dense, M10->size0, M10->size1, M10->size0));
   NumericsMatrix* C3ref =
       NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
                           calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
-  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
-                     C3ref->matrix0);
-  dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
-                     C3ref->matrix0);
+  dense_gemm_by_hand(alpha, M9->dense, M9->dense, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->dense);
+  dense_gemm_by_hand(alpha, M9->dense, M9->dense, M9->size0, M9->size1, M9->size0, beta,
+                     C3ref->dense);
 
-  info = NM_dense_equal(C20, C3ref->matrix0, tol);
+  info = NM_dense_equal(C20, C3ref->dense, tol);
   NM_free(C20);
   NM_free(M10);
   NM_free(C3ref);
@@ -857,11 +861,11 @@ static int SBM_multiply_test2(double tol) {
   printf("========= Starts SBM tests SBM_multiply_test2 ========= \n");
   int info = 0;
   NumericsMatrix* M2 = test_matrix_2();
-  SparseBlockStructuredMatrix* SBM2 = M2->matrix1;
+  SparseBlockStructuredMatrix* SBM2 = M2->sparse_block;
   DEBUG_EXPR(SBM_print(SBM2););
 
   NumericsMatrix* M10 = test_matrix_10();
-  SparseBlockStructuredMatrix* SBM10 = M10->matrix1;
+  SparseBlockStructuredMatrix* SBM10 = M10->sparse_block;
   DEBUG_EXPR(SBM_print(SBM10););
 
   SparseBlockStructuredMatrix* C2 = SBM_multiply(SBM2, SBM10);
@@ -916,11 +920,11 @@ static int SBM_multiply_test3(double tol) {
   printf("========= Starts SBM tests SBM_multiply_test3  ========= \n");
   int info = 0;
   NumericsMatrix* M2 = test_matrix_2();
-  SparseBlockStructuredMatrix* SBM2 = M2->matrix1;
+  SparseBlockStructuredMatrix* SBM2 = M2->sparse_block;
   DEBUG_EXPR(SBM_print(SBM2););
 
   NumericsMatrix* M4 = test_matrix_4();
-  SparseBlockStructuredMatrix* SBM4 = M4->matrix1;
+  SparseBlockStructuredMatrix* SBM4 = M4->sparse_block;
   DEBUG_EXPR(SBM_print(SBM4););
 
   SparseBlockStructuredMatrix* C2 = SBM_multiply(SBM2, SBM4);
@@ -1178,13 +1182,13 @@ static int SBM_entry_test1(double tol) {
   add_initial_value_square_1a(C);
 
   NumericsMatrix* C2 = NM_create(NM_SPARSE_BLOCK, M2->size0, M2->size1);
-  SBM_free(C2->matrix1, SBM_FREE_ALL);
-  C2->matrix1 = SBM_zero_matrix_for_multiply(M2->matrix1, M2->matrix1);
-  add_initial_value_square_SBM_1(C2->matrix1);
+  SBM_free(C2->sparse_block, SBM_FREE_ALL);
+  C2->sparse_block = SBM_zero_matrix_for_multiply(M2->sparse_block, M2->sparse_block);
+  add_initial_value_square_SBM_1(C2->sparse_block);
 
   DEBUG_EXPR(NM_display(C));
   DEBUG_EXPR(NM_display(C2));
-  info = NM_dense_equal(C2, C->matrix0, tol);
+  info = NM_dense_equal(C2, C->dense, tol);
   NM_free(M2);
   NM_free(C2);
   NM_free(C);
@@ -1194,26 +1198,26 @@ static int SBM_entry_test1(double tol) {
 static int SBM_entry_test2(double tol) {
   NumericsMatrix* M2 = test_matrix_2();
 
-  /* CHECK_RETURN(SBM_entry(M2->matrix1,0,8,1.0)); */
-  /* CHECK_RETURN(SBM_entry(M2->matrix1,8,0,1.0)); */
-  /* CHECK_RETURN(SBM_entry(M2->matrix1,0,7,1.0)); */
-  bool res = SBM_entry(M2->matrix1, 0, 8, 1.0);
+  /* CHECK_RETURN(SBM_entry(M2->sparse_block,0,8,1.0)); */
+  /* CHECK_RETURN(SBM_entry(M2->sparse_block,8,0,1.0)); */
+  /* CHECK_RETURN(SBM_entry(M2->sparse_block,0,7,1.0)); */
+  bool res = SBM_entry(M2->sparse_block, 0, 8, 1.0);
   if (res) {  // res must be false, only 8 rows in the matrix.
     NM_free(M2);
     return 1;
   }
-  res = SBM_entry(M2->matrix1, 8, 0, 1.0);
+  res = SBM_entry(M2->sparse_block, 8, 0, 1.0);
   if (res) {  // res must be false, only 8 cols in the matrix.
     NM_free(M2);
     return 1;
   }
-  res = SBM_entry(M2->matrix1, 0, 7, 1.0);
+  res = SBM_entry(M2->sparse_block, 0, 7, 1.0);
   if (res) {  // res must be false, (0,7) corresponds to a null-block
     NM_free(M2);
     return 1;
   }
 
-  res = SBM_entry(M2->matrix1, 0, 2, 1.0);
+  res = SBM_entry(M2->sparse_block, 0, 2, 1.0);
   NM_free(M2);
   if (!res) return 1;
 

@@ -231,7 +231,7 @@ GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
     genericMechanicalProblem_free(problem, GMP_FREE_GMP);
     return NULL;
   }
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  SparseBlockStructuredMatrix* m = problem->M->sparse_block;
 
   problem->q = (double*)malloc(to_size_t(problem->M->size1) * sizeof(double));
   for (size_t i = 0; i < to_size_t(problem->M->size1); i++) {

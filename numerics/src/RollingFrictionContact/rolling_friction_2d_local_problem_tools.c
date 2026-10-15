@@ -46,7 +46,7 @@ void rolling_friction_2d_local_problem_compute_q(RollingFrictionContactProblem* 
 void rolling_friction_2d_local_problem_fill_M(RollingFrictionContactProblem* problem,
                                               RollingFrictionContactProblem* localproblem,
                                               int contact) {
-  NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+  NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense);
 }
 
 RollingFrictionContactProblem* rolling_friction_2d_local_problem_allocate(
@@ -75,7 +75,7 @@ void rolling_friction_2d_local_problem_free(RollingFrictionContactProblem* local
   if (problem->M->storageType == NM_SPARSE_BLOCK) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   rollingFrictionContactProblem_free(localproblem);
 }

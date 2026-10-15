@@ -113,7 +113,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem, double* 
     /* { */
     /*   numerics_printf(" ========================== Call Alart Curnier solver for Second
      * Order Cone LCP problem ==========================\n"); */
-    /*   if (problem->M->matrix0) */
+    /*   if (problem->M->dense) */
     /*   { */
     /*     soclcp_nonsmooth_Newton_AlartCurnier(problem, r , v , &info , options); */
     /*   } */

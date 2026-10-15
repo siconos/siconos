@@ -34,28 +34,28 @@ void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem* lcp_probl
   int i, j;
   for (i = 0; i < problem->size; i++) {
     for (j = 0; j < problem->size; j++) {
-      lcp_problem->M->matrix0[i + j * lcp_problem->size] =
-          problem->M->matrix0[i + j * problem->size];
+      lcp_problem->M->dense[i + j * lcp_problem->size] =
+          problem->M->dense[i + j * problem->size];
     }
   }
   for (i = 0; i < problem->size; i++) {
     for (j = problem->size; j < 2 * problem->size; j++) {
-      lcp_problem->M->matrix0[i + j * lcp_problem->size] = 0.0;
+      lcp_problem->M->dense[i + j * lcp_problem->size] = 0.0;
     }
-    lcp_problem->M->matrix0[i + (i + problem->size) * lcp_problem->size] = 1.0;
+    lcp_problem->M->dense[i + (i + problem->size) * lcp_problem->size] = 1.0;
   }
   for (i = problem->size; i < 2 * problem->size; i++) {
     for (j = 0; j < 2 * problem->size; j++) {
-      lcp_problem->M->matrix0[i + j * lcp_problem->size] = 0.0;
+      lcp_problem->M->dense[i + j * lcp_problem->size] = 0.0;
     }
-    lcp_problem->M->matrix0[i + (i - problem->size) * lcp_problem->size] = -1.0;
+    lcp_problem->M->dense[i + (i - problem->size) * lcp_problem->size] = -1.0;
   }
 
   for (i = 0; i < problem->size; i++) {
     lcp_problem->q[i] = problem->q[i];
     lcp_problem->q[i + problem->size] = problem->ub[i] - problem->lb[i];
     for (j = 0; j < problem->size; j++) {
-      lcp_problem->q[i] += problem->M->matrix0[i + j * (problem->size)] * problem->lb[j];
+      lcp_problem->q[i] += problem->M->dense[i + j * (problem->size)] * problem->lb[j];
     }
   }
 }

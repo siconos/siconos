@@ -78,7 +78,7 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
   H->size1 = 3 * to_int(nc);
 
   NumericsSparseMatrix* SM = NSM_new();
-  M->matrix2 = SM;
+  M->sparse = SM;
   SM->triplet = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
   CSparseMatrix* _M = SM->triplet;
   SM->origin = NSM_TRIPLET;
@@ -99,7 +99,7 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
   DEBUG_PRINTF("_M->m=%lli\n", _M->m);
 
   NumericsSparseMatrix* SH = NSM_new();
-  H->matrix2 = SH;
+  H->sparse = SH;
   SH->triplet = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
   CSparseMatrix* _H = SH->triplet;
   SH->origin = NSM_TRIPLET;
@@ -282,9 +282,9 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
 /*   size_t * _colH = alloc_memory_int(nzH, colH); */
 /*   size_t * _rowH = alloc_memory_int(nzH, rowH); */
 
-/*   M.matrix0 = NULL; */
-/*   M.matrix1 = NULL; */
-/*   M.matrix2 = NULL; */
+/*   M.dense = NULL; */
+/*   M.sparse_block = NULL; */
+/*   M.sparse = NULL; */
 /*   M.internalData = NULL; */
 
 /*   M.storageType = 2; /\* csc *\/ */
@@ -299,9 +299,9 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
 /*   _M.i = (int *) _rowM; */
 /*   _M.x = Mdata; */
 
-/*   H.matrix0 = NULL; */
-/*   H.matrix1 = NULL; */
-/*   H.matrix2 = NULL; */
+/*   H.dense = NULL; */
+/*   H.sparse_block = NULL; */
+/*   H.sparse = NULL; */
 /*   H.internalData = NULL; */
 
 /*   H.storageType = 2; */
@@ -317,8 +317,8 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
 /*   _H.i = (int *) _rowH; */
 /*   _H.x = Hdata; */
 
-/*   M.matrix2->triplet = &_M; */
-/*   H.matrix2->triplet = &_H; */
+/*   M.sparse->triplet = &_M; */
+/*   H.sparse->triplet = &_H; */
 
 /*   for (int i=0; i< _M.nz; ++i) */
 /*   { */

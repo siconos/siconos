@@ -45,7 +45,7 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
 
   /* H could be sparse ... */
   NumericsMatrix* Htmp = data_NMS->H;
-  double* H = Htmp->matrix0;
+  double* H = Htmp->dense;
   double* F = NMS_get_F(data_NMS->workspace, n);
   double* F_merit = NMS_get_F_merit(data_NMS->workspace, n);
   double* JacThetaF_merit = NMS_get_JacTheta_F_merit(data_NMS->workspace, n);

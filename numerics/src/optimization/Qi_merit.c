@@ -72,8 +72,8 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict wo
   NM_assert(NM_DENSE, nabla_F);
   NM_assert(NM_DENSE, H);
 
-  double* H_dense = H->matrix0;
-  double* nabla_F_dense = nabla_F->matrix0;
+  double* H_dense = H->dense;
+  double* nabla_F_dense = nabla_F->dense;
 
   // function based on the formula given p. 873 in Facchinei--Pang (2003)
   // when the gradient fails to exists, we set a_i = 0 and b_i = 1, as in

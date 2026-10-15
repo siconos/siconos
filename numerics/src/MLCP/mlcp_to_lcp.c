@@ -76,7 +76,7 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   lcp->q = (double*)calloc(m, sizeof(double));
 
   /* compute B-DA^{-1}C */
-  memcpy(lcp->M->matrix0, problem->B, m * m * sizeof(double));
+  memcpy(lcp->M->dense, problem->B, m * m * sizeof(double));
   DEBUG_EXPR(NM_display(lcp->M));
 
   NumericsMatrix* D = NM_create_with_data(NM_DENSE, m, n, problem->D);
@@ -91,9 +91,9 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   memcpy(lcp->q, problem->b, m * sizeof(double));
   NM_gemv(-1.0, D, Ainva, 1.0, lcp->q);
 
-  D->matrix0 = NULL;
+  D->dense = NULL;
   NM_free(D);
-  nm_AinvC->matrix0 = NULL;
+  nm_AinvC->dense = NULL;
   NM_free(nm_AinvC);
   NM_free(A);
   free(AinvC);

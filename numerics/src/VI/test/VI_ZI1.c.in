@@ -71,7 +71,7 @@ static void F_ZI(void* problem, int n, double* restrict l, double* restrict F)
 
 static void nabla_F_ZI(void* problem, int n, double* restrict l, NumericsMatrix* restrict nabla_F)
 {
-  double* restrict nabla_F_dense = nabla_F->matrix0;
+  double* restrict nabla_F_dense = nabla_F->dense;
   data_ZI* d = (data_ZI*) VI_get_env(problem);
 
   double l0 = l[0];

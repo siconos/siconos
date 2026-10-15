@@ -41,7 +41,7 @@ void lcp_path(LinearComplementarityProblem* problem, double* z, double* w, int* 
   *info = 1;
 #ifdef HAVE_PATHFERRIS
   /* matrix M/vector q of the lcp */
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
 
   double* q = problem->q;
   int nnz, i, j;

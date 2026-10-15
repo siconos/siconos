@@ -111,10 +111,10 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double* z, doubl
   options->solverId = SICONOS_MLCP_LCP_LEMKE;
 
   freeLinearComplementarityProblem(lcp);
-  A->matrix0 = NULL;
+  A->dense = NULL;
   NM_free(A);
   free(A_copy);
-  C->matrix0 = NULL;
+  C->dense = NULL;
   NM_free(C);
   DEBUG_END("mlcp_lcp_lemke(...)\n");
   return;

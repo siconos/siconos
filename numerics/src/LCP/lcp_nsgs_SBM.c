@@ -48,7 +48,7 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* 
   /* Position in vector blmat->block of the required diagonal block */
   unsigned int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
-  local_problem->M->matrix0 = blmat->block[diagPos];
+  local_problem->M->dense = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];
   int pos = 0;
   if (rowNumber != 0) {
@@ -83,7 +83,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
      - Input matrix M of the problem is supposed to be sparse-block
        with no null row (ie no rows with all blocks equal to null)
   */
-  if (problem->M->matrix1 == NULL) {
+  if (problem->M->sparse_block == NULL) {
     assert(0);
   }
 
@@ -97,7 +97,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
   double tolerance = options[0].dparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the LCP */
-  SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
+  SparseBlockStructuredMatrix* blmat = problem->M->sparse_block;
   double* q = problem->q;
 
   /* Number of non-null blocks in blmat */
@@ -112,9 +112,9 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double* z, double* w, i
       (LinearComplementarityProblem*)malloc(sizeof(*local_problem));
   local_problem->M = (NumericsMatrix*)malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0;  // dense storage
-  local_problem->M->matrix0 = NULL;
-  local_problem->M->matrix1 = NULL;
-  local_problem->M->matrix2 = NULL;
+  local_problem->M->dense = NULL;
+  local_problem->M->sparse_block = NULL;
+  local_problem->M->sparse = NULL;
   local_problem->M->internalData = NULL;
 
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat

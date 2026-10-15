@@ -207,7 +207,7 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double* u, double* mu, Nume
                                              NumericsMatrix* H_full, double* normUT_work) {
   NumericsMatrix* H_correction = NM_create(NM_SPARSE, 3 * nc, 3 * nc);
   NM_triplet_alloc(H_correction, 3 * nc);
-  H_correction->matrix2->origin = NSM_TRIPLET;
+  H_correction->sparse->origin = NSM_TRIPLET;
 
   NV_cone_tangential_norms_3d(u, nc, normUT_work);
   for (int contact = 0; contact < nc; contact++) {
@@ -270,7 +270,7 @@ static void gfc3d_print_problem_info(GlobalFrictionContactProblem* restrict prob
     numerics_printf_verbose(1, "---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(H));
     /* W = NM_create(NM_SPARSE,n,n); */
     /* NM_triplet_alloc(W, n); */
-    /* W->matrix2->origin = NSM_TRIPLET; */
+    /* W->sparse->origin = NSM_TRIPLET; */
     /* NM_gemm(1.0, H, Htrans, 0.0, W); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of HH^T = %g  ", NM_norm_1(W)); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of HH^T = %g ",
@@ -414,7 +414,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
                             cone_scaling);
     NumericsMatrix* P = NM_create(NM_SPARSE, m, m);
     NM_triplet_alloc(P, m);
-    P->matrix2->origin = NSM_TRIPLET;
+    P->sparse->origin = NSM_TRIPLET;
     mu = (double*)malloc(nc * sizeof(double));
     b = (double*)malloc(m * sizeof(double));
     cblas_dcopy(m, problem->b, 1, b, 1);
@@ -440,7 +440,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   NumericsMatrix* W = NM_create(NM_SPARSE, n, n);
   NM_triplet_alloc(W, n);
-  W->matrix2->origin = NSM_TRIPLET;
+  W->sparse->origin = NSM_TRIPLET;
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -466,7 +466,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   NumericsMatrix* H_full = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(H_full, n);
-  H_full->matrix2->origin = NSM_TRIPLET;
+  H_full->sparse->origin = NSM_TRIPLET;
 
   // getchar();
   int is_rho_variable = 0;

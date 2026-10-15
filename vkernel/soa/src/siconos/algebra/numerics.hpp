@@ -370,7 +370,7 @@ void invert_diagonal_matrix(diag_mat<A>& a)
 {
   if (!NM_internalData(a._m)->isInversed) {
     for (auto i = 0; i < NM_triplet(a._m)->nz; ++i)
-      a._m->matrix2->triplet->x[i] = 1.0 / a._m->matrix2->triplet->x[i];
+      a._m->sparse->triplet->x[i] = 1.0 / a._m->sparse->triplet->x[i];
   }
   NM_internalData(a._m)->isInversed = true;
 }
@@ -379,11 +379,11 @@ void invert_diagonal_matrix(diag_mat<A>& a)
 template <typename T>
 void add(const vec<T>& a, vec<T>& b)
 {
-  // improve Numerics  cblas_daxpy(size0(a), 1, a._v->matrix0, 1,
-  // b._v->matrix0);
+  // improve Numerics  cblas_daxpy(size0(a), 1, a._v->dense, 1,
+  // b._v->dense);
 
   for (size_t i = 0; i < size0(a) * a.vnrows; ++i) {
-    b._v->matrix0[i] += a._v->matrix0[i];
+    b._v->dense[i] += a._v->dense[i];
   }
 }
 
@@ -425,7 +425,7 @@ template <typename V>
 void copy(const vec<V>& a, vec<V>& b)
 {
   for (auto i = 0; i < size0(a) * a.vnrows; ++i) {
-    b._v->matrix0[i] = a._v->matrix0[i];
+    b._v->dense[i] = a._v->dense[i];
   }
 }
 
@@ -439,13 +439,13 @@ void scal(match::scalar auto h, vec<T>& v)
 template <typename T>
 decltype(auto) get_vector(vec<T>& v, match::indice auto i)
 {
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
+  return matrix_view<T>(v._v->dense + i * v.vnrows + v._offset);
 }
 
 template <typename T>
 decltype(auto) get_vector(const vec<T>& v, match::indice auto i)
 {
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
+  return matrix_view<T>(v._v->dense + i * v.vnrows + v._offset);
 }
 
 template <typename T>
@@ -458,8 +458,7 @@ template <typename T>
 decltype(auto) get_vector(vec<T>& v, match::indice auto i,
                           match::indice auto vector_size)
 {
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset,
-                        vector_size);
+  return matrix_view<T>(v._v->dense + i * v.vnrows + v._offset, vector_size);
 }
 //
 // c <- a b
@@ -474,7 +473,7 @@ void prod(const mat<A>& a, const mat<B>& b, mat<prod_t<A, B>>& c)
 template <typename A, typename B>
 void prod(const mat<A>& a, const vec<B>& b, vec<prod_t<A, B>>&& c)
 {
-  NM_gemv(1, a._m, b._v->matrix0, 1, c._v->matrix0);
+  NM_gemv(1, a._m, b._v->dense, 1, c._v->dense);
 }
 
 // c <- a^t b
@@ -484,7 +483,7 @@ void prodt1(const mat<A>& a, const vec<B>& b, vec<prod_t<trans_t<A>, B>>& c)
   assert(a._mt);
   assert(a._mt->size1 == b._v->size0);  // transpose mult
   assert(c._v->size0 == a._mt->size0);
-  NM_gemv(1, a._mt, b._v->matrix0, 1, c._v->matrix0);
+  NM_gemv(1, a._mt, b._v->dense, 1, c._v->dense);
 }
 // c <- a b^t
 template <typename A, typename B>
@@ -508,7 +507,7 @@ void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c)
 {
   if (!NM_internalData(a._m)->isInversed) {
     copy(b, c);
-    if (NM_gesv_expert(a._m, c._v->matrix0, 1) != 0) {
+    if (NM_gesv_expert(a._m, c._v->dense, 1) != 0) {
       throw std::runtime_error(
           "NumericsMatrix solve failed in NM_gesv_expert.");
     }
@@ -522,7 +521,7 @@ void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c)
 template <match::any_matrix A, typename B>
 void solve_in_place(const mat<A>& a, const vec<B>& b)
 {
-  if (NM_gesv_expert(a._m, b._v->matrix0, 1) != 0) {
+  if (NM_gesv_expert(a._m, b._v->dense, 1) != 0) {
     throw std::runtime_error(
         "NumericsMatrix solve_in_place failed in NM_gesv_expert.");
   }
@@ -578,7 +577,7 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
   std::vector<double> rhs_vec(d);
 
   // Support for Siconos NumericsSparseMatrix either triplet or compressed row
-  NumericsSparseMatrix* H_sparse = h_matrix._m->matrix2;
+  NumericsSparseMatrix* H_sparse = h_matrix._m->sparse;
   bool is_sparse = (h_matrix._m->storageType == NM_SPARSE && H_sparse);
 
   for (auto k = 0; k < n; ++k) {
@@ -614,9 +613,9 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
     else {
       // fallback to dense (should not happen if h_matrix is actually sparse,
       // but for completeness)
-      if (h_matrix._mt && h_matrix._mt->matrix0) {
+      if (h_matrix._mt && h_matrix._mt->dense) {
         for (int j = 0; j < d; ++j) {
-          rhs_vec[j] = h_matrix._mt->matrix0[k * d + j];
+          rhs_vec[j] = h_matrix._mt->dense[k * d + j];
         }
       }
       else {

@@ -220,7 +220,7 @@ int main(void) {
   }
 
   NM_clear(W);
-  tmpM->matrix0 = NULL;
+  tmpM->dense = NULL;
   NM_clear(tmpM);
   free(W);
   free(tmpM);

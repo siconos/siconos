@@ -103,8 +103,8 @@ static void fc2d_nsgs_buildLocalProblem_parallel(int contact, FrictionContactPro
                                                  SparseBlockCoordinateMatrix* diagonal_blocks,
                                                  LinearComplementarityProblem* local_problem,
                                                  double* reaction) {
-  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->matrix0);
-  local_problem->M->matrix0 = diagonal_blocks->block[contact];
+  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->dense);
+  local_problem->M->dense = diagonal_blocks->block[contact];
 
   local_problem->M->size0 = 2;  // Necessary ?
   local_problem->M->size1 = 2;
@@ -424,9 +424,8 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
                                                  local_problem, z);
 
             /* Solve local problem */
-            fc2d_nsgs_local_solve(local_problem->M->matrix0,
-                                  diagonal_block_determinant[contact], local_problem->q,
-                                  problem->mu[contact], localreaction);
+            fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
+                                  local_problem->q, problem->mu[contact], localreaction);
 
             light_error_2 = light_error_squared(localreaction, &z[pos]);
 
@@ -525,9 +524,8 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
                                                  local_problem, z);
 
             /* Solve local problem */
-            fc2d_nsgs_local_solve(local_problem->M->matrix0,
-                                  diagonal_block_determinant[contact], local_problem->q,
-                                  problem->mu[contact], localreaction);
+            fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
+                                  local_problem->q, problem->mu[contact], localreaction);
 
             light_error_sum += light_error_squared(localreaction, &z[pos]);
             // light_error_sum += (z[pos] - localreaction[0]) * (z[pos] - localreaction[0]) +

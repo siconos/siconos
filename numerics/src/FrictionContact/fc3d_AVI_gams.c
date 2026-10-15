@@ -340,7 +340,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   unsigned nb_approx = (unsigned)Akmat->size0 / nb_contacts;
   assert(nb_approx * nb_contacts == (unsigned)Akmat->size0);
   unsigned offset_row = 0;
-  CSparseMatrix* triplet_mat = Akmat->matrix2->triplet;
+  CSparseMatrix* triplet_mat = Akmat->sparse->triplet;
 
   double angle = 2 * M_PI / (NB_APPROX + 1);
   DEBUG_PRINTF("angle: %g\n", angle);
@@ -488,19 +488,19 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
   Emat.size0 = size;
   Emat.size1 = size;
 
-  Emat.matrix2->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
+  Emat.sparse->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
 
   for (unsigned i = 0; i < size; i += 3) {
-    cs_entry(Emat.matrix2->triplet, i, i, 1.);
+    cs_entry(Emat.sparse->triplet, i, i, 1.);
   }
 
   Akmat.storageType = NM_SPARSE;
   numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX * problem->numberOfContacts;
   Akmat.size1 = size;
-  Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                      NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-  CSparseMatrix* Ak_triplet = Akmat.matrix2->triplet;
+  Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                     NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+  CSparseMatrix* Ak_triplet = Akmat.sparse->triplet;
 
   FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
 
@@ -646,9 +646,9 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
     /* TODO we should zero out the storage and the content, but not deallocate the matrix ! */
     NM_clearSparseStorage(&Akmat);
     /* This is now a upper bound ...  */
-    Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                        NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-    Ak_triplet = Akmat.matrix2->triplet;
+    Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                       NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+    Ak_triplet = Akmat.sparse->triplet;
     /************************************************
      * Compute the error on each contact point +
      ************************************************/

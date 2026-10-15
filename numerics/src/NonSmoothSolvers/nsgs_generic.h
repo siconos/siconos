@@ -195,9 +195,9 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
    * ===================================================================== */
 
   /* Check for pre-extracted diagonal blocks (NM_SPARSE with matrix1) */
-  if (M->storageType == NM_SPARSE && M->matrix1) {
+  if (M->storageType == NM_SPARSE && M->sparse_block) {
     /* Use pre-extracted block from SparseBlockStructuredMatrix */
-    local_problem->M_local = M->matrix1->block[block];
+    local_problem->M_local = M->sparse_block->block[block];
   } else {
     /* Extract diagonal block on-the-fly */
     switch (dim) {
@@ -291,7 +291,7 @@ static inline int nsgs_generic_update_local_problem_callback(unsigned int block,
 
 /** Extract diagonal blocks from matrix for efficient access
  *
- * For NM_SPARSE matrices, extracts diagonal blocks and stores them in M->matrix1
+ * For NM_SPARSE matrices, extracts diagonal blocks and stores them in M->sparse_block
  * as a SparseBlockStructuredMatrix. This allows O(1) access to diagonal blocks
  * during the NSGS iterations.
  *
@@ -299,20 +299,20 @@ static inline int nsgs_generic_update_local_problem_callback(unsigned int block,
  *
  * \param[in,out] M The matrix to extract diagonal blocks from
  * \param[in] dim Dimension per block
- * \return Pointer to the original M->matrix1 (for later restoration), or NULL if no extraction
- * was done
+ * \return Pointer to the original M->sparse_block (for later restoration), or NULL if no
+ * extraction was done
  */
 static inline void* nsgs_generic_extract_diagonal_blocks(NumericsMatrix* M, int dim) {
   if (!M) return NULL;
 
   if (M->storageType == NM_SPARSE) {
-    void* original_matrix1 = M->matrix1;
-    if (M->matrix1) {
+    void* original_matrix1 = M->sparse_block;
+    if (M->sparse_block) {
       numerics_printf(
-          "nsgs_generic_extract_diagonal_blocks: Warning - M->matrix1 already exists, "
+          "nsgs_generic_extract_diagonal_blocks: Warning - M->sparse_block already exists, "
           "overwriting");
     }
-    M->matrix1 = NM_extract_diagonal_blocks(M, dim);
+    M->sparse_block = NM_extract_diagonal_blocks(M, dim);
     return original_matrix1;
   }
 
@@ -322,21 +322,21 @@ static inline void* nsgs_generic_extract_diagonal_blocks(NumericsMatrix* M, int 
 /** Free extracted diagonal blocks and restore original matrix1 pointer
  *
  * Cleans up the memory allocated by nsgs_generic_extract_diagonal_blocks
- * and restores the original M->matrix1 pointer.
+ * and restores the original M->sparse_block pointer.
  *
  * \param[in,out] M The matrix to clean up
- * \param[in] original_matrix1 The original M->matrix1 pointer (from
+ * \param[in] original_matrix1 The original M->sparse_block pointer (from
  * nsgs_generic_extract_diagonal_blocks)
  */
 static inline void nsgs_generic_free_diagonal_blocks(NumericsMatrix* M,
                                                      void* original_matrix1) {
   if (!M) return;
 
-  if (M->storageType == NM_SPARSE && M->matrix1) {
+  if (M->storageType == NM_SPARSE && M->sparse_block) {
     /* Free the extracted diagonal blocks */
-    SBM_free(M->matrix1, SBM_FREE_ALL);
+    SBM_free(M->sparse_block, SBM_FREE_ALL);
     /* Restore original matrix1 */
-    M->matrix1 = (SparseBlockStructuredMatrix*)original_matrix1;
+    M->sparse_block = (SparseBlockStructuredMatrix*)original_matrix1;
   }
 }
 

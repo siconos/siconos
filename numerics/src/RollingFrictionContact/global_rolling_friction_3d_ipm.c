@@ -233,9 +233,9 @@ static NumericsMatrix* compute_J_matrix(const size_t varsCount) {
   NM_triplet_alloc(J_1, J_1_nzmax);
   NM_triplet_alloc(J_2, J_1_nzmax);
 
-  J->matrix2->origin = NSM_TRIPLET;
-  J_1->matrix2->origin = NSM_TRIPLET;
-  J_2->matrix2->origin = NSM_TRIPLET;
+  J->sparse->origin = NSM_TRIPLET;
+  J_1->sparse->origin = NSM_TRIPLET;
+  J_2->sparse->origin = NSM_TRIPLET;
 
   NumericsMatrix* N3 = NM_eye(3);
   NM_insert(J_1, N3, 0, 0);
@@ -321,30 +321,30 @@ static void family_of_F(const double* const x, const double* const z, const size
 
     // Construct matrix F
     if (F) {
-      F_block->matrix0[0] = f[i] * w;
+      F_block->dense[0] = f[i] * w;
       for (size_t j = 1; j < dimension; ++j) {
-        F_block->matrix0[j] = f[i + j] * w;
-        F_block->matrix0[j * dimension] = F_block->matrix0[j];
+        F_block->dense[j] = f[i + j] * w;
+        F_block->dense[j * dimension] = F_block->dense[j];
       }
       for (size_t j = 1; j < dimension; ++j) {
         for (size_t k = 1; k < dimension; ++k)
-          F_block->matrix0[j + dimension * k] =
-              (j == k) ? (1 + f[i + j] * f[i + k] / (1 + f[i])) * w
-                       : f[i + j] * f[i + k] / (1 + f[i]) * w;
+          F_block->dense[j + dimension * k] = (j == k)
+                                                  ? (1 + f[i + j] * f[i + k] / (1 + f[i])) * w
+                                                  : f[i + j] * f[i + k] / (1 + f[i]) * w;
       }
       NM_insert(F, F_block, i, i);
     }
 
     // Construct matrix F^-1
     if (Finv) {
-      Finv_block->matrix0[0] = f[i] / w;
+      Finv_block->dense[0] = f[i] / w;
       for (size_t j = 1; j < dimension; ++j) {
-        Finv_block->matrix0[j] = -f[i + j] / w;
-        Finv_block->matrix0[j * dimension] = Finv_block->matrix0[j];
+        Finv_block->dense[j] = -f[i + j] / w;
+        Finv_block->dense[j * dimension] = Finv_block->dense[j];
       }
       for (size_t j = 1; j < dimension; ++j) {
         for (size_t k = 1; k < dimension; ++k)
-          Finv_block->matrix0[j + dimension * k] =
+          Finv_block->dense[j + dimension * k] =
               (j == k) ? (1 + f[i + j] * f[i + k] / (1 + f[i])) / w
                        : f[i + j] * f[i + k] / (1 + f[i]) / w;
       }
@@ -353,14 +353,14 @@ static void family_of_F(const double* const x, const double* const z, const size
 
     // Construct matrix F^2
     if (F2) {
-      F2_block->matrix0[0] = w2 * cblas_ddot(dimension, f + i, 1, f + i, 1);
+      F2_block->dense[0] = w2 * cblas_ddot(dimension, f + i, 1, f + i, 1);
       for (size_t j = 1; j < dimension; ++j) {
-        F2_block->matrix0[j] = 2 * f[i] * f[i + j] * w2;
-        F2_block->matrix0[j * dimension] = F2_block->matrix0[j];
+        F2_block->dense[j] = 2 * f[i] * f[i + j] * w2;
+        F2_block->dense[j * dimension] = F2_block->dense[j];
       }
       for (size_t j = 1; j < dimension; ++j) {
         for (size_t k = 1; k < dimension; ++k)
-          F2_block->matrix0[j + dimension * k] =
+          F2_block->dense[j + dimension * k] =
               (j == k) ? (1 + 2 * f[i + j] * f[i + k]) * w2 : 2 * f[i + j] * f[i + k] * w2;
       }
       NM_insert(F2, F2_block, i, i);
@@ -368,14 +368,14 @@ static void family_of_F(const double* const x, const double* const z, const size
 
     // Construct matrix F^-2
     if (Finv2) {
-      Finv2_block->matrix0[0] = cblas_ddot(dimension, f + i, 1, f + i, 1) / w2;
+      Finv2_block->dense[0] = cblas_ddot(dimension, f + i, 1, f + i, 1) / w2;
       for (size_t j = 1; j < dimension; ++j) {
-        Finv2_block->matrix0[j] = -2 * f[i] * f[i + j] / w2;
-        Finv2_block->matrix0[j * dimension] = Finv2_block->matrix0[j];
+        Finv2_block->dense[j] = -2 * f[i] * f[i + j] / w2;
+        Finv2_block->dense[j * dimension] = Finv2_block->dense[j];
       }
       for (size_t j = 1; j < dimension; ++j) {
         for (size_t k = 1; k < dimension; ++k)
-          Finv2_block->matrix0[j + dimension * k] =
+          Finv2_block->dense[j + dimension * k] =
               (j == k) ? (1 + 2 * f[i + j] * f[i + k]) / w2 : 2 * f[i + j] * f[i + k] / w2;
       }
       NM_insert(Finv2, Finv2_block, i, i);
@@ -432,17 +432,17 @@ static NumericsMatrix* Pinv_F(const double* const f, const double* const g,
     tmp2 = 2 * f[i * dim] * dnrm2l(dim - 1, f + i * dim + 1) / dnrm2l(dim, f + i * dim);
     tmp3 = dnrm2l(dim, g + i * dim);
     tmp4 = 2 * g[i * dim] * dnrm2l(dim - 1, g + i * dim + 1) / dnrm2l(dim, g + i * dim);
-    out15->matrix0[0] = 1. / sqrtl((tmp1 - tmp2) * (tmp1 + tmp2) / (wf[i] * wf[i]) +
-                                   (tmp3 - tmp4) * (tmp3 + tmp4) / (wg[i] * wg[i]));
+    out15->dense[0] = 1. / sqrtl((tmp1 - tmp2) * (tmp1 + tmp2) / (wf[i] * wf[i]) +
+                                 (tmp3 - tmp4) * (tmp3 + tmp4) / (wg[i] * wg[i]));
 
-    coef = 2 * f[i * dim] * out15->matrix0[0] / dnrm2sqrl(dim, f + i * dim);
+    coef = 2 * f[i * dim] * out15->dense[0] / dnrm2sqrl(dim, f + i * dim);
     for (size_t k = 1; k < dim; k++) {
-      out15->matrix0[k] = coef * f[i * dim + k];
+      out15->dense[k] = coef * f[i * dim + k];
     }
 
-    coef = 2 * g[i * dim] * out15->matrix0[0] / dnrm2sqrl(dim, g + i * dim);
+    coef = 2 * g[i * dim] * out15->dense[0] / dnrm2sqrl(dim, g + i * dim);
     for (size_t k = 1; k < dim; k++) {
-      out15->matrix0[k + 2] = coef * g[i * dim + k];
+      out15->dense[k + 2] = coef * g[i * dim + k];
     }
     NM_insert(out, out15, i * d5, i * d5);
 
@@ -454,7 +454,7 @@ static NumericsMatrix* Pinv_F(const double* const f, const double* const g,
     size_t pos = 0;
     for (size_t k = 1; k < dim; k++) {
       for (size_t l = 1; l < dim; l++) {
-        out22->matrix0[pos++] =
+        out22->dense[pos++] =
             coef * (coef_tmp * f[i * dim + k] * f[i * dim + l] + othor[k - 1] * othor[l - 1]);
       }
     }
@@ -468,7 +468,7 @@ static NumericsMatrix* Pinv_F(const double* const f, const double* const g,
     pos = 0;
     for (size_t k = 1; k < dim; k++) {
       for (size_t l = 1; l < dim; l++) {
-        out22->matrix0[pos++] =
+        out22->dense[pos++] =
             coef * (coef_tmp * g[i * dim + k] * g[i * dim + l] + othor[k - 1] * othor[l - 1]);
       }
     }
@@ -498,7 +498,7 @@ static NumericsMatrix* Pinv(const double* u1, const double* r1, const double* u2
 
   NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, (5 + 2 * (2 * 2)) * varsCount);
-  CSparseMatrix* out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->sparse->triplet;
 
   double* othor = (double*)calloc(2, sizeof(double));
 
@@ -1057,8 +1057,8 @@ static void PinvTy(const double* u1, const double* r1, const double* u2, const d
 
 //   /*   out->storageType = H->storageType; */
 //   /*   numericsSparseMatrix(out)->csc = out_csc; */
-//   /*   out->size0 = (int)out->matrix2->csc->m; */
-//   /*   out->size1 = (int)out->matrix2->csc->n; */
+//   /*   out->size0 = (int)out->sparse->csc->m; */
+//   /*   out->size1 = (int)out->sparse->csc->n; */
 //   /*   numericsSparseMatrix(out)->origin = NSM_CSC; */
 
 //   free(x);
@@ -1208,7 +1208,7 @@ static NumericsMatrix* compute_JQinv2Jt(const double* u1, const double* r1, cons
 
   NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, (9 + 2 * (2 * 2)) * varsCount);
-  CSparseMatrix* out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->sparse->triplet;
 
   float_type data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
 
@@ -1421,8 +1421,8 @@ static NumericsMatrix* compute_JQinv2Jt(const double* u1, const double* r1, cons
 
 //       LinvH->storageType = H->storageType;
 //       numericsSparseMatrix(LinvH)->csc = X;
-//       LinvH->size0 = (int)LinvH->matrix2->csc->m;
-//       LinvH->size1 = (int)LinvH->matrix2->csc->n;
+//       LinvH->size0 = (int)LinvH->sparse->csc->m;
+//       LinvH->size1 = (int)LinvH->sparse->csc->n;
 //       numericsSparseMatrix(LinvH)->origin = NSM_CSC;
 
 //       *chol_L = N->L;  // for storage Cholesky factor
@@ -1510,8 +1510,8 @@ static NumericsMatrix* multiply_UinvH(CSparseMatrix* chol_U, NumericsMatrix* H) 
 
       UinvH->storageType = H->storageType;
       numericsSparseMatrix(UinvH)->csc = X;
-      UinvH->size0 = (int)UinvH->matrix2->csc->m;
-      UinvH->size1 = (int)UinvH->matrix2->csc->n;
+      UinvH->size0 = (int)UinvH->sparse->csc->m;
+      UinvH->size1 = (int)UinvH->sparse->csc->n;
       numericsSparseMatrix(UinvH)->origin = NSM_CSC;
 
       if (x) free(x);
@@ -1544,7 +1544,7 @@ static NumericsMatrix* compute_factor_U(const double* u1, const double* r1, cons
 
   NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, 11 * varsCount);
-  CSparseMatrix* out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->sparse->triplet;
 
   float_type p0 = 0., detx = 0., detz = 0., tmpx = 0., tmpz = 0., nx2 = 0., nz2 = 0.;
   float_type nxb = 0., nzb = 0.;
@@ -1912,14 +1912,14 @@ static int compute_errors(NumericsMatrix* M, NumericsMatrix* H, const double* w,
 //       break;
 //     }
 //     case NM_SPARSE_BLOCK: {
-//       assert(m->matrix1);
+//       assert(m->sparse_block);
 //       // printf("========== storageType =  NM_SPARSE_BLOCK\n");
 //       break;
 //     }
 //     case NM_SPARSE: {
-//       assert(m->matrix2);
+//       assert(m->sparse);
 //       // printf("========== storageType = NM_SPARSE\n");
-//       switch (m->matrix2->origin) {
+//       switch (m->sparse->origin) {
 //         case NSM_TRIPLET: {
 //           // printf("========== origin =  NSM_TRIPLET\n");
 //           break;
@@ -1938,21 +1938,21 @@ static int compute_errors(NumericsMatrix* M, NumericsMatrix* H, const double* w,
 //         }
 //         default: {
 //           // fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n",
-//           // m->matrix2->origin);
+//           // m->sparse->origin);
 //         }
 //       }
 
 //       // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
 //       CSparseMatrix *A = NULL;
-//       if (m->matrix2->triplet) {
+//       if (m->sparse->triplet) {
 //         // printf("========== a matrix in format triplet is stored\n");
-//         A = m->matrix2->triplet;
-//       } else if (m->matrix2->csc) {
+//         A = m->sparse->triplet;
+//       } else if (m->sparse->csc) {
 //         // printf("========== a matrix in format csc is stored\n");
-//         A = m->matrix2->csc;
-//       } else if (m->matrix2->trans_csc) {
+//         A = m->sparse->csc;
+//       } else if (m->sparse->trans_csc) {
 //         // printf("========== a matrix in format trans_csc is stored\n");
-//         A = m->matrix2->trans_csc;
+//         A = m->sparse->trans_csc;
 //       }
 //       assert(A);
 //       CS_INT p, nz, *Ap, *Ai;
@@ -2080,7 +2080,7 @@ static NumericsMatrix* compute_JQinv(const double* u1, const double* r1, const d
 
   NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 6 * varsCount);
   NM_triplet_alloc(out, (10 + 2 * (2 * 2)) * varsCount);
-  CSparseMatrix* out_triplet = out->matrix2->triplet;
+  CSparseMatrix* out_triplet = out->sparse->triplet;
 
   float_type data = 0., nub = 0., nrb = 0., det_u = 0., det_r = 0.;
 
@@ -3062,7 +3062,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           Jac = NM_create(NM_SPARSE, m + nd + n_dplus1, m + nd + n_dplus1);
           Jac_nzmax = M_nzmax + 2 * H_nzmax + 2 * 9 * n * n + 6 * n;
           NM_triplet_alloc(Jac, Jac_nzmax);
-          Jac->matrix2->origin = NSM_TRIPLET;
+          Jac->sparse->origin = NSM_TRIPLET;
 
           // if(!identity) identity = NM_eye(nd);
           // NM_scal(-barr_param, identity);
@@ -3077,7 +3077,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           arrowMat_u2 = Arrow_repr(velocity_2, n_dminus2, n);
           Z = NM_create(NM_SPARSE, n_dplus1, n_dplus1);
           NM_triplet_alloc(Z, 7 * 2 * n);
-          Z->matrix2->origin = NSM_TRIPLET;
+          Z->sparse->origin = NSM_TRIPLET;
           NM_insert(Z, arrowMat_u1, 0, 0);
           NM_insert(Z, arrowMat_u2, n_dminus2, n_dminus2);
           ZJT = NM_multiply(Z, Jt);
@@ -3329,7 +3329,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           Jac = NM_create(NM_SPARSE, m + nd + n_dplus1, m + nd + n_dplus1);
           Jac_nzmax = M_nzmax + 2 * H_nzmax + 2 * 9 * n * n + 6 * n;
           NM_triplet_alloc(Jac, Jac_nzmax);
-          Jac->matrix2->origin = NSM_TRIPLET;
+          Jac->sparse->origin = NSM_TRIPLET;
           NM_insert(Jac, M, 0, 0);
           NM_insert(Jac, minus_Ht, 0, m);
           NM_insert(Jac, minus_H, m, 0);
@@ -3641,7 +3641,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           Jac = NM_create(NM_SPARSE, m + nd + n_dplus1, m + nd + n_dplus1);
           Jac_nzmax = M_nzmax + 2 * H_nzmax + nd * n_dplus1 + n_dplus1;
           NM_triplet_alloc(Jac, Jac_nzmax);
-          Jac->matrix2->origin = NSM_TRIPLET;
+          Jac->sparse->origin = NSM_TRIPLET;
           NM_insert(Jac, M, 0, 0);
           NM_insert(Jac, minus_Ht, 0, m);
           NM_insert(Jac, minus_H, m, 0);
@@ -4017,7 +4017,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           Jac = NM_create(NM_SPARSE, m + nd, m + nd);
           Jac_nzmax = M_nzmax + 2 * H_nzmax + nd * nd;
           NM_triplet_alloc(Jac, Jac_nzmax);
-          Jac->matrix2->origin = NSM_TRIPLET;
+          Jac->sparse->origin = NSM_TRIPLET;
           NM_insert(Jac, minus_M, 0, 0);
           NM_insert(Jac, Ht, 0, m);
           NM_insert(Jac, H, m, 0);
@@ -4425,7 +4425,7 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
           Jac = NM_create(NM_SPARSE, m + nd, m + nd);
           Jac_nzmax = M_nzmax + 2 * m * nd + nd;
           NM_triplet_alloc(Jac, Jac_nzmax);
-          Jac->matrix2->origin = NSM_TRIPLET;
+          Jac->sparse->origin = NSM_TRIPLET;
           NM_insert(Jac, minus_M, 0, 0);
           NM_insert(Jac, PinvH_T, 0, m);
           NM_insert(Jac, PinvH, m, 0);
@@ -5831,7 +5831,7 @@ void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem* pr
   data->P_mu = (IPM_change_of_variable*)malloc(sizeof(IPM_change_of_variable));
   data->P_mu->mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->mat, nd);
-  data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
+  data->P_mu->mat->sparse->origin = NSM_TRIPLET;
   for (size_t i = 0; i < nd; ++i) {
     if (i % d == 0)
       NM_entry(data->P_mu->mat, i, i, 1.);
@@ -5845,7 +5845,7 @@ void global_rolling_friction_3d_IPM_init(GlobalRollingFrictionContactProblem* pr
   /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
   data->P_mu->inv_mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->inv_mat, nd);
-  data->P_mu->inv_mat->matrix2->origin = NSM_TRIPLET;
+  data->P_mu->inv_mat->sparse->origin = NSM_TRIPLET;
   for (size_t i = 0; i < nd; ++i) {
     if (i % d == 0)
       NM_entry(data->P_mu->inv_mat, i, i, 1.);

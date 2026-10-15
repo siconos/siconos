@@ -67,9 +67,9 @@ void plasticity_2d_local_problem_compute_q(PlasticityProblem* problem,
 void plasticity_2d_local_problem_fill_M(PlasticityProblem* problem,
                                         PlasticityProblem* localproblem, int contact) {
   if (problem->M->storageType == NM_SPARSE) {
-    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+    localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+    NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense);
 }
 
 PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* problem) {
@@ -120,7 +120,7 @@ void plasticity_2d_local_problem_free(PlasticityProblem* localproblem,
     // a pointer link when problem->M is NM_SPARSE.
     // So we need to release the pointer to avoid double free deallocation of the diagonal
     // blocks of the original matrix of the problem.
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   plasticity2DProblem_free(localproblem);
 }

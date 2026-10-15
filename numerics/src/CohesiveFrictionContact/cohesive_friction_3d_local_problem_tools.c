@@ -75,7 +75,7 @@ void cohesive_friction_3d_local_problem_free(CohesiveFrictionContactProblem* loc
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   cohesiveFrictionContactProblem_free(localproblem);
 }
@@ -101,7 +101,7 @@ void cohesive_friction_3d_local_problem_fill_M(CohesiveFrictionContactProblem* p
                                                CohesiveFrictionContactProblem* localproblem,
                                                int contact) {
   if (problem->M->storageType == NM_SPARSE) {
-    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+    localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+    NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense);
 }

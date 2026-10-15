@@ -519,13 +519,13 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   unsigned int* freeze_contacts = NULL;
   int frozen_contact = 0;
 
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->sparse_block;
   if (problem->M->storageType == NM_SPARSE) {
-    if (problem->M->matrix1) {
+    if (problem->M->sparse_block) {
       printf("Warning matrix 1 different from NULL");
     }
 
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+    problem->M->sparse_block = NM_extract_diagonal_blocks(problem->M, problem->dimension);
   }
 
   /*****  Initialize various solver options *****/
@@ -751,8 +751,8 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
   /** Free memory **/
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
-    problem->M->matrix1 = matrix1;
+    SBM_free(problem->M->sparse_block, SBM_FREE_ALL);
+    problem->M->sparse_block = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver_contact(localproblem_contact,
                                                          local_opts_contact);

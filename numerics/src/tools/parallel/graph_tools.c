@@ -16,7 +16,7 @@ int color_graph(int n, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
   */
   switch (M->storageType) {
     case NM_DENSE: {
-      PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
+      PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->dense, &A));
       PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
 
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
@@ -25,7 +25,7 @@ int color_graph(int n, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
     }
     case NM_SPARSE: {
       CSparseMatrix* sparse;
-      if (M->matrix2->origin == NSM_CSR) {
+      if (M->sparse->origin == NSM_CSR) {
         sparse = NM_csr(M);
       } else {
         sparse = NM_csc_trans(M);
@@ -133,7 +133,7 @@ int color_graph_permut(int n, NumericsMatrix* M, size_t* n_colors, size_t** sum_
   PetscFunctionBeginUser;
   switch (M->storageType) {
     case NM_DENSE: {
-      PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
+      PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->dense, &A));
       PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
       PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
       PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
@@ -141,7 +141,7 @@ int color_graph_permut(int n, NumericsMatrix* M, size_t* n_colors, size_t** sum_
     }
     case NM_SPARSE: {
       CSparseMatrix* sparse;
-      if (M->matrix2->origin == NSM_CSR) {
+      if (M->sparse->origin == NSM_CSR) {
         sparse = NM_csr(M);
       } else {
         sparse = NM_csc_trans(M);
@@ -330,8 +330,8 @@ int compare(const void* a, const void* b) {
 void create_adjacency_lists(int n, NumericsMatrix* M, node_t** adjacency_lists) {
   switch (M->storageType) {
     case NM_DENSE: {
-      assert(M->matrix0);
-      double* dense = M->matrix0;
+      assert(M->dense);
+      double* dense = M->dense;
 
       for (size_t row = 0; row < (size_t)n; row++) {
         for (size_t col = 0; col < (size_t)n; col++) {
@@ -343,7 +343,7 @@ void create_adjacency_lists(int n, NumericsMatrix* M, node_t** adjacency_lists) 
     }
     case NM_SPARSE: {
       CSparseMatrix* sparse;
-      if (M->matrix2->origin == NSM_CSR) {
+      if (M->sparse->origin == NSM_CSR) {
         sparse = NM_csr(M);
       } else {
         sparse = NM_csc_trans(M);
@@ -609,7 +609,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
   // Create PETSC matrix, finding which blocks are full of zeros
   switch (M->storageType) {
     case NM_DENSE: {
-      double* M_mat = M->matrix0;
+      double* M_mat = M->dense;
 
       /* Count non zero blocks */
       size_t nnz = 0;
@@ -652,7 +652,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
     }
     case NM_SPARSE: {
       CSparseMatrix* sparse;
-      if (M->matrix2->origin == NSM_CSR) {
+      if (M->sparse->origin == NSM_CSR) {
         sparse = NM_csr(M);
       } else {
         sparse = NM_csc_trans(M);
@@ -775,7 +775,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
     case NM_SPARSE_BLOCK: {
       /* Can I make assumptions ? Like all blocks are squared with size d * d ? */
 
-      SparseBlockStructuredMatrix* sbm = M->matrix1;
+      SparseBlockStructuredMatrix* sbm = M->sparse_block;
 
       /* TO DO
 
@@ -964,7 +964,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
   // Create PETSC matrix, finding which blocks are full of zeros
   switch (M->storageType) {
     case NM_DENSE: {
-      double* M_mat = M->matrix0;
+      double* M_mat = M->dense;
 
       /* Count non zero blocks */
       size_t nnz = 0;
@@ -1007,7 +1007,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
     }
     case NM_SPARSE: {
       CSparseMatrix* sparse;
-      if (M->matrix2->origin == NSM_CSR) {
+      if (M->sparse->origin == NSM_CSR) {
         sparse = NM_csr(M);
       } else {
         sparse = NM_csc_trans(M);
@@ -1130,7 +1130,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
     case NM_SPARSE_BLOCK: {
       /* Can I make assumptions ? Like all blocks are squared with size d * d ? */
 
-      SparseBlockStructuredMatrix* sbm = M->matrix1;
+      SparseBlockStructuredMatrix* sbm = M->sparse_block;
 
       /* TO DO
 

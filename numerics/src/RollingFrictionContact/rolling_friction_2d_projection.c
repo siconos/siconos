@@ -81,7 +81,7 @@ int rolling_friction_2d_projectionOnCone_solve(RollingFrictionContactProblem* lo
                                                double* reaction, SolverOptions* options) {
   DEBUG_BEGIN("rolling_friction_2d_projectionOnCone_solve(...)\n");
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   double mu_r_i = localproblem->mu_r[0];
@@ -167,7 +167,7 @@ void rolling_friction_2d_projectionOnConeWithLocalIteration_initialize(
         SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_USE_TRIVIAL_SOLUTION_TRUE) {
       /* The part of MGlobal which corresponds to the current block is copied into MLocal */
       rolling_friction_2d_local_problem_fill_M(problem, localproblem, i);
-      double* MLocal = localproblem->M->matrix0;
+      double* MLocal = localproblem->M->dense;
       unsigned int pos = i * 10 + nc;
       double* MLocal_LU = &(localsolver_options->dWork[pos]);
       memcpy(MLocal_LU, MLocal, 9 * sizeof(double));
@@ -261,7 +261,7 @@ int rolling_friction_2d_projectionOnConeWithLocalIteration_solve(
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   double mu_r_i = localproblem->mu_r[0]; /* int nLocal = 5; */

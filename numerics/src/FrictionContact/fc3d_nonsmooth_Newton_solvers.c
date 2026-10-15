@@ -60,9 +60,9 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
                                       size_t block_col_size) {
   /* TODO  CSC, CSR version*/
   assert(A);
-  if (!B->matrix2->triplet) NM_triplet_alloc(B, block_row_size * block_col_size);
-  CSparseMatrix* Btriplet = B->matrix2->triplet;
-  B->matrix2->origin = NSM_TRIPLET;
+  if (!B->sparse->triplet) NM_triplet_alloc(B, block_row_size * block_col_size);
+  CSparseMatrix* Btriplet = B->sparse->triplet;
+  B->sparse->origin = NSM_TRIPLET;
   double* Alocal = A;
   for (size_t i = 0, j = 0; i < (size_t)B->size0; i += block_row_size, j += block_col_size) {
     {
@@ -81,8 +81,8 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
 static void computeDenseAWpB(double* A, NumericsMatrix* W, double* B, NumericsMatrix* AWpB) {
   unsigned problemSize = W->size0;
 
-  double* result = AWpB->matrix0;
-  double* Wx = W->matrix0;
+  double* result = AWpB->dense;
+  double* Wx = W->dense;
   assert(result);
   assert(Wx);
 
@@ -112,8 +112,8 @@ static void computeSparseBlockAWpB(double* A, NumericsMatrix* W, double* B,
                                    NumericsMatrix* AWpB) {
   /* unsigned int problemSize = W->size0; */
 
-  SparseBlockStructuredMatrix* Wb = W->matrix1;
-  SparseBlockStructuredMatrix* result = AWpB->matrix1;
+  SparseBlockStructuredMatrix* Wb = W->sparse_block;
+  SparseBlockStructuredMatrix* result = AWpB->sparse_block;
   assert(Wb);
   assert(result);
 
@@ -124,7 +124,7 @@ static void computeSparseBlockAWpB(double* A, NumericsMatrix* W, double* B,
     *AWpB = *W_copy;
     AWpB->destructible = AWpB;
     free(W_copy);
-    result = AWpB->matrix1;
+    result = AWpB->sparse_block;
   }
 
   assert((unsigned)W->size0 >= 3);
@@ -157,8 +157,8 @@ static void computeSparseAWpB(double* A, NumericsMatrix* W, double* B, NumericsM
   unsigned problemSize = W->size0;
   assert(problemSize >= 3);
 
-  assert(AWpB->matrix2);
-  assert(W->matrix2);
+  assert(AWpB->sparse);
+  assert(W->sparse);
 
   NM_clearSparseStorage(AWpB);
   NumericsMatrix* Amat = NM_create(NM_SPARSE, problemSize, problemSize);
@@ -422,7 +422,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   assert(problem->mu);
   assert(problem->M);
 
-  assert(problem->M->matrix0 || problem->M->matrix1 || problem->M->matrix2);
+  assert(problem->M->dense || problem->M->sparse_block || problem->M->sparse);
 
   assert(!options->iparam[4]);  // only host
 
@@ -503,13 +503,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   // compute rho here
   FrictionContactProblem* localproblem = fc3d_local_problem_allocate(problem->M->storageType);
   assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0);
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->sparse_block;
   if (problem->M->storageType == NM_SPARSE) {
-    if (problem->M->matrix1) {
+    if (problem->M->sparse_block) {
       printf("Warning matrix 1 different from NULL");
     }
 
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+    problem->M->sparse_block = NM_extract_diagonal_blocks(problem->M, problem->dimension);
   }
 
   for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
@@ -544,14 +544,14 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
                             rho[3 * contact + 2]);
   }
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
-    problem->M->matrix1 = matrix1;
-    localproblem->M->matrix0 = NULL;
+    SBM_free(problem->M->sparse_block, SBM_FREE_ALL);
+    problem->M->sparse_block = matrix1;
+    localproblem->M->dense = NULL;
   }
   if (problem->M->storageType == NM_SPARSE_BLOCK) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   frictionContactProblem_free(localproblem);
 

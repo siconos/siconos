@@ -52,7 +52,7 @@ void relay_avi_caoferris_test(RelayProblem* problem, double* z, double* w, int* 
   poly.size_ineq = s;
   poly.size_eq = 0;
   poly.H = NM_create_with_data(NM_DENSE, s, n, calloc(s * n, sizeof(double)));
-  double* H = poly.H->matrix0;
+  double* H = poly.H->dense;
   poly.K = (double*)malloc(s * sizeof(double));
   poly.Heq = NULL;
   poly.Keq = NULL;

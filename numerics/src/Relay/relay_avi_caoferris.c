@@ -61,13 +61,13 @@ void relay_avi_caoferris(RelayProblem* problem, double* z, double* w, int* info,
   double tmp;
   for (unsigned int i = 0; i < n; ++i) {
     tmp = 0.0;
-    lcplike_pb.M->matrix0[i * (s + 1)] = 1.0;
-    lcplike_pb.M->matrix0[(i + n) * (s + 1)] = -1.0;
+    lcplike_pb.M->dense[i * (s + 1)] = 1.0;
+    lcplike_pb.M->dense[(i + n) * (s + 1)] = -1.0;
     lcplike_pb.q[i] = problem->q[i];
     lcplike_pb.q[i + n] = -problem->lb[i] + problem->ub[i];
     for (unsigned j = 0; j < n; ++j) {
-      lcplike_pb.M->matrix0[i + (j + n) * s] = problem->M->matrix0[i + j * n];
-      tmp += problem->M->matrix0[i + j * n] * problem->lb[j];
+      lcplike_pb.M->dense[i + (j + n) * s] = problem->M->dense[i + j * n];
+      tmp += problem->M->dense[i + j * n] * problem->lb[j];
     }
     /* \bar{a} =  -\tilde{a} + Ay_e */
     lcplike_pb.q[i] += tmp;

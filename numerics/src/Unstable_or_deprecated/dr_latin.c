@@ -26,7 +26,7 @@
 #include "SiconosLapack.h"
 #include "numerics_errors.h"
 void dr_latin(RelayProblem* problem, double* z, double* w, int* info, SolverOptions* options) {
-  double* vec = problem->M->matrix0;
+  double* vec = problem->M->dense;
   double* qq = problem->q;
   int n = problem->size;
   double* a = problem->ub;

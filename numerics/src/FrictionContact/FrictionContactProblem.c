@@ -246,7 +246,7 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_nn = 1;
       size_t col_components_nn[1] = {0};
       size_t col_components_size_nn = 1;
-      SBM_extract_component_3x3(M->matrix1, M_nn->matrix1, row_components_nn,
+      SBM_extract_component_3x3(M->sparse_block, M_nn->sparse_block, row_components_nn,
                                 row_components_size_nn, col_components_nn,
                                 col_components_size_nn);
 
@@ -254,7 +254,7 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_nt = 1;
       size_t col_components_nt[2] = {1, 2};
       size_t col_components_size_nt = 2;
-      SBM_extract_component_3x3(M->matrix1, M_nt->matrix1, row_components_nt,
+      SBM_extract_component_3x3(M->sparse_block, M_nt->sparse_block, row_components_nt,
                                 row_components_size_nt, col_components_nt,
                                 col_components_size_nt);
 
@@ -262,7 +262,7 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_tn = 2;
       size_t col_components_tn[1] = {0};
       size_t col_components_size_tn = 1;
-      SBM_extract_component_3x3(M->matrix1, M_tn->matrix1, row_components_tn,
+      SBM_extract_component_3x3(M->sparse_block, M_tn->sparse_block, row_components_tn,
                                 row_components_size_tn, col_components_tn,
                                 col_components_size_tn);
 
@@ -270,22 +270,22 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_tt = 2;
       size_t col_components_tt[2] = {1, 2};
       size_t col_components_size_tt = 2;
-      SBM_extract_component_3x3(M->matrix1, M_tt->matrix1, row_components_tt,
+      SBM_extract_component_3x3(M->sparse_block, M_tt->sparse_block, row_components_tt,
                                 row_components_size_tt, col_components_tt,
                                 col_components_size_tt);
 
 #ifdef SN_SBM_TO_DENSE
-      M_nn->matrix0 = (double*)malloc(M_nn->size0 * M_nn->size1 * sizeof(double));
-      SBM_to_dense(M_nn->matrix1, M_nn->matrix0);
+      M_nn->dense = (double*)malloc(M_nn->size0 * M_nn->size1 * sizeof(double));
+      SBM_to_dense(M_nn->sparse_block, M_nn->dense);
       M_nn->storageType = NM_DENSE;
-      M_nt->matrix0 = (double*)malloc(M_nt->size0 * M_nt->size1 * sizeof(double));
-      SBM_to_dense(M_nt->matrix1, M_nt->matrix0);
+      M_nt->dense = (double*)malloc(M_nt->size0 * M_nt->size1 * sizeof(double));
+      SBM_to_dense(M_nt->sparse_block, M_nt->dense);
       M_nt->storageType = NM_DENSE;
-      M_tn->matrix0 = (double*)malloc(M_tn->size0 * M_tn->size1 * sizeof(double));
-      SBM_to_dense(M_tn->matrix1, M_tn->matrix0);
+      M_tn->dense = (double*)malloc(M_tn->size0 * M_tn->size1 * sizeof(double));
+      SBM_to_dense(M_tn->sparse_block, M_tn->dense);
       M_tn->storageType = NM_DENSE;
-      M_tt->matrix0 = (double*)malloc(M_tt->size0 * M_tt->size1 * sizeof(double));
-      SBM_to_dense(M_tt->matrix1, M_tt->matrix0);
+      M_tt->dense = (double*)malloc(M_tt->size0 * M_tt->size1 * sizeof(double));
+      SBM_to_dense(M_tt->sparse_block, M_tt->dense);
       M_tt->storageType = NM_DENSE;
 #endif
 

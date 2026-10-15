@@ -132,9 +132,9 @@ int main(void) {
 
   printf("final x: %2.6e %2.6e\n", sigma[0], sigma[1]);
 
-  H->matrix0 = NULL;
+  H->dense = NULL;
   NM_free(H);
-  num_mat->matrix0 = NULL;
+  num_mat->dense = NULL;
   NM_free(num_mat);
   solver_options_delete(options);
   return info;
@@ -144,9 +144,9 @@ expose_failure:
   fprintf(stderr, "q = %2.10e %2.10e\n", q[0], q[1]);
   fprintf(stderr, "lambda = %2.10e %2.10e\n", lambda[0], lambda[1]);
 
-  H->matrix0 = NULL;
+  H->dense = NULL;
   NM_free(H);
-  num_mat->matrix0 = NULL;
+  num_mat->dense = NULL;
   NM_free(num_mat);
 
   return 1;

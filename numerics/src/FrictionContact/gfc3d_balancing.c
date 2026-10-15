@@ -181,7 +181,7 @@ GlobalFrictionContactProblem* gfc3d_balancing_problem(GlobalFrictionContactProbl
   /* /\* Compute M + rho H H^T (storage in W)*\/ */
   /* NumericsMatrix *W = NM_create(NM_SPARSE,n,n); */
   /* NM_triplet_alloc(W, n); */
-  /* W->matrix2->origin = NSM_TRIPLET; */
+  /* W->sparse->origin = NSM_TRIPLET; */
 
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] ==
       SICONOS_FRICTION_3D_RESCALING_SCALAR) {
@@ -221,7 +221,7 @@ GlobalFrictionContactProblem* gfc3d_balancing_problem(GlobalFrictionContactProbl
     /****** compute balancing matrices **************************************/
     NumericsMatrix* MHHT = NM_create(NM_SPARSE, n + m, n + m);
     NM_triplet_alloc(MHHT, n + m);
-    MHHT->matrix2->origin = NSM_TRIPLET;
+    MHHT->sparse->origin = NSM_TRIPLET;
     NM_insert(MHHT, problem->M, 0, 0);
     NM_insert(MHHT, problem->H, 0, n);
     NumericsMatrix* HT = NM_transpose(H);

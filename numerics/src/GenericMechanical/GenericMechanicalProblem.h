@@ -156,7 +156,7 @@ void genericMechanicalProblem_display(GenericMechanicalProblem* problem);
  *  The memory of the elementary block matrix is not managed here: the user
  *  must ensure it. In Siconos, the Kernel allocates the global NumericsMatrix
  *  and the diagonal block is plugged later in gmp_gauss_seidel
- *  (localProblem->M->matrix0 = diagBlock).
+ *  (localProblem->M->dense = diagBlock).
  *
  *  \param[in,out] problem         the GenericMechanicalProblem
  *  \param[in]     problemType  type of the added sub-problem

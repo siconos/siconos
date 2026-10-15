@@ -549,13 +549,14 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
   unsigned int* scontacts = NULL;
   unsigned int* freeze_contacts = NULL;
 
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->sparse_block;
   if (problem->M->storageType == NM_SPARSE) {
-    if (problem->M->matrix1) {
+    if (problem->M->sparse_block) {
       printf("Warning matrix 1 different from NULL");
     }
 
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, (size_t)problem->dimension);
+    problem->M->sparse_block =
+        NM_extract_diagonal_blocks(problem->M, (size_t)problem->dimension);
   }
 
   /*****  Initialize various solver options *****/
@@ -885,8 +886,8 @@ void fc3d_nsgs_graph(FrictionContactProblem* problem, double* reaction, double* 
   /** Free memory **/
 
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
-    problem->M->matrix1 = matrix1;
+    SBM_free(problem->M->sparse_block, SBM_FREE_ALL);
+    problem->M->sparse_block = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver(localproblem, local_opts);
 

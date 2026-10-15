@@ -33,7 +33,7 @@ int main(void) {
   int basis[11] = {0};
 
   siconos_find_vertex(&P, 2, basis);
-  H->matrix0 = NULL;
+  H->dense = NULL;
   NM_free(H);
   for (unsigned i = 0; i < 11; ++i) printf("%d ", basis[i]);
   printf("\n");

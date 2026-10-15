@@ -148,7 +148,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     problem->m = n;
     problem->A = NM_create(NM_SPARSE, n, n);
     NM_triplet_alloc(problem->A, 0);
-    problem->A->matrix2->origin = NSM_TRIPLET;
+    problem->A->sparse->origin = NSM_TRIPLET;
 
     for (size_t k = 0; k < n; k++) {
       NM_entry(problem->A, k, k, 1);

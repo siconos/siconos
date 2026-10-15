@@ -156,7 +156,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
 
     // trivial solution : size-1 LCP
     if (n == 1) {
-      double* M = problem->M->matrix0;
+      double* M = problem->M->dense;
       w[0] = 0.;
       z[0] = -q[0] / M[0];
       info = 0;

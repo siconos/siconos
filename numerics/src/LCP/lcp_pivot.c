@@ -52,7 +52,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   /* matrix M of the LCP */
   assert(problem);
   assert(problem->M);
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   assert(M);
   assert(problem->q);
 

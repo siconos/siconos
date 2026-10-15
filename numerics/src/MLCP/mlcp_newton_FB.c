@@ -33,15 +33,14 @@ static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w) {
   // q --> w
   MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem*)data_opaque;
   assert(problem->M);
-  assert(problem->M->matrix0);
+  assert(problem->M->dense);
   unsigned int n = problem->n;
   unsigned int m = problem->m;
   /* Problem in the form (M,q) */
   if (problem->isStorageType1) {
     cblas_dcopy(n, problem->q, 1, w, 1);
     // Mz+q --> w
-    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, problem->M->matrix0, n, z, 1, 1.0, w,
-                1);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, problem->M->dense, n, z, 1, 1.0, w, 1);
   } else {
     /* Links to problem data */
     double* a = problem->q;
@@ -76,8 +75,8 @@ static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* w
   MixedLinearComplementarityProblem* data = (MixedLinearComplementarityProblem *)data_opaque;
   unsigned int n = data->size;
   assert(data->M);
-  assert(data->M->matrix0);
-  double* M = data->M->matrix0;
+  assert(data->M->dense);
+  double* M = data->M->dense;
   double normi;
 
   // workV1 = "z" in Facchibei--Pang p. 808

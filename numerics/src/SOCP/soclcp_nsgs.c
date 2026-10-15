@@ -212,7 +212,7 @@ void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem* problem
                             int cone) {
   int coneStart = problem->coneIndex[cone];
   NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone + 1] - coneStart,
-                        &localproblem->M->matrix0);
+                        &localproblem->M->dense);
 }
 
 /* swap two indices */
@@ -516,7 +516,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
   /***** Free memory *****/
   (*freeSolver)(problem, localproblem, localsolver_options);
 
-  if (problem->M->storageType == NM_SPARSE_BLOCK) localproblem->M->matrix0 = NULL;
+  if (problem->M->storageType == NM_SPARSE_BLOCK) localproblem->M->dense = NULL;
 
   freeSecondOrderConeLinearComplementarityProblem(localproblem);
 

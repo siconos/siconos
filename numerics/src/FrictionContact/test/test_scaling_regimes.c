@@ -154,7 +154,7 @@ static FrictionContactProblem* make_identity_problem(const double r[3], const do
   for (int i = 0; i < 3; ++i) problem->q[i] = u[i] - r[i];
 
   NumericsMatrix* M = NM_create_with_data(NM_DENSE, 3, 3, calloc(9, sizeof(double)));
-  for (int i = 0; i < 3; ++i) M->matrix0[i * 3 + i] = 1.0;
+  for (int i = 0; i < 3; ++i) M->dense[i * 3 + i] = 1.0;
   problem->M = M;
   return problem;
 }
@@ -164,8 +164,8 @@ static void free_problem(FrictionContactProblem* problem) {
   free(problem->mu);
   free(problem->q);
   if (problem->M) {
-    free(problem->M->matrix0);
-    problem->M->matrix0 = NULL;
+    free(problem->M->dense);
+    problem->M->dense = NULL;
     NM_free(problem->M);
   }
   free(problem);

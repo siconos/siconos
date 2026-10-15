@@ -168,7 +168,7 @@ void mlcp_direct_reset() {
 
 int internalPrecompute(MixedLinearComplementarityProblem* problem) {
   lapack_int INFO = 0;
-  mlcp_enum_build_M(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, s_n, s_m, s_nbLines);
+  mlcp_enum_build_M(spFirstCC->zw, spFirstCC->M, problem->M->dense, s_n, s_m, s_nbLines);
   if (verbose) {
     printf("mlcp_direct, precomputed M :\n");
     NM_dense_display(spFirstCC->M, s_npM, s_npM, 0);

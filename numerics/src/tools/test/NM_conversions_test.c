@@ -145,8 +145,8 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   CSparseMatrix* csc = NM_csc(M);
 
   NM_clearSparseStorage(M_new);
-  M_new->matrix2->origin = NSM_CSC;
-  M_new->matrix2->csc = csc;
+  M_new->sparse->origin = NSM_CSC;
+  M_new->sparse->csc = csc;
   // NM_display(M_new);
 
   foutput = fopen("matrix_sparse_csc.dat", "w");
@@ -159,7 +159,7 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
 
   is_equal = NM_equal(M_new, M_csc);
   NM_free(M_csc);
-  M_new->matrix2->csc = NULL;
+  M_new->sparse->csc = NULL;
   if (is_equal)
     printf("equal csc\n");
   else
@@ -168,8 +168,8 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   CSparseMatrix* csr = NM_csr(M);
 
   NM_clearSparseStorage(M_new);
-  M_new->matrix2->origin = NSM_CSR;
-  M_new->matrix2->csr = csr;
+  M_new->sparse->origin = NSM_CSR;
+  M_new->sparse->csr = csr;
   // NM_display(M_new);
 
   foutput = fopen("matrix_sparse_csr.dat", "w");
@@ -183,7 +183,7 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
 
   is_equal = NM_equal(M_new, M_csr);
   NM_free(M_csr);
-  M_new->matrix2->csr = NULL;
+  M_new->sparse->csr = NULL;
   NM_free(M_new);
   NM_free(M);
 

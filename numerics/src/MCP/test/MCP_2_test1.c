@@ -57,7 +57,7 @@ void testNablaF(void* env, int size, double* z, NumericsMatrix* nablaF) {
 
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
-      nablaF->matrix0[i + j * size] = M[i + j * size];
+      nablaF->dense[i + j * size] = M[i + j * size];
     }
   }
 }

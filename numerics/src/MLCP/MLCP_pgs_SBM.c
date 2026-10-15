@@ -47,7 +47,7 @@ static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
   /* Position in vector blmat->block of the required diagonal block */
   int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
-  local_problem->M->matrix0 = blmat->block[diagPos];
+  local_problem->M->dense = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];
   int pos = 0;
 
@@ -81,11 +81,12 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
        with no null row (ie no rows with all blocks equal to null)
   */
 
-  if (problem->M->matrix1 == NULL) {
+  if (problem->M->sparse_block == NULL) {
     numerics_printf_verbose(0, "mlcp_PGS_SBM, storageType =%i", problem->M->storageType);
-    fprintf(stderr,
-            "mlcp_PGS_SBM error: wrong storage type (problem->M->matrix1 == NULL) for input "
-            "matrix M of the MLCP.\n");
+    fprintf(
+        stderr,
+        "mlcp_PGS_SBM error: wrong storage type (problem->M->sparse_block == NULL) for input "
+        "matrix M of the MLCP.\n");
     *info = 1;
     return;
   }
@@ -100,7 +101,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   double tolerance = options[0].dparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the MLCP */
-  SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
+  SparseBlockStructuredMatrix* blmat = problem->M->sparse_block;
   double* q = problem->q;
 
   /* Number of non-null blocks in blmat */
@@ -116,9 +117,9 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
       (LinearComplementarityProblem*)malloc(sizeof(*local_problem));
   local_problem->M = (NumericsMatrix*)malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0;  // dense storage
-  local_problem->M->matrix0 = NULL;
-  local_problem->M->matrix1 = NULL;
-  local_problem->M->matrix2 = NULL;
+  local_problem->M->dense = NULL;
+  local_problem->M->sparse_block = NULL;
+  local_problem->M->sparse = NULL;
   local_problem->M->internalData = NULL;
 
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat
@@ -173,7 +174,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
       } else /* Solve a linear system*/
       {
         if (local_problem->size == 1) {
-          double d = local_problem->M->matrix0[0];
+          double d = local_problem->M->dense[0];
           if (fabs(d) < DBL_EPSILON) {
             printf("Numerics::mlcp_pgs_sbm, error: vanishing diagonal term \n");
             printf(" The problem cannot be solved with this method \n");

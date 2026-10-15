@@ -525,12 +525,12 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
   NM_types storage = H->storageType;
   switch (storage) {
       /* case NM_DENSE: */
-      /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x,
+      /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->dense, sizeY, x,
        * 1, beta, y, 1); */
       /*   break; */
       /* /\* SparseBlock storage *\/ */
       /* case NM_SPARSE_BLOCK: */
-      /*   SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y); */
+      /*   SBM_gemv_3x3(sizeX, sizeY, A->sparse_block, x, y); */
       /*   break; */
       /* coordinate */
     case NM_SPARSE: {
@@ -609,8 +609,8 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
 
       QpH->storageType = H->storageType;
       numericsSparseMatrix(QpH)->csc = QpH_csc;
-      QpH->size0 = (int)QpH->matrix2->csc->m;
-      QpH->size1 = (int)QpH->matrix2->csc->n;
+      QpH->size0 = (int)QpH->sparse->csc->m;
+      QpH->size1 = (int)QpH->sparse->csc->n;
       numericsSparseMatrix(QpH)->origin = NSM_CSC;
       free(beta);
       break;
@@ -984,7 +984,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->P_mu = (IPM_change_of_variable*)malloc(sizeof(IPM_change_of_variable));
   data->P_mu->mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->mat, nd);
-  data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
+  data->P_mu->mat->sparse->origin = NSM_TRIPLET;
   for (size_t i = 0; i < nd; ++i)
     if (i % d == 0) /* NM_entry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]); */
       NM_entry(data->P_mu->mat, i, i, 1.);
@@ -995,7 +995,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
   data->P_mu->inv_mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->inv_mat, nd);
-  data->P_mu->inv_mat->matrix2->origin = NSM_TRIPLET;
+  data->P_mu->inv_mat->sparse->origin = NSM_TRIPLET;
   for (size_t i = 0; i < nd; ++i)
     if (i % d == 0) /* NM_entry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]); */
       NM_entry(data->P_mu->inv_mat, i, i, 1.);
@@ -1694,7 +1694,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         J = NM_create(NM_SPARSE, m + 2 * nd, m + 2 * nd);
         J_nzmax = (d * d) * (m / d) + H_nzmax + (3 * d - 2) * n + 3 * d * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
-        J->matrix2->origin = NSM_TRIPLET;
+        J->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* arrow_r = Arrow_repr(reaction, nd, n);
         NumericsMatrix* arrow_u = Arrow_repr(velocity, nd, n);
@@ -1755,7 +1755,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         J = NM_create(NM_SPARSE, m + 2 * nd, m + 2 * nd);
         J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
-        J->matrix2->origin = NSM_TRIPLET;
+        J->sparse->origin = NSM_TRIPLET;
 
         Nesterov_Todd_vector(2, velocity, reaction, nd, n, p2);
         Qp2 = QRmat(p2, nd, n);
@@ -1796,7 +1796,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         J = NM_create(NM_SPARSE, m + 2 * nd, m + 2 * nd);
         J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
-        J->matrix2->origin = NSM_TRIPLET;
+        J->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* minusQpH = QNTpH(velocity, reaction, H, nd, n);
         NM_scal(-1.0, minusQpH);
@@ -1855,7 +1855,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         JR = NM_create(NM_SPARSE, m + nd, m + nd);
         JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
         NM_triplet_alloc(JR, JR_nzmax);
-        JR->matrix2->origin = NSM_TRIPLET;
+        JR->sparse->origin = NSM_TRIPLET;
 
         Nesterov_Todd_vector(3, velocity, reaction, nd, n, p2);
         Qp2 = QRmat(p2, nd, n);
@@ -1900,7 +1900,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         JR = NM_create(NM_SPARSE, m + nd, m + nd);
         JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
         NM_triplet_alloc(JR, JR_nzmax);
-        JR->matrix2->origin = NSM_TRIPLET;
+        JR->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
         NumericsMatrix* QpHt = NM_transpose(QpH);
@@ -1954,7 +1954,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         JR = NM_create(NM_SPARSE, nd, nd);
         // JR_nzmax = 2*H_nzmax + nd;
         // NM_triplet_alloc(JR, JR_nzmax);
-        // JR->matrix2->origin = NSM_TRIPLET;
+        // JR->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* JR_a = NULL;
         NumericsMatrix* JR_b = NULL;
@@ -2825,7 +2825,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     J = NM_create(NM_SPARSE, m + nd, m + nd);
     J_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
     NM_triplet_alloc(J, J_nzmax);
-    J->matrix2->origin = NSM_TRIPLET;
+    J->sparse->origin = NSM_TRIPLET;
 
     NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
     NumericsMatrix* QpHt = NM_transpose(QpH);

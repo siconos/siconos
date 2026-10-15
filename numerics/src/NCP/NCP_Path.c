@@ -103,7 +103,7 @@ static CB_FUNC(int)
   ncp->compute_nabla_F(ncp->env, n, z, ncp->nabla_F);
 
   /* Write jacobianFGlocker in a Path-Sparse format */
-  convertToPathSparse(n, n, ncp->nabla_F->matrix0, col_start, col_len, row, data);
+  convertToPathSparse(n, n, ncp->nabla_F->dense, col_start, col_len, row, data);
   (*nnz) = env->nnz;
   return err;
 }

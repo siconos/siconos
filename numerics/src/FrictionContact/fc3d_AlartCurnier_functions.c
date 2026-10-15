@@ -85,7 +85,7 @@ extern computeNonsmoothFunction Function;
 /*     exit(EXIT_FAILURE); */
 /*   } */
 /*   double * qLocal = localFC3D->q; */
-/*   double * MLocal = localFC3D->M->matrix0; */
+/*   double * MLocal = localFC3D->M->dense; */
 /*   double mu_i = localFC3D->mu[0]; */
 
 /*   /\* up2Date = 1 = true if jacobianF(n, reaction,jacobianF) has been called just before
@@ -159,7 +159,7 @@ extern computeNonsmoothFunction Function;
 /*   int nLocal = 3; */
 
 /*   double * qLocal = localFC3D->q; */
-/*   double * MLocal = localFC3D->M->matrix0; */
+/*   double * MLocal = localFC3D->M->dense; */
 /*   double mu_i = localFC3D->mu[0]; */
 
 /*   if (jacobianFMatrix == NULL) */
@@ -260,7 +260,7 @@ extern computeNonsmoothFunction Function;
 /*   int n = 3 * numberOfContacts; */
 
 /*   NumericsMatrix * MGlobal = globalFC3D->M; */
-/*   double * MLocal = localFC3D->M->matrix0; */
+/*   double * MLocal = localFC3D->M->dense; */
 /*   double * qLocal = localFC3D->q; */
 /*   double *mu = globalFC3D->mu; */
 
@@ -276,7 +276,7 @@ extern computeNonsmoothFunction Function;
 /*       /\* The part of MGlobal which corresponds to the current block is copied into MLocal
  * *\/ */
 /*       diagPos = numberOfContacts * contact + contact; */
-/*       MLocal = MGlobal->matrix1->block[diagPos]; */
+/*       MLocal = MGlobal->sparse_block->block[diagPos]; */
 /*     } */
 /*     else if (MGlobal->storageType == 0) */
 /*     { */
@@ -284,7 +284,7 @@ extern computeNonsmoothFunction Function;
 /*       it = in + 1; */
 /*       is = it + 1; */
 /*       inc = n * in; */
-/*       double *MM = MGlobal->matrix0; */
+/*       double *MM = MGlobal->dense; */
 /*       /\* The part of MM which corresponds to the current block is copied into MLocal *\/ */
 /*       MLocal[0] = MM[inc + in]; */
 /*       MLocal[1] = MM[inc + it]; */
@@ -754,7 +754,7 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 }
 
 void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   assert(MLocal[0 + 0 * 3] > 0);
 
   DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
@@ -783,7 +783,7 @@ void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, 
 }
 
 void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   assert(MLocal[0 + 0 * 3] > 0);
 
   DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
@@ -813,7 +813,7 @@ void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, doubl
 }
 
 void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double worktmp[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   double eig[3] = {0.0, 0.0, 0.0};
   if (eig_3x3(MLocal, worktmp, eig)) numerics_printf("compute_rho_spectral_norm : failed");

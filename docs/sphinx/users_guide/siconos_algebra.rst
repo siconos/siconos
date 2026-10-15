@@ -66,7 +66,7 @@ The first classical storage results in:
 
 * M.size0 = 8, M.size1 = 8
 
-* M.matrix0 = [1 2 0 5 0 0 0 0 2 1 0 0 ...]
+* M.dense = [1 2 0 5 0 0 0 0 2 1 0 0 ...]
 
   matrix0 being a double* of size 64.
 
@@ -76,7 +76,7 @@ For the second way of storage, :cpp:struct:`SparseBlockStructuredMatrix` we have
 
 * M.size0 = 8, M.size1 = 8
 
-* M.matrix1 a :cpp:struct:`SparseBlockStructuredMatrix` in which we save:
+* M.sparse_block a :cpp:struct:`SparseBlockStructuredMatrix` in which we save:
 
   * the number of non null blocks, 6 (matrix1->nbblocks) and the number of diagonal blocks, 3 (matrix1->size).
 

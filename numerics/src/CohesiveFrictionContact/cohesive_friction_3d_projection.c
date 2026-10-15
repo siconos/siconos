@@ -68,7 +68,7 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
 
   double c_n = localproblem->c_n[0];

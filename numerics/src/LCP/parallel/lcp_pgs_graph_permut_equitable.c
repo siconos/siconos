@@ -96,7 +96,7 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, doubl
   /* TO CHECK COLORING
 
   CSparseMatrix *sparse;
-  if (M->matrix2->origin == NSM_CSR)
+  if (M->sparse->origin == NSM_CSR)
   {
     sparse = NM_csr(M);
   }

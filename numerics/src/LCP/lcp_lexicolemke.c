@@ -86,12 +86,12 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double* zlem, double
   NumericsMatrix* M_dense = NULL;
 
   if (problem->M->storageType == NM_DENSE) {
-    assert(problem->M->matrix0);
-    M = problem->M->matrix0;
+    assert(problem->M->dense);
+    M = problem->M->dense;
   } else if (problem->M->storageType == NM_SPARSE) {
     M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
     NM_to_dense(problem->M, M_dense);
-    M = M_dense->matrix0;
+    M = M_dense->dense;
   } else {
     *info = numerics_error("lcp_lexicolemke", "not implemented for this storage type");
   }

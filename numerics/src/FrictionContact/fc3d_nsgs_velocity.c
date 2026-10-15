@@ -82,19 +82,19 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
     /*  /\* Inversion of the matrix M *\/ */
     /*   int* ipiv = (int *)malloc(n*sizeof(*ipiv));  */
     /*   int infoDGETRF=0; */
-    /*   DGETRF(n,n,M->matrix0,n, ipiv,infoDGETRF ); */
+    /*   DGETRF(n,n,M->dense,n, ipiv,infoDGETRF ); */
     /*   assert(!infoDGETRF); */
     /*   int infoDGETRI; */
-    /*   DGETRI(n,M->matrix0,n, ipiv,infoDGETRI ); */
+    /*   DGETRI(n,M->dense,n, ipiv,infoDGETRI ); */
     /*   assert(!infoDGETRI); */
     /*   double* qtmp = (double*)malloc(n*sizeof(double)); */
     /*   cblas_dcopy(n,  q, 1, qtmp, 1); */
-    /*   cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, -1.0, M->matrix0 , n, qtmp,1,0.0,q, 1);
+    /*   cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, -1.0, M->dense , n, qtmp,1,0.0,q, 1);
      */
     /*   free(ipiv); */
     /*   free(qtmp); */
     double tolpinv = 1e-07;
-    pinv(M->matrix0, n, n, tolpinv);
+    pinv(M->dense, n, n, tolpinv);
   } else {
     assert(0);
   }

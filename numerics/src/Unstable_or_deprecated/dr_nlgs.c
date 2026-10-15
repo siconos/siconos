@@ -24,7 +24,7 @@
 #include "SiconosBlas.h"
 #include "numerics_errors.h"
 void dr_nlgs(RelayProblem* problem, double* z, double* w, int* info, SolverOptions* options) {
-  double* vec = problem->M->matrix0;
+  double* vec = problem->M->dense;
   double* q = problem->q;
   int n = problem->size;
   double* a = problem->ub;
