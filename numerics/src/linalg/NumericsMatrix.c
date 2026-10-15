@@ -1806,7 +1806,26 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A) {
   //     NSM_max_version(numericsSparseMatrix(A)))
   {
     switch (A->storageType) {
-      case NM_DENSE:
+      case NM_DENSE: {
+        /* Invalidation of previously constructed csc storage. */
+        /* If we want to avoid this -> rewrite cs_compress with reallocation. */
+        NM_clearCSC(A);
+        NM_clearCSR(A);
+        NM_clearCSCTranspose(A);
+
+        A->matrix2->origin = NSM_TRIPLET;
+
+        A->matrix2->triplet = cs_spalloc(0, 0, 1, 1, 1);
+
+        if (A->matrix0) {
+          /* version set in NM_dense_to_sparse */
+          NM_dense_to_sparse(A, A, DBL_EPSILON);
+        } else if (A->size0 > 0 || A->size1 > 0) {
+          fprintf(stderr, "NM_triplet: dense matrix has no data.\n");
+          exit(EXIT_FAILURE);
+        }
+        break;
+      }
       case NM_SPARSE_BLOCK: {
         /* Invalidation of previously constructed csc storage. */
         /* If we want to avoid this -> rewrite cs_compress with reallocation. */
@@ -1818,42 +1837,34 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A) {
 
         A->matrix2->triplet = cs_spalloc(0, 0, 1, 1, 1);
 
-        if (A->matrix1) {
-          /* iteration on row, cr : current row */
-          for (size_t cr = 0; cr < A->matrix1->filled1 - 1; ++cr) {
-            for (size_t bn = A->matrix1->index1_data[cr]; bn < A->matrix1->index1_data[cr + 1];
-                 ++bn) {
-              /* cc : current column */
-              size_t cc = A->matrix1->index2_data[bn];
-              size_t inbr = A->matrix1->blocksize0[cr];
-              size_t roffset = 0;
-              size_t coffset = 0;
-              if (cr != 0) {
-                roffset = A->matrix1->blocksize0[cr - 1];
-                inbr -= roffset;
-              }
-              size_t inbc = A->matrix1->blocksize1[cc];
-              if (cc != 0) {
-                coffset = A->matrix1->blocksize1[cc - 1];
-                inbc -= coffset;
-              }
-              for (unsigned j = 0; j < inbc; ++j) {
-                for (unsigned i = 0; i < inbr; ++i) {
-                  CHECK_RETURN(CSparseMatrix_entry(A->matrix2->triplet, i + roffset,
-                                                   j + coffset,
-                                                   A->matrix1->block[bn][i + j * inbr]));
-                }
+        assert(A->matrix1);
+        /* iteration on row, cr : current row */
+        for (size_t cr = 0; cr < A->matrix1->filled1 - 1; ++cr) {
+          for (size_t bn = A->matrix1->index1_data[cr]; bn < A->matrix1->index1_data[cr + 1];
+               ++bn) {
+            /* cc : current column */
+            size_t cc = A->matrix1->index2_data[bn];
+            size_t inbr = A->matrix1->blocksize0[cr];
+            size_t roffset = 0;
+            size_t coffset = 0;
+            if (cr != 0) {
+              roffset = A->matrix1->blocksize0[cr - 1];
+              inbr -= roffset;
+            }
+            size_t inbc = A->matrix1->blocksize1[cc];
+            if (cc != 0) {
+              coffset = A->matrix1->blocksize1[cc - 1];
+              inbc -= coffset;
+            }
+            for (unsigned j = 0; j < inbc; ++j) {
+              for (unsigned i = 0; i < inbr; ++i) {
+                CHECK_RETURN(CSparseMatrix_entry(A->matrix2->triplet, i + roffset, j + coffset,
+                                                 A->matrix1->block[bn][i + j * inbr]));
               }
             }
           }
-          NSM_set_version(A->matrix2, NSM_TRIPLET, NM_version(A, NM_SPARSE_BLOCK));
-        } else if (A->matrix0) {
-          /* version set in NM_dense_to_sparse */
-          NM_dense_to_sparse(A, A, DBL_EPSILON);
-        } else if (A->size0 > 0 || A->size1 > 0) {
-          fprintf(stderr, "NM_triplet: sparse matrix cannot be constructed.\n");
-          exit(EXIT_FAILURE);
         }
+        NSM_set_version(A->matrix2, NSM_TRIPLET, NM_version(A, NM_SPARSE_BLOCK));
         break;
       }
       case NM_SPARSE: {
@@ -1903,7 +1914,21 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A) {
 
   if (!numericsSparseMatrix(A)->half_triplet) {
     switch (A->storageType) {
-      case NM_DENSE:
+      case NM_DENSE: {
+        /* Invalidation of previously constructed csc storage. */
+        /* If we want to avoid this -> rewrite cs_compress with reallocation. */
+        NM_clearCSC(A);
+        NM_clearCSR(A);
+        NM_clearCSCTranspose(A);
+
+        A->matrix2->origin = NSM_HALF_TRIPLET;
+
+        A->matrix2->half_triplet = cs_spalloc(0, 0, 1, 1, 1);
+
+        fprintf(stderr, "NM_half_triplet: conversion from dense is not implemented\n");
+        exit(EXIT_FAILURE);
+        break;
+      }
       case NM_SPARSE_BLOCK: {
         /* Invalidation of previously constructed csc storage. */
         /* If we want to avoid this -> rewrite cs_compress with reallocation. */
@@ -1915,39 +1940,35 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A) {
 
         A->matrix2->half_triplet = cs_spalloc(0, 0, 1, 1, 1);
 
-        if (A->matrix1) {
-          /* iteration on row, cr : current row */
-          for (size_t cr = 0; cr < A->matrix1->filled1 - 1; ++cr) {
-            for (size_t bn = A->matrix1->index1_data[cr]; bn < A->matrix1->index1_data[cr + 1];
-                 ++bn) {
-              /* cc : current column */
-              size_t cc = A->matrix1->index2_data[bn];
-              size_t inbr = A->matrix1->blocksize0[cr];
-              size_t roffset = 0;
-              size_t coffset = 0;
-              if (cr != 0) {
-                roffset = A->matrix1->blocksize0[cr - 1];
-                inbr -= roffset;
-              }
-              size_t inbc = A->matrix1->blocksize1[cc];
-              if (cc != 0) {
-                coffset = A->matrix1->blocksize1[cc - 1];
-                inbc -= coffset;
-              }
-              for (unsigned j = 0; j < inbc; ++j) {
-                for (unsigned i = 0; i < inbr; ++i) {
-                  CHECK_RETURN(CSparseMatrix_symmetric_entry(
-                      A->matrix2->half_triplet, i + roffset, j + coffset,
-                      A->matrix1->block[bn][i + j * inbr]));
-                }
+        assert(A->matrix1);
+        /* iteration on row, cr : current row */
+        for (size_t cr = 0; cr < A->matrix1->filled1 - 1; ++cr) {
+          for (size_t bn = A->matrix1->index1_data[cr]; bn < A->matrix1->index1_data[cr + 1];
+               ++bn) {
+            /* cc : current column */
+            size_t cc = A->matrix1->index2_data[bn];
+            size_t inbr = A->matrix1->blocksize0[cr];
+            size_t roffset = 0;
+            size_t coffset = 0;
+            if (cr != 0) {
+              roffset = A->matrix1->blocksize0[cr - 1];
+              inbr -= roffset;
+            }
+            size_t inbc = A->matrix1->blocksize1[cc];
+            if (cc != 0) {
+              coffset = A->matrix1->blocksize1[cc - 1];
+              inbc -= coffset;
+            }
+            for (unsigned j = 0; j < inbc; ++j) {
+              for (unsigned i = 0; i < inbr; ++i) {
+                CHECK_RETURN(CSparseMatrix_symmetric_entry(
+                    A->matrix2->half_triplet, i + roffset, j + coffset,
+                    A->matrix1->block[bn][i + j * inbr]));
               }
             }
           }
-          NSM_set_version(A->matrix2, NSM_HALF_TRIPLET, NM_version(A, NM_SPARSE_BLOCK));
-        } else if (A->matrix0) {
-          fprintf(stderr, "NM_half_triplet: conversion is not implemented\n");
-          exit(EXIT_FAILURE);
         }
+        NSM_set_version(A->matrix2, NSM_HALF_TRIPLET, NM_version(A, NM_SPARSE_BLOCK));
         break;
       }
       case NM_SPARSE: {
