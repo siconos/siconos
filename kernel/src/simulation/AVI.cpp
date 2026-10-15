@@ -67,7 +67,7 @@ void siconos::nonsmooth_formulations::AVI::initialize(
         siconos::algebra::to_unsigned<unsigned int>(K.size());
     _numerics_problem->poly.split->size_eq = 0;
     _numerics_problem->poly.split->H =
-        NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.data());
+        NM_create_with_data(NM_DENSE, K.size(), nc.size(), H.data());
     _numerics_problem->poly.split->K = K.data();
     _numerics_problem->poly.split->Heq = nullptr;
     _numerics_problem->poly.split->Keq = nullptr;

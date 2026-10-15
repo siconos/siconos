@@ -80,15 +80,14 @@ static int gmp_equality_solve_local(GMP_LocalProblem* local, double* diag_block,
                                     double* w, SolverOptions* options) {
   (void)w;
   (void)options;
-  NumericsMatrix M;
-  NM_fill(&M, NM_DENSE, local->size, local->size, diag_block);
+  NumericsMatrix* M = NM_create_with_data(NM_DENSE, local->size, local->size, diag_block);
 
   for (size_t i = 0; i < local->size; ++i) sol[i] = -local->q_local[i];
 
-  int info = NM_LU_solve(NM_preserve(&M), sol, 1);
-  NM_unpreserve(&M);
-  M.matrix0 = NULL;
-  NM_clear(&M);
+  int info = NM_LU_solve(NM_preserve(M), sol, 1);
+  NM_unpreserve(M);
+  M->matrix0 = NULL;
+  NM_free(M);
   return info;
 }
 

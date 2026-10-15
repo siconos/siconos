@@ -50,8 +50,7 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
 
   double* A_copy = (double*)calloc(n * n, sizeof(double));
   memcpy(A_copy, problem->A, n * n * sizeof(double)); /* we preserve the original A */
-  NumericsMatrix* A = NM_new();
-  NM_fill(A, NM_DENSE, n, n, A_copy);
+  NumericsMatrix* A = NM_create_with_data(NM_DENSE, n, n, A_copy);
   double* AinvC = (double*)calloc(n * m, sizeof(double));
   memcpy(AinvC, problem->C, n * m * sizeof(double));
   int info = NM_gesv_expert_multiple_rhs(A, AinvC, m, NM_KEEP_FACTORS);
@@ -71,9 +70,8 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   LinearComplementarityProblem* lcp = newLCP();
 
   lcp->size = m;
-  lcp->M = NM_new();
   double* Mdata = (double*)calloc(m * m, sizeof(double));
-  NM_fill(lcp->M, NM_DENSE, m, m, Mdata);
+  lcp->M = NM_create_with_data(NM_DENSE, m, m, Mdata);
 
   lcp->q = (double*)calloc(m, sizeof(double));
 
@@ -81,12 +79,10 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   memcpy(lcp->M->matrix0, problem->B, m * m * sizeof(double));
   DEBUG_EXPR(NM_display(lcp->M));
 
-  NumericsMatrix* D = NM_new();
-  NM_fill(D, NM_DENSE, m, n, problem->D);
+  NumericsMatrix* D = NM_create_with_data(NM_DENSE, m, n, problem->D);
   DEBUG_EXPR(NM_display(D));
 
-  NumericsMatrix* nm_AinvC = NM_new();
-  NM_fill(nm_AinvC, NM_DENSE, n, m, AinvC);
+  NumericsMatrix* nm_AinvC = NM_create_with_data(NM_DENSE, n, m, AinvC);
   NM_gemm(-1.0, D, nm_AinvC, 1.0, lcp->M);
 
   DEBUG_EXPR(NM_display(lcp->M));

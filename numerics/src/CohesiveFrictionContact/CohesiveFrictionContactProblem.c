@@ -414,7 +414,8 @@ int cohesiveFrictionContactProblem_build_M_q_from_blocks(
       problem->M = NM_create(NM_SPARSE, M_size, M_size);
       NM_triplet_alloc(problem->M, M_size);
     } else {
-      problem->M = NM_create(NM_DENSE, M_size, M_size);
+      problem->M = NM_create_with_data(NM_DENSE, M_size, M_size,
+                                       calloc(M_size * M_size, sizeof(double)));
     }
   }
 

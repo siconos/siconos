@@ -717,7 +717,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   minus_e = NM_create(NM_SPARSE, nd, n);
   size_t minus_e_nzmax = n;
   NM_triplet_alloc(minus_e, minus_e_nzmax);
-  NM_fill(minus_e, NM_SPARSE, nd, n, minus_e->matrix2);
   for (size_t i = 0; i < n; ++i) {
     NM_entry(minus_e, i * d, i, -1.);
   }
@@ -1027,7 +1026,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
           subdiff_u = NM_create(NM_SPARSE, n, nd);  // Allocation of subdiff_u
           NM_triplet_alloc(subdiff_u, subdiff_u_nzmax);
-          NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->matrix2);
 
           for (size_t i = 0; i < n; ++i) {
             pos = i * d;
@@ -1336,7 +1334,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
         subdiff_u = NM_create(NM_SPARSE, n, nd);
         size_t subdiff_u_nzmax = 2 * n;
         NM_triplet_alloc(subdiff_u, subdiff_u_nzmax);
-        NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->matrix2);
 
         /* Matrix filling */
         scale_sub_diff = fmax(0.9, alpha_primal);

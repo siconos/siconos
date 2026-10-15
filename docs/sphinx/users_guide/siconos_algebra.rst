@@ -106,15 +106,13 @@ Todo write proper doc for CSparse storage and complete the example above.
 .. _numerics_matrix_storage_1NMAlloc:
 .. rubric:: Create, fill and delete NumericsMatrix functions:
 
-* :cpp:func:`NM_create` : allocation without initial values
+* :cpp:func:`NM_create` : create an empty shell (no matrix data allocated)
 
-* :cpp:func:`NM_create_from_data` : allocation and set default values from external data
-
-* :cpp:func:`NM_fill` : needs a pre-defined :cpp:struct:`NumericsMatrix` , set default values from external data
+* :cpp:func:`NM_create_with_data` : create a NumericsMatrix and attach caller-owned data
 
 * :cpp:func:`NM_free()` : free a NumericsMatrix
 
-These last two functions accept a *data* parameter, which if non-NULL contains the matrix data.
+:cpp:func:`NM_create_with_data` accepts a *data* parameter, which if non-NULL contains the matrix data. The allocation of the underlying storage (``matrix0``, ``matrix1`` or ``matrix2``) remains the caller's responsibility.
 
 .. _numerics_matrix_storage_1NM_LA:
 .. rubric:: Linear Algebra:

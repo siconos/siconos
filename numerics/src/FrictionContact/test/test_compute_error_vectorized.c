@@ -43,7 +43,7 @@ static double rel_diff(double a, double b) {
 static NumericsMatrix* identity_dense(int n) {
   double* data = (double*)calloc((size_t)n * n, sizeof(double));
   for (int i = 0; i < n; ++i) data[i * n + i] = 1.0;
-  return NM_create_from_data(NM_DENSE, n, n, data);
+  return NM_create_with_data(NM_DENSE, n, n, data);
 }
 
 static void fill_random(int n, double* v) {

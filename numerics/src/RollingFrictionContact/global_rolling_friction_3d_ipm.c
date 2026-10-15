@@ -284,16 +284,20 @@ static void family_of_F(const double* const x, const double* const z, const size
     wf = (float_type*)calloc(varsCount, sizeof(float_type));
   }
   if (F) {
-    F_block = NM_create(NM_DENSE, dimension, dimension);
+    F_block = NM_create_with_data(NM_DENSE, dimension, dimension,
+                                  calloc(dimension * dimension, sizeof(double)));
   }
   if (Finv) {
-    Finv_block = NM_create(NM_DENSE, dimension, dimension);
+    Finv_block = NM_create_with_data(NM_DENSE, dimension, dimension,
+                                     calloc(dimension * dimension, sizeof(double)));
   }
   if (F2) {
-    F2_block = NM_create(NM_DENSE, dimension, dimension);
+    F2_block = NM_create_with_data(NM_DENSE, dimension, dimension,
+                                   calloc(dimension * dimension, sizeof(double)));
   }
   if (Finv2) {
-    Finv2_block = NM_create(NM_DENSE, dimension, dimension);
+    Finv2_block = NM_create_with_data(NM_DENSE, dimension, dimension,
+                                      calloc(dimension * dimension, sizeof(double)));
   }
 
   float_type gamx, gamz, gamf, w, w2;
@@ -415,8 +419,8 @@ static NumericsMatrix* Pinv_F(const double* const f, const double* const g,
   NumericsMatrix* out = NM_create(NM_SPARSE, 5 * varsCount, 5 * varsCount);
   NM_triplet_alloc(out, (5 + 2 * (2 * 2)) * varsCount);
 
-  NumericsMatrix* out15 = NM_create(NM_DENSE, 1, 5);
-  NumericsMatrix* out22 = NM_create(NM_DENSE, 2, 2);
+  NumericsMatrix* out15 = NM_create_with_data(NM_DENSE, 1, 5, calloc(5, sizeof(double)));
+  NumericsMatrix* out22 = NM_create_with_data(NM_DENSE, 2, 2, calloc(4, sizeof(double)));
   double* othor = (double*)calloc(2, sizeof(double));
 
   float_type coef, coef_tmp, tmp1, tmp2, tmp3, tmp4;

@@ -92,8 +92,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   int size = problem->dimension * problem->numberOfContacts;
 
-  NumericsMatrix Htmat;
-  NM_fill(&Htmat, NM_SPARSE, problem->H->size0, problem->H->size1, NULL);
+  NumericsMatrix* Htmat = NM_create(NM_SPARSE, problem->H->size0, problem->H->size1);
   NumericsMatrix Emat;
   NM_null(&Emat);
   Emat.storageType = NM_SPARSE;
@@ -177,8 +176,8 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   optSetIntStr(Optr, "Keep", 0);
 
-  NM_copy_to_sparse(problem->H, &Htmat);
-  cs_fkeep(NM_csc(&Htmat), &SN_rm_normal_part_on_H, NULL);
+  NM_copy_to_sparse(problem->H, Htmat);
+  cs_fkeep(NM_csc(Htmat), &SN_rm_normal_part_on_H, NULL);
 
   cblas_dcopy(size, problem->b, 1, reaction, 1);
   for (unsigned i = 0; i < size; i += 3) {
@@ -192,7 +191,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   SN_GAMS_add_NM_to_gdx(gdx_data, problem->M, "M");
   SN_GAMS_add_NM_to_gdx(gdx_data, problem->H, "H");
-  SN_GAMS_add_NM_to_gdx(gdx_data, &Htmat, "Ht");
+  SN_GAMS_add_NM_to_gdx(gdx_data, Htmat, "Ht");
   SN_GAMS_add_NM_to_gdx(gdx_data, &Emat, "E");
   SN_GAMS_add_NM_to_gdx(gdx_data, &Akmat, "Ak");
 
@@ -211,7 +210,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   SN_free_SN_GAMS_gdx(gdx_data);
   free(gdx_data);
-  NM_clear(&Htmat);
+  NM_free(Htmat);
   NM_clear(&Emat);
   NM_clear(&Akmat);
   optFree(&Optr);

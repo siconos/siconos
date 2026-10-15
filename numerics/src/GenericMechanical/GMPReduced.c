@@ -39,7 +39,7 @@
 #include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "MLCP_Solvers.h"                  // for mixedLinearComplement...
 #include "NonSmoothDrivers.h"              // for linearComplementarity...
-#include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_create_with_data
 #include "SiconosBlas.h"                   // for cblas_dgemv, CblasNoT...
 #include "SolverOptions.h"                 // for SICONOS_NUMERICS_PROB...
 #include "SparseBlockMatrix.h"             // for SparseBlockStructured...
@@ -758,27 +758,27 @@ static void gmp_as_mlcp_lcp(double* reducedProb, double* Qreduced, size_t Mi_siz
                             double* reaction, double* velocity, int* info) {
   LinearComplementarityProblem aLCP;
   SolverOptions* aLcpOptions = solver_options_create(SICONOS_LCP_ENUM);
-  NumericsMatrix M;
-  NM_null(&M);
-  NM_fill(&M, NM_DENSE, to_int(Mi_size), to_int(Mi_size), reducedProb);
+  NumericsMatrix* M =
+      NM_create_with_data(NM_DENSE, to_int(Mi_size), to_int(Mi_size), reducedProb);
   aLCP.size = to_int(Mi_size);
   aLCP.q = Qreduced;
-  aLCP.M = &M;
+  aLCP.M = M;
   lcp_enum_init(&aLCP, aLcpOptions, 1);
   *info = linearComplementarity_driver(&aLCP, reaction, velocity, aLcpOptions);
   lcp_enum_reset(&aLCP, aLcpOptions, 1);
+  M->matrix0 = NULL;
+  NM_free(M);
   solver_options_delete(aLcpOptions);
 }
 
 static void gmp_as_mlcp_linear_system(double* reducedProb, double* Qreduced, size_t Me_size,
                                       double* reaction, int* info) {
   for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
-  NumericsMatrix M;
-  NM_null(&M);
-  NM_fill(&M, NM_DENSE, to_int(Me_size), to_int(Me_size), reducedProb);
-  *info = NM_LU_solve(&M, reaction, 1);
-  M.matrix0 = NULL; /* reducedProb is owned by the caller, do not free it. */
-  NM_clear(&M);
+  NumericsMatrix* M =
+      NM_create_with_data(NM_DENSE, to_int(Me_size), to_int(Me_size), reducedProb);
+  *info = NM_LU_solve(M, reaction, 1);
+  M->matrix0 = NULL; /* reducedProb is owned by the caller, do not free it. */
+  NM_free(M);
 }
 
 static void gmp_as_mlcp_mlcp(double* reducedProb, double* Qreduced, size_t Me_size,
@@ -800,15 +800,16 @@ static void gmp_as_mlcp_mlcp(double* reducedProb, double* Qreduced, size_t Me_si
   aMLCP.b = NULL;
   aMLCP.q = Qreduced;
 
-  NumericsMatrix M;
-  NM_null(&M);
-  NM_fill(&M, NM_DENSE, to_int(Mi_size + Me_size), to_int(Mi_size + Me_size), reducedProb);
-  aMLCP.M = &M;
+  NumericsMatrix* M = NM_create_with_data(NM_DENSE, to_int(Mi_size + Me_size),
+                                          to_int(Mi_size + Me_size), reducedProb);
+  aMLCP.M = M;
 
   mlcp_driver_init(&aMLCP, aMlcpOptions);
   aMlcpOptions->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
   *info = mlcp_driver(&aMLCP, reaction, velocity, aMlcpOptions);
   mlcp_driver_reset(&aMLCP, aMlcpOptions);
+  M->matrix0 = NULL;
+  NM_free(M);
   solver_options_delete(aMlcpOptions);
 }
 

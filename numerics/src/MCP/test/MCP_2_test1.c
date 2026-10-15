@@ -73,7 +73,7 @@ static MixedComplementarityProblem* create_mcp_1(void) {
   problem->n2 = 5;
   problem->compute_Fmcp = &testF;
   problem->compute_nabla_Fmcp = &testNablaF;
-  problem->nabla_Fmcp = NM_create(NM_DENSE, n, n);
+  problem->nabla_Fmcp = NM_create_with_data(NM_DENSE, n, n, calloc(n * n, sizeof(double)));
   problem->env = NULL;
 
   M = (double*)calloc(n * n, sizeof(double));

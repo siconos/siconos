@@ -393,7 +393,8 @@ static int SBM_gemm_without_allocation_test_1(NumericsMatrix** MM, double alpha,
 
   NM_gemm(alpha, M1, M1, beta, &C);
 
-  NumericsMatrix* Cref = NM_create(NM_DENSE, C.size0, C.size1);
+  NumericsMatrix* Cref = NM_create_with_data(
+      NM_DENSE, C.size0, C.size1, calloc((size_t)(C.size0) * (C.size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -441,7 +442,8 @@ static int SBM_gemm_without_allocation_test_2(NumericsMatrix** MM, double alpha,
 
   NM_gemm(alpha, M1, M3, beta, &C2);
 
-  NumericsMatrix* C2ref = NM_create(NM_DENSE, C2.size0, C2.size1);
+  NumericsMatrix* C2ref = NM_create_with_data(
+      NM_DENSE, C2.size0, C2.size1, calloc((size_t)(C2.size0) * (C2.size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -492,7 +494,9 @@ static int SBM_gemm_without_allocation_test_3(NumericsMatrix** MM, double alpha,
   DEBUG_EXPR(NM_display(&C3));
   DEBUG_EXPR(NM_dense_display(Cref->matrix0, M2->size0, M2->size1, M2->size0));
 
-  NumericsMatrix* Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* Cref =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -554,7 +558,9 @@ static int SBM_gemm_without_allocation_test_4(NumericsMatrix** MM, double alpha,
   DEBUG_EXPR(NM_dense_display(C2ref->matrix0, M2->size0, M4->size1, M2->size0));
   /*     Check if it is correct */
   /* C4 and C2Ref must have the same values.*/
-  NumericsMatrix* C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  NumericsMatrix* C2ref =
+      NM_create_with_data(NM_DENSE, M1->size0, M3->size1,
+                          calloc((size_t)(M1->size0) * (M3->size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -600,14 +606,18 @@ static int SBM_gemm_without_allocation_test_5(NumericsMatrix** MM, double alpha,
 
   NumericsMatrix* M9 = test_matrix_9();
 
-  NumericsMatrix* C7 = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C7 =
+      NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
+                          calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   MSAN_INIT_VAR(C7->matrix0, C7->size0 * C7->size1);
 
   add_initial_value_square_2(C7);
 
   NM_gemm(alpha, M9, M9, beta, C7);
 
-  NumericsMatrix* C3ref = NM_create(NM_DENSE, C7->size0, C7->size1);
+  NumericsMatrix* C3ref =
+      NM_create_with_data(NM_DENSE, C7->size0, C7->size1,
+                          calloc((size_t)(C7->size0) * (C7->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -666,7 +676,9 @@ static int SBM_gemm_without_allocation_test_6(NumericsMatrix** MM, double alpha,
   add_initial_value_square_2(C8);
 
   NM_gemm(alpha, M10, M10, beta, C8);
-  NumericsMatrix* C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C3ref =
+      NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
+                          calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -726,7 +738,9 @@ static int SBM_gemm_without_allocation_test_7(NumericsMatrix** MM, double alpha,
 
   DEBUG_EXPR(NM_display(C20));
   DEBUG_EXPR(NM_dense_display(C3ref->matrix0, M10->size0, M10->size1, M10->size0));
-  NumericsMatrix* C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C3ref =
+      NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
+                          calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -1158,7 +1172,9 @@ static int SBM_entry_test1(double tol) {
 
   NumericsMatrix* M2 = test_matrix_2();
 
-  NumericsMatrix* C = NM_create(NM_DENSE, M2->size0, M2->size1);
+  NumericsMatrix* C =
+      NM_create_with_data(NM_DENSE, M2->size0, M2->size1,
+                          calloc((size_t)(M2->size0) * (M2->size1), sizeof(double)));
   add_initial_value_square_1a(C);
 
   NumericsMatrix* C2 = NM_create(NM_SPARSE_BLOCK, M2->size0, M2->size1);

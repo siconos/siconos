@@ -25,7 +25,7 @@ Ferris solves the subsequent AVI.
 #include <stdlib.h>  // for free, malloc, calloc
 
 #include "NumericsFwd.h"     // for LinearComplementarityProblem
-#include "NumericsMatrix.h"  // for NumericsMatrix, NM_fill
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_create_with_data
 #include "Relay_Solvers.h"   // for relay_avi_caoferris
 #include "Relay_options.h"
 #include "avi_caoferris.h"  // for avi_caoferris_stage3
@@ -42,10 +42,9 @@ void relay_avi_caoferris(RelayProblem* problem, double* z, double* w, int* info,
   /* Copy the data from Relay problem */
   LinearComplementarityProblem lcplike_pb;
   lcplike_pb.size = s;
-  NumericsMatrix num_mat;
-  NM_fill(&num_mat, NM_DENSE, s, s, calloc(s * s, sizeof(double)));
+  NumericsMatrix* num_mat = NM_create_with_data(NM_DENSE, s, s, calloc(s * s, sizeof(double)));
 
-  lcplike_pb.M = &num_mat;
+  lcplike_pb.M = num_mat;
 
   lcplike_pb.q = (double*)malloc(s * sizeof(double));
   double* b_bar = (double*)malloc(s * sizeof(double));
@@ -98,7 +97,7 @@ void relay_avi_caoferris(RelayProblem* problem, double* z, double* w, int* info,
   free(s_vec);
   free(A);
   free(d_vec);
-  NM_clear(lcplike_pb.M);
+  NM_free(lcplike_pb.M);
   free(lcplike_pb.q);
   free(b_bar);
 }

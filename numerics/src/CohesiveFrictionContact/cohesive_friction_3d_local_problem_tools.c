@@ -23,7 +23,7 @@
 
 #include "CohesiveFrictionContactProblem.h"
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
-#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
+#include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 #include "numerics_errors.h"
 
@@ -62,10 +62,10 @@ CohesiveFrictionContactProblem* cohesive_friction_3d_local_problem_allocate(
   localproblem->c_t = (double*)malloc(sizeof(double));
 
   if (storageType != NM_SPARSE_BLOCK) {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(
+    localproblem->M = NM_create_with_data(
         NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;

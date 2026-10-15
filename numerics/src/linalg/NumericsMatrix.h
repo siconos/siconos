@@ -124,7 +124,12 @@ RawNumericsMatrix* NM_new(void);
 RawNumericsMatrix* NM_eye(size_t size);
 RawNumericsMatrix* NM_scalar(size_t size, double s);
 
-/** create a NumericsMatrix and allocate the memory according to the matrix type
+/** create a NumericsMatrix as an empty shell
+ *
+ *  No actual matrix values are allocated. For NM_DENSE no buffer is allocated
+ *  (matrix0 is NULL); for NM_SPARSE and NM_SPARSE_BLOCK the wrapper structs
+ *  (matrix1/matrix2) are allocated but contain no entries yet. The caller may
+ *  also provide its own data through NM_create_with_data.
  *
  *  \param storageType the type of storage
  *  \param size0 number of rows
@@ -135,14 +140,18 @@ RawNumericsMatrix* NM_create(NM_types storageType, int size0, int size1);
 
 /** create a NumericsMatrix and possibly set the data
  *
+ *  The data pointer is attached to the matrix as-is; its allocation is the
+ *  caller's responsibility. If NULL, all matrixX fields are set to NULL.
+ *
  *  \param storageType the type of storage
  *  \param size0 number of rows
  *  \param size1 number of columns
- *  \param data pointer to the matrix data. If NULL, all matrixX fields are
- *  set to NULL
+ *  \param data pointer to the matrix data. For NM_DENSE this is a double*,
+ *  for NM_SPARSE_BLOCK a SparseBlockStructuredMatrix*, and for NM_SPARSE a
+ *  NumericsSparseMatrix*.
  *  \return a pointer to a NumericsMatrix
  */
-RawNumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
+RawNumericsMatrix* NM_create_with_data(NM_types storageType, int size0, int size1, void* data);
 RawNumericsMatrix* NM_create_from_filename(const char* filename);
 RawNumericsMatrix* NM_create_from_file(FILE* file);
 
@@ -225,17 +234,6 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A);
  *  \return the compressed row CSparseMatrix created in A.
  */
 CSparseMatrix* NM_csr(NumericsMatrix* A);
-
-/** fill an existing NumericsMatrix struct
- *
- *  \param[in,out] M the struct to fill
- *  \param storageType the type of storage
- *  \param size0 number of rows
- *  \param size1 number of columns
- *  \param data pointer to the matrix data. If NULL, all matrixX fields are
- *  set to NULL
- */
-void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void* data);
 
 /** new NumericsMatrix with sparse storage from minimal set of data
  *

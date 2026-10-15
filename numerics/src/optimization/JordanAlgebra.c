@@ -54,7 +54,6 @@ NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsC
       (CS_INT)((dimension * 3 - 2) *
                varsCount);  // This formula is uniquely correct for 3-dimensional mat
   NM_triplet_alloc(Arw_mat, nzmax);
-  NM_fill(Arw_mat, NM_SPARSE, to_int(vecSize), to_int(vecSize), Arw_mat->matrix2);
 
   /* Arrow matirx filling */
   size_t pos;
@@ -138,11 +137,15 @@ int Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const s
 }
 
 NumericsMatrix* Reflect_mat(const size_t size, NM_types type) {
-  NumericsMatrix* Refl_mat = NM_create(type, to_int(size), to_int(size));
-
-  if (type == NM_SPARSE) {
-    NM_triplet_alloc(Refl_mat, to_csint(size));
-    NM_fill(Refl_mat, NM_SPARSE, to_int(size), to_int(size), Refl_mat->matrix2);
+  NumericsMatrix* Refl_mat;
+  if (type == NM_DENSE) {
+    Refl_mat = NM_create_with_data(NM_DENSE, to_int(size), to_int(size),
+                                   calloc(to_size_t(size) * size, sizeof(double)));
+  } else {
+    Refl_mat = NM_create(type, to_int(size), to_int(size));
+    if (type == NM_SPARSE) {
+      NM_triplet_alloc(Refl_mat, to_csint(size));
+    }
   }
 
   NM_entry(Refl_mat, 0, 0, 1.0);
@@ -157,7 +160,9 @@ NumericsMatrix* Quad_repr(const double* const vec, const size_t vecSize,
   NM_triplet_alloc(out, to_csint(dimension * dimension * varsCount));
   // NM_fill(out, NM_SPARSE, to_int(vecSize), to_int(vecSize), out->matrix2);
 
-  NumericsMatrix* quad_tmp = NM_create(NM_DENSE, to_int(dimension), to_int(dimension));
+  NumericsMatrix* quad_tmp =
+      NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
+                          calloc(to_size_t(dimension) * dimension, sizeof(double)));
 
   NumericsMatrix* R = Reflect_mat(dimension, NM_DENSE);
 
@@ -835,7 +840,9 @@ NumericsMatrix* QRmat(const double* const vec, const size_t vecSize, const size_
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
   // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
 
-  NumericsMatrix* quad_tmp = NM_create(NM_DENSE, to_int(dimension), to_int(dimension));
+  NumericsMatrix* quad_tmp =
+      NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
+                          calloc(to_size_t(dimension) * dimension, sizeof(double)));
 
   float_type nvec, nvecb, dvec;
 
@@ -886,7 +893,9 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const size_t
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
   // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
 
-  NumericsMatrix* G = NM_create(NM_DENSE, to_int(dimension), to_int(dimension));
+  NumericsMatrix* G =
+      NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
+                          calloc(to_size_t(dimension) * dimension, sizeof(double)));
 
   float_type gamx, gamz, gamt;
   double* t = (double*)calloc(dimension, sizeof(double));
@@ -932,7 +941,9 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const siz
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
   // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
 
-  NumericsMatrix* G = NM_create(NM_DENSE, to_int(dimension), to_int(dimension));
+  NumericsMatrix* G =
+      NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
+                          calloc(to_size_t(dimension) * dimension, sizeof(double)));
 
   float_type gamx, gamz, gamt;
   double* t = (double*)calloc(dimension, sizeof(double));
@@ -978,7 +989,9 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const siz
   NM_triplet_alloc(out, to_int(dimension * dimension * varsCount));
   // NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
 
-  NumericsMatrix* G = NM_create(NM_DENSE, to_int(dimension), to_int(dimension));
+  NumericsMatrix* G =
+      NM_create_with_data(NM_DENSE, to_int(dimension), to_int(dimension),
+                          calloc(to_size_t(dimension) * dimension, sizeof(double)));
 
   float_type gamx, gamz, gamt;
   double* t = (double*)calloc(dimension, sizeof(double));

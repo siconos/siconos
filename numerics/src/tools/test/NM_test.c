@@ -123,7 +123,7 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha) {
   NumericsMatrix* C1 = NM_new();
   NM_copy(M, C1);
 
-  NumericsMatrix* Cref = NM_create(NM_DENSE, n, m);
+  NumericsMatrix* Cref = NM_create_with_data(NM_DENSE, n, m, calloc(n * m, sizeof(double)));
   SBM_to_dense(M->matrix1, Cref->matrix0);
 
   NM_add_to_diag3(C1, alpha);
@@ -173,9 +173,9 @@ static int NM_add_to_diag3_test_all(void) {
   SparseBlockStructuredMatrix* SBM = SBM_new_from_file(file);
   fclose(file);
 
-  NumericsMatrix* M = NM_new();
-  NM_fill(M, NM_SPARSE_BLOCK, SBM->blocksize0[SBM->blocknumber0 - 1],
-          SBM->blocksize1[SBM->blocknumber1 - 1], SBM);
+  NumericsMatrix* M =
+      NM_create_with_data(NM_SPARSE_BLOCK, SBM->blocksize0[SBM->blocknumber0 - 1],
+                          SBM->blocksize1[SBM->blocknumber1 - 1], SBM);
 
   int info = NM_add_to_diag3_test(M, 1.0);
   NM_free(M);
@@ -197,7 +197,8 @@ int triplet_to_dense(void) {
   A = NM_create_from_filename(filename);
   /* NM_display(A); */
 
-  NumericsMatrix* B = NM_create(NM_DENSE, A->size0, A->size1);
+  NumericsMatrix* B = NM_create_with_data(
+      NM_DENSE, A->size0, A->size1, calloc((size_t)(A->size0) * (A->size1), sizeof(double)));
 
   info = NM_to_dense(A, B);
   if (info != 0) {
@@ -223,7 +224,7 @@ int csc_to_dense(void) {
   /* NumericsSparseMatrix * C_NSM =  numericsSparseMatrix_new(); */
   /* C_NSM->csc = A_csc ; */
   /* C_NSM->origin= NS_CSC; */
-  /* NumericsMatrix*  A_CSC  = NM_create_from_data(NM_SPARSE, A->size0, A->size1,
+  /* NumericsMatrix*  A_CSC  = NM_create_with_data(NM_SPARSE, A->size0, A->size1,
    * (void*)C_NSM); */
   /* NM_display(A_CSC); */
   /* NM_write_in_filename(A_CSC, "./data/NSM_csc_162x162.dat"); */
@@ -232,7 +233,8 @@ int csc_to_dense(void) {
   A = NM_new_from_filename(filename);
   /* NM_display(A); */
 
-  NumericsMatrix* B = NM_create(NM_DENSE, A->size0, A->size1);
+  NumericsMatrix* B = NM_create_with_data(
+      NM_DENSE, A->size0, A->size1, calloc((size_t)(A->size0) * (A->size1), sizeof(double)));
   info = NM_to_dense(A, B);
   if (info != 0) {
     NM_free(A);
@@ -358,7 +360,9 @@ static int NM_gemm_test_1(NumericsMatrix** MM, double alpha, double beta) {
 
   NM_gemm(alpha, M1, M1, beta, &C);
 
-  NumericsMatrix* Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* Cref =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -405,7 +409,9 @@ static int NM_gemm_test_2(NumericsMatrix** MM, double alpha, double beta) {
 
   NM_gemm(alpha, M1, M3, beta, &C2);
 
-  NumericsMatrix* C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  NumericsMatrix* C2ref =
+      NM_create_with_data(NM_DENSE, M1->size0, M3->size1,
+                          calloc((size_t)(M1->size0) * (M3->size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -453,7 +459,9 @@ static int NM_gemm_test_3(NumericsMatrix** MM, double alpha, double beta) {
   add_initial_value_square_1(&C3);
   DEBUG_EXPR(SBM_print(C3.matrix1););
 
-  NumericsMatrix* Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* Cref =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -506,7 +514,9 @@ static int NM_gemm_test_4(NumericsMatrix** MM, double alpha, double beta) {
 
   NM_gemm(alpha, M2, M4, beta, &C4);
 
-  NumericsMatrix* C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  NumericsMatrix* C2ref =
+      NM_create_with_data(NM_DENSE, M1->size0, M3->size1,
+                          calloc((size_t)(M1->size0) * (M3->size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -555,7 +565,9 @@ static int NM_gemm_test_5(NumericsMatrix** MM, double alpha, double beta) {
 
   NM_gemm(alpha, M5, M5, beta, C5);
 
-  NumericsMatrix* Cref = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* Cref =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   add_initial_value_square_1(Cref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M1->matrix0, M1->matrix0, M1->size0, M1->size1, M1->size0, beta,
@@ -600,7 +612,9 @@ static int NM_gemm_test_6(NumericsMatrix** MM, double alpha, double beta) {
   C6->matrix2->origin = NSM_TRIPLET;
   add_initial_value_rectangle_1(C6);
 
-  NumericsMatrix* C2ref = NM_create(NM_DENSE, M1->size0, M3->size1);
+  NumericsMatrix* C2ref =
+      NM_create_with_data(NM_DENSE, M1->size0, M3->size1,
+                          calloc((size_t)(M1->size0) * (M3->size1), sizeof(double)));
   add_initial_value_rectangle_1(C2ref);
 
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,
@@ -635,14 +649,18 @@ static int NM_gemm_test_7(NumericsMatrix** MM, double alpha, double beta) {
 
   NumericsMatrix* M9 = test_matrix_9();
 
-  NumericsMatrix* C7 = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C7 =
+      NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
+                          calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   MSAN_INIT_VAR(C7->matrix0, C7->size0 * C7->size1);
 
   add_initial_value_square_2(C7);
 
   NM_gemm(alpha, M9, M9, beta, C7);
 
-  NumericsMatrix* C3ref = NM_create(NM_DENSE, C7->size0, C7->size1);
+  NumericsMatrix* C3ref =
+      NM_create_with_data(NM_DENSE, C7->size0, C7->size1,
+                          calloc((size_t)(C7->size0) * (C7->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -696,7 +714,9 @@ static int NM_gemm_test_8(NumericsMatrix** MM, double alpha, double beta) {
 
   NM_gemm(alpha, M10, M10, beta, C8);
   NumericsMatrix* M9 = test_matrix_9();
-  NumericsMatrix* C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C3ref =
+      NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
+                          calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -743,7 +763,9 @@ static int NM_gemm_test_9(NumericsMatrix** MM, double alpha, double beta) {
 
   NM_gemm(alpha, M10, M10, beta, C20);
   NumericsMatrix* M9 = test_matrix_9();
-  NumericsMatrix* C3ref = NM_create(NM_DENSE, M9->size0, M9->size1);
+  NumericsMatrix* C3ref =
+      NM_create_with_data(NM_DENSE, M9->size0, M9->size1,
+                          calloc((size_t)(M9->size0) * (M9->size1), sizeof(double)));
   add_initial_value_square_2(C3ref);
   /* gemm by hand */
   dense_gemm_by_hand(alpha, M9->matrix0, M9->matrix0, M9->size0, M9->size1, M9->size0, beta,
@@ -1396,17 +1418,20 @@ static int NM_insert_dense_test() {
   size_t end_j = start_j + Bsize1;
 
   /* create and fill the dense matrix A */
-  NumericsMatrix* A_dense = NM_create(NM_DENSE, Asize0, Asize1);
+  NumericsMatrix* A_dense = NM_create_with_data(
+      NM_DENSE, Asize0, Asize1, calloc((size_t)(Asize0) * (Asize1), sizeof(double)));
   for (size_t i = 0; i < Asize0; ++i)
     for (size_t j = 0; j < Asize1; ++j) NM_entry(A_dense, i, j, 10.0);
 
   /* create and fill the dense matrix B */
-  NumericsMatrix* B_dense = NM_create(NM_DENSE, Bsize0, Bsize1);
+  NumericsMatrix* B_dense = NM_create_with_data(
+      NM_DENSE, Bsize0, Bsize1, calloc((size_t)(Bsize0) * (Bsize1), sizeof(double)));
   for (size_t i = 0; i < Bsize0; ++i)
     for (size_t j = 0; j < Bsize1; ++j) NM_entry(B_dense, i, j, 999.0);
 
   /* create an expected result */
-  NumericsMatrix* AB_dense = NM_create(NM_DENSE, Asize0, Asize1);
+  NumericsMatrix* AB_dense = NM_create_with_data(
+      NM_DENSE, Asize0, Asize1, calloc((size_t)(Asize0) * (Asize1), sizeof(double)));
   NM_copy(A_dense, AB_dense);
   for (size_t i = start_i; i < end_i; ++i)
     for (size_t j = start_j; j < end_j; ++j) NM_entry(AB_dense, i, j, 999.0);
@@ -2655,7 +2680,9 @@ static int test_NM_posv_expert(void) {
 
   NumericsMatrix* M1 = NMM[0];
   NumericsMatrix* M1T = NM_transpose(M1);
-  NumericsMatrix* C = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* C =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   NM_gemm(1.0, M1, M1T, 0.0, C);
   NM_free(M1T);
   n = M1->size0;
@@ -2841,7 +2868,7 @@ static int test_NM_LU_solve_matrix_rhs(void) {
 
   M1 = NMM[0];
   n = M1->size0;
-  B = NM_create(NM_DENSE, n, n);
+  B = NM_create_with_data(NM_DENSE, n, n, calloc((size_t)(n) * (n), sizeof(double)));
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
   NM_free(B);
@@ -2860,7 +2887,7 @@ static int test_NM_LU_solve_matrix_rhs(void) {
   /* SPARSE matrix, DENSE RHS */
   M1 = test_matrix_5();
   n = M1->size0;
-  B = NM_create(NM_DENSE, n, n);
+  B = NM_create_with_data(NM_DENSE, n, n, calloc((size_t)(n) * (n), sizeof(double)));
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
   NM_free(B);
@@ -3026,7 +3053,9 @@ static int test_NM_Cholesky_solve(void) {
   printf("test 3 ...\n");
   M1 = NMM[0];
   NumericsMatrix* M1T = NM_transpose(M1);
-  NumericsMatrix* C = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* C =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   NM_gemm(1.0, M1, M1T, 0.0, C);
   // NM_display(C);
   n = M1->size0;
@@ -3142,10 +3171,12 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   n = M1->size0;
 
   NumericsMatrix* M1T = NM_transpose(M1);
-  NumericsMatrix* C = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* C =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   NM_gemm(1.0, M1, M1T, 0.0, C);
 
-  B = NM_create(NM_DENSE, n, n);
+  B = NM_create_with_data(NM_DENSE, n, n, calloc((size_t)(n) * (n), sizeof(double)));
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
   NM_free(B);
@@ -3170,7 +3201,7 @@ static int test_NM_Cholesky_solve_matrix_rhs(void) {
   NM_triplet_alloc(C, 0);
   C->matrix2->origin = NSM_TRIPLET;
   NM_gemm(1.0, M1, M1T, 0.0, C);
-  B = NM_create(NM_DENSE, n, n);
+  B = NM_create_with_data(NM_DENSE, n, n, calloc((size_t)(n) * (n), sizeof(double)));
   for (int j = 0; j < n; j++) B->matrix0[j + j * n] = 1.0;
   info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
   NM_free(B);
@@ -3408,7 +3439,9 @@ static int test_NM_LDLT_solve(void) {
   printf("test 3 ...\n");
   M1 = NMM[0];
   NumericsMatrix* M1T = NM_transpose(M1);
-  NumericsMatrix* C = NM_create(NM_DENSE, M1->size0, M1->size1);
+  NumericsMatrix* C =
+      NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+                          calloc((size_t)(M1->size0) * (M1->size1), sizeof(double)));
   NM_gemm(1.0, M1, M1T, 0.0, C);
   // NM_display(C);
   n = M1->size0;
@@ -3471,7 +3504,7 @@ int test_NM_compute_values_sha1() {
   int info = 0;
 
   NumericsMatrix* M1;
-  M1 = NM_create(NM_DENSE, 2, 2);
+  M1 = NM_create_with_data(NM_DENSE, 2, 2, calloc((size_t)(2) * (2), sizeof(double)));
 
   NM_entry(M1, 0, 0, 2.);
   NM_entry(M1, 0, 1, -1.);
@@ -3508,7 +3541,7 @@ int test_NM_compute_values_sha1() {
 int test_NM_check_values_sha1() {
   int info = 0;
   NumericsMatrix* M1;
-  M1 = NM_create(NM_DENSE, 2, 2);
+  M1 = NM_create_with_data(NM_DENSE, 2, 2, calloc((size_t)(2) * (2), sizeof(double)));
 
   NM_entry(M1, 0, 0, 2.);
   NM_entry(M1, 0, 1, -1.);
@@ -3803,7 +3836,8 @@ static int test_NM_LDLT_refine(void) {
   /* printf("test 3 ...\n"); */
   /* M1 = NMM[0]; */
   /* NumericsMatrix * M1T = NM_transpose(M1); */
-  /* NumericsMatrix * C = NM_create(NM_DENSE,M1->size0,M1->size1); */
+  /* NumericsMatrix * C = NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+   * calloc((size_t)(M1->size0) * (M1->size1), sizeof(double))); */
   /* NM_gemm(1.0, M1, M1T, 0.0, C); */
   /* //NM_display(C); */
   /* n = M1->size0; */
@@ -4016,7 +4050,8 @@ static int test_NM_LU_refine(void) {
   /* printf("test 3 ...\n"); */
   /* M1 = NMM[0]; */
   /* NumericsMatrix * M1T = NM_transpose(M1); */
-  /* NumericsMatrix * C = NM_create(NM_DENSE,M1->size0,M1->size1); */
+  /* NumericsMatrix * C = NM_create_with_data(NM_DENSE, M1->size0, M1->size1,
+   * calloc((size_t)(M1->size0) * (M1->size1), sizeof(double))); */
   /* NM_gemm(1.0, M1, M1T, 0.0, C); */
   /* //NM_display(C); */
   /* n = M1->size0; */

@@ -138,7 +138,7 @@ int main(void)
  verbose=0;
 
   problem->env = &sim_data;
-  problem->nabla_F = NM_create_from_data(NM_DENSE, N, N, nablaF);
+  problem->nabla_F = NM_create_with_data(NM_DENSE, N, N, nablaF);
 
   unsigned k = 0;
 

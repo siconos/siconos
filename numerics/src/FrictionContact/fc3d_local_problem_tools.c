@@ -23,7 +23,7 @@
 #include <stdlib.h>  // for malloc, NULL
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
-#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
+#include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"       // IWYU pragma: keep
 #include "safe_casts.h"
 
@@ -80,10 +80,10 @@ FrictionContactProblem* fc3d_local_problem_allocate(NM_types storageType) {
   localproblem->mu = (double*)malloc(sizeof(double));
 
   if (storageType != NM_SPARSE_BLOCK) {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(
+    localproblem->M = NM_create_with_data(
         NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;

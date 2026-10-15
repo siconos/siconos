@@ -84,14 +84,12 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double* z, doubl
   /* compute u  = -A^{1}(Cv + a)*/
   double* u = z;
   memcpy(u, problem->a, problem->n * sizeof(double));
-  NumericsMatrix* C = NM_new();
-  NM_fill(C, NM_DENSE, n, m, problem->C);
+  NumericsMatrix* C = NM_create_with_data(NM_DENSE, n, m, problem->C);
   NM_gemv(-1.0, C, z_lcp, -1.0, u);
 
   double* A_copy = (double*)calloc(n * n, sizeof(double));
   memcpy(A_copy, problem->A, n * n * sizeof(double)); /* we preserve the original A */
-  NumericsMatrix* A = NM_new();
-  NM_fill(A, NM_DENSE, n, n, A_copy);
+  NumericsMatrix* A = NM_create_with_data(NM_DENSE, n, n, A_copy);
   NM_gesv_expert(A, u, NM_KEEP_FACTORS);
 
   /* compute error (this also recompute w !!) */

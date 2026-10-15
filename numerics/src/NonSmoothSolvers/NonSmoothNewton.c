@@ -105,7 +105,8 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   /* Memory allocation for phi and its jacobian */
   double* phiVector = (double*)malloc((size_t)n * sizeof(double));
 
-  NumericsMatrix* H = NM_create(NM_DENSE, n, n);
+  NumericsMatrix* H =
+      NM_create_with_data(NM_DENSE, n, n, malloc((size_t)n * n * sizeof(double)));
   double* jacobianPhiMatrix = H->matrix0;
 
   /** Memory allocation for the merit function and its gradient */

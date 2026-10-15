@@ -275,7 +275,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
     localproblem->coneIndex[1] = dim_max;
 
     if (problem->M->storageType != NM_SPARSE_BLOCK) {
-      localproblem->M = NM_create_from_data(NM_DENSE, dim_max, dim_max,
+      localproblem->M = NM_create_with_data(NM_DENSE, dim_max, dim_max,
                                             malloc(dim_max * dim_max * sizeof(double)));
     } else {
       localproblem->M = NM_new();

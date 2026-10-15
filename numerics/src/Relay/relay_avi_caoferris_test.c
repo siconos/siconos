@@ -27,7 +27,7 @@ Ferris solves the subsequent AVI.
 #include "AVI_Solvers.h"                    // for avi_caoferris
 #include "AffineVariationalInequalities.h"  // for AffineVariationalInequali...
 #include "NumericsFwd.h"                    // for RelayProblem, AffineVaria...
-#include "NumericsMatrix.h"                 // for NM_create_from_data, NM_D...
+#include "NumericsMatrix.h"                 // for NM_create_with_data, NM_D...
 #include "RelayProblem.h"                   // for RelayProblem
 #include "Relay_Solvers.h"                  // for relay_avi_caoferris_test
 #include "SiconosSets.h"                    // for polyhedron, free_polyhedron
@@ -51,7 +51,7 @@ void relay_avi_caoferris_test(RelayProblem* problem, double* z, double* w, int* 
   poly.id = SICONOS_SET_POLYHEDRON;
   poly.size_ineq = s;
   poly.size_eq = 0;
-  poly.H = NM_create_from_data(NM_DENSE, s, n, calloc(s * n, sizeof(double)));
+  poly.H = NM_create_with_data(NM_DENSE, s, n, calloc(s * n, sizeof(double)));
   double* H = poly.H->matrix0;
   poly.K = (double*)malloc(s * sizeof(double));
   poly.Heq = NULL;

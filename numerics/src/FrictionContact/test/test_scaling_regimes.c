@@ -153,7 +153,7 @@ static FrictionContactProblem* make_identity_problem(const double r[3], const do
   problem->q = (double*)malloc(3 * sizeof(double));
   for (int i = 0; i < 3; ++i) problem->q[i] = u[i] - r[i];
 
-  NumericsMatrix* M = NM_create(NM_DENSE, 3, 3);
+  NumericsMatrix* M = NM_create_with_data(NM_DENSE, 3, 3, calloc(9, sizeof(double)));
   for (int i = 0; i < 3; ++i) M->matrix0[i * 3 + i] = 1.0;
   problem->M = M;
   return problem;

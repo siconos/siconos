@@ -903,11 +903,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert(jac_B_sparse.m == jac_B_sparse.n);
   assert(jac_A_sparse.m == problem->H->size1);
 
-  NumericsMatrix* nm_jacobian = NM_new();
   /* jacobian_triplet is square; rows = jacobian_triplet->m, cols =
    * jacobian_triplet->n. */
   assert(jacobian_triplet->m == jacobian_triplet->n);
-  NM_fill(nm_jacobian, NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
+  NumericsMatrix* nm_jacobian =
+      NM_create_with_data(NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
 
   /* Optional Jacobian regularization matrix (regul * I). */
   NumericsMatrix* reg_eye = NULL;

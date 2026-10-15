@@ -41,7 +41,7 @@ int main(void) {
                       0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
-  NumericsMatrix* tmpM = NM_create_from_data(NM_DENSE, 9, 9, Wdata);
+  NumericsMatrix* tmpM = NM_create_with_data(NM_DENSE, 9, 9, Wdata);
   NumericsMatrix* W = NM_create(NM_SPARSE, 9, 9);
   NM_copy_to_sparse(tmpM, W, 1e-16);
 

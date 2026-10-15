@@ -22,7 +22,7 @@
 #endif
 #include <stdlib.h>  // for malloc, NULL
 
-#include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
+#include "NumericsMatrix.h"                 // for NM_create_with_data, Nume...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "numerics_errors.h"
 
@@ -61,10 +61,10 @@ RollingFrictionContactProblem* rolling_friction_2d_local_problem_allocate(
   localproblem->mu_r = (double*)malloc(sizeof(double));
 
   if (problem->M->storageType != NM_SPARSE_BLOCK) {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(
+    localproblem->M = NM_create_with_data(
         NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;

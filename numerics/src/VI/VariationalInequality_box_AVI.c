@@ -94,7 +94,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   if (!options->solverData) {
     RelayProblem* relay_pb = (RelayProblem*)malloc(sizeof(RelayProblem));
     relay_pb->size = n;
-    relay_pb->M = NM_create(NM_DENSE, n, n);
+    relay_pb->M = NM_create_with_data(NM_DENSE, n, n, calloc(n * n, sizeof(double)));
 
     relay_pb->q = (double*)malloc(n * sizeof(double));
 

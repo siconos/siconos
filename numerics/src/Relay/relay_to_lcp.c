@@ -19,16 +19,16 @@
 
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_create_with_data
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp
 #include "numerics_errors.h"
 
 void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem* lcp_problem) {
   lcp_problem->size = 2 * problem->size;
-  lcp_problem->M = NM_new();
-  NM_fill(lcp_problem->M, NM_DENSE, lcp_problem->size, lcp_problem->size,
-          malloc(lcp_problem->size * lcp_problem->size * sizeof(double)));
+  lcp_problem->M =
+      NM_create_with_data(NM_DENSE, lcp_problem->size, lcp_problem->size,
+                          malloc(lcp_problem->size * lcp_problem->size * sizeof(double)));
   lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
 
   int i, j;

@@ -1664,6 +1664,9 @@ void NM_read_in_file(NumericsMatrix* const m, FILE* file) {
   NM_version_sync(m);
 }
 
+static void NM_fill_internal(NumericsMatrix* M, NM_types storageType, int size0, int size1,
+                             void* data);
+
 NumericsMatrix* NM_new_from_file(FILE* file) {
   NumericsMatrix* m = NM_new();
 
@@ -1693,7 +1696,7 @@ NumericsMatrix* NM_new_from_file(FILE* file) {
     data = NSM_new_from_file(file);
   }
 
-  NM_fill(m, m->storageType, (int)size0, (int)size1, data);
+  NM_fill_internal(m, m->storageType, (int)size0, (int)size1, data);
 
   return m;
 }
@@ -2077,7 +2080,13 @@ NumericsMatrix* NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMat
   assert(A->size1 == B->size1 && "NM_add :: A->size1 != B->size1 ");
 
   /* The storageType  for C inherits from A except for NM_SPARSE_BLOCK */
-  NumericsMatrix* C = NM_create(A->storageType, A->size0, A->size1);
+  NumericsMatrix* C;
+  if (A->storageType == NM_DENSE) {
+    C = NM_create_with_data(A->storageType, A->size0, A->size1,
+                            calloc((size_t)A->size0 * A->size1, sizeof(double)));
+  } else {
+    C = NM_create(A->storageType, A->size0, A->size1);
+  }
 
 /* should we copy the whole internal data ? */
 /*NM_internalData_copy(A, C);*/
@@ -2174,10 +2183,10 @@ int NM_scal(double alpha, NumericsMatrix* A) {
   return 0;
 }
 
-NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data) {
+NumericsMatrix* NM_create_with_data(NM_types storageType, int size0, int size1, void* data) {
   NumericsMatrix* M = NM_new();
 
-  NM_fill(M, storageType, size0, size1, data);
+  NM_fill_internal(M, storageType, size0, size1, data);
 
   return M;
 }
@@ -2189,7 +2198,6 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat) {
   int size0 = mat->size0;
   int size1 = mat->size1;
 
-  M->storageType = mat->storageType;
   switch (mat->storageType) {
     case NM_DENSE:
       data = malloc((size_t)size0 * size1 * sizeof(double));
@@ -2203,10 +2211,11 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat) {
     default:
       fprintf(stderr, "NM_duplicate :: storageType value %d not implemented yet !\n",
               mat->storageType);
+      free(M);
       return NULL;
   }
 
-  NM_fill(M, mat->storageType, size0, size1, data);
+  NM_fill_internal(M, mat->storageType, size0, size1, data);
 
   return M;
 }
@@ -2238,13 +2247,13 @@ NumericsMatrix* NM_scalar(size_t size, double s) {
 }
 
 NumericsMatrix* NM_create(NM_types storageType, int size0, int size1) {
-  NumericsMatrix* M = NM_new();
-
-  void* data;
-
+  /* Create the type-appropriate empty shell. For dense matrices no data buffer is
+   * allocated (the caller must provide it); for sparse storage we still allocate the
+   * wrapper since it holds no actual matrix values yet. */
+  void* data = NULL;
   switch (storageType) {
     case NM_DENSE:
-      data = calloc(size0 * size1, sizeof(double));
+      data = NULL;
       break;
     case NM_SPARSE_BLOCK:
       data = SBM_new();
@@ -2253,18 +2262,15 @@ NumericsMatrix* NM_create(NM_types storageType, int size0, int size1) {
       data = NSM_new();
       break;
     default:
-      data = NULL;
       numerics_error_log("NM_create", "storageType value %d not implemented yet !",
                          storageType);
       return NULL;
   }
-
-  NM_fill(M, storageType, size0, size1, data);
-
-  return M;
+  return NM_create_with_data(storageType, size0, size1, data);
 }
 
-void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void* data) {
+static void NM_fill_internal(NumericsMatrix* M, NM_types storageType, int size0, int size1,
+                             void* data) {
   assert(M);
   NM_null(M);
   M->storageType = storageType;
@@ -2303,7 +2309,7 @@ void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void
         break;
 
       default:
-        printf("NM_fill :: storageType value %d not implemented yet !", storageType);
+        printf("NM_fill_internal :: storageType value %d not implemented yet !", storageType);
         exit(EXIT_FAILURE);
     }
   }
@@ -2312,13 +2318,14 @@ void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void
 }
 
 NumericsMatrix* NM_new_SBM(size_t size0, size_t size1, SparseBlockStructuredMatrix* m1) {
-  return NM_create_from_data(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
+  return NM_create_with_data(NM_SPARSE_BLOCK, size0, size1, (void*)m1);
 }
 NumericsMatrix* NM_transpose(NumericsMatrix* A) {
   NumericsMatrix* Atrans;
   switch (A->storageType) {
     case NM_DENSE: {
-      Atrans = NM_create(NM_DENSE, A->size1, A->size0);
+      Atrans = NM_create_with_data(NM_DENSE, A->size1, A->size0,
+                                   malloc(A->size1 * A->size0 * sizeof(double)));
       for (int i = 0; i < Atrans->size0; i++) {
         for (int j = 0; j < Atrans->size1; j++) {
           Atrans->matrix0[i + j * Atrans->size0] = A->matrix0[j + i * A->size0];
@@ -2327,7 +2334,7 @@ NumericsMatrix* NM_transpose(NumericsMatrix* A) {
       break;
     }
     case NM_SPARSE_BLOCK: {
-      Atrans = NM_create(NM_SPARSE_BLOCK, A->size1, A->size0);
+      Atrans = NM_create_with_data(NM_SPARSE_BLOCK, A->size1, A->size0, SBM_new());
       SBM_transpose(A->matrix1, Atrans->matrix1);
       break;
     }
@@ -3325,7 +3332,7 @@ NumericsMatrix* NM_multiply(NumericsMatrix* A, NumericsMatrix* B) {
         int size0 = C->size0;
         int size1 = C->size1;
         NM_free(C);
-        NM_fill(C, NM_SPARSE, size0, size1, result);
+        C = NM_create_with_data(NM_SPARSE, size0, size1, result);
         NM_MKL_to_sparse_matrix(C);
         return;
       }
@@ -3444,7 +3451,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B, const dou
         int size0 = C->size0;
         int size1 = C->size1;
         NM_free(C);
-        NM_fill(C, NM_SPARSE, size0, size1, result);
+        C = NM_create_with_data(NM_SPARSE, size0, size1, result);
         NM_MKL_to_sparse_matrix(C);
         return;
       }
@@ -4657,7 +4664,8 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, size_t block
       else if ((block_size_max == 3) && (block_size_min == 3)) {
         size_t start_row = 0;
         for (size_t b = 0; b < block_number; b++) {
-          NumericsMatrix* block_NM = NM_create(NM_DENSE, 3, 3);
+          NumericsMatrix* block_NM =
+              NM_create_with_data(NM_DENSE, 3, 3, calloc(9, sizeof(double)));
 
           double** block_adress = &block_NM->matrix0;
 
@@ -4679,7 +4687,9 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, size_t block
         for (size_t b = 0; b < block_number; b++) {
           const int block_size = to_int(blocksizes[b]);
 
-          NumericsMatrix* block_NM = NM_create(NM_DENSE, block_size, block_size);
+          NumericsMatrix* block_NM =
+              NM_create_with_data(NM_DENSE, block_size, block_size,
+                                  calloc((size_t)block_size * block_size, sizeof(double)));
 
           double** block_adress = &block_NM->matrix0;
 

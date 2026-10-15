@@ -137,7 +137,7 @@ int main(void)
  options->iparam[SICONOS_IPARAM_PREALLOC] = 1;
 
   problem->env = &sim_data;
-  problem->nabla_F = NM_create_from_data(NM_DENSE, N, N, nablaF);
+  problem->nabla_F = NM_create_with_data(NM_DENSE, N, N, nablaF);
 
   unsigned k = 0;
 

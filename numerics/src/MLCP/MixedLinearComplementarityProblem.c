@@ -376,7 +376,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   problem->blocksIsComp[0] = 0;
   problem->blocksIsComp[1] = 1;
 
-  problem->M = NM_create_from_data(NM_DENSE, NbLines, n + m, vecM);
+  problem->M = NM_create_with_data(NM_DENSE, NbLines, n + m, vecM);
 
   problem->isStorageType1 = 1;  // Both problems seems to be stored
   problem->isStorageType2 = 1;  // Both problems seems to be stored
