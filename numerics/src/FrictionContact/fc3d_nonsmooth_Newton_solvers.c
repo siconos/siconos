@@ -236,7 +236,9 @@ int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(fc3d_nonsmooth_Newton_solver
     cblas_dcopy(problemSize, qfree, 1, velocity, 1);
     NM_gemv(1., W, tmp, 1., velocity);
 
-    equation->function(equation->data, problemSize, tmp, velocity, mu, rho, F, NULL, NULL);
+    int info_fun =
+        equation->function(equation->data, problemSize, tmp, velocity, mu, rho, F, NULL, NULL);
+    if (info_fun) return -2;
 
     double q = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
@@ -309,14 +311,18 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers* equati
   double scal = 1.;
 
   // F <- compute fb
-  fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterFunctionGenerated,
-                                 reaction, velocity, mu, rho, F, NULL, NULL);
+  int info_fb =
+      fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterFunctionGenerated,
+                                     reaction, velocity, mu, rho, F, NULL, NULL);
+  if (info_fb) return -2;
 
   double thetafb0 = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
   // F <- compute gradient of fb merit function (ugly)
-  fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterGradMeritFunctionGenerated,
-                                 reaction, velocity, mu, rho, F, NULL, NULL);
+  info_fb = fc3d_FischerBurmeisterFunction(problemSize,
+                                           fc3d_FischerBurmeisterGradMeritFunctionGenerated,
+                                           reaction, velocity, mu, rho, F, NULL, NULL);
+  if (info_fb) return -2;
   double norm_dir_exp_p = pow(cblas_dnrm2(problemSize, direction, 1), p);
   double gradmeritfb_dir = cblas_ddot(problemSize, F, 1, direction, 1);
 
@@ -348,15 +354,18 @@ int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers* equati
     NM_gemv(1., W, tmp, 1., velocity);
 
     // compute fb
-    fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterFunctionGenerated, tmp,
-                                   velocity, mu, rho, F, NULL, NULL);
+    info_fb =
+        fc3d_FischerBurmeisterFunction(problemSize, fc3d_FischerBurmeisterFunctionGenerated,
+                                       tmp, velocity, mu, rho, F, NULL, NULL);
+    if (info_fb) return -2;
 
     double thetafb = 0.5 * cblas_ddot(problemSize, F, 1, F, 1);
 
     // compute grad merit fb (ugly)
-    fc3d_FischerBurmeisterFunction(problemSize,
-                                   fc3d_FischerBurmeisterGradMeritFunctionGenerated, tmp,
-                                   velocity, mu, rho, F, NULL, NULL);
+    info_fb = fc3d_FischerBurmeisterFunction(problemSize,
+                                             fc3d_FischerBurmeisterGradMeritFunctionGenerated,
+                                             tmp, velocity, mu, rho, F, NULL, NULL);
+    if (info_fb) return -2;
 
     // tmp <- scal*direction
     cblas_dscal(problemSize, 0., tmp, 1);
@@ -540,8 +549,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   double linear_solver_residual = 0.0;
 
   while (iter++ < itermax) {
-    equation->function(equation->data, problemSize, reaction, velocity, equation->problem->mu,
-                       rho, F, Ax, Bx);
+    int info_fun = equation->function(equation->data, problemSize, reaction, velocity,
+                                      equation->problem->mu, rho, F, Ax, Bx);
+    if (info_fun) {
+      *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                             "Equation function evaluation failed (non-finite values).\n");
+      break;
+    }
     // AW + B
     fc3d_nonsmooth_Newton_computeAWpB(Ax, problem->M, Bx, AWpB);
 
@@ -606,6 +620,12 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       }
     }
 
+    if (info_ls == -2) {
+      *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                             "Fischer-Burmeister evaluation failed (non-finite values).\n");
+      break;
+    }
+
     if (info_ls >= 0) {
       // line search success
       // reaction_ls_tmp should contains the reaction iterate of the line search
@@ -629,8 +649,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
           //      fc3d_FischerBurmeister_compute_error(problem, reaction, velocity,
           tolerance, options, &SOLVER_RESIDUAL(options));
 
-      DEBUG_EXPR_WE(equation->function(equation->data, problemSize, reaction, velocity,
-                                       equation->problem->mu, rho, F, NULL, NULL));
+      int info_fun_dbg = equation->function(equation->data, problemSize, reaction, velocity,
+                                            equation->problem->mu, rho, F, NULL, NULL);
+      if (info_fun_dbg) {
+        *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                               "Equation function evaluation failed (non-finite values).\n");
+        break;
+      }
 
       DEBUG_EXPR_WE(assert(
           (cblas_dnrm2(problemSize, F, 1) / (1 + cblas_dnrm2(problemSize, problem->q, 1))) <=
@@ -638,8 +663,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     }
 
     if (verbose > 0) {
-      equation->function(equation->data, problemSize, reaction, velocity,
-                         equation->problem->mu, rho, F, NULL, NULL);
+      int info_fun_v = equation->function(equation->data, problemSize, reaction, velocity,
+                                          equation->problem->mu, rho, F, NULL, NULL);
+      if (info_fun_v) {
+        *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
+                               "Equation function evaluation failed (non-finite values).\n");
+        break;
+      }
       numerics_printf_verbose(1, "---- FC3D - NSN | %3i | %.1e | %.1e | %8i | %.1e | %.1e |",
                               iter, SOLVER_RESIDUAL(options), cblas_dnrm2(problemSize, F, 1),
                               info_ls, alpha, linear_solver_residual);
