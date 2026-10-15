@@ -61,7 +61,6 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   SolverOptions** internalsolver_options = options->internalSolvers;
 

@@ -1452,7 +1452,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   // }
 
   char matlab_name[100];
-  sprintf(matlab_name, "iterates.m");
+  snprintf(matlab_name, sizeof(matlab_name), "iterates.m");
   free(str);
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
@@ -2690,7 +2690,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
-    sprintf(matlab_name, "iterates_muF_sF.m");
+    snprintf(matlab_name, sizeof(matlab_name), "iterates_muF_sF.m");
     iterates = fopen(matlab_name, "a+");
     fprintf(iterates, "data(end+1).name = \"%s\";\n", strToken);
     fprintf(iterates, "data(end).val = [\n");

@@ -167,7 +167,7 @@ static void compute_system_residual(GlobalFrictionContactProblem* problem,
   NM_tgemv(1., problem->H, global_velocity, 1, residual + num_global_dofs);
 
   /* Contact residual: residual[n+m:n+2m] = Phi_AC(u, r, rho) */
-  for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
+  for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
     compute_ac(reaction + 2 * contact, velocity + 2 * contact, problem->mu[contact],
                rho + 2 * contact, residual + num_global_dofs + num_contact_dofs + 2 * contact,
                NULL, NULL);
@@ -738,7 +738,7 @@ restart:
       "--------------------------------------------------------------------------------"
       "---------------------------");
 
-  for (unsigned int i = 0; i < problem->numberOfContacts; ++i) {
+  for (int i = 0; i < problem->numberOfContacts; ++i) {
     previous_contact_status[i] = -1;
   }
 
@@ -754,7 +754,7 @@ restart:
     residual_norm = cblas_dnrm2(system_size, system_residual, 1);
 
     /* Evaluate the contact Jacobians A(x_k) and B(x_k). */
-    for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
+    for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
       compute_ac(current_reaction + 2 * contact, current_velocity + 2 * contact,
                  problem->mu[contact], rho + 2 * contact, contact_ac_values + 2 * contact,
                  jac_A + 4 * contact, jac_B + 4 * contact);
@@ -884,7 +884,7 @@ restart:
      * the previous Newton iteration). */
     unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
     unsigned int stabilized = 0;
-    for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
+    for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
       const double rN = current_reaction[2 * contact];
       const double rT = current_reaction[2 * contact + 1];
       const double uT = current_velocity[2 * contact + 1];

@@ -986,7 +986,7 @@ restart:
       "--------------------------------------------------------------------------------"
       "---------------------------");
 
-  for (unsigned int i = 0; i < problem->numberOfContacts; ++i) {
+  for (int i = 0; i < problem->numberOfContacts; ++i) {
     previous_contact_status[i] = -1;
   }
 
@@ -1155,7 +1155,7 @@ restart:
     unsigned int stabilized = 0;
     NV_cone_tangential_norms_3d(current_reaction, problem->numberOfContacts, rT_norm);
     NV_cone_tangential_norms_3d(current_velocity, problem->numberOfContacts, uT_norm);
-    for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
+    for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
       const double rN = current_reaction[3 * contact];
       const int status = gfc3d_contact_status_3d(rN, rT_norm[contact], uT_norm[contact],
                                                  problem->mu[contact]);

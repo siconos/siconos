@@ -22,6 +22,7 @@
 #include <stdio.h>
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+#if 0
 /**
  * \brief Set the normal part of the 2D Alart--Curnier residual and Jacobians.
  *
@@ -64,6 +65,7 @@ static void zero_tangential_jacobian(double* jacobian_u, double* jacobian_r) {
   jacobian_r[0 + 2 * 1] = 0.0;
   jacobian_r[1 + 2 * 1] = 0.0;
 }
+#endif
 
 /**
  * \brief Compute the 2D Alart--Curnier function and its Jacobians.

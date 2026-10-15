@@ -66,7 +66,6 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
   DEBUG_PRINTF("norm_b = %12.8e\n", norm_b);
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
-  double norm_r = cblas_dnrm2(m, reaction, 1);
   DEBUG_PRINTF("norm of reaction %e\n", cblas_dnrm2(m, reaction, 1));
   DEBUG_PRINTF("norm of global velocity  %e\n", cblas_dnrm2(n, globalVelocity, 1));
 
@@ -124,8 +123,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1, H, globalVelocity, 1.0, velocity);
-  double norm_u = cblas_dnrm2(m, velocity, 1);
-  DEBUG_PRINTF("norm of velocity %e\n", norm_u);
+  DEBUG_PRINTF("norm of velocity %e\n", cblas_dnrm2(m, velocity, 1));
 
   int norm = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
   int scope = SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE;

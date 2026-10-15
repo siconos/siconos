@@ -46,7 +46,6 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   if (options->numberOfInternalSolvers < 1) {
     return numerics_error(

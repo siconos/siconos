@@ -49,6 +49,7 @@
 #include "pinv.h"                          // for pinv
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR_WE, DEBUG_PRINT_MAT_STR
 
+#if 0
 /** Print a dense column-major matrix in Scilab-compatible format.
  *  If file is NULL the matrix is printed to stdout.
  *  \param[in] name variable name to print
@@ -80,6 +81,7 @@ static void printDenseMatrix(char* name, FILE* file, double* m, int N, int M) {
     printf("];\n");
   }
 }
+#endif
 
 /** Convert a reduced solution back to the original GenericMechanicalProblem layout.
  *  Equality blocks take their value from Re, while LCP/FC3D blocks take (Rreduced, Vreduced).

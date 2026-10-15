@@ -55,7 +55,6 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction
   int lsitermax = iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0;      /* Current iteration number */

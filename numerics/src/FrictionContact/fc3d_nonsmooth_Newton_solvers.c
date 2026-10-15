@@ -441,7 +441,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   numerics_printf_verbose(1, "---- FC3D - NSN - start with tolerance = %g", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
-  double norm_q = cblas_dnrm2(problemSize, problem->q, 1);
 
   void* buffer;
 

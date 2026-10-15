@@ -1068,6 +1068,11 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     }
   }
 
+  /* Allocate block ordering arrays (declared early so cleanup is safe even if
+   * local-problem allocation fails and jumps over the allocation blocks below). */
+  unsigned int* sblocks = NULL;
+  unsigned int* freeze_blocks = NULL;
+
   /* Get local problem: use alloc_local callback if provided, otherwise use
    * toolkit.localproblem */
   void* local_problem = NULL;
@@ -1081,10 +1086,6 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     /* Use pre-allocated local problem from toolkit */
     local_problem = toolkit->localproblem;
   }
-
-  /* Allocate block ordering arrays */
-  unsigned int* sblocks = NULL;
-  unsigned int* freeze_blocks = NULL;
 
   /* Allocate shuffled blocks array if shuffling is enabled */
   if (toolkit->use_shuffling) {

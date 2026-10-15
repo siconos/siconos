@@ -2717,10 +2717,10 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
   /* -------------------------- Print into matlab file -------------------------- */
   FILE *iterates, *iterates_python;
   char matlab_name[100];
-  sprintf(matlab_name, "iteratesNC%zu.m", n);
+  snprintf(matlab_name, sizeof(matlab_name), "iteratesNC%zu.m", n);
 
   char python_name[100];
-  sprintf(python_name, "PrimitiveSoup-nc-%zu.py", n);
+  snprintf(python_name, sizeof(python_name), "PrimitiveSoup-nc-%zu.py", n);
 
   int reinit = 0;
   while (1) {

@@ -245,7 +245,6 @@ static int fc3d_nsgs_solve_local_wrapper(void* local_problem,
 static double fc3d_nsgs_compute_error_wrapper(void* problem, double* var_z, double* var_x,
                                               SolverOptions* options) {
   double error = 0.0;
-  double norm_q = 0.0;
   fc3d_compute_error((FrictionContactProblem*)problem, var_z, var_x,
                      options->dparam[SICONOS_DPARAM_TOL], options, &error);
   return error;

@@ -67,7 +67,7 @@ static const ScalingCase SCALINGS[] = {
      SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED, "wgt_pc_mix"},
     {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
      SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "wgt_pv_max"}};
-static const int N_SCALINGS = (int)(sizeof(SCALINGS) / sizeof(SCALINGS[0]));
+#define N_SCALINGS ((int)(sizeof(SCALINGS) / sizeof(SCALINGS[0])))
 
 static const char* REGIME_NAMES[] = {"sticking", "separation", "sliding"};
 static const char* MAGN_NAMES[] = {"balanced", "r_large", "u_large"};

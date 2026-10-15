@@ -361,7 +361,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   // problem_name[i]; count++;} probName[count] = '\0'; sprintf(matlab_name, "%s.m",probName);
 
   // sprintf(matlab_name, "%s.m",strToken);
-  sprintf(matlab_name, "iterates_local_Aqueduc.m");
+  snprintf(matlab_name, sizeof(matlab_name), "iterates_local_Aqueduc.m");
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
@@ -758,7 +758,6 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
     // projerr = projectionError(velocity, reaction, n, tol);
     NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
     NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
-    double norm_q = cblas_dnrm2(blasnd, problem->q, 1);
     (*computeError)(problem, data->tmp_point->t_reaction, data->tmp_point->t_velocity, tol,
                     options, &projerr);
 

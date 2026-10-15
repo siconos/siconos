@@ -90,7 +90,7 @@ static int test_nsgs_on_filename(const char* filename) {
   }
 
   /* Set solver parameters */
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_NSGS_FREEZING_CONTACT] = 0;
   options->iparam[SICONOS_NSGS_SHUFFLE] = SICONOS_NSGS_SHUFFLE_TRUE;

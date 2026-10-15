@@ -736,7 +736,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   // }
 
   char matlab_name[100];
-  sprintf(matlab_name, "iterates_Spheres_no_s.m");
+  snprintf(matlab_name, sizeof(matlab_name), "iterates_Spheres_no_s.m");
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
