@@ -132,7 +132,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* problem, unsigned i
  *  \param[in] problem the printed problem
  *  \param[in,out] file the output file
  */
-void genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file);
+int genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file);
 
 /** Read a GenericMechanicalProblem from a file descriptor.
  * \param[in] file the file descriptor

@@ -26,7 +26,8 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
 #include "RelayProblem.h"                  // IWYU pragma: keep
 #include "SparseBlockMatrix.h"             // IWYU pragma: keep
-#include "numerics_verbose.h"              // for check_io, numerics_error, numerics_warning
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for check_io, numerics_error, numerics_warning
 #include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR
 
@@ -196,11 +197,12 @@ void genericMechanicalProblem_display(GenericMechanicalProblem* problem) {
   printf("\nEND Display a GenericMechanicalProblem:\n");
 }
 
-void genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file) {
-  if (!problem || !file) return;
+int genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file) {
+  if (!problem || !file) return NUMERICS_ERR_INVALID_ARGUMENT;
   GMP_LocalProblem* local_problem = problem->firstLocal;
   /* Print M */
-  NM_write_in_file(problem->M, file);
+  int nm_info = NM_write_in_file(problem->M, file);
+  if (nm_info != NUMERICS_OK) return nm_info;
   fprintf(file, "\n");
   /* Print Q */
   for (size_t ii = 0; ii < problem->globalSize; ii++) fprintf(file, "%e\n", problem->q[ii]);
@@ -212,6 +214,7 @@ void genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FIL
       fprintf(file, "%e\n", ((FrictionContactProblem*)local_problem->problem)->mu[0]);
     local_problem = local_problem->next;
   }
+  return NUMERICS_OK;
 }
 
 GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {

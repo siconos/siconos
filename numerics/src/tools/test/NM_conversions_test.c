@@ -26,6 +26,8 @@
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 static int compare_csc(CSparseMatrix* A, CSparseMatrix* B) {
   CS_INT m, n, nz, p, k, j, *Ap, *Ai, *Bi, *Bp;
@@ -128,7 +130,10 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   NumericsMatrix* M = NM_copy(M_orig);
 
   FILE* foutput = fopen("matrix_sparse_triplet.dat", "w");
-  NM_write_in_file(M, foutput);
+  {
+    int nm_info = NM_write_in_file(M, foutput);
+    if (nm_info != NUMERICS_OK) return 1;
+  }
   fclose(foutput);
 
   FILE* finput = fopen("matrix_sparse_triplet.dat", "r");
@@ -150,7 +155,10 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   // NM_display(M_new);
 
   foutput = fopen("matrix_sparse_csc.dat", "w");
-  NM_write_in_file(M_new, foutput);
+  {
+    int nm_info = NM_write_in_file(M_new, foutput);
+    if (nm_info != NUMERICS_OK) return 1;
+  }
   fclose(foutput);
 
   finput = fopen("matrix_sparse_csc.dat", "r");
@@ -173,7 +181,10 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   // NM_display(M_new);
 
   foutput = fopen("matrix_sparse_csr.dat", "w");
-  NM_write_in_file(M_new, foutput);
+  {
+    int nm_info = NM_write_in_file(M_new, foutput);
+    if (nm_info != NUMERICS_OK) return 1;
+  }
   fclose(foutput);
 
   finput = fopen("matrix_sparse_csr.dat", "r");

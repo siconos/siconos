@@ -64,8 +64,9 @@ void gfc3d_balancing_MHHT(GlobalFrictionContactProblem* problem, BalancingMatric
   /* scaling of M */
   NumericsMatrix* M_tmp = NM_create(NM_SPARSE, n, n);
   NM_triplet_alloc(M_tmp, n);
-  NM_gemm(1.0, problem->M, B_for_M->D2, 0.0, M_tmp);  // M * D2M
-  NM_gemm(1.0, B_for_M->D2, M_tmp, 0.0, problem->M);  // D1M *M  * D2M
+  CHECK_RETURN(NM_gemm(1.0, problem->M, B_for_M->D2, 0.0, M_tmp) == NUMERICS_OK);  // M * D2M
+  CHECK_RETURN(NM_gemm(1.0, B_for_M->D2, M_tmp, 0.0, problem->M) ==
+               NUMERICS_OK);  // D1M *M  * D2M
 
   /* scaling of H */
   /* Warning the matrix H must be scaled such
@@ -77,8 +78,9 @@ void gfc3d_balancing_MHHT(GlobalFrictionContactProblem* problem, BalancingMatric
   }
   NumericsMatrix* H_tmp = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(H_tmp, n);
-  NM_gemm(1.0, problem->H, B_for_H->D2, 0.0, H_tmp);  // H * D2H
-  NM_gemm(1.0, B_for_M->D1, H_tmp, 0.0, problem->H);  // D1M * H* D2H
+  CHECK_RETURN(NM_gemm(1.0, problem->H, B_for_H->D2, 0.0, H_tmp) == NUMERICS_OK);  // H * D2H
+  CHECK_RETURN(NM_gemm(1.0, B_for_M->D1, H_tmp, 0.0, problem->H) ==
+               NUMERICS_OK);  // D1M * H* D2H
   // NM_gemm(1.0,B_for_M->D1,problem->M, 0.0, M_tmp);
   // NM_copy(M_tmp, problem->M);
 
@@ -113,8 +115,9 @@ void gfc3d_balancing_M(GlobalFrictionContactProblem* problem, BalancingMatrices*
   /* NM_scal(alpha*gamma*gamma, problem->M); */
   NumericsMatrix* M_tmp = NM_create(NM_SPARSE, n, n);
   NM_triplet_alloc(M_tmp, n);
-  NM_gemm(1.0, problem->M, B_for_M->D2, 0.0, M_tmp);
-  NM_gemm(1.0, B_for_M->D1, M_tmp, 0.0, problem->M);
+  CHECK_RETURN(NM_gemm(1.0, problem->M, B_for_M->D2, 0.0, M_tmp) == NUMERICS_OK);
+
+  CHECK_RETURN(NM_gemm(1.0, B_for_M->D1, M_tmp, 0.0, problem->M) == NUMERICS_OK);
 
   /* scaling of H */
   /* NM_scal(beta*gamma, problem->H);*/
@@ -122,7 +125,8 @@ void gfc3d_balancing_M(GlobalFrictionContactProblem* problem, BalancingMatrices*
    * that the cone constraint is respected */
   NumericsMatrix* H_tmp = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(H_tmp, n);
-  NM_gemm(1.0, B_for_M->D2, problem->H, 0.0, H_tmp);
+  CHECK_RETURN(NM_gemm(1.0, B_for_M->D2, problem->H, 0.0, H_tmp) == NUMERICS_OK);
+
   NumericsMatrix* H_tmp_copy = NM_copy(H_tmp);
   NM_clear(problem->H);
   *problem->H = *H_tmp_copy;

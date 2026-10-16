@@ -74,7 +74,10 @@ int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
   fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
-  NM_write_in_file(problem->M, file);
+  {
+    int nm_info = NM_write_in_file(problem->M, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   for (i = 0; i < problem->M->size1; i++) {
     fprintf(file, "%32.24e ", problem->q[i]);
   }

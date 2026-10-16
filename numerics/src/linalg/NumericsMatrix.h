@@ -413,7 +413,7 @@ NumericsMatrix* NM_copy_to_sparse(const NumericsMatrix* A, double threshold);
    \param M the matrix to be printed
    \param filename the corresponding name of the file
 */
-void NM_write_in_filename(const NumericsMatrix* const M, const char* filename);
+int NM_write_in_filename(const NumericsMatrix* const M, const char* filename);
 
 /**
    Read in file  of the matrix content
@@ -421,7 +421,7 @@ void NM_write_in_filename(const NumericsMatrix* const M, const char* filename);
    \param M the matrix to be read
    \param filename the corresponding name of the file
 */
-void NM_read_in_filename(NumericsMatrix* const M, const char* filename);
+int NM_read_in_filename(NumericsMatrix* const M, const char* filename);
 
 /**
    PrintInFile  of the matrix content
@@ -430,7 +430,7 @@ void NM_read_in_filename(NumericsMatrix* const M, const char* filename);
    \param file filename the corresponding file
 */
 
-void NM_write_in_file(const NumericsMatrix* const M, FILE* file);
+int NM_write_in_file(const NumericsMatrix* const M, FILE* file);
 
 /**
    Read in file  of the matrix content without performing memory allocation
@@ -438,7 +438,7 @@ void NM_write_in_file(const NumericsMatrix* const M, FILE* file);
    \param M the matrix to be read
    \param file the corresponding  file
 */
-void NM_read_in_file(NumericsMatrix* const M, FILE* file);
+int NM_read_in_file(NumericsMatrix* const M, FILE* file);
 
 /**
    Create from file a NumericsMatrix with  memory allocation
@@ -455,7 +455,7 @@ RawNumericsMatrix* NM_new_from_filename(const char* filename);
    \param M the matrix to be printed
    \param file the corresponding file
 */
-void NM_write_in_file_scilab(const NumericsMatrix* const M, FILE* file);
+int NM_write_in_file_scilab(const NumericsMatrix* const M, FILE* file);
 
 /**
       NM_write_in_file_python of the matrix content
@@ -471,7 +471,7 @@ void NM_write_in_file_python(const NumericsMatrix* const M, FILE* file);
    \param M the matrix to be read
    \param file the corresponding  file
 */
-void NM_read_in_file_scilab(NumericsMatrix* const M, FILE* file);
+int NM_read_in_file_scilab(NumericsMatrix* const M, FILE* file);
 
 /**
    Screen display of the matrix content stored as a double * array in Fortran style
@@ -481,7 +481,7 @@ void NM_read_in_file_scilab(NumericsMatrix* const M, FILE* file);
    \param nCol the number of columns
    \param lDim the leading dimension of M
 */
-void NM_dense_display_matlab(double* m, int nRow, int nCol, int lDim);
+int NM_dense_display_matlab(double* m, int nRow, int nCol, int lDim);
 
 /**
    Screen display of the matrix content stored as a double * array in Fortran style
@@ -520,7 +520,7 @@ void NM_display_storageType(const NumericsMatrix* const M);
 
    \param m the matrix to be displayed
 */
-void NM_display_row_by_row(const NumericsMatrix* const m);
+int NM_display_row_by_row(const NumericsMatrix* const m);
 
 /**************************************************/
 /** matrix I/O                *********************/
@@ -955,8 +955,8 @@ RawNumericsMatrix* NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
  *  \param[in] beta scalar
  *  \param[in,out] C a NumericsMatrix
  */
-void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B, const double beta,
-             NumericsMatrix* C);
+int NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B, const double beta,
+            NumericsMatrix* C);
 
 /**
    LU factorization of the matrix. If the matrix has already been

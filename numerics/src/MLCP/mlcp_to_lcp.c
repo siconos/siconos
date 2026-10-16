@@ -24,7 +24,8 @@
 
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NM_...
-#include "numerics_verbose.h"                   // for verbose */
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for verbose */
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -83,7 +84,7 @@ LinearComplementarityProblem* mlcp_to_lcp(MixedLinearComplementarityProblem* pro
   DEBUG_EXPR(NM_display(D));
 
   NumericsMatrix* nm_AinvC = NM_create_with_data(NM_DENSE, n, m, AinvC);
-  NM_gemm(-1.0, D, nm_AinvC, 1.0, lcp->M);
+  CHECK_RETURN(NM_gemm(-1.0, D, nm_AinvC, 1.0, lcp->M) == NUMERICS_OK);
 
   DEBUG_EXPR(NM_display(lcp->M));
 

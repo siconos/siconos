@@ -175,7 +175,7 @@ static void computeSparseAWpB(double* A, NumericsMatrix* W, double* B, NumericsM
   free(Bmat_copy);
 
   /*  AWpB += AW */
-  NM_gemm(1., Amat, W, 1., AWpB);
+  CHECK_RETURN(NM_gemm(1., Amat, W, 1., AWpB) == NUMERICS_OK);
 
   NM_clear(Amat);
   NM_clear(Bmat);

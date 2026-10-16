@@ -637,7 +637,8 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
       /* W= NM_new(); */
       NM_free(W);
       W = NM_copy(M_s);
-      NM_gemm(rho, Atrans, A, 1.0, W);
+      CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
+
       DEBUG_EXPR(NM_display(W));
     }
 

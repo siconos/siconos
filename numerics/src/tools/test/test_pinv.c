@@ -4,7 +4,9 @@
 
 #include "NumericsFwd.h"     // for NumericsMatrix
 #include "NumericsMatrix.h"  // for NumericsMatrix, NM_clear, NM_new, NM_writ...
-#include "pinv.h"            // for pinv
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "pinv.h"  // for pinv
 int main(void) {
   int n = 4;
   int m = 5;
@@ -48,7 +50,7 @@ int main(void) {
   Wnum->dense = W;
 
   FILE* file1 = fopen("dataW.dat", "w");
-  NM_write_in_file_scilab(Wnum, file1);
+  if (NM_write_in_file_scilab(Wnum, file1) != NUMERICS_OK) return 1;
   fclose(file1);
 
   NumericsMatrix* WnumpInv = NM_new();
@@ -142,7 +144,7 @@ int main(void) {
   if (err < 1e-16) info = 0;
 
   FILE* file2 = fopen("dataWPseudoInverse.dat", "w");
-  NM_write_in_file_scilab(WnumpInv, file2);
+  if (NM_write_in_file_scilab(WnumpInv, file2) != NUMERICS_OK) return 1;
   fclose(file2);
 
   free(Wpinvtest);

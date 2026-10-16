@@ -949,7 +949,8 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     SN_logh5_vec_double(Akmat.size0, lambda_y, "lambda_y", logger_s->group);
 
     /* Compute tildeW and tildeWt*/
-    NM_gemm(1., problem->M, &Ab, 0., tmpWmat);
+    CHECK_RETURN(NM_gemm(1., problem->M, &Ab, 0., tmpWmat) == NUMERICS_OK);
+
 
     CSparseMatrix* AbT = cs_transpose(numericsSparseMatrix(&Ab)->csc, 1);
     numericsSparseMatrix(&tildeW)->csc = cs_multiply(AbT, NM_csc(tmpWmat));

@@ -3,6 +3,7 @@
 #include "CSparseMatrix.h"  // for CSparseMatrix
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
+#include "numerics_verbose.h"
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
@@ -466,7 +467,7 @@ decltype(auto) get_vector(vec<T>& v, match::indice auto i,
 template <typename A, typename B>
 void prod(const mat<A>& a, const mat<B>& b, mat<prod_t<A, B>>& c)
 {
-  NM_gemm(1, a._m, b._m, 1, c._m);
+  CHECK_RETURN(NM_gemm(1, a._m, b._m, 1, c._m) == NUMERICS_OK);
 }
 
 // Matrix Vector
@@ -491,7 +492,7 @@ void prodt2(const diag_mat<A>& a, const mat<B>& b,
             mat<prod_t<A, trans_t<B>>>& c)
 {
   assert(b._mt);
-  NM_gemm(1, a._m, b._mt, 1, c._m);
+  CHECK_RETURN(NM_gemm(1, a._m, b._mt, 1, c._m) == NUMERICS_OK);
 }
 
 // c <- a^-1 b
@@ -639,7 +640,8 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& mass_matrix,
     }
   }
 
-  NM_gemm(1.0, h_matrix._m, Minv_ht, 0.0, w_matrix._m);
+  CHECK_RETURN(NM_gemm(1.0, h_matrix._m, Minv_ht, 0.0, w_matrix._m) ==
+               NUMERICS_OK);
 
   NM_free(Minv_ht);
 }

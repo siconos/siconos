@@ -635,7 +635,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* problem, double* reaction, doubl
   DEBUG_EXPR_WE({
     FILE* toto1 = fopen("GMP_CURRENT.txt", "w");
     if (toto1) {
-      genericMechanicalProblem_printInFile(problem, toto1);
+      CHECK_RETURN(genericMechanicalProblem_printInFile(problem, toto1) == NUMERICS_OK);
       fclose(toto1);
     }
   });

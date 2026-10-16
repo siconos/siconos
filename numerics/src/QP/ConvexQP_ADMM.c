@@ -209,7 +209,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     NM_add_to_diag3(W, rho);
   } else {
     Atrans = NM_transpose(A);
-    NM_gemm(rho, Atrans, A, 1.0, W);
+    CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
   }
 
   double eta = dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA];
@@ -248,7 +248,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
       } else {
         if (Atrans) NM_free(Atrans);
         Atrans = NM_transpose(A);
-        NM_gemm(rho, Atrans, A, 1.0, W);
+        CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
       }
       DEBUG_PRINT("M + rho A^T A: ");
       DEBUG_EXPR(NM_display(W));

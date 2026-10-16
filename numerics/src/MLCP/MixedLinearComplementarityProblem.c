@@ -190,8 +190,10 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
       fprintf(file, "%d ", problem->blocksIsComp[i]);
     }
     fprintf(file, "\n");
-    NM_write_in_file(problem->M, file);
-
+    {
+      int nm_info = NM_write_in_file(problem->M, file);
+      if (nm_info != NUMERICS_OK) return nm_info;
+    }
     for (i = 0; i < problem->M->size1; i++) {
       fprintf(file, "%32.24e ", problem->q[i]);
     }

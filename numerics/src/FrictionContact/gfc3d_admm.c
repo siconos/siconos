@@ -232,7 +232,7 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double* u, double* mu, Nume
   DEBUG_EXPR(NM_display(H_correction););
 
   // DEBUG_EXPR(NM_display(H));
-  NM_gemm(1.0, H, H_correction, 0.0, H_full);
+  CHECK_RETURN(NM_gemm(1.0, H, H_correction, 0.0, H_full) == NUMERICS_OK);
   NM_clear(H_correction);
 
   DEBUG_EXPR(NM_display(H_full));
@@ -430,8 +430,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     P = NM_free(P);
     NumericsMatrix* Htrans = NM_transpose(problem->H);
     NumericsMatrix* H = NM_copy(problem->H);
-    NM_gemm(1.0, P, Htrans, 0.0, Htrans);
-    NM_gemm(1.0, H, P, 0.0, H);
+    CHECK_RETURN(NM_gemm(1.0, P, Htrans, 0.0, Htrans) == NUMERICS_OK);
+    CHECK_RETURN(NM_gemm(1.0, H, P, 0.0, H) == NUMERICS_OK);
     Htrans = NM_free(Htrans);
     H = NM_free(H);
   }
@@ -612,14 +612,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
           NM_free(W);
           W = NM_copy(M);
           NM_unpreserve(W);
-          NM_gemm(rho, H_full, Htrans, 1.0, W);
+          CHECK_RETURN(NM_gemm(rho, H_full, Htrans, 1.0, W) == NUMERICS_OK);
         }
       } else {
         NM_free(W);
         W = NM_copy(M);
         NM_unpreserve(W); /* if not unpreserve, the follwing operations are
                              not made on the destructible pointer */
-        NM_gemm(rho, H, Htrans, 1.0, W);
+        CHECK_RETURN(NM_gemm(rho, H, Htrans, 1.0, W) == NUMERICS_OK);
       }
       DEBUG_PRINT("M + rho H H^T: ");
       DEBUG_EXPR(NM_display(W));
