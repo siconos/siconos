@@ -26,6 +26,7 @@
 #include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 struct CohesiveLocalProblemFunctionToolkit* cohesiveLocalProblemFunctionToolkit_new(void) {
   struct CohesiveLocalProblemFunctionToolkit* lpft =
@@ -94,7 +95,8 @@ void cohesive_friction_3d_local_problem_compute_q(CohesiveFrictionContactProblem
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal,
+                                    false) == NUMERICS_OK);
 }
 
 void cohesive_friction_3d_local_problem_fill_M(CohesiveFrictionContactProblem* problem,
@@ -103,5 +105,6 @@ void cohesive_friction_3d_local_problem_fill_M(CohesiveFrictionContactProblem* p
   if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense);
+    CHECK_RETURN(NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+                 NUMERICS_OK);
 }

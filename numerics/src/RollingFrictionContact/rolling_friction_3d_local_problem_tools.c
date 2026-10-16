@@ -26,6 +26,7 @@
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SparseBlockMatrix.h"
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 void rolling_friction_3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
                                                  RollingFrictionContactProblem* localproblem,
                                                  double* reaction, int contact) {
@@ -42,7 +43,8 @@ void rolling_friction_3d_local_problem_compute_q(RollingFrictionContactProblem* 
   qLocal[4] = problem->q[iw];
 
   // NM_row_prod_no_diag3(n, contact, 3*contact, problem->M, reaction, qLocal, false);
-  NM_row_prod_no_diag(n, 5, contact, 5 * contact, problem->M, reaction, qLocal, NULL, false);
+  CHECK_RETURN(NM_row_prod_no_diag(n, 5, contact, 5 * contact, problem->M, reaction, qLocal,
+                                   NULL, false) == NUMERICS_OK);
 }
 
 void rolling_friction_3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
@@ -51,7 +53,8 @@ void rolling_friction_3d_local_problem_fill_M(RollingFrictionContactProblem* pro
   if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block5(problem->M, contact, &localproblem->M->dense);
+    CHECK_RETURN(NM_extract_diag_block5(problem->M, contact, &localproblem->M->dense) ==
+                 NUMERICS_OK);
 }
 
 RollingFrictionContactProblem* rolling_friction_3d_local_problem_allocate(

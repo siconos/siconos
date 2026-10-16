@@ -235,7 +235,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
       /* W= NM_new(); */
       NM_free(W);
       W = NM_copy(M);
-      NM_add_to_diag3(W, rho);
+      CHECK_RETURN(NM_add_to_diag3(W, rho) == NUMERICS_OK);
     }
 
     /********************/

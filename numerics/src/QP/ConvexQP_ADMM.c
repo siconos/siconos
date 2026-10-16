@@ -206,7 +206,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   NumericsMatrix* W = NM_copy(M);
 
   if (AisIdentity) {
-    NM_add_to_diag3(W, rho);
+    CHECK_RETURN(NM_add_to_diag3(W, rho) == NUMERICS_OK);
   } else {
     Atrans = NM_transpose(A);
     CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
@@ -244,7 +244,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
       DEBUG_PRINT("copy of M: ");
       DEBUG_EXPR(NM_display(W));
       if (AisIdentity) {
-        NM_add_to_diag3(W, rho);
+        CHECK_RETURN(NM_add_to_diag3(W, rho) == NUMERICS_OK);
       } else {
         if (Atrans) NM_free(Atrans);
         Atrans = NM_transpose(A);

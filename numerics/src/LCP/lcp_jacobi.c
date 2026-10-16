@@ -13,7 +13,8 @@
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for verbose
 #include "siconos_debug.h"
 
 void lcp_jacobi(LinearComplementarityProblem* problem, double* z, double* w, int* info,
@@ -57,7 +58,8 @@ void lcp_jacobi(LinearComplementarityProblem* problem, double* z, double* w, int
     for (int i = 0; i < n; i++) {
       new_z[i] = q[i];
       DEBUG_PRINTF("zi = %e\n", new_z[i]);
-      NM_row_prod_no_diag1x1((size_t)n, i, i, M, z, &new_z[i], false);
+      CHECK_RETURN(NM_row_prod_no_diag1x1((size_t)n, i, i, M, z, &new_z[i], false) ==
+                   NUMERICS_OK);
       DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], new_z[i]);
 
       new_z[i] = -(new_z[i]) * diag[i];

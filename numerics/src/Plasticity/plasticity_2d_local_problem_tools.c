@@ -26,6 +26,8 @@
 #include "NumericsMatrix.h"     // for NM_create_with_data, NumericsMatrix
 #include "PlasticityProblem.h"  // for PlasticityProblem,
 #include "SparseBlockMatrix.h"  // IWYU pragma: keep
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 struct LocalPLASTICITY_2DProblemFunctionToolkit* localPLASTICITY_2DProblemFunctionToolkit_new(
     void) {
@@ -61,7 +63,8 @@ void plasticity_2d_local_problem_compute_q(PlasticityProblem* problem,
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal,
+                                    false) == NUMERICS_OK);
 }
 
 void plasticity_2d_local_problem_fill_M(PlasticityProblem* problem,
@@ -69,7 +72,8 @@ void plasticity_2d_local_problem_fill_M(PlasticityProblem* problem,
   if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense);
+    CHECK_RETURN(NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+                 NUMERICS_OK);
 }
 
 PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* problem) {

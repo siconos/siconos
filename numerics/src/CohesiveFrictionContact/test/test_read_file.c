@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
   /* info += test_nsgs_on_filename(filename_2); */
 
   const char* filename_3 = "data/diamond_sphere_sphere_pack.dat";
-  info += test_nsgs_on_filename(filename_3);
+  info = test_nsgs_on_filename(filename_3);
 
   printf("\n=================================================================\n");
   printf("=== Test %s ======================================\n",

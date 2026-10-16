@@ -28,6 +28,8 @@
 
 #include "NumericsMatrix.h"
 #include "numericsMatrixTestFunction.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 int main(void) {
   printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
 

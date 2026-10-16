@@ -135,7 +135,7 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha) {
   NumericsMatrix* Cref = NM_create_with_data(NM_DENSE, n, m, calloc(n * m, sizeof(double)));
   SBM_to_dense(M->sparse_block, Cref->dense);
 
-  NM_add_to_diag3(C1, alpha);
+  CHECK_RETURN(NM_add_to_diag3(C1, alpha) == NUMERICS_OK);
   DEBUG_EXPR(NM_display(C1););
 
   double* Id = (double*)calloc(n * m, sizeof(double));
@@ -157,7 +157,7 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha) {
   /* C = C + alpha +I NM_SPARSE storage, square matrix  */
   /***********************************************************/
   NumericsMatrix* C2 = NM_copy_to_sparse(M, 1e-16);
-  NM_add_to_diag3(C2, alpha);
+  CHECK_RETURN(NM_add_to_diag3(C2, alpha) == NUMERICS_OK);
 
   info = NM_dense_equal(C2, Cref->dense, 1e-14);
 
@@ -1718,7 +1718,7 @@ static int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2) {
   int incx = n, incy = 1;
   for (i = 0; i < sizeY; i++) yref[i] = cblas_ddot(n, &(M1->dense[min + i]), incx, x, incy);
 
-  NM_row_prod(n, sizeY, min, M1, x, y, 1);
+  CHECK_RETURN(NM_row_prod(n, sizeY, min, M1, x, y, 1) == NUMERICS_OK);
   double tol = 1e-12;
   int info = 0;
   for (i = 0; i < sizeY; i++) {
@@ -1733,7 +1733,7 @@ static int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2) {
     printf("Step 0 ( y = subA*x, double* storage) failed ...\n");
 
   /* += */
-  NM_row_prod(n, sizeY, min, M1, x, y, 0);
+  CHECK_RETURN(NM_row_prod(n, sizeY, min, M1, x, y, 0) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
     /*        printf("%lf\n", fabs(y[i]-2*yref[i]));  */
@@ -1755,13 +1755,13 @@ static int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2) {
     yref[i] = cblas_ddot(n, &(M1->dense[4 + i]), incx, x, incy);
   }
   /* Sparse ... */
-  NM_row_prod(n, sizeY, pos, M2, x, y, 1);
+  CHECK_RETURN(NM_row_prod(n, sizeY, pos, M2, x, y, 1) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
   for (i = 0; i < sizeY; i++) yref[i] = cblas_ddot(n, &(M1->dense[6 + i]), incx, x, incy);
-  NM_row_prod(n, sizeY, pos + 1, M2, x, y, 1);
+  CHECK_RETURN(NM_row_prod(n, sizeY, pos + 1, M2, x, y, 1) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
@@ -1773,7 +1773,7 @@ static int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2) {
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  NM_row_prod(n, sizeY, pos + 1, M2, x, y, 0);
+  CHECK_RETURN(NM_row_prod(n, sizeY, pos + 1, M2, x, y, 0) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
     /*       printf("%lf\n", fabs(y[i]-yref[i])); */
@@ -1873,12 +1873,13 @@ static int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2) {
   yref[1] = 16;
 
   /* Sparse ... */
-  NM_row_prod_no_diag(n, sizeY, pos, SIZE_MAX, M2, x, y, NULL, 1);
+  CHECK_RETURN(NM_row_prod_no_diag(n, sizeY, pos, SIZE_MAX, M2, x, y, NULL, 1) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
-  NM_row_prod_no_diag(n, sizeY, pos + 1, SIZE_MAX, M2, x, y, NULL, 1);
+  CHECK_RETURN(NM_row_prod_no_diag(n, sizeY, pos + 1, SIZE_MAX, M2, x, y, NULL, 1) ==
+               NUMERICS_OK);
   yref[0] = 10;
   yref[1] = 14;
   for (i = 0; i < sizeY; i++) {
@@ -1891,7 +1892,8 @@ static int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2) {
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  NM_row_prod_no_diag(n, sizeY, pos + 1, SIZE_MAX, M2, x, y, NULL, 0);
+  CHECK_RETURN(NM_row_prod_no_diag(n, sizeY, pos + 1, SIZE_MAX, M2, x, y, NULL, 0) ==
+               NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
     /*       printf("%lf\n", fabs(y[i]-yref[i])); */
@@ -1989,7 +1991,8 @@ static int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatri
   yref[1] = 0;
 
   /* Sparse ... */
-  NM_row_prod_no_diag(sizeX, sizeY, pos, SIZE_MAX, M4, x, y, NULL, 1);
+  CHECK_RETURN(NM_row_prod_no_diag(sizeX, sizeY, pos, SIZE_MAX, M4, x, y, NULL, 1) ==
+               NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     /*       printf("%lf\n", fabs(y[i]-yref[i])); */
@@ -2001,7 +2004,8 @@ static int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatri
   yref[0] = 10;
   yref[1] = 14;
 
-  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, SIZE_MAX, M4, x, y, NULL, 1);
+  CHECK_RETURN(NM_row_prod_no_diag(sizeX, sizeY, pos + 1, SIZE_MAX, M4, x, y, NULL, 1) ==
+               NUMERICS_OK);
 
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -2016,7 +2020,8 @@ static int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatri
     printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
 
   /* Sparse, += ... */
-  NM_row_prod_no_diag(sizeX, sizeY, pos + 1, SIZE_MAX, M4, x, y, NULL, 0);
+  CHECK_RETURN(NM_row_prod_no_diag(sizeX, sizeY, pos + 1, SIZE_MAX, M4, x, y, NULL, 0) ==
+               NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
     /*           printf("%lf\n", fabs(y[i]-yref[i])); */
@@ -2081,7 +2086,7 @@ static int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4) {
   int incx = n, incy = 1;
   for (i = 0; i < sizeY; i++) yref[i] = cblas_ddot(m, &(M3->dense[min + i]), incx, x, incy);
 
-  NM_row_prod(sizeX, sizeY, min, M3, x, y, 1);
+  CHECK_RETURN(NM_row_prod(sizeX, sizeY, min, M3, x, y, 1) == NUMERICS_OK);
   double tol = 1e-12;
   int info = 0;
   for (i = 0; i < sizeY; i++) {
@@ -2096,7 +2101,7 @@ static int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4) {
     printf("Step 0 ( y = subA*x, double* storage _non_square) failed ...\n");
 
   /* += */
-  NM_row_prod(sizeX, sizeY, min, M3, x, y, 0);
+  CHECK_RETURN(NM_row_prod(sizeX, sizeY, min, M3, x, y, 0) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
     /*         printf("%lf\n", fabs(y[i]-2*yref[i]));  */
@@ -2119,13 +2124,13 @@ static int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4) {
     yref[i] = cblas_ddot(m, &(M3->dense[4 + i]), incx, x, incy);
   }
   /* Sparse ... */
-  NM_row_prod(sizeX, sizeY, pos, M4, x, y, 1);
+  CHECK_RETURN(NM_row_prod(sizeX, sizeY, pos, M4, x, y, 1) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
   for (i = 0; i < sizeY; i++) yref[i] = cblas_ddot(m, &(M3->dense[6 + i]), incx, x, incy);
-  NM_row_prod(sizeX, sizeY, pos + 1, M4, x, y, 1);
+  CHECK_RETURN(NM_row_prod(sizeX, sizeY, pos + 1, M4, x, y, 1) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
     //  printf("%lf\n", fabs(y[i]-yref[i]));
@@ -2137,7 +2142,7 @@ static int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4) {
     printf("Step 2 ( y = subA*x,  sparse storage _non_square) failed ...\n");
 
   /* Sparse, += ... */
-  NM_row_prod(sizeX, sizeY, pos + 1, M4, x, y, 0);
+  CHECK_RETURN(NM_row_prod(sizeX, sizeY, pos + 1, M4, x, y, 0) == NUMERICS_OK);
   for (i = 0; i < sizeY; i++) {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
     /*       printf("%lf\n", fabs(y[i]-yref[i])); */

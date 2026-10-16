@@ -42,6 +42,7 @@
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "SparseBlockMatrix.h" /* for SparseBlockStructuredMatrix */
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 /** Callback type for updating local problem for a given block */
@@ -202,13 +203,13 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
     /* Extract diagonal block on-the-fly */
     switch (dim) {
       case 2:
-        NM_extract_diag_block2(M, block, &local_problem->M_local);
+        CHECK_RETURN(NM_extract_diag_block2(M, block, &local_problem->M_local) == NUMERICS_OK);
         break;
       case 3:
-        NM_extract_diag_block3(M, block, &local_problem->M_local);
+        CHECK_RETURN(NM_extract_diag_block3(M, block, &local_problem->M_local) == NUMERICS_OK);
         break;
       case 5:
-        NM_extract_diag_block5(M, block, &local_problem->M_local);
+        CHECK_RETURN(NM_extract_diag_block5(M, block, &local_problem->M_local) == NUMERICS_OK);
         break;
       default:
         /* Generic fallback for other dimensions */
@@ -233,17 +234,20 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
   /* Add off-diagonal contributions using dimension-specific optimized functions */
   switch (dim) {
     case 2:
-      NM_row_prod_no_diag2(problem_data->nb_blocks * 2, block, block_start, M, var_z_global,
-                           local_problem->q_local, false);
+      CHECK_RETURN(NM_row_prod_no_diag2(problem_data->nb_blocks * 2, block, block_start, M,
+                                        var_z_global, local_problem->q_local,
+                                        false) == NUMERICS_OK);
       break;
     case 3:
-      NM_row_prod_no_diag3(problem_data->nb_blocks * 3, block, block_start, M, var_z_global,
-                           local_problem->q_local, false);
+      CHECK_RETURN(NM_row_prod_no_diag3(problem_data->nb_blocks * 3, block, block_start, M,
+                                        var_z_global, local_problem->q_local,
+                                        false) == NUMERICS_OK);
       break;
     default:
       /* Generic fallback for other dimensions using NM_row_prod_no_diag */
-      NM_row_prod_no_diag(problem_data->nb_blocks * dim, dim, block, block_start, M,
-                          var_z_global, local_problem->q_local, NULL, false);
+      CHECK_RETURN(NM_row_prod_no_diag(problem_data->nb_blocks * dim, dim, block, block_start,
+                                       M, var_z_global, local_problem->q_local, NULL,
+                                       false) == NUMERICS_OK);
       break;
   }
 

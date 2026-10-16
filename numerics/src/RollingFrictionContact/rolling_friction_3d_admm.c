@@ -237,7 +237,7 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
     if (has_rho_changed) {
       NM_free(W);
       W = NM_copy(M);
-      NM_add_to_diag5(W, rho);
+      CHECK_RETURN(NM_add_to_diag5(W, rho) == NUMERICS_OK);
     }
 
     /********************/

@@ -25,6 +25,8 @@
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"       // IWYU pragma: keep
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "safe_casts.h"
 
 struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new(void) {
@@ -59,7 +61,8 @@ void fc3d_local_problem_compute_q(FrictionContactProblem* problem,
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, in, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3(n, contact, in, problem->M, reaction, qLocal, false) ==
+               NUMERICS_OK);
 }
 
 void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
@@ -67,7 +70,8 @@ void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
   if (problem->M->storageType == NM_SPARSE) {
     localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense);
+    CHECK_RETURN(NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+                 NUMERICS_OK);
 }
 
 FrictionContactProblem* fc3d_local_problem_allocate(NM_types storageType) {
@@ -112,5 +116,6 @@ void fc3d_local_problem_compute_q_parallel(FrictionContactProblem* problem,
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3_parallel(n, contact, in, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3_parallel(n, contact, in, problem->M, reaction, qLocal,
+                                             false) == NUMERICS_OK);
 }

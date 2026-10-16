@@ -1670,7 +1670,6 @@ NumericsMatrix* NM_copy_to_sparse(const NumericsMatrix* A, double threshold) {
 }
 
 int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B) {
-  int info = 1;
   if (!B->dense) {
     B->dense = (double*)calloc(A->size0 * A->size1, sizeof(double));
   } else if (B->size0 != A->size0 || B->size0 != A->size0) {
@@ -1688,19 +1687,17 @@ int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B) {
   switch (A->storageType) {
     case NM_DENSE: {
       cblas_dcopy(A->size0 * A->size1, A->dense, 1, B->dense, 1);
-      info = 0;
       src_version = NM_version(A, NM_DENSE);
       break;
     }
     case NM_SPARSE_BLOCK: {
       SBM_to_dense(A->sparse_block, B->dense);
-      info = 0;
       src_version = NM_version(A, NM_SPARSE_BLOCK);
       break;
     }
     case NM_SPARSE: {
       assert(A->sparse);
-      info = NSM_to_dense(A->sparse, B->dense);
+      NSM_to_dense(A->sparse, B->dense);
       assert(NSM_version(A->sparse, NSM_latest_id(A->sparse)) ==
              NSM_version(A->sparse, A->sparse->origin));
       src_version = NSM_version(A->sparse, A->sparse->origin);
@@ -1724,7 +1721,7 @@ int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B) {
   }
 
   NM_version_sync(A);
-  return info;
+  return 0;
 }
 
 void NM_dense_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold) {
@@ -2238,7 +2235,7 @@ int NM_scal(double alpha, NumericsMatrix* A) {
   return 0;
 }
 
-void NM_add_to_diag3(NumericsMatrix* M, double alpha) {
+int NM_add_to_diag3(NumericsMatrix* M, double alpha) {
   size_t n = M->size0;
   switch (M->storageType) {
     case NM_DENSE: {
@@ -2275,13 +2272,14 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha) {
       break;
     }
     default:
-      printf("NM_add_to_diag3 :: unsupported matrix storage %d", M->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_add_to_diag3", "unsupported matrix storage %d",
+                            M->storageType);
   }
 
   NM_version_sync(M);
+  return NUMERICS_OK;
 }
-void NM_add_to_diag5(NumericsMatrix* M, double alpha) {
+int NM_add_to_diag5(NumericsMatrix* M, double alpha) {
   size_t n = M->size0;
   switch (M->storageType) {
     case NM_DENSE: {
@@ -2311,15 +2309,16 @@ void NM_add_to_diag5(NumericsMatrix* M, double alpha) {
       break;
     }
     default:
-      printf("NM_add_to_diag5 :: unsupported matrix storage %d", M->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_add_to_diag5", "unsupported matrix storage %d",
+                            M->storageType);
   }
 
   NM_version_sync(M);
+  return NUMERICS_OK;
 }
 
-void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size,
-                           double** Block) {
+int NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size,
+                          double** Block) {
   NM_types storageType = M->storageType;
   switch (storageType) {
     case NM_DENSE: {
@@ -2343,12 +2342,13 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
       break;
     }
     default: {
-      printf("NM_extract_diag_block :: unknown matrix storage");
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_extract_diag_block", "unsupported matrix storage %d",
+                            M->storageType);
     }
   }
+  return NUMERICS_OK;
 }
-void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
+int NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
   NM_types storageType = M->storageType;
   switch (storageType) {
     case NM_DENSE: {
@@ -2379,12 +2379,13 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block)
       break;
     }
     default: {
-      printf("NM_extract_diag_block :: unknown matrix storage");
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_extract_diag_block3", "unsupported matrix storage %d",
+                            M->storageType);
     }
   }
+  return NUMERICS_OK;
 }
-void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double** Block) {
+int NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double** Block) {
   NM_types storageType = M->storageType;
   switch (storageType) {
     case NM_DENSE: {
@@ -2409,13 +2410,14 @@ void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double** Block)
       break;
     }
     default: {
-      printf("NM_extract_diag_block :: unknown matrix storage");
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_extract_diag_block2", "unsupported matrix storage %d",
+                            M->storageType);
     }
   }
+  return NUMERICS_OK;
 }
 
-void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block) {
+int NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block) {
   NM_types storageType = M->storageType;
   switch (storageType) {
     case NM_DENSE: {
@@ -2466,12 +2468,13 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block)
       break;
     }
     default: {
-      printf("NM_extract_diag_block :: unknown matrix storage");
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_extract_diag_block5", "unsupported matrix storage %d",
+                            M->storageType);
     }
   }
+  return NUMERICS_OK;
 }
-void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
+int NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
   NM_types storageType = M->storageType;
   switch (storageType) {
     case NM_DENSE: {
@@ -2513,10 +2516,11 @@ void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
       break;
     }
     default: {
-      printf("NM_extract_diag_block :: unknown matrix storage");
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_copy_diag_block3", "unsupported matrix storage %d",
+                            M->storageType);
     }
   }
+  return NUMERICS_OK;
 }
 
 SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
@@ -2847,8 +2851,8 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double* x, const doub
 /* Insert the submatrix B into the matrix A on the position defined in
  * (start_i, start_j) position.
  */
-void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
-                 const double* const x, double* y, int init) {
+int NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
+                const double* const x, double* y, int init) {
   assert(A);
   assert(x);
   assert(y);
@@ -2900,15 +2904,16 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
     fprintf(stderr,
             "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
             "unknown storage\n");
-    exit(EXIT_FAILURE);
+    return numerics_error("NM_row_prod", "unsupported matrix storage %d", A->storageType);
   }
 
   NM_version_sync(A);
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start,
-                         NumericsMatrix* A, double* restrict x, double* restrict y,
-                         double* restrict xsave, bool init) {
+int NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start,
+                        NumericsMatrix* A, double* restrict x, double* restrict y,
+                        double* restrict xsave, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -2991,15 +2996,17 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
       fprintf(
           stderr,
           "Numerics, NumericsMatrix, product matrix - vector NM_row_prod_no_diag(A,x,y)\n");
-      return;
+      return numerics_error("NM_row_prod_no_diag", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
 
   NM_version_sync(A);
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
-                          double* x, double* y, bool init) {
+int NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
+                         double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -3121,15 +3128,17 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
     }
     default: {
       fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d\n", A->storageType);
-      return;
+      return numerics_error("NM_row_prod_no_diag3", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
 
   NM_version_sync(A);
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, double* x, double* y, bool init) {
+int NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
+                                  NumericsMatrix* A, double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -3198,15 +3207,15 @@ void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_sta
       break;
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag3_parallel :: unknown matrix storage %d",
-              A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_row_prod_no_diag3_parallel", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
-                          double* x, double* y, bool init) {
+int NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
+                         double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -3277,13 +3286,15 @@ void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, Numer
     }
     default: {
       fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d\n", A->storageType);
-      return;
+      return numerics_error("NM_row_prod_no_diag2", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, double* x, double* y, bool init) {
+int NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
+                                  NumericsMatrix* A, double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -3346,14 +3357,15 @@ void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_sta
       break;
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_row_prod_no_diag2_parallel", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
-                            double* x, double* y, bool init) {
+int NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
+                           double* x, double* y, bool init) {
   assert(A);
   assert(x);
   assert(y);
@@ -3410,15 +3422,17 @@ void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, Num
     }
     default: {
       fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d\n", A->storageType);
-      return;
+      return numerics_error("NM_row_prod_no_diag1x1", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
 
   NM_version_sync(A);
+  return NUMERICS_OK;
 }
 
-void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A,
-                   const double* x, double* y, int init) {
+int NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A,
+                  const double* x, double* y, int init) {
   assert(A);
   assert(x);
   assert(y);
@@ -3468,21 +3482,19 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
       break;
     }
     case NM_SPARSE_BLOCK: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d",
-              A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_block_prod", "unsupported matrix storage %d", A->storageType);
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_block_prod", "unsupported matrix storage %d", A->storageType);
     }
   }
 
   NM_version_sync(A);
+  return NUMERICS_OK;
 }
 
-void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A,
-                                   const double* x, double* left, double* right, int init) {
+int NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A,
+                                  const double* x, double* left, double* right, int init) {
   assert(A);
   assert(x);
   assert(left);
@@ -3538,22 +3550,22 @@ void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, Numer
       break;
     }
     case NM_SPARSE_BLOCK: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d",
-              A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_block_prod_no_diag_one_row", "unsupported matrix storage %d",
+                            A->storageType);
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_block_prod_no_diag_one_row", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
 
   NM_version_sync(A);
+  return NUMERICS_OK;
 }
 
-void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
-                       size_t col_start_right, NumericsMatrix* A, size_t* permutation,
-                       const double* x, double* left, double* right, bool init) {
+int NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
+                      size_t col_start_right, NumericsMatrix* A, size_t* permutation,
+                      const double* x, double* left, double* right, bool init) {
   assert(A);
   assert(x);
   assert(left);
@@ -3622,10 +3634,11 @@ void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
       break;
     }
     default: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
+      return numerics_error("NM_row_prod_graph", "unsupported matrix storage %d",
+                            A->storageType);
     }
   }
+  return NUMERICS_OK;
 
   // NM_version_sync(A);
 }
@@ -6042,7 +6055,7 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, size_t block
 
           double** block_adress = &block_NM->dense;
 
-          NM_extract_diag_block(A, b, start_row, 3, block_adress);
+          CHECK_RETURN(NM_extract_diag_block(A, b, start_row, 3, block_adress) == NUMERICS_OK);
 
           inv_3x3_gepp(*block_adress);
 
@@ -6066,7 +6079,8 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, size_t block
 
           double** block_adress = &block_NM->dense;
 
-          NM_extract_diag_block(A, b, start_row, block_size, block_adress);
+          CHECK_RETURN(NM_extract_diag_block(A, b, start_row, block_size, block_adress) ==
+                       NUMERICS_OK);
 
           NumericsMatrix* block_NM_inv = NM_LU_inv(block_NM);
 
@@ -6090,10 +6104,10 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, size_t block
 }
 
 int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
-  lapack_int info = 1;
   /* factorization is done on destructible part only if
    * !A->internalData->isLUfactorized */
-  NM_LDLT_factorize(Ao);
+  lapack_int info = NM_LDLT_factorize(Ao);
+  if (info) return info;
 
   /* get the destructible part of the matrix */
   NumericsMatrix* A = Ao->destructible;
@@ -6182,7 +6196,8 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
         break;
       }
       default:
-        assert(0 && "NM_Linear_solver__finalize unknown storageType");
+        return numerics_error("NM_Linear_solver_finalize", "unknown storageType %d",
+                              A->storageType);
     }
 
     /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok

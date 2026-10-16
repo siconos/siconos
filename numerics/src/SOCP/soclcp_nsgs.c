@@ -204,15 +204,17 @@ void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem* prob
     qLocal[i] = problem->q[normal + i];
   }
 
-  NM_row_prod_no_diag(n, dim, cone, normal, problem->M, r, qLocal, rsave, false);
+  CHECK_RETURN(NM_row_prod_no_diag(n, dim, cone, normal, problem->M, r, qLocal, rsave,
+                                   false) == NUMERICS_OK);
 }
 
 void soclcp_nsgs_fillMLocal(SecondOrderConeLinearComplementarityProblem* problem,
                             SecondOrderConeLinearComplementarityProblem* localproblem,
                             int cone) {
   int coneStart = problem->coneIndex[cone];
-  NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone + 1] - coneStart,
-                        &localproblem->M->dense);
+  CHECK_RETURN(NM_extract_diag_block(problem->M, cone, coneStart,
+                                     problem->coneIndex[cone + 1] - coneStart,
+                                     &localproblem->M->dense) == NUMERICS_OK);
 }
 
 /* swap two indices */

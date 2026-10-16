@@ -15,6 +15,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "graph_tools.h"
 #include "lcp_cst.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"  // for verbose
 #include "siconos_debug.h"
 
@@ -238,8 +239,9 @@ void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem* problem, 
           // printf("BEFORE ::: [%d] Color %d, lefts[%d] = %e, right = %e, w[%d] = %e\n",
           // thread, color, row, lefts[row], right, row, w[row]);
 
-          NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color], sum_sizes[color + 1],
-                            M, permutation, z, &lefts[row], &right, false);
+          CHECK_RETURN(NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color],
+                                         sum_sizes[color + 1], M, permutation, z, &lefts[row],
+                                         &right, false) == NUMERICS_OK);
 
           // printf("AFTER ::: [%d] Color %d, lefts[%d] = %e, right = %e, w[%d] = %e\n",
           // thread, color, row, lefts[row], right, row, w[row]);

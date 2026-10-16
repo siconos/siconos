@@ -184,7 +184,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
           // (iter - 1) * g + j_g); fflush(stdout); sleep(0.5);
         }
 
-        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_right, 0);
+        CHECK_RETURN(NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z,
+                                   t_right, 0) == NUMERICS_OK);
       }
 
       /* Start computing w_{iter} */
@@ -206,7 +207,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
           // g + j_g); fflush(stdout); sleep(0.5);
         }
 
-        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_left, 0);
+        CHECK_RETURN(NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z,
+                                   t_left, 0) == NUMERICS_OK);
       }
 
       /* Reset error when first group is back */
@@ -226,8 +228,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
         // NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
 
         for (int i = start_i; i < start_i + size_i; i++) {
-          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right,
-                                        0);
+          CHECK_RETURN(NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z,
+                                                     t_left, t_right, 0) == NUMERICS_OK);
           w[i] += t_right[i - start_i];
 
           local_err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
@@ -238,8 +240,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
         /* Update z, w, and error */
         for (int i = start_i; i < start_i + size_i; i++) {
           /* Diagonal block */
-          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right,
-                                        0);
+          CHECK_RETURN(NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z,
+                                                     t_left, t_right, 0) == NUMERICS_OK);
           // NM_row_prod_no_diag1x1(size_i, i - start_i, i - start_i, M, z, &t_right[i -
           // start_i], 0);
 

@@ -108,8 +108,9 @@ void soclcp_projection_update_with_regularization(
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   int coneStart = problem->coneIndex[cone];
-  NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone + 1] - coneStart,
-                        &localproblem->M->dense);
+  CHECK_RETURN(NM_extract_diag_block(problem->M, cone, coneStart,
+                                     problem->coneIndex[cone + 1] - coneStart,
+                                     &localproblem->M->dense) == NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current cone. ****/

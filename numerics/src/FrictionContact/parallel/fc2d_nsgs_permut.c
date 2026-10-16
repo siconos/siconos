@@ -76,7 +76,8 @@ static SparseBlockCoordinateMatrix* fc3d_extract_diagonal_blocks(
     //    sbcm->blocksize1[contact]=2;
     if (problem->M->storageType != NM_SPARSE_BLOCK)
       sbcm->block[contact] = (double*)calloc(sizeof(double*), 4);
-    NM_extract_diag_block2(problem->M, (int)contact, &sbcm->block[contact]);
+    CHECK_RETURN(NM_extract_diag_block2(problem->M, (int)contact, &sbcm->block[contact]) ==
+                 NUMERICS_OK);
   }
 
   return sbcm;
@@ -109,8 +110,9 @@ static void fc2d_nsgs_buildLocalProblem(int contact, FrictionContactProblem* pro
 
   local_problem->q[0] = problem->q[contact * 2];
   local_problem->q[1] = problem->q[contact * 2 + 1];
-  NM_row_prod_no_diag2(2 * (size_t)problem->numberOfContacts, contact, 2 * (size_t)contact,
-                       problem->M, reaction, local_problem->q, false);
+  CHECK_RETURN(NM_row_prod_no_diag2(2 * (size_t)problem->numberOfContacts, contact,
+                                    2 * (size_t)contact, problem->M, reaction,
+                                    local_problem->q, false) == NUMERICS_OK);
 
   DEBUG_EXPR(NM_display(local_problem->M););
   DEBUG_EXPR(NV_display(local_problem->q, 2););

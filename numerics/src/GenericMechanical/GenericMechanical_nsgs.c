@@ -273,8 +273,9 @@ static void gmp_build_local_q(const GenericMechanicalProblem* problem, int block
    * zeros the diagonal block in the x vector and restores it; the cast below
    * reflects that the function is not const-correct, but the input vector is
    * logically unchanged on return. */
-  NM_row_prod_no_diag(problem->globalSize, block_size, blockRowIndex, row_start, problem->M,
-                      (double*)reaction, q_local, NULL, 0);
+  CHECK_RETURN(NM_row_prod_no_diag(problem->globalSize, block_size, blockRowIndex, row_start,
+                                   problem->M, (double*)reaction, q_local, NULL,
+                                   0) == NUMERICS_OK);
 }
 
 /* ===========================================================================
@@ -369,11 +370,12 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
 
     double* diagBlock = 0;
     if (storageType == NM_DENSE) {
-      NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
-                            &bufForLocalProblemDense);
+      CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                         &bufForLocalProblemDense) == NUMERICS_OK);
       diagBlock = bufForLocalProblemDense;
     } else {
-      NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size, &diagBlock);
+      CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                         &diagBlock) == NUMERICS_OK);
     }
     DEBUG_PRINT_MAT_STR("diagBlock", diagBlock, (unsigned)local_size, (unsigned)local_size);
     DEBUG_PRINT_MAT_STR("Rlocal", reaction + global_offset, (unsigned)local_size, 1);
@@ -501,11 +503,12 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
       /* Extract the diagonal block for the local solver. */
       double* diagBlock = 0;
       if (storageType == NM_DENSE) {
-        NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
-                              &ws->diag_dense_buffer);
+        CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                           &ws->diag_dense_buffer) == NUMERICS_OK);
         diagBlock = ws->diag_dense_buffer;
       } else {
-        NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size, &diagBlock);
+        CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                           &diagBlock) == NUMERICS_OK);
       }
 
       sol = reaction + global_offset;

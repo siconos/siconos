@@ -199,7 +199,8 @@ void fc3d_projection_update_with_regularization(int contact,
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
 
-  NM_copy_diag_block3(main_problem->M, contact, &localproblem->M->dense);
+  CHECK_RETURN(NM_copy_diag_block3(main_problem->M, contact, &localproblem->M->dense) ==
+               NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
@@ -263,7 +264,8 @@ void fc3d_projection_update_with_regularization_parallel(int contact,
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
 
-  NM_copy_diag_block3(problem->M, contact, &localproblem->M->dense);
+  CHECK_RETURN(NM_copy_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+               NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/

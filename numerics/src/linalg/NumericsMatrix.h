@@ -659,8 +659,8 @@ size_t NM_nnz(const NumericsMatrix* M);
  *  \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by
  * caller. In case of SBM case **Bout contains the resulting block (from the SBM).
  */
-void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size,
-                           double** Block);
+int NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size,
+                          double** Block);
 SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
 NumericsMatrix* NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
 /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
@@ -671,7 +671,7 @@ NumericsMatrix* NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
  * caller. In case of SBM case **Bout contains the resulting block (from the SBM).
  */
 
-void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block);
+int NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block);
 
 /** get a 2x2 diagonal block of a NumericsMatrix. No allocation is done.
  *
@@ -681,7 +681,7 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block)
  * caller. In case of SBM case **Bout contains the resulting block (from the SBM).
  */
 
-void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double** Block);
+int NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double** Block);
 
 /** get a 5x5 diagonal block of a NumericsMatrix. No allocation is done.
  *
@@ -690,7 +690,7 @@ void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double** Block)
  *  \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by
  * caller. In case of SBM case **Bout contains the resulting block (from the SBM).
  */
-void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block);
+int NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block);
 
 /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
  *
@@ -700,7 +700,7 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block)
  * In all cases (dense, sbm, and sparse) (*Block) must be allocated by caller.
  * A copy is always performed
  */
-void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block);
+int NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block);
 
 void NM_dense_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold);
 
@@ -718,7 +718,7 @@ int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B);
  *  \param M the matrix
  *  \param alpha the term to add
  */
-void NM_add_to_diag3(NumericsMatrix* M, double alpha);
+int NM_add_to_diag3(NumericsMatrix* M, double alpha);
 
 /** Add a constant term to the diagonal elements, when the block of the SBM
  *  are 5x5
@@ -726,7 +726,7 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha);
  *  \param M the matrix
  *  \param alpha the term to add
  */
-void NM_add_to_diag5(NumericsMatrix* M, double alpha);
+int NM_add_to_diag5(NumericsMatrix* M, double alpha);
 
 /** Add two matrices with coefficients C = alpha*A + beta*B
  *
@@ -796,8 +796,8 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double* x, const doub
    multiplied \param[in] x the vector to be multiplied \param[in,out] y the resulting vector
     \param[in] init = 0 for y += Ax, =1 for y = Ax
 */
-void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
-                 const double* const x, double* y, int init);
+int NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
+                const double* const x, double* y, int init);
 
 /**
     Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A
@@ -813,8 +813,8 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A,
     \param[in] xsave storage for saving the part of x set to 0
     \param[in] init if True y = Ax, else y += Ax
 */
-void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start,
-                         NumericsMatrix* A, double* x, double* y, double* xsave, bool init);
+int NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start,
+                        NumericsMatrix* A, double* x, double* y, double* xsave, bool init);
 
 /**
     Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (3
@@ -828,8 +828,8 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
     \param[in,out] y the resulting vector
     \param[in] init if True y = Ax, else y += Ax
 */
-void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
-                          double* x, double* y, bool init);
+int NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
+                         double* x, double* y, bool init);
 
 /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2
    rows and sizeX columns) \param[in] sizeX dim of the vector x \param[in] block_start block
@@ -838,11 +838,11 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
     \param[in,out] y the resulting vector
     \param[in] init if True y = Ax, else y += Ax
 */
-void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
-                          double* x, double* y, bool init);
+int NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
+                         double* x, double* y, bool init);
 
-void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
-                            double* x, double* y, bool init);
+int NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A,
+                           double* x, double* y, bool init);
 
 /** \brief Submatrix vector product
  *
@@ -861,8 +861,8 @@ void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, Num
  *
  *  \warning Does not support NM_SPARSE_BLOCK format
  */
-void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A,
-                   const double* x, double* y, int init);
+int NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A,
+                  const double* x, double* y, int init);
 
 /** \brief Submatrix vector product, for diagonal blocks, one row only
  *
@@ -885,8 +885,8 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
  *
  *  \warning Does not support NM_SPARSE_BLOCK format
  */
-void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A,
-                                   const double* x, double* left, double* right, int init);
+int NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A,
+                                  const double* x, double* left, double* right, int init);
 
 /** \brief Row of matrix times vector, for lcp_pgs_graph_* solvers
  *
@@ -912,21 +912,21 @@ void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, Numer
  *
  *  \warning Does not support NM_SPARSE_BLOCK format
  */
-void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
-                       size_t col_start_right, NumericsMatrix* A, size_t* permutation,
-                       const double* x, double* left, double* right, bool init);
+int NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left,
+                      size_t col_start_right, NumericsMatrix* A, size_t* permutation,
+                      const double* x, double* left, double* right, bool init);
 
 /**
  * Same as NM_row_prod_no_diag2 but usable in parallel (does not modify x)
  */
-void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, double* x, double* y, bool init);
+int NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start,
+                                  NumericsMatrix* A, double* x, double* y, bool init);
 
 /**
  * Same as NM_row_prod_no_diag3 but usable in parallel (does not modify x)
  */
-void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
-                                   NumericsMatrix* A, double* x, double* y, bool init);
+int NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start,
+                                  NumericsMatrix* A, double* x, double* y, bool init);
 
 /** \brief Get the inverse of each diagonal element of a matrix
  *

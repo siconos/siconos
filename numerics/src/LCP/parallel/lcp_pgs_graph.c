@@ -82,7 +82,8 @@ void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, 
         i = partitions[color][v];
         zi = q[i];
         DEBUG_PRINTF("zi = %e\n", zi);
-        NM_row_prod_no_diag1x1((size_t)n, (int)i, i, M, z, &zi, false);
+        CHECK_RETURN(NM_row_prod_no_diag1x1((size_t)n, (int)i, i, M, z, &zi, false) ==
+                     NUMERICS_OK);
         DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
         zi = -(zi)*diag[i];
 

@@ -38,9 +38,10 @@
 #include "SiconosBlas.h"                 // for cblas_ddot, cblas_dgemv, cbl...
 #include "SparseBlockMatrix.h"           // for SBM_zero_matrix_for_multiply
 #include "numericsMatrixTestFunction.h"  // for test_build_first_4_NM, NM_de...
-#include "numerics_verbose.h"            // for numerics_error
-#include "sanitizer.h"                   // for MSAN_INIT_VAR
-#include "siconos_debug.h"               // for DEBUG_EXPR, DEBUG_PRINTF
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for numerics_error
+#include "sanitizer.h"         // for MSAN_INIT_VAR
+#include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINTF
 
 static double test_NM_row_prod_no_diag3(NumericsMatrix* A, int number_of_prod) {
   int n = A->size0;
@@ -79,7 +80,8 @@ static double test_NM_row_prod_no_diag3(NumericsMatrix* A, int number_of_prod) {
   /* while(1){ */
   {
     for (int contact = 0; contact < nc; contact++) {
-      NM_row_prod_no_diag3(n, contact, 3 * contact, A, reaction, &q[contact], false);
+      CHECK_RETURN(NM_row_prod_no_diag3(n, contact, 3 * contact, A, reaction, &q[contact],
+                                        false) == NUMERICS_OK);
     }
   }
   clock_t t2 = clock();

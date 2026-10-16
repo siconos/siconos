@@ -14,7 +14,8 @@
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for verbose
 #include "siconos_debug.h"
 
 void lcp_jacobi_parallel(LinearComplementarityProblem* problem, double* z, double* w,
@@ -71,7 +72,7 @@ void lcp_jacobi_parallel(LinearComplementarityProblem* problem, double* z, doubl
     for (int i = 0; i < n; i++) {
       w[i] = q[i];
       DEBUG_PRINTF("zi = %e\n", new_z[i]);
-      NM_row_prod(n, 1, i, M, z, &w[i], false);
+      CHECK_RETURN(NM_row_prod(n, 1, i, M, z, &w[i], false) == NUMERICS_OK);
       DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], new_z[i]);
       err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
 
