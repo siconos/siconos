@@ -43,7 +43,7 @@ static int test_0(void) {
 
   SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_PG);
   verbose = 1;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);

@@ -1032,6 +1032,15 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              "Global 3D ADMM solver (wrapped)")
       .value("SICONOS_GLOBAL_FRICTION_3D_IPM", FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM,
              "Global 3D Interior-point method solver")
+      .value("SICONOS_GLOBAL_FRICTION_3D_IPM_SNM",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM_SNM,
+             "Global 3D Interior-point method SNM solver")
+      .value("SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR,
+             "Global 3D Interior-point method SNM solver (wrapped)")
+      .value("SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX,
+             "Global 3D Interior-point method SNM solver with prox")
 
       /** Global 2D Frictional Contact solvers */
       .value("SICONOS_GLOBAL_FRICTION_2D_NSN_AC",
