@@ -34,7 +34,7 @@
 
 void relay_pgs(RelayProblem* problem, double* z, double* w, int* info,
                SolverOptions* options) {
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* q = problem->q;
   int n = problem->size;
   double* a = problem->lb;

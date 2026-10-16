@@ -22,7 +22,7 @@
 #include <stdlib.h>                 // for free
 #include "NonSmoothDrivers.h"       // for variationalInequality_driver
 #include "NumericsFwd.h"            // for VariationalInequality, SolverOptions
-#include "NumericsMatrix.h"         // for NM_create_from_data, NM_DENSE
+#include "NumericsMatrix.h"         // for NM_create_with_data, NM_DENSE
 #include "SiconosSets.h"            // for box_constraints, SICONOS_SET_BOX
 #include "SolverOptions.h"          // for SolverOptions, solver_options_delete
 #include "VI_cst.h"                 // for SICONOS_VI_BOX_AVI_LSA
@@ -71,7 +71,7 @@ static void F_ZI(void* problem, int n, double* restrict l, double* restrict F)
 
 static void nabla_F_ZI(void* problem, int n, double* restrict l, NumericsMatrix* restrict nabla_F)
 {
-  double* restrict nabla_F_dense = nabla_F->matrix0;
+  double* restrict nabla_F_dense = nabla_F->dense;
   data_ZI* d = (data_ZI*) VI_get_env(problem);
 
   double l0 = l[0];
@@ -131,7 +131,7 @@ int main(void)
 //  options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 10;
 
   problem->env = &sim_data;
-  problem->nabla_F = NM_create(NM_DENSE, N, N);
+  problem->nabla_F = NM_create_with_data(NM_DENSE, N, N, calloc(N * N, sizeof(double)));
 
   box_constraints box;
   double lb[] = {-1.0, -1.0};

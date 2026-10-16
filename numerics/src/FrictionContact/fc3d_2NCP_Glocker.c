@@ -88,7 +88,7 @@ void computeE(unsigned int i, double* e) {
 
 /* Compute and save MGlocker */
 void computeMGlocker() {
-  double* MLocal = localFC3D->M->matrix0;
+  double* MLocal = localFC3D->M->dense;
 
   /* Local function used in update */
 
@@ -171,8 +171,8 @@ int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
     int inc = n * in;
     // === Fill MLocal(3,3) according to the current contact number ===
     /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-    double* MM = MGlobal->matrix0;
-    double* MLocal = localproblem->M->matrix0;
+    double* MM = MGlobal->dense;
+    double* MLocal = localproblem->M->dense;
     MLocal[0] = MM[inc + in];
     MLocal[1] = MM[inc + it];
     MLocal[2] = MM[inc + is];
@@ -185,9 +185,10 @@ int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   } else if (storageType == NM_SPARSE_BLOCK) {
-    int diagPos = SBM_diagonal_block_index(MGlobal->matrix1, contact);
-    localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-    /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
+    int diagPos = SBM_diagonal_block_index(MGlobal->sparse_block, contact);
+    localproblem->M->dense = MGlobal->sparse_block->block[diagPos];
+    /*     cblas_dcopy(9, MGlobal->sparse_block->block[diagPos], 1,localproblem->M->dense , 1);
+     */
   } else
     return numerics_error("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -",
                           "unknown storage type for matrix M");

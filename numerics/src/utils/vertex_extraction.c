@@ -42,8 +42,8 @@
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis) {
   unsigned nrows = P->size_ineq;
-  assert(P->H->matrix0);
-  double* restrict H = P->H->matrix0;
+  assert(P->H->dense);
+  double* restrict H = P->H->dense;
   double* restrict K = P->K;
   lprec* lp;
   lp = make_lp(nrows, nrows + size);

@@ -107,8 +107,9 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem* problem, double* z, doub
 
         lefts[row] = 0.;
 
-        NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color], sum_sizes[color + 1], M,
-                          permutation, z, &lefts[row], &right, false);
+        CHECK_RETURN(NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color],
+                                       sum_sizes[color + 1], M, permutation, z, &lefts[row],
+                                       &right, false) == NUMERICS_OK);
 
         w[row] += right + z[row] / diag[row];
 

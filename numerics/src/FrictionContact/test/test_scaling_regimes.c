@@ -67,7 +67,7 @@ static const ScalingCase SCALINGS[] = {
      SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED, "wgt_pc_mix"},
     {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
      SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "wgt_pv_max"}};
-static const int N_SCALINGS = (int)(sizeof(SCALINGS) / sizeof(SCALINGS[0]));
+#define N_SCALINGS ((int)(sizeof(SCALINGS) / sizeof(SCALINGS[0])))
 
 static const char* REGIME_NAMES[] = {"sticking", "separation", "sliding"};
 static const char* MAGN_NAMES[] = {"balanced", "r_large", "u_large"};
@@ -153,8 +153,8 @@ static FrictionContactProblem* make_identity_problem(const double r[3], const do
   problem->q = (double*)malloc(3 * sizeof(double));
   for (int i = 0; i < 3; ++i) problem->q[i] = u[i] - r[i];
 
-  NumericsMatrix* M = NM_create(NM_DENSE, 3, 3);
-  for (int i = 0; i < 3; ++i) M->matrix0[i * 3 + i] = 1.0;
+  NumericsMatrix* M = NM_create_with_data(NM_DENSE, 3, 3, calloc(9, sizeof(double)));
+  for (int i = 0; i < 3; ++i) M->dense[i * 3 + i] = 1.0;
   problem->M = M;
   return problem;
 }
@@ -164,8 +164,8 @@ static void free_problem(FrictionContactProblem* problem) {
   free(problem->mu);
   free(problem->q);
   if (problem->M) {
-    free(problem->M->matrix0);
-    problem->M->matrix0 = NULL;
+    free(problem->M->dense);
+    problem->M->dense = NULL;
     NM_free(problem->M);
   }
   free(problem);

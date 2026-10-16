@@ -16,8 +16,7 @@
 # limitations under the License.
 #
 from numpy import double, finfo
-from scipy.sparse import lil_matrix
-from scipy.sparse.csr import csc_matrix, csr_matrix
+from scipy.sparse import csc_matrix, csr_matrix, lil_matrix
 from siconos.numerics import (
     SBM_from_csparse,
     SBM_get_value,

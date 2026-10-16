@@ -44,8 +44,8 @@ extern "C" {
 
 /** The Fischer Burmeister function signature for a 3x3 block.
  */
-typedef void (*FischerBurmeisterFun3x3Ptr)(double* reaction, double* velocity, double mu,
-                                           double* rho, double* F, double* A, double* B);
+typedef int (*FischerBurmeisterFun3x3Ptr)(double* reaction, double* velocity, double mu,
+                                          double* rho, double* F, double* A, double* B);
 
 /** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
  *  local (reduced) frictional contact problem in the dense form
@@ -75,12 +75,12 @@ void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem* problem, do
    problemSize) \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x
    problemSize)
 */
-void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
-                                    FischerBurmeisterFun3x3Ptr computeACFun3x3,
-                                    double* reaction3D, double* velocity3D, double* mu,
-                                    double* rho3D, double* output_blocklist3,
-                                    double* output_blocklist3x3_1,
-                                    double* output_blocklist3x3_2);
+int fc3d_FischerBurmeisterFunction(unsigned int problemSize,
+                                   FischerBurmeisterFun3x3Ptr computeACFun3x3,
+                                   double* reaction3D, double* velocity3D, double* mu,
+                                   double* rho3D, double* output_blocklist3,
+                                   double* output_blocklist3x3_1,
+                                   double* output_blocklist3x3_2);
 
 int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem* problem,
                                                           double* z, double* w,

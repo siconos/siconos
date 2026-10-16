@@ -117,7 +117,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p) {
     numerics_printf_verbose(0, "No A matrix:");
     if (p->M && !p->M->storageType) {
       numerics_printf_verbose(0, "A matrix from M:");
-      NM_dense_display(p->M->matrix0, n, n, n + m);
+      NM_dense_display(p->M->dense, n, n, n + m);
     }
   }
   if (p->B) {
@@ -127,7 +127,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p) {
     numerics_printf_verbose(0, "No B matrix:");
     if (p->M && !p->M->storageType) {
       numerics_printf_verbose(0, "B matrix from M:");
-      NM_dense_display(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
+      NM_dense_display(p->M->dense + n * (n + m) + n, m, m, n + m);
     }
   }
 
@@ -138,7 +138,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p) {
     numerics_printf_verbose(0, "No C matrix:");
     if (p->M && !p->M->storageType) {
       numerics_printf_verbose(0, "C matrix from M:");
-      NM_dense_display(p->M->matrix0 + n * (n + m), n, m, n + m);
+      NM_dense_display(p->M->dense + n * (n + m), n, m, n + m);
     }
   }
 
@@ -149,7 +149,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p) {
     numerics_printf_verbose(0, "No D matrix:");
     if (p->M && !p->M->storageType) {
       numerics_printf_verbose(0, "D matrix from M:");
-      NM_dense_display(p->M->matrix0 + n, m, n, n + m);
+      NM_dense_display(p->M->dense + n, m, n, n + m);
     }
   }
   if (p->a) {
@@ -190,8 +190,10 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
       fprintf(file, "%d ", problem->blocksIsComp[i]);
     }
     fprintf(file, "\n");
-    NM_write_in_file(problem->M, file);
-
+    {
+      int nm_info = NM_write_in_file(problem->M, file);
+      if (nm_info != NUMERICS_OK) return nm_info;
+    }
     for (i = 0; i < problem->M->size1; i++) {
       fprintf(file, "%32.24e ", problem->q[i]);
     }
@@ -376,7 +378,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   problem->blocksIsComp[0] = 0;
   problem->blocksIsComp[1] = 1;
 
-  problem->M = NM_create_from_data(NM_DENSE, NbLines, n + m, vecM);
+  problem->M = NM_create_with_data(NM_DENSE, NbLines, n + m, vecM);
 
   problem->isStorageType1 = 1;  // Both problems seems to be stored
   problem->isStorageType2 = 1;  // Both problems seems to be stored
@@ -480,28 +482,28 @@ MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(
   mlcp->A = (double*)calloc(n * n, sizeof(double));
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < n; j++) {
-      mlcp->A[i + j * n] = problem->M->matrix0[i + j * (m + n)];
+      mlcp->A[i + j * n] = problem->M->dense[i + j * (m + n)];
     }
   }
 
   mlcp->B = (double*)calloc(m * m, sizeof(double));
   for (size_t i = 0; i < m; i++) {
     for (size_t j = 0; j < m; j++) {
-      mlcp->B[i + j * m] = problem->M->matrix0[i + n + (j + n) * (m + n)];
+      mlcp->B[i + j * m] = problem->M->dense[i + n + (j + n) * (m + n)];
     }
   }
 
   mlcp->C = (double*)calloc(n * m, sizeof(double));
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < m; j++) {
-      mlcp->C[i + j * m] = problem->M->matrix0[i + (j + n) * (m + n)];
+      mlcp->C[i + j * m] = problem->M->dense[i + (j + n) * (m + n)];
     }
   }
 
   mlcp->D = (double*)calloc(m * n, sizeof(double));
   for (size_t i = 0; i < m; i++) {
     for (size_t j = 0; j < n; j++) {
-      mlcp->D[i + j * n] = problem->M->matrix0[i + n + j * (m + n)];
+      mlcp->D[i + j * n] = problem->M->dense[i + n + j * (m + n)];
     }
   }
 

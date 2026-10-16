@@ -39,7 +39,7 @@ int add_square_triplet() {
   // product of triplet matrices into triplet matrix
   NumericsMatrix* A = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A, 0);
-  A->matrix2->origin = NSM_TRIPLET;
+  A->sparse->origin = NSM_TRIPLET;
   NM_entry(A, 0, 0, 1);
   NM_entry(A, 0, 1, 2);
   NM_entry(A, 0, 2, 3);
@@ -49,7 +49,7 @@ int add_square_triplet() {
 
   NumericsMatrix* B = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B, 0);
-  B->matrix2->origin = NSM_TRIPLET;
+  B->sparse->origin = NSM_TRIPLET;
   NM_entry(B, 0, 0, 1);
   NM_entry(B, 1, 1, 2);
   NM_entry(B, 2, 2, 3);
@@ -62,7 +62,7 @@ int add_square_triplet() {
 
   NumericsMatrix* Cref = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(Cref, 0);
-  Cref->matrix2->origin = NSM_TRIPLET;
+  Cref->sparse->origin = NSM_TRIPLET;
   NM_entry(Cref, 0, 0, 4);
   NM_entry(Cref, 0, 1, 4);
   NM_entry(Cref, 0, 2, 6);
@@ -89,7 +89,7 @@ int add_square_csc() {
   // product of csc matrices into csc matrix
   NumericsMatrix* A = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(A, 0);
-  A->matrix2->origin = NSM_CSC;
+  A->sparse->origin = NSM_CSC;
   NM_entry(A, 0, 0, 1);
   NM_entry(A, 0, 1, 2);
   NM_entry(A, 0, 2, 3);
@@ -99,7 +99,7 @@ int add_square_csc() {
 
   NumericsMatrix* B = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(B, 0);
-  B->matrix2->origin = NSM_CSC;
+  B->sparse->origin = NSM_CSC;
   NM_entry(B, 0, 0, 1);
   NM_entry(B, 1, 1, 2);
   NM_entry(B, 2, 2, 3);
@@ -112,7 +112,7 @@ int add_square_csc() {
 
   NumericsMatrix* Cref = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(Cref, 0);
-  Cref->matrix2->origin = NSM_CSC;
+  Cref->sparse->origin = NSM_CSC;
   NM_entry(Cref, 0, 0, 4);
   NM_entry(Cref, 0, 1, 4);
   NM_entry(Cref, 0, 2, 6);
@@ -138,7 +138,7 @@ int add_rectangle_triplet() {
   // product of triplet matrices into triplet matrix
   NumericsMatrix* A = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A, 0);
-  A->matrix2->origin = NSM_TRIPLET;
+  A->sparse->origin = NSM_TRIPLET;
   NM_entry(A, 0, 0, 1);
   NM_entry(A, 0, 1, 2);
   NM_entry(A, 0, 2, 3);
@@ -150,7 +150,7 @@ int add_rectangle_triplet() {
 
   NumericsMatrix* B = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B, 0);
-  B->matrix2->origin = NSM_TRIPLET;
+  B->sparse->origin = NSM_TRIPLET;
   NM_entry(B, 0, 0, 1);
   NM_entry(B, 1, 1, 2);
   NM_entry(B, 2, 2, 3);
@@ -166,7 +166,7 @@ int add_rectangle_triplet() {
 
   NumericsMatrix* Cref = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(Cref, 0);
-  Cref->matrix2->origin = NSM_TRIPLET;
+  Cref->sparse->origin = NSM_TRIPLET;
   NM_entry(Cref, 0, 0, 3);
   NM_entry(Cref, 0, 1, 2);
   NM_entry(Cref, 0, 2, 3);

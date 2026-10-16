@@ -4,7 +4,9 @@
 
 #include "NumericsFwd.h"     // for NumericsMatrix
 #include "NumericsMatrix.h"  // for NumericsMatrix, NM_clear, NM_new, NM_writ...
-#include "pinv.h"            // for pinv
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
+#include "pinv.h"  // for pinv
 int main(void) {
   int n = 4;
   int m = 5;
@@ -42,23 +44,23 @@ int main(void) {
   Wnum->storageType = 0;
   Wnum->size0 = n;
   Wnum->size1 = m;
-  Wnum->matrix1 = NULL;
-  Wnum->matrix2 = NULL;
+  Wnum->sparse_block = NULL;
+  Wnum->sparse = NULL;
   Wnum->internalData = NULL;
-  Wnum->matrix0 = W;
+  Wnum->dense = W;
 
   FILE* file1 = fopen("dataW.dat", "w");
-  NM_write_in_file_scilab(Wnum, file1);
+  if (NM_write_in_file_scilab(Wnum, file1) != NUMERICS_OK) return 1;
   fclose(file1);
 
   NumericsMatrix* WnumpInv = NM_new();
   WnumpInv->storageType = 0;
   WnumpInv->size0 = n;
   WnumpInv->size1 = m;
-  WnumpInv->matrix1 = NULL;
-  WnumpInv->matrix2 = NULL;
+  WnumpInv->sparse_block = NULL;
+  WnumpInv->sparse = NULL;
   WnumpInv->internalData = NULL;
-  WnumpInv->matrix0 = Wpinv;
+  WnumpInv->dense = Wpinv;
 
   double tol = 1e-24;
   memcpy(Wpinv, W, n * m * sizeof(double));
@@ -142,7 +144,7 @@ int main(void) {
   if (err < 1e-16) info = 0;
 
   FILE* file2 = fopen("dataWPseudoInverse.dat", "w");
-  NM_write_in_file_scilab(WnumpInv, file2);
+  if (NM_write_in_file_scilab(WnumpInv, file2) != NUMERICS_OK) return 1;
   fclose(file2);
 
   free(Wpinvtest);

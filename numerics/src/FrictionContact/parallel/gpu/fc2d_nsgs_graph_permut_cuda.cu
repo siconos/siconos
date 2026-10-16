@@ -87,8 +87,8 @@ static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
   int diagPos;
 
   for (size_t i = 0; i < nc; ++i) {
-    diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
-    block = problem->M->matrix1->block[diagPos];
+    diagPos = SBM_diagonal_block_index(problem->M->sparse_block, i);
+    block = problem->M->sparse_block->block[diagPos];
     for (int j = 0; j < 4; j++) sbcm[i * 4 + j] = block[j];
   }
 
@@ -326,20 +326,20 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   color_graph_block_permut(nc, problem->M, &n_colors, &sum_sizes, inv_permutation);
 
   /* Create SBM if it does not exist */
-  if (!problem->M->matrix1) {
+  if (!problem->M->sparse_block) {
     SparseBlockStructuredMatrix* SBM_problem = SBM_new();
     switch (problem->M->storageType) {
       // Convert DENSE -> SBM
       case NM_DENSE: {
         SBM_from_dense(problem->dimension, problem->M->size1, problem->M->size0,
-                       problem->M->matrix0, SBM_problem);
+                       problem->M->dense, SBM_problem);
         break;
       }
       // Convert SPARSE -> SBM
       case NM_SPARSE: {
         // Get Csparse matrix
         CSparseMatrix* sparse;
-        if (problem->M->matrix2->origin == NSM_CSR) {
+        if (problem->M->sparse->origin == NSM_CSR) {
           sparse = NM_csr(problem->M);
         } else {
           sparse = NM_csc_trans(problem->M);
@@ -349,7 +349,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
         break;
       }
     }
-    problem->M->matrix1 = SBM_problem;
+    problem->M->sparse_block = SBM_problem;
   }
 
   /* Switch storageType to SBM temporarily */
@@ -362,12 +362,12 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   for (size_t i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
-  SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
+  SBM_column_permutation(rowIndex, problem->M->sparse_block, SBM_col_permuted);
   SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
   free(rowIndex);
 
-  SparseBlockStructuredMatrix* old_matrix1 = problem->M->matrix1;
-  problem->M->matrix1 = SBM_permuted;
+  SparseBlockStructuredMatrix* old_matrix1 = problem->M->sparse_block;
+  problem->M->sparse_block = SBM_permuted;
 
   /* Get diagonal blocks and determinants */
   double* diagonal_blocks = fc2d_extract_diagonal_blocks(problem);
@@ -390,7 +390,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
 
   SparseBlockStructuredMatrix* SBM_permuted_with_diag = SBM_new();
   SBM_copy(SBM_permuted, SBM_permuted_with_diag);
-  problem->M->matrix1 = SBM_permuted_with_diag;
+  problem->M->sparse_block = SBM_permuted_with_diag;
 
   // This only sets elements to 0, but I think they will still be present (as 0s) in the CSR
   // conversion, unless the conversion function checks for 0 elements
@@ -686,7 +686,7 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
   CHECK_CUDA(cudaStreamDestroy(stream));
 
   /* Restore problem before permutation */
-  problem->M->matrix1 = old_matrix1;
+  problem->M->sparse_block = old_matrix1;
   problem->q = old_q;
   problem->mu = old_mu;
 

@@ -28,6 +28,8 @@
 
 #include "NumericsMatrix.h"
 #include "numericsMatrixTestFunction.h"
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 int main(void) {
   printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
 
@@ -70,8 +72,8 @@ int main(void) {
   /* free memory */
 
   for (i = 0; i < nmm; i++) {
-    if (NMM[i]->matrix0) free(NMM[i]->matrix0);
-    if (NMM[i]->matrix1) SBM_clear(NMM[i]->matrix1, SBM_FREE_ALL);
+    if (NMM[i]->dense) free(NMM[i]->dense);
+    if (NMM[i]->sparse_block) SBM_clear(NMM[i]->sparse_block, SBM_FREE_ALL);
     free(NMM[i]);
   }
 

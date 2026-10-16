@@ -26,6 +26,8 @@
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 static int compare_csc(CSparseMatrix* A, CSparseMatrix* B) {
   CS_INT m, n, nz, p, k, j, *Ap, *Ai, *Bi, *Bp;
@@ -125,12 +127,13 @@ static int test_NM_conversion(NumericsMatrix* M) {
 };
 
 static int test_read_write_sparse(NumericsMatrix* M_orig) {
-  NumericsMatrix* M = NM_new();
-
-  NM_copy(M_orig, M);
+  NumericsMatrix* M = NM_copy(M_orig);
 
   FILE* foutput = fopen("matrix_sparse_triplet.dat", "w");
-  NM_write_in_file(M, foutput);
+  {
+    int nm_info = NM_write_in_file(M, foutput);
+    if (nm_info != NUMERICS_OK) return 1;
+  }
   fclose(foutput);
 
   FILE* finput = fopen("matrix_sparse_triplet.dat", "r");
@@ -147,12 +150,15 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   CSparseMatrix* csc = NM_csc(M);
 
   NM_clearSparseStorage(M_new);
-  M_new->matrix2->origin = NSM_CSC;
-  M_new->matrix2->csc = csc;
+  M_new->sparse->origin = NSM_CSC;
+  M_new->sparse->csc = csc;
   // NM_display(M_new);
 
   foutput = fopen("matrix_sparse_csc.dat", "w");
-  NM_write_in_file(M_new, foutput);
+  {
+    int nm_info = NM_write_in_file(M_new, foutput);
+    if (nm_info != NUMERICS_OK) return 1;
+  }
   fclose(foutput);
 
   finput = fopen("matrix_sparse_csc.dat", "r");
@@ -161,7 +167,7 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
 
   is_equal = NM_equal(M_new, M_csc);
   NM_free(M_csc);
-  M_new->matrix2->csc = NULL;
+  M_new->sparse->csc = NULL;
   if (is_equal)
     printf("equal csc\n");
   else
@@ -170,12 +176,15 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
   CSparseMatrix* csr = NM_csr(M);
 
   NM_clearSparseStorage(M_new);
-  M_new->matrix2->origin = NSM_CSR;
-  M_new->matrix2->csr = csr;
+  M_new->sparse->origin = NSM_CSR;
+  M_new->sparse->csr = csr;
   // NM_display(M_new);
 
   foutput = fopen("matrix_sparse_csr.dat", "w");
-  NM_write_in_file(M_new, foutput);
+  {
+    int nm_info = NM_write_in_file(M_new, foutput);
+    if (nm_info != NUMERICS_OK) return 1;
+  }
   fclose(foutput);
 
   finput = fopen("matrix_sparse_csr.dat", "r");
@@ -185,7 +194,7 @@ static int test_read_write_sparse(NumericsMatrix* M_orig) {
 
   is_equal = NM_equal(M_new, M_csr);
   NM_free(M_csr);
-  M_new->matrix2->csr = NULL;
+  M_new->sparse->csr = NULL;
   NM_free(M_new);
   NM_free(M);
 

@@ -110,7 +110,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
    */
   CSparseMatrix* S = NULL;
   if (M->storageType == NM_SPARSE) {
-    if (M->matrix2->origin == NSM_CSR) {
+    if (M->sparse->origin == NSM_CSR) {
       S = NM_csr(M);
     } else {
       S = NM_csc_trans(M);
@@ -184,7 +184,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
           // (iter - 1) * g + j_g); fflush(stdout); sleep(0.5);
         }
 
-        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_right, 0);
+        CHECK_RETURN(NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z,
+                                   t_right, 0) == NUMERICS_OK);
       }
 
       /* Start computing w_{iter} */
@@ -206,7 +207,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
           // g + j_g); fflush(stdout); sleep(0.5);
         }
 
-        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_left, 0);
+        CHECK_RETURN(NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z,
+                                   t_left, 0) == NUMERICS_OK);
       }
 
       /* Reset error when first group is back */
@@ -226,20 +228,20 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
         // NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
 
         for (int i = start_i; i < start_i + size_i; i++) {
-          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right,
-                                        0);
+          CHECK_RETURN(NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z,
+                                                     t_left, t_right, 0) == NUMERICS_OK);
           w[i] += t_right[i - start_i];
 
           local_err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
-          // printf("END [%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, z, 1) -
+          // printf("END [%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->dense[i]), n, z, 1) -
           // q[i]);
         }
       } else {
         /* Update z, w, and error */
         for (int i = start_i; i < start_i + size_i; i++) {
           /* Diagonal block */
-          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right,
-                                        0);
+          CHECK_RETURN(NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z,
+                                                     t_left, t_right, 0) == NUMERICS_OK);
           // NM_row_prod_no_diag1x1(size_i, i - start_i, i - start_i, M, z, &t_right[i -
           // start_i], 0);
 
@@ -267,7 +269,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
         for (int k = 0; k < g; k++) total_err += thread_errors[k];
         /* CHECK IF W_i = Q_i + M_ij Z_j*/
         /* for (int i = 0; i < n; i++)
-          printf("[%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, old_z, 1) -
+          printf("[%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->dense[i]), n, old_z, 1) -
         q[i]); cblas_dcopy(n, z, 1, old_z, 1); */
 
         total_err = sqrt(total_err) / norm_q;

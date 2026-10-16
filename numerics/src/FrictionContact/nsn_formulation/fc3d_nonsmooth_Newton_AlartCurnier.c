@@ -63,13 +63,14 @@ void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr c
   }
 }
 
-void nonsmoothEqnAlartCurnierFun(void* arg, unsigned int problemSize, double* reaction,
-                                 double* velocity, double* mu, double* rho, double* result,
-                                 double* A, double* B) {
+int nonsmoothEqnAlartCurnierFun(void* arg, unsigned int problemSize, double* reaction,
+                                double* velocity, double* mu, double* rho, double* result,
+                                double* A, double* B) {
   AlartCurnierParams* acparams_p = (AlartCurnierParams*)arg;
 
   fc3d_AlartCurnierFunction(problemSize, acparams_p->computeACFun3x3, reaction, velocity, mu,
                             rho, result, A, B);
+  return 0;
 }
 
 void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem* problem, double* reaction,

@@ -66,7 +66,7 @@ The first classical storage results in:
 
 * M.size0 = 8, M.size1 = 8
 
-* M.matrix0 = [1 2 0 5 0 0 0 0 2 1 0 0 ...]
+* M.dense = [1 2 0 5 0 0 0 0 2 1 0 0 ...]
 
   matrix0 being a double* of size 64.
 
@@ -76,7 +76,7 @@ For the second way of storage, :cpp:struct:`SparseBlockStructuredMatrix` we have
 
 * M.size0 = 8, M.size1 = 8
 
-* M.matrix1 a :cpp:struct:`SparseBlockStructuredMatrix` in which we save:
+* M.sparse_block a :cpp:struct:`SparseBlockStructuredMatrix` in which we save:
 
   * the number of non null blocks, 6 (matrix1->nbblocks) and the number of diagonal blocks, 3 (matrix1->size).
 
@@ -106,15 +106,13 @@ Todo write proper doc for CSparse storage and complete the example above.
 .. _numerics_matrix_storage_1NMAlloc:
 .. rubric:: Create, fill and delete NumericsMatrix functions:
 
-* :cpp:func:`NM_create` : allocation without initial values
+* :cpp:func:`NM_create` : create an empty shell (no matrix data allocated)
 
-* :cpp:func:`NM_create_from_data` : allocation and set default values from external data
-
-* :cpp:func:`NM_fill` : needs a pre-defined :cpp:struct:`NumericsMatrix` , set default values from external data
+* :cpp:func:`NM_create_with_data` : create a NumericsMatrix and attach caller-owned data
 
 * :cpp:func:`NM_free()` : free a NumericsMatrix
 
-These last two functions accept a *data* parameter, which if non-NULL contains the matrix data.
+:cpp:func:`NM_create_with_data` accepts a *data* parameter, which if non-NULL contains the matrix data. The allocation of the underlying storage (``matrix0``, ``matrix1`` or ``matrix2``) remains the caller's responsibility.
 
 .. _numerics_matrix_storage_1NM_LA:
 .. rubric:: Linear Algebra:

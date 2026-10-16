@@ -30,7 +30,7 @@ static int test_0(void) {
 
   NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.size; k++) {
     NM_entry(M, k, k, 1);
@@ -88,7 +88,7 @@ static int test_1(void) {
 
   NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.size; k++) {
     NM_entry(M, k, k, 1);
@@ -156,7 +156,7 @@ static int test_2(void) {
 
   NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.size; k++) {
     NM_entry(M, k, k, 1);
@@ -237,7 +237,7 @@ static int test_3(void) {
 
   NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.size; k++) {
     NM_entry(M, k, k, 1);
@@ -252,7 +252,7 @@ static int test_3(void) {
   cqp.m = 5;
   NumericsMatrix* A = NM_create(NM_SPARSE, cqp.m, cqp.size);
   NM_triplet_alloc(A, 0);
-  A->matrix2->origin = NSM_TRIPLET;
+  A->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.m; k++) {
     NM_entry(A, k, k, 1);
@@ -340,7 +340,7 @@ static int test_4(void) {
 
   NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.size; k++) {
     NM_entry(M, k, k, 1);
@@ -355,7 +355,7 @@ static int test_4(void) {
   cqp.m = 5;
   NumericsMatrix* A = NM_create(NM_SPARSE, cqp.m, cqp.size);
   NM_triplet_alloc(A, 0);
-  A->matrix2->origin = NSM_TRIPLET;
+  A->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.m; k++) {
     NM_entry(A, k, k, 1);
@@ -442,7 +442,7 @@ static int test_5(void) {
 
   NumericsMatrix* M = NM_create(NM_SPARSE, cqp.size, cqp.size);
   NM_triplet_alloc(M, 0);
-  M->matrix2->origin = NSM_TRIPLET;
+  M->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.size; k++) {
     NM_entry(M, k, k, 1);
@@ -457,7 +457,7 @@ static int test_5(void) {
   cqp.m = 5;
   NumericsMatrix* A = NM_create(NM_SPARSE, cqp.m, cqp.size);
   NM_triplet_alloc(A, 0);
-  A->matrix2->origin = NSM_TRIPLET;
+  A->sparse->origin = NSM_TRIPLET;
 
   for (int k = 0; k < cqp.m; k++) {
     NM_entry(A, k, k, 1);

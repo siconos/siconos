@@ -76,8 +76,8 @@ static void FC3D_compute_F_merit(void* data_opaque, double* reaction, double* ve
   FrictionContactProblem* problem = dat->problem;
   fc3d_nonsmooth_Newton_solvers* equation = dat->equation;
 
-  equation->function(equation->data, problem->M->size0, reaction, velocity,
-                     equation->problem->mu, dat->rho, F, dat->Ax, dat->Bx);
+  (void)equation->function(equation->data, problem->M->size0, reaction, velocity,
+                           equation->problem->mu, dat->rho, F, dat->Ax, dat->Bx);
   dat->AwpB_data_computed = true;
 }
 

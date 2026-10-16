@@ -67,8 +67,14 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FIL
   fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
-  NM_write_in_file(problem->M, file);
-  NM_write_in_file(problem->H, file);
+  {
+    int nm_info = NM_write_in_file(problem->M, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
+  {
+    int nm_info = NM_write_in_file(problem->H, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   for (i = 0; i < problem->M->size1; i++) {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
@@ -249,10 +255,8 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
   GlobalFrictionContactProblem* new = globalFrictionContactProblem_new();
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
-  new->M = NM_new();
-  NM_copy(problem->M, new->M);
-  new->H = NM_new();
-  NM_copy(problem->H, new->H);
+  new->M = NM_copy(problem->M);
+  new->H = NM_copy(problem->H);
   new->q = (double*)malloc(n * sizeof(double));
   memcpy(new->q, problem->q, n * sizeof(double));
   new->b = (double*)malloc(m * sizeof(double));
@@ -260,7 +264,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
   new->mu = (double*)malloc(nc * sizeof(double));
   memcpy(new->mu, problem->mu, nc * sizeof(double));
   if (problem->M_inverse) {
-    NM_copy(problem->M_inverse, new->M_inverse);
+    new->M_inverse = NM_copy(problem->M_inverse);
   }
   if (problem->name) new->name = problem->name;
   new->env = NULL;
@@ -336,43 +340,43 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     double* Htmp = (double*)calloc(nm, sizeof(double));
     // compute W = H^T M^-1 H
     // Copy Htmp <- H
-    cblas_dcopy_msan(to_blasint(nm), H->matrix0, 1, Htmp, 1);
+    cblas_dcopy_msan(to_blasint(nm), H->dense, 1, Htmp, 1);
 
     // Compute Htmp   <- M^-1 Htmp
 #ifdef USE_LAPACK_DGETRS
     lapack_int* ipiv = (lapack_int*)NM_iWork(M, M->size0, sizeof(lapack_int));
     lapack_int infoDGETRF;
     lapack_int infoDGETRS;
-    DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
+    DGETRF(n, n, M->dense, n, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
     NM_set_LU_factorized(M, true);
-    DGETRS(LA_NOTRANS, n, m, M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
+    DGETRS(LA_NOTRANS, n, m, M->dense, n, ipiv, Htmp, n, &infoDGETRS);
 #else
     // NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
     NM_LU_solve(M, Htmp, m);
 #endif
 
     /* assert(!infoDGETRS); */
-    /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
+    /*      DGESV(n, m, M->dense, n, ipiv, Htmp, n, infoDGESV); */
 
     localproblem->M = NM_new();
     NumericsMatrix* Wnum = localproblem->M;
     Wnum->storageType = 0;
     Wnum->size0 = to_int(m);
     Wnum->size1 = to_int(m);
-    Wnum->matrix0 = (double*)calloc(m * m, sizeof(double));
-    Wnum->matrix1 = NULL;
-    Wnum->matrix2 = NULL;
+    Wnum->dense = (double*)calloc(m * m, sizeof(double));
+    Wnum->sparse_block = NULL;
+    Wnum->sparse = NULL;
     Wnum->internalData = NULL;
     // Compute W <-  H^T M^1 H
 
-    assert(H->matrix0);
+    assert(H->dense);
     if (!Htmp) return NULL;
-    assert(Wnum->matrix0);
+    assert(Wnum->dense);
 
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m_blas, m_blas, n_blas, 1.0,
-                H->matrix0, n_blas, Htmp, n_blas, 0.0, Wnum->matrix0, m_blas);
-    /*     DGEMM(CblasTrans,CblasNoTrans,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m_blas, m_blas, n_blas, 1.0, H->dense,
+                n_blas, Htmp, n_blas, 0.0, Wnum->dense, m_blas);
+    /*     DGEMM(CblasTrans,CblasNoTrans,m,m,n,1.0,H->dense,n,Htmp,n,0.0,Wnum->dense,m); */
 
     // compute localq = H^T M^(-1) q +b
 
@@ -385,14 +389,14 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
 
     // compute H^T M^(-1) q + b
 #ifdef USE_LAPACK_DGETRS
-    DGETRS(LA_NOTRANS, n, 1, M->matrix0, n, ipiv, qtmp, n, &infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1, M->dense, n, ipiv, qtmp, n, &infoDGETRS);
 #else
     // NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
     NM_LU_solve(M, qtmp, 1);
 #endif
 
-    cblas_dgemv(CblasColMajor, CblasTrans, n_blas, m_blas, 1.0, H->matrix0, n_blas, qtmp, 1,
-                1.0, localproblem->q, 1);
+    cblas_dgemv(CblasColMajor, CblasTrans, n_blas, m_blas, 1.0, H->dense, n_blas, qtmp, 1, 1.0,
+                localproblem->q, 1);
 
     frictionContact_display(localproblem);
 
@@ -418,7 +422,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     /* NM_gemm(alpha, M, H, beta, MinvH); */
 
     NumericsMatrix* Htrans = NM_create(NM_SPARSE_BLOCK, H->size1, H->size0);
-    SBM_transpose(H->matrix1, Htrans->matrix1);
+    SBM_transpose(H->sparse_block, Htrans->sparse_block);
 
     /* localproblem->M = NM_create(NM_SPARSE_BLOCK, m, m ); */
     /* NumericsMatrix *W = localproblem->M; */

@@ -518,14 +518,14 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
 
   /* Solver initialization continues below */
 
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->sparse_block;
   if (problem->M->storageType == NM_SPARSE) {
-    if (problem->M->matrix1) {
+    if (problem->M->sparse_block) {
       printf("Warning matrix 1 different from NULL");
     }
     // Diagonal blocks of M (which is NM_SPARSE, so matrix2 is used), are saved (copied) in
-    // M->matrix1!
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+    // M->sparse_block!
+    problem->M->sparse_block = NM_extract_diagonal_blocks(problem->M, problem->dimension);
   }
 
   /*****  Initialize various solver options *****/
@@ -784,10 +784,10 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   if (problem->M->storageType == NM_SPARSE) {
     // Diagonal blocks of M (which is NM_SPARSE, so matrix2 is used, have been saved
     //(copied)
-    // in M->matrix1 so we need to clean M->matrix1
-    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
-    // Back to the inital (pointer) state for M->matrix1
-    problem->M->matrix1 = matrix1;
+    // in M->sparse_block so we need to clean M->sparse_block
+    SBM_free(problem->M->sparse_block, SBM_FREE_ALL);
+    // Back to the inital (pointer) state for M->sparse_block
+    problem->M->sparse_block = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver(problem, localproblem, localsolver_options);
   free(localProblemFunctionToolkit);

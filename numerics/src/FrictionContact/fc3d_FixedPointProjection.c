@@ -55,7 +55,6 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0;      /* Current iteration number */

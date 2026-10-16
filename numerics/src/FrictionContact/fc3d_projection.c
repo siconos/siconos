@@ -136,7 +136,7 @@ void fc3d_projectionWithDiagonalization_update(int contact,
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
 
   NumericsMatrix* MGlobal = main_problem->M;
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   double* qLocal = localproblem->q;
   double* qGlobal = main_problem->q;
@@ -151,7 +151,7 @@ void fc3d_projectionWithDiagonalization_update(int contact,
   qLocal[2] = qGlobal[is];
 
   if (MGlobal->storageType == NM_DENSE) {
-    double* MM = MGlobal->matrix0;
+    double* MM = MGlobal->dense;
     int incx = n, incy = 1;
     qLocal[0] += cblas_ddot(n, &MM[in], incx, reaction, incy);
     qLocal[1] += cblas_ddot(n, &MM[it], incx, reaction, incy);
@@ -164,7 +164,7 @@ void fc3d_projectionWithDiagonalization_update(int contact,
     /* qLocal += rowMB * reaction
        with rowMB the row of blocks of MGlobal which corresponds to the current contact
     */
-    SBM_row_prod(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+    SBM_row_prod(n, 3, contact, MGlobal->sparse_block, reaction, qLocal, 0);
     // Substract diagonal term
     qLocal[0] -= MLocal[0] * reaction[in];
     qLocal[1] -= MLocal[4] * reaction[it];
@@ -181,7 +181,7 @@ void fc3d_projectionWithDiagonalization_update(int contact,
 
 void fc3d_projection_initialize_with_regularization(FrictionContactProblem* main_problem,
                                                     FrictionContactProblem* localproblem) {
-  if (!localproblem->M->matrix0) localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
+  if (!localproblem->M->dense) localproblem->M->dense = (double*)calloc(9, sizeof(double));
 }
 
 void fc3d_projection_update_with_regularization(int contact,
@@ -199,14 +199,15 @@ void fc3d_projection_update_with_regularization(int contact,
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
 
-  NM_copy_diag_block3(main_problem->M, contact, &localproblem->M->matrix0);
+  CHECK_RETURN(NM_copy_diag_block3(main_problem->M, contact, &localproblem->M->dense) ==
+               NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
   fc3d_local_problem_compute_q(main_problem, localproblem, reaction, contact);
 
   double rho = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
+  for (int i = 0; i < 3; i++) localproblem->M->dense[i + 3 * i] += rho;
 
   double* qLocal = localproblem->q;
   int in = 3 * contact, it = in + 1, is = it + 1;
@@ -221,8 +222,8 @@ void fc3d_projection_update_with_regularization(int contact,
 }
 void fc3d_projection_with_regularization_free(FrictionContactProblem* localproblem,
                                               SolverOptions* localsolver_options) {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
+  free(localproblem->M->dense);
+  localproblem->M->dense = NULL;
 }
 static int fc3d_proj_cone_with_regularization_init_wrap(void* problem,
                                                         SolverOptions* options) {
@@ -263,14 +264,15 @@ void fc3d_projection_update_with_regularization_parallel(int contact,
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
 
-  NM_copy_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+  CHECK_RETURN(NM_copy_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+               NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
   fc3d_local_problem_compute_q_parallel(problem, localproblem, reaction, contact);
 
   double rho = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
-  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
+  for (int i = 0; i < 3; i++) localproblem->M->dense[i + 3 * i] += rho;
 
   double* qLocal = localproblem->q;
   int in = 3 * contact, it = in + 1, is = it + 1;
@@ -292,7 +294,7 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
   /*  fc3d_projection_update(contact, reaction); */
   /*  fc3d_projectionWithDiagonalization_update(contact, reaction);  */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   int nLocal = 3;
@@ -354,7 +356,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   /* int nLocal = 3; */
@@ -564,7 +566,7 @@ int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* re
   /*  /\* Builds local problem for the current contact *\/ */
   /*   fc3d_projection_update(contact, reaction); */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   /* int nLocal = 3; */
@@ -613,7 +615,7 @@ int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem,
   /* Builds local problem for the current contact */
   /*   fc3d_projection_update(contact, velocity); */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   /* int nLocal = 3; */
@@ -655,7 +657,7 @@ int fc3d_projectionOnCylinder_solve(FrictionContactProblem* localproblem, double
   /* int and double parameters */
   /*   int* iparam = options->iparam; */
   /*   double* dparam = options->dparam; */
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   /* int nLocal = 3; */
 
@@ -730,7 +732,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   /* int nLocal = 3; */
 

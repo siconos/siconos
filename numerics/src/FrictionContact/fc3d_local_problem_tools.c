@@ -23,8 +23,10 @@
 #include <stdlib.h>  // for malloc, NULL
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
-#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
+#include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"       // IWYU pragma: keep
+#include "numerics_errors.h"
+#include "numerics_verbose.h"
 #include "safe_casts.h"
 
 struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new(void) {
@@ -59,15 +61,17 @@ void fc3d_local_problem_compute_q(FrictionContactProblem* problem,
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, in, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3(n, contact, in, problem->M, reaction, qLocal, false) ==
+               NUMERICS_OK);
 }
 
 void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
                                FrictionContactProblem* localproblem, int contact) {
   if (problem->M->storageType == NM_SPARSE) {
-    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+    localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+    CHECK_RETURN(NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+                 NUMERICS_OK);
 }
 
 FrictionContactProblem* fc3d_local_problem_allocate(NM_types storageType) {
@@ -80,10 +84,10 @@ FrictionContactProblem* fc3d_local_problem_allocate(NM_types storageType) {
   localproblem->mu = (double*)malloc(sizeof(double));
 
   if (storageType != NM_SPARSE_BLOCK) {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(
+    localproblem->M = NM_create_with_data(
         NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
@@ -94,7 +98,7 @@ void fc3d_local_problem_free(FrictionContactProblem* localproblem,
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   frictionContactProblem_free(localproblem);
 }
@@ -112,5 +116,6 @@ void fc3d_local_problem_compute_q_parallel(FrictionContactProblem* problem,
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3_parallel(n, contact, in, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3_parallel(n, contact, in, problem->M, reaction, qLocal,
+                                             false) == NUMERICS_OK);
 }

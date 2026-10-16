@@ -38,7 +38,7 @@
 void lcp_latin(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                SolverOptions* options) {
   /* matrix M of the lcp */
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
 
   /* size of the LCP */
   int n = problem->size;

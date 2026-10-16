@@ -61,7 +61,10 @@ int AVI_printInFile(AffineVariationalInequalities* avi, FILE* file) {
   int i;
   size_t n = avi->size;
   fprintf(file, "%zu\n", n);
-  NM_write_in_file(avi->M, file);
+  {
+    int nm_info = NM_write_in_file(avi->M, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   for (i = 0; i < avi->M->size1; i++) {
     fprintf(file, "%32.24e ", avi->q[i]);
   }

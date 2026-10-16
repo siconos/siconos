@@ -159,18 +159,17 @@ void FC3D_unitary_enum_factorize2x2(double* a, double* b, double* c, double* l1,
 }
 void fc3d_unitary_enumerative_free(FrictionContactProblem* localproblem,
                                    SolverOptions* dummy2) {
-  free(localproblem->M->matrix0);
-  localproblem->M->matrix0 = NULL;
+  free(localproblem->M->dense);
+  localproblem->M->dense = NULL;
 }
 void fc3d_unitary_enumerative_initialize(FrictionContactProblem* localproblem) {
-  if (!localproblem->M->matrix0)
-    localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
+  if (!localproblem->M->dense) localproblem->M->dense = (double*)malloc(9 * sizeof(double));
 }
 
 int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem,
                                               double* reaction, double* velocity,
                                               SolverOptions* options) {
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* Q = problem->q;
   double* mu = problem->mu;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
@@ -276,7 +275,7 @@ int fc3d_unitary_enumerative(FrictionContactProblem* problem, double* reaction,
     *info = fc3d_unitary_enumerative_solve_sliding(problem, reaction, options);
   }
   if (!(*info)) {
-    double* M = problem->M->matrix0;
+    double* M = problem->M->dense;
     double* Q = problem->q;
     SET3(Q);
     Q = Q0;
@@ -304,7 +303,7 @@ int fc3d_unitary_enumerative(FrictionContactProblem* problem, double* reaction,
 }
 int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double* reaction,
                                            SolverOptions* options) {
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* Q = problem->q;
   double* mu = problem->mu;
   double D1, D2;
@@ -575,7 +574,7 @@ void solve2x2(double* a, double* b, double* c, double* a1, double* b1, double* c
  */
 int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem,
                                                    double* reaction, SolverOptions* options) {
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* Q = problem->q;
 
   SET3X3(M);

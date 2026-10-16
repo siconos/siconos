@@ -756,7 +756,7 @@ void test_matrix(void) {
 #ifdef BAVARD
     printf("\n");
     for (i = 0; i < n + m; i++) {
-      for (j = 0; j < n + m; j++) printf("%f ", problem->M->matrix0[(n + m) * j + i]);
+      for (j = 0; j < n + m; j++) printf("%f ", problem->M->dense[(n + m) * j + i]);
       printf("\n");
     }
 #endif

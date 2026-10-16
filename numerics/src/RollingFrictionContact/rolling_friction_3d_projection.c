@@ -79,7 +79,7 @@ int rolling_friction_3d_projectionOnCone_solve(RollingFrictionContactProblem* lo
                                                SolverOptions* options) {
   DEBUG_BEGIN("rolling_friction_3d_projectionOnCone_solve(...)\n");
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   double mu_r_i = localproblem->mu_r[0];
@@ -193,7 +193,7 @@ int rolling_friction_3d_projectionOnConeWithLocalIteration_solve(
   /* Access solver options through macros */
   // int* iparam = options->iparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
   double mu_r_i = localproblem->mu_r[0]; /* int nLocal = 5; */

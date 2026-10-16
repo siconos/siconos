@@ -22,9 +22,10 @@
 #endif
 #include <stdlib.h>  // for malloc, NULL
 
-#include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
+#include "NumericsMatrix.h"                 // for NM_create_with_data, Nume...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 void rolling_friction_2d_local_problem_compute_q(RollingFrictionContactProblem* problem,
                                                  RollingFrictionContactProblem* localproblem,
@@ -39,14 +40,16 @@ void rolling_friction_2d_local_problem_compute_q(RollingFrictionContactProblem* 
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal,
+                                    false) == NUMERICS_OK);
   // NM_row_prod_no_diag(n, 3, contact, 5*contact, problem->M, reaction, qLocal, NULL, false);
 }
 
 void rolling_friction_2d_local_problem_fill_M(RollingFrictionContactProblem* problem,
                                               RollingFrictionContactProblem* localproblem,
                                               int contact) {
-  NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+  CHECK_RETURN(NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+               NUMERICS_OK);
 }
 
 RollingFrictionContactProblem* rolling_friction_2d_local_problem_allocate(
@@ -61,10 +64,10 @@ RollingFrictionContactProblem* rolling_friction_2d_local_problem_allocate(
   localproblem->mu_r = (double*)malloc(sizeof(double));
 
   if (problem->M->storageType != NM_SPARSE_BLOCK) {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(
+    localproblem->M = NM_create_with_data(
         NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
@@ -75,7 +78,7 @@ void rolling_friction_2d_local_problem_free(RollingFrictionContactProblem* local
   if (problem->M->storageType == NM_SPARSE_BLOCK) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   rollingFrictionContactProblem_free(localproblem);
 }

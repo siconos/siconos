@@ -276,7 +276,7 @@ static int solveLocalReaction(
 
   localProblemFunctionToolkit->copy_local_reaction(&(reaction[contact * problem->dimension]),
                                                    localreaction);
-  if (contact < problem->numberOfContacts) {
+  if (contact < (unsigned int)problem->numberOfContacts) {
     local_opts_contact->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
     localproblem_contact->numberOfContacts = 1;
     localproblem_contact->dimension = 3;  // just for display
@@ -295,6 +295,7 @@ static int solveLocalReaction(
   //  return -1;
 }
 
+#if 0
 static int file_exists(const char* fname) {
   FILE* file;
   if ((file = fopen(fname, "r"))) {
@@ -303,6 +304,8 @@ static int file_exists(const char* fname) {
   }
   return 0;
 }
+#endif
+
 static void acceptLocalReactionFiltered(int dimension, SolverOptions* local_opts,
                                         unsigned int contact, unsigned int iter,
                                         double* reaction, double localreaction[3]) {
@@ -474,7 +477,6 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
   /* Tolerance setup with unified tolerance manager */
   double norm_q = cblas_dnrm2((nc + ncoh) * 3, problem->q, 1);
-  double omega = options->dparam[SICONOS_NSGS_RELAXATION_VALUE];
 
   double norm_r[] = {1e24};
   if (options->numberOfInternalSolvers < 2) {
@@ -519,13 +521,13 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   unsigned int* freeze_contacts = NULL;
   int frozen_contact = 0;
 
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->sparse_block;
   if (problem->M->storageType == NM_SPARSE) {
-    if (problem->M->matrix1) {
+    if (problem->M->sparse_block) {
       printf("Warning matrix 1 different from NULL");
     }
 
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+    problem->M->sparse_block = NM_extract_diagonal_blocks(problem->M, problem->dimension);
   }
 
   /*****  Initialize various solver options *****/
@@ -582,8 +584,6 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
     // fc3d_set_internalsolver_tolerance(nc, options, local_opts_contact, incr_error);
 
     unsigned int number_of_freezed_contact = 0;
-    double tmp_criteria1 = tolerance * tolerance / (nc * nc * 1000);
-    double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
 
     if (options->iparam[SICONOS_NSGS_FREEZING_CONTACT] > 0) {
       for (unsigned int i = 0; i < nc; ++i) {
@@ -751,8 +751,8 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
   /** Free memory **/
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
-    problem->M->matrix1 = matrix1;
+    SBM_free(problem->M->sparse_block, SBM_FREE_ALL);
+    problem->M->sparse_block = matrix1;
   }
   localProblemFunctionToolkit->free_local_solver_contact(localproblem_contact,
                                                          local_opts_contact);

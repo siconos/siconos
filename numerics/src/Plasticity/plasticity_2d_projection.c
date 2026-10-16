@@ -123,7 +123,7 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
 
   DEBUG_EXPR(plasticity2DProblem_display(localproblem););
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double eta_i = localproblem->model.drucker_prager->eta[0];
   double theta_i = localproblem->model.drucker_prager->theta[0];
@@ -291,7 +291,7 @@ int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double
   /*  /\* Builds local problem for the current contact *\/ */
   /*   plasticity_2d_projection_update(contact, stress_local); */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double eta_i = localproblem->model.drucker_prager->eta[0];
   double theta_i = localproblem->model.drucker_prager->theta[0];
@@ -410,7 +410,7 @@ int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
                                              double* stress_local, SolverOptions* options) {
   (void)options; /* Unused for now - simple projection doesn't need options */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double sigma_y = localproblem->model.von_mises->sigma_y[0];
 

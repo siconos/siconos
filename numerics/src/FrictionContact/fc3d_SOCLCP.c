@@ -52,7 +52,6 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double* reaction, double* velo
 
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   /*****  Fixed Point Iterations *****/
   double error = 1.; /* Current error */
 

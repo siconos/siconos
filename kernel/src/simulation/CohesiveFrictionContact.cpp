@@ -414,20 +414,13 @@ bool CohesiveFrictionContact::preCompute(double time) {
   // siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph& indexSet0 = *simulation()->indexSet(0);
   double theta = 0.0;
-  for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
-    auto inter = indexSet0.bundle(*ui);
-    auto osi1 = indexSet0.properties(*ui).osi1;
-    auto osi1_type = osi1->getType();
-    auto& osi2 = *indexSet0.properties(*ui).osi1;
-    auto osi2_type = osi2.getType();
+  auto [ui, uiend] = indexSet0.vertices();
+  if (ui != uiend) {
     using siconos::integrators::IntegratorType;
-    if ((osi1_type == IntegratorType::MOREAUJEANOSI &&
-         osi2_type == IntegratorType::MOREAUJEANOSI)) {
-      auto moreaujean_osi1 =
-          std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi1);
-      theta = moreaujean_osi1->theta();
+    auto osi1 = indexSet0.properties(*ui).osi1;
+    if (osi1->getType() == IntegratorType::MOREAUJEANOSI) {
+      theta = std::dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi1)->theta();
     }
-    break;
   }
   if (_scaling_as_percussion) {
     NM_scal(theta, &*(_U->numericsMatrix()));

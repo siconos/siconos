@@ -57,7 +57,7 @@ void testNablaF(void* env, int size, double* z, NumericsMatrix* nablaF) {
 
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
-      nablaF->matrix0[i + j * size] = M[i + j * size];
+      nablaF->dense[i + j * size] = M[i + j * size];
     }
   }
 }
@@ -73,7 +73,7 @@ static MixedComplementarityProblem* create_mcp_1(void) {
   problem->n2 = 5;
   problem->compute_Fmcp = &testF;
   problem->compute_nabla_Fmcp = &testNablaF;
-  problem->nabla_Fmcp = NM_create(NM_DENSE, n, n);
+  problem->nabla_Fmcp = NM_create_with_data(NM_DENSE, n, n, calloc(n * n, sizeof(double)));
   problem->env = NULL;
 
   M = (double*)calloc(n * n, sizeof(double));

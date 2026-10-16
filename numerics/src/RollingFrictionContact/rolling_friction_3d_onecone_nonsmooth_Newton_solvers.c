@@ -58,7 +58,7 @@ static double rolling_friction_3d_compute_local_error(
     RollingFrictionContactProblem* localproblem, double* local_reaction) {
   double* local_q = localproblem->q;
   double norm_q = cblas_dnrm2(5, localproblem->q, 1);
-  double* local_M = localproblem->M->matrix0;
+  double* local_M = localproblem->M->dense;
   double worktmp[5];
   double local_velocity[5] = {0., 0., 0., 0., 0.};
   cpy5(local_q, local_velocity);
@@ -81,7 +81,7 @@ static double rolling_friction_3d_compute_local_error(
 
 static void compute_rho_spectral_norm(RollingFrictionContactProblem* localproblem,
                                       double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double eigvals[5];
   // int info =
   eigvals_sym5x5_for_loop(MLocal, eigvals);
@@ -180,7 +180,7 @@ static void rolling_friction_3d_onecone_nonsmooth_Newton_initialize(
       for (int i = 0; i < 5; i++) {
         sum = 0.0;
         for (int j = 0; j < 5; j++) {
-          sum += fabs(local_p->M->matrix0[i + j * 5]);
+          sum += fabs(local_p->M->dense[i + j * 5]);
         }
         m_row_norm = max(sum, m_row_norm);
       }
@@ -360,7 +360,7 @@ int rolling_friction_3d_onecone_nonsmooth_Newton_solvers_solve_direct(
     norm_relative /= norm_qLocal;
   }
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /* store the increment */
   double dR[5] = {0., 0., 0., 0., 0.};

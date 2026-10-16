@@ -172,12 +172,21 @@ static inline const char* numerics_error_string(NumericsError err) {
  * Logging Functions
  * =========================================================================== */
 
+#if defined(__GNUC__) || defined(__clang__)
+#define NUMERICS_PRINTF_FORMAT(fmt_pos, args_pos) \
+  __attribute__((format(printf, fmt_pos, args_pos)))
+#else
+#define NUMERICS_PRINTF_FORMAT(fmt_pos, args_pos)
+#endif
+
 void numerics_log_error(const char* file, int line, const char* func, const char* error_type,
-                        const char* fmt, ...);
+                        const char* fmt, ...) NUMERICS_PRINTF_FORMAT(5, 6);
 
-void numerics_log_warning(const char* file, int line, const char* func, const char* fmt, ...);
+void numerics_log_warning(const char* file, int line, const char* func, const char* fmt, ...)
+    NUMERICS_PRINTF_FORMAT(4, 5);
 
-void numerics_log_info(const char* file, int line, const char* func, const char* fmt, ...);
+void numerics_log_info(const char* file, int line, const char* func, const char* fmt, ...)
+    NUMERICS_PRINTF_FORMAT(4, 5);
 
 /* ===========================================================================
  * Standardized Error Handling Macros

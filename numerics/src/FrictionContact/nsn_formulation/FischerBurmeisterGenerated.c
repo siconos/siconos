@@ -23,7 +23,8 @@
 #include <op3x3.h>   // for cpy3x3, cpy3, SET3
 #include <stdlib.h>  // for RAND_MAX
 
-#include "siconos_debug.h"  // for DEBUG_PRINT & for DEBUG_PRINTF
+#include "numerics_verbose.h"  // for numerics_error
+#include "siconos_debug.h"     // for DEBUG_PRINT & for DEBUG_PRINTF
 
 #define Sign(x) ((x > 0) - (x < 0))
 #define Max fmax
@@ -47,10 +48,34 @@ static const double ZERO_SQR = DBL_EPSILON * 500. * DBL_EPSILON * 500.;
 #define FB_WARN(M, X) ((void)0)
 #endif
 
-#define POST_CHECK_POW(x) FB_WARN("post check pow", isfinite((double)x))
-#define POST_CHECK_ADD(x) FB_WARN("post check add", isfinite((double)x))
-#define POST_CHECK_MUL(x) FB_WARN("post check mul", isfinite((double)x))
-#define POST_CHECK(x) FB_WARN("post check bool", isfinite((double)x))
+#define POST_CHECK_POW(x)                                               \
+  do {                                                                  \
+    if (!isfinite((double)(x))) {                                       \
+      return numerics_error("FischerBurmeisterGenerated",               \
+                            "post check pow: non-finite value in " #x); \
+    }                                                                   \
+  } while (0)
+#define POST_CHECK_ADD(x)                                               \
+  do {                                                                  \
+    if (!isfinite((double)(x))) {                                       \
+      return numerics_error("FischerBurmeisterGenerated",               \
+                            "post check add: non-finite value in " #x); \
+    }                                                                   \
+  } while (0)
+#define POST_CHECK_MUL(x)                                               \
+  do {                                                                  \
+    if (!isfinite((double)(x))) {                                       \
+      return numerics_error("FischerBurmeisterGenerated",               \
+                            "post check mul: non-finite value in " #x); \
+    }                                                                   \
+  } while (0)
+#define POST_CHECK(x)                                               \
+  do {                                                              \
+    if (!isfinite((double)(x))) {                                   \
+      return numerics_error("FischerBurmeisterGenerated",           \
+                            "post check: non-finite value in " #x); \
+    }                                                               \
+  } while (0)
 
 #define NOT_ZERO(x) fabs(x) > 0
 #define IS_NOT_ZERO(x) fabs(x) > 0
@@ -89,9 +114,9 @@ static inline double safe_sqrt(double x) {
 }
 
 // ./fb2.py --ccode --ccodefac --ccodeAB --wrapper --merit
-void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, double un,
-                                        double ut1, double ut2, double mu, double rhon,
-                                        double rhot1, double rhot2, double* result) {
+int fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, double un,
+                                       double ut1, double ut2, double mu, double rhon,
+                                       double rhot1, double rhot2, double* result) {
   double x1;
   double x2;
   double x3;
@@ -5144,10 +5169,12 @@ void fc3d_FischerBurmeisterFABGenerated(double rn, double rt1, double rt2, doubl
     POST_CHECK_MUL(x189);
     result[20] = 1 - x109 * x189 + x110 * x189;
   }
+  return 0;
 }
-void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double un, double ut1,
-                                      double ut2, double mu, double rhon, double rhot1,
-                                      double rhot2, double* result) {
+
+int fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double un, double ut1,
+                                     double ut2, double mu, double rhon, double rhot1,
+                                     double rhot2, double* result) {
   double x1;
   double x2;
   double x3;
@@ -5349,10 +5376,12 @@ void fc3d_FischerBurmeisterFGenerated(double rn, double rt1, double rt2, double 
     result[2] = x22 + x24 * x13 - x24 * x14;
   }
   /*@ assert (result[2]) >= 0.;*/
+  return 0;
 }
-void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double un,
-                                       double ut1, double ut2, double mu, double rhon,
-                                       double rhot1, double rhot2, double* result) {
+
+int fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double un, double ut1,
+                                      double ut2, double mu, double rhon, double rhot1,
+                                      double rhot2, double* result) {
   double x1;
   double x11;
   double x12;
@@ -10636,10 +10665,12 @@ void fc3d_FischerBurmeisterABGenerated(double rn, double rt1, double rt2, double
     result[17] = 1 - x184 * x106 + x184 * x107;
   }
   /*@ assert (result[17]) >= 0.;*/
+  return 0;
 }
-void fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, double un,
-                                           double ut1, double ut2, double mu, double rhon,
-                                           double rhot1, double rhot2, double* result) {
+
+int fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, double un,
+                                          double ut1, double ut2, double mu, double rhon,
+                                          double rhot1, double rhot2, double* result) {
   /* Assignment result=0.5*(rt1 + x13*x19 - x14*x19 + x7)**2 + 0.5*(rt2 + x13*x20 - x14*x20 +
    * x9)**2 + 0.5*(x4 - x13 - x14 + x3)**2 */
   double x1;
@@ -10716,10 +10747,12 @@ void fc3d_FischerBurmeisterFMeritGenerated(double rn, double rt1, double rt2, do
   *result = 0.5 * (rt1 + x13 * x19 - x14 * x19 + x7) * (rt1 + x13 * x19 - x14 * x19 + x7) +
             0.5 * (rt2 + x13 * x20 - x14 * x20 + x9) * (rt2 + x13 * x20 - x14 * x20 + x9) +
             0.5 * (x4 - x13 - x14 + x3) * (x4 - x13 - x14 + x3);
+  return 0;
 }
-void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2, double un,
-                                               double ut1, double ut2, double mu, double rhon,
-                                               double rhot1, double rhot2, double* result) {
+
+int fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2, double un,
+                                              double ut1, double ut2, double mu, double rhon,
+                                              double rhot1, double rhot2, double* result) {
   double x1;
   double x2;
   double x3;
@@ -11814,10 +11847,11 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2
     POST_CHECK_MUL(x67);
     result[2] = x48 * (-x50 * x65 + x66 * x49) + x51 * (2 - x53 * x65 + x66 * x52) + x67;
   }
+  return 0;
 }
 
-void fc3d_FischerBurmeisterFunctionGenerated(double* reaction, double* velocity, double mu,
-                                             double* rho, double* f, double* A, double* B) {
+int fc3d_FischerBurmeisterFunctionGenerated(double* reaction, double* velocity, double mu,
+                                            double* rho, double* f, double* A, double* B) {
   double result[21];
 
   assert(reaction);
@@ -11829,9 +11863,10 @@ void fc3d_FischerBurmeisterFunctionGenerated(double* reaction, double* velocity,
   SET3(rho);
 
   if (f && A && B) {
-    fc3d_FischerBurmeisterFABGenerated(*reaction0, *reaction1, *reaction2, *velocity0,
-                                       *velocity1, *velocity2, mu, *rho0, *rho1, *rho2,
-                                       result);
+    int info = fc3d_FischerBurmeisterFABGenerated(*reaction0, *reaction1, *reaction2,
+                                                  *velocity0, *velocity1, *velocity2, mu,
+                                                  *rho0, *rho1, *rho2, result);
+    if (info) return info;
     cpy3(result, f);
     cpy3x3(result + 3, A);
     cpy3x3(result + 12, B);
@@ -11839,25 +11874,28 @@ void fc3d_FischerBurmeisterFunctionGenerated(double* reaction, double* velocity,
 
   else {
     if (f) {
-      fc3d_FischerBurmeisterFGenerated(*reaction0, *reaction1, *reaction2, *velocity0,
-                                       *velocity1, *velocity2, mu, *rho0, *rho1, *rho2,
-                                       result);
+      int info = fc3d_FischerBurmeisterFGenerated(*reaction0, *reaction1, *reaction2,
+                                                  *velocity0, *velocity1, *velocity2, mu,
+                                                  *rho0, *rho1, *rho2, result);
+      if (info) return info;
       cpy3(result, f);
     }
 
     if (A && B) {
-      fc3d_FischerBurmeisterABGenerated(*reaction0, *reaction1, *reaction2, *velocity0,
-                                        *velocity1, *velocity2, mu, *rho0, *rho1, *rho2,
-                                        result);
+      int info = fc3d_FischerBurmeisterABGenerated(*reaction0, *reaction1, *reaction2,
+                                                   *velocity0, *velocity1, *velocity2, mu,
+                                                   *rho0, *rho1, *rho2, result);
+      if (info) return info;
       cpy3x3(result, A);
       cpy3x3(result + 9, B);
     }
   }
+  return 0;
 }
 
-void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double* reaction, double* velocity,
-                                                      double mu, double* rho, double* gf,
-                                                      double* dummy1, double* dummy2) {
+int fc3d_FischerBurmeisterGradMeritFunctionGenerated(double* reaction, double* velocity,
+                                                     double mu, double* rho, double* gf,
+                                                     double* dummy1, double* dummy2) {
   double result[3];
 
   assert(reaction);
@@ -11868,8 +11906,10 @@ void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double* reaction, double* 
   SET3(velocity);
   SET3(rho);
 
-  fc3d_FischerBurmeisterGradFMeritGenerated(*reaction0, *reaction1, *reaction2, *velocity0,
-                                            *velocity1, *velocity2, mu, *rho0, *rho1, *rho2,
-                                            result);
+  int info = fc3d_FischerBurmeisterGradFMeritGenerated(*reaction0, *reaction1, *reaction2,
+                                                       *velocity0, *velocity1, *velocity2, mu,
+                                                       *rho0, *rho1, *rho2, result);
+  if (info) return info;
   cpy3(result, gf);
+  return 0;
 }

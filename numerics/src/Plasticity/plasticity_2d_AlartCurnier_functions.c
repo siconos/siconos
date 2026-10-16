@@ -461,7 +461,7 @@ void plasticity_2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3]
 
 void plasticity_2d_compute_rho_split_spectral_norm_cond(PlasticityProblem* localproblem,
                                                         double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   assert(MLocal[0 + 0 * 3] > 0);
 
   DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
@@ -491,7 +491,7 @@ void plasticity_2d_compute_rho_split_spectral_norm_cond(PlasticityProblem* local
 
 void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localproblem,
                                                    double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   assert(MLocal[0 + 0 * 3] > 0);
 
   DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
@@ -521,7 +521,7 @@ void plasticity_2d_compute_rho_split_spectral_norm(PlasticityProblem* localprobl
 }
 
 void plasticity_2d_compute_rho_spectral_norm(PlasticityProblem* localproblem, double* rho) {
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double worktmp[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   double eig[3] = {0.0, 0.0, 0.0};
   if (eig_3x3(MLocal, worktmp, eig))

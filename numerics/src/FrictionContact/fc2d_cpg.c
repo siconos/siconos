@@ -35,7 +35,7 @@ void fc2d_cpg(FrictionContactProblem* problem, double* reaction, double* velocit
               SolverOptions* options) {
   int nc = problem->numberOfContacts;
   assert(nc > 0);
-  double* vec = problem->M->matrix0;
+  double* vec = problem->M->dense;
   double* mu = problem->mu;
 
   int n = 2 * nc, i, iter;

@@ -55,8 +55,8 @@ static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
   int diagPos;
 
   for (unsigned int i = 0; i < nc; ++i) {
-    diagPos = (int)SBM_diagonal_block_index(problem->M->matrix1, i);
-    block = problem->M->matrix1->block[diagPos];
+    diagPos = (int)SBM_diagonal_block_index(problem->M->sparse_block, i);
+    block = problem->M->sparse_block->block[diagPos];
     for (unsigned int j = 0; j < 4; j++) sbcm[i * 4 + j] = block[j];
   }
 
@@ -71,8 +71,8 @@ static void fc2d_nsgs_buildLocalProblem_parallel(
     unsigned int contact, FrictionContactProblem* problem, double* blocks_contiguous,
     double* diagonal_blocks, size_t* index1_data, size_t* index2_data,
     LinearComplementarityProblem* local_problem, double* reaction) {
-  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->matrix0);
-  local_problem->M->matrix0 = &diagonal_blocks[4 * contact];
+  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->dense);
+  local_problem->M->dense = &diagonal_blocks[4 * contact];
 
   local_problem->M->size0 = 2;  // Necessary ?
   local_problem->M->size1 = 2;
@@ -305,13 +305,13 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   SparseBlockStructuredMatrix* SBM_problem = NULL;
 
   /* Create SBM if it does not exist */
-  if (!problem->M->matrix1) {
+  if (!problem->M->sparse_block) {
     SBM_problem = SBM_new();
     switch (problem->M->storageType) {
       // Convert DENSE -> SBM
       case NM_DENSE: {
         SBM_from_dense(problem->dimension, (size_t)problem->M->size1,
-                       (size_t)problem->M->size0, problem->M->matrix0, SBM_problem);
+                       (size_t)problem->M->size0, problem->M->dense, SBM_problem);
         /* printf("Number of blocks: %d\n", SBM_problem->nbblocks);
         for (int b = 0; b < SBM_problem->nbblocks; b++) {
           printf("%e %e %e %e\n", SBM_problem->block[b][0], SBM_problem->block[b][1],
@@ -323,7 +323,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       case NM_SPARSE: {
         // Get Csparse matrix
         CSparseMatrix* sparse = NULL;
-        if (problem->M->matrix2->origin == NSM_CSR) {
+        if (problem->M->sparse->origin == NSM_CSR) {
           sparse = NM_csr(problem->M);
         } else {
           sparse = NM_csc_trans(problem->M);
@@ -339,7 +339,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
         break;
       }
     }
-    problem->M->matrix1 = SBM_problem;
+    problem->M->sparse_block = SBM_problem;
   }
 
   /* Switch storageType to SBM temporarily */
@@ -353,20 +353,20 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
   for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
-  SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
+  SBM_column_permutation(rowIndex, problem->M->sparse_block, SBM_col_permuted);
   SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
 
   free(rowIndex);
 
-  SparseBlockStructuredMatrix* old_matrix1 = problem->M->matrix1;
-  problem->M->matrix1 = SBM_permuted;
+  SparseBlockStructuredMatrix* old_matrix1 = problem->M->sparse_block;
+  problem->M->sparse_block = SBM_permuted;
 
   /* Store all blocks in contiguous array */
-  unsigned int nbblocks = problem->M->matrix1->nbblocks;
+  unsigned int nbblocks = problem->M->sparse_block->nbblocks;
   double* blocks_contiguous = (double*)malloc(nbblocks * 4 * sizeof(double));
   double* current_block;
   for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++) {
-    current_block = problem->M->matrix1->block[blockNum];
+    current_block = problem->M->sparse_block->block[blockNum];
     for (unsigned int j = 0; j < 4; j++) {
       blocks_contiguous[blockNum * 4 + j] = current_block[j];
     }
@@ -445,15 +445,15 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       // Copy matrix info for each thread
       index1_data = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      index2_data = (size_t*)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
-      memcpy(index1_data, problem->M->matrix1->index1_data, (nc + 1) * sizeof(size_t));
-      memcpy(index2_data, problem->M->matrix1->index2_data,
-             problem->M->matrix1->nbblocks * sizeof(size_t));
+      index2_data = (size_t*)malloc(problem->M->sparse_block->nbblocks * sizeof(size_t));
+      memcpy(index1_data, problem->M->sparse_block->index1_data, (nc + 1) * sizeof(size_t));
+      memcpy(index2_data, problem->M->sparse_block->index2_data,
+             problem->M->sparse_block->nbblocks * sizeof(size_t));
 
       double* blocks_contiguous_local =
-          (double*)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
+          (double*)malloc(problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       memcpy(blocks_contiguous_local, blocks_contiguous,
-             problem->M->matrix1->nbblocks * 4 * sizeof(double));
+             problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       double* diagonal_blocks_local = fc2d_extract_diagonal_blocks(problem);
 
       double local_light_error_sum = 0.0;
@@ -499,7 +499,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
-                local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
+                local_problem->M->dense, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
             local_light_error_sum += light_error_squared(localreaction, &z[pos]);
@@ -600,15 +600,15 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       // Copy matrix info for each thread
       index1_data = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      index2_data = (size_t*)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
-      memcpy(index1_data, problem->M->matrix1->index1_data, (nc + 1) * sizeof(size_t));
-      memcpy(index2_data, problem->M->matrix1->index2_data,
-             problem->M->matrix1->nbblocks * sizeof(size_t));
+      index2_data = (size_t*)malloc(problem->M->sparse_block->nbblocks * sizeof(size_t));
+      memcpy(index1_data, problem->M->sparse_block->index1_data, (nc + 1) * sizeof(size_t));
+      memcpy(index2_data, problem->M->sparse_block->index2_data,
+             problem->M->sparse_block->nbblocks * sizeof(size_t));
 
       double* blocks_contiguous_local =
-          (double*)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
+          (double*)malloc(problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       memcpy(blocks_contiguous_local, blocks_contiguous,
-             problem->M->matrix1->nbblocks * 4 * sizeof(double));
+             problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       double* diagonal_blocks_local = fc2d_extract_diagonal_blocks(problem);
 
       double local_light_error_sum = 0.0;
@@ -630,7 +630,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
-                local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
+                local_problem->M->dense, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
             local_light_error_sum += light_error_squared(localreaction, &z[pos]);
@@ -741,7 +741,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   free(inv_permutation);
 
   /* Restore problem before permutation */
-  problem->M->matrix1 = old_matrix1;
+  problem->M->sparse_block = old_matrix1;
   problem->q = old_q;
   problem->mu = old_mu;
   problem->M->storageType = old_storageType;
@@ -750,7 +750,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
   if (SBM_problem != NULL) {
     SBM_free(SBM_problem, SBM_FREE_ALL);
-    problem->M->matrix1 = NULL;
+    problem->M->sparse_block = NULL;
   }
 
   SBM_col_permuted =

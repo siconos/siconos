@@ -108,8 +108,7 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1, problem->H, globalVelocity, 1.0, velocity);
-  double norm_u = cblas_dnrm2(m, velocity, 1);
-  DEBUG_PRINTF("norm of velocity %e\n", norm_u);
+  DEBUG_PRINTF("norm of velocity %e\n", cblas_dnrm2(m, velocity, 1));
 
   double error_complementarity = 0.0;
   if (nc == 0) {

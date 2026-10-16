@@ -54,8 +54,8 @@ GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
 
   NumericsMatrix* Mglobal = NM_create(NM_SPARSE, m, m);
   CSparseMatrix* M_triplet = NM_triplet(M);
-  Mglobal->matrix2->triplet = M_triplet;
-  Mglobal->matrix2->origin = NSM_TRIPLET;
+  Mglobal->sparse->triplet = M_triplet;
+  Mglobal->sparse->origin = NSM_TRIPLET;
   globalproblem->M = Mglobal;
 
   NumericsMatrix* Hglobal = NM_eye(m);

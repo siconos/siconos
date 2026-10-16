@@ -104,7 +104,7 @@ void lcp_pgs(LinearComplementarityProblem* problem, double* z, double* w, int* i
 
       zi = q[i];
       DEBUG_PRINTF("zi = %e\n", zi);
-      NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false);
+      CHECK_RETURN(NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false) == NUMERICS_OK);
       DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
       zi = -(zi)*diag[i];
 

@@ -148,7 +148,7 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     problem->m = n;
     problem->A = NM_create(NM_SPARSE, n, n);
     NM_triplet_alloc(problem->A, 0);
-    problem->A->matrix2->origin = NSM_TRIPLET;
+    problem->A->sparse->origin = NSM_TRIPLET;
 
     for (size_t k = 0; k < n; k++) {
       NM_entry(problem->A, k, k, 1);
@@ -203,15 +203,13 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
   }
 
   /* Compute M + rho A^T A (storage in W)*/
-  NumericsMatrix* W = NM_new();
-
-  NM_copy(M, W);
+  NumericsMatrix* W = NM_copy(M);
 
   if (AisIdentity) {
-    NM_add_to_diag3(W, rho);
+    CHECK_RETURN(NM_add_to_diag3(W, rho) == NUMERICS_OK);
   } else {
     Atrans = NM_transpose(A);
-    NM_gemm(rho, Atrans, A, 1.0, W);
+    CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
   }
 
   double eta = dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA];
@@ -241,15 +239,16 @@ void convexQP_ADMM(ConvexQP* problem, double* z, double* w, double* xi, double* 
     ++iter;
 
     if (has_rho_changed) {
-      NM_copy(M, W);
+      NM_free(W);
+      W = NM_copy(M);
       DEBUG_PRINT("copy of M: ");
       DEBUG_EXPR(NM_display(W));
       if (AisIdentity) {
-        NM_add_to_diag3(W, rho);
+        CHECK_RETURN(NM_add_to_diag3(W, rho) == NUMERICS_OK);
       } else {
         if (Atrans) NM_free(Atrans);
         Atrans = NM_transpose(A);
-        NM_gemm(rho, Atrans, A, 1.0, W);
+        CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
       }
       DEBUG_PRINT("M + rho A^T A: ");
       DEBUG_EXPR(NM_display(W));

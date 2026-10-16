@@ -148,21 +148,22 @@ void siconos_io(Archive& ar, NumericsMatrix& v, unsigned int version) {
   SERIALIZE(v, (storageType)(size0)(size1), ar);
   if (v.storageType == 0) {
     if (Archive::is_loading::value) {
-      v.matrix0 = (double*)malloc(v.size0 * v.size1 * sizeof(double));
-      v.matrix1 = nullptr;
-      v.matrix2 = nullptr;
+      v.dense = (double*)malloc(v.size0 * v.size1 * sizeof(double));
+      v.sparse_block = nullptr;
+      v.sparse = nullptr;
       v.internalData = nullptr;
     }
-    SERIALIZE_C_ARRAY(v.size0 * v.size1, v, matrix0, ar);
+    SERIALIZE_C_ARRAY(v.size0 * v.size1, v, dense, ar);
   } else {
     {
       if (Archive::is_loading::value) {
-        v.matrix0 = nullptr;
-        v.matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-        v.matrix2 = nullptr;
+        v.dense = nullptr;
+        v.sparse_block =
+            (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+        v.sparse = nullptr;
         v.internalData = nullptr;
       }
-      SERIALIZE(v, (matrix1), ar);
+      SERIALIZE(v, (sparse_block), ar);
     }
   }
 }

@@ -140,10 +140,10 @@ void siconos::modeling::LagrangianSparseScleronomousR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& positions) {
   // Warning: the jacobian must be allocated and of the right size before a call to this
   // function
-  auto isComputed = siconos::algebra::computeSparse(
-      jacobianhOver_q_storage_, computejacobianhOver_q_, computejacobianhOver_q_python_,
-      "jacobianhOver_q_storage_", positions);
-  // isComputed == false => means jacobian is constant, functions not set
+  siconos::algebra::computeSparse(jacobianhOver_q_storage_, computejacobianhOver_q_,
+                                  computejacobianhOver_q_python_, "jacobianhOver_q_storage_",
+                                  positions);
+  // Return value == false => means jacobian is constant, functions not set
 }
 
 void siconos::modeling::LagrangianSparseScleronomousR::setConstantJacobianhOver_q_dot(
@@ -160,10 +160,10 @@ void siconos::modeling::LagrangianSparseScleronomousR::setConstantJacobianhOver_
 
 void siconos::modeling::LagrangianSparseScleronomousR::computeJacobianhOver_q_dot(
     const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
-  auto isComputed = siconos::algebra::computeSparse(
-      jacobianhOver_q_dot_storage_, computejacobianhOver_q_dot_,
-      computejacobianhOver_q_dot_python_, "jacobianhOver_q_storage_", q, qdot);
-  // isComputed == false => means jacobian is constant, functions not set
+  siconos::algebra::computeSparse(jacobianhOver_q_dot_storage_, computejacobianhOver_q_dot_,
+                                  computejacobianhOver_q_dot_python_,
+                                  "jacobianhOver_q_storage_", q, qdot);
+  // Return value == false => means jacobian is constant, functions not set
 }
 
 void siconos::modeling::LagrangianSparseScleronomousR::computeJacobianhOver_q_dot_X_qdot(

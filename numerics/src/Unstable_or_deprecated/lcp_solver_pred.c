@@ -228,7 +228,7 @@ int extractLCP(NumericsMatrix* MGlobal, double* z, int* indic, int* indicop, dou
   /* Extract data from problem */
   if (MGlobal->storageType == 1)
     numerics_error("extractLCP", "Not yet implemented for sparse storage");
-  double* M = MGlobal->matrix0;
+  double* M = MGlobal->dense;
   int sizelcp = MGlobal->size0;
   if (M == NULL) numerics_error("extractLCP", "Null input matrix M");
 

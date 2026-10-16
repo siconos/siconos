@@ -30,10 +30,10 @@
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
 #include "numerics_verbose.h"
 
-void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
-                                    FischerBurmeisterFun3x3Ptr computeACFun3x3,
-                                    double* reaction, double* velocity, double* mu,
-                                    double* rho, double* result, double* A, double* B) {
+int fc3d_FischerBurmeisterFunction(unsigned int problemSize,
+                                   FischerBurmeisterFun3x3Ptr computeACFun3x3,
+                                   double* reaction, double* velocity, double* mu, double* rho,
+                                   double* result, double* A, double* B) {
   assert(reaction);
   assert(velocity);
   assert(rho);
@@ -44,7 +44,8 @@ void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
 
   unsigned int i;
   for (i = 0; i < problemSize; i += 3) {
-    computeACFun3x3(reaction, velocity, *mu, rho, result, A, B);
+    int info = computeACFun3x3(reaction, velocity, *mu, rho, result, A, B);
+    if (info) return info;
 
     reaction += 3;
     velocity += 3;
@@ -57,6 +58,7 @@ void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
 
     if (B) B += 9;
   }
+  return 0;
 }
 
 int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem* problem,
@@ -81,8 +83,13 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem
     }
   }
 
-  fc3d_FischerBurmeisterFunction(problemSize, computeACFun3x3, z, w, problem->mu, rho, F, A,
-                                 B);
+  int info_fb = fc3d_FischerBurmeisterFunction(problemSize, computeACFun3x3, z, w, problem->mu,
+                                               rho, F, A, B);
+  if (info_fb) {
+    free(F);
+    free(rho);
+    return info_fb;
+  }
 
   *error = 0.;
   for (unsigned int i = 0; i < problemSize; i += 3) {
@@ -132,16 +139,16 @@ typedef struct {
   FischerBurmeisterFun3x3Ptr computeACFun3x3;
 } FischerBurmeisterParams;
 
-void nonsmoothEqnFischerBurmeisterFun(void* arg, unsigned int problemSize, double* reaction,
-                                      double* velocity, double* mu, double* rho,
-                                      double* result, double* A, double* B);
-void nonsmoothEqnFischerBurmeisterFun(void* arg, unsigned int problemSize, double* reaction,
-                                      double* velocity, double* mu, double* rho,
-                                      double* result, double* A, double* B) {
+int nonsmoothEqnFischerBurmeisterFun(void* arg, unsigned int problemSize, double* reaction,
+                                     double* velocity, double* mu, double* rho, double* result,
+                                     double* A, double* B);
+int nonsmoothEqnFischerBurmeisterFun(void* arg, unsigned int problemSize, double* reaction,
+                                     double* velocity, double* mu, double* rho, double* result,
+                                     double* A, double* B) {
   FischerBurmeisterParams* acparams_p = (FischerBurmeisterParams*)arg;
 
-  fc3d_FischerBurmeisterFunction(problemSize, acparams_p->computeACFun3x3, reaction, velocity,
-                                 mu, rho, result, A, B);
+  return fc3d_FischerBurmeisterFunction(problemSize, acparams_p->computeACFun3x3, reaction,
+                                        velocity, mu, rho, result, A, B);
 }
 
 void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem* problem, double* reaction,

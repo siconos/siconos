@@ -73,7 +73,7 @@ void F_MCPFischerBurmeister(int size, double* z, double* FBz, int a) {
  */
 void jacobianF_MCPFischerBurmeister(int size, double* z, double* jacobianFMatrix, int a) {
   computeFz(z);
-  jacobianPhi_Mixed_FB(sN, sM, z, sFz, sProblem->M->matrix0, jacobianFMatrix);
+  jacobianPhi_Mixed_FB(sN, sM, z, sFz, sProblem->M->dense, jacobianFMatrix);
 }
 
 void mlcp_FB_init(MixedLinearComplementarityProblem* problem, SolverOptions* options) {

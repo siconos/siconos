@@ -97,9 +97,9 @@ static CB_FUNC(int)
   vi_box->compute_nabla_F(vi_box, n, z, vi_box->nabla_F);
 
   /* Write the jacobian in a Path-Sparse format */
-  assert(vi_box->nabla_F->matrix0);
+  assert(vi_box->nabla_F->dense);
   assert(vi_box->nabla_F->storageType == NM_DENSE);
-  convertToPathSparse(n, n, vi_box->nabla_F->matrix0, col_start, col_len, row, data);
+  convertToPathSparse(n, n, vi_box->nabla_F->dense, col_start, col_len, row, data);
   (*nnz) = env->nnz;
   return err;
 }

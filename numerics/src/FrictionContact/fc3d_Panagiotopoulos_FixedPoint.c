@@ -61,7 +61,6 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   SolverOptions** internalsolver_options = options->internalSolvers;
 
@@ -112,9 +111,9 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
     /* { */
     /*   problem->mu[contact] =0.0; */
     /* } */
-    /* splitted_problem->M_nn->matrix0 =(double
+    /* splitted_problem->M_nn->dense =(double
      * *)malloc(splitted_problem->M_nn->size0*splitted_problem->M_nn->size1*sizeof(double)); */
-    /* SBM_to_dense(splitted_problem->M_nn->matrix1, splitted_problem->M_nn->matrix0); */
+    /* SBM_to_dense(splitted_problem->M_nn->sparse_block, splitted_problem->M_nn->dense); */
     /* splitted_problem->M_nn->storageType=NM_DENSE; */
 
     normal_lcp_problem->q = (double*)malloc(nc * sizeof(double));

@@ -125,9 +125,9 @@ struct FrictionContactProblemWrapper {
   ~FrictionContactProblemWrapper() {
     if (problem_) {
       if (problem_->M) {
-        if (problem_->M->matrix2) {
-          delete problem_->M->matrix2->csc;
-          delete problem_->M->matrix2;
+        if (problem_->M->sparse) {
+          delete problem_->M->sparse->csc;
+          delete problem_->M->sparse;
         }
         delete problem_->M;
       }
@@ -183,12 +183,12 @@ struct FrictionContactProblemWrapper {
   void somefunc() {
     // test function ...
     if (problem_->M->storageType == NM_SPARSE) {
-      CSparseMatrix* mat = problem_->M->matrix2->csc;
+      CSparseMatrix* mat = problem_->M->sparse->csc;
       for (int i = 0; i < mat->nzmax; ++i) {
         mat->x[i] += 10.0;
       }
     } else {
-      double* mat = problem_->M->matrix0;
+      double* mat = problem_->M->dense;
       int size = problem_->M->size0 * problem_->M->size1;
       for (int i = 0; i < size; ++i) {
         mat[i] += 5.0;
@@ -249,9 +249,9 @@ struct RollingFrictionContactProblemWrapper {
   ~RollingFrictionContactProblemWrapper() {
     if (problem) {
       if (problem->M) {
-        if (problem->M->matrix2) {
-          delete problem->M->matrix2->csc;
-          delete problem->M->matrix2;
+        if (problem->M->sparse) {
+          delete problem->M->sparse->csc;
+          delete problem->M->sparse;
         }
         delete problem->M;
       }
@@ -358,16 +358,16 @@ struct GlobalFrictionContactProblemWrapper {
         problem->b = nullptr;
       }
       if (problem->M) {
-        if (problem->M->matrix2) {
-          delete problem->M->matrix2->csc;
-          delete problem->M->matrix2;
+        if (problem->M->sparse) {
+          delete problem->M->sparse->csc;
+          delete problem->M->sparse;
         }
         delete problem->M;
       }
       if (problem->H) {
-        if (problem->H->matrix2) {
-          delete problem->H->matrix2->csc;
-          delete problem->H->matrix2;
+        if (problem->H->sparse) {
+          delete problem->H->sparse->csc;
+          delete problem->H->sparse;
         }
         delete problem->H;
       }
@@ -459,11 +459,11 @@ struct GlobalFrictionContactProblemWrapper {
     py::object matrixH;
     if (problem->M->storageType == NM_DENSE && problem->H->storageType == NM_DENSE) {
       py::array_t<double> Marray({n, n}, {sizeof(double), n * sizeof(double)});
-      std::memcpy(Marray.mutable_data(), problem->M->matrix0, n * n * sizeof(double));
+      std::memcpy(Marray.mutable_data(), problem->M->dense, n * n * sizeof(double));
       matrixM = Marray;
 
       py::array_t<double> Harray({n, dim * nc}, {sizeof(double), n * sizeof(double)});
-      std::memcpy(Harray.mutable_data(), problem->H->matrix0, n * dim * nc * sizeof(double));
+      std::memcpy(Harray.mutable_data(), problem->H->dense, n * dim * nc * sizeof(double));
       matrixH = Harray;
     } else {
       globalFrictionContact_free(problem);
@@ -500,12 +500,12 @@ struct GlobalFrictionContactProblemWrapper {
   void somefunc() {
     // test function ...
     if (problem->M->storageType == NM_SPARSE) {
-      CSparseMatrix* mat = problem->M->matrix2->csc;
+      CSparseMatrix* mat = problem->M->sparse->csc;
       for (int i = 0; i < mat->nzmax; ++i) {
         mat->x[i] += 10.0;
       }
     } else {
-      double* mat = problem->M->matrix0;
+      double* mat = problem->M->dense;
       int size = problem->M->size0 * problem->M->size1;
       for (int i = 0; i < size; ++i) {
         mat[i] += 5.0;
@@ -581,16 +581,16 @@ struct GlobalRollingFrictionContactProblemWrapper {
   ~GlobalRollingFrictionContactProblemWrapper() {
     if (problem) {
       if (problem->M) {
-        if (problem->M->matrix2) {
-          delete problem->M->matrix2->csc;
-          delete problem->M->matrix2;
+        if (problem->M->sparse) {
+          delete problem->M->sparse->csc;
+          delete problem->M->sparse;
         }
         delete problem->M;
       }
       if (problem->H) {
-        if (problem->H->matrix2) {
-          delete problem->H->matrix2->csc;
-          delete problem->H->matrix2;
+        if (problem->H->sparse) {
+          delete problem->H->sparse->csc;
+          delete problem->H->sparse;
         }
         delete problem->H;
       }
@@ -628,12 +628,12 @@ struct GlobalRollingFrictionContactProblemWrapper {
   void somefunc() {
     // test function ...
     if (problem->M->storageType == NM_SPARSE) {
-      CSparseMatrix* mat = problem->M->matrix2->csc;
+      CSparseMatrix* mat = problem->M->sparse->csc;
       for (int i = 0; i < mat->nzmax; ++i) {
         mat->x[i] += 10.0;
       }
     } else {
-      double* mat = problem->M->matrix0;
+      double* mat = problem->M->dense;
       int size = problem->M->size0 * problem->M->size1;
       for (int i = 0; i < size; ++i) {
         mat[i] += 5.0;
@@ -669,14 +669,14 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              ss << "  M:\n" << py::str(self.M()).cast<std::string>() << "\n";
              ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
              ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
-             if (self.problem_->M->matrix2 != nullptr) {
-               CSparseMatrix* csc = self.problem_->M->matrix2->csc;
+             if (self.problem_->M->sparse != nullptr) {
+               CSparseMatrix* csc = self.problem_->M->sparse->csc;
                display_csc_matrix(csc);
              } else {
                ss << "  Dense matrix (matrix0):\n";
                for (int i = 0; i < self.problem_->M->size0; ++i) {
                  for (int j = 0; j < self.problem_->M->size1; ++j) {
-                   ss << self.problem_->M->matrix0[i * self.problem_->M->size1 + j] << " ";
+                   ss << self.problem_->M->dense[i * self.problem_->M->size1 + j] << " ";
                  }
                  ss << "\n";
                }
@@ -714,14 +714,14 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
         ss << "  M:\n" << py::str(self.M()).cast<std::string>() << "\n";
         ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
         ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
-        if (self.problem->M->matrix2 != nullptr) {
-          CSparseMatrix* csc = self.problem->M->matrix2->csc;
+        if (self.problem->M->sparse != nullptr) {
+          CSparseMatrix* csc = self.problem->M->sparse->csc;
           display_csc_matrix(csc);
         } else {
           ss << "  Dense matrix (matrix0):\n";
           for (int i = 0; i < self.problem->M->size0; ++i) {
             for (int j = 0; j < self.problem->M->size1; ++j) {
-              ss << self.problem->M->matrix0[i * self.problem->M->size1 + j] << " ";
+              ss << self.problem->M->dense[i * self.problem->M->size1 + j] << " ";
             }
             ss << "\n";
           }
@@ -764,14 +764,14 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              ss << "  H:\n" << py::str(self.H()).cast<std::string>() << "\n";
              ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
              ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
-             if (self.problem->M->matrix2 != nullptr) {
-               CSparseMatrix* csc = self.problem->M->matrix2->csc;
+             if (self.problem->M->sparse != nullptr) {
+               CSparseMatrix* csc = self.problem->M->sparse->csc;
                display_csc_matrix(csc);
              } else {
                ss << "  Dense matrix (matrix0):\n";
                for (int i = 0; i < self.problem->M->size0; ++i) {
                  for (int j = 0; j < self.problem->M->size1; ++j) {
-                   ss << self.problem->M->matrix0[i * self.problem->M->size1 + j] << " ";
+                   ss << self.problem->M->dense[i * self.problem->M->size1 + j] << " ";
                  }
                  ss << "\n";
                }
@@ -828,14 +828,14 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              ss << "  q: " << py::str(self.q()).cast<std::string>() << "\n";
              ss << "  mu: " << py::str(self.mu()).cast<std::string>() << "\n";
              ss << "  mu_r: " << py::str(self.mu_r()).cast<std::string>() << "\n";
-             if (self.problem->M->matrix2 != nullptr) {
-               CSparseMatrix* csc = self.problem->M->matrix2->csc;
+             if (self.problem->M->sparse != nullptr) {
+               CSparseMatrix* csc = self.problem->M->sparse->csc;
                display_csc_matrix(csc);
              } else {
                ss << "  Dense matrix (matrix0):\n";
                for (int i = 0; i < self.problem->M->size0; ++i) {
                  for (int j = 0; j < self.problem->M->size1; ++j) {
-                   ss << self.problem->M->matrix0[i * self.problem->M->size1 + j] << " ";
+                   ss << self.problem->M->dense[i * self.problem->M->size1 + j] << " ";
                  }
                  ss << "\n";
                }

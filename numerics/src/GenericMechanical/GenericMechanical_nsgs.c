@@ -80,15 +80,14 @@ static int gmp_equality_solve_local(GMP_LocalProblem* local, double* diag_block,
                                     double* w, SolverOptions* options) {
   (void)w;
   (void)options;
-  NumericsMatrix M;
-  NM_fill(&M, NM_DENSE, local->size, local->size, diag_block);
+  NumericsMatrix* M = NM_create_with_data(NM_DENSE, local->size, local->size, diag_block);
 
   for (size_t i = 0; i < local->size; ++i) sol[i] = -local->q_local[i];
 
-  int info = NM_LU_solve(NM_preserve(&M), sol, 1);
-  NM_unpreserve(&M);
-  M.matrix0 = NULL;
-  NM_clear(&M);
+  int info = NM_LU_solve(NM_preserve(M), sol, 1);
+  NM_unpreserve(M);
+  M->dense = NULL;
+  NM_free(M);
   return info;
 }
 
@@ -111,7 +110,7 @@ static void gmp_equality_detach_diag_block(GMP_LocalProblem* local) { (void)loca
 static int gmp_lcp_solve_local(GMP_LocalProblem* local, double* diag_block, double* sol,
                                double* w, SolverOptions* options) {
   LinearComplementarityProblem* lcpProblem = (LinearComplementarityProblem*)local->problem;
-  lcpProblem->M->matrix0 = diag_block;
+  lcpProblem->M->dense = diag_block;
   return linearComplementarity_driver(lcpProblem, sol, w, options);
 }
 
@@ -127,14 +126,14 @@ static int gmp_lcp_compute_error(GMP_LocalProblem* local, const double* reaction
 
 static void gmp_lcp_detach_diag_block(GMP_LocalProblem* local) {
   LinearComplementarityProblem* lcpProblem = (LinearComplementarityProblem*)local->problem;
-  lcpProblem->M->matrix0 = NULL;
+  lcpProblem->M->dense = NULL;
 }
 
 /* RELAY */
 static int gmp_relay_solve_local(GMP_LocalProblem* local, double* diag_block, double* sol,
                                  double* w, SolverOptions* options) {
   RelayProblem* relayProblem = (RelayProblem*)local->problem;
-  relayProblem->M->matrix0 = diag_block;
+  relayProblem->M->dense = diag_block;
   return relay_driver(relayProblem, sol, w, options);
 }
 
@@ -150,7 +149,7 @@ static int gmp_relay_compute_error(GMP_LocalProblem* local, const double* reacti
 
 static void gmp_relay_detach_diag_block(GMP_LocalProblem* local) {
   RelayProblem* relayProblem = (RelayProblem*)local->problem;
-  relayProblem->M->matrix0 = NULL;
+  relayProblem->M->dense = NULL;
 }
 
 /* FC3D */
@@ -160,7 +159,7 @@ static int gmp_fc3d_solve_local(GMP_LocalProblem* local, double* diag_block, dou
   assert(fcProblem);
   assert(fcProblem->M);
   assert(fcProblem->q);
-  fcProblem->M->matrix0 = diag_block;
+  fcProblem->M->dense = diag_block;
   return fc3d_driver(fcProblem, sol, w, options);
 }
 
@@ -179,7 +178,7 @@ static int gmp_fc3d_compute_error(GMP_LocalProblem* local, const double* reactio
 
 static void gmp_fc3d_detach_diag_block(GMP_LocalProblem* local) {
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
-  fcProblem->M->matrix0 = NULL;
+  fcProblem->M->dense = NULL;
 }
 
 /* FC2D */
@@ -189,7 +188,7 @@ static int gmp_fc2d_solve_local(GMP_LocalProblem* local, double* diag_block, dou
   assert(fcProblem);
   assert(fcProblem->M);
   assert(fcProblem->q);
-  fcProblem->M->matrix0 = diag_block;
+  fcProblem->M->dense = diag_block;
   return fc2d_driver(fcProblem, sol, w, options);
 }
 
@@ -208,7 +207,7 @@ static int gmp_fc2d_compute_error(GMP_LocalProblem* local, const double* reactio
 
 static void gmp_fc2d_detach_diag_block(GMP_LocalProblem* local) {
   FrictionContactProblem* fcProblem = (FrictionContactProblem*)local->problem;
-  fcProblem->M->matrix0 = NULL;
+  fcProblem->M->dense = NULL;
 }
 
 /** Lookup table of operations, indexed by SICONOS_NUMERICS_PROBLEM_TYPE. */
@@ -274,8 +273,9 @@ static void gmp_build_local_q(const GenericMechanicalProblem* problem, int block
    * zeros the diagonal block in the x vector and restores it; the cast below
    * reflects that the function is not const-correct, but the input vector is
    * logically unchanged on return. */
-  NM_row_prod_no_diag(problem->globalSize, block_size, blockRowIndex, row_start, problem->M,
-                      (double*)reaction, q_local, NULL, 0);
+  CHECK_RETURN(NM_row_prod_no_diag(problem->globalSize, block_size, blockRowIndex, row_start,
+                                   problem->M, (double*)reaction, q_local, NULL,
+                                   0) == NUMERICS_OK);
 }
 
 /* ===========================================================================
@@ -370,11 +370,12 @@ int gmp_compute_error(const GenericMechanicalProblem* problem, const double* rea
 
     double* diagBlock = 0;
     if (storageType == NM_DENSE) {
-      NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
-                            &bufForLocalProblemDense);
+      CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                         &bufForLocalProblemDense) == NUMERICS_OK);
       diagBlock = bufForLocalProblemDense;
     } else {
-      NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size, &diagBlock);
+      CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                         &diagBlock) == NUMERICS_OK);
     }
     DEBUG_PRINT_MAT_STR("diagBlock", diagBlock, (unsigned)local_size, (unsigned)local_size);
     DEBUG_PRINT_MAT_STR("Rlocal", reaction + global_offset, (unsigned)local_size, 1);
@@ -502,11 +503,12 @@ static void gmp_gauss_seidel_internal(GenericMechanicalProblem* problem, double*
       /* Extract the diagonal block for the local solver. */
       double* diagBlock = 0;
       if (storageType == NM_DENSE) {
-        NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
-                              &ws->diag_dense_buffer);
+        CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                           &ws->diag_dense_buffer) == NUMERICS_OK);
         diagBlock = ws->diag_dense_buffer;
       } else {
-        NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size, &diagBlock);
+        CHECK_RETURN(NM_extract_diag_block(numMat, blockRowIndex, global_offset, local_size,
+                                           &diagBlock) == NUMERICS_OK);
       }
 
       sol = reaction + global_offset;
@@ -636,7 +638,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* problem, double* reaction, doubl
   DEBUG_EXPR_WE({
     FILE* toto1 = fopen("GMP_CURRENT.txt", "w");
     if (toto1) {
-      genericMechanicalProblem_printInFile(problem, toto1);
+      CHECK_RETURN(genericMechanicalProblem_printInFile(problem, toto1) == NUMERICS_OK);
       fclose(toto1);
     }
   });

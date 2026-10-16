@@ -76,8 +76,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
     double* reaction = (double*)calloc(n, sizeof(double));
     double* velocity = (double*)calloc(n, sizeof(double));
 
-    NumericsMatrix* W = NM_create(NM_SPARSE, n, n);
-    NM_copy_to_sparse(problem->M, W);
+    NumericsMatrix* W = NM_copy_to_sparse(problem->M, DBL_EPSILON);
     NM_clear(problem->M);
     free(problem->M);
     problem->M = W;
@@ -161,9 +160,8 @@ int main(void) {
                       0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
-  NumericsMatrix* tmpM = NM_create_from_data(NM_DENSE, 9, 9, Wdata);
-  NumericsMatrix* W = NM_create(NM_SPARSE, 9, 9);
-  NM_copy_to_sparse(tmpM, W);
+  NumericsMatrix* tmpM = NM_create_with_data(NM_DENSE, 9, 9, Wdata);
+  NumericsMatrix* W = NM_copy_to_sparse(tmpM, DBL_EPSILON);
 
   int solvers_to_test[] = {
       SICONOS_FRICTION_3D_NSGS,   SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_NEW,
@@ -222,7 +220,7 @@ int main(void) {
   }
 
   NM_clear(W);
-  tmpM->matrix0 = NULL;
+  tmpM->dense = NULL;
   NM_clear(tmpM);
   free(W);
   free(tmpM);

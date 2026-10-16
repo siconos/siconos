@@ -57,9 +57,9 @@ typedef struct {
   AlartCurnierFun3x3Ptr computeACFun3x3;
 } AlartCurnierParams;
 
-void nonsmoothEqnAlartCurnierFun(void* arg, unsigned int problemSize, double* reaction,
-                                 double* velocity, double* mu, double* rho, double* result,
-                                 double* A, double* B);
+int nonsmoothEqnAlartCurnierFun(void* arg, unsigned int problemSize, double* reaction,
+                                double* velocity, double* mu, double* rho, double* result,
+                                double* A, double* B);
 
 /** Nonsmooth Newton solver based on the Alart--Curnier function for the
  *  local (reduced) frictional contact problem in the dense form

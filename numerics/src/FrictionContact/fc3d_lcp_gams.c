@@ -828,19 +828,19 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   Emat.size0 = size;
   Emat.size1 = size;
 
-  Emat.matrix2->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
+  Emat.sparse->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
 
   for(unsigned i = 0; i < size; i += 3)
   {
-    cs_entry(Emat.matrix2->triplet, i, i, 1.);
+    cs_entry(Emat.sparse->triplet, i, i, 1.);
   }
 
   Akmat.storageType = NM_SPARSE;
   numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX*problem->numberOfContacts;
   Akmat.size1 = size;
-  Akmat.matrix2->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);
-  CSparseMatrix* Ak_triplet = Akmat.matrix2->triplet;
+  Akmat.sparse->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);
+  CSparseMatrix* Ak_triplet = Akmat.sparse->triplet;
 
   unsigned size_l = (NB_APPROX+3)*problem->numberOfContacts;
   /* Create a csc matric for Ab  */
@@ -949,7 +949,8 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     SN_logh5_vec_double(Akmat.size0, lambda_y, "lambda_y", logger_s->group);
 
     /* Compute tildeW and tildeWt*/
-    NM_gemm(1., problem->M, &Ab, 0., tmpWmat);
+    CHECK_RETURN(NM_gemm(1., problem->M, &Ab, 0., tmpWmat) == NUMERICS_OK);
+
 
     CSparseMatrix* AbT = cs_transpose(numericsSparseMatrix(&Ab)->csc, 1);
     numericsSparseMatrix(&tildeW)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
@@ -1065,8 +1066,8 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     NM_clearSparseStorage(&Akmat);
     NM_clearSparseStorage(&Emat);
     /* This is now a upper bound ...  */
-    Akmat.matrix2->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);
-    Emat.matrix2->triplet = cs_spalloc(3*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts, 1, 1);
+    Akmat.sparse->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);
+    Emat.sparse->triplet = cs_spalloc(3*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts, 1, 1);
     Ak_triplet = NM_triplet(&Akmat);
     CSparseMatrix* E_triplet = NM_triplet(&Emat);
     /************************************************

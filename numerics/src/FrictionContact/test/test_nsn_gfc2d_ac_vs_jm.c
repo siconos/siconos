@@ -68,7 +68,7 @@ static GlobalFrictionContactProblem* build_problem(const Scenario* s) {
   M_data[1] = 0.0;
   M_data[2] = 0.0;
   M_data[3] = 1.0;
-  problem->M = NM_create_from_data(NM_DENSE, n, n, M_data);
+  problem->M = NM_create_with_data(NM_DENSE, n, n, M_data);
 
   /* H = [normal tangent] with normal=(0,1), tangent=(-1,0).
    * Local unknowns are (rN, rT).  Hence u = H^T v = (v_y, -v_x). */
@@ -77,7 +77,7 @@ static GlobalFrictionContactProblem* build_problem(const Scenario* s) {
   H_data[1] = 1.0; /* col 0 = normal */
   H_data[2] = -1.0;
   H_data[3] = 0.0; /* col 1 = tangent */
-  problem->H = NM_create_from_data(NM_DENSE, n, dim, H_data);
+  problem->H = NM_create_with_data(NM_DENSE, n, dim, H_data);
 
   /* b = 0. */
   problem->b = (double*)calloc((size_t)dim * nc, sizeof(double));

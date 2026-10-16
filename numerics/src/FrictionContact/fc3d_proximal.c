@@ -60,7 +60,6 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   if (verbose > 0) {
     solver_options_print(options);
   }
@@ -185,7 +184,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       cblas_daxpy(n, -alpha, reactionold, 1, problem->q, 1);
 
       /* add proximal regularization on M */
-      NM_add_to_diag3(M, alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, alpha) == NUMERICS_OK);
 
       numerics_printf_verbose(1, "---- FC3D - PROXIMAL - alpha = %8.4e\n", alpha);
 
@@ -212,7 +211,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       /* substract proximal regularization on q */
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1);
       /* substract proximal regularization on M */
-      NM_add_to_diag3(M, -alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, -alpha) == NUMERICS_OK);
 
       fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
@@ -310,7 +309,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       cblas_daxpy(n, -alpha, reactionold, 1, problem->q, 1);
 
       /* add proximal regularization on M */
-      NM_add_to_diag3(M, alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, alpha) == NUMERICS_OK);
 
       fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options, error);
 
@@ -325,7 +324,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       /* substract proximal regularization on q */
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1);
       /* substract proximal regularization on M */
-      NM_add_to_diag3(M, -alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, -alpha) == NUMERICS_OK);
       fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       if (*info) {

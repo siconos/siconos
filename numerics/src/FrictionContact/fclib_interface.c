@@ -68,9 +68,9 @@ FrictionContactProblem* from_fclib_local(const fclib_local* fclib_problem) {
 
   problem->M = NM_create(NM_SPARSE_BLOCK, fclib_problem->W->m, fclib_problem->W->n);
 
-  problem->M->matrix1->block = NULL;
-  problem->M->matrix1->index1_data = NULL;
-  problem->M->matrix1->index2_data = NULL;
+  problem->M->sparse_block->block = NULL;
+  problem->M->sparse_block->index1_data = NULL;
+  problem->M->sparse_block->index2_data = NULL;
 
   CSparseMatrix W;
 
@@ -99,7 +99,7 @@ FrictionContactProblem* from_fclib_local(const fclib_local* fclib_problem) {
 
   W.nz = fclib_problem->W->nz;
 
-  SBM_from_csparse_2(problem->dimension, &W, problem->M->matrix1);
+  SBM_from_csparse_2(problem->dimension, &W, problem->M->sparse_block);
 
   free(W.p);
   free(W.i);
@@ -132,20 +132,20 @@ FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem
     /* compressed colums */
     W->p = (CS_INT*)malloc(sizeof(CS_INT) * (W->n + 1));
     int_to_csi(fclib_problem->W->p, W->p, (unsigned)(W->n + 1));
-    problem->M->matrix2->csc = W;
-    problem->M->matrix2->origin = NSM_CSC;
+    problem->M->sparse->csc = W;
+    problem->M->sparse->origin = NSM_CSC;
   } else if (fclib_problem->W->nz == -2) {
     /* compressed rows */
     W->p = (CS_INT*)malloc(sizeof(CS_INT) * (W->m + 1));
     int_to_csi(fclib_problem->W->p, W->p, (unsigned)(W->m + 1));
-    problem->M->matrix2->csr = W;
-    problem->M->matrix2->origin = NSM_CSR;
+    problem->M->sparse->csr = W;
+    problem->M->sparse->origin = NSM_CSR;
   } else {
     /* triplet */
     W->p = (CS_INT*)malloc(sizeof(CS_INT) * W->nzmax);
     int_to_csi(fclib_problem->W->p, W->p, (unsigned)W->nzmax);
-    problem->M->matrix2->triplet = W;
-    problem->M->matrix2->origin = NSM_TRIPLET;
+    problem->M->sparse->triplet = W;
+    problem->M->sparse->origin = NSM_TRIPLET;
   }
 
   W->i = (CS_INT*)malloc(sizeof(CS_INT) * W->nzmax);
@@ -214,7 +214,7 @@ int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char* title
       fclib_problem->W->p[i] = i * problem->M->size1;
       for (int j = 0; j < problem->M->size1; j++) {
         fclib_problem->W->x[i * problem->M->size1 + j] =
-            problem->M->matrix0[j * problem->M->size0 + i];
+            problem->M->dense[j * problem->M->size0 + i];
         fclib_problem->W->i[i * problem->M->size1 + j] = j;
       }
     }
@@ -224,8 +224,8 @@ int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char* title
   {
     /* DEBUG_PRINT("NM_SPARSE_BLOCK case\n"); */
     spmat = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
-    int MAYBE_UNUSED res = SBM_to_sparse_init_memory(problem->M->matrix1, spmat);
-    res = SBM_to_sparse(problem->M->matrix1, spmat);
+    int MAYBE_UNUSED res = SBM_to_sparse_init_memory(problem->M->sparse_block, spmat);
+    res = SBM_to_sparse(problem->M->sparse_block, spmat);
     fclib_problem->W->nzmax = (int)spmat->nzmax;
     fclib_problem->W->m = (int)spmat->m;
     fclib_problem->W->n = (int)spmat->n;
@@ -363,8 +363,8 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
 
   if (fclib_problem->M->nz == -1) {
     /* compressed colums */
-    problem->M->matrix2->csc = M;
-    problem->M->matrix2->origin = NSM_CSC;
+    problem->M->sparse->csc = M;
+    problem->M->sparse->origin = NSM_CSC;
     M->nz = (CS_INT)fclib_problem->M->nz;
     M->p = (CS_INT*)malloc(sizeof(CS_INT) * (M->n + 1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)(M->n + 1));
@@ -373,7 +373,7 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
     M->nz = (CS_INT)fclib_problem->M->nz;
     M->p = (CS_INT*)malloc(sizeof(CS_INT) * (M->m + 1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)(M->m + 1));
-    /* since  problem->M->matrix2->csr does not exist, we need
+    /* since  problem->M->sparse->csr does not exist, we need
        to fill transform M into a triplet or csc before returning
      */
 
@@ -381,8 +381,8 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
     return NULL;
   } else {
     /* triplet */
-    problem->M->matrix2->triplet = M;
-    problem->M->matrix2->origin = NSM_TRIPLET;
+    problem->M->sparse->triplet = M;
+    problem->M->sparse->origin = NSM_TRIPLET;
     M->nz = (CS_INT)fclib_problem->M->nz;
     M->p = (CS_INT*)malloc(sizeof(CS_INT) * M->nzmax);
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)M->nz);
@@ -402,8 +402,8 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
 
   if (fclib_problem->H->nz == -1) {
     /* compressed colums */
-    problem->H->matrix2->csc = H;
-    problem->H->matrix2->origin = NSM_CSC;
+    problem->H->sparse->csc = H;
+    problem->H->sparse->origin = NSM_CSC;
     H->p = (CS_INT*)malloc(sizeof(CS_INT) * (H->n + 1));
     int_to_csi(fclib_problem->H->p, H->p, (unsigned)(H->n + 1));
   } else if (fclib_problem->H->nz == -2) {
@@ -412,8 +412,8 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
     return NULL;
   } else {
     /* triplet */
-    problem->H->matrix2->triplet = H;
-    problem->H->matrix2->origin = NSM_TRIPLET;
+    problem->H->sparse->triplet = H;
+    problem->H->sparse->origin = NSM_TRIPLET;
     H->p = (CS_INT*)malloc(sizeof(CS_INT) * H->nzmax);
     int_to_csi(fclib_problem->H->p, H->p, (unsigned)H->nz);
   }
@@ -481,8 +481,8 @@ int globalFrictionContact_fclib_write(GlobalFrictionContactProblem* problem, cha
   fclib_problem->f = problem->q;
 
   /* only sparse storage */
-  assert(problem->M->matrix2);
-  assert(problem->H->matrix2);
+  assert(problem->M->sparse);
+  assert(problem->H->sparse);
 
   CSparseMatrix* spmat = NM_triplet(problem->M);
 
@@ -559,8 +559,8 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
 
   if (fclib_problem->M->nz == -1) {
     /* compressed colums */
-    problem->M->matrix2->csc = M;
-    problem->M->matrix2->origin = NSM_CSC;
+    problem->M->sparse->csc = M;
+    problem->M->sparse->origin = NSM_CSC;
     M->nz = (CS_INT)fclib_problem->M->nz;
     M->p = (CS_INT*)malloc(sizeof(CS_INT) * (M->n + 1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)(M->n + 1));
@@ -569,7 +569,7 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
     M->nz = (CS_INT)fclib_problem->M->nz;
     M->p = (CS_INT*)malloc(sizeof(CS_INT) * (M->m + 1));
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)(M->m + 1));
-    /* since  problem->M->matrix2->csr does not exist, we need
+    /* since  problem->M->sparse->csr does not exist, we need
        to fill transform M into a triplet or csc before returning
      */
 
@@ -577,8 +577,8 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
     return NULL;
   } else {
     /* triplet */
-    problem->M->matrix2->triplet = M;
-    problem->M->matrix2->origin = NSM_TRIPLET;
+    problem->M->sparse->triplet = M;
+    problem->M->sparse->origin = NSM_TRIPLET;
     M->nz = (CS_INT)fclib_problem->M->nz;
     M->p = (CS_INT*)malloc(sizeof(CS_INT) * M->nzmax);
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)M->nz);
@@ -598,8 +598,8 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
 
   if (fclib_problem->H->nz == -1) {
     /* compressed colums */
-    problem->H->matrix2->csc = H;
-    problem->H->matrix2->origin = NSM_CSC;
+    problem->H->sparse->csc = H;
+    problem->H->sparse->origin = NSM_CSC;
     H->p = (CS_INT*)malloc(sizeof(CS_INT) * (H->n + 1));
     int_to_csi(fclib_problem->H->p, H->p, (unsigned)(H->n + 1));
   } else if (fclib_problem->H->nz == -2) {
@@ -608,8 +608,8 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
     return NULL;
   } else {
     /* triplet */
-    problem->H->matrix2->triplet = H;
-    problem->H->matrix2->origin = NSM_TRIPLET;
+    problem->H->sparse->triplet = H;
+    problem->H->sparse->origin = NSM_TRIPLET;
     H->p = (CS_INT*)malloc(sizeof(CS_INT) * H->nzmax);
     int_to_csi(fclib_problem->H->p, H->p, (unsigned)H->nz);
   }
@@ -664,8 +664,8 @@ int globalRollingFrictionContact_fclib_write(GlobalRollingFrictionContactProblem
   fclib_problem->f = problem->q;
 
   /* only sparse storage */
-  assert(problem->M->matrix2);
-  assert(problem->H->matrix2);
+  assert(problem->M->sparse);
+  assert(problem->H->sparse);
 
   CSparseMatrix* spmat = NM_triplet(problem->M);
 

@@ -187,7 +187,10 @@ int plasticity_printInFile(PlasticityProblem* problem, FILE* file) {
 
   fprintf(file, "%d\n", model_type);
 
-  NM_write_in_file(problem->M, file);
+  {
+    int nm_info = NM_write_in_file(problem->M, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   for (i = 0; i < problem->M->size1; i++) {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
@@ -425,8 +428,7 @@ PlasticityProblem* plasticity_copy(PlasticityProblem* problem) {
   new_problem->dimension = problem->dimension;
   new_problem->numberOfCones = problem->numberOfCones;
   new_problem->model_type = problem->model_type;
-  new_problem->M = NM_new();
-  NM_copy(problem->M, new_problem->M);
+  new_problem->M = NM_copy(problem->M);
   new_problem->q = (double*)malloc(n * sizeof(double));
   memcpy(new_problem->q, problem->q, n * sizeof(double));
 

@@ -39,7 +39,7 @@
 #include "LinearComplementarityProblem.h"  // IWYU pragma: keep
 #include "MLCP_Solvers.h"                  // for mixedLinearComplement...
 #include "NonSmoothDrivers.h"              // for linearComplementarity...
-#include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_create_with_data
 #include "SiconosBlas.h"                   // for cblas_dgemv, CblasNoT...
 #include "SolverOptions.h"                 // for SICONOS_NUMERICS_PROB...
 #include "SparseBlockMatrix.h"             // for SparseBlockStructured...
@@ -49,6 +49,7 @@
 #include "pinv.h"                          // for pinv
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR_WE, DEBUG_PRINT_MAT_STR
 
+#if 0
 /** Print a dense column-major matrix in Scilab-compatible format.
  *  If file is NULL the matrix is printed to stdout.
  *  \param[in] name variable name to print
@@ -80,6 +81,7 @@ static void printDenseMatrix(char* name, FILE* file, double* m, int N, int M) {
     printf("];\n");
   }
 }
+#endif
 
 /** Convert a reduced solution back to the original GenericMechanicalProblem layout.
  *  Equality blocks take their value from Re, while LCP/FC3D blocks take (Rreduced, Vreduced).
@@ -199,7 +201,7 @@ static void _GMPReducedGetSizes(GenericMechanicalProblem* problem, size_t* Me_si
 static int buildReducedGMP(GenericMechanicalProblem* problem, double* Me, double* Mi,
                            double* Qe, double* Qi, size_t* Me_Size, size_t* Mi_Size) {
   assert(problem->M->storageType == NM_SPARSE_BLOCK);
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  SparseBlockStructuredMatrix* m = problem->M->sparse_block;
   DEBUG_EXPR_WE({
     FILE* file = fopen("buildReducedGMP_input.txt", "w");
     if (file) {
@@ -359,7 +361,7 @@ static int buildReducedGMP(GenericMechanicalProblem* problem, double* Me, double
  */
 static int _GMPReducedEquality(GenericMechanicalProblem* problem, double* reducedProb,
                                double* Qreduced, size_t* Me_size, size_t* Mi_size) {
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  SparseBlockStructuredMatrix* m = problem->M->sparse_block;
   size_t numberOfRows = m->blocksize0[m->blocknumber0 - 1];
   size_t numberOfColumns = m->blocksize1[m->blocknumber1 - 1];
 
@@ -434,7 +436,7 @@ static int _GMPReducedEquality(GenericMechanicalProblem* problem, double* reduce
  */
 void gmp_reduced_equality_solve(GenericMechanicalProblem* problem, double* reaction,
                                 double* velocity, int* info, SolverOptions* options) {
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  SparseBlockStructuredMatrix* m = problem->M->sparse_block;
   size_t numberOfRows = m->blocksize0[m->blocknumber0 - 1];
   size_t numberOfColumns = m->blocksize1[m->blocknumber1 - 1];
 
@@ -509,8 +511,8 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* problem, double* react
   NumericsMatrix numM;
   NM_null(&numM);
   numM.storageType = NM_DENSE;
-  numM.matrix0 = reducedProb;
-  numM.matrix1 = NULL;
+  numM.dense = reducedProb;
+  numM.sparse_block = NULL;
   numM.size0 = to_int(numberOfRows);
   numM.size1 = to_int(numberOfColumns);
   _pnumerics_GMP->M = &numM;
@@ -554,7 +556,7 @@ cleanup:
  */
 void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, double* velocity,
                        int* info, SolverOptions* options) {
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  SparseBlockStructuredMatrix* m = problem->M->sparse_block;
   size_t numberOfRows = m->blocksize0[m->blocknumber0 - 1];
   size_t numberOfColumns = m->blocksize1[m->blocknumber1 - 1];
 
@@ -674,8 +676,8 @@ void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, doub
   NumericsMatrix numM;
   NM_null(&numM);
   numM.storageType = NM_DENSE;
-  numM.matrix0 = reducedProb;
-  numM.matrix1 = NULL;
+  numM.dense = reducedProb;
+  numM.sparse_block = NULL;
   numM.size0 = to_int(Mi_size);
   numM.size1 = numM.size0;
   _pnumerics_GMP->M = &numM;
@@ -758,27 +760,27 @@ static void gmp_as_mlcp_lcp(double* reducedProb, double* Qreduced, size_t Mi_siz
                             double* reaction, double* velocity, int* info) {
   LinearComplementarityProblem aLCP;
   SolverOptions* aLcpOptions = solver_options_create(SICONOS_LCP_ENUM);
-  NumericsMatrix M;
-  NM_null(&M);
-  NM_fill(&M, NM_DENSE, to_int(Mi_size), to_int(Mi_size), reducedProb);
+  NumericsMatrix* M =
+      NM_create_with_data(NM_DENSE, to_int(Mi_size), to_int(Mi_size), reducedProb);
   aLCP.size = to_int(Mi_size);
   aLCP.q = Qreduced;
-  aLCP.M = &M;
+  aLCP.M = M;
   lcp_enum_init(&aLCP, aLcpOptions, 1);
   *info = linearComplementarity_driver(&aLCP, reaction, velocity, aLcpOptions);
   lcp_enum_reset(&aLCP, aLcpOptions, 1);
+  M->dense = NULL;
+  NM_free(M);
   solver_options_delete(aLcpOptions);
 }
 
 static void gmp_as_mlcp_linear_system(double* reducedProb, double* Qreduced, size_t Me_size,
                                       double* reaction, int* info) {
   for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
-  NumericsMatrix M;
-  NM_null(&M);
-  NM_fill(&M, NM_DENSE, to_int(Me_size), to_int(Me_size), reducedProb);
-  *info = NM_LU_solve(&M, reaction, 1);
-  M.matrix0 = NULL; /* reducedProb is owned by the caller, do not free it. */
-  NM_clear(&M);
+  NumericsMatrix* M =
+      NM_create_with_data(NM_DENSE, to_int(Me_size), to_int(Me_size), reducedProb);
+  *info = NM_LU_solve(M, reaction, 1);
+  M->dense = NULL; /* reducedProb is owned by the caller, do not free it. */
+  NM_free(M);
 }
 
 static void gmp_as_mlcp_mlcp(double* reducedProb, double* Qreduced, size_t Me_size,
@@ -800,15 +802,16 @@ static void gmp_as_mlcp_mlcp(double* reducedProb, double* Qreduced, size_t Me_si
   aMLCP.b = NULL;
   aMLCP.q = Qreduced;
 
-  NumericsMatrix M;
-  NM_null(&M);
-  NM_fill(&M, NM_DENSE, to_int(Mi_size + Me_size), to_int(Mi_size + Me_size), reducedProb);
-  aMLCP.M = &M;
+  NumericsMatrix* M = NM_create_with_data(NM_DENSE, to_int(Mi_size + Me_size),
+                                          to_int(Mi_size + Me_size), reducedProb);
+  aMLCP.M = M;
 
   mlcp_driver_init(&aMLCP, aMlcpOptions);
   aMlcpOptions->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
   *info = mlcp_driver(&aMLCP, reaction, velocity, aMlcpOptions);
   mlcp_driver_reset(&aMLCP, aMlcpOptions);
+  M->dense = NULL;
+  NM_free(M);
   solver_options_delete(aMlcpOptions);
 }
 
@@ -834,7 +837,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* problem, double* reaction, double* ve
   size_t Me_size;
   size_t Mi_size;
 
-  SparseBlockStructuredMatrix* m = problem->M->matrix1;
+  SparseBlockStructuredMatrix* m = problem->M->sparse_block;
   size_t numberOfRows = m->blocksize0[m->blocknumber0 - 1];
   size_t numberOfColumns = m->blocksize1[m->blocknumber1 - 1];
 

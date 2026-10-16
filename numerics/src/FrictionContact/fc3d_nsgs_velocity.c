@@ -33,6 +33,13 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
+static void fc3d_projection_free_velocity(FrictionContactProblem* problem,
+                                          FrictionContactProblem* localproblem,
+                                          SolverOptions* localsolver_options) {
+  (void)problem;
+  fc3d_projection_free(localproblem, localsolver_options);
+}
+
 void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr* freeSolver,
                                                 ComputeErrorPtr* computeError,
                                                 FrictionContactProblem* problem,
@@ -43,7 +50,7 @@ void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr*
   if (localsolver_options->solverId ==
       SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity) {
     *solve = &fc3d_projectionOnCone_velocity_solve;
-    *freeSolver = (FreeSolverPtr)&fc3d_projection_free;
+    *freeSolver = &fc3d_projection_free_velocity;
     *computeError = &fc3d_compute_error_velocity;
     fc3d_projection_initialize(problem);
   } else {
@@ -68,7 +75,6 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   /* Check for trivial case */
   /*   *info = fc3d_checkTrivialCase(n, q,velocity, reaction, options); */
 
@@ -82,19 +88,19 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double* reaction, doubl
     /*  /\* Inversion of the matrix M *\/ */
     /*   int* ipiv = (int *)malloc(n*sizeof(*ipiv));  */
     /*   int infoDGETRF=0; */
-    /*   DGETRF(n,n,M->matrix0,n, ipiv,infoDGETRF ); */
+    /*   DGETRF(n,n,M->dense,n, ipiv,infoDGETRF ); */
     /*   assert(!infoDGETRF); */
     /*   int infoDGETRI; */
-    /*   DGETRI(n,M->matrix0,n, ipiv,infoDGETRI ); */
+    /*   DGETRI(n,M->dense,n, ipiv,infoDGETRI ); */
     /*   assert(!infoDGETRI); */
     /*   double* qtmp = (double*)malloc(n*sizeof(double)); */
     /*   cblas_dcopy(n,  q, 1, qtmp, 1); */
-    /*   cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, -1.0, M->matrix0 , n, qtmp,1,0.0,q, 1);
+    /*   cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, -1.0, M->dense , n, qtmp,1,0.0,q, 1);
      */
     /*   free(ipiv); */
     /*   free(qtmp); */
     double tolpinv = 1e-07;
-    pinv(M->matrix0, n, n, tolpinv);
+    pinv(M->dense, n, n, tolpinv);
   } else {
     assert(0);
   }

@@ -42,6 +42,7 @@
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "SparseBlockMatrix.h" /* for SparseBlockStructuredMatrix */
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 /** Callback type for updating local problem for a given block */
@@ -195,20 +196,20 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
    * ===================================================================== */
 
   /* Check for pre-extracted diagonal blocks (NM_SPARSE with matrix1) */
-  if (M->storageType == NM_SPARSE && M->matrix1) {
+  if (M->storageType == NM_SPARSE && M->sparse_block) {
     /* Use pre-extracted block from SparseBlockStructuredMatrix */
-    local_problem->M_local = M->matrix1->block[block];
+    local_problem->M_local = M->sparse_block->block[block];
   } else {
     /* Extract diagonal block on-the-fly */
     switch (dim) {
       case 2:
-        NM_extract_diag_block2(M, block, &local_problem->M_local);
+        CHECK_RETURN(NM_extract_diag_block2(M, block, &local_problem->M_local) == NUMERICS_OK);
         break;
       case 3:
-        NM_extract_diag_block3(M, block, &local_problem->M_local);
+        CHECK_RETURN(NM_extract_diag_block3(M, block, &local_problem->M_local) == NUMERICS_OK);
         break;
       case 5:
-        NM_extract_diag_block5(M, block, &local_problem->M_local);
+        CHECK_RETURN(NM_extract_diag_block5(M, block, &local_problem->M_local) == NUMERICS_OK);
         break;
       default:
         /* Generic fallback for other dimensions */
@@ -233,17 +234,20 @@ static inline void nsgs_generic_update_local_problem(unsigned int block,
   /* Add off-diagonal contributions using dimension-specific optimized functions */
   switch (dim) {
     case 2:
-      NM_row_prod_no_diag2(problem_data->nb_blocks * 2, block, block_start, M, var_z_global,
-                           local_problem->q_local, false);
+      CHECK_RETURN(NM_row_prod_no_diag2(problem_data->nb_blocks * 2, block, block_start, M,
+                                        var_z_global, local_problem->q_local,
+                                        false) == NUMERICS_OK);
       break;
     case 3:
-      NM_row_prod_no_diag3(problem_data->nb_blocks * 3, block, block_start, M, var_z_global,
-                           local_problem->q_local, false);
+      CHECK_RETURN(NM_row_prod_no_diag3(problem_data->nb_blocks * 3, block, block_start, M,
+                                        var_z_global, local_problem->q_local,
+                                        false) == NUMERICS_OK);
       break;
     default:
       /* Generic fallback for other dimensions using NM_row_prod_no_diag */
-      NM_row_prod_no_diag(problem_data->nb_blocks * dim, dim, block, block_start, M,
-                          var_z_global, local_problem->q_local, NULL, false);
+      CHECK_RETURN(NM_row_prod_no_diag(problem_data->nb_blocks * dim, dim, block, block_start,
+                                       M, var_z_global, local_problem->q_local, NULL,
+                                       false) == NUMERICS_OK);
       break;
   }
 
@@ -291,7 +295,7 @@ static inline int nsgs_generic_update_local_problem_callback(unsigned int block,
 
 /** Extract diagonal blocks from matrix for efficient access
  *
- * For NM_SPARSE matrices, extracts diagonal blocks and stores them in M->matrix1
+ * For NM_SPARSE matrices, extracts diagonal blocks and stores them in M->sparse_block
  * as a SparseBlockStructuredMatrix. This allows O(1) access to diagonal blocks
  * during the NSGS iterations.
  *
@@ -299,20 +303,20 @@ static inline int nsgs_generic_update_local_problem_callback(unsigned int block,
  *
  * \param[in,out] M The matrix to extract diagonal blocks from
  * \param[in] dim Dimension per block
- * \return Pointer to the original M->matrix1 (for later restoration), or NULL if no extraction
- * was done
+ * \return Pointer to the original M->sparse_block (for later restoration), or NULL if no
+ * extraction was done
  */
 static inline void* nsgs_generic_extract_diagonal_blocks(NumericsMatrix* M, int dim) {
   if (!M) return NULL;
 
   if (M->storageType == NM_SPARSE) {
-    void* original_matrix1 = M->matrix1;
-    if (M->matrix1) {
+    void* original_matrix1 = M->sparse_block;
+    if (M->sparse_block) {
       numerics_printf(
-          "nsgs_generic_extract_diagonal_blocks: Warning - M->matrix1 already exists, "
+          "nsgs_generic_extract_diagonal_blocks: Warning - M->sparse_block already exists, "
           "overwriting");
     }
-    M->matrix1 = NM_extract_diagonal_blocks(M, dim);
+    M->sparse_block = NM_extract_diagonal_blocks(M, dim);
     return original_matrix1;
   }
 
@@ -322,21 +326,21 @@ static inline void* nsgs_generic_extract_diagonal_blocks(NumericsMatrix* M, int 
 /** Free extracted diagonal blocks and restore original matrix1 pointer
  *
  * Cleans up the memory allocated by nsgs_generic_extract_diagonal_blocks
- * and restores the original M->matrix1 pointer.
+ * and restores the original M->sparse_block pointer.
  *
  * \param[in,out] M The matrix to clean up
- * \param[in] original_matrix1 The original M->matrix1 pointer (from
+ * \param[in] original_matrix1 The original M->sparse_block pointer (from
  * nsgs_generic_extract_diagonal_blocks)
  */
 static inline void nsgs_generic_free_diagonal_blocks(NumericsMatrix* M,
                                                      void* original_matrix1) {
   if (!M) return;
 
-  if (M->storageType == NM_SPARSE && M->matrix1) {
+  if (M->storageType == NM_SPARSE && M->sparse_block) {
     /* Free the extracted diagonal blocks */
-    SBM_free(M->matrix1, SBM_FREE_ALL);
+    SBM_free(M->sparse_block, SBM_FREE_ALL);
     /* Restore original matrix1 */
-    M->matrix1 = (SparseBlockStructuredMatrix*)original_matrix1;
+    M->sparse_block = (SparseBlockStructuredMatrix*)original_matrix1;
   }
 }
 
@@ -1068,6 +1072,11 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     }
   }
 
+  /* Allocate block ordering arrays (declared early so cleanup is safe even if
+   * local-problem allocation fails and jumps over the allocation blocks below). */
+  unsigned int* sblocks = NULL;
+  unsigned int* freeze_blocks = NULL;
+
   /* Get local problem: use alloc_local callback if provided, otherwise use
    * toolkit.localproblem */
   void* local_problem = NULL;
@@ -1081,10 +1090,6 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     /* Use pre-allocated local problem from toolkit */
     local_problem = toolkit->localproblem;
   }
-
-  /* Allocate block ordering arrays */
-  unsigned int* sblocks = NULL;
-  unsigned int* freeze_blocks = NULL;
 
   /* Allocate shuffled blocks array if shuffling is enabled */
   if (toolkit->use_shuffling) {

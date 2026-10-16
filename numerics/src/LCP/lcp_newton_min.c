@@ -35,7 +35,7 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double* z, double* w,
   /* matrix M/vector q of the lcp */
   assert(problem);
   assert(problem->M);
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
   double* q = problem->q;
 
   /* size of the LCP */

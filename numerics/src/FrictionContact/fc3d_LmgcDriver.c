@@ -180,7 +180,7 @@ int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, d
   FC->mu = NULL;
   frictionContactProblem_free(FC);
   FC = NULL;
-  NM->matrix1 = NULL;
+  NM->sparse_block = NULL;
   NM_free(NM);
   M = SBM_free(M, SBM_FREE_KEEP_BLOCKS_AND_SIZES);
 

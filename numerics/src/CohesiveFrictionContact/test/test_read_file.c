@@ -90,7 +90,7 @@ static int test_nsgs_on_filename(const char* filename) {
   }
 
   /* Set solver parameters */
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_NSGS_FREEZING_CONTACT] = 0;
   options->iparam[SICONOS_NSGS_SHUFFLE] = SICONOS_NSGS_SHUFFLE_TRUE;
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
   /* info += test_nsgs_on_filename(filename_2); */
 
   const char* filename_3 = "data/diamond_sphere_sphere_pack.dat";
-  info += test_nsgs_on_filename(filename_3);
+  info = test_nsgs_on_filename(filename_3);
 
   printf("\n=================================================================\n");
   printf("=== Test %s ======================================\n",

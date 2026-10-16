@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
   M_data[1] = 0.0; /* column 0 */
   M_data[2] = 0.0;
   M_data[3] = 1.0; /* column 1 */
-  problem->M = NM_create_from_data(NM_DENSE, n, n, M_data);
+  problem->M = NM_create_with_data(NM_DENSE, n, n, M_data);
 
   /* H = [n t] with n = (0,1) (upward normal) and t = (1,0) (rightward tangent) */
   double* H_data = (double*)malloc((size_t)n * dim * sizeof(double));
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
   H_data[1] = 1.0; /* column 0 = normal */
   H_data[2] = -1.0;
   H_data[3] = 0.0; /* column 1 = tangent */
-  problem->H = NM_create_from_data(NM_DENSE, n, dim, H_data);
+  problem->H = NM_create_with_data(NM_DENSE, n, dim, H_data);
 
   /* q = (0, -g): gravity pulls the particle downward */
   problem->q = (double*)malloc((size_t)n * sizeof(double));

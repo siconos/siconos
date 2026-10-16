@@ -161,14 +161,14 @@ static int fc3d_AC_initialize(FrictionContactProblem* main_problem, SolverOption
       for (int i = 0; i < 3; i++) {
         sum = 0.0;
         for (int j = 0; j < 3; j++) {
-          sum += fabs(local_p->M->matrix0[i + j * 3]);
+          sum += fabs(local_p->M->dense[i + j * 3]);
         }
         m_row_norm = max(sum, m_row_norm);
       }
       numerics_printf_verbose(2,
                               "fc3d_AC_initialize"
                               " inverse of norm of M = %e",
-                              1.0 / hypot9(local_p->M->matrix0));
+                              1.0 / hypot9(local_p->M->dense));
       numerics_printf_verbose(2,
                               "fc3d_AC_initialize"
                               " inverse of row norm of M = %e",
@@ -419,7 +419,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
     norm_relative /= norm_qLocal;
   }
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /* store the increment */
   double dR[3] = {0., 0., 0.};
@@ -559,7 +559,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
 
   double mu = localproblem->mu[0];
   double* qLocal = localproblem->q;
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /*     for (int i=0; i<3; i++) v_local[i] = MLocal[i+0*3]*r_local[0] + qLocal[i] */
   /*          + MLocal[i+1*3]*r_local[1] + */
@@ -700,7 +700,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
     norm_relative /= norm_qLocal;
   }
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /* store the increment */
   double dR[3] = {0., 0., 0.};
@@ -831,7 +831,7 @@ static double compute_local_error(FrictionContactProblem* localproblem,
                                   double* local_reaction) {
   double* local_q = localproblem->q;
   double norm_q = cblas_dnrm2(3, localproblem->q, 1);
-  double* local_M = localproblem->M->matrix0;
+  double* local_M = localproblem->M->dense;
   double worktmp[3];
   double local_velocity[3] = {0., 0., 0.};
   cpy3(local_q, local_velocity);

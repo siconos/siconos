@@ -525,12 +525,12 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
   NM_types storage = H->storageType;
   switch (storage) {
       /* case NM_DENSE: */
-      /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x,
+      /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->dense, sizeY, x,
        * 1, beta, y, 1); */
       /*   break; */
       /* /\* SparseBlock storage *\/ */
       /* case NM_SPARSE_BLOCK: */
-      /*   SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y); */
+      /*   SBM_gemv_3x3(sizeX, sizeY, A->sparse_block, x, y); */
       /*   break; */
       /* coordinate */
     case NM_SPARSE: {
@@ -609,8 +609,8 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
 
       QpH->storageType = H->storageType;
       numericsSparseMatrix(QpH)->csc = QpH_csc;
-      QpH->size0 = (int)QpH->matrix2->csc->m;
-      QpH->size1 = (int)QpH->matrix2->csc->n;
+      QpH->size0 = (int)QpH->sparse->csc->m;
+      QpH->size1 = (int)QpH->sparse->csc->n;
       numericsSparseMatrix(QpH)->origin = NSM_CSC;
       free(beta);
       break;
@@ -984,7 +984,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->P_mu = (IPM_change_of_variable*)malloc(sizeof(IPM_change_of_variable));
   data->P_mu->mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->mat, nd);
-  data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
+  data->P_mu->mat->sparse->origin = NSM_TRIPLET;
   for (size_t i = 0; i < nd; ++i)
     if (i % d == 0) /* NM_entry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]); */
       NM_entry(data->P_mu->mat, i, i, 1.);
@@ -995,7 +995,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
   data->P_mu->inv_mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->inv_mat, nd);
-  data->P_mu->inv_mat->matrix2->origin = NSM_TRIPLET;
+  data->P_mu->inv_mat->sparse->origin = NSM_TRIPLET;
   for (size_t i = 0; i < nd; ++i)
     if (i % d == 0) /* NM_entry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]); */
       NM_entry(data->P_mu->inv_mat, i, i, 1.);
@@ -1143,8 +1143,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     printf(
         "\n\n\n######################### FORCE SPARSE STORAGE "
         "#########################\n\n\n");
-    M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
+    M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
   } else {
     M = problem->M;
   }
@@ -1164,8 +1163,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
           SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
       problem->H->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
-    H_tilde = NM_create(NM_SPARSE, problem->H->size1, problem->H->size0);
-    NM_copy_to_sparse(NM_transpose(problem->H), H_tilde, DBL_EPSILON);
+    H_tilde = NM_copy_to_sparse(NM_transpose(problem->H), DBL_EPSILON);
   } else {
     H_tilde = NM_transpose(problem->H);
   }
@@ -1200,8 +1198,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   // NV_norm_2(f,m));
 
   // compute -H
-  NumericsMatrix* minus_H = NM_create(H->storageType, H->size0, H->size1);
-  NM_copy(H, minus_H);
+  NumericsMatrix* minus_H = NM_copy(H);
   NM_scal(-1.0, minus_H);
   NumericsMatrix* minus_Ht = NM_transpose(minus_H);
 
@@ -1218,12 +1215,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
-  NumericsMatrix* minus_M = NM_create(
-      M->storageType, M->size0,
-      M->size1);  // store the matrix -M to build the matrix of the Newton linear system
+  NumericsMatrix* minus_M =
+      NM_copy(M);  // store the matrix -M to build the matrix of the Newton linear system
 
   /* Create the matrix -M to build the matrix of the reduced linear system */
-  NM_copy(M, minus_M);
   NM_scal(-1.0, minus_M);
 
   /* COMPUTATION OF A NEW STARTING POINT */
@@ -1457,7 +1452,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   // }
 
   char matlab_name[100];
-  sprintf(matlab_name, "iterates.m");
+  snprintf(matlab_name, sizeof(matlab_name), "iterates.m");
   free(str);
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
@@ -1699,7 +1694,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         J = NM_create(NM_SPARSE, m + 2 * nd, m + 2 * nd);
         J_nzmax = (d * d) * (m / d) + H_nzmax + (3 * d - 2) * n + 3 * d * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
-        J->matrix2->origin = NSM_TRIPLET;
+        J->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* arrow_r = Arrow_repr(reaction, nd, n);
         NumericsMatrix* arrow_u = Arrow_repr(velocity, nd, n);
@@ -1760,7 +1755,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         J = NM_create(NM_SPARSE, m + 2 * nd, m + 2 * nd);
         J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
-        J->matrix2->origin = NSM_TRIPLET;
+        J->sparse->origin = NSM_TRIPLET;
 
         Nesterov_Todd_vector(2, velocity, reaction, nd, n, p2);
         Qp2 = QRmat(p2, nd, n);
@@ -1801,7 +1796,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         J = NM_create(NM_SPARSE, m + 2 * nd, m + 2 * nd);
         J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
-        J->matrix2->origin = NSM_TRIPLET;
+        J->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* minusQpH = QNTpH(velocity, reaction, H, nd, n);
         NM_scal(-1.0, minusQpH);
@@ -1860,7 +1855,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         JR = NM_create(NM_SPARSE, m + nd, m + nd);
         JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
         NM_triplet_alloc(JR, JR_nzmax);
-        JR->matrix2->origin = NSM_TRIPLET;
+        JR->sparse->origin = NSM_TRIPLET;
 
         Nesterov_Todd_vector(3, velocity, reaction, nd, n, p2);
         Qp2 = QRmat(p2, nd, n);
@@ -1905,7 +1900,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         JR = NM_create(NM_SPARSE, m + nd, m + nd);
         JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
         NM_triplet_alloc(JR, JR_nzmax);
-        JR->matrix2->origin = NSM_TRIPLET;
+        JR->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
         NumericsMatrix* QpHt = NM_transpose(QpH);
@@ -1959,7 +1954,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         JR = NM_create(NM_SPARSE, nd, nd);
         // JR_nzmax = 2*H_nzmax + nd;
         // NM_triplet_alloc(JR, JR_nzmax);
-        // JR->matrix2->origin = NSM_TRIPLET;
+        // JR->sparse->origin = NSM_TRIPLET;
 
         NumericsMatrix* JR_a = NULL;
         NumericsMatrix* JR_b = NULL;
@@ -2583,8 +2578,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   M = problem->M;
   H_tilde = NM_transpose(problem->H);
 
-  NumericsMatrix* minus_M = NM_create(M->storageType, M->size0, M->size1);
-  NM_copy(M, minus_M);
+  NumericsMatrix* minus_M = NM_copy(M);
   NM_scal(-1.0, minus_M);
 
   // initialize solver if it is not set
@@ -2696,7 +2690,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
-    sprintf(matlab_name, "iterates_muF_sF.m");
+    snprintf(matlab_name, sizeof(matlab_name), "iterates_muF_sF.m");
     iterates = fopen(matlab_name, "a+");
     fprintf(iterates, "data(end+1).name = \"%s\";\n", strToken);
     fprintf(iterates, "data(end).val = [\n");
@@ -2831,7 +2825,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     J = NM_create(NM_SPARSE, m + nd, m + nd);
     J_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
     NM_triplet_alloc(J, J_nzmax);
-    J->matrix2->origin = NSM_TRIPLET;
+    J->sparse->origin = NSM_TRIPLET;
 
     NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
     NumericsMatrix* QpHt = NM_transpose(QpH);

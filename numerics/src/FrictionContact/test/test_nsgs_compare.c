@@ -124,7 +124,7 @@ static FrictionContactProblem* create_test_problem(void) {
     }
   }
 
-  problem->M = NM_create_from_data(NM_DENSE, n, n, M_data);
+  problem->M = NM_create_with_data(NM_DENSE, n, n, M_data);
 
   /* Set q vector */
   for (int i = 0; i < n; i++) {

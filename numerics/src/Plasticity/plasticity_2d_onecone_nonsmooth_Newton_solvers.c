@@ -61,7 +61,7 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
                                                 double* local_reaction) {
   double* local_q = localproblem->q;
   double norm_q = cblas_dnrm2(3, localproblem->q, 1);
-  double* local_M = localproblem->M->matrix0;
+  double* local_M = localproblem->M->dense;
   double worktmp[3];
   double local_velocity[3] = {0., 0., 0.};
   cpy3(local_q, local_velocity);
@@ -178,7 +178,7 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
       for (int i = 0; i < 3; i++) {
         sum = 0.0;
         for (int j = 0; j < 3; j++) {
-          sum += fabs(localproblem->M->matrix0[i + j * 3]);
+          sum += fabs(localproblem->M->dense[i + j * 3]);
         }
         m_row_norm = max(sum, m_row_norm);
       }
@@ -187,7 +187,7 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
                               "cone = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e, "
                               "||M||^-1 = %4.2e, ||M||_row^-1 = %4.2e ",
                               cone, rho[0], rho[1], rho[2],
-                              1.0 / hypot9(localproblem->M->matrix0), 1.0 / m_row_norm);
+                              1.0 / hypot9(localproblem->M->dense), 1.0 / m_row_norm);
     }
 
     DEBUG_EXPR(NM_display(localproblem->M););
@@ -420,7 +420,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(
     norm_relative /= norm_qLocal;
   }
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /* store the increment */
   double dR[3] = {0., 0., 0.};
@@ -562,7 +562,7 @@ static int LineSearchGP(PlasticityProblem* localproblem, computeNonsmoothFunctio
   double eta = localproblem->model.drucker_prager->eta[0];
   double theta = localproblem->model.drucker_prager->theta[0];
   double* qLocal = localproblem->q;
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /*     for (int i=0; i<3; i++) velocity[i] = MLocal[i+0*3]*R[0] + qLocal[i] */
   /*          + MLocal[i+1*3]*R[1] + */
@@ -704,7 +704,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
     norm_relative /= norm_qLocal;
   }
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
 
   /* store the increment */
   double dR[3] = {0., 0., 0.};

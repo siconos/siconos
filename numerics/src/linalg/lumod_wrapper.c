@@ -244,7 +244,7 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   assert(n > 0);
   double* H = lumod_data->LU_H;
   unsigned* factorized_basis = lumod_data->factorized_basis;
-  double* Mlcp = M->matrix0;
+  double* Mlcp = M->dense;
   CHECK_NULL(Mlcp);
 
   /* Reset the factorized_basis */

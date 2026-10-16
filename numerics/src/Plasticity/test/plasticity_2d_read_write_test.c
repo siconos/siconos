@@ -41,9 +41,8 @@ int main(void) {
                       0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
-  NumericsMatrix* tmpM = NM_create_from_data(NM_DENSE, 9, 9, Wdata);
-  NumericsMatrix* W = NM_create(NM_SPARSE, 9, 9);
-  NM_copy_to_sparse(tmpM, W, 1e-16);
+  NumericsMatrix* tmpM = NM_create_with_data(NM_DENSE, 9, 9, Wdata);
+  NumericsMatrix* W = NM_copy_to_sparse(tmpM, 1e-16);
 
   PlasticityProblem* PLASTICITY_2D = plasticity2DProblem_new_with_data(3, 3, W, q, eta, theta);
   double stress[9] = {0.};
@@ -63,7 +62,7 @@ int main(void) {
   plasticity2DProblem_free(PLASTICITY_2D_r);
 
   NM_clear(W);
-  tmpM->matrix0 = NULL;
+  tmpM->dense = NULL;
   NM_clear(tmpM);
   free(W);
   free(tmpM);

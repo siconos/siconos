@@ -207,7 +207,7 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double* u, double* mu, Nume
                                              NumericsMatrix* H_full, double* normUT_work) {
   NumericsMatrix* H_correction = NM_create(NM_SPARSE, 3 * nc, 3 * nc);
   NM_triplet_alloc(H_correction, 3 * nc);
-  H_correction->matrix2->origin = NSM_TRIPLET;
+  H_correction->sparse->origin = NSM_TRIPLET;
 
   NV_cone_tangential_norms_3d(u, nc, normUT_work);
   for (int contact = 0; contact < nc; contact++) {
@@ -232,7 +232,7 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double* u, double* mu, Nume
   DEBUG_EXPR(NM_display(H_correction););
 
   // DEBUG_EXPR(NM_display(H));
-  NM_gemm(1.0, H, H_correction, 0.0, H_full);
+  CHECK_RETURN(NM_gemm(1.0, H, H_correction, 0.0, H_full) == NUMERICS_OK);
   NM_clear(H_correction);
 
   DEBUG_EXPR(NM_display(H_full));
@@ -270,7 +270,7 @@ static void gfc3d_print_problem_info(GlobalFrictionContactProblem* restrict prob
     numerics_printf_verbose(1, "---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(H));
     /* W = NM_create(NM_SPARSE,n,n); */
     /* NM_triplet_alloc(W, n); */
-    /* W->matrix2->origin = NSM_TRIPLET; */
+    /* W->sparse->origin = NSM_TRIPLET; */
     /* NM_gemm(1.0, H, Htrans, 0.0, W); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of HH^T = %g  ", NM_norm_1(W)); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of HH^T = %g ",
@@ -330,14 +330,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE) {
     if (problem->M->storageType == NM_SPARSE_BLOCK) {
       DEBUG_PRINT("Force a copy to sparse storage type\n");
-      problem->M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-      NM_copy_to_sparse(M_original, problem->M, DBL_EPSILON);
+      problem->M = NM_copy_to_sparse(M_original, DBL_EPSILON);
     }
 
     if (problem->H->storageType == NM_SPARSE_BLOCK) {
       DEBUG_PRINT("Force a copy to sparse storage type\n");
-      problem->H = NM_create(NM_SPARSE, problem->H->size0, problem->H->size1);
-      NM_copy_to_sparse(H_original, problem->H, DBL_EPSILON);
+      problem->H = NM_copy_to_sparse(H_original, DBL_EPSILON);
     }
   }
 
@@ -416,7 +414,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
                             cone_scaling);
     NumericsMatrix* P = NM_create(NM_SPARSE, m, m);
     NM_triplet_alloc(P, m);
-    P->matrix2->origin = NSM_TRIPLET;
+    P->sparse->origin = NSM_TRIPLET;
     mu = (double*)malloc(nc * sizeof(double));
     b = (double*)malloc(m * sizeof(double));
     cblas_dcopy(m, problem->b, 1, b, 1);
@@ -431,13 +429,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     }
     P = NM_free(P);
     NumericsMatrix* Htrans = NM_transpose(problem->H);
-    NumericsMatrix* H = problem->H;
-    H = NM_create(NM_SPARSE, n, m);
-    NM_triplet_alloc(H, n);
-    H->matrix2->origin = NSM_TRIPLET;
-    NM_copy(problem->H, H);
-    NM_gemm(1.0, P, Htrans, 0.0, Htrans);
-    NM_gemm(1.0, H, P, 0.0, H);
+    NumericsMatrix* H = NM_copy(problem->H);
+    CHECK_RETURN(NM_gemm(1.0, P, Htrans, 0.0, Htrans) == NUMERICS_OK);
+    CHECK_RETURN(NM_gemm(1.0, H, P, 0.0, H) == NUMERICS_OK);
     Htrans = NM_free(Htrans);
     H = NM_free(H);
   }
@@ -446,7 +440,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   NumericsMatrix* W = NM_create(NM_SPARSE, n, n);
   NM_triplet_alloc(W, n);
-  W->matrix2->origin = NSM_TRIPLET;
+  W->sparse->origin = NSM_TRIPLET;
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -472,7 +466,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   NumericsMatrix* H_full = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(H_full, n);
-  H_full->matrix2->origin = NSM_TRIPLET;
+  H_full->sparse->origin = NSM_TRIPLET;
 
   // getchar();
   int is_rho_variable = 0;
@@ -615,15 +609,17 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
           has_full_H_changed = 0;
         }
         if (has_full_H_changed || has_rho_changed) {
-          NM_copy(M, W);
+          NM_free(W);
+          W = NM_copy(M);
           NM_unpreserve(W);
-          NM_gemm(rho, H_full, Htrans, 1.0, W);
+          CHECK_RETURN(NM_gemm(rho, H_full, Htrans, 1.0, W) == NUMERICS_OK);
         }
       } else {
-        NM_copy(M, W);
+        NM_free(W);
+        W = NM_copy(M);
         NM_unpreserve(W); /* if not unpreserve, the follwing operations are
                              not made on the destructible pointer */
-        NM_gemm(rho, H, Htrans, 1.0, W);
+        CHECK_RETURN(NM_gemm(rho, H, Htrans, 1.0, W) == NUMERICS_OK);
       }
       DEBUG_PRINT("M + rho H H^T: ");
       DEBUG_EXPR(NM_display(W));

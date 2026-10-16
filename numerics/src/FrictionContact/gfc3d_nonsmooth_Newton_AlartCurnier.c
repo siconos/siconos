@@ -749,8 +749,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
 
   DEBUG_EXPR(
       NumericsMatrix* Mdense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
-      NM_to_dense(problem->M, Mdense); printf(
-          "conditioning = %g\n", cond(Mdense->matrix0, problem->M->size0, problem->M->size1));
+      NM_to_dense(problem->M, Mdense);
+      printf("conditioning = %g\n", cond(Mdense->dense, problem->M->size0, problem->M->size1));
       Mdense = NM_free(Mdense););
 
   assert((int)num_contact_dofs == problem->numberOfContacts * problem->dimension);
@@ -903,11 +903,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert(jac_B_sparse.m == jac_B_sparse.n);
   assert(jac_A_sparse.m == problem->H->size1);
 
-  NumericsMatrix* nm_jacobian = NM_new();
   /* jacobian_triplet is square; rows = jacobian_triplet->m, cols =
    * jacobian_triplet->n. */
   assert(jacobian_triplet->m == jacobian_triplet->n);
-  NM_fill(nm_jacobian, NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
+  NumericsMatrix* nm_jacobian =
+      NM_create_with_data(NM_SPARSE, jacobian_triplet->m, jacobian_triplet->n, nsm_jacobian);
 
   /* Optional Jacobian regularization matrix (regul * I). */
   NumericsMatrix* reg_eye = NULL;
@@ -986,7 +986,7 @@ restart:
       "--------------------------------------------------------------------------------"
       "---------------------------");
 
-  for (unsigned int i = 0; i < problem->numberOfContacts; ++i) {
+  for (int i = 0; i < problem->numberOfContacts; ++i) {
     previous_contact_status[i] = -1;
   }
 
@@ -1155,7 +1155,7 @@ restart:
     unsigned int stabilized = 0;
     NV_cone_tangential_norms_3d(current_reaction, problem->numberOfContacts, rT_norm);
     NV_cone_tangential_norms_3d(current_velocity, problem->numberOfContacts, uT_norm);
-    for (unsigned int contact = 0; contact < problem->numberOfContacts; ++contact) {
+    for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
       const double rN = current_reaction[3 * contact];
       const int status = gfc3d_contact_status_3d(rN, rT_norm[contact], uT_norm[contact],
                                                  problem->mu[contact]);

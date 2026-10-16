@@ -38,7 +38,7 @@
 void lcp_psor(LinearComplementarityProblem* problem, double* z, double* w, int* info,
               SolverOptions* options) {
   /* matrix M/vector q of the lcp */
-  double* M = problem->M->matrix0;
+  double* M = problem->M->dense;
 
   double* q = problem->q;
 

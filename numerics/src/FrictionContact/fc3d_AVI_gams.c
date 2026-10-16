@@ -340,7 +340,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   unsigned nb_approx = (unsigned)Akmat->size0 / nb_contacts;
   assert(nb_approx * nb_contacts == (unsigned)Akmat->size0);
   unsigned offset_row = 0;
-  CSparseMatrix* triplet_mat = Akmat->matrix2->triplet;
+  CSparseMatrix* triplet_mat = Akmat->sparse->triplet;
 
   double angle = 2 * M_PI / (NB_APPROX + 1);
   DEBUG_PRINTF("angle: %g\n", angle);
@@ -386,11 +386,10 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
   unsigned size = (unsigned)problem->dimension * problem->numberOfContacts;
 
-  NumericsMatrix Wtmat;
+  NumericsMatrix* Wtmat = NULL;
   NumericsMatrix Emat;
   NumericsMatrix Akmat;
 
-  NM_null(&Wtmat);
   NM_null(&Emat);
   NM_null(&Akmat);
 
@@ -480,9 +479,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
   optSetIntStr(Optr, "Keep", 0);
 
-  Wtmat.storageType = NM_SPARSE;
-  NM_copy_to_sparse(problem->M, &Wtmat);
-  cs_fkeep(NM_csc(&Wtmat), &SN_rm_normal_part, NULL);
+  Wtmat = NM_copy_to_sparse(problem->M, DBL_EPSILON);
+  cs_fkeep(NM_csc(Wtmat), &SN_rm_normal_part, NULL);
   DEBUG_PRINT("FC3D_AVI_GAMS :: Wt matrix constructed\n");
 
   Emat.storageType = NM_SPARSE;
@@ -490,19 +488,19 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
   Emat.size0 = size;
   Emat.size1 = size;
 
-  Emat.matrix2->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
+  Emat.sparse->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
 
   for (unsigned i = 0; i < size; i += 3) {
-    cs_entry(Emat.matrix2->triplet, i, i, 1.);
+    cs_entry(Emat.sparse->triplet, i, i, 1.);
   }
 
   Akmat.storageType = NM_SPARSE;
   numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX * problem->numberOfContacts;
   Akmat.size1 = size;
-  Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                      NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-  CSparseMatrix* Ak_triplet = Akmat.matrix2->triplet;
+  Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                     NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+  CSparseMatrix* Ak_triplet = Akmat.sparse->triplet;
 
   FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
 
@@ -555,7 +553,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
     int solverStat = FC3D_gams_inner_loop_condensed(
         iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, reaction, velocity,
-        tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat, options);
+        tmpq, lambda_r, lambda_y, problem->M, problem->q, Wtmat, &Emat, &Akmat, options);
     // DEBUG_PRINT_VEC(reaction, size);
     // DEBUG_PRINT_VEC(velocity, size);
 
@@ -648,9 +646,9 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
     /* TODO we should zero out the storage and the content, but not deallocate the matrix ! */
     NM_clearSparseStorage(&Akmat);
     /* This is now a upper bound ...  */
-    Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                        NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-    Ak_triplet = Akmat.matrix2->triplet;
+    Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                       NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+    Ak_triplet = Akmat.sparse->triplet;
     /************************************************
      * Compute the error on each contact point +
      ************************************************/
@@ -1100,7 +1098,7 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  NM_clear(&Wtmat);
+  Wtmat = NM_free(Wtmat);
   NM_clear(&Emat);
   NM_clear(&Akmat);
 

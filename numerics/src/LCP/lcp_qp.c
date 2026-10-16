@@ -69,7 +69,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double* z, double* w, int* in
   function p
 
   // Q= M;*/
-  double* vec = problem->M->matrix0;
+  double* vec = problem->M->dense;
   Q = (double*)malloc(nmax * nmax * sizeof(double));
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];

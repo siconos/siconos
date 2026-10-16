@@ -57,7 +57,7 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
                                   double* reaction, SolverOptions* options) {
   /*  /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
   int nLocal = localproblem->n;
@@ -90,8 +90,7 @@ void soclcp_projection_free(SecondOrderConeLinearComplementarityProblem* problem
 void soclcp_projection_initialize_with_regularization(
     SecondOrderConeLinearComplementarityProblem* problem,
     SecondOrderConeLinearComplementarityProblem* localproblem) {
-  if (!localproblem->M->matrix0)
-    localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
+  if (!localproblem->M->dense) localproblem->M->dense = (double*)malloc(9 * sizeof(double));
 }
 
 void soclcp_projection_update_with_regularization(
@@ -109,15 +108,16 @@ void soclcp_projection_update_with_regularization(
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   int coneStart = problem->coneIndex[cone];
-  NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone + 1] - coneStart,
-                        &localproblem->M->matrix0);
+  CHECK_RETURN(NM_extract_diag_block(problem->M, cone, coneStart,
+                                     problem->coneIndex[cone + 1] - coneStart,
+                                     &localproblem->M->dense) == NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current cone. ****/
   soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone, options);
 
   double rho = options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO];
-  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
+  for (int i = 0; i < 3; i++) localproblem->M->dense[i + 3 * i] += rho;
 
   double* qLocal = localproblem->q;
   int in = 3 * cone, it = in + 1, is = it + 1;
@@ -166,7 +166,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
   int nLocal = localproblem->n;
@@ -309,7 +309,7 @@ int soclcp_projectionOnCylinder_solve(
   /*  /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
   int nLocal = localproblem->n;

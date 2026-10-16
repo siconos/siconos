@@ -619,7 +619,7 @@ NumericsSparseMatrix* NSM_triplet_scalar(size_t size, double s) {
 }
 
 static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M) {
-  NumericsSparseMatrix* A = M->matrix2;
+  NumericsSparseMatrix* A = M->sparse;
   if (!A) return NULL;
   if (A->diag_indx) return A->diag_indx;
 
@@ -688,7 +688,7 @@ static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M) {
 
 CS_INT* NSM_diag_indices(NumericsMatrix* M) {
   DEBUG_BEGIN("NSM_diag_indices(NumericsMatrix* M)\n");
-  NumericsSparseMatrix* A = M->matrix2;
+  NumericsSparseMatrix* A = M->sparse;
   if (!A) return NULL;
   if (A->diag_indx) return A->diag_indx;
 
@@ -789,12 +789,12 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
   assert(block_row_size > 0 && block_row_size + pos_row <= (unsigned long int)M->size0);
   assert(block_col_size > 0 && block_col_size + pos_col <= (unsigned long int)M->size1);
 
-  assert(M->matrix2);
+  assert(M->sparse);
 
   /* Clear memory */
   memset(blockM, 0, block_row_size * block_col_size * sizeof(double));
 
-  switch (M->matrix2->origin) {
+  switch (M->sparse->origin) {
     case NSM_TRIPLET:
     case NSM_CSC: {
       CSparseMatrix* Mcsc = NM_csc(M);
@@ -819,7 +819,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
       break;
     }
     case NSM_CSR: {
-      CSparseMatrix* Mcsr = M->matrix2->csr;
+      CSparseMatrix* Mcsr = M->sparse->csr;
       if (!Mcsr) return;
       CS_INT* Mp = Mcsr->p;
       CS_INT* Mi = Mcsr->i;
@@ -842,7 +842,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
       break;
     }
     default:
-      printf("NSM_extract_block :: unsupported matrix type %d\n", M->matrix2->origin);
+      printf("NSM_extract_block :: unsupported matrix type %d\n", M->sparse->origin);
       exit(EXIT_FAILURE);
   }
 }
@@ -850,11 +850,11 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
 double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
   if (!M) return NULL;
   assert(M->storageType == NM_SPARSE);
-  assert(M->matrix2);
+  assert(M->sparse);
 
   double** diag_blocks = NULL;
   size_t number_of_diagonal_blocks = 0;
-  switch (M->matrix2->origin) {
+  switch (M->sparse->origin) {
     case NSM_TRIPLET:
     case NSM_CSC: {
       CSparseMatrix* Mcsc = NM_csc(M);
@@ -878,7 +878,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
       break;
     }
     case NSM_CSR: {
-      CSparseMatrix* Mcsr = M->matrix2->csr;
+      CSparseMatrix* Mcsr = M->sparse->csr;
       if (!Mcsr) return NULL;
 
       /* We ensure that the matrix is correclty ordered before extraction,
@@ -899,7 +899,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
       break;
     }
     default:
-      printf("NSM_extract_block :: unsupported matrix type %d\n", M->matrix2->origin);
+      printf("NSM_extract_block :: unsupported matrix type %d\n", M->sparse->origin);
       exit(EXIT_FAILURE);
   }
 
@@ -920,7 +920,7 @@ double** NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
 CSparseMatrix* NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
   if (!M) return NULL;
   assert(M->storageType == NM_SPARSE);
-  assert(M->matrix2);
+  assert(M->sparse);
 
   CSparseMatrix* out = cs_spalloc(M->size0, M->size1, 0, 1, 1);
 

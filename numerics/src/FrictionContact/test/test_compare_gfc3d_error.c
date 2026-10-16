@@ -81,7 +81,8 @@ int main(void) {
        SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED, "wgt_pc_mix"},
       {SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED, SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR,
        SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, "wgt_pv_max"}};
-  const int n_scalings = (int)(sizeof(scalings) / sizeof(scalings[0]));
+  const int n_scalings = (int)(sizeof(scalings) / sizeof(scalings[0])); /* used for loops */
+#define N_SCALINGS_LOCAL ((int)(sizeof(scalings) / sizeof(scalings[0])))
 
   printf(
       "---------------------------------------------------------------------------------------"
@@ -143,7 +144,7 @@ int main(void) {
                           /* tolerance = */ 1.0, options, norm_q, norm_b, &error_standard);
 
       /* Error with each explicit scaling choice. */
-      double errors[n_scalings];
+      double errors[N_SCALINGS_LOCAL];
       for (int s = 0; s < n_scalings; ++s) {
         options->iparam[SICONOS_FRICTION_3D_SCALING_NORM] = scalings[s].norm;
         options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE] = scalings[s].scope;
