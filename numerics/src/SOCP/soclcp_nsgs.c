@@ -263,7 +263,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double* r
     }
   }
 
-  SecondOrderConeLinearComplementarityProblem* localproblem;
+  SecondOrderConeLinearComplementarityProblem* localproblem = NULL;
 
   if (isConeDimensionsEqual) {
     localproblem = (SecondOrderConeLinearComplementarityProblem*)malloc(
