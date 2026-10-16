@@ -140,8 +140,8 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     siconos::algebra::SiconosMatrix tmpC{*_C};
     for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
-    Eigen::BDCSVD<siconos::algebra::SiconosMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV>
-        svd(tmpC);
+    Eigen::BDCSVD<siconos::algebra::SiconosMatrix> svd(
+        tmpC, Eigen::ComputeThinU | Eigen::ComputeThinV);
     siconos::algebra::SiconosVector result = svd.solve(tmpV);
     *(_xHat) -= result;
     *(_DS->x()) -= result;
