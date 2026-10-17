@@ -23,6 +23,7 @@
 #include "siconos/siconos.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
+#include "siconos/storage/registry.hpp"
 #include "siconos/storage/storage.hpp"
 #include "siconos/utils/range.hpp"
 
@@ -79,8 +80,18 @@ namespace siconos::python::disks {
 
 namespace config = siconos::config::disks;
 
+// registry-backed world (storage/registry.hpp); NONOS_DATABASE restores the
+// storage::make database
+#ifndef NONOS_DATABASE
+template <template <typename> typename Env, typename... Items>
+using world_maker = storage::make_world<Env, Items...>;
+#else
+template <template <typename> typename Env, typename... Items>
+using world_maker = storage::make<Env, Items...>;
+#endif
+
 struct maker
-    : storage::make<
+    : world_maker<
           config::env, config::simulation, config::interaction_manager, config::io,
           config::segment_shape, config::disk_shape, config::mesh_shape,
           storage::with_properties<
