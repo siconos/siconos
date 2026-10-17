@@ -103,12 +103,10 @@ struct neighborhood : storage::data_holder<CompactNSearch::NeighborhoodSearch> {
       using scalar = typename env_t::scalar;
 
       return collect(
-          method("point_set_id", &interface<Handle>::point_set_id),
           method("create", &interface<Handle>::create<scalar>),
           method("add_point_sets", &interface<Handle>::add_point_sets<indice>),
           method("update", &interface<Handle>::update<indice>),
           method("set_active", &interface<Handle>::set_active<indice, indice, bool>),
-          method("is_active", &interface<Handle>::is_active<indice, indice>),
           method("search", &interface<Handle>::search),
           method("sort", &interface<Handle>::sort));
     }

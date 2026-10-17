@@ -42,7 +42,6 @@ struct interaction_manager : item {
       return collect(
           method("insert_nonsmooth_law",
                  &interface<Handle>::insert_nonsmooth_law<ref_nslaw_t, indice, indice>),
-          method("get_nonsmooth_law", &interface<Handle>::get_nonsmooth_law<indice, indice>),
           method("update_interactions", &interface<Handle>::update_interactions<indice>));
     }
   };

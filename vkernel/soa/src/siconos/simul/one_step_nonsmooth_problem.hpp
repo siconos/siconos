@@ -257,8 +257,7 @@ struct one_step_nonsmooth_problem : item {
     auto methods()
     {
       return collect(method("options", &interface<Handle>::options),
-                     method("problem", &interface<Handle>::problem),
-                     method("level", &interface<Handle>::level));
+                     method("problem", &interface<Handle>::problem));
     }
   };
 };
