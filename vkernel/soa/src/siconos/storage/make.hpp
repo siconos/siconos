@@ -184,6 +184,8 @@ struct make {
     using item_storage_t = item_storage<Env, Items...>;
     using info_t = typename item_storage_t::iinfo;
     auto base_storage = typename item_storage_t::type{};
+    using all_wrappers_t = decltype(pre_map_all_properties_as<property::wrapped>(base_storage));
+    using all_keeps_t = decltype(pre_map_all_properties_as<property::keep>(base_storage));
 
     // Build the storage through a multi-stage transformation pipeline
     return mp::to_database(attribute_storage_transform(
@@ -213,10 +215,6 @@ struct make {
                                      typename traits::config<env_t>::template convert<
                                          typename Item::template wrapper<storage_t>>::type>{};
               } else {
-                // Look for wrappers specified in properties
-                using all_wrappers_t =
-                    decltype(pre_map_all_properties_as<property::wrapped>(base_storage));
-
                 using storage_wrapped = decltype(apply_wrapper<Item, all_wrappers_t>(s));
 
                 // Apply wrapper if different from original storage type
@@ -236,8 +234,6 @@ struct make {
         []<match::attribute Attribute>(Attribute attr, auto s) {
           using storage_t = std::decay_t<decltype(s)>;
 
-          using all_keeps_t =
-              decltype(pre_map_all_properties_as<property::keep>(base_storage));
           return memory_t<storage_t, memory_size<Attribute, all_keeps_t>()>{};
         }));
   };
