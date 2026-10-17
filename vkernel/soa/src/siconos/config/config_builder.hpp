@@ -5,6 +5,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
+#include "siconos/storage/registry.hpp"
 
 namespace siconos::config {
 
@@ -106,6 +107,17 @@ class config_builder {
                                 return mp::tuple<storage::with_properties<Props...>>{};
                               })),
         []<typename... Ts>(Ts... ts) { return storage::make<env, Ts...>{}; });
+  }
+
+  // build a registry-backed world (storage/registry.hpp) instead of a database
+  auto build_world() const {
+    return mp::unpack(
+        mp::concat(mp::concat(mp::tuple<>{}, ItemsList{}),
+                   mp::unpack(PropertiesList{},
+                              []<typename... Props>(Props...) {
+                                return mp::tuple<storage::with_properties<Props...>>{};
+                              })),
+        []<typename... Ts>(Ts... ts) { return storage::make_world<env, Ts...>{}; });
   }
 
   // Type aliases for merging

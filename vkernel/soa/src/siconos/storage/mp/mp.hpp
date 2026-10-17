@@ -448,6 +448,14 @@ decltype(auto) get(mp::database<HPairs...>& data) {
   return get_internal<T>(data.store);
 };
 
+// A store that resolves its own columns (storage::world): no key pack to scan,
+// the store hands back the column for T directly.
+template <typename T, typename S>
+  requires requires(S&& s) { static_cast<S&&>(s).template column<T>(); }
+decltype(auto) get(S&& s) {
+  return static_cast<S&&>(s).template column<T>();
+};
+
 static auto make_type_c = []<typename T>(T) constexpr { return type_c<T>; };
 
 static constexpr auto all_type_c(auto tpl) { return transform(tpl, make_type_c); };
