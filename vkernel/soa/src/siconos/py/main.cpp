@@ -73,7 +73,7 @@ PYBIND11_MODULE(_nonos, m) {
     auto base_index = py::class_<index_t>(
         disks,
         std::format("index_{}", storage::bind_name<item_t, disks_properties_t>()).c_str());
-    if constexpr (match::batch_capable<item_t>) {
+    if constexpr (match::batch_capable<item_t> && !match::without_batch_bindings<item_t>) {
       return mp::make_tuple(
           base_index,
           py::class_<handle_t>(disks, storage::bind_name<item_t, disks_properties_t>(),
@@ -129,7 +129,7 @@ PYBIND11_MODULE(_nonos, m) {
           });
     }
 
-    if constexpr (match::batch_capable<item_t>) {
+    if constexpr (match::batch_capable<item_t> && !match::without_batch_bindings<item_t>) {
       mp::fold_left(
           decltype(storage::attached_storages(
               item_t{}, std::declval<siconos::python::disks::idata_t&>())){},  // all attached
@@ -208,7 +208,7 @@ PYBIND11_MODULE(_nonos, m) {
           });
     }
 
-    if constexpr (match::batch_capable<item_t>) {
+    if constexpr (match::batch_capable<item_t> && !match::without_batch_bindings<item_t>) {
       mp::fold_left(
           pattern::attributes(typename handle_t::type{}),  // all attributes
           std::ref(pyhandle[3_c]),                         // initial state
@@ -250,7 +250,6 @@ PYBIND11_MODULE(_nonos, m) {
           });
     }
 
-    //    using item_t = typename handle_t::type;
     mp::fold_left(storage::methods(pyhandle[2_c]),  // all methods
                   std::ref(pyhandle[1_c]),          // initial state
                   []<typename M>(py::class_<handle_t> dc, M m) {
@@ -269,7 +268,7 @@ PYBIND11_MODULE(_nonos, m) {
         Add
     )pbdoc");
 
-    if constexpr (match::batch_capable<item_t>) {
+    if constexpr (match::batch_capable<item_t> && !match::without_batch_bindings<item_t>) {
       disks.def(
           std::format("multiple_add_{}", item_name).c_str(),
           [](siconos::python::disks::data_t& data, indice_t count) {

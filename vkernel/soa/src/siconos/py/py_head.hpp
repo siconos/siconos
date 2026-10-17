@@ -31,7 +31,9 @@ namespace py = pybind11;
 namespace siconos::config::disks {
 
 struct disk : model::lagrangian_ds {};
-struct fem : model::elastic_lagrangian_ds {};
+struct fem : model::elastic_lagrangian_ds {
+  using without_batch_bindings = void;
+};
 
 struct nslaw : model::newton_impact_friction {};
 using diskdisk_r = collision::diskdisk_r;

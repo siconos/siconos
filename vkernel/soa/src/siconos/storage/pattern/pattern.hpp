@@ -632,6 +632,9 @@ concept without_attached_storages_bindings =
 template <typename Item>
 concept batch_capable = requires { typename Item::batch_capable; };
 
+template <typename Item>
+concept without_batch_bindings = requires { typename Item::without_batch_bindings; };
+
 template <typename Prop>
 concept without_binding = requires { typename Prop::without_binding_t; };
 
