@@ -109,6 +109,12 @@ python_add_library(_nonos MODULE
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
 target_compile_definitions(_nonos PRIVATE NONOS_PARTS=${NONOS_BIND_PARTS})
 
+# reference build of _nonos on the storage::make database (A/B comparisons)
+option(NONOS_DATABASE "build _nonos on the storage::make database instead of the registry" OFF)
+if(NONOS_DATABASE)
+  target_compile_definitions(_nonos PRIVATE NONOS_DATABASE)
+endif()
+
 if(ftime_trace)
   # one trace per object file, next to it
   target_compile_options(_nonos PRIVATE -ftime-trace)
