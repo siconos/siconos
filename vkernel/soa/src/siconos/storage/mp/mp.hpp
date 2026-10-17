@@ -178,9 +178,39 @@ static auto transform = hana::transform;
 using hana::drop_front;
 static auto concat = hana::concat;
 
+namespace detail {
+// Concatenation of tuple types in one pass.  The fold of hana::concat below
+// rebuilds a tuple at every step, which is quadratic in compile time over the
+// item and property lists of a whole world.
+template <typename... Tuples>
+struct concat_types;
+template <>
+struct concat_types<> {
+  using type = hana::tuple<>;
+};
+template <typename... Ts>
+struct concat_types<hana::tuple<Ts...>> {
+  using type = hana::tuple<Ts...>;
+};
+template <typename... As, typename... Bs, typename... Rest>
+struct concat_types<hana::tuple<As...>, hana::tuple<Bs...>, Rest...>
+    : concat_types<hana::tuple<As..., Bs...>, Rest...> {};
+
+// tuples of empty types only (type lists): no value is lost by rebuilding them
+template <typename T>
+constexpr bool is_type_list = false;
+template <typename... Ts>
+constexpr bool is_type_list<hana::tuple<Ts...>> =
+    ((std::is_empty_v<Ts> && std::is_default_constructible_v<Ts>) && ...);
+}  // namespace detail
+
 template <typename... Args>
 auto constexpr concat_all(Args... args) {
-  return hana::fold_left(hana::make_tuple(args...), hana::make_tuple(), hana::concat);
+  if constexpr ((detail::is_type_list<Args> && ...)) {
+    return typename detail::concat_types<Args...>::type{};
+  } else {
+    return hana::fold_left(hana::make_tuple(args...), hana::make_tuple(), hana::concat);
+  }
 }
 
 // static_assert(concat(make_tuple(1, 2, 3), make_tuple(4, 5, 6)) ==
@@ -463,6 +493,65 @@ static constexpr auto all_type_c(auto tpl) { return transform(tpl, make_type_c);
 static constexpr auto all_inside_types(auto tpl) {
   return transform(tpl, []<typename T>(T) { return typename T::type{}; });
 }
+
+namespace detail {
+// First occurrence of each type, in order: what hana::to_set then to_tuple
+// gives, without inserting into a set one element at a time (quadratic in
+// compile time).  The comparisons are __is_same builtins inside constant
+// evaluation, so no trait is instantiated per pair.
+template <typename T, typename... Us>
+constexpr std::array<bool, sizeof...(Us)> same_as_each = {__is_same(T, Us)...};
+
+template <typename... Ts>
+struct unique_types {
+  static constexpr std::size_t n = sizeof...(Ts);
+  static constexpr std::array<std::array<bool, n>, n> same = {same_as_each<Ts, Ts...>...};
+
+  static constexpr std::array<bool, n> first = [] {
+    std::array<bool, n> f{};
+    for (std::size_t i = 0; i < n; ++i) {
+      f[i] = true;
+      for (std::size_t j = 0; j < i; ++j) {
+        if (same[i][j]) {
+          f[i] = false;
+          break;
+        }
+      }
+    }
+    return f;
+  }();
+
+  static constexpr std::size_t count = [] {
+    std::size_t c = 0;
+    for (bool b : first) c += b;
+    return c;
+  }();
+
+  static constexpr std::array<std::size_t, count> indices = [] {
+    std::array<std::size_t, count> a{};
+    for (std::size_t i = 0, c = 0; i < n; ++i) {
+      if (first[i]) a[c++] = i;
+    }
+    return a;
+  }();
+
+  template <std::size_t... I>
+  static auto build(std::index_sequence<I...>)
+      -> hana::tuple<__type_pack_element<indices[I], Ts...>...>;
+
+  using type = decltype(build(std::make_index_sequence<count>{}));
+};
+
+template <>
+struct unique_types<> {
+  using type = hana::tuple<>;
+};
+}  // namespace detail
+
+template <typename... Ts>
+static constexpr auto tuple_unique(hana::tuple<Ts...>) {
+  return typename detail::unique_types<std::decay_t<Ts>...>::type{};
+};
 
 static constexpr auto tuple_unique(auto xs) {
   return all_inside_types(hana::to_tuple(hana::to_set(all_type_c(xs))));
