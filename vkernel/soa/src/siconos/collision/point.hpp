@@ -128,7 +128,8 @@ struct point<Item, Shape> {
       // coord() = algebra::cast(
       //     mp::type_c<float>,
       //     storage::make_handle(self()->data(),
-      //                          storage::prop<"shape">(self()->item()))
+      //                          storage::prop<"shape",
+      //                          storage::config_declared>(self()->item()))
       //         .segments()
       //         .point_coord(point_index(), seg_index()));
     }

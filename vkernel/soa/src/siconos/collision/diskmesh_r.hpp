@@ -25,13 +25,14 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
     decltype(auto) compute_h(auto step, auto& ds1, auto& ds2) {
       auto& q1 = ds1.q(step); /* disk */
 
-      // auto& mesh = storage::prop<"shape">(ds2);
+      // auto& mesh = storage::prop<"shape", storage::config_declared>(ds2);
       // assert ds2 mesh == mesh()
 
       auto& cindex = self()->contact_index();
 
       return mesh().segments().distance(q1, cindex) -
-             make_handle(self()->data(), prop<"shape">(ds1)).radius();
+             make_handle(self()->data(), prop<"shape", storage::config_declared>(ds1))
+                 .radius();
     }
 
     template <typename I, match::handle<model::lagrangian_ds> DS1,
@@ -42,7 +43,9 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
 
       auto& q1 = hds1.q(step);
 
-      auto& r = storage::make_handle(data, storage::prop<"shape">(hds1)).radius();
+      auto& r =
+          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(hds1))
+              .radius();
 
       /* disk coordinates */
       const scalar& xb = q1(0);

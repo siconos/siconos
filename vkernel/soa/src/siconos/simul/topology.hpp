@@ -104,9 +104,9 @@ struct topology : item {
       attr<"ydot">(inter).setZero();
       attr<"lambda">(inter).setZero();
 
-      prop<"nds">(inter) = 1;
-      prop<"ds1">(inter) = ds;
-      prop<"ds2">(inter) = ds;
+      prop<"nds", topology>(inter) = 1;
+      prop<"ds1", topology>(inter) = ds;
+      prop<"ds2", topology>(inter) = ds;
 
       return inter;
     };
@@ -122,9 +122,9 @@ struct topology : item {
       attr<"ydot">(inter).setZero();
       attr<"lambda">(inter).setZero();
 
-      prop<"nds">(inter) = 2;
-      prop<"ds1">(inter) = ds1;
-      prop<"ds2">(inter) = ds2;
+      prop<"nds", topology>(inter) = 2;
+      prop<"ds1", topology>(inter) = ds1;
+      prop<"ds2", topology>(inter) = ds2;
 
       return inter;
     };
@@ -140,10 +140,10 @@ struct topology : item {
       attr<"ydot">(inter).setZero();
       attr<"lambda">(inter).setZero();
 
-      prop<"nds">(inter) = 2;
+      prop<"nds", topology>(inter) = 2;
 
-      prop<"ds1">(inter) = ds1;
-      prop<"ds2">(inter) = ds2;
+      prop<"ds1", topology>(inter) = ds1;
+      prop<"ds2", topology>(inter) = ds2;
 
       return inter;
     };
@@ -159,9 +159,9 @@ struct topology : item {
       attr<"ydot">(inter).setZero();
       attr<"lambda">(inter).setZero();
 
-      prop<"nds">(inter) = 1;
-      prop<"ds1">(inter) = ds;
-      prop<"ds2">(inter) = ds;
+      prop<"nds", topology>(inter) = 1;
+      prop<"ds1", topology>(inter) = ds;
+      prop<"ds2", topology>(inter) = ds;
 
       return inter;
     };

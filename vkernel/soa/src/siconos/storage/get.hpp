@@ -54,8 +54,42 @@ template <string_literal S>
 static auto param =
     [](auto h) constexpr -> decltype(auto) { return h.template env_param<S>(); };
 
-template <string_literal S>
-static auto prop = [](auto h) constexpr -> decltype(auto) { return h.template property<S>(); };
+/**
+ * Where an attached storage is declared: the optional last template argument
+ * of prop_values, prop and handle::property.
+ *
+ * - world_declared (the default): search every property of the world, as
+ *   before;
+ * - config_declared: declared in the configuration (with_properties<...>);
+ *   searches the world for now, and the configuration once a world no longer
+ *   carries its item closure;
+ * - an item type: search only that item's own properties list, without the
+ *   world.  This is what lets item code look up the attached storages it
+ *   declares (topology, moreau_jean_element, io, ...) without the world.
+ *
+ * Compile with VKERNEL_CHECK_DECLARER to check, at every call site, that the
+ * declarer's list gives the same storage as the world search.
+ */
+struct world_declared {};
+struct config_declared {};
+
+template <typename Decl, typename Data>
+struct declared_properties {
+  using type = typename get_info_t<Data>::all_properties_t;
+};
+
+template <typename Decl, typename Data>
+  requires match::item<Decl>
+struct declared_properties<Decl, Data> {
+  using type = std::decay_t<decltype(pattern::properties(Decl{}))>;
+};
+
+template <typename Decl, typename Data>
+using declared_properties_t = typename declared_properties<Decl, Data>::type;
+
+template <string_literal S, typename Decl = world_declared>
+static auto prop =
+    [](auto h) constexpr -> decltype(auto) { return h.template property<S, Decl>(); };
 
 template <string_literal S>
 static auto attr =
@@ -78,19 +112,39 @@ template <string_literal S>
 static constexpr auto is_identified_by =
     mp::is_a_model<[]<typename T>() constexpr { return match::tag<T, symbol<S>>; }>;
 
-template <match::item I, string_literal S>
-static auto prop_memory = [](auto& data) constexpr -> decltype(auto) {
-  using info_t = get_info_t<decltype(data)>;
-  constexpr auto tpl =
-      mp::filter(mp::filter(typename info_t::all_properties_t{}, is_attached_storage<I>),
+/// The (static) attached storage of item I with tag S, searched in the
+/// properties declared by Decl (see world_declared).
+template <match::item I, string_literal S, typename Decl, typename Data>
+struct declared_attached_storage {
+  static constexpr auto tpl =
+      mp::filter(mp::filter(declared_properties_t<Decl, Data>{}, is_attached_storage<I>),
                  is_identified_by<S>);
+  static constexpr bool found = mp::size(tpl) >= mp::size_c<1_c>;
 
-  if constexpr (mp::size(tpl) >= mp::size_c<1_c>) {
-    using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
-    return mp::get<attached_storage_t>(data.store());
-  } else {
-    []<bool flag = false>() { static_assert(flag, "attached storage not found"); }();
+  static constexpr auto first() {
+    if constexpr (found) {
+      return std::decay_t<decltype(tpl[0_c])>{};
+    } else {
+      []<bool flag = false>() { static_assert(flag, "attached storage not found"); }();
+    }
   }
+
+  using type = decltype(first());
+
+#ifdef VKERNEL_CHECK_DECLARER
+  static_assert(
+      std::is_same_v<Decl, world_declared> ||
+          std::is_same_v<type,
+                         typename declared_attached_storage<I, S, world_declared, Data>::type>,
+      "the declarer's attached storage differs from the world's");
+#endif
+};
+
+template <match::item I, string_literal S, typename Decl = world_declared>
+static auto prop_memory = [](auto& data) constexpr -> decltype(auto) {
+  using attached_storage_t =
+      typename declared_attached_storage<I, S, Decl, std::decay_t<decltype(data)>>::type;
+  return mp::get<attached_storage_t>(data.store());
 };
 
 template <match::attribute T>
@@ -112,10 +166,11 @@ static constexpr bool has_property_v =
              match::attached_storage<X, Item>;
     });
 
-// Compile-time check: is there a dynamic_storage property for Item with tag S?
-template <typename Item, typename Data, string_literal S>
+// Compile-time check: is there a dynamic_storage property for Item with tag S
+// (among the properties declared by Decl)?
+template <typename Item, typename Data, string_literal S, typename Decl = world_declared>
 static constexpr bool is_dynamic_storage_v =
-    mp::any_of(typename get_info_t<Data>::all_properties_t{}, []<typename X>(X) -> bool {
+    mp::any_of(declared_properties_t<Decl, Data>{}, []<typename X>(X) -> bool {
       return match::property<X> && match::tag<X, symbol<S>> &&
              match::attached_storage<X, Item> && requires { typename X::dynamic_storage_t; };
     });
@@ -128,17 +183,24 @@ static constexpr auto is_dynamic_storage_tagged = mp::is_a_model<[]<typename T>(
 
 // Runtime lookup: get or create the sparse_set for a dynamic property.
 // The sparse_set is stored in the database-level _dynamic_properties map.
-template <match::item I, string_literal S>
+template <match::item I, string_literal S, typename Decl = world_declared>
 static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
-  using info_t = get_info_t<decltype(data)>;
+  using data_t = std::decay_t<decltype(data)>;
+  using info_t = get_info_t<data_t>;
   using env_t = typename info_t::template env<I>;
   using indice = typename env_t::indice;
 
   // Find the property to get its attribute type (Value)
   constexpr auto tpl =
-      mp::filter(typename info_t::all_properties_t{}, is_dynamic_storage_tagged<I, S>);
+      mp::filter(declared_properties_t<Decl, data_t>{}, is_dynamic_storage_tagged<I, S>);
   static_assert(mp::size(tpl) >= mp::size_c<1_c>, "dynamic property not found in topology");
   using prop_t = std::decay_t<decltype(tpl[0_c])>;
+#ifdef VKERNEL_CHECK_DECLARER
+  constexpr auto world_tpl = mp::filter(declared_properties_t<world_declared, data_t>{},
+                                        is_dynamic_storage_tagged<I, S>);
+  static_assert(std::is_same_v<prop_t, std::decay_t<decltype(world_tpl[0_c])>>,
+                "the declarer's dynamic property differs from the world's");
+#endif
   using attr_t = typename prop_t::type;
   using value_t = typename traits::config<env_t>::template convert<attr_t>::type;
 
@@ -157,12 +219,12 @@ static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
   return std::any_cast<storage::sparse_set<indice, value_t>&>(it->second);
 };
 
-template <match::item I, string_literal S>
+template <match::item I, string_literal S, typename Decl = world_declared>
 static auto prop_values = [](auto& data, auto step) -> decltype(auto) {
-  if constexpr (is_dynamic_storage_v<I, std::decay_t<decltype(data)>, S>) {
-    return prop_dynamic_memory<I, S>(data);
+  if constexpr (is_dynamic_storage_v<I, std::decay_t<decltype(data)>, S, Decl>) {
+    return prop_dynamic_memory<I, S, Decl>(data);
   } else {
-    return memory(step, (prop_memory<I, S>(data)));
+    return memory(step, (prop_memory<I, S, Decl>(data)));
   }
 };
 

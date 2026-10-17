@@ -12,11 +12,14 @@
 
 namespace siconos::simul {
 
-template <typename System, typename Inter, typename OsiAssembled>
+// Topology is the item that declares the attached storages of the systems and
+// interactions (involved, index, ds1, ...): their lookups name it as declarer.
+template <typename System, typename Inter, typename OsiAssembled, typename Topology>
 struct moreau_jean_element : item {
   using system = System;
   using interaction = Inter;
   using osi_assembled_t = OsiAssembled;
+  using topology = Topology;
   using items = gather<System, Inter, OsiAssembled>;
 
   using nonsmooth_law = typename interaction::nslaw;
@@ -71,7 +74,7 @@ struct moreau_jean_element : item {
 
         auto& data = self()->data();
         auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-        auto& involveds = storage::prop_values<system, "involved">(data, step);
+        auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
 
         indice sum_cols = 0;
         sum_dofs().clear();
@@ -250,8 +253,9 @@ struct moreau_jean_element : item {
       auto& mats = storage::attr_values<system, "mass_matrix">(data, step);
       auto& fs = storage::attr_values<system, "fext">(data, step);
       auto& fs_next = storage::attr_values<system, "fext">(data, step + 1);
-      auto& minv_fs = storage::prop_values<system, "minv_f">(data, step);
-      auto& minv_fs_next = storage::prop_values<system, "minv_f">(data, step + 1);
+      auto& minv_fs = storage::prop_values<system, "minv_f", moreau_jean_element>(data, step);
+      auto& minv_fs_next =
+          storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
 
       if constexpr (system_with_k_matrix()) {
         auto& ks = storage::attr_values<system, "k_matrix">(data, step);
@@ -278,10 +282,10 @@ struct moreau_jean_element : item {
 
       auto& h_matrices1 = storage::attr_values<h_matrix1>(data, step);
       auto& h_matrices2 = storage::attr_values<h_matrix2>(data, step);
-      auto& ndss = storage::prop_values<interaction, "nds">(data, step);
+      auto& ndss = storage::prop_values<interaction, "nds", topology>(data, step);
 
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
       auto& relations = storage::attr_values<relation>(data, step);
 
       for (auto [rel, hm1, hm2, nds, ds1, ds2] :
@@ -358,7 +362,8 @@ struct moreau_jean_element : item {
         auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
         auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
 
-        auto& bc_velocities_0s = storage::prop_values<system, "bc_velocities_0">(data, step);
+        auto& bc_velocities_0s =
+            storage::prop_values<system, "bc_velocities_0", topology>(data, step);
 
         auto n = qs.size();
         for (std::size_t i = 0; i < n; ++i) {
@@ -400,10 +405,13 @@ struct moreau_jean_element : item {
 
       else {
         // K = 0
-        auto& minv_fs = storage::prop_values<system, "minv_f">(data, step);
-        auto& minv_fs_next = storage::prop_values<system, "minv_f">(data, step + 1);
+        auto& minv_fs =
+            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step);
+        auto& minv_fs_next =
+            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
 
-        auto& bc_velocities_0s = storage::prop_values<system, "bc_velocities_0">(data, step);
+        auto& bc_velocities_0s =
+            storage::prop_values<system, "bc_velocities_0", topology>(data, step);
 
         auto n = qs.size();
         for (std::size_t i = 0; i < n; ++i) {
@@ -442,10 +450,10 @@ struct moreau_jean_element : item {
       auto& qs = storage::attr_values<system, "q">(data, step);
       auto& velocities = storage::attr_values<attr_t<system, "velocity">>(data, step);
 
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
 
-      auto& ndss = storage::prop_values<interaction, "nds">(data, step);
+      auto& ndss = storage::prop_values<interaction, "nds", topology>(data, step);
 
       const auto& inters = storage::handles<interaction>(data, step);
 
@@ -532,7 +540,7 @@ struct moreau_jean_element : item {
 
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
-      auto activations = storage::prop_values<interaction, "activation">(data, step);
+      auto activations = storage::prop_values<interaction, "activation", topology>(data, step);
 
       size_t k = 0;
       for (auto [lambda, activation] : view::zip(lambdas, activations)) {
@@ -554,11 +562,12 @@ struct moreau_jean_element : item {
 
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
-      auto& involveds = storage::prop_values<system, "involved">(data, step);
+      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
 
-      auto& indices = storage::prop_values<system, "index">(data, step);
+      auto& indices = storage::prop_values<system, "index", topology>(data, step);
 
-      auto& bc_velocities_0s = storage::prop_values<system, "bc_velocities_0">(data, step);
+      auto& bc_velocities_0s =
+          storage::prop_values<system, "bc_velocities_0", topology>(data, step);
 
       // involved ds velocities -> ds velocities
       auto n = vs_next.size();
@@ -589,7 +598,7 @@ struct moreau_jean_element : item {
       auto& vs = storage::attr_values<velocity>(data, step);
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
-      auto& involveds = storage::prop_values<system, "involved">(data, step);
+      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
       for (auto [x, x_next, v, v_next, involved] :
            view::zip(xs, xs_next, vs, vs_next, involveds)) {
         x_next = x + h * (theta() * v_next + (1.0 - theta()) * v);
@@ -603,7 +612,7 @@ struct moreau_jean_element : item {
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
 
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto activations = storage::prop_values<interaction, "activation">(data, step);
+      auto activations = storage::prop_values<interaction, "activation", topology>(data, step);
 
       size_t k = 0;
       for (auto [lambda, nslaw, ydot, activation] :
@@ -626,8 +635,8 @@ struct moreau_jean_element : item {
       auto& data = self()->data();
 
       auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-      auto& involveds = storage::prop_values<system, "involved">(data, step);
-      auto& indices = storage::prop_values<system, "index">(data, step);
+      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
+      auto& indices = storage::prop_values<system, "index", topology>(data, step);
 
       // size may be 0
       for (auto [mass_matrix, involved, index] :
@@ -643,8 +652,8 @@ struct moreau_jean_element : item {
         auto& data = self()->data();
 
         auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
-        auto& involveds = storage::prop_values<system, "involved">(data, step);
-        auto& indices = storage::prop_values<system, "index">(data, step);
+        auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
+        auto& indices = storage::prop_values<system, "index", topology>(data, step);
         // size may be 0
 
         for (auto [k_matrix, involved, index] : view::zip(k_matrices, involveds, indices)) {
@@ -673,13 +682,13 @@ struct moreau_jean_element : item {
   };
 };
 
-template <typename System, typename OsiAssembled>
-struct moreau_jean_element<System, empty_item, OsiAssembled> : empty_item {
+template <typename System, typename OsiAssembled, typename Topology>
+struct moreau_jean_element<System, empty_item, OsiAssembled, Topology> : empty_item {
   using attributes = gather<>;
 };
 
-template <typename T>
-struct moreau_jean_element<empty_item, empty_item, T> : empty_item {
+template <typename T, typename Topology>
+struct moreau_jean_element<empty_item, empty_item, T, Topology> : empty_item {
   using attributes = gather<>;
 };
 

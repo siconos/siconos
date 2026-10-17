@@ -185,39 +185,47 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @param step Memory step index (for time-dependent storage)
    * @return Reference to the attached storage value
    */
-  template <typename A>
+  template <typename A, typename Decl = world_declared>
   constexpr decltype(auto) property(A, indice step = 0) {
     using item_t = T;
-    // Filter properties to find attached storage matching the tag; excludes
-    // dynamic_storage-backed properties, since they have no static slot to
-    // index here (see the string_literal overload below, which dispatches
-    // to the dynamic path when appropriate).
-    constexpr auto tpl =
-        mp::filter(typename info_t::all_properties_t{}, mp::is_a_model<[]<typename X>() {
-                     return match::attached_storage<X, item_t> && match::tag<X, A> &&
-                            !requires { typename X::dynamic_storage_t; };
-                   }>);
+    // Filter the properties declared by Decl (see world_declared) to find the
+    // attached storage matching the tag; excludes dynamic_storage-backed
+    // properties, since they have no static slot to index here (see the
+    // string_literal overload below, which dispatches to the dynamic path
+    // when appropriate).
+    constexpr auto matching = mp::is_a_model<[]<typename X>() {
+      return match::attached_storage<X, item_t> && match::tag<X, A> &&
+             !requires { typename X::dynamic_storage_t; };
+    }>;
+    constexpr auto tpl = mp::filter(declared_properties_t<Decl, D>{}, matching);
 
     // Ensure we found at least one matching attached storage
     static_assert(mp::size(tpl) >= mp::size_c<1>, "attached storage not found");
 
     using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
+#ifdef VKERNEL_CHECK_DECLARER
+    constexpr auto world_tpl =
+        mp::filter(declared_properties_t<world_declared, D>{}, matching);
+    static_assert(std::is_same_v<attached_storage_t, std::decay_t<decltype(world_tpl[0_c])>>,
+                  "the declarer's attached storage differs from the world's");
+#endif
     return memory(step, mp::get<attached_storage_t>(data().store()))[this->index().value()];
   }
 
   /**
    * @brief Access an attached storage property by compile-time string
    * @tparam S Compile-time string literal
+   * @tparam Decl where the attached storage is declared (see world_declared)
    * @param step Memory step index
    * @return Reference to the attached storage value
    */
-  template <string_literal S>
+  template <string_literal S, typename Decl = world_declared>
   constexpr decltype(auto) property(indice step = 0) {
     using data_t = std::decay_t<decltype(data())>;
-    if constexpr (is_dynamic_storage_v<T, data_t, S>) {
-      return prop_dynamic_memory<T, S>(data()).get_or_create(this->index().value());
+    if constexpr (is_dynamic_storage_v<T, data_t, S, Decl>) {
+      return prop_dynamic_memory<T, S, Decl>(data()).get_or_create(this->index().value());
     } else {
-      return property(symbol<S>{}, step);
+      return property<symbol<S>, Decl>(symbol<S>{}, step);
     }
   }
 

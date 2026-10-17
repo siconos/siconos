@@ -252,7 +252,7 @@ struct space_filter : item {
           auto all_ds = storage::handles<item_t>(data);
           for (auto ds : all_ds) {
             //            print("add disk point : {}\n", ds.get());
-            auto shape_idx = storage::prop<"shape">(ds);
+            auto shape_idx = storage::prop<"shape", storage::config_declared>(ds);
             using shape_t = typename std::decay_t<decltype(shape_idx)>::type;
             if constexpr (std::derived_from<shape_t, collision::shape::mesh>) {
               auto shape_handle = storage::make_handle(self()->data(), shape_idx);
@@ -387,13 +387,13 @@ struct space_filter : item {
       if (find_inter != fmap.end()) {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
       } else {
         // create the edge
         auto inter = topo.link(ds1, ds2);
         inter.nslaw() = nslaw;  // one nslaw for the moment
 
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
 
         inter.relation() = diskdisk_r;
         fmap[make_ipair(ds1.index(), ds2.index())] = inter;
@@ -414,13 +414,13 @@ struct space_filter : item {
       if (find_inter != dmap.end()) {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
       } else {
         // create the edge
         auto inter = topo.link(ds1, ds2);
         inter.nslaw() = nslaw;  // one nslaw for the moment
 
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
 
         if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
             search != diskmeshes.end()) {
@@ -456,7 +456,7 @@ struct space_filter : item {
       if (find_inter != intermap.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         // keep this interaction
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
 
         // print("interaction FOUND for
         // {},{},{}\n", a, b,
@@ -480,7 +480,7 @@ struct space_filter : item {
           inter.relation() = dl;
           relmap[{x1, x2, y1, y2}] = dl;
         }
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
         intermap[mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2})] = inter;
       }
     }
@@ -501,7 +501,7 @@ struct space_filter : item {
 
       if (find_inter != ds_fdisk_prox.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
       } else {
         auto inter = topo.link(body1);
         inter.nslaw() = nslaw;
@@ -517,7 +517,7 @@ struct space_filter : item {
           inter.relation() = dfd;
           diskfdisks[coefs] = dfd;
         }
-        storage::prop<"activation">(inter) = true;
+        storage::prop<"activation", Topology>(inter) = true;
         ds_fdisk_prox[mp::make_pair(ds1.index().value(), coefs)] = inter;
       }
     }
@@ -529,7 +529,7 @@ struct space_filter : item {
 
       auto& data = self()->data();
 
-      auto& activations = storage::prop_values<Interaction, "activation">(data, 0);
+      auto& activations = storage::prop_values<Interaction, "activation", Topology>(data, 0);
 
       auto interactions = storage::handles<Interaction>(data, 0);
 
@@ -539,17 +539,17 @@ struct space_filter : item {
         if (!activation) {
           //          print("START REMOVE interaction {}\n", inter.get());
 
-          if (storage::prop<"ds1">(inter) != storage::prop<"ds2">(inter)) {
-            auto finter = ds_ds_prox.find(
-                make_ipair(storage::prop<"ds1">(inter), storage::prop<"ds2">(inter)));
+          if (storage::prop<"ds1", Topology>(inter) != storage::prop<"ds2", Topology>(inter)) {
+            auto finter = ds_ds_prox.find(make_ipair(storage::prop<"ds1", Topology>(inter),
+                                                     storage::prop<"ds2", Topology>(inter)));
 
             assert(inter.index().value() == std::get<1>(*finter).value());
 
             ds_ds_prox.erase(finter);
             //            print("  REMOVE ds ds interaction between {}
             //            {}\n",
-            //                  storage::prop<"ds1">(inter).get(),
-            //                  storage::prop<"ds2">(inter).get());
+            //                  storage::prop<"ds1", Topology>(inter).get(),
+            //                  storage::prop<"ds2", Topology>(inter).get());
           } else {
             siconos::variant::visit(
                 data, inter.relation(),
@@ -559,14 +559,14 @@ struct space_filter : item {
                       auto coefs =
                           std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
                       auto finter = ds_segment_prox.find(
-                          mp::make_pair(storage::prop<"ds1">(inter).value(), coefs));
+                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
                       ds_segment_prox.erase(finter);
                     },
                     [&]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
                       auto& translat = rel.translated_disk_shape().translation();
                       auto coefs = std::array{translat[0], translat[1]};
                       auto finter = ds_fdisk_prox.find(
-                          mp::make_pair(storage::prop<"ds1">(inter).value(), coefs));
+                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
                       ds_fdisk_prox.erase(finter);
                     },
                     []<bool flag = false>(auto) {
@@ -578,7 +578,7 @@ struct space_filter : item {
                     }));
             //            print("  REMOVE ds segment interaction between {}
             //            {},{},{})\n",
-            //                  storage::prop<"ds1">(inter).get(),
+            //                  storage::prop<"ds1", Topology>(inter).get(),
             //                  segmentcoefs[0], segmentcoefs[1],
             //                  segmentcoefs[2], segmentcoefs[3]);
 
@@ -658,11 +658,11 @@ struct space_filter : item {
 
       auto ds_fdisk_prox = map_ds_fdisk_prox_t();
 
-      auto& ds1s = storage::prop_values<finteraction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<finteraction, "ds2">(data, step);
+      auto& ds1s = storage::prop_values<finteraction, "ds1", Topology>(data, step);
+      auto& ds2s = storage::prop_values<finteraction, "ds2", Topology>(data, step);
 
-      auto& dds1s = storage::prop_values<dfinteraction, "ds1">(data, step);
-      auto& dds2s = storage::prop_values<dfinteraction, "ds2">(data, step);
+      auto& dds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, step);
+      auto& dds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, step);
 
       auto interactions = storage::handles<finteraction>(data, step);
 
@@ -674,9 +674,10 @@ struct space_filter : item {
         build_dproximity_maps(ds_dds_prox, dds1s, dds2s, dinteractions);
       }
 
-      auto& activations = storage::prop_values<finteraction, "activation">(data, 0);
+      auto& activations = storage::prop_values<finteraction, "activation", Topology>(data, 0);
 
-      auto& dactivations = storage::prop_values<dfinteraction, "activation">(data, 0);
+      auto& dactivations =
+          storage::prop_values<dfinteraction, "activation", Topology>(data, 0);
 
       int activations_size = activations.size();
       int dactivations_size = dactivations.size();

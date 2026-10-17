@@ -21,6 +21,8 @@ using namespace storage::pattern;
 template <typename Osi, typename... ContactShapes>
 struct io : item {
   using osi = Osi;
+  // declares the attached storages of systems and interactions (id, ds1, ...)
+  using topology = typename osi::topology;
   /* /!\ only system sizes defined at compile time and 2D for the moment */
   using system = nth_t<0, typename osi::systems_t>;   // fixed dof system
   using dsystem = nth_t<1, typename osi::systems_t>;  // runtime dof system
@@ -62,9 +64,9 @@ struct io : item {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
-      auto& involveds = storage::prop_values<system, "involved">(data, step);
-      auto& indices = storage::prop_values<system, "index">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
+      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
+      auto& indices = storage::prop_values<system, "index", topology>(data, step);
 
       /* /!\ first osi */
       const auto& p0_v = self()->make_handle(osi()).template visit_element<0>(
@@ -93,8 +95,9 @@ struct io : item {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
-      auto& shapes = storage::prop_values<system, "shape">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
+      auto& shapes =
+          storage::prop_values<system, "shape", storage::config_declared>(data, step);
 
       attr<"radii_info">(*self()).clear();
 
@@ -111,9 +114,9 @@ struct io : item {
     decltype(auto) displacements(auto step) {
       auto& data = self()->data();
       if constexpr (!match::empty_item<dsystem>) {
-        auto& ids = storage::prop_values<dsystem, "id">(data, step);
+        auto& ids = storage::prop_values<dsystem, "id", topology>(data, step);
         auto& qs = storage::attr_values<dsystem, "q">(data, step);
-        auto& q0s = storage::prop_values<dsystem, "q0">(data, step);
+        auto& q0s = storage::prop_values<dsystem, "q0", topology>(data, step);
 
         attr<"disp_info">(*self()).clear();
 
@@ -130,7 +133,7 @@ struct io : item {
       //      using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
       auto& qs = storage::attr_values<system, "q">(data, step);
 
       attr<"pos_info">(*self()).clear();
@@ -150,7 +153,7 @@ struct io : item {
       //      using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
       auto& velos = storage::attr_values<system, "velocity">(data, step);
 
       attr<"vel_info">(*self()).clear();
@@ -176,12 +179,13 @@ struct io : item {
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
       auto& relations = storage::attr_values<interaction, "relation">(data, step);
 
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
 
       auto& h_matrices1 = storage::attr_values<interaction, "h_matrix1">(data, step);
 
-      auto& activations = storage::prop_values<interaction, "activation">(data, step);
+      auto& activations =
+          storage::prop_values<interaction, "activation", topology>(data, step);
 
       attr<"cp_info">(*self()).clear();
 
@@ -214,8 +218,14 @@ struct io : item {
             scalar dc2c1 = collision::distance(c2, c1);
 
             cn = (c2 - c1) / dc2c1;
-            ca = c1 + storage::make_handle(data, storage::prop<"shape">(hds1)).radius() * cn;
-            cb = c2 - storage::make_handle(data, storage::prop<"shape">(hds2)).radius() * cn;
+            ca = c1 + storage::make_handle(
+                          data, storage::prop<"shape", storage::config_declared>(hds1))
+                              .radius() *
+                          cn;
+            cb = c2 - storage::make_handle(
+                          data, storage::prop<"shape", storage::config_declared>(hds2))
+                              .radius() *
+                          cn;
           } else {
             variant::visit(
                 data, relation,
@@ -233,8 +243,11 @@ struct io : item {
                       cb = segment.p1() + t * segment.dp2p1();
                       scalar dcbc1 = collision::distance(cb, c1);
                       cn = (cb - c1) / dcbc1;
-                      ca = c1 + cn * storage::make_handle(data, storage::prop<"shape">(hds1))
-                                         .radius();
+                      ca =
+                          c1 + cn * storage::make_handle(
+                                        data,
+                                        storage::prop<"shape", storage::config_declared>(hds1))
+                                        .radius();
                     },
                     /* disk / fixed disk */
                     [&](storage::index<collision::diskfdisk_r, indice> rrel) {
@@ -248,7 +261,9 @@ struct io : item {
 
                       cn = (c2 - c1) / dc2c1;
                       ca = c1 +
-                           storage::make_handle(data, storage::prop<"shape">(hds1)).radius() *
+                           storage::make_handle(
+                               data, storage::prop<"shape", storage::config_declared>(hds1))
+                                   .radius() *
                                cn;
                       cb = c2 - radius2 * cn;
                     },
@@ -259,8 +274,8 @@ struct io : item {
                     }));
           };
 
-          auto id_ds1 = storage::prop<"id">(hds1);
-          auto id_ds2 = storage::prop<"id">(hds2);
+          auto id_ds1 = storage::prop<"id", topology>(hds1);
+          auto id_ds2 = storage::prop<"id", topology>(hds2);
 
           /* disk / segment */
           attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
@@ -304,9 +319,10 @@ struct io : item {
       using integer = typename env_t::integer;
 
       auto& relations = storage::attr_values<interaction, "relation">(data, step);
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
-      auto& activations = storage::prop_values<interaction, "activation">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
+      auto& activations =
+          storage::prop_values<interaction, "activation", topology>(data, step);
 
       attr<"co_info">(*self()).clear();
 
@@ -316,8 +332,8 @@ struct io : item {
         if (activation) {
           auto hds1 = storage::make_handle(data, ds1);
           auto hds2 = storage::make_handle(data, ds2);
-          auto id_ds1 = prop<"id">(hds1);
-          auto id_ds2 = prop<"id">(hds2);
+          auto id_ds1 = prop<"id", topology>(hds1);
+          auto id_ds2 = prop<"id", topology>(hds2);
 
           indice inter_index = k++; /* index of interaction in indexset 1 */
           // a pair type of shape (unsigned int) + index
@@ -327,7 +343,7 @@ struct io : item {
                                  // relation1 with static shape : the concept is missing
                                  [&]<match::relation1 Relation>(Relation rrel) {
                                    // must provide shape method
-                                   return storage::prop<"ident">(rrel.shape());
+                                   return storage::prop<"ident", io>(rrel.shape());
                                  },
                                  [&](auto) {
                                    // another kind of relation

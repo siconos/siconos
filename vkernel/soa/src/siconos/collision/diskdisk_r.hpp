@@ -21,8 +21,12 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 = storage::make_handle(self()->data(), storage::prop<"shape">(ds1)).radius();
-      auto& r2 = storage::make_handle(self()->data(), storage::prop<"shape">(ds2)).radius();
+      auto& r1 = storage::make_handle(self()->data(),
+                                      storage::prop<"shape", storage::config_declared>(ds1))
+                     .radius();
+      auto& r2 = storage::make_handle(self()->data(),
+                                      storage::prop<"shape", storage::config_declared>(ds2))
+                     .radius();
 
       auto dx = q2[0] - q1[0];
       auto dy = q2[1] - q1[1];
@@ -38,8 +42,12 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 = storage::make_handle(data, storage::prop<"shape">(ds1)).radius();
-      auto& r2 = storage::make_handle(data, storage::prop<"shape">(ds2)).radius();
+      auto& r1 =
+          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds1))
+              .radius();
+      auto& r2 =
+          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds2))
+              .radius();
 
       auto x1 = q1(0);
       auto y1 = q1(1);

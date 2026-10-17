@@ -32,11 +32,12 @@ struct one_step_integrator {
     using systems_t = gather<ct_system, rt_system>;
     using interactions_t = gather<ct_interaction, rt_ct_interaction, rt_rt_interaction>;
 
-    using ct_osi_t = moreau_jean_element<ct_system, ct_interaction, moreau_jean_assembled>;
+    using ct_osi_t =
+        moreau_jean_element<ct_system, ct_interaction, moreau_jean_assembled, Topology>;
     using rt_ct_osi_t =
-        moreau_jean_element<rt_system, rt_ct_interaction, moreau_jean_assembled>;
+        moreau_jean_element<rt_system, rt_ct_interaction, moreau_jean_assembled, Topology>;
     using rt_rt_osi_t =
-        moreau_jean_element<rt_system, rt_rt_interaction, moreau_jean_assembled>;
+        moreau_jean_element<rt_system, rt_rt_interaction, moreau_jean_assembled, Topology>;
 
     using all_elements_t = mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_ct_osi_t>,
                                      some::item_ref<rt_rt_osi_t>>;
@@ -58,11 +59,10 @@ struct one_step_integrator {
                      using t = typename std::decay_t<decltype(h)>::type;
                      return mp::bool_c<!std::derived_from<t, empty_item>>;
                    }),
-        []<typename... Elems>(Elems...) {
-          return mp::tuple<typename Elems::type...>{};
-        }));
+        []<typename... Elems>(Elems...) { return mp::tuple<typename Elems::type...>{}; }));
 
-    using items = decltype(mp::concat(mp::tuple<topology, ct_osi_t, assembled_osi_t>{}, filtered_element_types_t{}));
+    using items = decltype(mp::concat(mp::tuple<topology, ct_osi_t, assembled_osi_t>{},
+                                      filtered_element_types_t{}));
 
     struct attributes {
       elements_t elements;
@@ -255,13 +255,14 @@ struct one_step_integrator {
         auto& ct_ys = storage::attr_values<ct_interaction, "y">(data, step);
         auto& ct_ydots = storage::attr_values<ct_interaction, "ydot">(data, step);
 
-        auto& ct_ids1s = storage::prop_values<ct_interaction, "ds1">(data, step);
-        auto& ct_ids2s = storage::prop_values<ct_interaction, "ds2">(data, step);
-        auto& ct_ndss = storage::prop_values<ct_interaction, "nds">(data, step);
+        auto& ct_ids1s = storage::prop_values<ct_interaction, "ds1", Topology>(data, step);
+        auto& ct_ids2s = storage::prop_values<ct_interaction, "ds2", Topology>(data, step);
+        auto& ct_ndss = storage::prop_values<ct_interaction, "nds", Topology>(data, step);
 
-        auto& ct_activations = storage::prop_values<ct_interaction, "activation">(data, step);
+        auto& ct_activations =
+            storage::prop_values<ct_interaction, "activation", Topology>(data, step);
 
-        auto& ct_involveds = storage::prop_values<ct_system, "involved">(data, step);
+        auto& ct_involveds = storage::prop_values<ct_system, "involved", Topology>(data, step);
 
         const auto& ct_interactions = storage::handles<ct_interaction>(data, step);
 
@@ -290,17 +291,17 @@ struct one_step_integrator {
 
             auto ds2 = storage::make_handle(data, ids2);
 
-            if (!prop<"involved">(ds2)) {
-              prop<"involved">(ds2) = true;
-              prop<"index">(ds2) = ct_ds_counter++;
+            if (!prop<"involved", Topology>(ds2)) {
+              prop<"involved", Topology>(ds2) = true;
+              prop<"index", Topology>(ds2) = ct_ds_counter++;
             }
 
             if (nds == 2) {
               auto ds1 = storage::make_handle(data, ids1);
 
-              if (!prop<"involved">(ds1)) {
-                prop<"involved">(ds1) = true;
-                prop<"index">(ds1) = ct_ds_counter++;
+              if (!prop<"involved", Topology>(ds1)) {
+                prop<"involved", Topology>(ds1) = true;
+                prop<"index", Topology>(ds1) = ct_ds_counter++;
               };
             }
           }
@@ -318,7 +319,8 @@ struct one_step_integrator {
           // reset rt_system involvement once per step, regardless of which
           // rt-family interaction type(s) (rt_ct and/or rt_rt) are actually
           // present - both key off this same shared per-rt_system property.
-          auto& rt_involveds = storage::prop_values<rt_system, "involved">(data, step);
+          auto& rt_involveds =
+              storage::prop_values<rt_system, "involved", Topology>(data, step);
 
           for (auto [involved] : view::zip(rt_involveds)) {
             involved = false;
@@ -328,16 +330,20 @@ struct one_step_integrator {
         if constexpr (with_rt_ct_interaction()) {
           auto& rt_ct_ys = storage::attr_values<rt_ct_interaction, "y">(data, step);
           auto& rt_ct_ydots = storage::attr_values<rt_ct_interaction, "ydot">(data, step);
-          auto& rt_ct_ids1s = storage::prop_values<rt_ct_interaction, "ds1">(data, step);
-          auto& rt_ct_ids2s = storage::prop_values<rt_ct_interaction, "ds2">(data, step);
-          auto& rt_ct_ndss = storage::prop_values<rt_ct_interaction, "nds">(data, step);
+          auto& rt_ct_ids1s =
+              storage::prop_values<rt_ct_interaction, "ds1", Topology>(data, step);
+          auto& rt_ct_ids2s =
+              storage::prop_values<rt_ct_interaction, "ds2", Topology>(data, step);
+          auto& rt_ct_ndss =
+              storage::prop_values<rt_ct_interaction, "nds", Topology>(data, step);
 
           auto& rt_ct_activations =
-              storage::prop_values<rt_ct_interaction, "activation">(data, step);
+              storage::prop_values<rt_ct_interaction, "activation", Topology>(data, step);
 
           // already reset once above, unconditionally, for the whole
           // rt_system regardless of which rt-family interaction is present
-          auto& rt_involveds = storage::prop_values<rt_system, "involved">(data, step);
+          auto& rt_involveds =
+              storage::prop_values<rt_system, "involved", Topology>(data, step);
 
           const auto& rt_ct_interactions = storage::handles<rt_ct_interaction>(data, step);
 
@@ -352,9 +358,9 @@ struct one_step_integrator {
 
               auto ds2 = storage::make_handle(data, ids2);
 
-              if (!prop<"involved">(ds2)) {
-                prop<"involved">(ds2) = true;
-                prop<"index">(ds2) = rt_ds_counter++;
+              if (!prop<"involved", Topology>(ds2)) {
+                prop<"involved", Topology>(ds2) = true;
+                prop<"index", Topology>(ds2) = rt_ds_counter++;
               }
 
               // /!\ a rt system can only be in interaction with a ct system
@@ -363,9 +369,9 @@ struct one_step_integrator {
               {
                 auto ds1 = storage::make_handle(data, ids1);
 
-                if (!prop<"involved">(ds1)) {
-                  prop<"involved">(ds1) = true;
-                  prop<"index">(ds1) = ct_ds_counter++;
+                if (!prop<"involved", Topology>(ds1)) {
+                  prop<"involved", Topology>(ds1) = true;
+                  prop<"index", Topology>(ds1) = ct_ds_counter++;
                 };
               }
             }
@@ -393,12 +399,15 @@ struct one_step_integrator {
           // marked involved via rt_ct keeps its index.
           auto& rt_rt_ys = storage::attr_values<rt_rt_interaction, "y">(data, step);
           auto& rt_rt_ydots = storage::attr_values<rt_rt_interaction, "ydot">(data, step);
-          auto& rt_rt_ids1s = storage::prop_values<rt_rt_interaction, "ds1">(data, step);
-          auto& rt_rt_ids2s = storage::prop_values<rt_rt_interaction, "ds2">(data, step);
-          auto& rt_rt_ndss = storage::prop_values<rt_rt_interaction, "nds">(data, step);
+          auto& rt_rt_ids1s =
+              storage::prop_values<rt_rt_interaction, "ds1", Topology>(data, step);
+          auto& rt_rt_ids2s =
+              storage::prop_values<rt_rt_interaction, "ds2", Topology>(data, step);
+          auto& rt_rt_ndss =
+              storage::prop_values<rt_rt_interaction, "nds", Topology>(data, step);
 
           auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation">(data, step);
+              storage::prop_values<rt_rt_interaction, "activation", Topology>(data, step);
 
           const auto& rt_rt_interactions = storage::handles<rt_rt_interaction>(data, step);
 
@@ -413,17 +422,17 @@ struct one_step_integrator {
 
               auto ds2 = storage::make_handle(data, ids2);
 
-              if (!prop<"involved">(ds2)) {
-                prop<"involved">(ds2) = true;
-                prop<"index">(ds2) = rt_ds_counter++;
+              if (!prop<"involved", Topology>(ds2)) {
+                prop<"involved", Topology>(ds2) = true;
+                prop<"index", Topology>(ds2) = rt_ds_counter++;
               }
 
               if (nds == 2) {
                 auto ds1 = storage::make_handle(data, ids1);
 
-                if (!prop<"involved">(ds1)) {
-                  prop<"involved">(ds1) = true;
-                  prop<"index">(ds1) = rt_ds_counter++;
+                if (!prop<"involved", Topology>(ds1)) {
+                  prop<"involved", Topology>(ds1) = true;
+                  prop<"index", Topology>(ds1) = rt_ds_counter++;
                 };
               }
             }
@@ -472,13 +481,14 @@ struct one_step_integrator {
 
         auto&& ct_h_matrix = ct_elem.h_matrix_assembled();
 
-        auto& ct_activations = storage::prop_values<ct_interaction, "activation">(data, step);
+        auto& ct_activations =
+            storage::prop_values<ct_interaction, "activation", Topology>(data, step);
 
         auto& rt_ct_activations =
-            storage::prop_values<rt_ct_interaction, "activation">(data, step);
+            storage::prop_values<rt_ct_interaction, "activation", Topology>(data, step);
 
         // auto& rt_rt_activations =
-        //     storage::prop_values<rt_rt_interaction, "activation">(data,
+        //     storage::prop_values<rt_rt_interaction, "activation", Topology>(data,
         //     step);
 
         auto& ct_h_mat1s = storage::attr_values<ct_interaction, "h_matrix1">(data, step);
@@ -491,18 +501,18 @@ struct one_step_integrator {
         //     storage::attr_values<rt_rt_interaction, "h_matrix2">(data,
         //     step);
 
-        auto& ct_ids1s = storage::prop_values<ct_interaction, "ds1">(data, step);
-        auto& ct_ids2s = storage::prop_values<ct_interaction, "ds2">(data, step);
+        auto& ct_ids1s = storage::prop_values<ct_interaction, "ds1", Topology>(data, step);
+        auto& ct_ids2s = storage::prop_values<ct_interaction, "ds2", Topology>(data, step);
 
         // auto& rt_rt_ids1s =
-        //     storage::prop_values<rt_rt_interaction, "ds1">(data, step);
+        //     storage::prop_values<rt_rt_interaction, "ds1", Topology>(data, step);
         // auto& rt_rt_ids2s =
-        //     storage::prop_values<rt_rt_interaction, "ds2">(data, step);
+        //     storage::prop_values<rt_rt_interaction, "ds2", Topology>(data, step);
 
-        auto& ct_indices = storage::prop_values<ct_system, "index">(data, step);
+        auto& ct_indices = storage::prop_values<ct_system, "index", Topology>(data, step);
 
         auto& ct_bc_velocities_0s =
-            storage::prop_values<ct_system, "bc_velocities_0">(data, step);
+            storage::prop_values<ct_system, "bc_velocities_0", Topology>(data, step);
 
         size_t i_ct = 0;
         for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
@@ -551,13 +561,15 @@ struct one_step_integrator {
               storage::attr_values<rt_ct_interaction, "h_matrix1">(data, step);
           auto& rt_ct_h_mat2s =
               storage::attr_values<rt_ct_interaction, "h_matrix2">(data, step);
-          auto& rt_ct_ids1s = storage::prop_values<rt_ct_interaction, "ds1">(data, step);
-          auto& rt_ct_ids2s = storage::prop_values<rt_ct_interaction, "ds2">(data, step);
+          auto& rt_ct_ids1s =
+              storage::prop_values<rt_ct_interaction, "ds1", Topology>(data, step);
+          auto& rt_ct_ids2s =
+              storage::prop_values<rt_ct_interaction, "ds2", Topology>(data, step);
           auto& rt_ct_rels = storage::attr_values<rt_ct_interaction, "relation">(data, step);
-          auto& rt_indices = storage::prop_values<rt_system, "index">(data, step);
+          auto& rt_indices = storage::prop_values<rt_system, "index", Topology>(data, step);
 
           auto& rt_bc_velocities_0s =
-              storage::prop_values<rt_system, "bc_velocities_0">(data, step);
+              storage::prop_values<rt_system, "bc_velocities_0", Topology>(data, step);
 
           size_t i_rt = 0;
           for (auto [activation, h_mat1, h_mat2, ids1, ids2, rel] :
@@ -625,15 +637,17 @@ struct one_step_integrator {
               rt_rt_elem.ds_offset());
 
           auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation">(data, step);
+              storage::prop_values<rt_rt_interaction, "activation", Topology>(data, step);
           auto& rt_rt_h_mat1s =
               storage::attr_values<rt_rt_interaction, "h_matrix1">(data, step);
-          auto& rt_rt_ndss = storage::prop_values<rt_rt_interaction, "nds">(data, step);
-          auto& rt_rt_ids2s = storage::prop_values<rt_rt_interaction, "ds2">(data, step);
+          auto& rt_rt_ndss =
+              storage::prop_values<rt_rt_interaction, "nds", Topology>(data, step);
+          auto& rt_rt_ids2s =
+              storage::prop_values<rt_rt_interaction, "ds2", Topology>(data, step);
 
-          auto& rt_rt_indices = storage::prop_values<rt_system, "index">(data, step);
+          auto& rt_rt_indices = storage::prop_values<rt_system, "index", Topology>(data, step);
           auto& rt_rt_bc_velocities_0s =
-              storage::prop_values<rt_system, "bc_velocities_0">(data, step);
+              storage::prop_values<rt_system, "bc_velocities_0", Topology>(data, step);
 
           size_t i_rt_rt = 0;
           for (auto [activation, h_mat1, nds, ids2] :
@@ -715,7 +729,8 @@ struct one_step_integrator {
         auto ct_elem = std::get<0>(elements());
 
         auto& ct_ydots_next = storage::attr_values<ct_interaction, "ydot">(data, step + 1);
-        auto& ct_activations = storage::prop_values<ct_interaction, "activation">(data, step);
+        auto& ct_activations =
+            storage::prop_values<ct_interaction, "activation", Topology>(data, step);
 
         auto k = 0;
         for (auto [ydot_next, activation] : view::zip(ct_ydots_next, ct_activations)) {
@@ -728,7 +743,7 @@ struct one_step_integrator {
           auto& rt_ct_ydots_next =
               storage::attr_values<rt_ct_interaction, "ydot">(data, step + 1);
           auto& rt_ct_activations =
-              storage::prop_values<rt_ct_interaction, "activation">(data, step);
+              storage::prop_values<rt_ct_interaction, "activation", Topology>(data, step);
 
           for (auto [ydot_next, activation] : view::zip(rt_ct_ydots_next, rt_ct_activations)) {
             if (activation) {
@@ -743,7 +758,7 @@ struct one_step_integrator {
           auto& rt_rt_ydots_next =
               storage::attr_values<rt_rt_interaction, "ydot">(data, step + 1);
           auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation">(data, step);
+              storage::prop_values<rt_rt_interaction, "activation", Topology>(data, step);
 
           for (auto [ydot_next, activation] : view::zip(rt_rt_ydots_next, rt_rt_activations)) {
             if (activation) {

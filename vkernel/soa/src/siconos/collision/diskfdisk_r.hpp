@@ -28,7 +28,7 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
       auto& data = self()->data();
       auto& q = storage::attr<"q">(ds, step);
       return collision::distance(q, translated_disk_shape().translation()) -
-             make_handle(data, prop<"shape">(ds)).radius() -
+             make_handle(data, prop<"shape", storage::config_declared>(ds)).radius() -
              translated_disk_shape().translated().radius();
     }
 
@@ -38,7 +38,9 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
 
       const auto& q1 = storage::attr<"q">(ds, step);
       const auto& q2 = translated_disk_shape().translation();
-      const scalar& r1 = storage::make_handle(data, storage::prop<"shape">(ds)).radius();
+      const scalar& r1 =
+          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds))
+              .radius();
 
       //      const scalar& r2 =
       //        translated_disk_shape().item().radius();
