@@ -4351,6 +4351,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n / 3.;
     }
 
+    /* Keep the workspace copy of the barrier parameter in sync; the corrector (and some
+     * predictors) read it from the workspace. */
+    ws.barr_param = barr_param;
+
     // t2 = clock();
     //    total_time += (double)(t2 - t1) / (double)clk_tck;
 
