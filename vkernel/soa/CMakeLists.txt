@@ -88,22 +88,30 @@ endif()
 
 # install(TARGETS _nothing DESTINATION nothing)
 
+# The bindings are spread over NONOS_BIND_PARTS translation units, each one
+# binding every NONOS_BIND_PARTS-th item (see src/siconos/py/py_bind_part.hpp),
+# so that they compile in parallel and with less memory each.
+set(NONOS_BIND_PARTS 4 CACHE STRING "number of translation units for the _nonos bindings")
+set(nonos_bind_sources)
+math(EXPR nonos_last_part "${NONOS_BIND_PARTS} - 1")
+foreach(part RANGE ${nonos_last_part})
+  set(nonos_part_file ${CMAKE_CURRENT_BINARY_DIR}/nonos/bind_part_${part}.cpp)
+  file(CONFIGURE OUTPUT ${nonos_part_file}
+    CONTENT "#define NONOS_PART ${part}\n#include \"siconos/py/py_bind_part.hpp\"\n")
+  list(APPEND nonos_bind_sources ${nonos_part_file})
+endforeach()
+
 python_add_library(_nonos MODULE
   ./src/siconos/py/main.cpp
-#  ./src/siconos/py/py_null.cpp
-#  ./src/siconos/py/main_disks.cpp
-#  ./src/siconos/py/py_attached_storages.cpp
-#  ./src/siconos/py/py_attributes.cpp
-#  ./src/siconos/py/py_add.cpp
-#  ./src/siconos/py/py_methods.cpp
+  ${nonos_bind_sources}
   WITH_SOABI)
 
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
+target_compile_definitions(_nonos PRIVATE NONOS_PARTS=${NONOS_BIND_PARTS})
 
 if(ftime_trace)
-  target_compile_options(_nonos PRIVATE
-    -ftime-trace=${CMAKE_CURRENT_BINARY_DIR}/time-trace-nonos.json
-  )
+  # one trace per object file, next to it
+  target_compile_options(_nonos PRIVATE -ftime-trace)
 endif()
 
 if(WITH_GPU)
