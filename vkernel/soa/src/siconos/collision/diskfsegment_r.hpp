@@ -25,13 +25,13 @@ struct diskfsegment_r : item, model::relation1, model::any_lagrangian_relation {
 
     decltype(auto) shape() { return self()->segment(); }
 
-    decltype(auto) compute_h(auto step, auto& ds) {
+    [[gnu::always_inline]] decltype(auto) compute_h(auto step, auto& ds) {
       auto& q = storage::attr<"q">(ds, step);
       return segment().distance(q) -
              make_handle(self()->data(), prop<"shape", storage::config_declared>(ds)).radius();
     }
 
-    void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
+    [[gnu::always_inline]] void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
       auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;
 
