@@ -159,6 +159,17 @@ std::size_t slot_id() {
   return id;
 }
 
+namespace registry_detail {
+/// slot_id<Key>() + 1, read on the hot path without the guard of slot_id's
+/// static: that guard is an atomic acquire load, which keeps the compiler
+/// from hoisting or merging column lookups in inlined kernels.  Initialised
+/// from slot_id when the program or library is loaded, so both agree; 0 means
+/// "not initialised yet" (a lookup during static initialisation), which the
+/// lookup turns into its checked path.
+template <typename Key>
+inline const std::size_t slot_plus_one = slot_id<Key>() + 1;
+}  // namespace registry_detail
+
 /**
  * @brief World-independent column storage.
  *
@@ -199,13 +210,24 @@ struct registry {
   // creation included, called out of line at each access: 3.7% of the run.
   template <typename Key, typename Memory>
   Memory& column() {
-    const std::size_t id = slot_id<Key>();
+    // the slot id without the guard of slot_id's static (see slot_plus_one);
+    // wraps to SIZE_MAX before slot_plus_one is initialised
+    std::size_t id = registry_detail::slot_plus_one<Key> - 1;
+#ifdef VKERNEL_UNCHECKED_LOOKUP
+    // opt-in (CMake option VKERNEL_UNCHECKED_LOOKUP): no check at all; a
+    // column that was never registered is undefined behaviour
+    return static_cast<storage::column<Memory>*>(slots[id].get())->value;
+#else
+    if (id >= slots.size()) [[unlikely]] {
+      id = slot_id<Key>();  // static initialisation order: ask slot_id itself
+    }
     if (id < slots.size()) [[likely]] {
       if (column_base* slot = slots[id].get()) [[likely]] {
         return static_cast<storage::column<Memory>*>(slot)->value;
       }
     }
     registry_detail::column_not_registered();
+#endif
   }
 
   /// Create the column of Key with its memory depth (keep<>), and list it
