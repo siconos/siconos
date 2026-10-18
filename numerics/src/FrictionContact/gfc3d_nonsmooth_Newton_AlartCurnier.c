@@ -761,6 +761,13 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                           NM_norm_1(problem->H), norm_b);
   numerics_printf_verbose(1, "---- GFC3D - NSN_AC - inf-norm of H = %g ",
                           NM_norm_inf(problem->H));
+  numerics_printf_verbose(
+      1, "---- GFC3D - NSN_AC - nnz M = %8zu density = %9.4f, size = (%u, %u)",
+      NM_nnz(problem->M), NM_nnz(problem->M) / 1.0 / num_global_dofs / num_global_dofs,
+      num_global_dofs, num_global_dofs);
+  numerics_printf_verbose(
+      1, "---- GFC3D - NSN_AC - nnz H = %8zu density = %9.4f, mu = %.2e", NM_nnz(problem->H),
+      NM_nnz(problem->H) / 1.0 / num_global_dofs / num_contact_dofs, problem->mu[0]);
 
   DEBUG_EXPR(
       NumericsMatrix* Mdense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);

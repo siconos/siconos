@@ -1147,8 +1147,12 @@ static void gfc3d_IPM_prepare_problem(GlobalFrictionContactProblem* problem,
     *H_tilde_out = NM_transpose(problem->H);
   }
 
-  printf("nnz H = %8zu density = %9.4f, \t mu = %.2e\n", NM_nnz(problem->H),
-         NM_nnz(problem->H) / 1.0 / nd / m, problem->mu[0]);
+  numerics_printf_verbose(1, "nnz M = %8zu density = %9.4f, \t size = (%i, %i)",
+                          NM_nnz(problem->M),
+                          NM_nnz(problem->M) / 1.0 / problem->M->size0 / problem->M->size1,
+                          problem->M->size0, problem->M->size1);
+  numerics_printf_verbose(1, "nnz H = %8zu density = %9.4f, \t mu = %.2e", NM_nnz(problem->H),
+                          NM_nnz(problem->H) / 1.0 / nd / m, problem->mu[0]);
 }
 
 /* Apply the friction-coefficient scaling (P_mu) to H_tilde and w, then build the derived

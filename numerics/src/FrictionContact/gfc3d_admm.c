@@ -268,6 +268,11 @@ static void gfc3d_print_problem_info(GlobalFrictionContactProblem* restrict prob
     numerics_printf_verbose(1, "---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ",
                             NM_norm_1(H), norm_b);
     numerics_printf_verbose(1, "---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(H));
+    numerics_printf_verbose(
+        1, "---- GFC3D - ADMM - nnz M = %8zu density = %9.4f, size = (%zu, %zu)", NM_nnz(M),
+        NM_nnz(M) / 1.0 / n / n, n, n);
+    numerics_printf_verbose(1, "---- GFC3D - ADMM - nnz H = %8zu density = %9.4f, mu = %.2e",
+                            NM_nnz(H), NM_nnz(H) / 1.0 / n / m, problem->mu[0]);
     /* W = NM_create(NM_SPARSE,n,n); */
     /* NM_triplet_alloc(W, n); */
     /* W->sparse->origin = NSM_TRIPLET; */

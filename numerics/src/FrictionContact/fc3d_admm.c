@@ -994,6 +994,10 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                             NM_norm_1(problem->M), norm_q);
     numerics_printf_verbose(1, "---- FC3D - ADMM - inf-norm of M = %g ",
                             NM_norm_inf(problem->M));
+    numerics_printf_verbose(
+        1, "---- FC3D - ADMM - nnz M = %8zu density = %9.4f, size = (%zu, %zu)",
+        NM_nnz(problem->M), NM_nnz(problem->M) / 1.0 / m / m, problem->M->size0,
+        problem->M->size1);
   }
   int internal_allocation = 0;
   if (!(Fc3d_ADMM_data*)options->solverData) {
