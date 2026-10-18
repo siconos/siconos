@@ -232,10 +232,15 @@ static auto prop_values = [](auto& data, auto step) -> decltype(auto) {
 template <typename Hc>
 static auto constexpr methods(Hc hc) {
   using handle_t = typename decltype(+hc)::type;
-  using data_t = typename handle_t::data_t;
 
   if constexpr (match::methods<handle_t>) {
-    return handle_t{data_t{}, 0UL}.methods();
+    // the (name, &interface::member) table needs no handle state: call it on a
+    // bare interface object.  It used to be called on handle_t{data_t{}, 0},
+    // which built a whole temporary world (database, or registry with all its
+    // columns) for every bound item, at compile time in every TU and at
+    // import time.  methods() bodies may use self() in unevaluated operands
+    // only.
+    return typename handle_t::type::template interface<handle_t>{}.methods();
   } else {
     return gather<>{};
   }

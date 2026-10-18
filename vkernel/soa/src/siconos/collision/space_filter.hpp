@@ -769,16 +769,18 @@ struct space_filter : item {
     }
 
     auto methods() {
-      auto& data = self()->data();
+      // types only: methods() is called on a bare interface object, without a
+      // world (see storage::methods), so nothing here may be evaluated
+      using data_t = std::decay_t<decltype(self()->data())>;
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       // using scalar = typename env_t::scalar;
       using diskfsegment_r_t = std::decay_t<decltype(storage::make_handle(
-          data, storage::index<collision::diskfsegment_r, indice>{}))>;
+          std::declval<data_t&>(), storage::index<collision::diskfsegment_r, indice>{}))>;
       using diskfdisk_r_t = std::decay_t<decltype(storage::make_handle(
-          data, storage::index<collision::diskfdisk_r, indice>{}))>;
+          std::declval<data_t&>(), storage::index<collision::diskfdisk_r, indice>{}))>;
       using segment_handle_t = std::decay_t<decltype(storage::make_handle(
-          data, storage::index<collision::shape::segment, indice>{}))>;
+          std::declval<data_t&>(), storage::index<collision::shape::segment, indice>{}))>;
 
       return collect(
           method("make_points", &interface<Handle>::make_points),
