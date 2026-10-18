@@ -25,15 +25,34 @@ namespace match = siconos::storage::pattern::match;
  * @return The wrapped storage if a matching wrapper is found, otherwise the
  * original storage
  */
+namespace wrapper_detail {
+// Index of the first wrapped<> property for Item (sizeof...(Ws) if none), as a
+// constant-folded scan with __is_same builtins, instead of a hana filter per
+// column over the whole wrapper list.
+template <typename Item, typename Wrappers>
+struct wrapper_of;
+
+template <typename Item, typename... Ws>
+struct wrapper_of<Item, boost::hana::tuple<Ws...>> {
+  static constexpr std::size_t index = [] {
+    constexpr bool same[] = {false, __is_same(Item, typename Ws::type)...};
+    for (std::size_t i = 1; i <= sizeof...(Ws); ++i) {
+      if (same[i]) return i - 1;
+    }
+    return sizeof...(Ws);
+  }();
+  static constexpr bool found = index < sizeof...(Ws);
+};
+}  // namespace wrapper_detail
+
 template <match::item Item, typename Wrappers, typename Storage>
 static constexpr auto apply_wrapper(Storage storage) {
-  // Filter wrappers to find those matching the item type
-  auto tpl = mp::filter(Wrappers{}, mp::is_a_model<[]<typename T>() consteval {
-                          return std::is_same_v<Item, typename T::type>;
-                        }>);
+  using of = wrapper_detail::wrapper_of<Item, std::decay_t<Wrappers>>;
   // If matching wrapper found, apply it; otherwise return storage as-is
-  if constexpr (mp::size(tpl) > mp::size_c<0>) {
-    return typename std::decay_t<decltype(tpl[0_c])>::template wrapper<Storage>{};
+  if constexpr (of::found) {
+    return []<typename... Ws>(boost::hana::tuple<Ws...>) {
+      return typename __type_pack_element<of::index, Ws...>::template wrapper<Storage>{};
+    }(std::decay_t<Wrappers>{});
   } else {
     // without wrapper
     return Storage{};
@@ -73,7 +92,8 @@ template <template <typename> typename EnvTemplate, match::item... Items>
 struct item_storage_info {
   using items = gather<Items...>;
 
-  using all_items_t = decltype(mp::tuple_unique(mp::concat_all(all_items(std::declval<Items>())...)));
+  using all_items_t =
+      decltype(mp::tuple_unique(mp::concat_all(all_items(std::declval<Items>())...)));
 
   using all_attributes_t =
       decltype(mp::flatten(mp::concat_all(all_attributes(std::declval<Items>())...)));
@@ -184,7 +204,8 @@ struct make {
     using item_storage_t = item_storage<Env, Items...>;
     using info_t = typename item_storage_t::iinfo;
     auto base_storage = typename item_storage_t::type{};
-    using all_wrappers_t = decltype(pre_map_all_properties_as<property::wrapped>(base_storage));
+    using all_wrappers_t =
+        decltype(pre_map_all_properties_as<property::wrapped>(base_storage));
     using all_keeps_t = decltype(pre_map_all_properties_as<property::keep>(base_storage));
 
     // Build the storage through a multi-stage transformation pipeline
@@ -202,7 +223,7 @@ struct make {
 
                   return typename traits::config<env_t>::template convert<
                       decltype(refine_recursively_attribute(base_storage,
-                                                          Attribute{}))>::type{};
+                                                            Attribute{}))>::type{};
                 }),
             // Item level: handle collection wrappers for items
             []<match::item Item, match::attribute Attr>(Item item, Attr attr, auto s) {
@@ -256,7 +277,8 @@ struct make_merged {
   using db1_t = typename Make1::database_t;
   using db2_t = typename Make2::database_t;
 
-  using merged_db_t = decltype(mp::merge_databases(std::declval<db1_t>(), std::declval<db2_t>()));
+  using merged_db_t =
+      decltype(mp::merge_databases(std::declval<db1_t>(), std::declval<db2_t>()));
 
   struct store_t : merged_db_t {
     std::unordered_map<std::string, std::any> _dynamic_properties;
