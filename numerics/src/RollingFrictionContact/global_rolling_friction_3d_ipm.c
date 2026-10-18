@@ -180,8 +180,7 @@ static void extract_vector(const double* const vec, const size_t vecSize,
   size_t vec_dim = (int)(vecSize / varsCount);
   assert(j <= vec_dim);
 
-  size_t out_dim = vec_dim - 2;
-  assert(out_dim > 0);
+  assert(vec_dim > 2);
 
   size_t posX = 0;
   size_t posY = 0;
@@ -2285,12 +2284,12 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
     MT = NM_free(MT);
   }
 
-  /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE =
-     SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE, we force the copy into a NM_SPARSE
+  /* if SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE =
+     SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE, we force the copy into a NM_SPARSE
      storageType */
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->M->storageType);
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->M->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     printf(
@@ -2305,8 +2304,8 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
   size_t* blocksizes_of_M = NULL;
 
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->H->storageType);
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->H->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     H_origin = NM_copy_to_sparse(NM_transpose(problem->H), DBL_EPSILON);
@@ -2795,8 +2794,8 @@ void global_rolling_friction_3d_IPM(GlobalRollingFrictionContactProblem* restric
                               problem->H->size1);
     }
 
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-            SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+    if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+            SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
         problem->M->storageType == NM_SPARSE_BLOCK) {
       DEBUG_PRINT("Force a copy to sparse storage type\n");
       M = NM_free(M);

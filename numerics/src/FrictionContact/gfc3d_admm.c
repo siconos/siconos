@@ -326,8 +326,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   /* Change storage                        **********************************/
   /**************************************************************************/
 
-  if (iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] ==
-      SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE) {
+  if (iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+      SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE) {
     if (problem->M->storageType == NM_SPARSE_BLOCK) {
       DEBUG_PRINT("Force a copy to sparse storage type\n");
       problem->M = NM_copy_to_sparse(M_original, DBL_EPSILON);
@@ -998,8 +998,8 @@ void gfc3d_admm_set_default(SolverOptions* options) {
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] =
       SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
-  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =
-      SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] =
+      SICONOS_FRICTION_3D_KEEP_STORAGE;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] =
       SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN;

@@ -1112,11 +1112,11 @@ static void gfc3d_IPM_prepare_problem(GlobalFrictionContactProblem* problem,
     NM_free(MT);
   }
 
-  /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE is set, force a copy into NM_SPARSE
+  /* if SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE is set, force a copy into NM_SPARSE
    * storageType */
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->M->storageType);
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->M->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     printf(
@@ -1138,8 +1138,8 @@ static void gfc3d_IPM_prepare_problem(GlobalFrictionContactProblem* problem,
   }
 
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->H->storageType);
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->H->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     *H_tilde_out = NM_copy_to_sparse(NM_transpose(problem->H), DBL_EPSILON);

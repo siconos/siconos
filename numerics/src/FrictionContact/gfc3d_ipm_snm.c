@@ -347,11 +347,11 @@ static void gfc3d_IPM_SNM_prepare_problem(GlobalFrictionContactProblem* problem,
     MT = NM_free(MT);
   }
 
-  /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE is set, force a copy into NM_SPARSE
+  /* if SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE is set, force a copy into NM_SPARSE
    * storageType */
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->M->storageType);
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->M->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     printf(
@@ -363,8 +363,8 @@ static void gfc3d_IPM_SNM_prepare_problem(GlobalFrictionContactProblem* problem,
   }
 
   DEBUG_PRINTF("problem->M->storageType : %i\n", problem->H->storageType);
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE &&
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->H->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     *H_tilde_out = NM_copy_to_sparse(NM_transpose(problem->H), DBL_EPSILON);
@@ -708,6 +708,8 @@ typedef struct {
 /* ---- per-linear-system-formulation step helpers ---- */
 static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
   /* locals not carried in the workspace struct */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
   int jacobian_is_nan = 0;
   size_t pos = 0;
   double nub = 0.0;
@@ -801,6 +803,8 @@ static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
   /* misc */
   FILE* iterates = ws->iterates;
   char fws = ws->fws;
+
+#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -1180,6 +1184,8 @@ static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
 
 static void gfc3d_IPM_SNM_step_QP2(gfc3d_IPM_SNM_workspace* ws) {
   /* locals not carried in the workspace struct */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
   int jacobian_is_nan = 0;
   size_t pos = 0;
   double nub = 0.0;
@@ -1282,6 +1288,8 @@ static void gfc3d_IPM_SNM_step_QP2(gfc3d_IPM_SNM_workspace* ws) {
   double* velocity_inv = ws->velocity_inv;
   size_t H_nzmax = ws->H_nzmax;
   size_t M_nzmax = ws->M_nzmax;
+
+#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -1618,7 +1626,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
   Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
-  NumericsMatrix* P_mu_inv = data->P_mu->inv_mat;
 
   double* f = problem->q;
 
@@ -1678,7 +1685,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   // double error[6];
   double totalresidual = 1e300, /*totalresidual_mu = 1e300,*/ totalresidual_Jor = 1e300;
 
-  double diff_fixp = 1e300, nub = 1e300;
+  double diff_fixp = 1e300;
   double* diff_fixp_vec = (double*)calloc(n, sizeof(double));
 
   double* primalConstraint = data->tmp_vault_nd[no_nd++];
@@ -1690,7 +1697,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   //  double norm_theta = 1e300;
 
   double gmm = gmmp1 + gmmp2;
-  double barr_param_a, e;
   double norm_f = cblas_dnrm2(m, f, 1);
   double norm_w = cblas_dnrm2(nd, w, 1);
 
@@ -1713,7 +1719,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double* sol = (double*)calloc(m + 2 * nd + n, sizeof(double));
 
   double* nub_vec = (double*)calloc(n, sizeof(double));
-  int pos = 0;
 
   char fws = ' '; /* finish without scaling */
 
@@ -1744,7 +1749,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double* Qpinv_dr = data->tmp_vault_nd[no_nd++];
   double* ududr = data->tmp_vault_nd[no_nd++];
   double* Qp_ududr = data->tmp_vault_nd[no_nd++];
-  int max_refine = 1;
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] ==
       SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES) {

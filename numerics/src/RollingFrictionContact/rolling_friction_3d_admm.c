@@ -139,12 +139,12 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
   int m = 5 * nc;
   NumericsMatrix* M = NULL;
 
-  /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE =
-     SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE, we force the copy into a NM_SPARSE
+  /* if SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE =
+     SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE, we force the copy into a NM_SPARSE
      storageType */
 
-  if (iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE &&
+  if (iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->M->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
@@ -1069,8 +1069,8 @@ void rolling_friction_3d_admm_set_default(SolverOptions* options) {
       SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
       SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
-  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =
-      SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] =
+      SICONOS_FRICTION_3D_KEEP_STORAGE;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] =
       SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN;

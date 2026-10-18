@@ -718,6 +718,21 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert(tolerance > 0);
 
   /* ====================================================================== *
+   * Optional forced sparse storage for M and H
+   * ====================================================================== */
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+      SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE) {
+    if (problem->M->storageType == NM_SPARSE_BLOCK) {
+      DEBUG_PRINT("Force a copy of M to sparse storage type\n");
+      problem->M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
+    }
+    if (problem->H->storageType == NM_SPARSE_BLOCK) {
+      DEBUG_PRINT("Force a copy of H to sparse storage type\n");
+      problem->H = NM_copy_to_sparse(problem->H, DBL_EPSILON);
+    }
+  }
+
+  /* ====================================================================== *
    * Sparse triplet storage for M and H
    * ====================================================================== */
   DEBUG_EXPR(NM_display(problem->M););
