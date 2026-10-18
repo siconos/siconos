@@ -146,15 +146,16 @@ struct maker
               storage::bind<typename config::osi::assembled_osi_t, "assembled_osi">,
               storage::bind<config::fc2d, "fc2d">, storage::bind<config::io, "io">>> {};
 
-static auto imake_storage() { return maker(); }
-
-static auto idata = imake_storage();
-
-struct idata_t : std::decay_t<decltype(idata)> {};
+// no static instance: it was only there to name the type, and every TU
+// including this header constructed (and, with the registry, registered) one
+struct idata_t : maker {};
 
 // just hide idata_t to pybind11
 struct data_t {
-  data_t() : _data(idata_t{}) {};
+  // defined in one translation unit only (py/world.cpp):
+  // constructing the world instantiates its column registration, which every
+  // TU including this header would otherwise compile
+  data_t();
 
   idata_t& operator()() { return _data; };
 

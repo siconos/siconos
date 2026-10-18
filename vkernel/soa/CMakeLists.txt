@@ -103,6 +103,7 @@ endforeach()
 
 python_add_library(_nonos MODULE
   ./src/siconos/py/main.cpp
+  ./src/siconos/py/world.cpp
   ${nonos_bind_sources}
   WITH_SOABI)
 
