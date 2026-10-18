@@ -15,11 +15,34 @@ namespace mp = siconos::storage::mp;
 
 inline data_t make_storage() { return data_t(); };
 
-using disks_info_t = siconos::storage::get_info_t<idata_t>;
+// The bindings are assembly code: they enumerate the whole world (items,
+// attached storages, bind names), so they use its full description.  Handles
+// of a registry world only carry its configuration (see storage::world_config).
+template <typename D>
+struct world_info_of {
+  using type = siconos::storage::get_info_t<D>;  // storage::make database
+};
+template <typename D>
+  requires requires { typename D::world_info_t; }
+struct world_info_of<D> {
+  using type = typename D::world_info_t;  // registry world
+};
+
+using disks_info_t = typename world_info_of<idata_t>::type;
 
 using indice_t = typename disks_info_t::template env<config::disk>::indice;
 
 using disks_properties_t = typename disks_info_t::all_properties_t;
+
+/// declarer for the lookups of the bindings: every property of the world
+struct disks_world_properties : pattern::item {
+  using properties = disks_properties_t;
+};
+
+/// the attached storages of Item (static and dynamic) among all the world's
+template <typename Item>
+static constexpr auto is_attached_to =
+    mp::is_a_model<[]<typename T>() constexpr { return match::attached_storage<T, Item>; }>;
 
 using disks_items_t =
     decltype(mp::transform(typename disks_info_t::all_items_t{}, []<match::item I>(I) {
@@ -42,9 +65,9 @@ constexpr bool bound_by(boost::hana::tuple<Binds...>) {
 }
 
 // the items with a storage::bind<> name, in a fixed order shared by all parts
-using named_disks_items_t = decltype(mp::tuple_unique(mp::filter(
-    disks_items_t{},
-    mp::is_a_model<[]<typename T>() { return bound_by<T>(disks_binds_t{}); }>)));
+using named_disks_items_t = decltype(mp::tuple_unique(
+    mp::filter(disks_items_t{},
+               mp::is_a_model<[]<typename T>() { return bound_by<T>(disks_binds_t{}); }>)));
 
 /// py::class_ for the handle (and index, and batch wrapper) of item I, with
 /// its attached storages, attributes, methods and add_ functions.
@@ -83,26 +106,28 @@ void bind_item(py::module_& disks) {
   // attached storage
   if constexpr (!match::without_attached_storages_bindings<item_t>) {
     mp::fold_left(
-        decltype(storage::attached_storages(item_t{},
-                                            std::declval<idata_t&>())){},  // all attached
-                                                                           // storages
-        std::ref(pyhandle[1_c]),                                           // initial state
+        decltype(mp::filter(disks_properties_t{}, is_attached_to<item_t>)){},  // all attached
+                                                                               // storages
+        std::ref(pyhandle[1_c]),                                               // initial state
         []<match::attached_storage<item_t> S>(py::class_<handle_t> dc, S s) {
           if constexpr (!match::without_binding<S>) {
             constexpr auto astor_name = storage::attached_storage_name(s);
             using target_type = std::decay_t<decltype(out_formatter(
-                handle_t{}, storage::prop<astor_name.str>(handle_t{})))>;
+                handle_t{},
+                storage::prop<astor_name.str, disks_world_properties>(handle_t{})))>;
 
             return dc
                 .def(
                     std::format("{}", astor_name.str.value).c_str(),
                     [&astor_name](handle_t& h) -> target_type {
-                      return out_formatter(h, storage::prop<astor_name.str>(h));
+                      return out_formatter(
+                          h, storage::prop<astor_name.str, disks_world_properties>(h));
                     },
                     py::return_value_policy::reference)
                 .def(std::format("set_{}", astor_name.str.value).c_str(),
                      [&astor_name](handle_t& h, target_type val) {
-                       in_formatter(h, storage::prop<astor_name.str>(h)) =
+                       in_formatter(h,
+                                    storage::prop<astor_name.str, disks_world_properties>(h)) =
                            in_formatter(h, val);
                      });
           } else {
@@ -113,15 +138,14 @@ void bind_item(py::module_& disks) {
 
   if constexpr (match::batch_capable<item_t> && !match::without_batch_bindings<item_t>) {
     mp::fold_left(
-        decltype(storage::attached_storages(item_t{},
-                                            std::declval<idata_t&>())){},  // all attached
-                                                                           // storages
-        std::ref(pyhandle[3_c]),                                           // initial state
+        decltype(mp::filter(disks_properties_t{}, is_attached_to<item_t>)){},  // all attached
+                                                                               // storages
+        std::ref(pyhandle[3_c]),                                               // initial state
         []<match::attached_storage<item_t> S>(
             py::class_<handles_wrap<std::vector<handle_t>>> hw, S s) {
           constexpr auto astor_name = storage::attached_storage_name(s);
           using target_type = std::decay_t<decltype(out_formatter(
-              handle_t{}, storage::prop<astor_name.str>(handle_t{})))>;
+              handle_t{}, storage::prop<astor_name.str, disks_world_properties>(handle_t{})))>;
 
           return hw
               .def(
@@ -129,18 +153,19 @@ void bind_item(py::module_& disks) {
                   [&astor_name](handles_wrap<std::vector<handle_t>>& h_multiple) {
                     return std::ranges::to<std::vector>(
                         h_multiple.handles | view::transform([&astor_name](auto&& h) {
-                          return out_formatter(h, storage::prop<astor_name.str>(h));
+                          return out_formatter(
+                              h, storage::prop<astor_name.str, disks_world_properties>(h));
                         }));
                   },
                   py::return_value_policy::reference)
               .def(std::format("set_{}", astor_name.str.value).c_str(),
                    [&astor_name](handles_wrap<std::vector<handle_t>>& h_multiple,
                                  target_type val) {
-                     std::ranges::for_each(
-                         h_multiple.handles, [&astor_name, &val](auto&& h) {
-                           in_formatter(h, storage::prop<astor_name.str>(h)) =
-                               in_formatter(h, val);
-                         });
+                     std::ranges::for_each(h_multiple.handles, [&astor_name, &val](auto&& h) {
+                       in_formatter(h,
+                                    storage::prop<astor_name.str, disks_world_properties>(h)) =
+                           in_formatter(h, val);
+                     });
                    })
               .def(std::format("multiple_set_{}", astor_name.str.value).c_str(),
                    [&astor_name](handles_wrap<std::vector<handle_t>>& h_multiple,
@@ -149,7 +174,8 @@ void bind_item(py::module_& disks) {
                          view::zip(vals, h_multiple.handles), [&astor_name](auto&& pair) {
                            auto& val = std::get<0>(pair);
                            auto& h = std::get<1>(pair);
-                           in_formatter(h, storage::prop<astor_name.str>(h)) =
+                           in_formatter(
+                               h, storage::prop<astor_name.str, disks_world_properties>(h)) =
                                in_formatter(h, val);
                          });
                    });
@@ -218,13 +244,11 @@ void bind_item(py::module_& disks) {
               .def(std::format("multiple_set_{}", pattern::attribute_name(a)).c_str(),
                    [](handles_wrap<std::vector<handle_t>>& h_multiple,
                       std::vector<attr_value_t> vs) {
-                     std::ranges::for_each(view::zip(vs, h_multiple.handles),
-                                           [](auto&& pair) {
-                                             auto& v = std::get<0>(pair);
-                                             auto& h = std::get<1>(pair);
-                                             in_formatter(h, storage::get<A>(h.data(), h)) =
-                                                 in_formatter(h, v);
-                                           });
+                     std::ranges::for_each(view::zip(vs, h_multiple.handles), [](auto&& pair) {
+                       auto& v = std::get<0>(pair);
+                       auto& h = std::get<1>(pair);
+                       in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, v);
+                     });
                    });
         });
   }
@@ -250,7 +274,8 @@ void bind_item(py::module_& disks) {
         std::format("multiple_add_{}", item_name).c_str(),
         [](data_t& data, indice_t count) {
           auto r = siconos::storage::add<item_t>(data(), count);
-          return handles_wrap<std::vector<handle_t>>{std::ranges::to<std::vector<handle_t>>(r)};
+          return handles_wrap<std::vector<handle_t>>{
+              std::ranges::to<std::vector<handle_t>>(r)};
         },
         R"pbdoc(
         Add

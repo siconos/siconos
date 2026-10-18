@@ -159,10 +159,6 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   using data_t = D;
   /// Index type from environment
   using indice = typename info_t::template env<T>::indice;
-  /// Type of attached storages for this item
-  using attached_storages_t = decltype(mp::filter(
-      typename info_t::all_properties_t{},
-      mp::is_a_model<[]<typename X>() { return match::attached_storage<X, T>; }>));
 
   /// @brief Get the item type managed by this handle
   auto item_type() { return type{}; }
@@ -204,10 +200,12 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
 
     using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
 #ifdef VKERNEL_CHECK_DECLARER
-    constexpr auto world_tpl =
-        mp::filter(declared_properties_t<world_declared, D>{}, matching);
-    static_assert(std::is_same_v<attached_storage_t, std::decay_t<decltype(world_tpl[0_c])>>,
-                  "the declarer's attached storage differs from the world's");
+    if constexpr (world_fully_known<D>) {
+      constexpr auto world_tpl =
+          mp::filter(declared_properties_t<world_declared, D>{}, matching);
+      static_assert(std::is_same_v<attached_storage_t, std::decay_t<decltype(world_tpl[0_c])>>,
+                    "the declarer's attached storage differs from the world's");
+    }
 #endif
     return memory(step, mp::get<attached_storage_t>(data().store()))[this->index().value()];
   }

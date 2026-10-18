@@ -306,6 +306,42 @@ struct world_info {
                           }>));
 };
 
+namespace registry_detail {
+template <typename T>
+concept configuration_item = match::item<T> && requires { typename T::properties; } &&
+                             std::derived_from<T, with_properties_base>;
+}  // namespace registry_detail
+
+/**
+ * @brief What handles of a registry world know about it: the per-item
+ * environment and the configuration's own properties, without the item
+ * closure (step (a) P4).
+ *
+ * all_properties_t holds ONLY the configuration's properties (the
+ * with_properties<...> given to make_world): the user refinements, wrappers
+ * and configuration-declared attached storages.  Properties declared by items
+ * (topology's attached storages, keep<> depths) are not there on purpose: a
+ * lookup of those must name its declarer, and a world-wide one fails to
+ * compile ("attached storage not found") instead of silently differing.
+ */
+template <template <typename> typename Env, typename ConfigProperties>
+struct world_config {
+  template <typename Item>
+  using env = Env<Item>;
+
+  using all_properties_t = ConfigProperties;
+};
+
+/// the with_properties<...> lists among the items given to make_world
+template <match::item... Items>
+using configuration_properties_t = decltype(mp::concat_all([] {
+  if constexpr (registry_detail::configuration_item<Items>) {
+    return typename Items::properties{};
+  } else {
+    return mp::tuple<>{};
+  }
+}()...));
+
 /**
  * @brief Concrete column type of one attribute key.
  *
@@ -317,7 +353,16 @@ struct world_info {
 template <typename Info, match::attribute A>
 struct column_of {
   using all_properties_t = typename Info::all_properties_t;
-  using item_t = decltype(item_attribute<A>(typename Info::all_items_t{}));
+  // the item of the key: searched in the item closure when the Info has one
+  // (world_info, at registration), taken from the key otherwise (world_config,
+  // at access sites; paired<> and attached<> both name their item)
+  using item_t = decltype([] {
+    if constexpr (requires { typename Info::all_items_t; }) {
+      return item_attribute<A>(typename Info::all_items_t{});
+    } else {
+      return typename A::item{};
+    }
+  }());
   using env_t = typename Info::template env<item_t>;
 
   // attribute level: user refinements over the recursively rebuilt attribute
@@ -354,7 +399,8 @@ struct column_of {
   // memory level: keep<> depth.  The depth is a runtime size, not part of
   // the type (unlike memory_t's std::array), so that the type of a column
   // does not depend on which item declares a keep<> on it.  memory(step, m)
-  // indexes m[step % size] either way.
+  // indexes m[step % size] either way.  Only meaningful with a world_info
+  // (registration): keep<> is declared by items.
   using keeps_t = decltype(mp::filter(all_properties_t{}, mp::derive_from<property::keep>));
   static constexpr std::size_t depth = memory_size<A, keeps_t>();
   using type = std::vector<storage_t>;
@@ -383,7 +429,9 @@ static constexpr auto is_attached_dynamic = mp::is_a_model<[]<typename T>() cons
  *
  * It is its own store, so every existing access site, which goes through
  * mp::get<A>(data.store()), works unchanged. Handles carry world<Info>
- * instead of the database type of storage::make.
+ * instead of the database type of storage::make.  Info is a world_config
+ * (make_world): the environment and the configuration's properties, not the
+ * item closure, which only the constructor of make_world uses.
  */
 template <typename Info>
 struct world {
@@ -407,22 +455,32 @@ struct world {
   /// attributes of every item and the static attached storages declared for
   /// it, as storage::make enumerates them.  Afterwards every access takes the
   /// fast path of registry::column.
+  ///
+  /// WorldInfo is the full world_info (item closure, all properties): only
+  /// here, where the world is built, are the keep<> depths and the item lists
+  /// needed.  The column types are those the access sites compute from Info
+  /// alone, checked against the full computation.
+  template <typename WorldInfo>
   void register_columns() {
-    using static_attached_t = typename Info::static_attached_t;
-    using dynamic_all_t = typename Info::dynamic_attached_t;
-    mp::for_each(typename Info::all_items_t{}, [this]<typename Item>(Item) {
+    using static_attached_t = typename WorldInfo::static_attached_t;
+    using dynamic_all_t = typename WorldInfo::dynamic_attached_t;
+    mp::for_each(typename WorldInfo::all_items_t{}, [this]<typename Item>(Item) {
       // the static attached storages of Item
       using attached_t = decltype(mp::filter(static_attached_t{}, is_attached_storage<Item>));
       mp::for_each(concat(attributes(Item{}), attached_t{}), [this]<typename A>(A) {
-        using column_t = column_of<Info, A>;
-        (void)_registry.template create_column<Item, A, typename column_t::type>(
-            column_t::depth);
+        using access_t = typename column_of<Info, A>::type;
+        static_assert(std::is_same_v<access_t, typename column_of<WorldInfo, A>::type>,
+                      "the column type of an access site differs from the world's");
+        (void)_registry.template create_column<Item, A, access_t>(
+            column_of<WorldInfo, A>::depth);
       });
       // its dynamic properties: sparse columns, kept consistent by remove
       using dynamic_t = decltype(mp::filter(dynamic_all_t{}, is_attached_dynamic<Item>));
       mp::for_each(dynamic_t{}, [this]<typename P>(P) {
-        (void)_registry
-            .template create_column<Item, P, typename dynamic_column_of<Info, P>::type>(0);
+        using access_t = typename dynamic_column_of<Info, P>::type;
+        static_assert(std::is_same_v<access_t, typename dynamic_column_of<WorldInfo, P>::type>,
+                      "the dynamic column type of an access site differs from the world's");
+        (void)_registry.template create_column<Item, P, access_t>(0);
       });
       (void)_registry.template kind_columns<Item>();  // registered, even without columns
     });
@@ -430,10 +488,15 @@ struct world {
 };
 
 /// storage::make counterpart that builds a world instead of a database; its
-/// columns are registered on construction.
+/// columns are registered on construction.  Handles of it carry
+/// world<world_config<...>>: the configuration, not the item closure.
 template <template <typename> typename Env, match::item... Items>
-struct make_world : world<world_info<Env, Items...>> {
-  make_world() { this->register_columns(); }
+struct make_world : world<world_config<Env, configuration_properties_t<Items...>>> {
+  /// the full description (item closure, every property): for registration
+  /// and for assembly code such as the python bindings, never in handles
+  using world_info_t = world_info<Env, Items...>;
+
+  make_world() { this->template register_columns<world_info_t>(); }
 };
 
 }  // namespace siconos::storage

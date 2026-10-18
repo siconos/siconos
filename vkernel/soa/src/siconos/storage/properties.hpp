@@ -73,8 +73,11 @@ struct refine_with_type : A {
   using type = T;
 };
 
+/// marks the configuration's property lists (see world_config)
+struct with_properties_base {};
+
 template <match::property... Parts>
-struct with_properties : item {
+struct with_properties : item, with_properties_base {
   using properties = gather<Parts...>;
 };
 

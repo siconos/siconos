@@ -130,20 +130,25 @@ struct declared_attached_storage {
   }
 
   using type = decltype(first());
-
-#ifdef VKERNEL_CHECK_DECLARER
-  static_assert(
-      std::is_same_v<Decl, world_declared> ||
-          std::is_same_v<type,
-                         typename declared_attached_storage<I, S, world_declared, Data>::type>,
-      "the declarer's attached storage differs from the world's");
-#endif
 };
+
+/// The world search covers every property: with a storage::make database,
+/// not with a registry world, whose handles only know the configuration.
+template <typename Data>
+static constexpr bool world_fully_known = requires { typename get_info_t<Data>::all_items_t; };
 
 template <match::item I, string_literal S, typename Decl = world_declared>
 static auto prop_memory = [](auto& data) constexpr -> decltype(auto) {
-  using attached_storage_t =
-      typename declared_attached_storage<I, S, Decl, std::decay_t<decltype(data)>>::type;
+  using data_t = std::decay_t<decltype(data)>;
+  using attached_storage_t = typename declared_attached_storage<I, S, Decl, data_t>::type;
+#ifdef VKERNEL_CHECK_DECLARER
+  if constexpr (!std::is_same_v<Decl, world_declared> && world_fully_known<data_t>) {
+    static_assert(
+        std::is_same_v<attached_storage_t,
+                       typename declared_attached_storage<I, S, world_declared, data_t>::type>,
+        "the declarer's attached storage differs from the world's");
+  }
+#endif
   return mp::get<attached_storage_t>(data.store());
 };
 
@@ -217,10 +222,12 @@ static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
   static_assert(mp::size(tpl) >= mp::size_c<1_c>, "dynamic property not found in topology");
   using prop_t = std::decay_t<decltype(tpl[0_c])>;
 #ifdef VKERNEL_CHECK_DECLARER
-  constexpr auto world_tpl = mp::filter(declared_properties_t<world_declared, data_t>{},
-                                        is_dynamic_storage_tagged<I, S>);
-  static_assert(std::is_same_v<prop_t, std::decay_t<decltype(world_tpl[0_c])>>,
-                "the declarer's dynamic property differs from the world's");
+  if constexpr (world_fully_known<data_t>) {
+    constexpr auto world_tpl = mp::filter(declared_properties_t<world_declared, data_t>{},
+                                          is_dynamic_storage_tagged<I, S>);
+    static_assert(std::is_same_v<prop_t, std::decay_t<decltype(world_tpl[0_c])>>,
+                  "the declarer's dynamic property differs from the world's");
+  }
 #endif
   if constexpr (requires { data.store()._registry; }) {
     // registry world: the sparse column of the property, created at
