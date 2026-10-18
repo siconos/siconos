@@ -109,16 +109,24 @@ class config_builder {
         []<typename... Ts>(Ts... ts) { return storage::make<env, Ts...>{}; });
   }
 
-  // build a registry-backed world (storage/registry.hpp) instead of a database
-  auto build_world() const {
-    return mp::unpack(
-        mp::concat(mp::concat(mp::tuple<>{}, ItemsList{}),
-                   mp::unpack(PropertiesList{},
-                              []<typename... Props>(Props...) {
-                                return mp::tuple<storage::with_properties<Props...>>{};
-                              })),
-        []<typename... Ts>(Ts... ts) { return storage::make_world<env, Ts...>{}; });
-  }
+  // the registry-backed world type (storage/registry.hpp), computed without
+  // constructing one
+  using world_type = typename decltype(mp::unpack(
+      mp::concat(mp::concat(mp::tuple<>{}, ItemsList{}),
+                 mp::unpack(PropertiesList{},
+                            []<typename... Props>(Props...) {
+                              return mp::tuple<storage::with_properties<Props...>>{};
+                            })),
+      []<typename... Ts>(Ts...) {
+        return std::type_identity<storage::make_world<env, Ts...>>{};
+      }))::type;
+
+  // build a registry-backed world instead of a database.  The return type is
+  // explicit: struct data_t : decltype(storage()...build_world()) {} must not
+  // instantiate this body, whose construction registers the world's columns
+  // and so needs the whole item closure; only the TU that constructs data_t
+  // does that.
+  world_type build_world() const { return world_type{}; }
 
   // Type aliases for merging
   using params_map = ParamsMap;
