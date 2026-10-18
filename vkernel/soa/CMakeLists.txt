@@ -119,6 +119,14 @@ python_add_library(_nonos MODULE
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
 target_compile_definitions(_nonos PRIVATE NONOS_PARTS=${NONOS_BIND_PARTS})
 
+# The binding parts all include py_bind.hpp and recompute the same world-level
+# type computations (item lists, attribute transforms, containers): about half
+# of their template instantiation time.  In the precompiled header, with
+# clang's -fpch-instantiate-templates (added by CMake), they are done once.
+# SiconosConfig.h first: the numerics headers depend on its macros (WITH_FCLIB...)
+target_precompile_headers(_nonos PRIVATE ${CMAKE_BINARY_DIR}/SiconosConfig.h
+                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/py_bind.hpp)
+
 # reference build of _nonos on the storage::make database (A/B comparisons)
 option(NONOS_DATABASE "build _nonos on the storage::make database instead of the registry" OFF)
 if(NONOS_DATABASE)
