@@ -183,6 +183,27 @@ static constexpr auto is_dynamic_storage_tagged = mp::is_a_model<[]<typename T>(
 
 // Runtime lookup: get or create the sparse_set for a dynamic property.
 // The sparse_set is stored in the database-level _dynamic_properties map.
+// storage::make database: the sparse set lives in a map keyed by name
+template <match::item I, string_literal S, typename prop_t, typename env_t, typename indice>
+static decltype(auto) prop_dynamic_map(auto& data) {
+  using attr_t = typename prop_t::type;
+  using value_t = typename traits::config<env_t>::template convert<attr_t>::type;
+
+  // Build a unique key for this (Item, S) pair
+  std::string key = std::string(typeid(I).name());
+  key += ":";
+  key += S.value;
+
+  auto& map = data.store()._dynamic_properties;
+  auto it = map.find(key);
+  if (it == map.end()) {
+    storage::sparse_set<indice, value_t> set;
+    auto [new_it, _] = map.emplace(key, std::move(set));
+    return std::any_cast<storage::sparse_set<indice, value_t>&>(new_it->second);
+  }
+  return std::any_cast<storage::sparse_set<indice, value_t>&>(it->second);
+};
+
 template <match::item I, string_literal S, typename Decl = world_declared>
 static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
   using data_t = std::decay_t<decltype(data)>;
@@ -201,22 +222,13 @@ static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
   static_assert(std::is_same_v<prop_t, std::decay_t<decltype(world_tpl[0_c])>>,
                 "the declarer's dynamic property differs from the world's");
 #endif
-  using attr_t = typename prop_t::type;
-  using value_t = typename traits::config<env_t>::template convert<attr_t>::type;
-
-  // Build a unique key for this (Item, S) pair
-  std::string key = std::string(typeid(I).name());
-  key += ":";
-  key += S.value;
-
-  auto& map = data.store()._dynamic_properties;
-  auto it = map.find(key);
-  if (it == map.end()) {
-    storage::sparse_set<indice, value_t> set;
-    auto [new_it, _] = map.emplace(key, std::move(set));
-    return std::any_cast<storage::sparse_set<indice, value_t>&>(new_it->second);
+  if constexpr (requires { data.store()._registry; }) {
+    // registry world: the sparse column of the property, created at
+    // registration and kept consistent by storage::remove
+    return mp::get<prop_t>(data.store());
+  } else {
+    return prop_dynamic_map<I, S, prop_t, env_t, indice>(data);
   }
-  return std::any_cast<storage::sparse_set<indice, value_t>&>(it->second);
 };
 
 template <match::item I, string_literal S, typename Decl = world_declared>

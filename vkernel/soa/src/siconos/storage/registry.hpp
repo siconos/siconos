@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <any>
 #include <atomic>
 #include <cstddef>
@@ -15,6 +16,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/properties.hpp"
+#include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
 namespace siconos::storage {
@@ -29,20 +31,107 @@ namespace match = siconos::storage::pattern::match;
  * attribute key alone (see column_of).
  */
 struct column_base {
+  /// returned by push_default for columns that do not number the items
+  /// (sparse, dynamic properties)
+  static constexpr std::size_t no_index = static_cast<std::size_t>(-1);
+
   virtual ~column_base() = default;
   virtual std::unique_ptr<column_base> clone() const = 0;
+
+  /// storage::add: append a default value for a new item, in every kept step;
+  /// returns the new item's index, or no_index
+  virtual std::size_t push_default() = 0;
+
+  /// storage::remove: item i goes away and the last item, last, takes its
+  /// index (swap and pop), in every kept step
+  virtual void move_back(std::size_t i, std::size_t last) = 0;
+
+  /// number of items stored, or no_index for columns that do not number them
+  virtual std::size_t item_count() const = 0;
 };
 
+namespace registry_detail {
+template <typename T>
+constexpr bool is_sparse_set = false;
+template <typename K, typename V>
+constexpr bool is_sparse_set<storage::sparse_set<K, V>> = true;
+}  // namespace registry_detail
+
+/**
+ * @brief A typed column: the memory of one attribute (one storage per kept
+ * step), or the sparse set of a dynamic property.
+ *
+ * push_default and move_back are the per-type code of storage::add and
+ * storage::remove, so that both can walk the columns of an item at run time.
+ */
 template <typename Memory>
 struct column final : column_base {
   Memory value{};
 
   column() = default;
   // runtime memory depth (keep<>): one storage per kept time step
-  explicit column(std::size_t depth) : value(depth) {}
+  explicit column(std::size_t depth) {
+    if constexpr (!registry_detail::is_sparse_set<Memory>) value.resize(depth);
+  }
 
   std::unique_ptr<column_base> clone() const override {
     return std::make_unique<column>(*this);
+  }
+
+  std::size_t push_default() override {
+    if constexpr (registry_detail::is_sparse_set<Memory>) {
+      return no_index;  // absent means empty
+    } else {
+      // as storage::add does for the static database
+      std::size_t index = 0;
+      for (auto& storage : value) {
+        using storage_t = std::decay_t<decltype(storage)>;
+        if constexpr (match::push_back<storage_t>) {
+          storage.push_back(typename storage_t::value_type{});
+          index = std::size(storage) - 1;
+        } else {
+          // std::array or similar: a single item
+          storage[0] = typename storage_t::value_type{};
+          index = 0;
+        }
+      }
+      return index;
+    }
+  }
+
+  std::size_t item_count() const override {
+    if constexpr (registry_detail::is_sparse_set<Memory>) {
+      return no_index;
+    } else {
+      using storage_t = typename Memory::value_type;
+      if constexpr (match::push_back<storage_t>) {
+        return value.empty() ? 0 : std::size(value[0]);
+      } else {
+        return 1;
+      }
+    }
+  }
+
+  void move_back(std::size_t i, std::size_t last) override {
+    if constexpr (registry_detail::is_sparse_set<Memory>) {
+      // the removed item's entry goes, the last item's entry is re-keyed to i
+      using key_t = typename Memory::key_type;
+      value.erase(static_cast<key_t>(i));
+      if (last != i && value.contains(static_cast<key_t>(last))) {
+        auto moved = std::move(value.at(static_cast<key_t>(last)));
+        value.erase(static_cast<key_t>(last));
+        value.emplace(static_cast<key_t>(i), std::move(moved));
+      }
+    } else {
+      // as storage::remove does for the static database (move_back)
+      for (auto& storage : value) {
+        using storage_t = std::decay_t<decltype(storage)>;
+        if constexpr (match::push_back<storage_t>) {
+          storage[i] = std::move(storage.back());
+          storage.pop_back();
+        }
+      }
+    }
   }
 };
 
@@ -79,12 +168,22 @@ std::size_t slot_id() {
 struct registry {
   std::vector<std::unique_ptr<column_base>> slots;
 
+  /// for each item kind (indexed by slot_id<kind<Item>>), the slots of its
+  /// columns, in registration order; slot ids, not pointers, so that a copy
+  /// of the registry needs no remapping
+  std::vector<std::vector<std::size_t>> kinds;
+  std::vector<bool> kind_registered;
+
+  template <typename Item>
+  struct kind {};
+
   registry() = default;
   registry(registry&&) = default;
   registry& operator=(registry&&) = default;
 
   // deep copy, as the storage::make database it replaces is copyable
-  registry(const registry& other) : slots(other.slots.size()) {
+  registry(const registry& other)
+      : slots(other.slots.size()), kinds(other.kinds), kind_registered(other.kind_registered) {
     for (std::size_t i = 0; i < slots.size(); ++i) {
       if (other.slots[i]) slots[i] = other.slots[i]->clone();
     }
@@ -109,15 +208,65 @@ struct registry {
     registry_detail::column_not_registered();
   }
 
-  /// Create the column of Key with its memory depth (keep<>); done once per
-  /// column, when the world registers its columns.
-  template <typename Key, typename Memory>
+  /// Create the column of Key with its memory depth (keep<>), and list it
+  /// among the columns of Item; done once per column and item, when the world
+  /// registers its columns.
+  template <typename Item, typename Key, typename Memory>
   Memory& create_column(std::size_t depth) {
     const std::size_t id = slot_id<Key>();
     if (id >= slots.size()) slots.resize(id + 1);
     auto& slot = slots[id];
     if (!slot) slot = std::make_unique<storage::column<Memory>>(depth);
+    auto& columns = kind_columns<Item>();
+    if (std::find(columns.begin(), columns.end(), id) == columns.end()) columns.push_back(id);
     return static_cast<storage::column<Memory>&>(*slot).value;
+  }
+
+  /// the column list of Item, marked as registered (possibly empty)
+  template <typename Item>
+  std::vector<std::size_t>& kind_columns() {
+    const std::size_t k = slot_id<kind<Item>>();
+    if (k >= kinds.size()) {
+      kinds.resize(k + 1);
+      kind_registered.resize(k + 1, false);
+    }
+    kind_registered[k] = true;
+    return kinds[k];
+  }
+
+  /// storage::add: a default value in every column of Item; the new index
+  template <typename Item>
+  std::size_t push_item() {
+    std::size_t index = 0;
+    for (std::size_t id : registered_kind<Item>()) {
+      if (std::size_t i = slots[id]->push_default(); i != column_base::no_index) index = i;
+    }
+    return index;
+  }
+
+  /// storage::remove: item i of Item goes away, the last one takes index i
+  template <typename Item>
+  void remove_item(std::size_t i) {
+    const auto& columns = registered_kind<Item>();
+    std::size_t count = column_base::no_index;
+    for (std::size_t id : columns) {
+      if (std::size_t c = slots[id]->item_count(); c != column_base::no_index) {
+        count = c;
+        break;
+      }
+    }
+    if (count == column_base::no_index || count == 0) return;  // nothing stored
+    for (std::size_t id : columns) slots[id]->move_back(i, count - 1);
+  }
+
+ private:
+  template <typename Item>
+  const std::vector<std::size_t>& registered_kind() const {
+    const std::size_t k = slot_id<kind<Item>>();
+    if (k >= kind_registered.size() || !kind_registered[k]) [[unlikely]] {
+      throw std::logic_error("storage::registry: item kind not registered");
+    }
+    return kinds[k];
   }
 };
 
@@ -148,6 +297,12 @@ struct world_info {
       decltype(mp::filter(all_properties_t{}, mp::is_a_model<[]<typename T>() {
                             return std::derived_from<T, some::attached_storage> &&
                                    !requires { typename T::dynamic_storage_t; };
+                          }>));
+
+  /// the dynamic properties of the world (dynamic_storage<attached<...>>)
+  using dynamic_attached_t =
+      decltype(mp::filter(all_properties_t{}, mp::is_a_model<[]<typename T>() {
+                            return requires { typename T::dynamic_storage_t; };
                           }>));
 };
 
@@ -206,6 +361,24 @@ struct column_of {
 };
 
 /**
+ * @brief Column type of a dynamic property P (dynamic_storage<attached<...>>):
+ * a sparse set from the item index to the value, as prop_dynamic_memory uses
+ * for the storage::make database (there, in a map keyed by name).
+ */
+template <typename Info, typename P>
+struct dynamic_column_of {
+  using env_t = typename Info::template env<typename P::item>;
+  using value_t = typename traits::config<env_t>::template convert<typename P::type>::type;
+  using type = storage::sparse_set<typename env_t::indice, value_t>;
+};
+
+/// P is a dynamic property attached to Item
+template <typename Item>
+static constexpr auto is_attached_dynamic = mp::is_a_model<[]<typename T>() constexpr {
+  return match::attached_storage<T, Item> && requires { typename T::dynamic_storage_t; };
+}>;
+
+/**
  * @brief A world: a registry plus the compile-time Info to type its columns.
  *
  * It is its own store, so every existing access site, which goes through
@@ -223,6 +396,8 @@ struct world {
   decltype(auto) column() {
     if constexpr (std::is_same_v<K, info>) {
       return Info{};
+    } else if constexpr (requires { typename K::dynamic_storage_t; }) {
+      return _registry.template column<K, typename dynamic_column_of<Info, K>::type>();
     } else {
       return _registry.template column<K, typename column_of<Info, K>::type>();
     }
@@ -234,13 +409,22 @@ struct world {
   /// fast path of registry::column.
   void register_columns() {
     using static_attached_t = typename Info::static_attached_t;
+    using dynamic_all_t = typename Info::dynamic_attached_t;
     mp::for_each(typename Info::all_items_t{}, [this]<typename Item>(Item) {
       // the static attached storages of Item
       using attached_t = decltype(mp::filter(static_attached_t{}, is_attached_storage<Item>));
       mp::for_each(concat(attributes(Item{}), attached_t{}), [this]<typename A>(A) {
         using column_t = column_of<Info, A>;
-        (void)_registry.template create_column<A, typename column_t::type>(column_t::depth);
+        (void)_registry.template create_column<Item, A, typename column_t::type>(
+            column_t::depth);
       });
+      // its dynamic properties: sparse columns, kept consistent by remove
+      using dynamic_t = decltype(mp::filter(dynamic_all_t{}, is_attached_dynamic<Item>));
+      mp::for_each(dynamic_t{}, [this]<typename P>(P) {
+        (void)_registry
+            .template create_column<Item, P, typename dynamic_column_of<Info, P>::type>(0);
+      });
+      (void)_registry.template kind_columns<Item>();  // registered, even without columns
     });
   }
 };

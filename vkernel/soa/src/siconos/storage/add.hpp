@@ -13,8 +13,9 @@ namespace siconos::storage {
 
 using namespace siconos::storage::pattern;
 
+// storage::make database: the columns of Item are enumerated at compile time
 template <match::item Item>
-decltype(auto) add(auto&& data) {
+decltype(auto) add_static(auto&& data) {
   // types
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
@@ -77,6 +78,25 @@ decltype(auto) add(auto&& data) {
     return make_full_handle<Item>(data, indice{0});
   }
 };
+
+template <match::item Item>
+decltype(auto) add(auto&& data) {
+  if constexpr (requires { data.store()._registry; }) {
+    // registry world: the columns of Item were listed at registration, so
+    // they are walked at run time, with no compile-time scan of the world
+    using indice =
+        typename get_info_t<std::decay_t<decltype(data)>>::template env<Item>::indice;
+    const auto index = static_cast<indice>(data.store()._registry.template push_item<Item>());
+    auto h = make_full_handle<Item>(data, index);
+    // handle initialization is not mandatory
+    if constexpr (has_init(h)) {
+      h.__init__();
+    }
+    return h;
+  } else {
+    return add_static<Item>(data);
+  }
+}
 
 // Multiple add at once.
 template <match::item Item>
