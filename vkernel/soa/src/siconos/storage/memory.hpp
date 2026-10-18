@@ -12,9 +12,22 @@ using namespace pattern;
 template <typename T, std::size_t N>
 using memory_t = std::array<T, N>;
 
+template <typename T>
+constexpr bool is_std_array = false;
+template <typename T, std::size_t N>
+constexpr bool is_std_array<std::array<T, N>> = true;
+
 static constexpr auto memory = []<typename T>(typename std::decay_t<T>::size_type step,
                                               T&& mem) constexpr -> decltype(auto) {
-  return static_cast<T&&>(mem)[step % std::size(static_cast<T&&>(mem))];
+  if constexpr (is_std_array<std::decay_t<T>>) {
+    // compile-time depth: the modulo folds away
+    return static_cast<T&&>(mem)[step % std::size(static_cast<T&&>(mem))];
+  } else {
+    // runtime depth (registry columns): keep<> depths are 1 or 2, so avoid an
+    // integer division at every access
+    const auto n = std::size(static_cast<T&&>(mem));
+    return static_cast<T&&>(mem)[n == 1 ? 0 : (n == 2 ? (step & 1) : step % n)];
+  }
 };
 
 namespace memory_detail {
