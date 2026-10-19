@@ -464,3 +464,29 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
 }
 
 }  // namespace siconos::collision
+
+#include "siconos/collision/collision_head.hpp"
+
+namespace siconos::collision {
+
+/* ---- the narrowphase stage item ----
+   Task 4 needs the type complete only (the relation's item_ref attribute
+   must satisfy the storage item concept); Task 5 fills the pinned
+   structure (topology/dsds_r/poly_dsds_r refs, cache, rebind + batch +
+   write-back). ensure() is defined so callers compile, and is rewired in
+   Task 5 to the actual run machinery. */
+template <typename Topo>
+struct cxd_narrowphase : item {
+  using topology = Topo;
+
+  struct attributes {};
+
+  template <typename Handle>
+  struct interface : default_interface<Handle> {
+    using default_interface<Handle>::self;
+
+    void ensure(auto step) {}
+  };
+};
+
+}  // namespace siconos::collision

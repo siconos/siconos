@@ -7,16 +7,28 @@
 
 #include "siconos/siconos.hpp"
 
+// clang-format off
+/* before the config block: the world wires these types directly. The
+   load-bearing cxd include order lives inside cxd_narrowphase.hpp; the
+   relation header transitively brings the engine */
+#include "siconos/collision/polytopexpolytope_r.hpp"
+// clang-format on
+
 namespace siconos::config {
 namespace some = siconos::storage::some;
 struct polytope_ds : model::lagrangian_ds {};
+/* Task 5 wires the real simul::topology<...>; the relation/narrowphase pair
+   is templated on this type only so their mutual item_refs stay acyclic */
+struct topo;
 using polytope_shape = collision::shape::polytope;
+using polytopexpolytope_r = collision::polytopexpolytope_r<topo>;
+using cxd_narrowphase = collision::cxd_narrowphase<topo>;
 template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 struct data_t
-    : storage::make<env, polytope_ds, polytope_shape,
+    : storage::make<env, polytope_ds, polytope_shape, polytopexpolytope_r, cxd_narrowphase,
                     storage::with_properties<
                         storage::wrapped<polytope_ds, some::unbounded_collection>,
                         storage::attached<polytope_ds, storage::pattern::symbol<"shape">,
@@ -27,10 +39,6 @@ struct data_t
 
 /* ---- Task 3: narrowphase batch engine (exact pin values) ---- */
 int test_polytope_item(siconos::config::data_t& data);
-
-// clang-format off
-#include "siconos/collision/cxd_narrowphase.hpp"
-// clang-format on
 
 namespace {
 
@@ -100,7 +108,6 @@ int test_polytope_item(siconos::config::data_t& data) {
 }
 
 void test_batch_engine() {
-
   // {0,0} square x {3,0} square: separated
   {
     auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
@@ -163,8 +170,52 @@ void test_batch_engine() {
   std::print("narrowphase_batch engine: all exact cases pass\n");
 }
 
+/* ---- Task 4: polytopexpolytope_r relation, exact G pins ----
+   Standalone world: no narrowphase stage item exists, the relation's cached
+   h/normal/cps are set manually and ensure() must no-op (ledger ruling). */
+void test_polytopexpolytope_relation(siconos::config::data_t& data) {
+  using siconos::storage::add;
+
+  // body 1 center (0,0), body 2 center (0,1.9): flush vertical overlap of
+  // 0.1 -> n = (0,1), cp1 = (0,1), cp2 = (0,0.9)
+  auto ds1 = add<siconos::config::polytope_ds>(data);
+  auto ds2 = add<siconos::config::polytope_ds>(data);
+  ds1.q() = {0, 0, 0};
+  ds2.q() = {0, 1.9, 0};
+
+  auto rel = add<siconos::config::polytopexpolytope_r>(data);
+  // manual cache (the narrowphase ref stays unbound)
+  rel.status() = 1;
+  rel.h() = -0.1;
+  rel.normal() = {0, 1};
+  rel.cp1() = {0, 1};
+  rel.cp2() = {0, 0.9};
+  rel.init_dir() = {0, -1};
+
+  check(std::abs(rel.compute_h(0, ds1, ds2) + 0.1) <= 1e-12, "compute_h == -0.1");
+
+  /* hand-derived (plan Task 4, with one corrected pin): n = (0,1),
+     t = z^n = (-1,0); arm1 = cp1 - c1 = (0,1) -> z^arm1 = (-1,0);
+     arm2 = cp2 - c2 = (0,0.9) - (0,1.9) = (0,-1.0) -> z^arm2 = (1.0,0).
+     (the plan text pins arm2 = (0,-1.1): arithmetic slip, 0.9 - 1.9 = -1.0;
+     the structural rule arm_i = cp_i - c(q_i) is unchanged — ledger) */
+  Eigen::Matrix<double, 2, 3> g1 = Eigen::Matrix<double, 2, 3>::Zero();
+  Eigen::Matrix<double, 2, 3> g2 = Eigen::Matrix<double, 2, 3>::Zero();
+  rel.compute_jachq(0, ds1, ds2, g1, g2);
+  const double pin_g1[2][3] = {{0, -1, 0}, {1, 0, -1}};
+  const double pin_g2[2][3] = {{0, 1, 0}, {-1, 0, -1.0}};
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      check(std::abs(g1(i, j) - pin_g1[i][j]) <= 1e-12, "G1 pin");
+      check(std::abs(g2(i, j) - pin_g2[i][j]) <= 1e-12, "G2 pin");
+    }
+  }
+  std::print("polytopexpolytope_r: G exact pins pass\n");
+}
+
 int main() {
   siconos::config::data_t data;
   test_polytope_item(data);
   test_batch_engine();
+  test_polytopexpolytope_relation(data);
 }
