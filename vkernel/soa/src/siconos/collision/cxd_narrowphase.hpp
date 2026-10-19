@@ -380,14 +380,16 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
   const std::size_t npairs = in.ids_a.size();
   std::vector<narrowphase_contact> out(npairs);
   for (auto& c : out) {
-    c.status = static_cast<int>(status::invalid_input);
+    c.status = static_cast<int>(cxd::status::invalid_input);
     c.h = 0.0;
     c.normal = {0.0, 0.0};
     c.cp1 = {0.0, 0.0};
     c.cp2 = {0.0, 0.0};
   }
 
-  if (in.entries.size() == 0) return out;
+  if (in.entries.size() == 0) {
+    return out;
+  }
 
   // the pool takes ownership of the vertex buffer
   cxd::packed_pool<V> pool{std::move(in.vertices), std::move(in.entries)};
@@ -405,7 +407,7 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
   }
 
   // spec §5 tolerance/budget: tight tolerance, default iteration budget
-  const cxd::gjk_options opts{.tolerance = 1e-6, .max_iterations = 64};
+  const cxd::gjk_options opts{.tolerance = 1e-10, .max_iterations = 64};
 
   const auto results = cxd::gjk_batch<2>(pool, pairs, opts);
 
@@ -413,7 +415,7 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
     auto& c = out[k];
     switch (results[k].st) {
       case status::enclosed: {
-        c.status = static_cast<int>(status::enclosed);
+        c.status = static_cast<int>(cxd::status::enclosed);
         // deepest-face measurement, siconos-side (see enclosed_depth:
         // cxd's 2D epa rejects the degenerate seeds that flush contacts
         // deterministically produce)
@@ -434,7 +436,7 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
         break;
       }
       case status::separated: {
-        c.status = static_cast<int>(status::separated);
+        c.status = static_cast<int>(cxd::status::separated);
         const V dir0{pairs[k].init_dir[0], pairs[k].init_dir[1]};
         const auto sub =
             detail::subdistance_gjk(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, dir0, 64);
@@ -466,26 +468,232 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
 }  // namespace siconos::collision
 
 #include "siconos/collision/collision_head.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
+#include "siconos/simul/topology.hpp"
 
 namespace siconos::collision {
 
-/* ---- the narrowphase stage item ----
-   Task 4 needs the type complete only (the relation's item_ref attribute
-   must satisfy the storage item concept); Task 5 fills the pinned
-   structure (topology/dsds_r/poly_dsds_r refs, cache, rebind + batch +
-   write-back). ensure() is defined so callers compile, and is rewired in
-   Task 5 to the actual run machinery. */
+template <typename Topo>
+struct polytopexpolytope_r;  // polytopexpolytope_r.hpp (Task 4)
+
+/* ---- the narrowphase stage item (Task 5) ----
+   Owns the world's polytope interactions: rebinds generic ds-ds relations
+   to polytopexpolytope_r items, packs world-vertex data once per call,
+   runs the batch engine, writes statuses back and caches the step tag +
+   a world checksum so ensure(step) re-runs only when the geometry moved. */
 template <typename Topo>
 struct cxd_narrowphase : item {
   using topology = Topo;
+  using finteraction = typename topology::finteraction;
+  using poly_r_t = polytopexpolytope_r<Topo>;
 
-  struct attributes {};
+  struct attributes {
+    some::item_ref<topology> topology;
+    some::item_ref<collision::diskdisk_r> dsds_r;  // generic binder to detect
+    // the plan's poly_dsds_r ref (cxd_narrowphase -> polytopexpolytope_r) is
+    // DISABLED on purpose: the mutual item_refs with poly_r's narrowphase
+    // ref make storage::make's all_items walker recurse forever (found by
+    // bisection, see ledger); polytope relations are identified by dispatch
+    // type in rebind/pack, so the back-ref is not needed
+    some::indice cache_step;
+    some::scalar cache_checksum;  // FNV-1a over world-vertex doubles (53-bit)
+    some::map<some::array<some::indice, some::indice_value<2>>,
+              some::item_ref<poly_r_t>>
+        rel_map;  // ordered ds-index pair -> polytope relation reuse map
+  };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    void ensure(auto step) {}
+    decltype(auto) topology() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
+    }
+    decltype(auto) rel_map() { return storage::attr<"rel_map">(*self()); }
+    decltype(auto) dsds_r() { return storage::attr<"dsds_r">(*self()); }
+
+    /* world vertices of a ds' polytope, CCW: world = c(q) + R(theta) local,
+       c(q) = (q(0), q(1)), theta = q(2); the rotation-direction convention
+       is pinned by an exact-value test (R(pi/2)*(1,0) == (0,1)) */
+    auto world_vertices(auto& ds, auto step) {
+      auto& data = self()->data();
+      auto sh =
+          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
+      auto& q = storage::attr<"q">(ds, step);
+      const double c = std::cos(q(2)), s = std::sin(q(2));
+      std::vector<std::array<double, 2>> out;
+      const auto n = sh.nvertices();
+      out.reserve(n);
+      for (auto i = 0u; i < n; ++i) {
+        const auto& v = sh.vertices()[i];
+        out.push_back({q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]});
+      }
+      return out;
+    }
+
+    /* 1. rebind: interactions between two ds whose shapes are polytopes and
+       whose relation is still the generic diskdisk_r get a
+       polytopexpolytope_r item (created or reused from rel_map; reuse keeps
+       init_dir); the relation ref then points at this stage item. */
+    void rebind(auto step) {
+      auto& data = self()->data();
+      for (auto inter : storage::handles<finteraction>(data, step)) {
+        auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+        auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
+        if (ds1.index().value() == ds2.index().value()) continue;
+        auto poly_shape = [&](auto& ds) {
+          auto sh =
+              storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
+          using shape_t = typename std::decay_t<decltype(sh)>::type;
+          return std::derived_from<shape_t, shape::polytope>;
+        };
+        if (!poly_shape(ds1) || !poly_shape(ds2)) continue;
+        auto& relvar = storage::attr<"relation">(inter);
+        if (std::holds_alternative<storage::index<collision::diskdisk_r, std::size_t>>(
+                relvar)) {
+          // generic binder still attached: give this pair a polytope relation
+          const auto i1 = ds1.index().value(), i2 = ds2.index().value();
+          const std::array<std::decay_t<decltype(i1)>, 2> key =
+              i1 < i2 ? std::array{i1, i2} : std::array{i2, i1};
+          auto& rmap = rel_map();
+          auto rel = [&] {
+            if (auto it = rmap.find(key); it != rmap.end()) {
+              return storage::make_handle(data, it->second);
+            }
+            auto rel = storage::add<poly_r_t>(data);
+            // fresh vector attrs are uninitialized storage (Eigen default);
+            // give the first batch a well-defined direction: the engine maps
+            // a zero init_dir to {1, 0} (spec §5)
+            rel.normal() = {0, 0};
+            rel.cp1() = {0, 0};
+            rel.cp2() = {0, 0};
+            rel.init_dir() = {0, 0};
+            rmap[key] = rel;
+            return rel;
+          }();
+          rel.narrowphase() = *self();
+          inter.relation() = rel;
+        }
+      }
+    }
+
+    /* FNV-1a over every involved ds' world-vertex doubles (53-bit mask: the
+       cache_checksum attribute is a scalar) */
+    double checksum(auto step) {
+      auto& data = self()->data();
+      std::uint64_t hsh = 1469598103934665603ull;
+      auto mix = [&](const void* p, std::size_t n) {
+        const auto* bytes = static_cast<const unsigned char*>(p);
+        for (std::size_t i = 0; i < n; ++i) {
+          hsh ^= bytes[i];
+          hsh *= 1099511628211ull;
+        }
+      };
+      std::map<std::size_t, bool> seen;
+      for (auto inter : storage::handles<finteraction>(data, step)) {
+        auto& relvar = storage::attr<"relation">(inter);
+        if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
+          auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+          auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
+          for (auto* ds : {&ds1, &ds2}) {
+            const auto idx = ds->index().value();
+            if (seen[idx]) continue;
+            seen[idx] = true;
+            mix(&idx, sizeof idx);
+            for (const auto& v : world_vertices(*ds, step)) {
+              mix(&v[0], sizeof v[0]);
+              mix(&v[1], sizeof v[1]);
+            }
+          }
+        }
+      }
+      return static_cast<double>(hsh & ((1ull << 52) - 1));
+    }
+
+    /* 2. pack the batch input: candidates are all interactions whose
+       relation is a polytopexpolytope_r (active or not: h continuity);
+       each involved ds contributes its world vertices once */
+    auto pack(auto step) {
+      auto& data = self()->data();
+      narrowphase_input in;
+      std::map<std::size_t, std::uint32_t> slot;
+      for (auto inter : storage::handles<finteraction>(data, step)) {
+        auto& relvar = storage::attr<"relation">(inter);
+        if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
+          auto rel = storage::make_handle(
+              data, std::get<storage::index<poly_r_t, std::size_t>>(relvar));
+          auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+          auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
+          for (auto* ds : {&ds1, &ds2}) {
+            if (slot.count(ds->index().value())) continue;
+            const std::uint32_t offset = static_cast<std::uint32_t>(in.vertices.size());
+            for (const auto& v : world_vertices(*ds, step)) {
+              in.vertices.push_back(v);
+            }
+            in.entries.push_back(
+                {offset, static_cast<std::uint32_t>(in.vertices.size() - offset)});
+            // shape ids are ENTRY indices, not vertex offsets
+            slot[ds->index().value()] = static_cast<std::uint32_t>(in.entries.size()) - 1;
+          }
+          in.ids_a.push_back(slot[ds1.index().value()]);
+          in.ids_b.push_back(slot[ds2.index().value()]);
+          in.init_dirs.push_back({rel.init_dir()[0], rel.init_dir()[1]});
+        }
+      }
+      return in;
+    }
+
+    /* 3. batch + write-back: statuses/h/normal/cps go to the relations;
+       init_dir becomes the contact normal when enclosed, else the unit
+       vector from cp1 toward cp2; max_iterations/invalid_input keep the
+       previous cached h and init_dir (keep-previous contract) */
+    void run(auto step) {
+      auto& data = self()->data();
+      auto in = pack(step);
+      if (!in.ids_a.empty()) {
+        auto out = narrowphase_batch(std::move(in));
+        std::size_t k = 0;
+        for (auto inter : storage::handles<finteraction>(data, step)) {
+          auto& relvar = storage::attr<"relation">(inter);
+          if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
+            auto rel = storage::make_handle(
+                data, std::get<storage::index<poly_r_t, std::size_t>>(relvar));
+            const auto& c = out[k++];
+            rel.status() = c.status;
+            if (c.status == static_cast<int>(cxd::status::max_iterations) ||
+                c.status == static_cast<int>(cxd::status::invalid_input)) {
+              continue;  // keep-previous: cached h + init_dir stay
+            }
+            rel.h() = c.h;
+            rel.normal() = {c.normal[0], c.normal[1]};
+            rel.cp1() = {c.cp1[0], c.cp1[1]};
+            rel.cp2() = {c.cp2[0], c.cp2[1]};
+            if (c.status == static_cast<int>(cxd::status::enclosed)) {
+              rel.init_dir() = {rel.normal()[0], rel.normal()[1]};
+            } else if (c.h > 0) {
+              const double dx = rel.cp2()[0] - rel.cp1()[0];
+              const double dy = rel.cp2()[1] - rel.cp1()[1];
+              const double d = std::hypot(dx, dy);
+              if (d > 0) rel.init_dir() = {-dx / d, -dy / d};
+            }
+          }
+        }
+      }
+      storage::attr<"cache_step">(*self()) = step;
+      storage::attr<"cache_checksum">(*self()) = checksum(step);
+    }
+
+    /* ensure(step): rebind is idempotent and cheap, so it runs every call;
+       the batch re-runs only on a new step tag or a changed world checksum */
+    void ensure(auto step) {
+      rebind(step);
+      const double ck = checksum(step);
+      if (storage::attr<"cache_step">(*self()) == step &&
+          storage::attr<"cache_checksum">(*self()) == ck) {
+        return;
+      }
+      run(step);
+    }
   };
 };
 

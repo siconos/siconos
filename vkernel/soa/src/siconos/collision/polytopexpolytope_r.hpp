@@ -43,19 +43,28 @@ struct polytopexpolytope_r : item, model::relation2, model::any_lagrangian_relat
 
     decltype(auto) status() { return storage::attr<"status">(*self()); }
     decltype(auto) h() { return storage::attr<"h">(*self()); }
+    // the stage writes this ref at its rebind step (cxd_narrowphase's rebind
+    // sets rel.narrowphase() = the stage handle)
+    decltype(auto) narrowphase() { return storage::attr<"narrowphase">(*self()); }
     decltype(auto) normal() { return storage::attr<"normal">(*self()); }
     decltype(auto) cp1() { return storage::attr<"cp1">(*self()); }
     decltype(auto) cp2() { return storage::attr<"cp2">(*self()); }
     decltype(auto) init_dir() { return storage::attr<"init_dir">(*self()); }
 
-    /* ensure the stage cache is fresh for this step. The stage ref is
-       bound once at rebind (Task 5); an unset ref (= the attribute's
-       defaulted index 0 while the world holds no stage item to bind) is
-       the standalone hand-cached case and must no-op (ledger ruling). */
+    /* ensure the stage cache is fresh for this step. The stage ref is bound
+       once at rebind (the stage item writes rel.narrowphase() = itself);
+       the standalone hand-cached case (Task 4 world) keeps the attribute
+       defaulted and must no-op. Bound test: the ref value must index an
+       EXISTING stage item in the world, so a legit stage at index 0 counts
+       as bound (ledger ruling, refined at Task 5). */
     void ensure(auto step) {
+      auto& data = self()->data();
       auto& ref = storage::attr<"narrowphase">(*self());
-      if (ref.value() == std::remove_cvref_t<decltype(ref.value())>{0}) return;
-      storage::make_ref_handle(self()->data(), ref).ensure(step);
+      using np_t = typename std::decay_t<decltype(ref)>::type;
+      // storage::handles is sized by the item count of the stage collection
+      const auto n_stage = std::size(storage::handles<np_t>(data));
+      if (ref.value() >= n_stage) return;  // unbound: standalone relation
+      storage::make_ref_handle(data, ref).ensure(step);
     }
 
     template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>

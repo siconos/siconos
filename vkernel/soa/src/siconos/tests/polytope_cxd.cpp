@@ -17,20 +17,31 @@
 namespace siconos::config {
 namespace some = siconos::storage::some;
 struct polytope_ds : model::lagrangian_ds {};
-/* Task 5 wires the real simul::topology<...>; the relation/narrowphase pair
-   is templated on this type only so their mutual item_refs stay acyclic */
-struct topo;
+struct nslaw : model::newton_impact_friction {};
 using polytope_shape = collision::shape::polytope;
+using diskdisk_r = collision::diskdisk_r;
+/* topo is fwd-declared as the ACYCLIC marker for the poly_r/narrowphase
+   refs; defined right after interaction (Task 5 sim config, modeled on
+   bouncing_disks) */
+struct topo;
 using polytopexpolytope_r = collision::polytopexpolytope_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
+struct interaction : simul::interaction<nslaw, diskdisk_r, polytopexpolytope_r> {};
+struct topo : simul::topology<polytope_ds, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
+struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 struct data_t
-    : storage::make<env, polytope_ds, polytope_shape, polytopexpolytope_r, cxd_narrowphase,
+    : storage::make<env, polytope_ds, polytope_shape, diskdisk_r, nslaw, interaction, topo,
+                    polytopexpolytope_r, cxd_narrowphase, osi, td, osnspb,
                     storage::with_properties<
                         storage::wrapped<polytope_ds, some::unbounded_collection>,
+                        storage::wrapped<interaction, some::unbounded_collection>,
                         storage::attached<polytope_ds, storage::pattern::symbol<"shape">,
                                           storage::some::item_ref<polytope_shape>>>> {};
 }  // namespace siconos::config
@@ -44,6 +55,11 @@ namespace {
 
 auto check = [](bool ok, auto&& what) {
   if (!ok) throw std::runtime_error(std::string("CHECK FAILED: ") + what);
+};
+// relation vector attrs come back as Eigen 2-vectors; the near() helpers
+// below take std::array, so funnel them through this
+auto to_arr = [](const auto& v) {
+  return std::array<double, 2>{static_cast<double>(v[0]), static_cast<double>(v[1])};
 };
 
 std::vector<std::array<double, 2>> square_at(double cx, double cy) {
@@ -213,9 +229,90 @@ void test_polytopexpolytope_relation(siconos::config::data_t& data) {
   std::print("polytopexpolytope_r: G exact pins pass\n");
 }
 
+/* ---- Task 5: cxd_narrowphase stage — rebind + batch + write-back + cache ---- */
+void test_narrowphase_stage(siconos::config::data_t& data) {
+  using siconos::storage::add;
+
+  // body1: axis-aligned square, body2: diamond r=1 (CCW locals)
+  auto sh1 = add<siconos::config::polytope_shape>(data);
+  std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
+  for (int i = 0; i < 4; ++i) sh1.vertices()[i] = {sq[i][0], sq[i][1]};
+  sh1.nvertices() = 4;
+  auto sh2 = add<siconos::config::polytope_shape>(data);
+  std::array<std::array<double, 2>, 4> dm = {{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}};
+  for (int i = 0; i < 4; ++i) sh2.vertices()[i] = {dm[i][0], dm[i][1]};
+  sh2.nvertices() = 4;
+
+  // body1 center (0,0), body2 center (0,1.9): overlap 0.1 along y
+  auto ds1 = add<siconos::config::polytope_ds>(data);
+  ds1.q() = {0, 0, 0};
+  siconos::storage::prop<"shape">(ds1) = sh1;
+  auto ds2 = add<siconos::config::polytope_ds>(data);
+  ds2.q() = {0, 1.9, 0};
+  siconos::storage::prop<"shape">(ds2) = sh2;
+
+  // generic space_filter-style binding: topo.link + generic diskdisk_r
+  auto topo_h = add<siconos::config::topo>(data);
+  auto dsds = add<siconos::config::diskdisk_r>(data);
+  auto inter = topo_h.link(ds1, ds2);
+  inter.relation() = dsds;
+
+  // the narrowphase stage
+  auto np = add<siconos::config::cxd_narrowphase>(data);
+  np.topology() = topo_h;
+  np.dsds_r() = dsds;
+
+  np.ensure(0);
+
+  // the interaction's relation is now a polytopexpolytope_r with the exact
+  // cached pair (square x diamond, flush y-overlap 0.1)
+  using poly_r_index =
+      siconos::storage::index<siconos::config::polytopexpolytope_r, std::size_t>;
+  auto check_rebound = [&]() {
+    check(std::holds_alternative<poly_r_index>(inter.relation()),
+          "relation rebound to polytopexpolytope_r");
+    return siconos::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
+  };
+  {
+    auto rel = check_rebound();
+    check(rel.status() == 1 /* enclosed */, "rebound relation enclosed");
+    check(std::abs(rel.h() + 0.1) <= 1e-6, "rebound h == -0.1");
+    check(near(to_arr(rel.normal()), {0, 1}, 1e-6), "rebound normal == (0,1)");
+    check(near(to_arr(rel.cp1()), {0, 1}, 1e-6), "rebound cp1 == (0,1)");
+    check(near(to_arr(rel.cp2()), {0, 0.9}, 1e-6), "rebound cp2 == (0,0.9)");
+  }
+
+  // mutate q2 at the SAME step tag: the checksum must re-run the batch
+  ds2.q() = {0, 1.95, 0};
+  np.ensure(0);
+  {
+    auto rel = check_rebound();
+    check(std::abs(rel.h() + 0.05) <= 1e-6, "checksum re-run: h == -0.05");
+  }
+
+  // rotation convention pin: local (1,0) under theta=pi/2 -> world (0,1) CCW
+  ds2.q() = {0, 0, M_PI / 2};
+  const auto wv = np.world_vertices(ds2, 0);
+  check(wv.size() == 4, "four world vertices");
+  check(near(wv[0], {0, 1}), "R(pi/2)*(1,0) == (0,1) (CCW convention)");
+  // and the rotated diamond still reads the same overlap when centered on
+  // body1's box gap... verify invariance with the square back at (0,1.9)
+  ds2.q() = {0, 1.9, M_PI / 2};
+  np.ensure(0);
+  {
+    auto rel = check_rebound();
+    check(std::abs(rel.h() + 0.1) <= 1e-6, "rotated pair h == -0.1");
+    check(near(to_arr(rel.normal()), {0, 1}, 1e-6), "rotated pair normal == (0,1)");
+  }
+  ds2.q() = {0, 1.9, 0};
+
+  std::print("cxd_narrowphase stage: rebound, cached exact pair, checksum re-runs\n");
+}
+
 int main() {
   siconos::config::data_t data;
   test_polytope_item(data);
   test_batch_engine();
   test_polytopexpolytope_relation(data);
+  test_narrowphase_stage(data);
 }
