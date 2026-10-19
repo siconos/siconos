@@ -280,6 +280,8 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
     check(near(to_arr(rel.normal()), {0, 1}, 1e-6), "rebound normal == (0,1)");
     check(near(to_arr(rel.cp1()), {0, 1}, 1e-6), "rebound cp1 == (0,1)");
     check(near(to_arr(rel.cp2()), {0, 0.9}, 1e-6), "rebound cp2 == (0,0.9)");
+    // the warm start written back for the next batch is the contact normal
+    check(near(to_arr(rel.init_dir()), {0, 1}, 1e-6), "init_dir == the contact normal");
   }
 
   // mutate q2 at the SAME step tag: the checksum must re-run the batch

@@ -13,6 +13,11 @@ struct polytope : item {
     some::array<some::vector<some::scalar, some::indice_value<2>>, some::indice_value<16>>
         vertices;
     some::indice nvertices;
+    // bounding radius cached for the generic ds-ds binder: collision::diskdisk_r
+    // reads shape.radius() (an lvalue) on every relation compute, so a
+    // polytope attached to a ds must expose one; radius() refreshes it from
+    // rmax() (the true circumradius of the local polygon)
+    some::scalar radius;
   };
 
   template <typename Handle>
@@ -34,6 +39,13 @@ struct polytope : item {
         m = std::max(m, std::hypot(v[0], v[1]));
       }
       return m;
+    }
+
+    // radius lvalue for the generic ds-ds binder (collision::diskdisk_r binds
+    // `auto& r = shape.radius()`): refreshed from rmax() on every access
+    decltype(auto) radius() {
+      attr<"radius">(*self()) = rmax();
+      return attr<"radius">(*self());
     }
 
     // convexity check: all consecutive edge cross products same sign.

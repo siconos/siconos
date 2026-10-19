@@ -201,23 +201,6 @@ inline auto subdistance_gjk(const Pool& pool, std::uint32_t id_a, std::uint32_t 
   return std::nullopt;  // budget exhausted
 }
 
-// barycentric cps from the weights + witness tuples
-template <typename Pool>
-inline auto witness_points(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b,
-                           const std::array<support_t, 3>& w,
-                           const std::array<double, 3>& alpha, std::size_t n)
-    -> std::pair<V, V> {
-  const cxd::shape_view<Pool> va{pool, id_a};
-  const cxd::shape_view<Pool> vb{pool, id_b};
-  V cp1{0., 0.}, cp2{0., 0.};
-  for (std::size_t i = 0; i < n; ++i) {
-    const auto& [ia, ib, pos] = w[i];
-    cp1 = vadd(cp1, vscale(alpha[i], va[ia]));
-    cp2 = vadd(cp2, vscale(alpha[i], vb[ib]));
-  }
-  return {cp1, cp2};
-}
-
 /* Witness pair for a separated pair, from the SUPPORTING FACES of both
    polygons along the contact normal n (unit, 1 -> 2). cxd's support query
    tie-breaks to the lowest vertex index, which would report a corner of a
@@ -671,10 +654,12 @@ struct cxd_narrowphase : item {
             if (c.status == static_cast<int>(cxd::status::enclosed)) {
               rel.init_dir() = {rel.normal()[0], rel.normal()[1]};
             } else if (c.h > 0) {
+              // separated: the warm start points from body 1 to body 2, i.e.
+              // -(cp1 - cp2)/h (cp2 - cp1 = h * normal for a separated pair)
               const double dx = rel.cp2()[0] - rel.cp1()[0];
               const double dy = rel.cp2()[1] - rel.cp1()[1];
               const double d = std::hypot(dx, dy);
-              if (d > 0) rel.init_dir() = {-dx / d, -dy / d};
+              if (d > 0) rel.init_dir() = {dx / d, dy / d};
             }
           }
         }
