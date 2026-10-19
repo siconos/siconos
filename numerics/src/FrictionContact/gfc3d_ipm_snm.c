@@ -883,7 +883,7 @@ static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
         }
 
         numerics_printf_verbose(
-            -1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||", iteration,
+            1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||", iteration,
             fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr, barr_param, sigma);
 
         hasNotConverged = 0;
@@ -1351,7 +1351,7 @@ static void gfc3d_IPM_SNM_step_QP2(gfc3d_IPM_SNM_workspace* ws) {
         }
 
         numerics_printf_verbose(
-            -1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||", iteration,
+            1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||", iteration,
             fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr, barr_param, sigma);
 
         hasNotConverged = 0;
@@ -1773,7 +1773,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
   /* ---- IPM iterations ---- */
-  numerics_printf_verbose(-1, "problem dimensions n, nd x m: %1i, %6i x %-6i", n, nd, m);
+  numerics_printf_verbose(1, "problem dimensions n, nd x m: %1i, %6i x %-6i", n, nd, m);
   switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM]) {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_NOSCAL: {
       numerics_printf_verbose(
@@ -1784,7 +1784,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_QP2: {
-      numerics_printf_verbose(-1,
+      numerics_printf_verbose(1,
                               "Global friction contact problem - LS solution: 4x4 NT scaling "
                               "with Qp2 and Mehrotra\n");
       break;
@@ -1795,11 +1795,11 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
     }
   }
 
-  numerics_printf_verbose(-1,
+  numerics_printf_verbose(1,
                           "| it  | pinfeas | dinfeas |  |s-ub| |Ma|ui'ri||  |uor|  | prj err "
                           "| barpram |  sigma  ||  alpha  |  |dv|   |  |du|   |  |dr|   |  "
                           "|ds|   | ls prim | ls dual | ls comp | ls fixP |");
-  numerics_printf_verbose(-1,
+  numerics_printf_verbose(1,
                           "-------------------------------------------------------------------"
                           "-------------------------------------------------------------------"
                           "--------------------------------------------");

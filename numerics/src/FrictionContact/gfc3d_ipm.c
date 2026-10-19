@@ -4064,26 +4064,26 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   }
 
   /* ---- IPM iterations ---- */
-  numerics_printf_verbose(-1, "problem dimensions n, nd x m: %1i, %6i x %-6i", n, nd, m);
+  numerics_printf_verbose(1, "problem dimensions n, nd x m: %1i, %6i x %-6i", n, nd, m);
   switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM]) {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL: {
-      numerics_printf_verbose(-1, "LS solution: 3x3 no scaling\n");
+      numerics_printf_verbose(1, "LS solution: 3x3 no scaling\n");
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2: {
-      numerics_printf_verbose(-1, "LS solution: 3x3 NT scaling with Qp2\n");
+      numerics_printf_verbose(1, "LS solution: 3x3 NT scaling with Qp2\n");
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH: {
-      numerics_printf_verbose(-1, "LS solution: 3x3 NT scaling with QpH\n");
+      numerics_printf_verbose(1, "LS solution: 3x3 NT scaling with QpH\n");
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QP2: {
-      numerics_printf_verbose(-1, "LS solution: 2x2 NT scaling with Qp2\n");
+      numerics_printf_verbose(1, "LS solution: 2x2 NT scaling with Qp2\n");
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH: {
-      // numerics_printf_verbose(-1,"LS solution: 2x2 NT scaling with QpH\n");
+      // numerics_printf_verbose(1,"LS solution: 2x2 NT scaling with QpH\n");
       if (type == NORM_2)
         numerics_printf_verbose(
             -1, "LS solution: 2x2 NT scaling with QpH,\t stopping test: norm 2\n");
@@ -4091,11 +4091,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         numerics_printf_verbose(
             -1, "LS solution: 2x2 NT scaling with QpH,\t stopping test: norm inf\n");
       else
-        numerics_printf_verbose(-1, "LS solution: 2x2 NT scaling with QpH\n");
+        numerics_printf_verbose(1, "LS solution: 2x2 NT scaling with QpH\n");
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH: {
-      numerics_printf_verbose(-1, "LS solution: 1x1 NT scaling with QpH\n");
+      numerics_printf_verbose(1, "LS solution: 1x1 NT scaling with QpH\n");
       break;
     }
     default: {
@@ -4104,11 +4104,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   }
 
   numerics_printf_verbose(
-      -1,
+      1,
       "| it  |  dualgap | pinfeas | dinfeas |  <u, r> | complem | prj err | barpram | alpha_p "
       "| alpha_d |  sigma  |  |dv|   |  |du|   |  |dr|   | ls prim | ls dual | ls comp |");
   numerics_printf_verbose(
-      -1,
+      1,
       "---------------------------------------------------------------------------------------"
       "--------------------------------------------------------------------------------");
 
@@ -4308,7 +4308,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       if (fmax(pinfeas, fmax(dinfeas, complem)) < tol) {
         numerics_printf_verbose(
-            -1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration, fws,
+            1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration, fws,
             dualgap, pinfeas, dinfeas, udotr, complem, projerr, barr_param);
         iteration++;
 
@@ -4318,11 +4318,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
           }
         }
         printf("\n");
-        numerics_printf_verbose(-1,
+        numerics_printf_verbose(1,
                                 "| it  |  dualgap | pinfeas | dinfeas |  <u, r> | complem | "
                                 "prj err | barpram | alpha_p | alpha_d |  sigma  |  |dv|   |  "
                                 "|du|   |  |dr|   | ls prim | ls dual | ls comp |");
-        numerics_printf_verbose(-1,
+        numerics_printf_verbose(1,
                                 "-------------------------------------------------------------"
                                 "-------------------------------------------------------------"
                                 "---------------------------------------------");
@@ -4376,7 +4376,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     // if (total_time > max_time)
     if (0 == 1) {
       // hasNotConverged = 5;
-      // numerics_printf_verbose(-1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e
+      // numerics_printf_verbose(1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e
       // |",
       //                         iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem,
       //                         projerr, barr_param);
@@ -4401,7 +4401,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     // if ( fmax(totalresidual,projerr) <= tol )
     // if ( fmax(fmax(totalresidual,projerr),complem) <= tol )
     {
-      numerics_printf_verbose(-1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+      numerics_printf_verbose(1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
                               iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem,
                               projerr, barr_param);
 
@@ -4657,7 +4657,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     // t2 = clock();
     // total_time += (double)(t2 - t1) / (double)clk_tck;
 
-    numerics_printf_verbose(-1,
+    numerics_printf_verbose(1,
                             "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e "
                             "| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
                             iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, projerr,
@@ -4666,7 +4666,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                             fabs(d_velocity[cblas_idamax(nd, d_velocity, 1)]),
                             fabs(d_reaction[cblas_idamax(nd, d_reaction, 1)]), LS_norm_p,
                             LS_norm_d, LS_norm_c);
-    // numerics_printf_verbose(-1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |
+    // numerics_printf_verbose(1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |
     // %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
     //                       iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem,
     //                       projerr, barr_param, alpha_primal, alpha_tmp, sigma,
@@ -4949,7 +4949,7 @@ static void gfc3d_IPM_fixed_step(gfc3d_IPM_workspace* ws) {
       if (totalresidual <= tol)  // SUCCESS => need to quit the main loop
       {
         numerics_printf_verbose(
-            -1, "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration,
+            1, "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration,
             dualgap, pinfeas, dinfeas, udotr, diff_fixp, complem, projerr, barr_param);
 
         for (size_t i = 0; i < n; i++) {
@@ -4963,11 +4963,11 @@ static void gfc3d_IPM_fixed_step(gfc3d_IPM_workspace* ws) {
       else if (totalresidual_mu <= tol)  // Finish solving ls (1 time) => update s after
       {
         numerics_printf_verbose(
-            -1, "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration,
+            1, "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration,
             dualgap, pinfeas, dinfeas, udotr, diff_fixp, complem, projerr, barr_param);
 
         printf("\n");
-        numerics_printf_verbose(-1,
+        numerics_printf_verbose(1,
                                 "| it  |  dualgap | pinfeas | dinfeas |  <u, r> |  |s-ub| | "
                                 "complem | prj err | barpram |  2*n*mu |  alpha  |  |dv|   "
                                 "|  |du|   |  |dr|   | ls prim | ls dual | ls comp |");
@@ -5008,7 +5008,7 @@ static void gfc3d_IPM_fixed_step(gfc3d_IPM_workspace* ws) {
       if (totalresidual <= tol)  // SUCCESS => need to quit the main loop
       {
         numerics_printf_verbose(
-            -1, "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration,
+            1, "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |", iteration,
             dualgap, pinfeas, dinfeas, udotr, diff_fixp, complem, projerr, barr_param);
 
         for (size_t i = 0; i < n; i++) {
@@ -5155,14 +5155,14 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   long J_nzmax = 0;
   size_t H_nzmax = NM_nnz(H);
 
-  numerics_printf_verbose(-1, "LS solution: 2x2 NT scaling with QpH, mu fixed, s fixed\n");
+  numerics_printf_verbose(1, "LS solution: 2x2 NT scaling with QpH, mu fixed, s fixed\n");
 
   numerics_printf_verbose(
-      -1,
+      1,
       "| it  |  dualgap | pinfeas | dinfeas |  <u, r> |  |s-ub| | complem | prj err | barpram "
       "|  2*n*mu |  alpha  |  |dv|   |  |du|   |  |dr|   | ls dual | ls comp |");
   numerics_printf_verbose(
-      -1,
+      1,
       "---------------------------------------------------------------------------------------"
       "-----------------------------------------------------------------------");
 
@@ -5349,7 +5349,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     /* updating the gamma parameter used to compute the step-length */
     gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
 
-    numerics_printf_verbose(-1,
+    numerics_printf_verbose(1,
                             "| %3i | %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | "
                             "%.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
                             iteration, dualgap, pinfeas, dinfeas, udotr, diff_fixp, complem,
