@@ -926,13 +926,107 @@ namespace cxd
       if (max_iterations == 0)
         throw std::invalid_argument("EPA max_iterations must be positive");
 
-      const vector a = support_vector(supporta);
-      const vector b = support_vector(supportb);
-      const vector c = support_vector(supportc);
-      const scalar area = (b[0] - a[0]) * (c[1] - a[1]) -
-                          (b[1] - a[1]) * (c[0] - a[0]);
-      if (std::abs(area) <= tol)
-        throw std::invalid_argument("EPA requires a non-degenerate triangle simplex");
+      vector a = support_vector(supporta);
+      vector b = support_vector(supportb);
+      vector c = support_vector(supportc);
+      support seed_a = supporta;
+      support seed_b = supportb;
+      support seed_c = supportc;
+      std::array<support, 3> seed{supporta, supportb, supportc};
+      scalar area = (b[0] - a[0]) * (c[1] - a[1]) -
+                    (b[1] - a[1]) * (c[0] - a[0]);
+      if (std::abs(area) <= tol) {
+        // GJK handed EPA a degenerate witness simplex: the origin lies ON
+        // the segment between two supports, so the triangle has zero area,
+        // even though the shapes may genuinely overlap. Bootstrap a support
+        // off that line and walk from the resulting triangle, the way the 3D
+        // path bootstraps a tetrahedron. A difference polytope that really
+        // is a segment (point/line touching contacts) keeps the closest-point
+        // answer.
+        std::size_t i0 = 0;
+        std::size_t i1 = 0;
+        bool have_second = false;
+        for (std::size_t i = 1; i < 3 && !have_second; ++i) {
+          const vector d = support_vector(seed[i]) - support_vector(seed[i0]);
+          if (num::inner_prod(d, d) > tol * tol) {
+            i1 = i;
+            have_second = true;
+          }
+        }
+        if (!have_second) {
+          // one support only: the difference is a point sitting on the
+          // origin, a touching contact with no direction
+          const vector p = support_vector(seed[i0]);
+          const scalar distance = std::sqrt(num::inner_prod(p, p));
+          const vector normal = distance > tol
+                                    ? vector{p[0] / distance, p[1] / distance}
+                                    : vector{0., 0.};
+          return std::tuple{distance, normal, seed[i0]};
+        }
+        const vector line = support_vector(seed[i1]) - support_vector(seed[i0]);
+        const scalar line_length = std::sqrt(num::inner_prod(line, line));
+        if (line_length > tol) {
+          const vector perp{-line[1], line[0]};
+          // a perpendicular probe can re-discover a support that lies on the
+          // line (a tied vertex on axis-aligned shapes), so the two oblique
+          // directions are probed as well
+          const vector oblique_a{line[0] + perp[0], line[1] + perp[1]};
+          const vector oblique_b{line[0] - perp[0], line[1] - perp[1]};
+          const std::array<vector, 4> probes{perp, vector{-perp[0], -perp[1]},
+                                             oblique_a, oblique_b};
+          bool bootstrapped = false;
+          for (const vector& probe : probes) {
+            if (num::inner_prod(probe, probe) <= tol * tol) continue;
+            const support candidate = diff_support(sa, sb, probe);
+            const vector off = support_vector(candidate) - support_vector(seed[i0]);
+            const scalar perpendicular_distance =
+                std::abs(line[0] * off[1] - line[1] * off[0]) / line_length;
+            if (perpendicular_distance > tol) {
+              seed_a = seed[i0];
+              seed_b = seed[i1];
+              seed_c = candidate;
+              bootstrapped = true;
+              break;
+            }
+          }
+          if (!bootstrapped) {
+            // the difference polytope really is a segment: the minimum
+            // translation is the distance from the origin to that segment
+            const vector d = line;
+            const scalar dd = num::inner_prod(d, d);
+            scalar t = 0.;
+            if (dd > 0.) {
+              t = -num::inner_prod(support_vector(seed[i0]), d) / dd;
+              if (t < 0.) t = 0.;
+              if (t > 1.) t = 1.;
+            }
+            const vector closest = support_vector(seed[i0]) + t * d;
+            const scalar distance = std::sqrt(num::inner_prod(closest, closest));
+            const vector normal = distance > tol
+                                      ? vector{closest[0] / distance, closest[1] / distance}
+                                      : vector{-d[1], d[0]};
+            return std::tuple{distance, normal, seed[i0]};
+          }
+        }
+        a = support_vector(seed_a);
+        b = support_vector(seed_b);
+        c = support_vector(seed_c);
+        area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+      }
+
+      // The walk's exterior normals follow the triangle's orientation, and the
+      // two GJK paths can hand the same three supports in a different order,
+      // which would flip every normal the walk derives. Canonicalize the
+      // orientation (counterclockwise) so the answer's normal points away from
+      // the origin whatever order the witness came in.
+      if (clockwise(a, b, c)) {
+        const support swap = seed_b;
+        seed_b = seed_c;
+        seed_c = swap;
+        a = support_vector(seed_a);
+        b = support_vector(seed_b);
+        c = support_vector(seed_c);
+      }
 
       const bool cw = clockwise(a, b, c);
 
@@ -946,9 +1040,9 @@ namespace cxd
 
       if (use_sbo)
       {
-        sbo[0] = supporta;
-        sbo[1] = supportb;
-        sbo[2] = supportc;
+        sbo[0] = seed_a;
+        sbo[1] = seed_b;
+        sbo[2] = seed_c;
         polytope_data = sbo.data();
         polytope_size = 3;
       }
@@ -963,9 +1057,9 @@ namespace cxd
         // initialization does; reserve would leave them raw. Three is the
         // smallest polytope the bootstrap needs.
         heap.resize(std::max(max_polytope, std::size_t{3}));
-        heap[0] = supporta;
-        heap[1] = supportb;
-        heap[2] = supportc;
+        heap[0] = seed_a;
+        heap[1] = seed_b;
+        heap[2] = seed_c;
         polytope_data = heap.data();
         polytope_size = 3;
       }

@@ -12,12 +12,11 @@
      construction along the normal (overlap-window centers for flush
      edge-edge contacts, vertices / perpendicular feet otherwise), so the
      cps and h stay mutually consistent: h = n.(cp2 - cp1).
-     enclosed (origin inside): exact minimum translation depth over the
-     edge normals of both polygons (see enclosed_depth for why this is
-     siconos-side rather than cxd's 2D epa, which rejects the degenerate
-     seeds that flush contacts deterministically produce); witnesses from
-     the same face construction along the deepest-face normal; the
-     ambiguous-tie case (coincident/symmetric bodies) falls back to h = 0.
+     enclosed (origin inside): cxd's EPA gives the depth and the normal
+     of the deepest face of the difference polytope -- its 2D EPA
+     bootstraps a non-degenerate seed when the GJK hands a degenerate one,
+     which a flush axis-aligned overlap always is; the witnesses are the
+     supporting faces along that normal, and h = -depth.
    - cp1/cp2 for both cases are the supporting faces' points (uniquely
      determined, deterministic); cxd's support tuples stay inside the
      GJK internals.
@@ -272,88 +271,6 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
           lerp_on(vb, tie_b.front(), tie_b.back(), pb0, pb1)};
 }
 
-/* Enclosed-pair measurement, exact for convex polygons.
-
-   The Minkowski difference's faces all have the normal of some edge of
-   A or of B, so the minimum translation depth is the minimum overlap
-        depth(n) = max_A (n.a) - min_B (n.b)
-   over the unit edge normals of both polygons. The argmin direction is
-   the exterior normal of the deepest diff face: unique -> face_witnesses
-   along it yields the deep contact pair, h = n.(cp2-cp1) = -depth.
-   A TIED argmin means the deepest face is ambiguous (concentric /
-   symmetric configurations: for coincident squares four directions tie
-   at depth 2): no canonical contact exists, the caller falls back.
-
-   cxd's 2D epa rejects degenerate seeds outright (its repair paths are
-   3D only), and flush contacts -- the steady state of the warm-start
-   writeback, init_dir = normal -- deterministically produce those
-   degenerate seeds, so the depth is computed here instead of epa_batch. */
-template <typename Pool>
-inline auto enclosed_depth(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b)
-    -> std::optional<std::tuple<V, V, V>> {  // normal, cp1, cp2
-  const cxd::shape_view<Pool> va{pool, id_a};
-  const cxd::shape_view<Pool> vb{pool, id_b};
-  const auto nverts = [](const auto& view) {
-    return static_cast<std::size_t>(std::distance(view.begin(), view.end()));
-  };
-  const std::size_t na = nverts(va), nb = nverts(vb);
-  if (na < 3 || nb < 3 || (na + nb) > 32) return std::nullopt;
-
-  // overlap along a unit direction n
-  const auto overlap = [&va, &vb, na, nb](const V& n) {
-    double amax = -std::numeric_limits<double>::infinity();
-    for (std::size_t i = 0; i < na; ++i) amax = std::max(amax, vdot(n, va[i]));
-    double bmin = std::numeric_limits<double>::infinity();
-    for (std::size_t j = 0; j < nb; ++j) bmin = std::min(bmin, vdot(n, vb[j]));
-    return amax - bmin;
-  };
-
-  // candidate unit normals: perpendiculars of every edge, both signs.
-  // Parallel edges (dup vertices included) give identical candidates, so
-  // dedupe before scoring -- ties must be counted over DISTINCT directions.
-  std::vector<V> cands;
-  const auto cand_tol = 1e-12;
-  const auto push_cand = [&](const V& n) {
-    for (const auto& m : cands)
-      if (n[0] * m[0] + n[1] * m[1] > 1.0 - cand_tol) return;
-    cands.push_back(n);
-  };
-  for (const cxd::shape_view<Pool>* view : {&va, &vb}) {
-    for (std::size_t i = 0; i < nverts(*view); ++i) {
-      const V p = (*view)[i];
-      const V q = (*view)[(i + 1) % nverts(*view)];
-      const V e = vsub2(q, p);
-      const double el = vnorm(e);
-      if (el <= 1e-30) continue;
-      const V n = V{-e[1] / el, e[0] / el};
-      push_cand(n);
-      push_cand(V{-n[0], -n[1]});
-    }
-  }
-  if (cands.empty()) return std::nullopt;
-
-  double best = std::numeric_limits<double>::infinity();
-  std::size_t ties = 0;
-  V best_n{};
-  for (const auto& n : cands) {
-    const double d = overlap(n);
-    const double tol = 1e-9 * (1.0 + std::abs(best) + std::abs(d));
-    if (d < best - tol) {
-      best = d;
-      best_n = n;
-      ties = 1;
-    } else if (d <= best + tol) {
-      if (d < best) best = d;  // tighten within the tie band
-      best_n = ties == 0 ? n : best_n;
-      ++ties;
-    }
-  }
-
-  if (!std::isfinite(best) || best <= 0.0 || ties != 1) return std::nullopt;
-  const auto [cp1, cp2] = face_witnesses(pool, id_a, id_b, best_n);
-  return std::tuple{best_n, cp1, cp2};
-}
-
 }  // namespace detail
 
 inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in) {
@@ -394,23 +311,35 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
 
   const auto results = cxd::gjk_batch<2>(pool, pairs, opts);
 
+  // The enclosed pairs get their depth and normal from cxd's EPA. The 2D
+  // EPA bootstraps a non-degenerate seed when the GJK hands one that is
+  // degenerate -- the case a flush, axis-aligned overlap always is, since
+  // the GJK's direction then collapses onto the line through the origin.
+  std::vector<std::uint32_t> hit_pairs;
+  for (std::size_t k = 0; k < npairs; ++k)
+    if (results[k].st == status::enclosed)
+      hit_pairs.push_back(static_cast<std::uint32_t>(k));
+  const auto epa_answers = cxd::epa_batch<2>(pool, pairs, hit_pairs, results, opts);
+  std::size_t hit_i = 0;
+
   for (std::size_t k = 0; k < npairs; ++k) {
     auto& c = out[k];
     switch (results[k].st) {
       case status::enclosed: {
         c.status = static_cast<int>(cxd::status::enclosed);
-        // deepest-face measurement, siconos-side (see enclosed_depth:
-        // cxd's 2D epa rejects the degenerate seeds that flush contacts
-        // deterministically produce)
-        const auto m = detail::enclosed_depth(pool, pairs[k].shape_id_A, pairs[k].shape_id_B);
-        if (m) {
-          const auto& [nrm, cp1, cp2] = *m;
+        const auto& [depth, epa_normal] = epa_answers[hit_i++];
+        if (std::isfinite(depth) && std::isfinite(epa_normal[0]) &&
+            std::isfinite(epa_normal[1])) {
+          const V nrm{epa_normal[0], epa_normal[1]};
+          // the witnesses are the supporting faces along EPA's normal; h is
+          // EPA's depth (the spec's mapping: enclosed = -depth)
+          const auto [cp1, cp2] =
+              detail::face_witnesses(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, nrm);
           c.normal = nrm;
           c.cp1 = cp1;
           c.cp2 = cp2;
-          c.h = detail::vdot(nrm, detail::vsub2(cp2, cp1));
-        } else {  // ambiguous deepest face (e.g. coincident bodies):
-                  // keep-previous contract, finite outputs
+          c.h = -depth;
+        } else {  // EPA refused: keep-previous contract, finite outputs
           c.h = 0.0;
           c.normal = {0.0, 0.0};
           c.cp1 = {0.0, 0.0};

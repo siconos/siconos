@@ -164,12 +164,14 @@ void test_batch_engine() {
     check(near(out[0].cp2, {0.9, 0}, 1e-6), "cp2 == (0.9,0)");
     check(near(out[0].normal, {1, 0}, 1e-6), "normal == (1,0)");
   }
-  // two identical squares: enclosed, near-zero depth, finite outputs
+  // two identical squares: enclosed, and the depth is the minimum
+  // translation that separates them (the half-width of the difference
+  // square, 2) -- EPA answers it, so the h is -2
   {
     auto in = make_input({square_at(0, 0), square_at(0, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
     check(out[0].status == 1, "identical squares enclosed");
-    check(std::abs(out[0].h) <= 1e-6, "|h| < 1e-6");
+    check(std::abs(out[0].h + 2.0) <= 1e-6, "h == -2");
     for (double x : {out[0].h, out[0].normal[0], out[0].normal[1], out[0].cp1[0],
                      out[0].cp1[1], out[0].cp2[0], out[0].cp2[1]})
       check(std::isfinite(x), "all outputs finite");

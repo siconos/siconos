@@ -1221,13 +1221,109 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
       pool.entries[id_b].vertex_count == 0)
     return rejected();
 
-  const vector a = support_vector(seed[0]);
-  const vector b = support_vector(seed[1]);
-  const vector c = support_vector(seed[2]);
-  const scalar area =
-      (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
-  if (std::abs(area) <= options.tolerance) return rejected();
+  // A GJK witness can be degenerate. When the 2D search direction collapses
+  // -- the origin lies ON the segment between two supports -- the walk stops
+  // with a two-point simplex whose empty slot is padded by repeating a
+  // support, so the seed triangle has zero area. The 3D path bootstraps a
+  // non-degenerate polytope in that case (epa_penetration_3d); the 2D
+  // analogue queries a support off the degenerate line and restarts the face
+  // walk from that triangle. The walk then expands from the origin-carrying
+  // edge (whose distance to the origin is zero) towards the real closest
+  // face, which is the deep face of the difference polytope.
+  std::array<support, 3> tri{seed[0], seed[1], seed[2]};
+  {
+    const vector p0 = support_vector(tri[0]);
+    const vector p1 = support_vector(tri[1]);
+    const vector p2 = support_vector(tri[2]);
+    const scalar area =
+        (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0]);
+    if (std::abs(area) <= options.tolerance) {
+      // recover the distinct supports the degenerate seed repeats
+      std::size_t i0 = 0;
+      std::size_t i1 = 0;
+      bool have_second = false;
+      for (std::size_t i = 1; i < 3 && !have_second; ++i) {
+        const vector d = support_vector(tri[i]) - support_vector(tri[i0]);
+        if (num::inner_prod(d, d) > options.tolerance * options.tolerance) {
+          i1 = i;
+          have_second = true;
+        }
+      }
+      if (!have_second) {
+        // one support only: the difference is a point and the origin sits on
+        // it (a touching contact with no direction)
+        const vector p = support_vector(tri[i0]);
+        const scalar distance = std::sqrt(num::inner_prod(p, p));
+        const vector normal = distance > options.tolerance
+                                  ? vector{p[0] / distance, p[1] / distance}
+                                  : vector{0., 0.};
+        return {distance,
+                {static_cast<scalar>(normal[0]), static_cast<scalar>(normal[1])}};
+      }
+      const vector line = support_vector(tri[i1]) - support_vector(tri[i0]);
+      const scalar line_length = std::sqrt(num::inner_prod(line, line));
+      if (line_length > options.tolerance) {
+        const vector perp{-line[1], line[0]};
+        // a perpendicular probe can re-discover a support that lies on the
+        // line (a tied vertex on axis-aligned shapes), so the two oblique
+        // directions are probed as well
+        const vector oblique_a{line[0] + perp[0], line[1] + perp[1]};
+        const vector oblique_b{line[0] - perp[0], line[1] - perp[1]};
+        const std::array<vector, 4> probes{perp, vector{-perp[0], -perp[1]},
+                                           oblique_a, oblique_b};
+        bool bootstrapped = false;
+        for (const vector& probe : probes) {
+          if (num::inner_prod(probe, probe) <=
+              options.tolerance * options.tolerance)
+            continue;
+          const support candidate = diff_support(id_a, id_b, probe);
+          const vector off = support_vector(candidate) - support_vector(tri[i0]);
+          const scalar perpendicular_distance =
+              std::abs(line[0] * off[1] - line[1] * off[0]) / line_length;
+          if (perpendicular_distance > options.tolerance) {
+            tri[0] = tri[i0];
+            tri[1] = tri[i1];
+            tri[2] = candidate;
+            bootstrapped = true;
+            break;
+          }
+        }
+        if (!bootstrapped) {
+          // the difference polytope really is a segment: the minimum
+          // translation is the distance from the origin to that segment
+          const vector d = line;
+          const scalar dd = num::inner_prod(d, d);
+          scalar t = 0.;
+          if (dd > 0.) {
+            t = -num::inner_prod(support_vector(tri[i0]), d) / dd;
+            if (t < 0.) t = 0.;
+            if (t > 1.) t = 1.;
+          }
+          const vector closest = support_vector(tri[i0]) + t * d;
+          const scalar distance = std::sqrt(num::inner_prod(closest, closest));
+          const vector normal = distance > options.tolerance
+                                    ? vector{closest[0] / distance, closest[1] / distance}
+                                    : vector{-d[1], d[0]};
+          return {distance,
+                  {static_cast<scalar>(normal[0]), static_cast<scalar>(normal[1])}};
+        }
+      }
+    }
+  }
 
+  // The walk's exterior normals follow the triangle's orientation, and the
+  // two GJK paths can hand the same three supports in a different order,
+  // which would flip every normal the walk derives. Canonicalize the
+  // orientation (counterclockwise) so the answer's normal points away from
+  // the origin whatever order the witness came in.
+  const std::array<support, 3> oriented =
+      clockwise(support_vector(tri[0]), support_vector(tri[1]),
+                support_vector(tri[2]))
+          ? std::array<support, 3>{tri[0], tri[2], tri[1]}
+          : tri;
+  const vector a = support_vector(oriented[0]);
+  const vector b = support_vector(oriented[1]);
+  const vector c = support_vector(oriented[2]);
   const bool cw = clockwise(a, b, c);
 
   // The polytope can hold one vertex per point of the two shapes' difference.
@@ -1236,9 +1332,9 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
 
   auto& ring = arena.points;
   ring.reset();
-  ring.push_back(seed[0]);
-  ring.push_back(seed[1]);
-  ring.push_back(seed[2]);
+  ring.push_back(oriented[0]);
+  ring.push_back(oriented[1]);
+  ring.push_back(oriented[2]);
 
   for (std::size_t iteration = 0; iteration < options.max_iterations;
        ++iteration) {
