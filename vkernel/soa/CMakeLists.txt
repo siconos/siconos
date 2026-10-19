@@ -42,6 +42,9 @@ else()
   include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
 endif()
 
+# vendored cxd batch narrowphase headers (provenance: externals/cxd/VENDOR.md)
+include_directories(${CMAKE_SOURCE_DIR}/externals/cxd/src)
+
 if(WITH_GPU)
   add_subdirectory(extern/cuNSearch)
 else()
