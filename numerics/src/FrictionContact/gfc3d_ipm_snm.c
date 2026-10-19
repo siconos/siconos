@@ -426,7 +426,8 @@ static void gfc3d_IPM_SNM_compute_starting_point(size_t m, size_t nd, size_t d, 
                                                  NumericsMatrix* M, NumericsMatrix* H,
                                                  const double* f, const char* strToken,
                                                  double* reaction, double* velocity,
-                                                 double* globalVelocity, double* s) {
+                                                 double* globalVelocity, double* s,
+                                                 Gfc3d_IPM_init_data* data) {
   int load_starting_point = 0, pertu_point = 0;
 
   // Reset vars
@@ -438,9 +439,21 @@ static void gfc3d_IPM_SNM_compute_starting_point(size_t m, size_t nd, size_t d, 
 
   cblas_dcopy(m, f, 1, globalVelocity, 1);
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  int info_cholesky = NM_Cholesky_solve(M, globalVelocity, 1);
-  if (info_cholesky) {
-    numerics_printf_verbose(1, "Cholesky failed. We continue as if M is the identity matrix");
+  int info_cholesky = 1;
+  if (!data->cholesky_failed) {
+    info_cholesky = NM_Cholesky_solve(M, globalVelocity, 1);
+    if (info_cholesky) {
+      data->cholesky_failed = 1;
+      numerics_printf_verbose(1,
+                              "Cholesky failed. We continue as if M is the identity matrix");
+    }
+  } else {
+    numerics_printf_verbose(
+        2, "gfc3d_IPM_SNM_compute_starting_point: using LU after previous Cholesky failure");
+    int info_lu = NM_LU_solve(M, globalVelocity, 1);
+    if (info_lu) {
+      numerics_printf_verbose(1, "LU failed. We continue as if M is the identity matrix");
+    }
   }
 
   for (size_t i = 0; i < nd; i++)
@@ -870,7 +883,7 @@ static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
 
       // projerr = projectionError(velocity, reaction, n, tol);
       projerr = projectionError_based_reaction_norm_infinity_conic(H, M, f, w, reaction, n,
-                                                                   NOT_ON_DUAL_CONE);
+                                                                   NOT_ON_DUAL_CONE, ws->data);
 
       // if (total_time > max_time)
       if (0 == 1) {
@@ -1348,7 +1361,7 @@ static void gfc3d_IPM_SNM_step_QP2(gfc3d_IPM_SNM_workspace* ws) {
       // compute Projection Error
       // projerr = projectionError(velocity, reaction, n, tol);
       projerr = projectionError_based_reaction_norm_infinity_conic(H, M, f, w, reaction, n,
-                                                                   NOT_ON_DUAL_CONE);
+                                                                   NOT_ON_DUAL_CONE, ws->data);
 
       if (totalresidual <= tol) {
         double unitur;
@@ -1650,6 +1663,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
   Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
+  data->cholesky_failed = 0;
 
   double* f = problem->q;
 
@@ -1883,7 +1897,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   // computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
 
   gfc3d_IPM_SNM_compute_starting_point(m, nd, d, n, M, H, f, strToken, reaction, velocity,
-                                       globalVelocity, s);
+                                       globalVelocity, s, data);
 
   // Reset params
   iteration = 0;

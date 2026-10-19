@@ -451,7 +451,8 @@ double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix* H, Num
                                                           const double* f, const double* w,
                                                           const double* reaction,
                                                           const size_t varsCount,
-                                                          const int on_dual_cone) {
+                                                          const int on_dual_cone,
+                                                          Gfc3d_IPM_init_data* data) {
   size_t m = M->size0;
   size_t d = 3;
   size_t nd = varsCount * d;
@@ -462,10 +463,22 @@ double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix* H, Num
   // Re-compute v = M\(H'*r+f)
   cblas_dcopy(m, f, 1, globalVelocity, 1);
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  int info_cholesky = NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
-  if (info_cholesky) {
-    numerics_error_log("projectionError_based_reaction_norm_infinity_conic",
-                       "NM_Cholesky_solve failed, we switch to LU");
+  if (!data->cholesky_failed) {
+    int info_cholesky = NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
+    if (info_cholesky) {
+      data->cholesky_failed = 1;
+      numerics_error_log("projectionError_based_reaction_norm_infinity_conic",
+                         "NM_Cholesky_solve failed, we switch to LU");
+      int info_lu = NM_LU_solve(NM_preserve(M), globalVelocity, 1);
+      if (info_lu) {
+        numerics_error_log("projectionError_based_reaction_norm_infinity_conic",
+                           "NM_LU_solve failed");
+      }
+    }
+  } else {
+    numerics_printf_verbose(2,
+                            "projectionError_based_reaction_norm_infinity_conic: using LU "
+                            "after previous Cholesky failure");
     int info_lu = NM_LU_solve(NM_preserve(M), globalVelocity, 1);
     if (info_lu) {
       numerics_error_log("projectionError_based_reaction_norm_infinity_conic",
@@ -1205,7 +1218,8 @@ static void gfc3d_IPM_scale_problem(NumericsMatrix* M, NumericsMatrix* H_tilde,
 static void gfc3d_IPM_compute_starting_point(size_t m, size_t nd, size_t d, NumericsMatrix* M,
                                              NumericsMatrix* H, const double* f,
                                              double* reaction, double* velocity,
-                                             double* globalVelocity) {
+                                             double* globalVelocity,
+                                             Gfc3d_IPM_init_data* data) {
   for (size_t i = 0; i < nd; i++)
     if (i % d == 0)
       reaction[i] = 0.1;
@@ -1214,7 +1228,21 @@ static void gfc3d_IPM_compute_starting_point(size_t m, size_t nd, size_t d, Nume
 
   for (size_t i = 0; i < m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
+  if (!data->cholesky_failed) {
+    int info_cholesky = NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
+    if (info_cholesky) {
+      data->cholesky_failed = 1;
+      numerics_printf_verbose(1,
+                              "Cholesky failed. We continue as if M is the identity matrix");
+    }
+  } else {
+    numerics_printf_verbose(
+        2, "gfc3d_IPM_compute_starting_point: using LU after previous Cholesky failure");
+    int info_lu = NM_LU_solve(NM_preserve(M), globalVelocity, 1);
+    if (info_lu) {
+      numerics_printf_verbose(1, "LU failed. We continue as if M is the identity matrix");
+    }
+  }
 
   for (size_t i = 0; i < nd; i++)
     if (i % d == 0)
@@ -3941,6 +3969,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   }
 
   Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
+  data->cholesky_failed = 0;
   NumericsMatrix* P_mu = data->P_mu->mat;
   NumericsMatrix* P_mu_inv = data->P_mu->inv_mat;
 
@@ -3967,7 +3996,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
   /* COMPUTATION OF A NEW STARTING POINT */
-  gfc3d_IPM_compute_starting_point(m, nd, d, M, H, f, reaction, velocity, globalVelocity);
+  gfc3d_IPM_compute_starting_point(m, nd, d, M, H, f, reaction, velocity, globalVelocity,
+                                   data);
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   size_t max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -5110,6 +5140,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   }
 
   Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
+  data->cholesky_failed = 0;
   NumericsMatrix* P_mu = data->P_mu->mat;
   // NumericsMatrix* P_mu_inv = data->P_mu->inv_mat;
 

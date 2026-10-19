@@ -57,6 +57,9 @@ typedef struct {
 
   double** tmp_vault_nd;
   double** tmp_vault_m;
+
+  /* If Cholesky failed once on M, remember to use LU for subsequent solves. */
+  int cholesky_failed;
 } Gfc3d_IPM_init_data;
 
 typedef long double float_type;
@@ -252,7 +255,8 @@ double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix* H, Num
                                                           const double* f, const double* w,
                                                           const double* reaction,
                                                           const size_t varsCount,
-                                                          const int on_dual_cone);
+                                                          const int on_dual_cone,
+                                                          Gfc3d_IPM_init_data* data);
 
 /* Routine is to read matrix-block in hdf5 file
  * type = 0 : return number of blocks (blk_index is neglected)
