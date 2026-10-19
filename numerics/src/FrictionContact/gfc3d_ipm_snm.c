@@ -331,18 +331,21 @@ static int NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const size_t start
  * ------------------------------ */
 
 /* Prepare the problem matrices: symmetrize M and, if requested, convert M and H to sparse
- * storage. Outputs M (may point to problem->M or a fresh copy) and H_tilde (a transpose or a
+ * storage. Outputs M (may point to problem->M or a fresh copy), the original
+ * problem->M if it was symmetrized (NULL otherwise), and H_tilde (a transpose or a
  * sparse copy of the transpose). */
 static void gfc3d_IPM_SNM_prepare_problem(GlobalFrictionContactProblem* problem,
                                           SolverOptions* options, size_t m, size_t nd,
                                           NumericsMatrix** M_out,
+                                          NumericsMatrix** M_original_out,
                                           NumericsMatrix** H_tilde_out) {
   /* symmetrization of the matrix M */
+  *M_original_out = NULL;
   if (!(NM_is_symmetric(problem->M))) {
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix* MT = NM_transpose(problem->M);
     NumericsMatrix* MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
-    NM_free(problem->M);
+    *M_original_out = problem->M; /* keep the user-provided matrix for restoration */
     problem->M = MSym;
     MT = NM_free(MT);
   }
@@ -435,7 +438,10 @@ static void gfc3d_IPM_SNM_compute_starting_point(size_t m, size_t nd, size_t d, 
 
   cblas_dcopy(m, f, 1, globalVelocity, 1);
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  NM_Cholesky_solve(M, globalVelocity, 1);
+  int info_cholesky = NM_Cholesky_solve(M, globalVelocity, 1);
+  if (info_cholesky) {
+    numerics_printf_verbose(1, "Cholesky failed. We continue as if M is the identity matrix");
+  }
 
   for (size_t i = 0; i < nd; i++)
     if (i % d == 0)
@@ -548,6 +554,8 @@ typedef struct {
   double totalresidual;
   double projerr;
 
+  NumericsMatrix* M;
+  NumericsMatrix* M_original;
   NumericsMatrix* H_tilde;
   NumericsMatrix* H;
   NumericsMatrix* minus_H;
@@ -603,6 +611,17 @@ static void gfc3d_IPM_SNM_cleanup(gfc3d_IPM_SNM_cleanup_data* cd, int* info) {
   cd->options->solverData = (double*)malloc(sizeof(double));
   double* projerr_ptr = (double*)cd->options->solverData;
   *projerr_ptr = cd->projerr;
+
+  /* Free any working copy of M that is not the problem's own matrix (e.g. a
+   * sparse-storage copy), then restore the original user-provided M if
+   * symmetrization replaced it. */
+  if (cd->M && cd->M != cd->problem->M) {
+    cd->M = NM_free(cd->M);
+  }
+  if (cd->M_original) {
+    cd->problem->M = NM_free(cd->problem->M);
+    cd->problem->M = cd->M_original;
+  }
 
   if (cd->H_tilde) cd->H_tilde = NM_free(cd->H_tilde);
   if (cd->minus_H) cd->minus_H = NM_free(cd->minus_H);
@@ -1615,11 +1634,12 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   size_t no_m = 0, no_nd = 0;
 
   NumericsMatrix* M = NULL;
+  NumericsMatrix* M_original = NULL;
   NumericsMatrix* H_tilde = NULL;
 
   /* globalFrictionContact_display(problem); */
 
-  gfc3d_IPM_SNM_prepare_problem(problem, options, m, nd, &M, &H_tilde);
+  gfc3d_IPM_SNM_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde);
 
   // initialize solver if it is not set
   int internal_allocation = 0;
@@ -2158,6 +2178,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   cd.reaction = reaction;
   cd.totalresidual = totalresidual;
   cd.projerr = projerr;
+  cd.M = M;
+  cd.M_original = M_original;
   cd.H_tilde = H_tilde;
   cd.H = H;
   cd.minus_H = minus_H;

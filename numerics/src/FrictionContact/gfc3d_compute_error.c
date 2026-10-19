@@ -253,7 +253,15 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
 
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
-  NM_Cholesky_solve(NM_preserve(M), tmp, 1);
+  int info_cholesky = NM_Cholesky_solve(NM_preserve(M), tmp, 1);
+  if (info_cholesky) {
+    numerics_error_log("gfc3d_compute_error_r", "NM_Cholesky_solve failed, we switch to LU");
+    int info_lu = NM_LU_solve(NM_preserve(M), tmp, 1);
+    if (info_lu) {
+      numerics_error_log("gfc3d_compute_error_r", "NM_LU_solve failed");
+    }
+  }
+
   cblas_dcopy(m, problem->b, 1, tmp_1, 1);
   NM_tgemv(1, H, tmp, 1.0, tmp_1);
   // cblas_daxpy(n, 1.0, problem->b, 1, tmp_1, 1);

@@ -4104,9 +4104,11 @@ int NM_LU_factorize(NumericsMatrix* Ao) {
             info = !CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A);
             if (info) {
               numerics_printf_verbose(2, "NM_LU_factorize: csparse factorization failed.");
+              free(cs_lu_A);
+            } else {
+              assert(!p->linear_solver_data);
+              p->linear_solver_data = cs_lu_A;
             }
-            assert(!p->linear_solver_data);
-            p->linear_solver_data = cs_lu_A;
             break;
 #ifdef WITH_MUMPS
           case NSM_MUMPS: {
@@ -4172,6 +4174,18 @@ int NM_LU_factorize(NumericsMatrix* Ao) {
       NM_internalData(A)->isLUfactorized = true;
     } else {
       assert(NM_internalData(A)->isLUfactorized == false);
+      /* Clean up partial/failed LU state so that another solver can be tried.
+       * Only drop the hook if no linear_solver_data was produced, to avoid
+       * destroying a previously valid factorization. */
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      if (p->solver_free_hook && !p->linear_solver_data) {
+        p->solver_free_hook = NULL;
+      }
+      if (p->dWork) {
+        free(p->dWork);
+        p->dWork = NULL;
+        p->dWorkSize = 0;
+      }
     }
   }
 
@@ -4185,7 +4199,11 @@ int NM_LU_solve(NumericsMatrix* Ao, double* b, size_t nrhs) {
 
   /* factorization is done on destructible part only if
    * !A->internalData->isLUfactorized */
-  NM_LU_factorize(Ao);
+  info = NM_LU_factorize(Ao);
+  if (info) {
+    numerics_error_log("NM_LU_solve", "factorization failed, solve aborted.");
+    return info;
+  }
 
   /* get the destructible part of the matrix */
   NumericsMatrix* A = Ao->destructible;
@@ -4299,7 +4317,11 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
 
   /* factorization is done on destructible part only if
    * !A->internalData->isLUfactorized */
-  NM_LU_factorize(Ao);
+  info = NM_LU_factorize(Ao);
+  if (info) {
+    numerics_error_log("NM_LU_solve_matrix_rhs", "factorization failed, solve aborted.");
+    return info;
+  }
 
   /* get the destructible part of the matrix */
   NumericsMatrix* A = Ao->destructible;
@@ -5244,14 +5266,16 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao) {
             numerics_printf_verbose(
                 2, "NM_Cholesky_factorize, using CSparse (chol_factorization)");
 
-            if (!(p->dWork && p->linear_solver_data)) {
-              assert(!NSM_workspace(p));
+            if (!p->linear_solver_data) {
               assert(!NSM_linear_solver_data(p));
-              assert(!p->solver_free_hook);
 
-              p->solver_free_hook = &NSM_clear_p;
-              p->dWork = (double*)malloc(A->size1 * sizeof(double));
-              p->dWorkSize = A->size1;
+              if (!p->solver_free_hook) {
+                p->solver_free_hook = &NSM_clear_p;
+              }
+              if (!p->dWork) {
+                p->dWork = (double*)malloc(A->size1 * sizeof(double));
+                p->dWorkSize = A->size1;
+              }
             };
 
             CSparseMatrix_factors* cs_chol_A =
@@ -5262,9 +5286,11 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao) {
             if (info) {
               numerics_printf_verbose(2,
                                       "NM_Cholesky_factorize: csparse factorization failed.");
+              free(cs_chol_A);
+            } else {
+              assert(!p->linear_solver_data);
+              p->linear_solver_data = cs_chol_A;
             }
-            assert(!p->linear_solver_data);
-            p->linear_solver_data = cs_chol_A;
             break;
 #ifdef WITH_MUMPS
           case NSM_MUMPS: {
@@ -5328,6 +5354,19 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao) {
       NM_internalData(A)->isCholeskyfactorized = true;
     } else {
       assert(NM_internalData(A)->isCholeskyfactorized == false);
+      /* Clean up partial/failed Cholesky state so that another solver (e.g. LU)
+       * can be tried on the same matrix. We only drop the hook if no
+       * linear_solver_data was produced: this avoids destroying a previously
+       * valid LU/LDLT factorization that might still be attached to the matrix. */
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      if (p->solver_free_hook && !p->linear_solver_data) {
+        p->solver_free_hook = NULL;
+      }
+      if (p->dWork) {
+        free(p->dWork);
+        p->dWork = NULL;
+        p->dWorkSize = 0;
+      }
     }
   }
 
@@ -5341,7 +5380,11 @@ int NM_Cholesky_solve(NumericsMatrix* Ao, double* b, size_t nrhs) {
   lapack_int info = 1;
   /* factorization is done on destructible part only if
    * !A->internalData->isLUfactorized */
-  NM_Cholesky_factorize(Ao);
+  info = NM_Cholesky_factorize(Ao);
+  if (info) {
+    numerics_error_log("NM_Cholesky_solve", "factorization failed, solve aborted.");
+    return info;
+  }
 
   /* get the destructible part of the matrix */
   NumericsMatrix* A = Ao->destructible;
@@ -5444,7 +5487,11 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
 
   /* factorization is done on destructible part only if
    * !A->internalData->isCHOLESKYfactorized */
-  NM_Cholesky_factorize(Ao);
+  info = NM_Cholesky_factorize(Ao);
+  if (info) {
+    numerics_error_log("NM_Cholesky_solve_matrix_rhs", "factorization failed, solve aborted.");
+    return info;
+  }
 
   /* get the destructible part of the matrix */
   NumericsMatrix* A = Ao->destructible;
@@ -6260,22 +6307,15 @@ int NM_is_symmetric(NumericsMatrix* A) {
   NumericsMatrix* AplusATrans = NM_add(1 / 2.0, A, -1 / 2.0, Atrans);
   double norm_inf = NM_norm_inf(AplusATrans);
 
+  numerics_printf_verbose(2, "NM_is_symmetric : norm_inf : %12.3e\n", norm_inf);
+
   NM_free(Atrans);
   NM_free(AplusATrans);
 
   if (norm_inf <= DBL_EPSILON * 10) {
     return 1;
   }
-  /* int n = A->size0; */
-  /* int m = A->size1; */
-  /* for (int i =0; i < n ; i++) */
-  /* { */
-  /*   for (int j =0 ; j < m ; j++) */
-  /*   { */
-  /*     if (fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)) >= DBL_EPSILON) */
-  /*       return 0; */
-  /*   } */
-  /* }   */
+
   return 0;
 }
 

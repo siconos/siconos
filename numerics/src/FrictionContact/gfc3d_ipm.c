@@ -462,8 +462,16 @@ double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix* H, Num
   // Re-compute v = M\(H'*r+f)
   cblas_dcopy(m, f, 1, globalVelocity, 1);
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  NM_Cholesky_solve(M, globalVelocity, 1);
-
+  int info_cholesky = NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
+  if (info_cholesky) {
+    numerics_error_log("projectionError_based_reaction_norm_infinity_conic",
+                       "NM_Cholesky_solve failed, we switch to LU");
+    int info_lu = NM_LU_solve(NM_preserve(M), globalVelocity, 1);
+    if (info_lu) {
+      numerics_error_log("projectionError_based_reaction_norm_infinity_conic",
+                         "NM_LU_solve failed");
+    }
+  }
   // Re-compute u = Hv + w + phi(Hv + w)
   cblas_dcopy(nd, w, 1, velocity, 1);
   NM_gemv(1, H, globalVelocity, 1.0, velocity);
@@ -1097,17 +1105,21 @@ void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* option
 }
 
 /* Prepare the problem matrices: symmetrize M, optionally force sparse storage, and compute the
- * block-diagonal inverse Minv needed by the 1x1 QPH formulation. */
+ * block-diagonal inverse Minv needed by the 1x1 QPH formulation. Outputs M (may point to
+ * problem->M or a fresh copy), the original problem->M if it was symmetrized (NULL otherwise),
+ * H_tilde and Minv. */
 static void gfc3d_IPM_prepare_problem(GlobalFrictionContactProblem* problem,
                                       SolverOptions* options, size_t m, size_t nd,
-                                      NumericsMatrix** M_out, NumericsMatrix** H_tilde_out,
+                                      NumericsMatrix** M_out, NumericsMatrix** M_original_out,
+                                      NumericsMatrix** H_tilde_out,
                                       NumericsMatrix** Minv_out) {
   /* symmetrization of the matrix M */
+  *M_original_out = NULL;
   if (!(NM_is_symmetric(problem->M))) {
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix* MT = NM_transpose(problem->M);
     NumericsMatrix* MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
-    NM_free(problem->M);
+    *M_original_out = problem->M; /* keep the user-provided matrix for restoration */
     problem->M = MSym;
     NM_free(MT);
   }
@@ -1225,6 +1237,8 @@ typedef struct {
   size_t iteration;
   double* velocity;
   double* reaction;
+  NumericsMatrix* M;
+  NumericsMatrix* M_original;
   double* globalVelocity;
   double* s;
   double* diff_fixp_vec;
@@ -1290,6 +1304,17 @@ static void gfc3d_IPM_cleanup(gfc3d_IPM_cleanup_data* cd, int* info) {
   }
 
   cd->options->solverData = (double*)malloc(sizeof(double));
+
+  /* Free any working copy of M that is not the problem's own matrix (e.g. a
+   * sparse-storage copy), then restore the original user-provided M if
+   * symmetrization replaced it. */
+  if (cd->M && cd->M != cd->problem->M) {
+    cd->M = NM_free(cd->M);
+  }
+  if (cd->M_original) {
+    cd->problem->M = NM_free(cd->problem->M);
+    cd->problem->M = cd->M_original;
+  }
 
   if (cd->H_tilde) cd->H_tilde = NM_free(cd->H_tilde);
   if (cd->minus_H) cd->minus_H = NM_free(cd->minus_H);
@@ -3899,12 +3924,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   size_t n = problem->numberOfContacts;
 
   NumericsMatrix* M = NULL;
+  NumericsMatrix* M_original = NULL;
   NumericsMatrix* H_tilde = NULL;
 
   /* globalFrictionContact_display(problem); */
 
   NumericsMatrix* Minv = NULL;
-  gfc3d_IPM_prepare_problem(problem, options, m, nd, &M, &H_tilde, &Minv);
+  gfc3d_IPM_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde, &Minv);
 
   // initialize solver if it is not set
   int internal_allocation = 0;
@@ -4767,6 +4793,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cd.velocity = velocity;
   cd.reaction = reaction;
   cd.totalresidual = totalresidual;
+  cd.M = M;
+  cd.M_original = M_original;
   cd.P_mu = P_mu;
   cd.P_mu_inv = P_mu_inv;
   cd.H_tilde = H_tilde;
@@ -5053,6 +5081,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   size_t no_m = 0, no_nd = 0;
 
   NumericsMatrix* M = NULL;
+  NumericsMatrix* M_original = NULL;
   NumericsMatrix* H_tilde = NULL;
   NumericsMatrix* eye_nd = NM_eye(nd);
 
@@ -5061,7 +5090,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix* MT = NM_transpose(problem->M);
     NumericsMatrix* MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
-    NM_free(problem->M);
+    M_original = problem->M; /* keep the user-provided matrix for restoration */
     problem->M = MSym;
     NM_free(MT);
   }
@@ -5432,6 +5461,8 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   cd.s = s;
   cd.diff_fixp_vec = diff_fixp_vec;
   cd.totalresidual = totalresidual;
+  cd.M = M;
+  cd.M_original = M_original;
   cd.H_tilde = H_tilde;
   cd.H = H;
   cd.minus_M = minus_M;
