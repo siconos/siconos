@@ -24,6 +24,7 @@ if(WITH_vkernel_TESTING)
   add_executable(fem_t3 fem_t3.cpp)
 
   add_executable(cxd_batch_smoke cxd_batch_smoke.cpp)
+  add_executable(polytope_cxd polytope_cxd.cpp)
 
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
 
@@ -45,6 +46,7 @@ if(WITH_vkernel_TESTING)
   set_target_properties(fixed_disks PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
   set_target_properties(fem_t3 PROPERTIES COMPILE_FLAGS "${flags}")
   set_target_properties(cxd_batch_smoke PROPERTIES COMPILE_FLAGS "${flags}")
+  set_target_properties(polytope_cxd PROPERTIES COMPILE_FLAGS "${flags}")
 
 
   target_link_libraries(t1 Eigen3::Eigen numerics pthread)
@@ -65,5 +67,6 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread ${COMPACTNSEARCH})
 
   target_link_libraries(cxd_batch_smoke Eigen3::Eigen numerics pthread)
+  target_link_libraries(polytope_cxd Eigen3::Eigen numerics pthread)
 
 endif()

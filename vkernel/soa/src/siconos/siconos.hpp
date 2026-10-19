@@ -12,6 +12,7 @@
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/line.hpp"
+#include "siconos/collision/shape/polytope.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/config/config.hpp"
 #include "siconos/config/environment.hpp"
