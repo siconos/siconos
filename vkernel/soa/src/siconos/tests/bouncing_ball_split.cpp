@@ -1,7 +1,7 @@
+#include "bouncing_ball_split.hpp"
+
 #include <fstream>
 #include <print>
-
-#include "bouncing_ball_split.hpp"
 
 int main(int argc, char* argv[]) {
   namespace storage = siconos::storage;

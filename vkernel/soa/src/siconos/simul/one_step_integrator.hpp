@@ -680,8 +680,9 @@ struct one_step_integrator {
       // assembled iteration matrix
       std::vector<algebra::factored_block> factored_blocks(auto step, auto time_step) {
         std::vector<algebra::factored_block> blocks;
-        mp::for_each(elements(),
-                     [&](auto elem) { elem.collect_factored_blocks(step, time_step, blocks); });
+        mp::for_each(elements(), [&](auto elem) {
+          elem.collect_factored_blocks(step, time_step, blocks);
+        });
         return blocks;
       }
 

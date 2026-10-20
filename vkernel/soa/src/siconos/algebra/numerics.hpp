@@ -603,7 +603,9 @@ class block_diagonal_solver {
     return _known[j] >= 0 ? _known[j] : number_of_factored() + _blocks.comp[j];
   }
   CS_INT number_of_factored() const { return static_cast<CS_INT>(_factored.size()); }
-  CS_INT number_of_groups() const { return number_of_factored() + _blocks.number_of_components(); }
+  CS_INT number_of_groups() const {
+    return number_of_factored() + _blocks.number_of_components();
+  }
 
   CS_INT size(CS_INT g) const {
     return g < number_of_factored() ? _factored[g].size
@@ -619,9 +621,7 @@ class block_diagonal_solver {
   // a component whose dofs belong to a factored block: the blocks are
   // checked to be diagonal blocks of A, so a component is either fully
   // inside one of them or outside all of them
-  bool covered(CS_INT g) const {
-    return g >= number_of_factored() && _known[dof(g, 0)] >= 0;
-  }
+  bool covered(CS_INT g) const { return g >= number_of_factored() && _known[dof(g, 0)] >= 0; }
   // a 1x1 component that is not part of a factored block
   bool diagonal(CS_INT g) const {
     return g >= number_of_factored() && size(g) == 1 && !covered(g);
@@ -636,8 +636,7 @@ class block_diagonal_solver {
     if (size(g) <= small_block_size) return nullptr;
     auto& f = _local_factors[g];
     if (!f) {
-      f = std::make_unique<sparse_factor>(
-          _blocks.sparse_block(_a, g - number_of_factored()));
+      f = std::make_unique<sparse_factor>(_blocks.sparse_block(_a, g - number_of_factored()));
     }
     return f.get();
   }
@@ -769,7 +768,8 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& iteration_matrix, mat<W>& w_ma
 
       std::vector<sparse_factor::index_t> local_slots(locals.size());
       for (std::size_t l = 0; l < locals.size(); ++l) local_slots[l] = factor->slot(locals[l]);
-      for (auto& e : entries) e.local = factor->slot(static_cast<sparse_factor::index_t>(e.local));
+      for (auto& e : entries)
+        e.local = factor->slot(static_cast<sparse_factor::index_t>(e.local));
 
       // group entries by row
       std::ranges::stable_sort(entries, {}, &h_entry::row);

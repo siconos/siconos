@@ -33,7 +33,7 @@ struct data_t : decltype(storage()
 #else
                              .build_world()
 #endif
-                                 ){};
+                ){};
 }  // namespace siconos::config
 
 // defined in bouncing_ball_split_sim.cpp

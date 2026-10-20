@@ -77,9 +77,9 @@ struct topology : item {
 
              // factorizations of M + h^2 theta^2 K and M, built once (see
              // algebra::fem_operator)
-             storage::without_binding<storage::attached<
-                 dsystem, symbol<"fem_operator">,
-                 some::specific<std::shared_ptr<algebra::fem_operator>>>>,
+             storage::without_binding<
+                 storage::attached<dsystem, symbol<"fem_operator">,
+                                   some::specific<std::shared_ptr<algebra::fem_operator>>>>,
 
              storage::attached<finteraction, symbol<"nds">, some::indice>,
              storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,

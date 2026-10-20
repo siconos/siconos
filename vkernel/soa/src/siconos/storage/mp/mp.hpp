@@ -436,7 +436,7 @@ auto to_database(tuple<Pairs...>&& data) {
 template <typename... Pairs1, typename... Pairs2>
 constexpr auto merge_databases(database<Pairs1...>&& db1, database<Pairs2...>&& db2) {
   return to_database(hana::concat(static_cast<tuple<Pairs1...>&&>(db1.store),
-                                   static_cast<tuple<Pairs2...>&&>(db2.store)));
+                                  static_cast<tuple<Pairs2...>&&>(db2.store)));
 }
 
 using hana::make_map;
