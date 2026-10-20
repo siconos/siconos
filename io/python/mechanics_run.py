@@ -3304,6 +3304,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options["time_stepping"] = time_stepping
             run_options["interaction_manager"] = interaction_manager
             run_options["bullet_options"] = bullet_options
+            run_options["vnative_options"] = vnative_options
             run_options["controller"] = controller
             run_options["gravity_scale"] = gravity_scale
             run_options["t0"] = t0
