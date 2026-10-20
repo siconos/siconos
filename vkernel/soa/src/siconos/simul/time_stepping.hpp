@@ -98,7 +98,7 @@ struct time_stepping : item {
 
         mp::for_each(osi.elements(), [&](auto elem) {
           // a least one activated interaction
-          elem.compute_h_matrices(step);
+          elem.ensure_h_matrices(step);
         });
 
         osi.assemble_h_matrix_for_involved_ds(step);

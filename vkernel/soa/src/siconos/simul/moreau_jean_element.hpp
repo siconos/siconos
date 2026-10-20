@@ -329,14 +329,24 @@ struct moreau_jean_element : item {
       }
     }
 
+    static constexpr bool time_invariant_h_matrices() {
+      using data_t = const std::decay_t<typename Handle::data_t>;
+      return storage::has_property_t<interaction, property::time_invariant, data_t>();
+    }
+
     void update_h_matrices(auto step) {
-      auto& data = self()->data();
-      using data_t = const std::decay_t<decltype(data)>;
-      if constexpr (!storage::has_property_t<interaction, property::time_invariant,
-                                             data_t>()) {
+      if constexpr (!time_invariant_h_matrices()) {
         compute_h_matrices(step);
       }
     };
+
+    // jacobians for the assembly: already up to date at this step if
+    // update_h_matrices computed them (q(step) has not changed since)
+    void ensure_h_matrices(auto step) {
+      if constexpr (time_invariant_h_matrices()) {
+        compute_h_matrices(step);
+      }
+    }
 
     // update v(step + 1)
     void compute_free_state(auto step, auto h) {
