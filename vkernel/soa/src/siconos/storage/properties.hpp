@@ -81,9 +81,14 @@ struct with_properties : item, with_properties_base {
   using properties = gather<Parts...>;
 };
 
+// An attached storage that is not bound to python.  It derives from the
+// attached storage itself so that it keeps its item, tag and attribute:
+// it is stored and found by the property lookups like the plain
+// attached storage, only the binding loop (py_bind.hpp) skips it.  (Not
+// also derived from property::without_binding: Attr is already a
+// some::property, a second base would make it ambiguous.)
 template <match::attribute Attr>
-struct without_binding : property::without_binding {
-  using type = Attr;
+struct without_binding : Attr {
   using without_binding_t = void;
 };
 
