@@ -27,6 +27,7 @@
   #:use-module (gnu packages python-build)
   #:use-module (gnu packages python-science)
   #:use-module (gnu packages python-xyz)
+  #:use-module (gnu packages simulation)
   #:use-module (gnu packages swig)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages xml)
