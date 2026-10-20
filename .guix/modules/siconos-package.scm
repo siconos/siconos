@@ -154,9 +154,34 @@ problems.")
                   (("new_test\\(SOURCES CableDSTest.cpp")
                    "# new_test(SOURCES CableDSTest.cpp"))))
 
-                ;; wrap siconos file
-            	    (add-after 'install 'wrap-python
-              (assoc-ref py:%standard-phases 'wrap))
+                ;; wrap siconos file and friends.  py:wrap embeds the
+                ;; build-time GUIX_PYTHONPATH, which does not contain
+                ;; the site-packages of output. Record it in the
+                ;; environment before the standard wrap is run.
+                (add-after 'install 'wrap-python
+                  (lambda* (#:key inputs outputs #:allow-other-keys)
+                    (let ((own-sites
+                           (find-files (string-append (assoc-ref outputs "out")
+                                                      "/lib")
+                                       (lambda (file stat)
+                                         (and (eq? 'directory (stat:type stat))
+                                              (string-suffix? "/site-packages"
+                                                              file)))
+                                       #:directories? #t)))
+                      (for-each
+                       (lambda (site)
+                         (let ((env (getenv "GUIX_PYTHONPATH")))
+                           (setenv "GUIX_PYTHONPATH"
+                                   (string-append
+                                    site
+                                    (if (and env (not (string=? env "")))
+                                        (string-append ":" env)
+                                        "")))))
+                       own-sites)
+                      ;; standard wrap of bin/ scripts; embeds the
+                      ;; current GUIX_PYTHONPATH in each wrapper
+                      ((assoc-ref py:%standard-phases 'wrap)
+                       #:inputs inputs #:outputs outputs))))
 	      	    )))
 
     (native-inputs (list clang-toolchain-21
