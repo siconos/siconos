@@ -34,12 +34,14 @@ struct env : standard_environment<T> {
 };
 
 struct make
-    : storage::make<config::env, fem_ds, simulation,
-                    storage::with_properties<
-                        storage::time_invariant<storage::attr_t<ball, "fext">>,
-                        storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-                        storage::assembled_diagonal<storage::attr_t<
-                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+    : storage::make_compile_time_database<
+          config::env, fem_ds, simulation,
+          storage::with_properties<
+              storage::time_invariant<storage::attr_t<ball, "fext">>,
+              storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
+              storage::assembled_diagonal<
+                  storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
+};
 
 }  // namespace siconos::config
 

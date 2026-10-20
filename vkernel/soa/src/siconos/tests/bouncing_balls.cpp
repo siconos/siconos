@@ -26,7 +26,7 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make<
+    : storage::make_compile_time_database<
           env, simulation, storage::pattern::wrap<some::unbounded_collection, ball>,
           storage::pattern::wrap<some::bounded_collection, relation, some::indice_value<1>>,
           storage::pattern::wrap<some::unbounded_collection, interaction>,

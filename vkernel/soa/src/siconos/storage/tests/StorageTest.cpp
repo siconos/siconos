@@ -55,9 +55,10 @@ struct env {
 
 struct params {};
 
-struct make : storage::make<env, item_a, item_b,
-                            with_properties<wrapped<item_a, some::unbounded_collection>,
-                                            wrapped<item_b, some::unbounded_collection>>> {};
+struct make : storage::make_compile_time_database<
+                  env, item_a, item_b,
+                  with_properties<wrapped<item_a, some::unbounded_collection>,
+                                  wrapped<item_b, some::unbounded_collection>>> {};
 
 }  // namespace siconos::config
 

@@ -192,7 +192,7 @@ struct registry {
   registry(registry&&) = default;
   registry& operator=(registry&&) = default;
 
-  // deep copy, as the storage::make database it replaces is copyable
+  // deep copy, as the storage::make_compile_time_database it replaces is copyable
   registry(const registry& other)
       : slots(other.slots.size()), kinds(other.kinds), kind_registered(other.kind_registered) {
     for (std::size_t i = 0; i < slots.size(); ++i) {
@@ -340,7 +340,7 @@ concept configuration_item = match::item<T> && requires { typename T::properties
  * closure (step (a) P4).
  *
  * all_properties_t holds ONLY the configuration's properties (the
- * with_properties<...> given to make_world): the user refinements, wrappers
+ * with_properties<...> given to make_runtime_database): the user refinements, wrappers
  * and configuration-declared attached storages.  Properties declared by items
  * (topology's attached storages, keep<> depths) are not there on purpose: a
  * lookup of those must name its declarer, and a world-wide one fails to
@@ -354,7 +354,7 @@ struct world_config {
   using all_properties_t = ConfigProperties;
 };
 
-/// the with_properties<...> lists among the items given to make_world
+/// the with_properties<...> lists among the items given to make_runtime_database
 template <match::item... Items>
 using configuration_properties_t = decltype(mp::concat_all([] {
   if constexpr (registry_detail::configuration_item<Items>) {
@@ -367,7 +367,7 @@ using configuration_properties_t = decltype(mp::concat_all([] {
 /**
  * @brief Concrete column type of one attribute key.
  *
- * The same three stages as storage::make::internal_build (attribute
+ * The same three stages as storage::make_compile_time_database::internal_build (attribute
  * refinement, item wrapper or default storage, memory depth), applied to a
  * single key instead of to the whole database. It is a class template, so it
  * is computed once per key however many access sites ask for it.
@@ -451,9 +451,10 @@ static constexpr auto is_attached_dynamic = mp::is_a_model<[]<typename T>() cons
  *
  * It is its own store, so every existing access site, which goes through
  * mp::get<A>(data.store()), works unchanged. Handles carry world<Info>
- * instead of the database type of storage::make.  Info is a world_config
- * (make_world): the environment and the configuration's properties, not the
- * item closure, which only the constructor of make_world uses.
+ * instead of the database type of make_compile_time_database.  Info is a
+ * world_config (make_runtime_database): the environment and the
+ * configuration's properties, not the item closure, which only the
+ * constructor of make_runtime_database uses.
  */
 template <typename Info>
 struct world {
@@ -475,8 +476,8 @@ struct world {
 
   /// Create every column of the world up front, with its depth: the
   /// attributes of every item and the static attached storages declared for
-  /// it, as storage::make enumerates them.  Afterwards every access takes the
-  /// fast path of registry::column.
+  /// it, as storage::make_compile_time_database enumerates them.  Afterwards every access
+  /// takes the fast path of registry::column.
   ///
   /// WorldInfo is the full world_info (item closure, all properties): only
   /// here, where the world is built, are the keep<> depths and the item lists
@@ -509,16 +510,27 @@ struct world {
   }
 };
 
-/// storage::make counterpart that builds a world instead of a database; its
-/// columns are registered on construction.  Handles of it carry
+/// make_compile_time_database counterpart that builds a runtime
+/// (registry-backed) database: its columns are compile-time typed per key
+/// (same refine -> wrapper -> keep<> pipeline as its counterpart, see
+/// column_of), but materialised (registered) at run time, at construction.
+/// Much faster to compile than make_compile_time_database (no database type:
+/// no per-TU instantiation, see SiconosVkernelRegistryWorld), at the cost of
+/// a small runtime column lookup (+1 to +4% measured, less with
+/// -DVKERNEL_UNCHECKED_LOOKUP).  Handles of it carry
 /// world<world_config<...>>: the configuration, not the item closure.
 template <template <typename> typename Env, match::item... Items>
-struct make_world : world<world_config<Env, configuration_properties_t<Items...>>> {
+struct make_runtime_database : world<world_config<Env, configuration_properties_t<Items...>>> {
   /// the full description (item closure, every property): for registration
   /// and for assembly code such as the python bindings, never in handles
   using world_info_t = world_info<Env, Items...>;
 
-  make_world() { this->template register_columns<world_info_t>(); }
+  make_runtime_database() { this->template register_columns<world_info_t>(); }
 };
+
+/// previous name of make_runtime_database, kept so existing call sites
+/// compile
+template <template <typename> typename Env, match::item... Items>
+using make_world = make_runtime_database<Env, Items...>;
 
 }  // namespace siconos::storage

@@ -91,7 +91,7 @@ static_assert(std::is_same_v<
 static_assert(
     std::is_same_v<
         typename std::decay_t<decltype(storage::mp::get<storage::info>(
-            storage::make<
+            storage::make_compile_time_database<
                 standard_environment, item0,
                 storage::with_properties<storage::diagonal<attr_t<item0, "attr0">>>>()
                 .store()))>::all_properties_t,
@@ -105,7 +105,7 @@ static_assert(
 // static_assert(mp::filter(
 //     mp::transform(
 //         typename std::decay_t<decltype(mp::get<storage::info>(
-//             storage::make<standard_environment<int>, item0,
+//             storage::make_compile_time_database<standard_environment<int>, item0,
 //                           storage::with_properties<storage::diagonal<attr_t<
 //                               item0, "attr0">>>>()))>::all_properties_t{},
 //         []<typename P>(P) { return typename P::type{}; }),
@@ -126,9 +126,9 @@ static_assert(
     std::is_same_v<
         decltype(storage::mp::filter(
             typename std::decay_t<decltype(storage::mp::get<storage::info>(
-                storage::make<standard_environment, item0,
-                              storage::with_properties<
-                                  storage::attached<item0, symbol<"zz">, some::scalar>>>()
+                storage::make_compile_time_database<standard_environment, item0,
+                                                    storage::with_properties<storage::attached<
+                                                        item0, symbol<"zz">, some::scalar>>>()
                     .store()))>::all_properties_t{},
             storage::mp::is_a_model<[]<typename T>() constexpr {
               return match::attached_storage<T, item0>;
@@ -139,13 +139,13 @@ static_assert(
 
 static_assert(
     match::diagonal_matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
-        storage::make<
+        storage::make_compile_time_database<
             standard_environment, item0,
             storage::with_properties<storage::diagonal<attr_t<item0, "attr0">>>>())))>);
 
 static_assert(
     match::mat<std::decay_t<decltype(storage::attr<"attr0">(storage::add<item0>(
-        storage::make<
+        storage::make_compile_time_database<
             standard_environment, item0,
             storage::with_properties<storage::assembled<attr_t<item0, "attr0">>>>())))>>);
 
@@ -154,7 +154,7 @@ using item1 = item0;
 
 static_assert(
     match::diagonal_matrix<decltype(storage::attr<"attr0">(storage::add<item1>(
-        storage::make<
+        storage::make_compile_time_database<
             standard_environment, item0, item1,
             storage::with_properties<storage::diagonal<attr_t<item0, "attr0">>>>())))>);
 
@@ -162,45 +162,48 @@ static_assert(
 struct item2 : item0 {};
 static_assert(
     !match::diagonal_matrix<decltype(storage::attr<"attr0">(storage::add<item2>(
-        storage::make<
+        storage::make_compile_time_database<
             standard_environment, item0, item2,
             storage::with_properties<storage::diagonal<attr_t<item0, "attr0">>>>())))>);
 
-static_assert(
-    match::matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
-        storage::make<standard_environment, wrap<some::unbounded_collection, item0>>())))>);
+static_assert(match::matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
+                  storage::make_compile_time_database<
+                      standard_environment, wrap<some::unbounded_collection, item0>>())))>);
 
 static_assert(match::push_back<std::decay_t<decltype(storage::attr_values<item0, "attr0">(
-                  storage::add<item0>(storage::make<standard_environment,
-                                                    wrap<some::unbounded_collection, item0>>())
+                  storage::add<item0>(
+                      storage::make_compile_time_database<
+                          standard_environment, wrap<some::unbounded_collection, item0>>())
                       .data(),
                   0))>>);
 
 static_assert(
     match::diagonal_matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
-        storage::make<
+        storage::make_compile_time_database<
             standard_environment, wrap<some::unbounded_collection, item0>,
             storage::with_properties<storage::diagonal<attr_t<item0, "attr0">>>>())))>);
 
-static_assert(std::is_same_v<std::decay_t<decltype((storage::add<model::newton_impact>(
-                                                        storage::make<standard_environment,
-                                                                      model::newton_impact>()))
-                                                       .e())>,
-                             typename standard_environment<int>::scalar>);
+static_assert(std::is_same_v<
+              std::decay_t<decltype((storage::add<model::newton_impact>(
+                                         storage::make_compile_time_database<
+                                             standard_environment, model::newton_impact>()))
+                                        .e())>,
+              typename standard_environment<int>::scalar>);
 
 static_assert(
-    std::is_same_v<
-        std::decay_t<decltype(storage::add<collision::shape::disk>(
-                                  storage::make<standard_environment, collision::shape::disk,
-                                                storage::with_properties<storage::bind<
-                                                    collision::shape::disk, "disk_shape">>>())
-                                  .radius())>,
-        typename standard_environment<int>::scalar>);
+    std::is_same_v<std::decay_t<decltype(storage::add<collision::shape::disk>(
+                                             storage::make_compile_time_database<
+                                                 standard_environment, collision::shape::disk,
+                                                 storage::with_properties<storage::bind<
+                                                     collision::shape::disk, "disk_shape">>>())
+                                             .radius())>,
+                   typename standard_environment<int>::scalar>);
 
 //   error: static assertion expression is not an integral constant expression
 // static_assert(
 //     storage::has_property<collision::shape::disk, storage::property::bind>(
-//         storage::make<standard_environment<int>, collision::shape::disk,
+//         storage::make_compile_time_database<standard_environment<int>,
+//         collision::shape::disk,
 //                       storage::with_properties<storage::bind<
 //                           collision::shape::disk, "disk_shape">>>()));
 
@@ -244,13 +247,13 @@ using disk_shape = collision::shape::disk;
 
 static_assert(
     match::diagonal_matrix<decltype(storage::attr<"mass_matrix">(storage::add<ball>(
-        storage::make<
+        storage::make_compile_time_database<
             env, simulation, ball, relation, interaction,
             storage::with_properties<storage::diagonal<attr_t<ball, "mass_matrix">>>>())))>);
 
 static_assert(
     !match::diagonal_matrix<decltype(storage::attr<"mass_matrix">(storage::add<fem>(
-        storage::make<
+        storage::make_compile_time_database<
             env, simulation, ball, relation, interaction,
             storage::with_properties<storage::unbounded<attr_t<fem, "q">>,
                                      storage::unbounded<attr_t<fem, "velocity">>,
@@ -261,27 +264,30 @@ static_assert(
 
 static_assert(
     match::sparse_matrix<decltype(storage::attr<"mass_matrix">(storage::add<ball>(
-        storage::make<
+        storage::make_compile_time_database<
             env, simulation, ball, relation, interaction,
             storage::with_properties<storage::sparse<attr_t<ball, "mass_matrix">>>>())))>);
 
-static_assert(
-    match::unbounded<decltype(storage::attr<"q">(storage::add<ball>(
-        storage::make<env, simulation, ball, relation, interaction,
+static_assert(match::unbounded<decltype(storage::attr<"q">(storage::add<ball>(
+                  storage::make_compile_time_database<
+                      env, simulation, ball, relation, interaction,
                       storage::with_properties<storage::unbounded<attr_t<ball, "q">>>>())))>);
 
 static_assert(
     match::index<std::decay_t<decltype(storage::prop<"shape">(storage::add<ball>(
-        storage::make<env, ball,
-                      storage::with_properties<storage::attached<
-                          ball, symbol<"shape">, some::item_ref<disk_shape>>>>())))>>);
+        storage::make_compile_time_database<
+            env, ball,
+            storage::with_properties<
+                storage::attached<ball, symbol<"shape">, some::item_ref<disk_shape>>>>())))>>);
 
 template <typename T>
 struct is_polymorhic
     : std::integral_constant<bool, []() { return match::polymorphic_type<T>; }()> {};
 
-static_assert(match::relation1<storage::handle<storage::handle_base, relation, int,
-                                               decltype(storage::make<env, relation>())>>);
+static_assert(
+    match::relation1<
+        storage::handle<storage::handle_base, relation, int,
+                        decltype(storage::make_compile_time_database<env, relation>())>>);
 
 //  {
 static_assert(
@@ -376,8 +382,8 @@ static_assert(
 
 static_assert(
     model::runtime_dof<decltype(storage::add<ball>(
-        storage::make<env, ball,
-                      storage::with_properties<
-                          storage::unbounded<siconos::storage::attr_t<ball, "q">>>>()))>());
+        storage::make_compile_time_database<env, ball,
+                                            storage::with_properties<storage::unbounded<
+                                                siconos::storage::attr_t<ball, "q">>>>()))>());
 
 int main() {}

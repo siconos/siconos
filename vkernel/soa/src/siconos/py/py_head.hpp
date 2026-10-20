@@ -80,14 +80,14 @@ namespace siconos::python::disks {
 
 namespace config = siconos::config::disks;
 
-// registry-backed world (storage/registry.hpp); NONOS_COMPILE_TIME_DATABASE
-// restores the storage::make database
+// runtime (registry-backed) database (storage/registry.hpp);
+// NONOS_COMPILE_TIME_DATABASE restores the storage::make_compile_time_database
 #ifndef NONOS_COMPILE_TIME_DATABASE
 template <template <typename> typename Env, typename... Items>
-using world_maker = storage::make_world<Env, Items...>;
+using world_maker = storage::make_runtime_database<Env, Items...>;
 #else
 template <template <typename> typename Env, typename... Items>
-using world_maker = storage::make<Env, Items...>;
+using world_maker = storage::make_compile_time_database<Env, Items...>;
 #endif
 
 struct maker

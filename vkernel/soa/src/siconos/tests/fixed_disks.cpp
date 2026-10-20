@@ -35,8 +35,8 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t
-    : storage::make<env, simulation, interaction_manager, neighborhood, space_filter, io, disk,
+struct data_t : storage::make_compile_time_database<
+                    env, simulation, interaction_manager, neighborhood, space_filter, io, disk,
                     diskdisk_r, diskfdisk_r, diskfsegment_r, pointl, pointd, pointtds,
                     interaction, segment_shape, disk_shape,
                     storage::with_properties<

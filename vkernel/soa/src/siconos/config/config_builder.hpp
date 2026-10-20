@@ -98,19 +98,30 @@ class config_builder {
         ParamsMap{}, []<typename... Pairs>(Pairs... pairs) { return mp::map<Pairs...>{}; }));
   };
 
-  // build
-  auto build() const {
+  // build_compile_time_database: the compile-time typed database
+  // (storage::make_compile_time_database).  Slowest compile (the whole
+  // database type is built and carried by every handle), fastest runtime
+  // access.  For the registry-backed runtime database that compiles much
+  // faster at a small runtime cost, use build_runtime_database().
+  auto build_compile_time_database() const {
     return mp::unpack(
         mp::concat(mp::concat(mp::tuple<>{}, ItemsList{}),
                    mp::unpack(PropertiesList{},
                               []<typename... Props>(Props...) {
                                 return mp::tuple<storage::with_properties<Props...>>{};
                               })),
-        []<typename... Ts>(Ts... ts) { return storage::make<env, Ts...>{}; });
+        []<typename... Ts>(Ts... ts) {
+          return storage::make_compile_time_database<env, Ts...>{};
+        });
   }
 
-  // the registry-backed world type (storage/registry.hpp), computed without
-  // constructing one
+  // previous names of build_compile_time_database, kept so existing call
+  // sites compile
+  auto build_database() const { return build_compile_time_database(); }
+  auto build() const { return build_database(); }
+
+  // the runtime (registry-backed) database type (storage/registry.hpp),
+  // computed without constructing one
   using world_type = typename decltype(mp::unpack(
       mp::concat(mp::concat(mp::tuple<>{}, ItemsList{}),
                  mp::unpack(PropertiesList{},
@@ -118,15 +129,20 @@ class config_builder {
                               return mp::tuple<storage::with_properties<Props...>>{};
                             })),
       []<typename... Ts>(Ts...) {
-        return std::type_identity<storage::make_world<env, Ts...>>{};
+        return std::type_identity<storage::make_runtime_database<env, Ts...>>{};
       }))::type;
 
-  // build a registry-backed world instead of a database.  The return type is
-  // explicit: struct data_t : decltype(storage()...build_world()) {} must not
-  // instantiate this body, whose construction registers the world's columns
-  // and so needs the whole item closure; only the TU that constructs data_t
-  // does that.
-  world_type build_world() const { return world_type{}; }
+  // build the runtime database (compile-time typed per column, registered at
+  // run time).  The return type is explicit: struct data_t :
+  // decltype(storage()...build_runtime_database()) {} must not instantiate
+  // this body, whose construction registers the database's columns and so
+  // needs the whole item closure; only the TU that constructs data_t does
+  // that.
+  world_type build_runtime_database() const { return world_type{}; }
+
+  // previous name of build_runtime_database, kept so existing call sites
+  // compile
+  world_type build_world() const { return build_runtime_database(); }
 
   // Type aliases for merging
   using params_map = ParamsMap;

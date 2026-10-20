@@ -2,8 +2,9 @@
 // bouncing_ball split in two translation units, to measure the per-TU fixed
 // cost of the world type: bouncing_ball_split.cpp sets the model up and
 // bouncing_ball_split_sim.cpp instantiates the simulation methods.
-// BB_DATABASE selects storage::make (database), the default is the
-// registry-backed storage::make_world.
+// BB_DATABASE selects build_compile_time_database()
+// (storage::make_compile_time_database); the default is build_runtime_database()
+// (storage::make_runtime_database).
 
 #include <cstddef>
 
@@ -29,9 +30,9 @@ struct data_t : decltype(storage()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
 #ifdef BB_DATABASE
-                             .build()
+                             .build_compile_time_database()
 #else
-                             .build_world()
+                             .build_runtime_database()
 #endif
                 ){};
 }  // namespace siconos::config

@@ -33,17 +33,17 @@ int main(int argc, char* argv[]) {
   using siconos::storage::pattern::attr_t;
   using siconos::storage::pattern::wrap;
 
-  auto data =
-      storage::make<standard_environment<config::params>, config::simulation,
-                    wrap<some::unbounded_collection, config::ball>,
-                    wrap<some::bounded_collection, config::relation, some::indice_value<1>>,
-                    wrap<some::unbounded_collection, config::interaction>,
-                    storage::with_properties<
-                        storage::time_invariant<attr_t<config::interaction, "h_matrix1">>,
-                        storage::time_invariant<storage::attr_t<config::ball, "fext">>,
-                        storage::diagonal<storage::attr_t<config::ball, "mass_matrix">>,
-                        storage::unbounded_diagonal<
-                            storage::attr_t<config::osi, "mass_matrix_assembled">>>>();
+  auto data = storage::make_compile_time_database<
+      standard_environment<config::params>, config::simulation,
+      wrap<some::unbounded_collection, config::ball>,
+      wrap<some::bounded_collection, config::relation, some::indice_value<1>>,
+      wrap<some::unbounded_collection, config::interaction>,
+      storage::with_properties<
+          storage::time_invariant<attr_t<config::interaction, "h_matrix1">>,
+          storage::time_invariant<storage::attr_t<config::ball, "fext">>,
+          storage::diagonal<storage::attr_t<config::ball, "mass_matrix">>,
+          storage::unbounded_diagonal<
+              storage::attr_t<config::osi, "mass_matrix_assembled">>>>();
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time

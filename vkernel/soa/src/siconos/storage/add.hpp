@@ -13,7 +13,8 @@ namespace siconos::storage {
 
 using namespace siconos::storage::pattern;
 
-// storage::make database: the columns of Item are enumerated at compile time
+// storage::make_compile_time_database database: the columns of Item are enumerated at
+// compile time
 template <match::item Item>
 decltype(auto) add_static(auto&& data) {
   // types

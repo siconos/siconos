@@ -45,7 +45,7 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 1>>;
 };
 struct make
-    : storage::make<
+    : storage::make_compile_time_database<
           env, fem_ds, simulation,
           storage::with_properties<
               storage::wrapped<config::interaction, storage::some::unbounded_collection>,

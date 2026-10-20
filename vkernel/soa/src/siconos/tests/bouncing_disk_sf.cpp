@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   using storage::pattern::wrap;
   using namespace storage;
 
-  auto data = storage::make<
+  auto data = storage::make_compile_time_database<
       standard_environment<config::params>, config::simulation,
       wrap<some::unbounded_collection, config::disk>, config::disk_shape, config::diskdisk_r,
       wrap<some::unbounded_collection, config::diskfsegment_r>,

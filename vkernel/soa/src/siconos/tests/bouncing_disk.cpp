@@ -27,14 +27,16 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make<env, simulation, disk_shape,
-                    storage::with_properties<
-                        storage::attached<disk, storage::pattern::symbol<"shape">,
-                                          storage::some::item_ref<disk_shape>>,
-                        storage::time_invariant<storage::attr_t<disk, "fext">>,
-                        storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
-                        storage::assembled_diagonal<storage::attr_t<
-                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+    : storage::make_compile_time_database<
+          env, simulation, disk_shape,
+          storage::with_properties<
+              storage::attached<disk, storage::pattern::symbol<"shape">,
+                                storage::some::item_ref<disk_shape>>,
+              storage::time_invariant<storage::attr_t<disk, "fext">>,
+              storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
+              storage::assembled_diagonal<
+                  storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
+};
 }  // namespace siconos::config
 
 int main(int argc, char* argv[]) {

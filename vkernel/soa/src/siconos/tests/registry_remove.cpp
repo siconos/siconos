@@ -30,9 +30,9 @@ struct data_t : decltype(storage()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
 #ifdef BB_DATABASE
-                             .build()
+                             .build_compile_time_database()
 #else
-                             .build_world()
+                             .build_runtime_database()
 #endif
                 ){};
 }  // namespace siconos::config

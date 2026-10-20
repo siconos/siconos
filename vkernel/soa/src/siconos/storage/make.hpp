@@ -189,13 +189,20 @@ static constexpr auto attribute_storage_transform =
 };
 
 /**
- * @brief Factory struct for building complete storage structures
+ * @brief Factory struct for building a complete compile-time typed database
+ *
+ * The whole database type (every column of every item, refined, wrapped and
+ * sized for its keep<> depth) is computed here, at compile time, and every
+ * handle carries it: slowest compile, fastest runtime access.
+ * For the counterpart where columns are compile-time typed per key too, but
+ * only created (registered) at run time - much faster to compile, at the
+ * cost of a small runtime column lookup - see storage::make_runtime_database.
  *
  * @tparam Env The environment type
  * @tparam Items Variadic list of item types to include
  */
 template <template <typename> typename Env, match::item... Items>
-struct make {
+struct make_compile_time_database {
   /**
    * @brief Internal build method that constructs the complete storage
    * @return The built storage structure
@@ -271,6 +278,13 @@ struct make {
   // Accessor for the storage
   store_t& store() { return _store; }
 };
+
+/// previous names of make_compile_time_database, kept so existing call sites
+/// compile
+template <template <typename> typename Env, match::item... Items>
+using make = make_compile_time_database<Env, Items...>;
+template <template <typename> typename Env, match::item... Items>
+using make_database = make_compile_time_database<Env, Items...>;
 
 template <typename Make1, typename Make2>
 struct make_merged {
