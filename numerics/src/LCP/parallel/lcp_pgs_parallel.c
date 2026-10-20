@@ -128,7 +128,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
   double* thread_errors = (double*)calloc((size_t)g, sizeof(double));
 
   /* Start solving */
-#pragma omp parallel default(none)                                                         \
+#pragma omp parallel default(none) shared(stderr)                                          \
     shared(n, g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, \
                norm_q, w, z, thread_errors, stdout)
   {

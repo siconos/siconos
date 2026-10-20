@@ -68,7 +68,8 @@ void lcp_jacobi_parallel(LinearComplementarityProblem* problem, double* z, doubl
     err = 0.;
 
 // Compute new_z
-#pragma omp parallel for reduction(+ : err) default(none) shared(q, z, new_z, w, diag, M, n)
+#pragma omp parallel for reduction(+ : err) default(none) \
+    shared(q, z, new_z, w, diag, M, n, stderr)
     for (int i = 0; i < n; i++) {
       w[i] = q[i];
       DEBUG_PRINTF("zi = %e\n", new_z[i]);

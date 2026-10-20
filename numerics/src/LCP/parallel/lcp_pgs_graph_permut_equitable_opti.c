@@ -189,8 +189,8 @@ void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem* problem, 
 
   size_t thread;
 
-#pragma omp parallel default(none) private(zi, right, i, row, thread, is_last)               \
-    shared(iter, itermax, q, z, start_lines, n_colors, norm_q, inv_permutation, permutation, \
+#pragma omp parallel default(none) shared(stderr) private(zi, right, i, row, thread, is_last) \
+    shared(iter, itermax, q, z, start_lines, n_colors, norm_q, inv_permutation, permutation,  \
                diag, M, n, sum_sizes, n_threads, w, lefts, err, tol)
   {
     thread = (size_t)omp_get_thread_num();

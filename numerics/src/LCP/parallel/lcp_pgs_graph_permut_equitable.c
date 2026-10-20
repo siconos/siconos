@@ -145,8 +145,9 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, doubl
     err = 0.;
 
     for (size_t color = 0; color < n_colors; color++) {
-#pragma omp parallel for reduction(+ : err) default(none) private(zi, right, i, row) shared( \
-        q, z, inv_permutation, permutation, diag, M, n, sum_sizes, color, w, lefts, is_last)
+#pragma omp parallel for reduction(+ : err) default(none) shared(stderr)              \
+    private(zi, right, i, row) shared(q, z, inv_permutation, permutation, diag, M, n, \
+                                          sum_sizes, color, w, lefts, is_last)
       for (size_t i = sum_sizes[color]; i < sum_sizes[color + 1]; i++) {
         row = inv_permutation[i];
         right = q[row];

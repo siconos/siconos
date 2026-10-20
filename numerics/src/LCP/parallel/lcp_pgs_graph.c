@@ -76,7 +76,7 @@ void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
     for (size_t color = 0; color < n_colors; color++) {
-#pragma omp parallel for default(none) private(zi, i) \
+#pragma omp parallel for default(none) shared(stderr) private(zi, i) \
     shared(q, z, diag, M, n, partitions, partition_size, color)
       for (int v = 0; v < partition_size[color]; v++) {
         i = partitions[color][v];
