@@ -2412,10 +2412,15 @@ class VView:
         actor = None
         actor_edge = None
 
-        if (
-            instance.attrs.get("mass", 0) > 0
-            or len(instance.attrs.get("material", [])) > 0
-        ) and not self.opts.view_as_glyphs:
+        is_fem = len(instance.attrs.get("material", [])) > 0
+        is_dynamic = instance.attrs.get("mass", 0) > 0 or is_fem
+
+        if is_dynamic and self.opts.view_as_glyphs and not is_fem:
+            # drawn by the glyphs (all dynamic objects of the dynamic data);
+            # a FEM object is drawn with its mesh in any case
+            pass
+
+        elif is_dynamic:
             # objects that may move
             actor = vtk.vtkActor()
             if self.opts.with_edges:
