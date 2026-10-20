@@ -421,6 +421,75 @@ void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
   std::print("cxd_narrowphase stage: pair-set change re-runs the batch\n");
 }
 
+/* ---- Task 5c: per-relation reads must not rescan the whole world ----
+   Moreau-Jean calls compute_h/compute_jachq once per interaction per step.
+   If every call re-runs rebind+checksum over all interactions, a step costs
+   O(n^2). The stage keeps a per-pair signature: once the pair is fresh, a
+   relation read is O(1) and the stage scan counter does not move. */
+void test_narrowphase_scan_once(siconos::config::data_t& data) {
+  using siconos::storage::add;
+  using poly_r_index =
+      siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
+
+  auto sh = add<siconos::config::polytope_shape>(data);
+  std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
+  for (int i = 0; i < 4; ++i) sh.vertices()[i] = {sq[i][0], sq[i][1]};
+  sh.nvertices() = 4;
+
+  auto mk = [&](double x) {
+    auto ds = add<siconos::config::polytope_ds>(data);
+    ds.q() = {x, 0, 0};
+    siconos::storage::prop<"shape">(ds) = sh;
+    return ds;
+  };
+  auto ds1 = mk(0);
+  auto ds2 = mk(3);
+  auto ds3 = mk(6);
+  auto ds4 = mk(9);
+
+  auto topo_h = add<siconos::config::topo>(data);
+  auto dsds = add<siconos::config::diskdisk_r>(data);
+  auto np = add<siconos::config::cxd_narrowphase>(data);
+  np.topology() = topo_h;
+  np.dsds_r() = dsds;
+
+  auto link = [&](auto a, auto b) {
+    auto inter = topo_h.link(a, b);
+    inter.relation() = dsds;
+    return inter;
+  };
+  auto i12 = link(ds1, ds2);
+  auto i23 = link(ds2, ds3);
+  auto i34 = link(ds3, ds4);
+
+  np.ensure(0);
+  const auto scans = np.cache_scan_count();
+  for (auto inter : {i12, i23, i34}) {
+    auto rel = siconos::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
+    auto d1 = siconos::storage::make_handle(
+        data, siconos::storage::prop<"ds1", siconos::config::topo>(inter));
+    auto d2 = siconos::storage::make_handle(
+        data, siconos::storage::prop<"ds2", siconos::config::topo>(inter));
+    rel.ensure(0, d1, d2);
+    check(std::abs(rel.h() - 1.0) <= 1e-6, "scan test: pair gap is 1");
+  }
+  check(np.cache_scan_count() == scans, "per-relation reads do not rescan the whole world");
+
+  // moving body 2 changes pairs (1,2) and (2,3). The first read pays ONE
+  // scan; the run re-stamps both pairs, so the second read is O(1).
+  ds2.q() = {2.5, 0, 0};
+  auto rel12 = siconos::storage::make_handle(data, std::get<poly_r_index>(i12.relation()));
+  rel12.ensure(0, ds1, ds2);
+  check(std::abs(rel12.h() - 0.5) <= 1e-6, "changed pair h == 0.5");
+  const auto after_move = np.cache_scan_count();
+  check(after_move == scans + 1, "changed pair triggers exactly one scan");
+  auto rel23 = siconos::storage::make_handle(data, std::get<poly_r_index>(i23.relation()));
+  rel23.ensure(0, ds2, ds3);
+  check(std::abs(rel23.h() - 1.5) <= 1e-6, "stamped pair h == 1.5");
+  check(np.cache_scan_count() == after_move, "stamped pair does not rescan");
+  std::print("cxd_narrowphase stage: per-relation reads are O(1)\n");
+}
+
 int main() {
   siconos::config::data_t data;
   test_polytope_item(data);
@@ -430,4 +499,5 @@ int main() {
   test_polytopepolytope_relation(data);
   test_narrowphase_stage(data);
   test_narrowphase_pair_set_cache(data);
+  test_narrowphase_scan_once(data);
 }

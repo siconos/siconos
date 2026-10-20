@@ -35,6 +35,9 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
     some::vector<some::scalar, some::indice_value<2>> cp1;
     some::vector<some::scalar, some::indice_value<2>> cp2;
     some::vector<some::scalar, some::indice_value<2>> init_dir;  // batch warm start
+    // signature of the pair's two bodies at the last stage run; lets the
+    // relation ensure skip the full-world scan (O(1) read per pair)
+    some::indice cache_pair_checksum;
   };
 
   template <typename Handle>
@@ -50,6 +53,9 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
     decltype(auto) cp1() { return storage::attr<"cp1">(*self()); }
     decltype(auto) cp2() { return storage::attr<"cp2">(*self()); }
     decltype(auto) init_dir() { return storage::attr<"init_dir">(*self()); }
+    decltype(auto) cache_pair_checksum() {
+      return storage::attr<"cache_pair_checksum">(*self());
+    }
 
     /* ensure the stage cache is fresh for this step. The stage ref is bound
        once at rebind (the stage item writes rel.narrowphase() = itself);
@@ -67,9 +73,29 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
       storage::make_ref_handle(data, ref).ensure(step);
     }
 
+    /* Pair-aware fast path. The cache of THIS pair only depends on its two
+       bodies, so hash those (O(vertices)) and compare with the signature
+       stamped by the last stage run. A match returns without touching the
+       stage; a miss runs the stage, which re-stamps every relation. The
+       first changed pair therefore pays one O(n) scan, the rest are O(1)
+       instead of each relation rescanning the whole world (O(n^2)). */
+    void ensure(auto step, auto& ds1, auto& ds2) {
+      auto& data = self()->data();
+      auto& ref = storage::attr<"narrowphase">(*self());
+      using np_t = typename std::decay_t<decltype(ref)>::type;
+      const auto n_stage = std::size(storage::handles<np_t>(data));
+      if (ref.value() >= n_stage) return;  // unbound: standalone relation
+      auto stage = storage::make_ref_handle(data, ref);
+      const auto sig = stage.pair_checksum(ds1, ds2, step);
+      if (stage.cache_step() == step && storage::attr<"cache_pair_checksum">(*self()) == sig) {
+        return;  // pair unchanged: cached row valid, no world scan
+      }
+      stage.ensure(step);  // run stamps every relation's pair signature
+    }
+
     template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>
     [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
-      ensure(step);
+      ensure(step, ds1, ds2);
       return storage::attr<"h">(*self());
     }
 
@@ -83,7 +109,7 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
     template <typename S, match::handle<model::lagrangian_ds> DS1,
               match::handle<model::lagrangian_ds> DS2, typename M>
     [[gnu::always_inline]] void compute_jachq(S step, DS1& ds1, DS2& ds2, M& g1, M& g2) {
-      ensure(step);
+      ensure(step, ds1, ds2);
 
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;

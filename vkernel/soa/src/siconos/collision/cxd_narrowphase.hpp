@@ -461,6 +461,8 @@ struct cxd_narrowphase : item {
     some::indice cache_step;
     // FNV-1a over the pair set and the world vertices: a hash, not a scalar
     some::indice cache_checksum;
+    // diagnostic: number of full-world scans (rebind + checksum) performed
+    some::indice cache_scan_count;
     some::map<some::array<some::indice, some::indice_value<2>>,
               some::item_ref<poly_r_t>>
         rel_map;  // ordered ds-index pair -> polytope relation reuse map
@@ -475,11 +477,15 @@ struct cxd_narrowphase : item {
     }
     decltype(auto) rel_map() { return storage::attr<"rel_map">(*self()); }
     decltype(auto) dsds_r() { return storage::attr<"dsds_r">(*self()); }
+    decltype(auto) cache_scan_count() { return storage::attr<"cache_scan_count">(*self()); }
+    decltype(auto) cache_step() { return storage::attr<"cache_step">(*self()); }
 
-    /* world vertices of a ds' polytope, CCW: world = c(q) + R(theta) local,
+    /* stream a ds' world vertices, CCW: world = c(q) + R(theta) local,
        c(q) = (q(0), q(1)), theta = q(2); the rotation-direction convention
-       is pinned by an exact-value test (R(pi/2)*(1,0) == (0,1)) */
-    auto world_vertices(auto& ds, auto step) {
+       is pinned by an exact-value test (R(pi/2)*(1,0) == (0,1)). Streaming
+       keeps the checksum allocation-free. */
+    template <typename F>
+    void for_each_world_vertex(auto& ds, auto step, F&& f) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
       auto& data = self()->data();
@@ -487,13 +493,18 @@ struct cxd_narrowphase : item {
           storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
       auto& q = storage::attr<"q">(ds, step);
       const scalar c = std::cos(q(2)), s = std::sin(q(2));
-      std::vector<std::array<scalar, 2>> out;
       const auto n = sh.nvertices();
-      out.reserve(n);
       for (std::size_t i = 0; i < n; ++i) {
         const auto& v = sh.vertices()[i];
-        out.push_back({q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]});
+        f(std::array<scalar, 2>{q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]});
       }
+    }
+
+    auto world_vertices(auto& ds, auto step) {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+      std::vector<std::array<scalar, 2>> out;
+      for_each_world_vertex(ds, step, [&](const auto& v) { out.push_back(v); });
       return out;
     }
 
@@ -533,6 +544,7 @@ struct cxd_narrowphase : item {
             // keep-previous baseline: no valid result yet.
             rel.status() = static_cast<std::size_t>(cxd::status::invalid_input);
             rel.h() = 0;
+            rel.cache_pair_checksum() = 0;
             rel.normal() = {0, 0};
             rel.cp1() = {0, 0};
             rel.cp2() = {0, 0};
@@ -574,12 +586,45 @@ struct cxd_narrowphase : item {
             const auto idx = ds->index().value();
             if (seen[idx]) continue;
             seen[idx] = true;
-            for (const auto& v : world_vertices(*ds, step)) {
+            for_each_world_vertex(*ds, step, [&](const auto& v) {
               mix(&v[0], sizeof v[0]);
               mix(&v[1], sizeof v[1]);
-            }
+            });
           }
         }
+      }
+      return hsh;
+    }
+
+    /* per-pair signature over the pair's two bodies only. The relation
+       ensure uses it to skip the full-world scan: once the pair is fresh,
+       a compute_h/compute_jachq read is O(vertices of the pair). Order
+       normalised by ds index, so either handle order hashes the same. */
+    auto pair_checksum(auto& ds1, auto& ds2, auto step) {
+      std::uint64_t hsh = 1469598103934665603ull;
+      auto mix = [&](const void* p, std::size_t n) {
+        const auto* bytes = static_cast<const unsigned char*>(p);
+        for (std::size_t i = 0; i < n; ++i) {
+          hsh ^= bytes[i];
+          hsh *= 1099511628211ull;
+        }
+      };
+      const auto i1 = ds1.index().value();
+      const auto i2 = ds2.index().value();
+      mix(&i1, sizeof i1);
+      mix(&i2, sizeof i2);
+      auto mix_body = [&](auto& ds) {
+        for_each_world_vertex(ds, step, [&](const auto& v) {
+          mix(&v[0], sizeof v[0]);
+          mix(&v[1], sizeof v[1]);
+        });
+      };
+      if (i1 <= i2) {
+        mix_body(ds1);
+        mix_body(ds2);
+      } else {
+        mix_body(ds2);
+        mix_body(ds1);
       }
       return hsh;
     }
@@ -634,6 +679,11 @@ struct cxd_narrowphase : item {
           if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
             auto rel = storage::make_handle(
                 data, std::get<storage::index<poly_r_t, std::size_t>>(relvar));
+            auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+            auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
+            // the pair is fresh for this configuration, even when the batch
+            // kept the previous row: stamp it so relation reads skip the scan
+            rel.cache_pair_checksum() = pair_checksum(ds1, ds2, step);
             const auto& c = out[k++];
             if (c.status == static_cast<int>(cxd::status::max_iterations) ||
                 c.status == static_cast<int>(cxd::status::invalid_input)) {
@@ -665,6 +715,7 @@ struct cxd_narrowphase : item {
     /* ensure(step): rebind is idempotent and cheap, so it runs every call;
        the batch re-runs only on a new step tag or a changed world checksum */
     void ensure(auto step) {
+      storage::attr<"cache_scan_count">(*self()) += 1;
       rebind(step);
       const auto ck = checksum(step);
       if (storage::attr<"cache_step">(*self()) == step &&
