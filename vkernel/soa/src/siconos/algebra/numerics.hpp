@@ -9,6 +9,8 @@
 #include "CSparseMatrix.h"  // for CSparseMatrix
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
+#include "numerics_errors.h"   // NUMERICS_OK
+#include "numerics_verbose.h"  // CHECK_RETURN
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
@@ -237,7 +239,9 @@ void resize(match::vec auto& v, match::indice auto nrows) {
   // dense vector
   assert(nrows * v.vnrows >= 1);
   assert(v.vncols == 1);
-  v._v = NM_create(NM_DENSE, nrows * v.vnrows, v.vncols);
+  // NM_create no longer allocates dense values
+  int size = nrows * v.vnrows;
+  v._v = NM_create_with_data(NM_DENSE, size, v.vncols, calloc(size, sizeof(double)));
 }
 
 auto nnz(match::any_mat auto& m) { return NM_triplet(m._m)->nz; }
@@ -246,8 +250,7 @@ template <typename T>
 vec<T> copy(vec<T>& v) {
   vec<T> new_vec;
 
-  auto* new_v = NM_new();
-  NM_copy(v._v, new_v);
+  auto* new_v = NM_copy(v._v);
 
   // new_vec destructor will free new_v
   new_vec._v = new_v;
@@ -334,7 +337,7 @@ template <match::diagonal_or_1x1 A>
 void invert_diagonal_matrix(diag_mat<A>& a) {
   if (!NM_internalData(a._m)->isInversed) {
     for (auto i = 0; i < NM_triplet(a._m)->nz; ++i)
-      a._m->matrix2->triplet->x[i] = 1.0 / a._m->matrix2->triplet->x[i];
+      a._m->sparse->triplet->x[i] = 1.0 / a._m->sparse->triplet->x[i];
   }
   NM_internalData(a._m)->isInversed = true;
 }
@@ -342,11 +345,11 @@ void invert_diagonal_matrix(diag_mat<A>& a) {
 // b += a
 template <typename T>
 void add(const vec<T>& a, vec<T>& b) {
-  // improve Numerics  cblas_daxpy(size0(a), 1, a._v->matrix0, 1,
-  // b._v->matrix0);
+  // improve Numerics  cblas_daxpy(size0(a), 1, a._v->dense, 1,
+  // b._v->dense);
 
   for (size_t i = 0; i < size0(a) * a.vnrows; ++i) {
-    b._v->matrix0[i] += a._v->matrix0[i];
+    b._v->dense[i] += a._v->dense[i];
   }
 }
 
@@ -358,8 +361,7 @@ mat<M> add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B) {
   if (nnz(B) > 0) {
     nm = NM_add(alpha, A._m, beta, B._m);
   } else {
-    nm = NM_new();
-    NM_copy(A._m, nm);
+    nm = NM_copy(A._m);
   }
   mat<M> rm;
   rm._m = nm;
@@ -372,8 +374,7 @@ void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B, mat<M>& C)
   if (nnz(B) > 0) {
     C._m = NM_add(alpha, A._m, beta, B._m);
   } else {
-    NumericsMatrix* nm = NM_new();
-    NM_copy(A._m, nm);
+    NumericsMatrix* nm = NM_copy(A._m);
     C._m = nm;
   }
   C._mt = nullptr;
@@ -384,7 +385,7 @@ void add(scalar alpha, const mat<M>& A, scalar beta, const mat<M>& B, mat<M>& C)
 template <typename V>
 void copy(const vec<V>& a, vec<V>& b) {
   for (auto i = 0; i < size0(a) * a.vnrows; ++i) {
-    b._v->matrix0[i] = a._v->matrix0[i];
+    b._v->dense[i] = a._v->dense[i];
   }
 }
 
@@ -396,12 +397,12 @@ void scal(match::scalar auto h, vec<T>& v) {
 
 template <typename T>
 decltype(auto) get_vector(vec<T>& v, match::indice auto i) {
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
+  return matrix_view<T>(v._v->dense + i * v.vnrows + v._offset);
 }
 
 template <typename T>
 decltype(auto) get_vector(const vec<T>& v, match::indice auto i) {
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
+  return matrix_view<T>(v._v->dense + i * v.vnrows + v._offset);
 }
 
 template <typename T>
@@ -411,20 +412,20 @@ decltype(auto) get_vector(vec<T>&& v, match::indice auto i) {
 
 template <typename T>
 decltype(auto) get_vector(vec<T>& v, match::indice auto i, match::indice auto vector_size) {
-  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset, vector_size);
+  return matrix_view<T>(v._v->dense + i * v.vnrows + v._offset, vector_size);
 }
 //
 // c <- a b
 // Matrix Matrix
 template <typename A, typename B>
 void prod(const mat<A>& a, const mat<B>& b, mat<prod_t<A, B>>& c) {
-  NM_gemm(1, a._m, b._m, 1, c._m);
+  CHECK_RETURN(NM_gemm(1, a._m, b._m, 1, c._m) == NUMERICS_OK);
 }
 
 // Matrix Vector
 template <typename A, typename B>
 void prod(const mat<A>& a, const vec<B>& b, vec<prod_t<A, B>>&& c) {
-  NM_gemv(1, a._m, b._v->matrix0, 1, c._v->matrix0);
+  NM_gemv(1, a._m, b._v->dense, 1, c._v->dense);
 }
 
 // c <- a^t b
@@ -433,13 +434,13 @@ void prodt1(const mat<A>& a, const vec<B>& b, vec<prod_t<trans_t<A>, B>>& c) {
   assert(a._mt);
   assert(a._mt->size1 == b._v->size0);  // transpose mult
   assert(c._v->size0 == a._mt->size0);
-  NM_gemv(1, a._mt, b._v->matrix0, 1, c._v->matrix0);
+  NM_gemv(1, a._mt, b._v->dense, 1, c._v->dense);
 }
 // c <- a b^t
 template <typename A, typename B>
 void prodt2(const diag_mat<A>& a, const mat<B>& b, mat<prod_t<A, trans_t<B>>>& c) {
   assert(b._mt);
-  NM_gemm(1, a._m, b._mt, 1, c._m);
+  CHECK_RETURN(NM_gemm(1, a._m, b._mt, 1, c._m) == NUMERICS_OK);
 }
 
 // c <- a^-1 b
@@ -453,7 +454,7 @@ template <match::any_matrix A, typename B>
 void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c) {
   if (!NM_internalData(a._m)->isInversed) {
     copy(b, c);
-    if (NM_gesv_expert(a._m, c._v->matrix0, 1) != 0) {
+    if (NM_gesv_expert(a._m, c._v->dense, 1) != 0) {
       throw std::runtime_error("NumericsMatrix solve failed in NM_gesv_expert.");
     }
   } else {
@@ -464,7 +465,7 @@ void solve_linear_system(const mat<A>& a, const vec<B>& b, vec<B>& c) {
 
 template <match::any_matrix A, typename B>
 void solve_in_place(const mat<A>& a, const vec<B>& b) {
-  if (NM_gesv_expert(a._m, b._v->matrix0, 1) != 0) {
+  if (NM_gesv_expert(a._m, b._v->dense, 1) != 0) {
     throw std::runtime_error("NumericsMatrix solve_in_place failed in NM_gesv_expert.");
   }
 }
@@ -800,7 +801,7 @@ void compute_kkt_matrix(mat<H>& h_matrix, mat<M>& iteration_matrix, mat<W>& w_ma
     }
   }
 
-  NM_gemm(1.0, h_matrix._m, minv_ht, 0.0, w_matrix._m);
+  CHECK_RETURN(NM_gemm(1.0, h_matrix._m, minv_ht, 0.0, w_matrix._m) == NUMERICS_OK);
 
   NM_free(minv_ht);
 }
@@ -812,8 +813,8 @@ void solve_block_diagonal_system(mat<M>& matrix, vec<B>& b, vec<B>& c,
   const CSparseMatrix* a = NM_csc(matrix._m);
   assert(b._v->size0 == a->n && c._v->size0 == a->n);
 
-  const double* bx = b._v->matrix0;
-  double* cx = c._v->matrix0;
+  const double* bx = b._v->dense;
+  double* cx = c._v->dense;
 
   block_diagonal_solver blocks(a, factored);
 
