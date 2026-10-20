@@ -16,6 +16,8 @@
 import math
 import sys
 
+import numpy as np
+
 import siconos.numerics as sn
 
 from siconos.mechanics.collision.tools import Contactor
@@ -45,14 +47,10 @@ spacing = spacing_factor * disk_radius
 nx = max(1, int(math.floor((0.9 - 2 * disk_radius) / spacing)))
 ny = int(math.ceil(ndisks / nx))
 
-positions = []
-for i in range(ny):
-    for j in range(nx):
-        if len(positions) >= ndisks:
-            break
-        x = 0.05 + disk_radius + j * spacing
-        y = 1.0 + disk_radius + 1e-3 + i * spacing
-        positions.append((x, y))
+x_vals = 0.05 + disk_radius + np.arange(nx) * spacing
+y_vals = 1.0 + disk_radius + 1e-3 + np.arange(ny) * spacing
+xx, yy = np.meshgrid(x_vals, y_vals, indexing="xy")
+positions = np.column_stack([xx.ravel(), yy.ravel()])[:ndisks]
 ndisks = len(positions)
 print(
     f"bench: {ndisks} disks of radius {disk_radius}, grid {nx}x{ny} "
@@ -63,16 +61,18 @@ print(
 with MechanicsHdf5Runner(config=runner_config, io_filename=hdf5_output) as io:
     io.add_primitive_shape("DiskR", "Disk", [disk_radius])
 
-    for k, (x, y) in enumerate(positions):
-        io.add_object(
-            f"disk-{k}",
-            [Contactor("DiskR")],
-            translation=[x, y],
-            orientation=[0],
-            velocity=[0, 0, -0.1],
-            mass=1,
-            inertia=1,
-        )
+    # one aggregate: the disks are created in a batch at import
+    velocities = np.zeros((ndisks, 3), dtype=np.float64)
+    velocities[:, 2] = -0.1
+    io.add_objects(
+        "disks",
+        [Contactor("DiskR")],
+        translations=positions,
+        orientations=np.zeros(ndisks, dtype=np.float64),
+        velocities=velocities,
+        mass=1,
+        inertia=1,
+    )
 
     io.add_primitive_shape("Ground-1", "Segment", (-10, 0, 10, 0))
 
