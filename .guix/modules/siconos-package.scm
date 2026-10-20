@@ -97,6 +97,7 @@ problems.")
                 (string-append "-DSICONOS_CUSTOM_INSTALL=" #$output)
                 "-DCOMPONENTS=externals;numerics;kernel;control;mechanics;io;vkernel"
                 "-DCMAKE_BUILD_TYPE=Release"
+                "-DNONOS_COMPILE_TIME_DATABASE=1"
                 "-DWITH_PYB11_WRAPPER=1"
                 "-DFCLIB_ROOT=1"
                 "-DWITH_BULLET=1"

@@ -128,9 +128,9 @@ target_precompile_headers(_nonos PRIVATE ${CMAKE_BINARY_DIR}/SiconosConfig.h
                                          ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/py_bind.hpp)
 
 # reference build of _nonos on the storage::make database (A/B comparisons)
-option(NONOS_DATABASE "build _nonos on the storage::make database instead of the registry" OFF)
-if(NONOS_DATABASE)
-  target_compile_definitions(_nonos PRIVATE NONOS_DATABASE)
+option(NONOS_COMPILE_TIME_DATABASE "build _nonos on the storage::make_compile_time_database instead of the registry" OFF)
+if(NONOS_COMPILE_TIME_DATABASE)
+  target_compile_definitions(_nonos PRIVATE NONOS_COMPILE_TIME_DATABASE)
 endif()
 
 # if(ftime_trace)
