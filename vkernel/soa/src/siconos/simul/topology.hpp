@@ -1,5 +1,6 @@
 #pragma once
 
+#include "siconos/algebra/sparse_factor.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/utils/range.hpp"
 
@@ -73,6 +74,12 @@ struct topology : item {
                              std::integral_constant<int, 2>>>>,
 
              bc_velocities_0_dsys,
+
+             // factorizations of M + h^2 theta^2 K and M, built once (see
+             // algebra::fem_operator)
+             storage::without_binding<storage::attached<
+                 dsystem, symbol<"fem_operator">,
+                 some::specific<std::shared_ptr<algebra::fem_operator>>>>,
 
              storage::attached<finteraction, symbol<"nds">, some::indice>,
              storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,

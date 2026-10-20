@@ -676,6 +676,26 @@ struct one_step_integrator {
         }
       }
 
+      // the involved FEM systems as factored diagonal blocks of the
+      // assembled iteration matrix
+      std::vector<algebra::factored_block> factored_blocks(auto step, auto time_step) {
+        std::vector<algebra::factored_block> blocks;
+        mp::for_each(elements(),
+                     [&](auto elem) { elem.collect_factored_blocks(step, time_step, blocks); });
+        return blocks;
+      }
+
+      // drop the FEM factorizations, to be called after changing the mass
+      // or stiffness matrix of a FEM system (h and theta changes are
+      // detected)
+      void invalidate_fem_operators() {
+        if constexpr (with_k_matrix()) {
+          auto& ops =
+              storage::prop_values<rt_system, "fem_operator", Topology>(self()->data(), 0);
+          for (auto& op : ops) op.reset();
+        }
+      }
+
       void compute_w_matrix(auto step, auto time_step) {
         if constexpr (with_k_matrix()) {
           // stiffness matrix is present
@@ -688,9 +708,11 @@ struct one_step_integrator {
                          time_step * time_step * theta() * theta(), k_matrix_assembled(),
                          iteration_matrix_assembled());
 
-            // H (M+ h^2 \theta^2 K)^-1 H^t
+            // H (M+ h^2 \theta^2 K)^-1 H^t, with the factorizations kept
+            // on the FEM systems
+            auto blocks = factored_blocks(step, time_step);
             compute_kkt_matrix(h_matrix_assembled(), iteration_matrix_assembled(),
-                               w_matrix_assembled());
+                               w_matrix_assembled(), blocks);
           }
         } else {
           // fem systems are not present in data
@@ -770,7 +792,7 @@ struct one_step_integrator {
         }
       }
 
-      void compute_input(auto time_step) {
+      void compute_input(auto step, auto time_step) {
         auto& h_matrix = h_matrix_assembled();
         auto& lambda = lambda_vector_assembled();
         auto& p0 = p0_vector_assembled();
@@ -785,7 +807,10 @@ struct one_step_integrator {
 
         if constexpr (with_k_matrix()) {
           if (algebra::nnz(k_matrix_assembled()) > 0) {
-            solve_linear_system(iteration_matrix_assembled(), p0, velo);
+            // block diagonal: rigid systems are divided, FEM blocks use the
+            // factorizations kept on the systems
+            auto blocks = factored_blocks(step, time_step);
+            solve_block_diagonal_system(iteration_matrix_assembled(), p0, velo, blocks);
           } else {
             solve_linear_system(mass_matrix, p0, velo);
           }
@@ -800,7 +825,8 @@ struct one_step_integrator {
         using scalar = typename env_t::scalar;
 
         return collect(
-            method("compute_input", &interface<Handle>::compute_input<scalar>),
+            method("compute_input", &interface<Handle>::compute_input<indice, scalar>),
+            method("invalidate_fem_operators", &interface<Handle>::invalidate_fem_operators),
             method("compute_w_matrix", &interface<Handle>::compute_w_matrix<indice, scalar>));
       }
     };

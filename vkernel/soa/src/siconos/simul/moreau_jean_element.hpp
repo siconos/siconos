@@ -260,10 +260,12 @@ struct moreau_jean_element : item {
       if constexpr (system_with_k_matrix()) {
         auto& ks = storage::attr_values<system, "k_matrix">(data, step);
         auto& qs = storage::attr_values<system, "q">(data, step);
-        for (auto [mat, k, q, f, f_next, minv_f, minv_f_next] :
-             view::zip(mats, ks, qs, fs, fs_next, minv_fs, minv_fs_next)) {
+        std::size_t i = 0;
+        for (auto [k, q, f, f_next, minv_f, minv_f_next] :
+             view::zip(ks, qs, fs, fs_next, minv_fs, minv_fs_next)) {
           algebra::unbounded_vector<scalar> fmkq = f - k * q;
-          algebra::solve_linear_system(mat, fmkq, minv_f);
+          // M factorized once for the simulation
+          minv_f = fem_m_factor(step, i++).solve(fmkq);
 
           // constant fext
           minv_f_next = minv_f;
@@ -273,6 +275,64 @@ struct moreau_jean_element : item {
           minv_f = f;
           algebra::solve_in_place(mat, minv_f);
           minv_f_next = minv_f;
+        }
+      }
+    }
+
+    // factorizations of the FEM system i, kept on the system for the whole
+    // simulation (see algebra::fem_operator)
+    algebra::fem_operator& fem_operator(auto step, std::size_t i) {
+      auto& ops = storage::prop_values<system, "fem_operator", topology>(self()->data(), step);
+      auto& op = ops[i];
+      if (!op) op = std::make_shared<algebra::fem_operator>();
+      return *op;
+    }
+
+    // M + h^2 theta^2 K, refactorized only if h or theta change
+    algebra::sparse_factor& fem_w_factor(auto step, std::size_t i, auto h) {
+      auto& op = fem_operator(step, i);
+      double theta = self()->theta();
+      if (!op.w || op.h != h || op.theta != theta) {
+        auto& data = self()->data();
+        auto& m = storage::attr_values<system, "mass_matrix">(data, step)[i];
+        auto& k = storage::attr_values<system, "k_matrix">(data, step)[i];
+        algebra::sparse_factor::matrix_t w = m;
+        w += (h * h * theta * theta) * k;
+        w.makeCompressed();
+        op.w = std::make_shared<algebra::sparse_factor>(w);
+        op.h = h;
+        op.theta = theta;
+      }
+      return *op.w;
+    }
+
+    algebra::sparse_factor& fem_m_factor(auto step, std::size_t i) {
+      auto& op = fem_operator(step, i);
+      if (!op.m) {
+        algebra::sparse_factor::matrix_t m =
+            storage::attr_values<system, "mass_matrix">(self()->data(), step)[i];
+        m.makeCompressed();
+        op.m = std::make_shared<algebra::sparse_factor>(m);
+      }
+      return *op.m;
+    }
+
+    // the involved FEM systems as factored diagonal blocks of the assembled
+    // iteration matrix, at the offsets used by the assembly
+    void collect_factored_blocks(auto step, auto h,
+                                 std::vector<algebra::factored_block>& blocks) {
+      if constexpr (system_with_k_matrix() && runtime_dof()) {
+        auto& data = self()->data();
+        auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
+        auto& indices = storage::prop_values<system, "index", topology>(data, step);
+        auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
+        for (std::size_t i = 0; i < involveds.size(); ++i) {
+          if (involveds[i]) {
+            blocks.push_back(
+                {static_cast<std::ptrdiff_t>(ds_offset() + sum_dofs()[indices[i]]),
+                 static_cast<std::ptrdiff_t>(algebra::ncols(mass_matrices[i])),
+                 &fem_w_factor(step, i, h)});
+          }
         }
       }
     }
@@ -369,7 +429,6 @@ struct moreau_jean_element : item {
 
         auto& fexts = storage::attr_values<system, "fext">(data, step);
 
-        auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
         auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
 
         auto& bc_velocities_0s =
@@ -377,7 +436,6 @@ struct moreau_jean_element : item {
 
         auto n = qs.size();
         for (std::size_t i = 0; i < n; ++i) {
-          auto& m_mat = mass_matrices[i];
           auto& k_mat = k_matrices[i];
           auto& q = qs[i];
           auto& q_next = qs_next[i];
@@ -391,16 +449,12 @@ struct moreau_jean_element : item {
           vector tf = f - k_mat * q;
           vector tf_next = f - k_mat * (q + h * v);
 
-          // W = M + h^2*theta^2*K
-          auto w_mat = m_mat;
-          w_mat += (h * h * theta * theta) * k_mat;
-
           // rhs
           vector rhs = h * theta * tf_next + h * (1 - theta) * tf;
 
-          // W * dv = RHS
-          vector dv(v_next.size());
-          algebra::solve_linear_system(w_mat, rhs, dv);
+          // W * dv = RHS, W = M + h^2*theta^2*K factorized once for the
+          // simulation
+          vector dv = fem_w_factor(step, i, h).solve(rhs);
           v_next = v + dv;
 
           // boundary conditions

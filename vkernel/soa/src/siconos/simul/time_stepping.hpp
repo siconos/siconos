@@ -118,7 +118,7 @@ struct time_stepping : item {
         self()->template solve_nonsmooth_problem<formulation_t>(step);
 
         // velocity_vector_assembled <- mass_matrix^-1 * (h_matrix^t * lambda)
-        osi.compute_input(time_step());
+        osi.compute_input(step, time_step());
 
         mp::for_each(osi.elements(), [&](auto elem) {
           // lambda_vector_assembled -> lambdas
