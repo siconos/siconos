@@ -11,7 +11,7 @@
 /* before the config block: the world wires these types directly. The
    load-bearing cxd include order lives inside cxd_narrowphase.hpp; the
    relation header transitively brings the engine */
-#include "siconos/collision/polytopexpolytope_r.hpp"
+#include "siconos/collision/polytopepolytope_r.hpp"
 // clang-format on
 
 namespace siconos::config {
@@ -24,9 +24,9 @@ using diskdisk_r = collision::diskdisk_r;
    refs; defined right after interaction (Task 5 sim config, modeled on
    bouncing_disks) */
 struct topo;
-using polytopexpolytope_r = collision::polytopexpolytope_r<topo>;
+using polytopepolytope_r = collision::polytopepolytope_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
-struct interaction : simul::interaction<nslaw, diskdisk_r, polytopexpolytope_r> {};
+struct interaction : simul::interaction<nslaw, diskdisk_r, polytopepolytope_r> {};
 struct topo : simul::topology<polytope_ds, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
@@ -38,7 +38,7 @@ struct env : standard_environment<T> {
 };
 struct data_t
     : storage::make<env, polytope_ds, polytope_shape, diskdisk_r, nslaw, interaction, topo,
-                    polytopexpolytope_r, cxd_narrowphase, osi, td, osnspb,
+                    polytopepolytope_r, cxd_narrowphase, osi, td, osnspb,
                     storage::with_properties<
                         storage::wrapped<polytope_ds, some::unbounded_collection>,
                         storage::wrapped<interaction, some::unbounded_collection>,
@@ -74,10 +74,10 @@ auto near = [](std::array<double, 2> a, std::array<double, 2> e, double tol = 1e
 };
 auto nears = [](double a, double e, double tol = 1e-9) { return std::abs(a - e) <= tol; };
 
-siconos::collision::narrowphase_input make_input(
+siconos::collision::narrowphase_input<double> make_input(
     std::vector<std::vector<std::array<double, 2>>> shapes,
     std::vector<std::array<std::uint32_t, 2>> pairs_in) {
-  siconos::collision::narrowphase_input in;
+  siconos::collision::narrowphase_input<double> in;
   for (auto& s : shapes) {
     in.entries.push_back({static_cast<std::uint32_t>(in.vertices.size()),
                           static_cast<std::uint32_t>(s.size())});
@@ -118,6 +118,20 @@ int test_polytope_item(siconos::config::data_t& data) {
       threw = true;
     }
     check(threw, "non-convex polygon rejected by __init__");
+  }
+
+  // the vertex column is a fixed 16-slot array; __init__ must reject a
+  // larger count instead of indexing past the column
+  auto sh3 = add<siconos::config::polytope_shape>(data);
+  sh3.nvertices() = 17;
+  {
+    bool threw = false;
+    try {
+      sh3.__init__();
+    } catch (const std::runtime_error&) {
+      threw = true;
+    }
+    check(threw, "nvertices above the 16-vertex capacity rejected by __init__");
   }
   std::print("polytope item ok, rmax={}\n", sh.rmax());
   return 0;
@@ -188,10 +202,51 @@ void test_batch_engine() {
   std::print("narrowphase_batch engine: all exact cases pass\n");
 }
 
-/* ---- Task 4: polytopexpolytope_r relation, exact G pins ----
+/* ---- Task 3a: the engine follows the environment scalar ----
+   A float instantiation must build and run: the pool point is
+   std::array<float,2>, the pair record is float, and the tolerance is
+   raised above the float epsilon instead of staying at 1e-10 (which no
+   float GJK could reach). */
+void test_batch_engine_float() {
+  using siconos::collision::narrowphase_input;
+  narrowphase_input<float> in;
+  auto add_square = [&](float cx, float cy) {
+    in.entries.push_back({static_cast<std::uint32_t>(in.vertices.size()), 4u});
+    in.vertices.insert(
+        in.vertices.end(),
+        {{cx - 1, cy - 1}, {cx + 1, cy - 1}, {cx + 1, cy + 1}, {cx - 1, cy + 1}});
+  };
+  add_square(0, 0);
+  add_square(3, 0);
+  in.ids_a.push_back(0);
+  in.ids_b.push_back(1);
+  in.init_dirs.push_back({1, 0});
+
+  auto out = siconos::collision::narrowphase_batch(std::move(in));
+  check(out.size() == 1, "float: one pair out");
+  check(out[0].status == 0 /* separated */, "float: separated");
+  check(std::abs(out[0].h - 1.0f) <= 1e-4f, "float: h == 1");
+  check(std::abs(out[0].normal[0] - 1.0f) <= 1e-4f, "float: normal == (1,0)");
+  std::print("narrowphase_batch engine: float instantiation passes\n");
+}
+
+/* ---- Task 3b: a failed separation sub-distance is a FAILURE status ----
+   If the siconos-side distance GJK cannot certify separation, the pair must
+   not come back as "separated, h=0": the stage would then overwrite the
+   relation's cached h with 0. A zero budget makes the sub-distance give up. */
+void test_failed_subdistance_status() {
+  auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
+  auto out = siconos::collision::narrowphase_batch(std::move(in), 0);
+  check(out[0].status == 2 /* cxd::status::max_iterations */,
+        "failed sub-distance reports a failure status, not separated");
+  check(out[0].h == 0.0, "failed pair keeps the placeholder h");
+  std::print("narrowphase_batch engine: failed sub-distance is a failure status\n");
+}
+
+/* ---- Task 4: polytopepolytope_r relation, exact G pins ----
    Standalone world: no narrowphase stage item exists, the relation's cached
    h/normal/cps are set manually and ensure() must no-op (ledger ruling). */
-void test_polytopexpolytope_relation(siconos::config::data_t& data) {
+void test_polytopepolytope_relation(siconos::config::data_t& data) {
   using siconos::storage::add;
 
   // body 1 center (0,0), body 2 center (0,1.9): flush vertical overlap of
@@ -201,7 +256,7 @@ void test_polytopexpolytope_relation(siconos::config::data_t& data) {
   ds1.q() = {0, 0, 0};
   ds2.q() = {0, 1.9, 0};
 
-  auto rel = add<siconos::config::polytopexpolytope_r>(data);
+  auto rel = add<siconos::config::polytopepolytope_r>(data);
   // manual cache (the narrowphase ref stays unbound)
   rel.status() = 1;
   rel.h() = -0.1;
@@ -228,7 +283,7 @@ void test_polytopexpolytope_relation(siconos::config::data_t& data) {
       check(std::abs(g2(i, j) - pin_g2[i][j]) <= 1e-12, "G2 pin");
     }
   }
-  std::print("polytopexpolytope_r: G exact pins pass\n");
+  std::print("polytopepolytope_r: G exact pins pass\n");
 }
 
 /* ---- Task 5: cxd_narrowphase stage — rebind + batch + write-back + cache ---- */
@@ -266,13 +321,13 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
 
   np.ensure(0);
 
-  // the interaction's relation is now a polytopexpolytope_r with the exact
+  // the interaction's relation is now a polytopepolytope_r with the exact
   // cached pair (square x diamond, flush y-overlap 0.1)
   using poly_r_index =
-      siconos::storage::index<siconos::config::polytopexpolytope_r, std::size_t>;
+      siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
   auto check_rebound = [&]() {
     check(std::holds_alternative<poly_r_index>(inter.relation()),
-          "relation rebound to polytopexpolytope_r");
+          "relation rebound to polytopepolytope_r");
     return siconos::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
   };
   {
@@ -313,10 +368,66 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
   std::print("cxd_narrowphase stage: rebound, cached exact pair, checksum re-runs\n");
 }
 
+/* ---- Task 5b: the cache key must include the pair set ----
+   Two pairs (1,2) and (2,3) put all three ds in the checksum. Adding the
+   pair (1,3) at the SAME step tag changes no ds geometry and no ds index
+   seen set, so a geometry-only checksum leaves the cache stale and the new
+   relation keeps the fresh h=0. The gap must be computed. */
+void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
+  using siconos::storage::add;
+  using poly_r_index =
+      siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
+
+  // one side-2 square shape shared by the three bodies
+  auto sh = add<siconos::config::polytope_shape>(data);
+  std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
+  for (int i = 0; i < 4; ++i) sh.vertices()[i] = {sq[i][0], sq[i][1]};
+  sh.nvertices() = 4;
+
+  auto mk = [&](double x, double y) {
+    auto ds = add<siconos::config::polytope_ds>(data);
+    ds.q() = {x, y, 0};
+    siconos::storage::prop<"shape">(ds) = sh;
+    return ds;
+  };
+  auto ds1 = mk(0, 0);
+  auto ds2 = mk(3, 0);
+  auto ds3 = mk(0, 3);
+
+  auto topo_h = add<siconos::config::topo>(data);
+  auto dsds = add<siconos::config::diskdisk_r>(data);
+  auto np = add<siconos::config::cxd_narrowphase>(data);
+  np.topology() = topo_h;
+  np.dsds_r() = dsds;
+
+  auto link = [&](auto a, auto b) {
+    auto inter = topo_h.link(a, b);
+    inter.relation() = dsds;
+    return inter;
+  };
+  link(ds1, ds2);
+  link(ds2, ds3);
+  np.ensure(0);
+
+  // (1,3): both ds are already in the checksum, the step tag is unchanged
+  auto i13 = link(ds1, ds3);
+  np.ensure(0);
+
+  check(std::holds_alternative<poly_r_index>(i13.relation()),
+        "third pair rebound to polytopepolytope_r");
+  auto rel13 = siconos::storage::make_handle(data, std::get<poly_r_index>(i13.relation()));
+  check(std::abs(rel13.h() - 1.0) <= 1e-6,
+        "new pair between cached bodies gets its gap (pair set in the cache key)");
+  std::print("cxd_narrowphase stage: pair-set change re-runs the batch\n");
+}
+
 int main() {
   siconos::config::data_t data;
   test_polytope_item(data);
   test_batch_engine();
-  test_polytopexpolytope_relation(data);
+  test_batch_engine_float();
+  test_failed_subdistance_status();
+  test_polytopepolytope_relation(data);
   test_narrowphase_stage(data);
+  test_narrowphase_pair_set_cache(data);
 }

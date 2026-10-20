@@ -28,8 +28,11 @@
    seed-projection sub-distance of the spec has to travel with the engine.
 
    max_iterations / invalid_input: h = 0 placeholder + status flag; the
-   CALLER (the relation item) keeps its previous cached h. No output is
-   ever non-finite. */
+   CALLER (the stage) keeps the relation's previous cached row (status, h,
+   normal, cps). A pair whose separation sub-distance gives up, or whose
+   EPA depth is non-finite, is reported with such a failure status -- never
+   as a successful separated/enclosed row with h = 0. No output is ever
+   non-finite. */
 
 #include <array>
 #include <cmath>
@@ -51,44 +54,70 @@
 
 namespace siconos::collision {
 
+/* The batch engine is scalar-generic: the stage instantiates it with the
+   environment's scalar (some::scalar cannot be written in a non-item
+   struct -- it is a storage descriptor, not a type), and cxd's packed pool
+   needs the point type to be a trivially copyable std::array. */
+template <typename Scalar>
 struct narrowphase_contact {
   int status;                    // cxd::status value
-  double h;                      // siconos gap: +distance / -depth
-  std::array<double, 2> normal;  // contact normal, body 1 -> body 2
-  std::array<double, 2> cp1, cp2;
+  Scalar h;                      // siconos gap: +distance / -depth
+  std::array<Scalar, 2> normal;  // contact normal, body 1 -> body 2
+  std::array<Scalar, 2> cp1, cp2;
 };
 
+template <typename Scalar>
 struct narrowphase_input {
-  std::vector<std::array<double, 2>>
-      vertices;                           // shape vertices concatenated, world frame, double
-  std::vector<cxd::shape_entry> entries;  // one per shape id: offset/count
+  std::vector<std::array<Scalar, 2>> vertices;  // shape vertices concatenated, world frame
+  std::vector<cxd::shape_entry> entries;        // one per shape id: offset/count
   std::vector<std::uint32_t> ids_a,
       ids_b;                                     // shape ids per pair (id = entries index)
-  std::vector<std::array<double, 2>> init_dirs;  // zero -> {1,0}
+  std::vector<std::array<Scalar, 2>> init_dirs;  // zero -> {1,0}
 };
 
 namespace detail {
 
-using V = std::array<double, 2>;
+template <typename V>
 using support_t = std::tuple<std::size_t, std::size_t, V>;
 
-constexpr double vdot(V a, V b) { return a[0] * b[0] + a[1] * b[1]; }
-inline double vnorm(V a) { return std::hypot(a[0], a[1]); }
-inline V vadd(V a, V b) { return {a[0] + b[0], a[1] + b[1]}; }
-inline V vscale(double s, V a) { return {s * a[0], s * a[1]}; }
+template <typename V>
+constexpr auto vdot(V a, V b) {
+  using scalar = typename V::value_type;
+  return static_cast<scalar>(a[0] * b[0] + a[1] * b[1]);
+}
+template <typename V>
+inline auto vnorm(V a) {
+  return std::hypot(a[0], a[1]);
+}
+template <typename V>
+inline V vadd(V a, V b) {
+  return {a[0] + b[0], a[1] + b[1]};
+}
+template <typename V>
+inline V vscale(typename V::value_type s, V a) {
+  return {s * a[0], s * a[1]};
+}
 
-inline const V& support_pos(const support_t& s) { return std::get<2>(s); }
+template <typename V>
+inline const V& support_pos(const support_t<V>& s) {
+  return std::get<2>(s);
+}
 
-inline V vsub2(V a, V b) { return {a[0] - b[0], a[1] - b[1]}; }
+template <typename V>
+inline V vsub2(V a, V b) {
+  return {a[0] - b[0], a[1] - b[1]};
+}
 
 // closest point of the origin to the segment [p, q]: foot and t in [0,1]
 // (t == 0 / 1 picks the vertex feature)
-inline std::pair<V, double> foot_on_segment(V p, V q) {
+template <typename V>
+inline std::pair<V, typename V::value_type> foot_on_segment(V p, V q) {
+  using scalar = typename V::value_type;
   const V e = vsub2(q, p);
-  const double ee = vdot(e, e);
-  if (ee <= 0) return {p, 0.0};
-  double t = -vdot(p, e) / ee;
-  t = std::max(0.0, std::min(1.0, t));
+  const scalar ee = vdot(e, e);
+  if (ee <= scalar{0}) return {p, scalar{0}};
+  scalar t = -vdot(p, e) / ee;
+  t = std::max(scalar{0}, std::min(scalar{1}, t));
   return {vadd(p, vscale(t, e)), t};
 }
 
@@ -97,21 +126,23 @@ inline std::pair<V, double> foot_on_segment(V p, V q) {
    count as the given simplex range), and a flag whether the foot is on a
    VERTEX (so the simplex reduces to that vertex) or on an EDGE (reduces
    to that edge's two supports). */
-inline auto closest_to_origin(const std::array<support_t, 3>& w, std::size_t n)
-    -> std::tuple<V, std::array<double, 3>, bool /*vertex feature*/,
+template <typename V>
+inline auto closest_to_origin(const std::array<support_t<V>, 3>& w, std::size_t n)
+    -> std::tuple<V, std::array<typename V::value_type, 3>, bool /*vertex feature*/,
                   std::size_t /*feature index*/> {
-  std::array<double, 3> alpha{};
-  V best_foot{0., 0.};
-  double best_norm = std::numeric_limits<double>::infinity();
+  using scalar = typename V::value_type;
+  std::array<scalar, 3> alpha{};
+  V best_foot{};
+  scalar best_norm = std::numeric_limits<scalar>::infinity();
   bool best_is_vertex = false;
   std::size_t best_index = 0;
 
   // vertex features
   for (std::size_t i = 0; i < n; ++i) {
     const auto& p = support_pos(w[i]);
-    if (const double d = vnorm(p); d < best_norm) {
-      std::array<double, 3> a{};
-      a[i] = 1.0;
+    if (const scalar d = vnorm(p); d < best_norm) {
+      std::array<scalar, 3> a{};
+      a[i] = scalar{1};
       best_norm = d;
       best_foot = p;
       best_is_vertex = true;
@@ -124,13 +155,13 @@ inline auto closest_to_origin(const std::array<support_t, 3>& w, std::size_t n)
     const auto& p = support_pos(w[i]);
     const auto& q = support_pos(w[(i + 1) % n]);
     const auto [foot, t] = foot_on_segment(p, q);
-    if (const double d = vnorm(foot); d < best_norm) {
-      std::array<double, 3> a{};
-      a[i] = 1.0 - t;
+    if (const scalar d = vnorm(foot); d < best_norm) {
+      std::array<scalar, 3> a{};
+      a[i] = scalar{1} - t;
       a[(i + 1) % n] = t;
       best_norm = d;
       best_foot = foot;
-      best_is_vertex = (t == 0.0 || t == 1.0);  // degenerate to a vertex
+      best_is_vertex = (t == scalar{0} || t == scalar{1});  // degenerate to a vertex
       best_index = i;
       alpha = a;
     }
@@ -143,18 +174,24 @@ inline auto closest_to_origin(const std::array<support_t, 3>& w, std::size_t n)
    enclosed or budget exhausted): the caller then reports the pair as not
    separated and keeps its previous cached h. */
 template <typename Pool>
-inline auto subdistance_gjk(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b, V dir0,
-                            std::size_t budget)
-    -> std::optional<std::tuple<double /*distance*/, V /*foot*/, std::array<support_t, 3>,
-                                std::size_t /*n*/>> {
-  const auto ds = [&](V d) -> support_t {
+inline auto subdistance_gjk(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b,
+                            const typename Pool::vector& dir0, std::size_t budget)
+    -> std::optional<
+        std::tuple<typename Pool::scalar /*distance*/, typename Pool::vector /*foot*/,
+                   std::array<support_t<typename Pool::vector>, 3>, std::size_t /*n*/>> {
+  using V = typename Pool::vector;
+  using scalar = typename Pool::scalar;
+  const auto ds = [&](V d) -> support_t<V> {
     return cxd::diff_support(cxd::shape_view<Pool>{pool, id_a},
                              cxd::shape_view<Pool>{pool, id_b}, d);
   };
 
-  const double tol = 1e-10;
+  // float environments need a tolerance above their epsilon; double keeps
+  // the spec's 1e-10
+  const scalar tol =
+      std::max(scalar{1e-10}, scalar{8} * std::numeric_limits<scalar>::epsilon());
 
-  std::array<support_t, 3> w{};
+  std::array<support_t<V>, 3> w{};
   w[0] = ds(dir0);
   std::size_t n = 1;
 
@@ -171,18 +208,18 @@ inline auto subdistance_gjk(const Pool& pool, std::uint32_t id_a, std::uint32_t 
       w[0] = w[fidx];
       n = 1;
     } else {
-      const support_t wa = w[fidx];
-      const support_t wb = w[(fidx + 1) % n];
+      const support_t<V> wa = w[fidx];
+      const support_t<V> wb = w[(fidx + 1) % n];
       w[0] = wa;
       w[1] = wb;
       n = 2;
     }
 
-    const support_t cand = ds(dir);
+    const support_t<V> cand = ds(dir);
     // no support strictly beyond the current foot: exact sub-distance
     // (dir = -foot, so the support bound and the simplex bound coincide)
     if (vdot(support_pos(cand), dir) <= -vdot(foot, foot) + tol) {
-      double distance = vnorm(foot);
+      scalar distance = vnorm(foot);
       return std::tuple{distance, foot, w, n};
     }
 
@@ -209,25 +246,28 @@ inline auto subdistance_gjk(const Pool& pool, std::uint32_t id_a, std::uint32_t 
    a unique supporting vertex gives that vertex, a vertex-edge pair gives
    the vertex and the foot of the perpendicular. */
 template <typename Pool>
-inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b, V n)
-    -> std::pair<V, V> {
+inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b,
+                           const typename Pool::vector& n)
+    -> std::pair<typename Pool::vector, typename Pool::vector> {
+  using V = typename Pool::vector;
+  using scalar = typename Pool::scalar;
   const cxd::shape_view<Pool> va{pool, id_a};
   const cxd::shape_view<Pool> vb{pool, id_b};
 
   const auto nverts = [](const auto& view) {
     return static_cast<std::size_t>(std::distance(view.begin(), view.end()));
   };
-  const double amax = [&] {
-    double m = -std::numeric_limits<double>::infinity();
+  const scalar amax = [&] {
+    scalar m = -std::numeric_limits<scalar>::infinity();
     for (std::size_t i = 0; i < nverts(va); ++i) m = std::max(m, vdot(n, va[i]));
     return m;
   }();
-  const double bmin = [&] {
-    double m = std::numeric_limits<double>::infinity();
+  const scalar bmin = [&] {
+    scalar m = std::numeric_limits<scalar>::infinity();
     for (std::size_t j = 0; j < nverts(vb); ++j) m = std::min(m, vdot(n, vb[j]));
     return m;
   }();
-  const double eps = 1e-9 * (1.0 + std::abs(amax) + std::abs(bmin));
+  const scalar eps = scalar{1e-9} * (scalar{1} + std::abs(amax) + std::abs(bmin));
 
   std::vector<std::size_t> tie_a, tie_b;
   for (std::size_t i = 0; i < nverts(va); ++i)
@@ -251,20 +291,20 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
   // both faces (parallel edges): midpoint of the overlap window along the
   // common edge direction
   const V e0 = vsub2(vb[tie_b.back()], vb[tie_b.front()]);
-  const double el = vnorm(e0);
-  const V e = el > 0 ? vscale(1.0 / el, e0) : V{1.0, 0.0};
-  const double pa0 = vdot(e, va[tie_a.front()]);
-  const double pa1 = vdot(e, va[tie_a.back()]);
-  const double pb0 = vdot(e, vb[tie_b.front()]);
-  const double pb1 = vdot(e, vb[tie_b.back()]);
-  const double lo = std::max(std::min(pa0, pa1), std::min(pb0, pb1));
-  const double hi = std::min(std::max(pa0, pa1), std::max(pb0, pb1));
-  const double tm = 0.5 * (lo + hi);
-  const auto lerp_on = [&](const auto& view, std::size_t i0, std::size_t i1, double p0,
-                           double p1) -> V {
-    const double denom = p1 - p0;
-    if (std::abs(denom) < 1e-30) return view[i0];
-    const double t = std::max(0.0, std::min(1.0, (tm - p0) / denom));
+  const scalar el = vnorm(e0);
+  const V e = el > scalar{0} ? vscale(scalar{1} / el, e0) : V{1, 0};
+  const scalar pa0 = vdot(e, va[tie_a.front()]);
+  const scalar pa1 = vdot(e, va[tie_a.back()]);
+  const scalar pb0 = vdot(e, vb[tie_b.front()]);
+  const scalar pb1 = vdot(e, vb[tie_b.back()]);
+  const scalar lo = std::max(std::min(pa0, pa1), std::min(pb0, pb1));
+  const scalar hi = std::min(std::max(pa0, pa1), std::max(pb0, pb1));
+  const scalar tm = scalar{0.5} * (lo + hi);
+  const auto lerp_on = [&](const auto& view, std::size_t i0, std::size_t i1, scalar p0,
+                           scalar p1) -> V {
+    const scalar denom = p1 - p0;
+    if (std::abs(denom) < scalar{1e-30}) return view[i0];
+    const scalar t = std::max(scalar{0}, std::min(scalar{1}, (tm - p0) / denom));
     return vadd(view[i0], vscale(t, vsub2(view[i1], view[i0])));
   };
   return {lerp_on(va, tie_a.front(), tie_a.back(), pa0, pa1),
@@ -273,18 +313,20 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
 
 }  // namespace detail
 
-inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in) {
+template <typename Scalar>
+inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
+    narrowphase_input<Scalar>&& in, std::size_t subdistance_budget = 64) {
   using cxd::status;
-  using V = std::array<double, 2>;
+  using V = std::array<Scalar, 2>;
 
   const std::size_t npairs = in.ids_a.size();
-  std::vector<narrowphase_contact> out(npairs);
+  std::vector<narrowphase_contact<Scalar>> out(npairs);
   for (auto& c : out) {
     c.status = static_cast<int>(cxd::status::invalid_input);
-    c.h = 0.0;
-    c.normal = {0.0, 0.0};
-    c.cp1 = {0.0, 0.0};
-    c.cp2 = {0.0, 0.0};
+    c.h = Scalar{0};
+    c.normal = V{0, 0};
+    c.cp1 = V{0, 0};
+    c.cp2 = V{0, 0};
   }
 
   if (in.entries.size() == 0) {
@@ -294,20 +336,24 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
   // the pool takes ownership of the vertex buffer
   cxd::packed_pool<V> pool{std::move(in.vertices), std::move(in.entries)};
 
-  std::vector<cxd::pair_record<double, 2>> pairs(npairs);
+  std::vector<cxd::pair_record<Scalar, 2>> pairs(npairs);
   for (std::size_t k = 0; k < npairs; ++k) {
     V d0 = in.init_dirs[k];
-    const double n0 = std::hypot(d0[0], d0[1]);
-    if (n0 <= 0)
-      d0 = {1.0, 0.0};
+    const Scalar n0 = std::hypot(d0[0], d0[1]);
+    if (n0 <= Scalar{0})
+      d0 = V{1, 0};
     else {
-      d0 = {d0[0] / n0, d0[1] / n0};
+      d0 = V{d0[0] / n0, d0[1] / n0};
     }
-    pairs[k] = cxd::pair_record<double, 2>{in.ids_a[k], in.ids_b[k], {d0[0], d0[1]}};
+    pairs[k] = cxd::pair_record<Scalar, 2>{in.ids_a[k], in.ids_b[k], {d0[0], d0[1]}};
   }
 
-  // spec §5 tolerance/budget: tight tolerance, default iteration budget
-  const cxd::gjk_options opts{.tolerance = 1e-10, .max_iterations = 64};
+  // spec §5 tolerance/budget: tight tolerance, default iteration budget.
+  // cxd's gjk_options carries the tolerance as a double; keep the float
+  // case above epsilon so the GJK can terminate.
+  const double tol = static_cast<double>(
+      std::max(Scalar{1e-10}, Scalar{8} * std::numeric_limits<Scalar>::epsilon()));
+  const cxd::gjk_options opts{.tolerance = tol, .max_iterations = 64};
 
   const auto results = cxd::gjk_batch<2>(pool, pairs, opts);
 
@@ -317,8 +363,7 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
   // the GJK's direction then collapses onto the line through the origin.
   std::vector<std::uint32_t> hit_pairs;
   for (std::size_t k = 0; k < npairs; ++k)
-    if (results[k].st == status::enclosed)
-      hit_pairs.push_back(static_cast<std::uint32_t>(k));
+    if (results[k].st == status::enclosed) hit_pairs.push_back(static_cast<std::uint32_t>(k));
   const auto epa_answers = cxd::epa_batch<2>(pool, pairs, hit_pairs, results, opts);
   std::size_t hit_i = 0;
 
@@ -339,33 +384,39 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
           c.cp1 = cp1;
           c.cp2 = cp2;
           c.h = -depth;
-        } else {  // EPA refused: keep-previous contract, finite outputs
-          c.h = 0.0;
-          c.normal = {0.0, 0.0};
-          c.cp1 = {0.0, 0.0};
-          c.cp2 = {0.0, 0.0};
+        } else {
+          // EPA refused (non-finite depth/normal): report a failure status so
+          // the stage keeps the previous cached row instead of writing zeros
+          c.status = static_cast<int>(cxd::status::invalid_input);
+          c.h = Scalar{0};
+          c.normal = V{0, 0};
+          c.cp1 = V{0, 0};
+          c.cp2 = V{0, 0};
         }
         break;
       }
       case status::separated: {
         c.status = static_cast<int>(cxd::status::separated);
         const V dir0{pairs[k].init_dir[0], pairs[k].init_dir[1]};
-        const auto sub =
-            detail::subdistance_gjk(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, dir0, 64);
+        const auto sub = detail::subdistance_gjk(
+            pool, pairs[k].shape_id_A, pairs[k].shape_id_B, dir0, subdistance_budget);
         if (sub) {
           const auto& [distance, foot, w, n] = *sub;
-          const double fn = detail::vnorm(foot);
-          c.normal = fn > 0 ? detail::vscale(-1.0 / fn, foot) : V{0., 0.};
+          const Scalar fn = detail::vnorm(foot);
+          c.normal = fn > Scalar{0} ? detail::vscale(-Scalar{1} / fn, foot) : V{0, 0};
           // supporting-face witnesses along the contact normal; h from the
           // witness pair keeps h and the cps mutually consistent
           const auto [cp1, cp2] =
               detail::face_witnesses(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, c.normal);
           c.cp1 = cp1;
           c.cp2 = cp2;
-          const double h_wit = detail::vdot(c.normal, detail::vsub2(cp2, cp1));
-          c.h = h_wit > 0 ? h_wit : distance;
+          const Scalar h_wit = detail::vdot(c.normal, detail::vsub2(cp2, cp1));
+          c.h = h_wit > Scalar{0} ? h_wit : distance;
+        } else {
+          // no separation certificate: not "separated with h=0", which would
+          // silently overwrite the cached gap; let the stage keep its row
+          c.status = static_cast<int>(cxd::status::max_iterations);
         }
-        // else: keep-previous contract (status separated, h untouched)
         break;
       }
       case status::max_iterations:
@@ -386,29 +437,30 @@ inline std::vector<narrowphase_contact> narrowphase_batch(narrowphase_input&& in
 namespace siconos::collision {
 
 template <typename Topo>
-struct polytopexpolytope_r;  // polytopexpolytope_r.hpp (Task 4)
+struct polytopepolytope_r;  // polytopepolytope_r.hpp (Task 4)
 
 /* ---- the narrowphase stage item (Task 5) ----
    Owns the world's polytope interactions: rebinds generic ds-ds relations
-   to polytopexpolytope_r items, packs world-vertex data once per call,
+   to polytopepolytope_r items, packs world-vertex data once per call,
    runs the batch engine, writes statuses back and caches the step tag +
    a world checksum so ensure(step) re-runs only when the geometry moved. */
 template <typename Topo>
 struct cxd_narrowphase : item {
   using topology = Topo;
   using finteraction = typename topology::finteraction;
-  using poly_r_t = polytopexpolytope_r<Topo>;
+  using poly_r_t = polytopepolytope_r<Topo>;
 
   struct attributes {
     some::item_ref<topology> topology;
     some::item_ref<collision::diskdisk_r> dsds_r;  // generic binder to detect
-    // the plan's poly_dsds_r ref (cxd_narrowphase -> polytopexpolytope_r) is
+    // the plan's poly_dsds_r ref (cxd_narrowphase -> polytopepolytope_r) is
     // DISABLED on purpose: the mutual item_refs with poly_r's narrowphase
     // ref make storage::make's all_items walker recurse forever (found by
     // bisection, see ledger); polytope relations are identified by dispatch
     // type in rebind/pack, so the back-ref is not needed
     some::indice cache_step;
-    some::scalar cache_checksum;  // FNV-1a over world-vertex doubles (53-bit)
+    // FNV-1a over the pair set and the world vertices: a hash, not a scalar
+    some::indice cache_checksum;
     some::map<some::array<some::indice, some::indice_value<2>>,
               some::item_ref<poly_r_t>>
         rel_map;  // ordered ds-index pair -> polytope relation reuse map
@@ -428,15 +480,17 @@ struct cxd_narrowphase : item {
        c(q) = (q(0), q(1)), theta = q(2); the rotation-direction convention
        is pinned by an exact-value test (R(pi/2)*(1,0) == (0,1)) */
     auto world_vertices(auto& ds, auto step) {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
       auto& data = self()->data();
       auto sh =
           storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
       auto& q = storage::attr<"q">(ds, step);
-      const double c = std::cos(q(2)), s = std::sin(q(2));
-      std::vector<std::array<double, 2>> out;
+      const scalar c = std::cos(q(2)), s = std::sin(q(2));
+      std::vector<std::array<scalar, 2>> out;
       const auto n = sh.nvertices();
       out.reserve(n);
-      for (auto i = 0u; i < n; ++i) {
+      for (std::size_t i = 0; i < n; ++i) {
         const auto& v = sh.vertices()[i];
         out.push_back({q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]});
       }
@@ -445,7 +499,7 @@ struct cxd_narrowphase : item {
 
     /* 1. rebind: interactions between two ds whose shapes are polytopes and
        whose relation is still the generic diskdisk_r get a
-       polytopexpolytope_r item (created or reused from rel_map; reuse keeps
+       polytopepolytope_r item (created or reused from rel_map; reuse keeps
        init_dir); the relation ref then points at this stage item. */
     void rebind(auto step) {
       auto& data = self()->data();
@@ -475,7 +529,10 @@ struct cxd_narrowphase : item {
             auto rel = storage::add<poly_r_t>(data);
             // fresh vector attrs are uninitialized storage (Eigen default);
             // give the first batch a well-defined direction: the engine maps
-            // a zero init_dir to {1, 0} (spec §5)
+            // a zero init_dir to {1, 0} (spec §5). status/h define the
+            // keep-previous baseline: no valid result yet.
+            rel.status() = static_cast<std::size_t>(cxd::status::invalid_input);
+            rel.h() = 0;
             rel.normal() = {0, 0};
             rel.cp1() = {0, 0};
             rel.cp2() = {0, 0};
@@ -489,9 +546,11 @@ struct cxd_narrowphase : item {
       }
     }
 
-    /* FNV-1a over every involved ds' world-vertex doubles (53-bit mask: the
-       cache_checksum attribute is a scalar) */
-    double checksum(auto step) {
+    /* FNV-1a over the PAIR SET and every involved ds' world vertices. The
+       pair keys are load-bearing: a new interaction between two ds that are
+       already in the checksum (both have another pair) changes no vertex and
+       no ds index, but must refresh the cache. */
+    auto checksum(auto step) {
       auto& data = self()->data();
       std::uint64_t hsh = 1469598103934665603ull;
       auto mix = [&](const void* p, std::size_t n) {
@@ -507,11 +566,14 @@ struct cxd_narrowphase : item {
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
           auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
           auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
+          const auto i1 = ds1.index().value();
+          const auto i2 = ds2.index().value();
+          mix(&i1, sizeof i1);
+          mix(&i2, sizeof i2);
           for (auto* ds : {&ds1, &ds2}) {
             const auto idx = ds->index().value();
             if (seen[idx]) continue;
             seen[idx] = true;
-            mix(&idx, sizeof idx);
             for (const auto& v : world_vertices(*ds, step)) {
               mix(&v[0], sizeof v[0]);
               mix(&v[1], sizeof v[1]);
@@ -519,15 +581,17 @@ struct cxd_narrowphase : item {
           }
         }
       }
-      return static_cast<double>(hsh & ((1ull << 52) - 1));
+      return hsh;
     }
 
     /* 2. pack the batch input: candidates are all interactions whose
-       relation is a polytopexpolytope_r (active or not: h continuity);
+       relation is a polytopepolytope_r (active or not: h continuity);
        each involved ds contributes its world vertices once */
     auto pack(auto step) {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
       auto& data = self()->data();
-      narrowphase_input in;
+      narrowphase_input<scalar> in;
       std::map<std::size_t, std::uint32_t> slot;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
@@ -571,11 +635,11 @@ struct cxd_narrowphase : item {
             auto rel = storage::make_handle(
                 data, std::get<storage::index<poly_r_t, std::size_t>>(relvar));
             const auto& c = out[k++];
-            rel.status() = c.status;
             if (c.status == static_cast<int>(cxd::status::max_iterations) ||
                 c.status == static_cast<int>(cxd::status::invalid_input)) {
-              continue;  // keep-previous: cached h + init_dir stay
+              continue;  // keep-previous: the whole cached row stays
             }
+            rel.status() = c.status;
             rel.h() = c.h;
             rel.normal() = {c.normal[0], c.normal[1]};
             rel.cp1() = {c.cp1[0], c.cp1[1]};
@@ -585,10 +649,11 @@ struct cxd_narrowphase : item {
             } else if (c.h > 0) {
               // separated: the warm start points from body 1 to body 2, i.e.
               // -(cp1 - cp2)/h (cp2 - cp1 = h * normal for a separated pair)
-              const double dx = rel.cp2()[0] - rel.cp1()[0];
-              const double dy = rel.cp2()[1] - rel.cp1()[1];
-              const double d = std::hypot(dx, dy);
-              if (d > 0) rel.init_dir() = {dx / d, dy / d};
+              using scalar = typename std::decay_t<decltype(self()->env())>::scalar;
+              const scalar dx = rel.cp2()[0] - rel.cp1()[0];
+              const scalar dy = rel.cp2()[1] - rel.cp1()[1];
+              const scalar d = std::hypot(dx, dy);
+              if (d > scalar{0}) rel.init_dir() = {dx / d, dy / d};
             }
           }
         }
@@ -601,7 +666,7 @@ struct cxd_narrowphase : item {
        the batch re-runs only on a new step tag or a changed world checksum */
     void ensure(auto step) {
       rebind(step);
-      const double ck = checksum(step);
+      const auto ck = checksum(step);
       if (storage::attr<"cache_step">(*self()) == step &&
           storage::attr<"cache_checksum">(*self()) == ck) {
         return;

@@ -2,7 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <print>
+#include <cstddef>
 #include <stdexcept>
 
 namespace siconos::collision::shape {
@@ -51,19 +51,24 @@ struct polytope : item {
     // convexity check: all consecutive edge cross products same sign.
     // tolerated (no-op) when nvertices() is still 0 at init time.
     void __init__() {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
       const auto n = nvertices();
       if (n < 3) {
         return;
       }
-      double sign = 0;
-      for (auto i = 0u; i < n; ++i) {
+      if (n > std::size(vertices())) {
+        throw std::runtime_error("shape::polytope: nvertices exceeds the 16-vertex capacity");
+      }
+      scalar sign = 0;
+      for (std::size_t i = 0; i < n; ++i) {
         const auto& a = vertices()[i];
         const auto& b = vertices()[(i + 1) % n];
         const auto& c = vertices()[(i + 2) % n];
         const auto cr = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
-        if (cr == 0) continue;
-        if (sign == 0) sign = cr;
-        if (cr * sign < 0) {
+        if (cr == scalar{0}) continue;
+        if (sign == scalar{0}) sign = cr;
+        if (cr * sign < scalar{0}) {
           throw std::runtime_error(
               "shape::polytope: non-convex polygon (inconsistent edge cross "
               "product sign); convex hull precomputation needed");

@@ -3,7 +3,7 @@
    Mirrors tests/bouncing_disks.cpp: two bodies fall, collide and separate
    while the simulation runs. The ONLY addition to the bouncing_disks
    harness loop is the np.ensure(step) line, which rebinds the generic
-   ds-ds relations to polytopexpolytope_r items and fills their cached
+   ds-ds relations to polytopepolytope_r items and fills their cached
    status/h/normal/cp1/cp2 from one batched narrowphase computation.
 
    The bodies are side-2 axis-aligned squares; body 1 falls on body 2
@@ -24,7 +24,7 @@
 // clang-format off
 /* the relation + stage headers must be visible before the config names
    them; the load-bearing cxd include order lives inside cxd_narrowphase.hpp */
-#include "siconos/collision/polytopexpolytope_r.hpp"
+#include "siconos/collision/polytopepolytope_r.hpp"
 // clang-format on
 
 namespace siconos::config {
@@ -37,11 +37,11 @@ using diskdisk_r = collision::diskdisk_r;
 /* topo is the acyclic marker of the relation/narrowphase pair; defined
    right after the interaction that names it */
 struct topo;
-using polytopexpolytope_r = collision::polytopexpolytope_r<topo>;
+using polytopepolytope_r = collision::polytopepolytope_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
-struct interaction : simul::interaction<nslaw, diskdisk_r, polytopexpolytope_r> {};
+struct interaction : simul::interaction<nslaw, diskdisk_r, polytopepolytope_r> {};
 struct topo : simul::topology<polytope, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
@@ -58,14 +58,14 @@ struct env : standard_environment<T> {
 
 struct data_t
     : storage::make<env, simulation, interaction_manager, polytope, polytope_shape, diskdisk_r,
-                    nslaw, interaction, topo, polytopexpolytope_r, cxd_narrowphase, osi, td,
+                    nslaw, interaction, topo, polytopepolytope_r, cxd_narrowphase, osi, td,
                     osnspb, neighborhood, space_filter,
                     storage::with_properties<
                         storage::wrapped<polytope, some::unbounded_collection>,
                         storage::wrapped<diskdisk_r, some::unbounded_collection>,
                         storage::wrapped<pointd, some::unbounded_collection>,
                         storage::wrapped<interaction, some::unbounded_collection>,
-                        storage::wrapped<polytopexpolytope_r, some::unbounded_collection>,
+                        storage::wrapped<polytopepolytope_r, some::unbounded_collection>,
                         storage::attached<polytope, storage::pattern::symbol<"shape">,
                                           storage::some::item_ref<polytope_shape>>,
                         storage::time_invariant<storage::pattern::attr_t<polytope, "fext">>,
@@ -200,7 +200,7 @@ int main() {
     const double theta1 = storage::attr<"q">(body1, step)(2);
     const double theta2 = storage::attr<"q">(body2, step)(2);
 
-    for (auto rel : storage::handles<config::polytopexpolytope_r>(data, step)) {
+    for (auto rel : storage::handles<config::polytopepolytope_r>(data, step)) {
       const double hval = rel.h();
       check(std::isfinite(hval), "cached h is finite");
       // a perfectly aligned normal impact must not excite any torque

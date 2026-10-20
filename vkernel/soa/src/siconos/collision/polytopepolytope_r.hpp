@@ -21,7 +21,7 @@ namespace siconos::collision {
    Templated on Topo only, so the relation <-> narrowphase mutual refs
    stay acyclic (narrowphase = cxd_narrowphase<Topo>, same Topo). */
 template <typename Topo>
-struct polytopexpolytope_r : item, model::relation2, model::any_lagrangian_relation {
+struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relation {
   using dof = some::indice_parameter<"dof">;
   using narrowphase_t = cxd_narrowphase<Topo>;
 
@@ -85,26 +85,29 @@ struct polytopexpolytope_r : item, model::relation2, model::any_lagrangian_relat
     [[gnu::always_inline]] void compute_jachq(S step, DS1& ds1, DS2& ds2, M& g1, M& g2) {
       ensure(step);
 
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
       auto& n = storage::attr<"normal">(*self());
       auto& c1 = storage::attr<"cp1">(*self());
       auto& c2 = storage::attr<"cp2">(*self());
 
-      const double nx = n[0];
-      const double ny = n[1];
-      const double tx = -ny;
-      const double ty = nx;
+      const scalar nx = n[0];
+      const scalar ny = n[1];
+      const scalar tx = -ny;
+      const scalar ty = nx;
 
-      const double a1x = c1[0] - q1(0);
-      const double a1y = c1[1] - q1(1);
-      const double a2x = c2[0] - q2(0);
-      const double a2y = c2[1] - q2(1);
+      const scalar a1x = c1[0] - q1(0);
+      const scalar a1y = c1[1] - q1(1);
+      const scalar a2x = c2[0] - q2(0);
+      const scalar a2y = c2[1] - q2(1);
 
-      const double za1x = -a1y;
-      const double za1y = a1x;
-      const double za2x = -a2y;
-      const double za2y = a2x;
+      const scalar za1x = -a1y;
+      const scalar za1y = a1x;
+      const scalar za2x = -a2y;
+      const scalar za2y = a2x;
 
       g1(0, 0) = -nx;
       g1(0, 1) = -ny;
