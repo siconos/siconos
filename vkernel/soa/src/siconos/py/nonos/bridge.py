@@ -323,7 +323,9 @@ class BodyBase(Stored):
 
     @classmethod
     def set_count(cls, newcount):
-        cls.__count = newcount
+        # on BodyBase: cls.__count = ... from a subclass (Bodies) would
+        # create a separate counter on the subclass
+        BodyBase.__count = newcount
 
     @classmethod
     def shapes(cls):
@@ -458,9 +460,10 @@ class BodyWrap:
 class Bodies(BodyBase):
     def __init__(self, radius, mass, positions, velocities):
 
-        start = self.count()
+        # ids from 1, as Body and the hdf5 file
+        start = self.count() + 1
         self.set_count(self.count() + len(positions))
-        self._ident = np.arange(start, self.count())
+        self._ident = np.arange(start, self.count() + 1)
 
         bodies = vkernel.disks.multiple_add_disk(self.data(), len(positions))
         self._handle = bodies
