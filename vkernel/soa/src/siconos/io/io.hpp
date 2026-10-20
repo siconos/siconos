@@ -28,6 +28,8 @@ struct io : item {
   using dsystem = nth_t<1, typename osi::systems_t>;  // runtime dof system
                                                       // maybe empty_item
   using interaction = nth_t<0, typename osi::interactions_t>;
+  // disk / fem interaction (maybe empty_item)
+  using dinteraction = nth_t<1, typename osi::interactions_t>;
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
@@ -306,6 +308,97 @@ struct io : item {
           k++;
         }
       }
+
+      // disk / fem contacts, numbered after the others as in the assembled
+      // problem
+      if constexpr (!match::empty_item<dinteraction>) {
+        auto& d_ys = storage::attr_values<dinteraction, "y">(data, step);
+        auto& d_ydots = storage::attr_values<dinteraction, "ydot">(data, step);
+        auto& d_lambdas = storage::attr_values<dinteraction, "lambda">(data, step);
+        auto& d_nslaws = storage::attr_values<dinteraction, "nslaw">(data, step);
+        auto& d_relations = storage::attr_values<dinteraction, "relation">(data, step);
+        auto& d_ds1s = storage::prop_values<dinteraction, "ds1", topology>(data, step);
+        auto& d_ds2s = storage::prop_values<dinteraction, "ds2", topology>(data, step);
+        auto& d_h_matrices1 = storage::attr_values<dinteraction, "h_matrix1">(data, step);
+        auto& d_activations =
+            storage::prop_values<dinteraction, "activation", topology>(data, step);
+
+        for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2, activation] :
+             view::zip(d_relations, d_h_matrices1, d_nslaws, d_ys, d_ydots, d_lambdas, d_ds1s,
+                       d_ds2s, d_activations)) {
+          if (activation) {
+            auto hds1 = storage::make_handle(data, ds1); /* disk */
+            auto hds2 = storage::make_handle(data, ds2); /* fem */
+
+            using vect = std::decay_t<decltype(hds1.q(step))>;
+
+            // impulse on the disk
+            auto p0 = h_matrix1.transpose() * lambda;
+
+            vect c1 = {hds1.q(step)[0], hds1.q(step)[1], 0.};
+            vect ca;
+            vect cb;
+            vect cn;
+
+            variant::visit(
+                data, relation,
+                mp::overload(
+                    /* disk / mesh segment: the segment of the mesh in its
+                     * reference configuration, as in diskmesh_r */
+                    [&](match::handle<collision::diskmesh_r> auto rrel) {
+                      auto segments = rrel.mesh().segments();
+                      auto ci = rrel.contact_index();
+                      vect p1 = {segments.x1(ci), segments.y1(ci), 0.};
+                      vect p2 = {segments.x2(ci), segments.y2(ci), 0.};
+                      vect dp = p2 - p1;
+                      vect d1 = c1 - p1;
+                      const scalar t =
+                          fmax(0, fmin(1, algebra::dot(d1, dp) / algebra::dot(dp, dp)));
+                      cb = p1 + t * dp;
+                      cn = (cb - c1) / collision::distance(cb, c1);
+                      ca =
+                          c1 + cn * storage::make_handle(
+                                        data,
+                                        storage::prop<"shape", storage::config_declared>(hds1))
+                                        .radius();
+                    },
+                    [&](auto) {
+                      throw(std::runtime_error("Error: not a disk-mesh relation"));
+                    }));
+
+            auto id_ds1 = storage::prop<"id", topology>(hds1);
+            auto id_ds2 = storage::prop<"id", topology>(hds2);
+
+            attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
+                                                cb[0],
+                                                cb[1],
+                                                0. /* 2D */,
+                                                ca[0],
+                                                ca[1],
+                                                0. /* 2D */,
+                                                -cn[0],
+                                                -cn[1],
+                                                0. /* 2D */,
+                                                p0[0],
+                                                p0[1],
+                                                0. /* 2D */,
+                                                y[0],
+                                                y[1],
+                                                0. /* 2D */,
+                                                ydot[0],
+                                                ydot[1],
+                                                0. /* 2D */,
+                                                lambda[0],
+                                                lambda[1],
+                                                0. /* 2D */,
+                                                (scalar)k,
+                                                (scalar)id_ds1,
+                                                (scalar)id_ds2});
+            k++;
+          }
+        }
+      }
+
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 25>>(
           attr<"cp_info">(*self()).data()->data(), attr<"cp_info">(*self()).size(),
           attr<"cp_info">(*self()).data()->size());
@@ -352,6 +445,23 @@ struct io : item {
 
           attr<"co_info">(*self()).push_back({(scalar)inter_index, (scalar)id_ds1,
                                               (scalar)id_ds2, (scalar)static_shape_info});
+        }
+      }
+
+      // disk / fem contacts, numbered after the others as in contact_points
+      if constexpr (!match::empty_item<dinteraction>) {
+        auto& d_ds1s = storage::prop_values<dinteraction, "ds1", topology>(data, step);
+        auto& d_ds2s = storage::prop_values<dinteraction, "ds2", topology>(data, step);
+        auto& d_activations =
+            storage::prop_values<dinteraction, "activation", topology>(data, step);
+
+        for (auto [ds1, ds2, activation] : view::zip(d_ds1s, d_ds2s, d_activations)) {
+          if (activation) {
+            auto id_ds1 = prop<"id", topology>(storage::make_handle(data, ds1));
+            auto id_ds2 = prop<"id", topology>(storage::make_handle(data, ds2));
+            attr<"co_info">(*self()).push_back(
+                {(scalar)k++, (scalar)id_ds1, (scalar)id_ds2, (scalar)0});
+          }
         }
       }
 
