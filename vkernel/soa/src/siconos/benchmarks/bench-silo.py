@@ -220,6 +220,10 @@ solver = sn.solver_ids.SICONOS_FRICTION_2D_NSGS
 options = sn.SolverOptions(solver)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = itermax
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
+# legacy FC2D error measure: the default became Euclidean scaling upstream
+options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
+    sn.params.SICONOS_FRICTION_2D_SCALING_NO
+)
 options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 fileName = f"./Silo-{N}-2D-disks"

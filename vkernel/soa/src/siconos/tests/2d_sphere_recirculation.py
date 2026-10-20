@@ -539,6 +539,10 @@ else:
 options = sk.SolverOptions(sn.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 100
 options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-3
+# legacy FC2D error measure: the default became Euclidean scaling upstream
+options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
+    sn.params.SICONOS_FRICTION_2D_SCALING_NO
+)
 options.iparam[sn.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
 
 
