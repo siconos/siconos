@@ -21,6 +21,27 @@
 /*!\file GlobalFrictionContactProblem.h
   Definition of a structure to handle global friction-contact (2D or 3D)
   problems.
+
+  A global friction-contact problem is defined by the data
+  \f$(M, H, q, b, \mu)\f$. It consists in finding a global velocity
+  \f$v\in{\mathrm{I\!R}}^n\f$ and a local reaction
+  \f$r\in{\mathrm{I\!R}}^m\f$ such that
+  \f[
+    M v = q + H r,
+  \f]
+  and, for each contact \f$\alpha=1,\dots,n_c\f$, the local velocity
+  \f$u_\alpha = (H^T v + b)_\alpha\f$ and the local reaction
+  \f$r_\alpha\f$ satisfy the Signorini--Coulomb friction conditions in
+  dimension \f$d\f$ (with \f$d=2\f$ or \f$d=3\f$ and \f$m = d\,n_c\f$).
+
+  Eliminating the global velocity yields the equivalent (reduced or local)
+  friction-contact problem
+  \f[
+    W r + q_{\text{loc}} = u
+  \f]
+  where \f$W = H^T M^{-1} H\f$, \f$q_{\text{loc}} = H^T M^{-1} q + b\f$,
+  and \f$C_\mu\f$ is the product of Coulomb friction cones defined by the
+  friction coefficients \f$\mu\f$.
 */
 
 #include <stdio.h>  // for NULL, FILE
@@ -28,7 +49,23 @@
 #include "NumericsFwd.h"  // for GlobalFrictionContactProblem, NumericsMatrix
 
 /**
-    The structure that defines a Friction-Contact (3D or 2D ) problem
+    The structure that defines a global Friction-Contact (3D or 2D) problem.
+
+    Given the data \f$(M, H, q, b, \mu)\f$, the unknowns are a global
+    velocity \f$v\in{\mathrm{I\!R}}^n\f$ and a local reaction
+    \f$r\in{\mathrm{I\!R}}^m\f$ satisfying
+    \f[
+      M v = q + H r,
+    \f]
+    together with the Signorini--Coulomb friction law between the local
+    velocity \f$u = H^T v + b\f$ and the reaction \f$r\f$, contact-wise in
+    dimension \f$d\f$ (\f$d=2\f$ or \f$d=3\f$, \f$m = d\,n_c\f$).
+
+    An equivalent local formulation is obtained by eliminating \f$v\f$:
+    \f[
+      W r + q_{\text{loc}} = u
+    \f]
+    with \f$W = H^T M^{-1} H\f$ and \f$q_{\text{loc}} = H^T M^{-1} q + b\f$.
 */
 
 struct GlobalFrictionContactProblem {

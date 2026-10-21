@@ -19,7 +19,23 @@
 #define FRICTIONCONTACTPROBLEM_H
 
 /*!\file FrictionContactProblem.h
-  Definition of a structure to handle friction-contact (2D or 3D) problems.
+  Definition of a structure to handle (reduced or dual) friction-contact
+  (2D or 3D) problems.
+
+  A friction-contact problem is defined by the data \f$(M, q, \mu)\f$.
+  It consists in finding a local reaction \f$r\in{\mathrm{I\!R}}^m\f$ and a
+  local relative velocity \f$u\in{\mathrm{I\!R}}^m\f$ such that
+  \f[
+    u = M r + q,
+  \f]
+  and, for each contact \f$\alpha=1,\dots,n_c\f$, the pair
+  \f$(u_\alpha, r_\alpha)\f$ satisfies the Signorini--Coulomb friction law in
+  dimension \f$d\f$ (with \f$d=2\f$ or \f$d=3\f$ and \f$m = d\,n_c\f$).
+
+  This is the reduced (or dual) form obtained from a
+  GlobalFrictionContactProblem by eliminating the global velocity, i.e.
+  \f$M = H^T M_{\text{glob}}^{-1} H\f$ and
+  \f$q = H^T M_{\text{glob}}^{-1} q_{\text{glob}} + b\f$.
 */
 #include <stdio.h>  // for FILE
 
@@ -29,6 +45,22 @@
 /**
     The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
     problem.
+
+    Given the data \f$(M, q, \mu)\f$, the unknowns are a local reaction
+    \f$r\in{\mathrm{I\!R}}^m\f$ and a local relative velocity
+    \f$u\in{\mathrm{I\!R}}^m\f$ satisfying
+    \f[
+      u = M r + q,
+    \f]
+    together with the Signorini--Coulomb friction law contact-wise in
+    dimension \f$d\f$ (\f$d=2\f$ or \f$d=3\f$, \f$m = d\,n_c\f$).
+
+    This reduced problem is obtained from a GlobalFrictionContactProblem by
+    eliminating the global velocity:
+    \f[
+      M = H^T M_{\text{glob}}^{-1} H,\qquad
+      q = H^T M_{\text{glob}}^{-1} q_{\text{glob}} + b.
+    \f]
 */
 struct FrictionContactProblem {
   /** dimension of the contact space (3D or 2D ) */
