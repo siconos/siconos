@@ -385,11 +385,13 @@ struct space_filter : item {
                     ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] = inter;
                   },
                   []<bool flag = false>(auto) {
-                    assert(flag);
-                    // should send an exception here
-                    // static_assert(flag,
-                    //               "should not
-                    //               happen");
+                    // hardening: this used to be a silent no-op in release
+                    // (assert compiled out); a self interaction must bind a
+                    // fixed-object relation
+                    throw std::runtime_error(
+                        "space_filter::build_proximity_maps: unhandled relation "
+                        "for a self interaction (ds1 == ds2); only "
+                        "diskfsegment_r/diskfdisk_r are supported");
                   }));
         }
       }
@@ -619,7 +621,21 @@ struct space_filter : item {
             auto finter = ds_ds_prox.find(make_ipair(storage::prop<"ds1", Topology>(inter),
                                                      storage::prop<"ds2", Topology>(inter)));
 
-            assert(inter.index().value() == std::get<1>(*finter).value());
+            // hardening: duplicate ds pairs (the proximity map keeps only
+            // the last interaction per pair) or a map rebuilt out of sync
+            // would leave this find empty; the assert is compiled out in a
+            // release build, so this used to dereference an end iterator
+            if (finter == ds_ds_prox.end()) {
+              throw std::runtime_error(
+                  "space_filter::remove_interactions: no proximity map entry for "
+                  "this ds-ds interaction (stale filter state or duplicate ds "
+                  "pair)");
+            }
+            if (inter.index().value() != std::get<1>(*finter).value()) {
+              throw std::runtime_error(
+                  "space_filter::remove_interactions: two interactions share the "
+                  "same ds pair; this one is stale");
+            }
 
             ds_ds_prox.erase(finter);
             //            print("  REMOVE ds ds interaction between {}
@@ -636,6 +652,11 @@ struct space_filter : item {
                           std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
                       auto finter = ds_segment_prox.find(
                           mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      if (finter == ds_segment_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this ds-fsegment interaction");
+                      }
                       ds_segment_prox.erase(finter);
                     },
                     [&]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
@@ -643,14 +664,20 @@ struct space_filter : item {
                       auto coefs = std::array{translat[0], translat[1]};
                       auto finter = ds_fdisk_prox.find(
                           mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      if (finter == ds_fdisk_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this ds-fdisk interaction");
+                      }
                       ds_fdisk_prox.erase(finter);
                     },
                     []<bool flag = false>(auto) {
-                      assert(flag);
-                      // should send an exception here
-                      // static_assert(flag,
-                      //               "should not
-                      //               happen");
+                      // hardening: this used to be a silent no-op in release
+                      // (assert compiled out), leaking the interaction
+                      throw std::runtime_error(
+                          "space_filter::remove_interactions: unhandled relation "
+                          "for a self interaction (ds1 == ds2); only "
+                          "diskfsegment_r/diskfdisk_r are supported");
                     }));
             //            print("  REMOVE ds segment interaction between {}
             //            {},{},{})\n",
