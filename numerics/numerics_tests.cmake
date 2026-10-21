@@ -325,6 +325,9 @@ if(WITH_TESTING)
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
 
+  # Compute rho for Alart-Curnier formulations
+  new_test(NAME fc3d_compute_rho_test SOURCES fc3d_compute_rho_test.c)
+
   # Vectorized complementarity error vs scalar reference
   new_test(NAME test_compute_error_vectorized SOURCES test_compute_error_vectorized.c)
 

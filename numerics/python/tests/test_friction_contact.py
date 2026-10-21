@@ -112,6 +112,96 @@ def test_friction_contact_sparse_build():
     del problem
 
 
+def test_compute_rho():
+    nc = 2
+    dim = 3 * nc
+
+    # Dense problem with non-trivial diagonal blocks
+    M = np.eye(dim, dtype=np.float64, order="F")
+    M[1, 1] = 4.0
+    M[2, 2] = 9.0
+    M[4, 4] = 2.0
+    M[5, 5] = 5.0
+    q = np.zeros(dim, dtype=np.float64)
+    mu = np.ones(nc, dtype=np.float64)
+    problem = sn.FrictionContactProblem(3, nc, M, q, mu)
+
+    rho_strat = sn.params.SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_enum
+
+    # Constant strategy
+    rho_const = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT, 0.5
+    )
+    assert rho_const.shape == (nc, 3)
+    assert np.allclose(rho_const, 0.5)
+
+    # Split spectral norm strategy
+    rho_split = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM
+    )
+    assert rho_split.shape == (nc, 3)
+    assert np.allclose(rho_split[:, 0], 1.0)
+    assert rho_split[0, 1] > 0.0
+    assert rho_split[0, 2] > 0.0
+
+    # Split spectral norm cond strategy
+    rho_split_cond = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND
+    )
+    assert rho_split_cond.shape == (nc, 3)
+    assert np.allclose(rho_split_cond[:, 0], 1.0)
+    assert rho_split_cond[0, 1] > 0.0
+    assert rho_split_cond[0, 2] > 0.0
+
+    # Spectral norm strategy
+    rho_spec = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM
+    )
+    assert rho_spec.shape == (nc, 3)
+    assert np.allclose(rho_spec[:, 0], 1.0)
+
+    # Sparse problem
+    data = np.array(
+        [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            4.0,
+            1.0,
+            1.0,
+            9.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            2.0,
+            1.0,
+            1.0,
+            5.0,
+            1.0,
+        ],
+        dtype=np.float64,
+    )
+    indices = np.array(
+        [0, 1, 2, 0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 3, 4, 5],
+        dtype=np.int64,
+    )
+    indptr = np.array([0, 3, 6, 9, 12, 15, 18], dtype=np.int64)
+    M_sparse = sp.csc_matrix(
+        (data, indices, indptr), shape=(dim, dim), dtype=np.float64
+    )
+    problem_sparse = sn.FrictionContactProblem(3, nc, M_sparse, q, mu)
+    rho_sparse = problem_sparse.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM
+    )
+    assert rho_sparse.shape == (nc, 3)
+    assert np.allclose(rho_sparse[:, 0], 1.0)
+    assert rho_sparse[0, 1] > 0.0
+    assert rho_sparse[0, 2] > 0.0
+
+
 def create_rfcpb(dim, nc):
     mFC = np.zeros((dim, dim), dtype=np.float64, order="F")
     qFC = np.zeros(dim, dtype=np.float64)

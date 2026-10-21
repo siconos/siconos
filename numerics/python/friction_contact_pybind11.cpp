@@ -41,6 +41,7 @@
 #include "RollingFrictionContact_options.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
+#include "fc3d_compute_rho.h"
 #include "fclib_interface.h"
 #include "gfc2d_nonsmooth_Newton_AlartCurnier.h"
 #include "numerics_errors.h"
@@ -179,6 +180,18 @@ struct FrictionContactProblemWrapper {
     check_numerics_error(info, "FrictionContactProblem.solve");
     return info;
   };
+
+  py::array_t<double> compute_rho(int rho_strategy, double rho_value) {
+    if (problem_->dimension != 3)
+      throw std::runtime_error(
+          "compute_rho is only available for 3D friction contact problems");
+
+    int nc = problem_->numberOfContacts;
+    py::array_t<double> rho({nc, 3});
+    int info = fc3d_compute_rho(problem_, rho_strategy, rho_value, rho.mutable_data());
+    check_numerics_error(info, "FrictionContactProblem.compute_rho");
+    return rho;
+  }
 
   void somefunc() {
     // test function ...
@@ -685,6 +698,9 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              return ss.str();
            })
       .def("somefunc", &FrictionContactProblemWrapper::somefunc)
+      .def("compute_rho", &FrictionContactProblemWrapper::compute_rho, py::arg("rho_strategy"),
+           py::arg("rho_value") = 0.0,
+           "Compute rho values for all contacts using the given strategy")
       .def("solve", &FrictionContactProblemWrapper::solve, py::arg("reactions"),
            py::arg("velocities"), py::arg("solver_options") = nullptr);
 

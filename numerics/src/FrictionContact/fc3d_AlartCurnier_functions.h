@@ -50,16 +50,11 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "NumericsFwd.h"  // for FrictionContactProblem
+#include "NumericsFwd.h"       // for FrictionContactProblem
+#include "fc3d_compute_rho.h"  // for compute_rho_* functions
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
-void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double* rho);
-
-void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double* rho);
-
-void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double* rho);
 
 void computeAlartCurnierSTD(double reaction[3], double velocity[3], double mu, double rho[3],
                             double result[3], double A[9], double B[9]);
