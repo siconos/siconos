@@ -56,6 +56,11 @@ class PointSet {
    * @returns Number of points neighboring point i in point set point_set.
    */
   inline std::size_t n_neighbors(unsigned int point_set, unsigned int i) const {
+    // The neighbor list of a pair of point sets is allocated only when the
+    // search is performed for this pair. It may be missing, for instance when
+    // the searched point set is empty: in that case the query has no neighbor
+    // in it.
+    if (neighbors[point_set].Counts == nullptr) return 0;
     return neighbors[point_set].Counts[i];
   }
 
@@ -69,6 +74,7 @@ class PointSet {
   inline unsigned int neighbor(unsigned int point_set, unsigned int i, unsigned int k) const {
     // Return index of the k-th neighbor to point i (of the given point set)
     const auto& neighborSet = neighbors[point_set];
+    if (neighborSet.Neighbors == nullptr) return 0;
     return neighborSet.Neighbors[neighborSet.Offsets[i] + k];
   }
 
@@ -81,6 +87,7 @@ class PointSet {
   inline unsigned int* neighbor_list(unsigned int point_set, unsigned int i) const {
     // Return index of the k-th neighbor to point i (of the given point set)
     const auto& neighborSet = neighbors[point_set];
+    if (neighborSet.Neighbors == nullptr) return nullptr;
     return &neighborSet.Neighbors[neighborSet.Offsets[i]];
   }
 
