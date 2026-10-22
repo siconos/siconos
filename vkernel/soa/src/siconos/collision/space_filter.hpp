@@ -464,6 +464,18 @@ struct space_filter : item {
       auto nslaw = storage::make_handle(data, search->second);
       auto diskmeshes = self()->diskmeshes();
 
+      // diskmesh_r reads shape.radius() on the ds side, which is correct only
+      // for a disk: a polytope exposes radius() as its circumradius. The shape
+      // type is fixed per ds type by the storage config, so the decision is
+      // compile time and the throw exists only in the branch that can reach it.
+      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
+          data, storage::prop<"shape", storage::config_declared>(ds1)))>::type;
+      if constexpr (!std::derived_from<shape1_t, collision::shape::disk>) {
+        throw std::runtime_error(
+            "diskmesh_r requires a disk-shaped ds; no narrowphase relation "
+            "exists for this shape pair");
+      }
+
       auto mesh = hp2.shape();
       auto contact_index = hp2.seg_index();
       // at most one edge between 2 ds !!
@@ -509,6 +521,18 @@ struct space_filter : item {
       auto nslaw = storage::make_handle(data, search->second);
       auto topo = self()->topology();
       auto& relmap = self()->diskfsegments();
+
+      // diskfsegment_r reads shape.radius() on the body, which is correct only
+      // for a disk: a polytope exposes radius() as its circumradius. The shape
+      // type is fixed per ds type by the storage config, so the decision is
+      // compile time and the throw exists only in the branch that can reach it.
+      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
+          data, storage::prop<"shape", storage::config_declared>(body1)))>::type;
+      if constexpr (!std::derived_from<shape1_t, collision::shape::disk>) {
+        throw std::runtime_error(
+            "diskfsegment_r requires a disk-shaped ds; no narrowphase relation "
+            "exists for this shape pair");
+      }
 
       auto segment = body2;
       auto x1 = segment.x1();
@@ -572,6 +596,18 @@ struct space_filter : item {
       auto fdisk = body2;
       auto& translat = fdisk.translation();
       auto coefs = std::array{translat[0], translat[1]};
+
+      // diskfdisk_r reads shape.radius() on the body, which is correct only for
+      // a disk: a polytope exposes radius() as its circumradius. The shape type
+      // is fixed per ds type by the storage config, so the decision is compile
+      // time and the throw exists only in the branch that can reach it.
+      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
+          data, storage::prop<"shape", storage::config_declared>(body1)))>::type;
+      if constexpr (!std::derived_from<shape1_t, collision::shape::disk>) {
+        throw std::runtime_error(
+            "diskfdisk_r requires a disk-shaped ds; no narrowphase relation "
+            "exists for this shape pair");
+      }
 
       auto& ds1 = body1;
 

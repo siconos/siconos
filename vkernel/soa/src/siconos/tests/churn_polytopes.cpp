@@ -25,7 +25,12 @@
    3. unknown relation on a self interaction (topo.link(ds), so
       ds1 == ds2): only diskfsegment_r/diskfdisk_r are handled in the
       ds1 == ds2 paths; anything else must fail loudly (the old code
-      hit an assert(false) no-op lambda, a silent leak in release). */
+      hit an assert(false) no-op lambda, a silent leak in release).
+
+   4. shape guard: a polytope body inside the neighborhood radius of a
+      fixed segment used to bind diskfsegment_r, which reads
+      shape.radius() -- the circumradius for a polytope -- and returned
+      a plausible but wrong gap. It must throw instead. */
 
 #include <array>
 #include <cmath>
@@ -141,7 +146,7 @@ auto add_two_bodies(siconos::config::data_t& data, double y2pos) {
    ds-ds pair loop at all (one point set never enters it).
    Call finalize_world AFTER the bodies are added: make_points needs the
    ds rows to build the ds point set. */
-auto setup_world(siconos::config::data_t& data, double radius) {
+auto setup_world(siconos::config::data_t& data, double radius, double ground_y = -1000.) {
   using namespace siconos;
   using namespace storage;
 
@@ -166,12 +171,14 @@ auto setup_world(siconos::config::data_t& data, double radius) {
   so.create(SICONOS_FRICTION_2D_LEMKE);
   osnspb.options() = so;
 
-  // far-away fixed ground: supplies the pointl point set
+  // fixed ground: supplies the pointl point set. ground_y = -1000 in the
+  // churn subtest (far outside the radius, so the segment never binds);
+  // the guard subtest moves it inside the radius on purpose.
   auto segment = storage::add<config::segment_shape>(data);
   segment.x1() = -10.;
-  segment.y1() = -1000.;
+  segment.y1() = ground_y;
   segment.x2() = 10.;
-  segment.y2() = -1000.;
+  segment.y2() = ground_y;
   segment.initialize();
   segment.maxpoints() = 10;
   auto ground_r = storage::add<config::diskfsegment_r>(data);
@@ -323,6 +330,32 @@ void test_unknown_relation_throws(siconos::config::data_t& data) {
   check(threw, "unhandled relation in the ds1 == ds2 paths must throw");
   std::print("remove_interactions: unhandled relation fails loudly\n");
 }
+/* ---- 4: a polytope near a fixed segment must fail loudly ---- */
+void test_polytope_against_fixed_segment_throws(siconos::config::data_t& data) {
+  using namespace siconos;
+  using namespace storage;
+
+  // the ground sits at y = -2, inside the 5.5 radius of the body at the
+  // origin: the filter will try to bind diskfsegment_r to a polytope body.
+  auto [simulation, spacef, ngbh, dsds] = setup_world(data, 5.5, -2.);
+  add_two_bodies(data, 100.0);  // bodies exist; the ds-ds pair is far apart
+  finalize_world(data, spacef, ngbh, simulation);
+
+  ngbh.update(0);
+  ngbh.search();
+
+  bool threw = false;
+  try {
+    spacef.update_index_set0(0);
+  } catch (const std::exception& e) {
+    threw = true;
+    std::print("polytope vs fixed segment: {}\n", e.what());
+  }
+  check(threw,
+        "a polytope near a fixed segment must throw instead of binding "
+        "diskfsegment_r and returning the circumradius gap");
+  std::print("space_filter: polytope vs fixed segment fails loudly\n");
+}
 }  // namespace
 
 int main() {
@@ -337,6 +370,10 @@ int main() {
   {
     siconos::config::data_t data;
     test_unknown_relation_throws(data);
+  }
+  {
+    siconos::config::data_t data;
+    test_polytope_against_fixed_segment_throws(data);
   }
   std::print("churn_polytopes: all groups pass\n");
 }
