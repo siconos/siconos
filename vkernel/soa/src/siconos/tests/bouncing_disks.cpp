@@ -1,5 +1,6 @@
 #include <fstream>
 #include <print>
+#include <vector>
 
 #include "siconos/siconos.hpp"
 
@@ -88,9 +89,16 @@ int main(int argc, char* argv[]) {
   auto disk_shape = storage::add<config::disk_shape>(data);
   disk_shape.radius() = radius;
 
-  auto disks = storage::add<config::disk>(data, ndisks);
+  /* storage::add(data, count) returns a LAZY view that calls add() again on
+     every walk; materialise the handles once so the world gets exactly
+     ndisks disks instead of growing on each walk (see roam note d5c5481a) */
+  using disk_handle_t = decltype(storage::add<config::disk>(data));
+  std::vector<disk_handle_t> disks;
+  disks.reserve(ndisks);
+  for (std::size_t i = 0; i < ndisks; ++i) disks.push_back(storage::add<config::disk>(data));
 
-  for (auto [i, disk] : disks | view::enumerate) {
+  for (std::size_t i = 0; i < disks.size(); ++i) {
+    auto& disk = disks[i];
     storage::prop<"id">(disk) = static_cast<uint>(i + 1);
 
     disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
@@ -170,8 +178,8 @@ int main(int argc, char* argv[]) {
   //  auto fd = io::open<ascii>("result.dat");
 
   //  auto disks = storage::handles<config::disk>(data, 0);
-  auto disk1 = (disks | view::take(1)).front();
-  auto disk2 = (disks | view::take(2)).back();
+  auto disk1 = disks.front();
+  auto disk2 = disks.back();
 
   // fix this for constant fext
   simulation.initialize();
