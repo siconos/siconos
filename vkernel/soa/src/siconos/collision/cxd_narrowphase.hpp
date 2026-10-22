@@ -41,6 +41,7 @@
 #include <optional>
 #include <stdexcept>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 // clang-format off
 /* load-bearing order — mirrors cxd's own test harness (test.cpp); do not
@@ -467,9 +468,8 @@ struct cxd_narrowphase : item {
     // instrumentation (additive, non-behavioural): seconds spent in each
     // phase of the LAST ensure() call. ensure() resets them, so they always
     // describe one call (a cache-hit step reports ~0). t_checksum covers
-    // EVERY checksum() call of that ensure(), and run() computes the
-    // checksum a second time -- so a doubled t_checksum is the visible
-    // cost of that duplication.
+    // the ONE checksum() call of that ensure() (run() re-stamps the value
+    // ensure() already computed instead of scanning the world again).
     some::scalar t_rebind;
     some::scalar t_checksum;
     some::scalar t_pack;
@@ -601,15 +601,8 @@ struct cxd_narrowphase : item {
     auto checksum(auto step) {
       auto& data = self()->data();
       const auto t0 = std::chrono::steady_clock::now();
-      std::uint64_t hsh = 1469598103934665603ull;
-      auto mix = [&](const void* p, std::size_t n) {
-        const auto* bytes = static_cast<const unsigned char*>(p);
-        for (std::size_t i = 0; i < n; ++i) {
-          hsh ^= bytes[i];
-          hsh *= 1099511628211ull;
-        }
-      };
-      std::map<std::size_t, bool> seen;
+      std::uint64_t hsh = kFnvBasis;
+      std::unordered_map<std::size_t, bool> seen;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -617,15 +610,15 @@ struct cxd_narrowphase : item {
           auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
           const auto i1 = ds1.index().value();
           const auto i2 = ds2.index().value();
-          mix(&i1, sizeof i1);
-          mix(&i2, sizeof i2);
+          fnv_mix(hsh, &i1, sizeof i1);
+          fnv_mix(hsh, &i2, sizeof i2);
           for (auto* ds : {&ds1, &ds2}) {
             const auto idx = ds->index().value();
             if (seen[idx]) continue;
             seen[idx] = true;
             for_each_world_vertex(*ds, step, [&](const auto& v) {
-              mix(&v[0], sizeof v[0]);
-              mix(&v[1], sizeof v[1]);
+              fnv_mix(hsh, &v[0], sizeof v[0]);
+              fnv_mix(hsh, &v[1], sizeof v[1]);
             });
           }
         }
@@ -634,37 +627,56 @@ struct cxd_narrowphase : item {
       return hsh;
     }
 
-    /* per-pair signature over the pair's two bodies only. The relation
-       ensure uses it to skip the full-world scan: once the pair is fresh,
-       a compute_h/compute_jachq read is O(vertices of the pair). Order
-       normalised by ds index, so either handle order hashes the same. */
-    auto pair_checksum(auto& ds1, auto& ds2, auto step) {
-      std::uint64_t hsh = 1469598103934665603ull;
-      auto mix = [&](const void* p, std::size_t n) {
-        const auto* bytes = static_cast<const unsigned char*>(p);
-        for (std::size_t i = 0; i < n; ++i) {
-          hsh ^= bytes[i];
-          hsh *= 1099511628211ull;
-        }
-      };
-      const auto i1 = ds1.index().value();
-      const auto i2 = ds2.index().value();
-      mix(&i1, sizeof i1);
-      mix(&i2, sizeof i2);
-      auto mix_body = [&](auto& ds) {
-        for_each_world_vertex(ds, step, [&](const auto& v) {
-          mix(&v[0], sizeof v[0]);
-          mix(&v[1], sizeof v[1]);
-        });
-      };
+    /* FNV-1a mixer over raw bytes; every hash below builds on it */
+    static void fnv_mix(std::uint64_t& hsh, const void* p, std::size_t n) {
+      const auto* bytes = static_cast<const unsigned char*>(p);
+      for (std::size_t i = 0; i < n; ++i) {
+        hsh ^= bytes[i];
+        hsh *= 1099511628211ull;
+      }
+    }
+    static constexpr std::uint64_t kFnvBasis = 1469598103934665603ull;
+
+    /* FNV over ONE ds' world vertices. The per-pair signature combines the
+       two bodies' hashes, and the batch writeback memoises this per-ds
+       hash so a body attached to several pairs is hashed once per run */
+    auto body_vertex_hash(auto& ds, auto step) {
+      std::uint64_t hsh = kFnvBasis;
+      for_each_world_vertex(ds, step, [&](const auto& v) {
+        fnv_mix(hsh, &v[0], sizeof v[0]);
+        fnv_mix(hsh, &v[1], sizeof v[1]);
+      });
+      return hsh;
+    }
+
+    /* combine the two ds indices and their per-body vertex hashes, order
+       normalised by ds index so either handle order hashes the same */
+    auto pair_signature(std::size_t i1, std::size_t i2, std::uint64_t h1, std::uint64_t h2) {
+      std::uint64_t hsh = kFnvBasis;
       if (i1 <= i2) {
-        mix_body(ds1);
-        mix_body(ds2);
+        fnv_mix(hsh, &i1, sizeof i1);
+        fnv_mix(hsh, &i2, sizeof i2);
+        fnv_mix(hsh, &h1, sizeof h1);
+        fnv_mix(hsh, &h2, sizeof h2);
       } else {
-        mix_body(ds2);
-        mix_body(ds1);
+        fnv_mix(hsh, &i2, sizeof i2);
+        fnv_mix(hsh, &i1, sizeof i1);
+        fnv_mix(hsh, &h2, sizeof h2);
+        fnv_mix(hsh, &h1, sizeof h1);
       }
       return hsh;
+    }
+
+    /* per-pair signature over the pair's two bodies only, recomputed from
+       the current world state (the relation gate re-derives it in
+       O(vertices of the pair); the stage stamps it with memoised body
+       hashes). Order normalised by ds index. */
+    auto pair_checksum(auto& ds1, auto& ds2, auto step) {
+      const auto i1 = ds1.index().value();
+      const auto i2 = ds2.index().value();
+      const auto h1 = body_vertex_hash(ds1, step);
+      const auto h2 = body_vertex_hash(ds2, step);
+      return pair_signature(i1, i2, h1, h2);
     }
 
     /* 2. pack the batch input: candidates are all interactions whose
@@ -677,7 +689,7 @@ struct cxd_narrowphase : item {
       auto& data = self()->data();
       const auto t0 = std::chrono::steady_clock::now();
       narrowphase_input<scalar> in;
-      std::map<std::size_t, std::uint32_t> slot;
+      std::unordered_map<std::size_t, std::uint32_t> slot;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -720,6 +732,18 @@ struct cxd_narrowphase : item {
         auto out = narrowphase_batch(std::move(in));
         storage::attr<"t_batch">(*self()) += seconds_since(t_batch0);
         const auto t_wb0 = std::chrono::steady_clock::now();
+        // each ds' vertex hash is memoised: a body attached to several
+        // pairs is hashed once per run instead of once per pair
+        std::unordered_map<std::size_t, std::uint64_t> ds_h;
+        ds_h.reserve(in.ids_a.size());
+        auto hash_ds = [&](auto& ds) -> std::uint64_t {
+          const auto key = ds.index().value();
+          const auto it = ds_h.find(key);
+          if (it != ds_h.end()) return it->second;
+          const auto h = body_vertex_hash(ds, step);
+          ds_h.emplace(key, h);
+          return h;
+        };
         std::size_t k = 0;
         std::size_t n_written = 0;
         std::size_t n_enclosed = 0;
@@ -732,7 +756,8 @@ struct cxd_narrowphase : item {
             auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
             // the pair is fresh for this configuration, even when the batch
             // kept the previous row: stamp it so relation reads skip the scan
-            rel.cache_pair_checksum() = pair_checksum(ds1, ds2, step);
+            rel.cache_pair_checksum() = pair_signature(
+                ds1.index().value(), ds2.index().value(), hash_ds(ds1), hash_ds(ds2));
             const auto& c = out[k++];
             if (c.status == static_cast<int>(cxd::status::max_iterations) ||
                 c.status == static_cast<int>(cxd::status::invalid_input)) {
@@ -763,7 +788,9 @@ struct cxd_narrowphase : item {
         storage::attr<"t_writeback">(*self()) += seconds_since(t_wb0);
       }
       storage::attr<"cache_step">(*self()) = step;
-      storage::attr<"cache_checksum">(*self()) = checksum(step);
+      // the world checksum is NOT recomputed here: ensure() computed it
+      // just before calling run() and nothing since changed the ds data
+      // the hash reads, so ensure() stamps the value it already has
     }
 
     /* ensure(step): rebind is idempotent and cheap, so it runs every call;
@@ -784,6 +811,9 @@ struct cxd_narrowphase : item {
         return;
       }
       run(step);
+      // run() changed relations only: the ds data checksum() read is the
+      // same, so the stamp is the value already computed above
+      storage::attr<"cache_checksum">(*self()) = ck;
     }
   };
 };
