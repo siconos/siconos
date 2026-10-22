@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include <cstddef>
+#include <memory>
 
 // #include <cassert>
 
@@ -289,6 +290,35 @@ struct RollingFrictionContactProblemWrapper {
   py::array_t<double> mu_r() const { return mu_r_array; }
 };
 
+/** Small RAII helper to temporarily set a user-provided rho vector on
+ *  SolverOptions and restore the original settings on scope exit. */
+struct RhoOptionGuard {
+  SolverOptions* options;
+  void* original_solverData;
+  int original_strategy;
+  bool active;
+
+  explicit RhoOptionGuard(SolverOptions* opt)
+      : options(opt),
+        original_solverData(opt->solverData),
+        original_strategy(opt->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY]),
+        active(false) {}
+
+  void activate(double* rho_data) {
+    options->solverData = rho_data;
+    options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] =
+        SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_USER_PROVIDED;
+    active = true;
+  }
+
+  ~RhoOptionGuard() {
+    if (active) {
+      options->solverData = original_solverData;
+      options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = original_strategy;
+    }
+  }
+};
+
 struct GlobalFrictionContactProblemWrapper {
   GlobalFrictionContactProblem* problem{nullptr};
   std::shared_ptr<SparseMatrixMemoryOwner> mem_for_Msparse{nullptr};
@@ -416,26 +446,43 @@ struct GlobalFrictionContactProblemWrapper {
   py::array_t<double> b() const { return b_array; }
 
   int solve(py::array_t<double> reaction, py::array_t<double> velocity,
-            py::array_t<double> globalVelocity, SolverOptions* solver_options) {
+            py::array_t<double> globalVelocity, SolverOptions* solver_options,
+            py::object rho_obj = py::none()) {
     int info = -1;
-    int default_solver_options = 0;
-    if (solver_options == nullptr) {
-      solver_options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_NSN_AC);
-      default_solver_options = 1;
+
+    std::unique_ptr<SolverOptions, decltype(&solver_options_delete)> owned_options(
+        nullptr, solver_options_delete);
+    SolverOptions* options = solver_options;
+    if (options == nullptr) {
+      int solver_id = (problem->dimension == 2) ? SICONOS_GLOBAL_FRICTION_2D_NSN_AC
+                                                : SICONOS_GLOBAL_FRICTION_3D_NSN_AC;
+      owned_options.reset(solver_options_create(solver_id));
+      options = owned_options.get();
     }
+
+    py::array_t<double> rho;
+    RhoOptionGuard rho_guard(options);
+    if (!rho_obj.is_none()) {
+      if (problem->dimension != 3)
+        throw std::runtime_error(
+            "rho parameter is only supported for 3D global friction contact problems");
+      rho = rho_obj.cast<py::array_t<double>>();
+      if (rho.ndim() != 1 || rho.shape(0) != problem->dimension * problem->numberOfContacts)
+        throw std::runtime_error(
+            "rho must be a 1D array of size dimension * numberOfContacts");
+      rho_guard.activate(rho.mutable_data());
+    }
+
     if (problem->dimension == 2) {
       info = gfc2d_driver(problem, reaction.mutable_data(), velocity.mutable_data(),
-                          globalVelocity.mutable_data(), solver_options);
+                          globalVelocity.mutable_data(), options);
     } else if (problem->dimension == 3) {
       info = gfc3d_driver(problem, reaction.mutable_data(), velocity.mutable_data(),
-                          globalVelocity.mutable_data(), solver_options);
+                          globalVelocity.mutable_data(), options);
     } else {
       throw std::runtime_error("GlobalFrictionContactProblem solve: wrong dimension");
     }
-    if (default_solver_options) {
-      solver_options_delete(solver_options);
-      solver_options = nullptr;
-    }
+
     check_numerics_error(info, "GlobalFrictionContactProblem.solve");
     return info;
   }
@@ -798,7 +845,9 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .def("somefunc", &GlobalFrictionContactProblemWrapper::somefunc)
       .def("solve", &GlobalFrictionContactProblemWrapper::solve, py::arg("reaction"),
            py::arg("velocity"), py::arg("global_velocity"),
-           py::arg("solver_options") = nullptr, "Solve the global friction contact problem")
+           py::arg("solver_options") = nullptr, py::arg("rho") = py::none(),
+           "Solve the global friction contact problem. When rho is provided, it is "
+           "used as the per-contact Alart-Curnier scaling vector (3 values per contact).")
       .def("warm_start", &GlobalFrictionContactProblemWrapper::warm_start, py::arg("reaction"),
            py::arg("velocity"), py::arg("global_velocity"),
            py::arg("solver_options") = nullptr,
@@ -1270,6 +1319,9 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM)
       .value("SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE",
              SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE)
+      .value("SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_USER_PROVIDED",
+             SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_USER_PROVIDED,
+             "Use the rho vector supplied by the user (pointed to by solverData)")
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_3D_NSN_WARM_START>(params,

@@ -328,6 +328,9 @@ if(WITH_TESTING)
   # Compute rho for Alart-Curnier formulations
   new_test(NAME fc3d_compute_rho_test SOURCES fc3d_compute_rho_test.c)
 
+  # GFC3D NSN solver with user-provided rho vector
+  new_test(NAME test_gfc3d_nsn_user_rho SOURCES test_gfc3d_nsn_user_rho.c)
+
   # Vectorized complementarity error vs scalar reference
   new_test(NAME test_compute_error_vectorized SOURCES test_compute_error_vectorized.c)
 

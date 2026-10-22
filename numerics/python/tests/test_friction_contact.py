@@ -17,6 +17,7 @@
 #
 
 import numpy as np
+import pytest
 import scipy.sparse as sp
 import siconos.numerics as sn
 
@@ -420,3 +421,52 @@ def test_global_rolling_friction_contact_sparse_build():
     print(problem.M())  # just to check if it's still alive
     print(problem.q())  # just to check if it's still alive
     del problem
+
+
+def test_global_friction_contact_solve_with_rho():
+    n = 3
+    nc = 1
+    dim = 3 * nc
+
+    # Simple one-contact problem: M = H = I, so it reduces to a local FC3D.
+    M = np.eye(n, dtype=np.float64, order="F")
+    H = np.eye(n, dim, dtype=np.float64, order="F")
+    q = np.array([-1.0, 0.0, 0.0], dtype=np.float64)
+    b = np.zeros(n, dtype=np.float64)
+    mu = np.array([0.3], dtype=np.float64)
+
+    problem = sn.GlobalFrictionContactProblem(3, nc, M, H, q, mu, b)
+
+    reaction = np.zeros(dim, dtype=np.float64)
+    velocity = np.zeros(dim, dtype=np.float64)
+    global_velocity = np.zeros(n, dtype=np.float64)
+
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
+    options.iparam[
+        sn.params.SICONOS_FRICTION_3D_NSN_IPARAM_enum.SICONOS_FRICTION_3D_NSN_FORMULATION
+    ] = sn.params.SICONOS_FRICTION_3D_NSN_FORMULATION_enum.SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD
+    options.dparam[
+        sn.params.SICONOS_FRICTION_3D_NSN_DPARAM_enum.SICONOS_FRICTION_3D_NSN_RHO
+    ] = 1.0
+    options.iparam[sn.params.SICONOS_IPARAM_enum.SICONOS_IPARAM_MAX_ITER] = 100
+    options.dparam[sn.params.SICONOS_DPARAM_enum.SICONOS_DPARAM_TOL] = 1e-4
+
+    # Solve with constant rho
+    info = problem.solve(reaction, velocity, global_velocity, options)
+    assert info == 0
+    assert np.isclose(reaction[0], 1.0)
+
+    # Solve with user-provided rho
+    reaction[:] = 0.0
+    velocity[:] = 0.0
+    global_velocity[:] = 0.0
+    rho = np.array([0.5, 0.5, 0.5], dtype=np.float64)
+    info = problem.solve(reaction, velocity, global_velocity, options, rho=rho)
+    assert info == 0
+    assert np.isclose(reaction[0], 1.0)
+
+    # Wrong size must raise
+    with pytest.raises(RuntimeError):
+        problem.solve(
+            reaction, velocity, global_velocity, options, rho=np.ones(dim + 1)
+        )
