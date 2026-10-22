@@ -31,6 +31,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <print>
 #include <stdexcept>
 #include <string>
@@ -116,6 +117,56 @@ struct rng {
 constexpr double kSize = 2.0;
 constexpr double kCircumradius = 1.4142135623730951;  // sqrt(2)
 
+/* the square's corner vertices, in edge order: the single source for
+   make_shape's payload and the SAT reference's corner translation */
+constexpr std::array<std::array<double, 2>, 4> kSquare = {
+    {{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
+
+/* Separating-axes reference on two convex quads given as 4 corners in edge
+   order (double[8]: x0,y0,x1,y1,...). This is the generic 2D polygon
+   narrowphase: loop ALL eight edge normals (4 per polygon), early-exit on
+   the first separating axis, otherwise return the least-overlapping axis.
+   overlap is the signed interval overlap on that returned axis: negative
+   means separated (by the axis projection of the gap, not the Euclidean
+   distance), positive means touching or penetrating. No GJK, no simplex,
+   no storage handles. */
+struct sat_result {
+  double overlap;
+  double nx;
+  double ny;
+};
+
+sat_result sat_quad(const double* ca, const double* cb) {
+  sat_result best{std::numeric_limits<double>::infinity(), 0.0, 0.0};
+  for (int p = 0; p < 2; ++p) {
+    const double* c = (p == 0) ? ca : cb;
+    for (int e = 0; e < 4; ++e) {
+      const int e2 = (e + 1) % 4;
+      const double ex = c[2 * e2] - c[2 * e];
+      const double ey = c[2 * e2 + 1] - c[2 * e + 1];
+      const double len = std::hypot(ex, ey);
+      const double ax = -ey / len;
+      const double ay = ex / len;
+      double mina = std::numeric_limits<double>::infinity(),
+             maxa = -std::numeric_limits<double>::infinity(), minb = mina, maxb = maxa;
+      for (int v = 0; v < 4; ++v) {
+        const double pa = ca[2 * v] * ax + ca[2 * v + 1] * ay;
+        const double pb = cb[2 * v] * ax + cb[2 * v + 1] * ay;
+        mina = std::min(mina, pa);
+        maxa = std::max(maxa, pa);
+        minb = std::min(minb, pb);
+        maxb = std::max(maxb, pb);
+      }
+      const double overlap = std::min(maxa, maxb) - std::max(mina, minb);
+      if (overlap < best.overlap) {
+        best = {overlap, ax, ay};
+        if (best.overlap < 0) return best;  // separating axis found
+      }
+    }
+  }
+  return best;
+}
+
 struct layout {
   std::size_t n = 0;
   std::size_t side = 0;  // grid side
@@ -176,8 +227,7 @@ auto make_shape(config::data_t& data) {
   using namespace storage;
 
   auto shape = storage::add<config::polytope_shape>(data);
-  const std::array<std::array<double, 2>, 4> square = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
-  for (int i = 0; i < 4; ++i) shape.vertices()[i] = {square[i][0], square[i][1]};
+  for (int i = 0; i < 4; ++i) shape.vertices()[i] = {kSquare[i][0], kSquare[i][1]};
   shape.nvertices() = 4;
   return shape;
 }
@@ -231,6 +281,15 @@ void self_check() {
   check(std::abs(h - 1.0) <= 1e-9, "the cached gap is the analytic gap (3 - 2 = 1)");
   check(status == static_cast<std::size_t>(cxd::status::separated),
         "the pair is reported as separated");
+
+  /* the SAT reference must agree with the same analytic gap on the same
+     pair: b1 centred at the origin, b2 at (0, 3) -> overlap on the y axis
+     is 2 - 3 = -1, i.e. separated by exactly 1 */
+  const double sa[8] = {-1, -1, 1, -1, 1, 1, -1, 1};
+  const double sb[8] = {-1, 2, 1, 2, 1, 4, -1, 4};
+  const auto sat = sat_quad(sa, sb);
+  check(sat.overlap < 0.0 && std::abs(-sat.overlap - 1.0) <= 1e-9,
+        "the SAT reference agrees with the analytic gap (3 - 2 = 1)");
 }
 
 struct measurement {
@@ -246,6 +305,7 @@ struct measurement {
   double ms_writeback = 0.0;
   double ns_per_pair = 0.0;
   double ns_per_pair_disk = 0.0;
+  double ns_per_pair_sat = 0.0;
   double ratio = 0.0;
 };
 
@@ -347,6 +407,29 @@ measurement run_scale(std::size_t n, std::size_t n_steps, double spacing_factor,
   m.ns_per_pair_disk =
       std::chrono::duration<double>(d1 - d0).count() * 1e9 / static_cast<double>(m.pairs);
   m.ratio = m.ns_per_pair / m.ns_per_pair_disk;
+
+  /* the SAT reference on the SAME pair set, at the SAME final positions: a
+     generic 8-axis separating-axes loop on each pair, the two polygons'
+     corners obtained by translating the shared shape's vertices to the
+     body origins (the vertex read any polygon narrowphase pays), early
+     exit included in the generic path */
+  double sat_sink = 0.0;
+  const auto sat0 = std::chrono::steady_clock::now();
+  for (const auto& [i, j] : L.pairs) {
+    double ca[8];
+    double cb[8];
+    for (int k = 0; k < 4; ++k) {
+      ca[2 * k] = xf[i] + kSquare[k][0];
+      ca[2 * k + 1] = yf[i] + kSquare[k][1];
+      cb[2 * k] = xf[j] + kSquare[k][0];
+      cb[2 * k + 1] = yf[j] + kSquare[k][1];
+    }
+    sat_sink += sat_quad(ca, cb).overlap;
+  }
+  const auto sat1 = std::chrono::steady_clock::now();
+  check(std::isfinite(sat_sink), "the SAT reference is finite");
+  m.ns_per_pair_sat =
+      std::chrono::duration<double>(sat1 - sat0).count() * 1e9 / static_cast<double>(m.pairs);
   return m;
 }
 
@@ -390,17 +473,22 @@ int main(int argc, char* argv[]) {
       "  the disk column is a plain arithmetic loop on the same pair set: no"
       " storage-handle overhead\n");
   std::print(
-      "\n{:>7} {:>8} {:>9} {:>7} {:>10} {:>9} {:>9} {:>8} {:>9} {:>9} {:>10} {:>13} {:>7}\n",
+      "  the sat column is a generic 8-axis separating-axes loop on the same"
+      " pairs: no handles, no GJK, early exit included\n");
+  std::print(
+      "\n{:>7} {:>8} {:>9} {:>7} {:>10} {:>9} {:>9} {:>8} {:>9} {:>9} {:>10} {:>9} {:>10} "
+      "{:>7}\n",
       "N", "pairs", "contacts", "encl", "ms/step", "rebind", "checksum", "pack", "batch",
-      "writeback", "ns/pair", "disk ns/pr", "ratio");
+      "writeback", "ns/pair", "disk ns/pr", "sat ns/pr", "ratio");
 
   for (const auto n : sizes) {
     const auto m = run_scale(n, n_steps, spacing_factor, jitter_factor);
     std::print(
         "{:>7} {:>8} {:>9} {:>7} {:>10.3} {:>9.3} {:>9.3} {:>8.3} {:>9.3} {:>9.3} {:>10.1} "
-        "{:>13.1} {:>7.1}\n",
+        "{:>9.1} {:>10.1} {:>7.1}\n",
         m.n, m.pairs, m.contacts, m.enclosed, m.ms_total, m.ms_rebind, m.ms_checksum,
-        m.ms_pack, m.ms_batch, m.ms_writeback, m.ns_per_pair, m.ns_per_pair_disk, m.ratio);
+        m.ms_pack, m.ms_batch, m.ms_writeback, m.ns_per_pair, m.ns_per_pair_disk,
+        m.ns_per_pair_sat, m.ratio);
   }
   return 0;
 }
