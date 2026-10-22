@@ -101,6 +101,7 @@
 #define GFC2D_NSN_AC SICONOS_GLOBAL_FRICTION_2D_NSN_AC
 #define GFC2D_VI_FPP SICONOS_GLOBAL_FRICTION_2D_VI_FPP
 #define GFC2D_VI_EG SICONOS_GLOBAL_FRICTION_2D_VI_EG
+#define GFC2D_NSGS_WR SICONOS_GLOBAL_FRICTION_2D_NSGS_WR
 
 /* ===========================================================================
  * Global Friction Contact 3D Solvers (GFC3D_*)

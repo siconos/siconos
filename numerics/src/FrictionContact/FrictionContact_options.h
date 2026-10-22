@@ -216,6 +216,8 @@ enum FRICTION_SOLVER {
   SICONOS_GLOBAL_FRICTION_2D_VI_FPP = 721,
   /** VI formulation, Extra Gradient, global 2D formulation */
   SICONOS_GLOBAL_FRICTION_2D_VI_EG = 722,
+  /** Non-smooth Gauss-Seidel, global 2D formulation with wrapper */
+  SICONOS_GLOBAL_FRICTION_2D_NSGS_WR = 723,
 
 }; /* end of enum FRICTION_SOLVER */
 

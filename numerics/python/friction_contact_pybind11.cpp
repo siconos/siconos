@@ -1117,6 +1117,9 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_GLOBAL_FRICTION_2D_VI_EG",
              FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_2D_VI_EG,
              "Global 2D VI formulation, Extra-gradient")
+      .value("SICONOS_GLOBAL_FRICTION_2D_NSGS_WR",
+             FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_2D_NSGS_WR,
+             "Global 2D Non-smooth Gauss-Seidel solver with reduction")
       .export_values();
 
   // Rolling Friction solver enum (separate from FRICTION_SOLVER)

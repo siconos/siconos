@@ -24,6 +24,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
 #include "fc3d_short_names.h"
+#include "gfc2d_Solvers.h"                        // for gfc2d_nsgs_wr
 #include "gfc2d_VI_ExtraGradient.h"               // for gfc2d_VI_ExtraGradient
 #include "gfc2d_VI_FixedPointProjection.h"        // for gfc2d_VI_FixedPointProjection
 #include "gfc2d_nonsmooth_Newton_AlartCurnier.h"  // for gfc2d_nonsmooth_Newton_AlartCurnier
@@ -138,6 +139,10 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
     }
     case GFC2D_VI_EG: {
       gfc2d_VI_ExtraGradient(problem, reaction, velocity, globalVelocity, &info, options);
+      break;
+    }
+    case GFC2D_NSGS_WR: {
+      gfc2d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
     case FC2D_NSGS: {
