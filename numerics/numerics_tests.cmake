@@ -334,6 +334,10 @@ if(WITH_TESTING)
   # GFC3D NSN solver with user-provided rho vector
   new_test(NAME test_gfc3d_nsn_user_rho SOURCES test_gfc3d_nsn_user_rho.c)
 
+  # Global friction contact reformulation for various 2D/3D matrix storage types
+  new_test(NAME test_globalFrictionContact_reformulation
+           SOURCES test_globalFrictionContact_reformulation.c)
+
   # Vectorized complementarity error vs scalar reference
   new_test(NAME test_compute_error_vectorized SOURCES test_compute_error_vectorized.c)
 

@@ -1665,6 +1665,7 @@ NumericsMatrix* NM_copy_to_sparse(const NumericsMatrix* A, double threshold) {
   }
   DEBUG_END("NM_copy_to_sparse(...)\n")
 
+  NM_version_sync(B);
   NM_version_sync((NumericsMatrix*)A);
   return B;
 }
@@ -3900,6 +3901,12 @@ NumericsMatrix* NM_multiply(NumericsMatrix* A, NumericsMatrix* B) {
     NM_version_copy(B, C);
   } else {
     NM_version_copy(A, C);
+  }
+  if (C->storageType == NM_SPARSE) {
+    /* The result data is CSC; make sure the CSC version is the latest one so
+     * that origin stays consistent with the actual storage. */
+    NSM_set_version(C->sparse, NSM_CSC, NSM_max_version(C->sparse) + 1);
+    NM_version_sync(C);
   }
   NM_version_sync(A);
 
