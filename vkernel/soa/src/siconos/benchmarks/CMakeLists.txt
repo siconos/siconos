@@ -1,13 +1,11 @@
 option(WITH_vkernel_BENCHMARKS "Build the vkernel benchmarks" OFF)
 
 if(WITH_vkernel_BENCHMARKS)
-  # ColumnOfBeadsTS (legacy kernel) and column_of_beads_ts (vkernel) do not
-  # compile: the first uses undeclared symbols (H, ...), the second includes
-  # a nonexistent siconos/utils/print.hpp. They had never been configured
-  # (this directory used to override the c++ standard), so they are kept out
-  # of the build until someone revives them.
-  #add_executable(ColumnOfBeadsTS  ColumnOfBeadsTS.cpp)
-  #add_executable(column_of_beads_ts column_of_beads_ts.cpp)
+  # The two legacy benchmarks (ColumnOfBeadsTS, column_of_beads_ts) were
+  # deleted: they had never been configured (this directory used to override
+  # the c++ standard) and no longer compile against the current storage API
+  # (undeclared symbols / missing siconos/utils/print.hpp). They are kept in
+  # git history if anyone wants to revive them.
   add_executable(polytope_narrowphase_scale polytope_narrowphase_scale.cpp)
   #add_executable(tnonos tnonos.cpp)
 
