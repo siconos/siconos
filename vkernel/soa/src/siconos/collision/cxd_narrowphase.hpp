@@ -35,6 +35,7 @@
    non-finite. */
 
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <optional>
@@ -463,6 +464,24 @@ struct cxd_narrowphase : item {
     some::indice cache_checksum;
     // diagnostic: number of full-world scans (rebind + checksum) performed
     some::indice cache_scan_count;
+    // instrumentation (additive, non-behavioural): seconds spent in each
+    // phase of the LAST ensure() call. ensure() resets them, so they always
+    // describe one call (a cache-hit step reports ~0). t_checksum covers
+    // EVERY checksum() call of that ensure(), and run() computes the
+    // checksum a second time -- so a doubled t_checksum is the visible
+    // cost of that duplication.
+    some::scalar t_rebind;
+    some::scalar t_checksum;
+    some::scalar t_pack;
+    some::scalar t_batch;
+    some::scalar t_writeback;
+    // instrumentation: state of the LAST COMPLETED batch (not reset by
+    // ensure()): n_pairs = pairs packed into the batch, n_contacts = pairs
+    // whose row was written (no failure status), n_enclosed = pairs the
+    // batch reported as enclosed.
+    some::indice n_pairs;
+    some::indice n_contacts;
+    some::indice n_enclosed;
     some::map<some::array<some::indice, some::indice_value<2>>,
               some::item_ref<poly_r_t>>
         rel_map;  // ordered ds-index pair -> polytope relation reuse map
@@ -479,6 +498,21 @@ struct cxd_narrowphase : item {
     decltype(auto) dsds_r() { return storage::attr<"dsds_r">(*self()); }
     decltype(auto) cache_scan_count() { return storage::attr<"cache_scan_count">(*self()); }
     decltype(auto) cache_step() { return storage::attr<"cache_step">(*self()); }
+
+    // instrumentation accessors (see the attribute comments)
+    decltype(auto) t_rebind() { return storage::attr<"t_rebind">(*self()); }
+    decltype(auto) t_checksum() { return storage::attr<"t_checksum">(*self()); }
+    decltype(auto) t_pack() { return storage::attr<"t_pack">(*self()); }
+    decltype(auto) t_batch() { return storage::attr<"t_batch">(*self()); }
+    decltype(auto) t_writeback() { return storage::attr<"t_writeback">(*self()); }
+    decltype(auto) n_pairs() { return storage::attr<"n_pairs">(*self()); }
+    decltype(auto) n_contacts() { return storage::attr<"n_contacts">(*self()); }
+    decltype(auto) n_enclosed() { return storage::attr<"n_enclosed">(*self()); }
+
+    // seconds elapsed since t0 (instrumentation helper)
+    static double seconds_since(std::chrono::steady_clock::time_point t0) {
+      return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    }
 
     /* stream a ds' world vertices, CCW: world = c(q) + R(theta) local,
        c(q) = (q(0), q(1)), theta = q(2); the rotation-direction convention
@@ -514,6 +548,7 @@ struct cxd_narrowphase : item {
        init_dir); the relation ref then points at this stage item. */
     void rebind(auto step) {
       auto& data = self()->data();
+      const auto t0 = std::chrono::steady_clock::now();
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
         auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
@@ -556,6 +591,7 @@ struct cxd_narrowphase : item {
           inter.relation() = rel;
         }
       }
+      storage::attr<"t_rebind">(*self()) += seconds_since(t0);
     }
 
     /* FNV-1a over the PAIR SET and every involved ds' world vertices. The
@@ -564,6 +600,7 @@ struct cxd_narrowphase : item {
        no ds index, but must refresh the cache. */
     auto checksum(auto step) {
       auto& data = self()->data();
+      const auto t0 = std::chrono::steady_clock::now();
       std::uint64_t hsh = 1469598103934665603ull;
       auto mix = [&](const void* p, std::size_t n) {
         const auto* bytes = static_cast<const unsigned char*>(p);
@@ -593,6 +630,7 @@ struct cxd_narrowphase : item {
           }
         }
       }
+      storage::attr<"t_checksum">(*self()) += seconds_since(t0);
       return hsh;
     }
 
@@ -635,7 +673,9 @@ struct cxd_narrowphase : item {
     auto pack(auto step) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
+      using indice_t = typename env_t::indice;
       auto& data = self()->data();
+      const auto t0 = std::chrono::steady_clock::now();
       narrowphase_input<scalar> in;
       std::map<std::size_t, std::uint32_t> slot;
       for (auto inter : storage::handles<finteraction>(data, step)) {
@@ -661,6 +701,8 @@ struct cxd_narrowphase : item {
           in.init_dirs.push_back({rel.init_dir()[0], rel.init_dir()[1]});
         }
       }
+      storage::attr<"n_pairs">(*self()) = static_cast<indice_t>(in.ids_a.size());
+      storage::attr<"t_pack">(*self()) += seconds_since(t0);
       return in;
     }
 
@@ -669,11 +711,18 @@ struct cxd_narrowphase : item {
        vector from cp1 toward cp2; max_iterations/invalid_input keep the
        previous cached h and init_dir (keep-previous contract) */
     void run(auto step) {
+      using env_t = decltype(self()->env());
+      using indice_t = typename env_t::indice;
       auto& data = self()->data();
       auto in = pack(step);
       if (!in.ids_a.empty()) {
+        const auto t_batch0 = std::chrono::steady_clock::now();
         auto out = narrowphase_batch(std::move(in));
+        storage::attr<"t_batch">(*self()) += seconds_since(t_batch0);
+        const auto t_wb0 = std::chrono::steady_clock::now();
         std::size_t k = 0;
+        std::size_t n_written = 0;
+        std::size_t n_enclosed = 0;
         for (auto inter : storage::handles<finteraction>(data, step)) {
           auto& relvar = storage::attr<"relation">(inter);
           if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -694,7 +743,9 @@ struct cxd_narrowphase : item {
             rel.normal() = {c.normal[0], c.normal[1]};
             rel.cp1() = {c.cp1[0], c.cp1[1]};
             rel.cp2() = {c.cp2[0], c.cp2[1]};
+            ++n_written;
             if (c.status == static_cast<int>(cxd::status::enclosed)) {
+              ++n_enclosed;
               rel.init_dir() = {rel.normal()[0], rel.normal()[1]};
             } else if (c.h > 0) {
               // separated: the warm start points from body 1 to body 2, i.e.
@@ -707,6 +758,9 @@ struct cxd_narrowphase : item {
             }
           }
         }
+        storage::attr<"n_contacts">(*self()) = static_cast<indice_t>(n_written);
+        storage::attr<"n_enclosed">(*self()) = static_cast<indice_t>(n_enclosed);
+        storage::attr<"t_writeback">(*self()) += seconds_since(t_wb0);
       }
       storage::attr<"cache_step">(*self()) = step;
       storage::attr<"cache_checksum">(*self()) = checksum(step);
@@ -716,6 +770,13 @@ struct cxd_narrowphase : item {
        the batch re-runs only on a new step tag or a changed world checksum */
     void ensure(auto step) {
       storage::attr<"cache_scan_count">(*self()) += 1;
+      // the phase timers describe THIS call: reset them so they never
+      // accumulate across steps (a cache-hit step reports ~0)
+      storage::attr<"t_rebind">(*self()) = 0;
+      storage::attr<"t_checksum">(*self()) = 0;
+      storage::attr<"t_pack">(*self()) = 0;
+      storage::attr<"t_batch">(*self()) = 0;
+      storage::attr<"t_writeback">(*self()) = 0;
       rebind(step);
       const auto ck = checksum(step);
       if (storage::attr<"cache_step">(*self()) == step &&
