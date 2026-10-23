@@ -31,8 +31,10 @@ namespace siconos::collision {
    lookups cost a membership test: callers on a hot path resolve the kind once
    (at pair activation) and keep what they need. */
 
+/// the name of the per-kind set of a shape kind; kinds without a name
+/// (mesh, segment, ...) are only declared statically
 template <typename Shape>
-struct shape_kind;
+struct shape_kind {};
 
 template <>
 struct shape_kind<shape::disk> {
@@ -56,10 +58,21 @@ template <typename DS>
 static constexpr bool has_static_shape_v =
     storage::has_property_v<ds_item_t<DS>, ds_data_t<DS>, "shape">;
 
+template <typename Shape>
+concept named_kind = requires { shape_kind<Shape>::name; };
+
 template <typename Shape, typename DS>
-static constexpr bool has_kind_v =
-    storage::is_dynamic_storage_v<ds_item_t<DS>, ds_data_t<DS>, shape_kind<Shape>::name,
-                                  storage::config_declared>;
+constexpr bool has_kind() {
+  if constexpr (named_kind<Shape>) {
+    return storage::is_dynamic_storage_v<ds_item_t<DS>, ds_data_t<DS>, shape_kind<Shape>::name,
+                                         storage::config_declared>;
+  } else {
+    return false;
+  }
+}
+
+template <typename Shape, typename DS>
+static constexpr bool has_kind_v = has_kind<Shape, DS>();
 
 template <typename DS>
 constexpr auto static_shape_type() {
