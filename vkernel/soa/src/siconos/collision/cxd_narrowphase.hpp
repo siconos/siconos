@@ -38,6 +38,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
@@ -331,6 +332,61 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
   return {lerp_on(va, ia0, ia1, pa0, pa1), lerp_on(vb, ib0, ib1, pb0, pb1)};
 }
 
+/* separating-axis contact of two convex vertex sets (a segment is a
+   2-vertex set): the edge normal of either shape with the largest
+   separation, oriented from A to B. The separation is exact when the shapes
+   touch or penetrate, and a lower bound of the distance when they are apart
+   (vertex-vertex closest features). Fallback for the pairs the GJK / EPA
+   path cannot answer -- in practice exactly touching shapes -- so that no
+   pair is left with a zero normal. */
+template <typename Pool>
+inline auto sat_contact(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b)
+    -> std::optional<std::pair<typename Pool::scalar, typename Pool::vector>> {
+  using V = typename Pool::vector;
+  using scalar = typename Pool::scalar;
+  const cxd::shape_view<Pool> va{pool, id_a};
+  const cxd::shape_view<Pool> vb{pool, id_b};
+  const auto nverts = [](const auto& view) {
+    return static_cast<std::size_t>(std::distance(view.begin(), view.end()));
+  };
+  const auto range = [&](const auto& view, const V& u) {
+    scalar lo = std::numeric_limits<scalar>::infinity();
+    scalar hi = -std::numeric_limits<scalar>::infinity();
+    for (std::size_t i = 0; i < nverts(view); ++i) {
+      lo = std::min(lo, vdot(u, view[i]));
+      hi = std::max(hi, vdot(u, view[i]));
+    }
+    return std::pair{lo, hi};
+  };
+  bool have = false;
+  scalar best = scalar{0};
+  V best_n{0, 0};
+  const auto test_edges = [&](const auto& view) {
+    const std::size_t n = nverts(view);
+    for (std::size_t i = 0; i < n; ++i) {
+      const V e = vsub2(view[(i + 1) % n], view[i]);
+      const scalar len = vnorm(e);
+      if (len <= scalar{0}) continue;
+      const V u{e[1] / len, -e[0] / len};
+      const auto [amin, amax] = range(va, u);
+      const auto [bmin, bmax] = range(vb, u);
+      // separation along +u (A then B) and along -u (B then A)
+      const scalar s_pos = bmin - amax;
+      const scalar s_neg = amin - bmax;
+      const scalar sep = std::max(s_pos, s_neg);
+      if (!have || sep > best) {
+        have = true;
+        best = sep;
+        best_n = s_pos >= s_neg ? u : V{-u[0], -u[1]};
+      }
+    }
+  };
+  test_edges(va);
+  test_edges(vb);
+  if (!have) return std::nullopt;
+  return std::pair{best, best_n};
+}
+
 }  // namespace detail
 
 template <typename Scalar>
@@ -387,14 +443,35 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
   const auto epa_answers = cxd::epa_batch<2>(pool, pairs, hit_pairs, results, opts);
   std::size_t hit_i = 0;
 
+  // the separating-axis answer for a pair the GJK / EPA path left
+  // unanswered; returns false (failure status kept) only for shapes with no
+  // edge at all
+  const auto sat_fallback = [&](std::size_t k, narrowphase_contact<Scalar>& c) {
+    const auto sat = detail::sat_contact(pool, pairs[k].shape_id_A, pairs[k].shape_id_B);
+    if (!sat) return false;
+    const auto& [sep, nrm] = *sat;
+    const auto [cp1, cp2] =
+        detail::face_witnesses(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, nrm);
+    c.status =
+        static_cast<int>(sep > Scalar{0} ? cxd::status::separated : cxd::status::enclosed);
+    c.h = sep;
+    c.normal = nrm;
+    c.cp1 = cp1;
+    c.cp2 = cp2;
+    return true;
+  };
+
   for (std::size_t k = 0; k < npairs; ++k) {
     auto& c = out[k];
     switch (results[k].st) {
       case status::enclosed: {
         c.status = static_cast<int>(cxd::status::enclosed);
         const auto& [depth, epa_normal] = epa_answers[hit_i++];
+        // a touching pair can come back with a finite depth 0 and a zero
+        // normal: that is no answer either
         if (std::isfinite(depth) && std::isfinite(epa_normal[0]) &&
-            std::isfinite(epa_normal[1])) {
+            std::isfinite(epa_normal[1]) &&
+            std::hypot(epa_normal[0], epa_normal[1]) > Scalar{0.5}) {
           const V nrm{epa_normal[0], epa_normal[1]};
           // the witnesses are the supporting faces along EPA's normal; h is
           // EPA's depth (the spec's mapping: enclosed = -depth)
@@ -404,9 +481,9 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
           c.cp1 = cp1;
           c.cp2 = cp2;
           c.h = -depth;
-        } else {
-          // EPA refused (non-finite depth/normal): report a failure status so
-          // the stage keeps the previous cached row instead of writing zeros
+        } else if (!sat_fallback(k, c)) {
+          // EPA refused (non-finite depth/normal) and no separating axis:
+          // a failure status, so the stage keeps its previous cached row
           c.status = static_cast<int>(cxd::status::invalid_input);
           c.h = Scalar{0};
           c.normal = V{0, 0};
@@ -432,14 +509,17 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
           c.cp2 = cp2;
           const Scalar h_wit = detail::vdot(c.normal, detail::vsub2(cp2, cp1));
           c.h = h_wit > Scalar{0} ? h_wit : distance;
-        } else {
-          // no separation certificate: not "separated with h=0", which would
-          // silently overwrite the cached gap; let the stage keep its row
+        } else if (!sat_fallback(k, c)) {
+          // no separation certificate and no separating axis: a failure
+          // status, so the stage keeps its previous cached row
           c.status = static_cast<int>(cxd::status::max_iterations);
         }
         break;
       }
       case status::max_iterations:
+        // the GJK exhausted its budget: the separating axis still answers
+        if (!sat_fallback(k, c)) c.status = static_cast<int>(cxd::status::max_iterations);
+        break;
       case status::invalid_input:
       default:
         break;  // keep-previous contract (already zeroed)

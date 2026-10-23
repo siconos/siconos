@@ -276,13 +276,29 @@ void test_batch_engine_float() {
    If the siconos-side distance GJK cannot certify separation, the pair must
    not come back as "separated, h=0": the stage would then overwrite the
    relation's cached h with 0. A zero budget makes the sub-distance give up. */
+/* a pair the GJK / EPA path cannot answer gets the separating-axis contact
+   instead of a failure row (h = 0 with a zero normal would be an active
+   constraint with an all-zero G row) */
 void test_failed_subdistance_status() {
-  auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
-  auto out = siconos::collision::narrowphase_batch(std::move(in), 0);
-  check(out[0].status == 2 /* cxd::status::max_iterations */,
-        "failed sub-distance reports a failure status, not separated");
-  check(out[0].h == 0.0, "failed pair keeps the placeholder h");
-  std::print("narrowphase_batch engine: failed sub-distance is a failure status\n");
+  // the sub-distance GJK given no budget: the separating axis answers
+  {
+    auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
+    auto out = siconos::collision::narrowphase_batch(std::move(in), 0);
+    check(out[0].status == 0, "failed sub-distance: separated by the separating axis");
+    check(nears(out[0].h, 1.0), "failed sub-distance: h == 1");
+    check(near(out[0].normal, {1, 0}), "failed sub-distance: normal == (1,0)");
+    check(near(out[0].cp1, {1, 0}) && near(out[0].cp2, {2, 0}),
+          "failed sub-distance: witnesses on the facing faces");
+  }
+  // exactly touching squares: a usable normal and h == 0
+  {
+    auto in = make_input({square_at(0, 0), square_at(2, 0)}, {{0, 1}});
+    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    check(out[0].status == 0 || out[0].status == 1, "touching squares answered");
+    check(nears(out[0].h, 0.0, 1e-9), "touching squares: h == 0");
+    check(near(out[0].normal, {1, 0}, 1e-9), "touching squares: normal == (1,0)");
+  }
+  std::print("narrowphase_batch engine: unanswered pairs fall back to the separating axis\n");
 }
 
 /* ---- Task 4: polytopepolytope_r relation, exact G pins ----
