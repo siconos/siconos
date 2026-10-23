@@ -474,6 +474,15 @@ struct space_filter : item {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         storage::prop<"activation", Topology>(inter) = true;
       } else {
+        // the generic binder serves disk x disk, and polytope x polytope until
+        // the cxd stage rebinds it; no disk x polytope relation exists yet
+        if (collision::has_shape<collision::shape::polytope>(ds1) !=
+            collision::has_shape<collision::shape::polytope>(ds2)) {
+          throw std::runtime_error(
+              "space_filter: a disk and a polytope are neighbors; no disk x "
+              "polytope narrowphase relation exists yet");
+        }
+
         // create the edge
         auto inter = topo.link(ds1, ds2);
         inter.nslaw() = nslaw;  // one nslaw for the moment
