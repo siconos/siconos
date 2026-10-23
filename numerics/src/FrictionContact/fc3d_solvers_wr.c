@@ -33,8 +33,7 @@
 
 /* Global Variable for the reformulation of the problem */
 
-GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
-    FrictionContactProblem* problem) {
+GlobalFrictionContactProblem* fc3d_expand_to_global_problem(FrictionContactProblem* problem) {
   int dimension = problem->dimension;
   int nc = problem->numberOfContacts;
   int m = dimension * nc;
@@ -63,4 +62,10 @@ GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
   globalproblem->H = M = Hglobal;
 
   return globalproblem;
+}
+
+/* Backward compatibility function name (deprecated) */
+GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
+    FrictionContactProblem* problem) {
+  return fc3d_expand_to_global_problem(problem);
 }

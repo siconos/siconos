@@ -2831,13 +2831,17 @@ int SBM_from_csparse_2(size_t blocksize, CSparseMatrix* sparseMat,
 
   /* Convert CSparse to CSR format */
   CSparseMatrix* sparseMatcsr = NULL;
+  int own_sparseMatcsr = 0;
 
   if (sparseMat->nz >= 0) {  // triplet
     sparseMatcsr = NM_triplet_to_csr(sparseMat);
+    own_sparseMatcsr = 1;
   } else if (sparseMat->nz == -1) {  // csc
     sparseMatcsr = NM_csc_to_csr(sparseMat);
+    own_sparseMatcsr = 1;
   } else if (sparseMat->nz == -2) {  // csr
     sparseMatcsr = sparseMat;
+    own_sparseMatcsr = 0;
   } else {
     return numerics_error("SBM_from_csparse_2", "Unknown type for the input csparse matrix\n");
   }
@@ -2994,7 +2998,7 @@ int SBM_from_csparse_2(size_t blocksize, CSparseMatrix* sparseMat,
   } */
 
   free(blocks_again);
-  cs_spfree(sparseMatcsr);
+  if (own_sparseMatcsr) cs_spfree(sparseMatcsr);
 
   return 0;
 }

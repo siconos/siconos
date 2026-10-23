@@ -1665,6 +1665,7 @@ NumericsMatrix* NM_copy_to_sparse(const NumericsMatrix* A, double threshold) {
   }
   DEBUG_END("NM_copy_to_sparse(...)\n")
 
+  NM_version_sync(B);
   NM_version_sync((NumericsMatrix*)A);
   return B;
 }
@@ -3901,6 +3902,12 @@ NumericsMatrix* NM_multiply(NumericsMatrix* A, NumericsMatrix* B) {
   } else {
     NM_version_copy(A, C);
   }
+  if (C->storageType == NM_SPARSE) {
+    /* The result data is CSC; make sure the CSC version is the latest one so
+     * that origin stays consistent with the actual storage. */
+    NSM_set_version(C->sparse, NSM_CSC, NSM_max_version(C->sparse) + 1);
+    NM_version_sync(C);
+  }
   NM_version_sync(A);
 
   return C;
@@ -4029,6 +4036,19 @@ int NM_LU_factorize(NumericsMatrix* Ao) {
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;
+
+  /* The LU factorization flag may have been copied from another matrix without
+   * the corresponding factor data (e.g. via NM_copy/NM_internalData_copy).
+   * In that case the flag is inconsistent: reset it and recompute the factors. */
+  if (NM_LU_factorized(Ao) &&
+      (A->storageType == NM_SPARSE || A->storageType == NM_SPARSE_BLOCK)) {
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+    if (!p->linear_solver_data) {
+      numerics_printf_verbose(
+          2, "NM_LU_factorize: flag set but sparse factor data missing, resetting");
+      NM_internalData(A)->isLUfactorized = false;
+    }
+  }
 
   if (!NM_LU_factorized(Ao)) {
     DEBUG_PRINT("NM_LU_factorize. The Factorization is performed\n");
@@ -5215,6 +5235,19 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao) {
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;
 
+  /* The Cholesky factorization flag may have been copied from another matrix
+   * without the corresponding factor data (e.g. via NM_copy/NM_internalData_copy).
+   * In that case the flag is inconsistent: reset it and recompute the factors. */
+  if (NM_Cholesky_factorized(Ao) &&
+      (A->storageType == NM_SPARSE || A->storageType == NM_SPARSE_BLOCK)) {
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+    if (!p->linear_solver_data) {
+      numerics_printf_verbose(
+          2, "NM_Cholesky_factorize: flag set but sparse factor data missing, resetting");
+      NM_internalData(A)->isCholeskyfactorized = false;
+    }
+  }
+
   if (!NM_Cholesky_factorized(Ao)) {
 #ifdef FACTORIZATION_DEBUG
     if (NM_internalData(Ao)->values_sha1_count > 0) {
@@ -5602,6 +5635,19 @@ int NM_LDLT_factorize(NumericsMatrix* Ao) {
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;
+
+  /* The LDL^T factorization flag may have been copied from another matrix
+   * without the corresponding factor data (e.g. via NM_copy/NM_internalData_copy).
+   * In that case the flag is inconsistent: reset it and recompute the factors. */
+  if (NM_LDLT_factorized(Ao) &&
+      (A->storageType == NM_SPARSE || A->storageType == NM_SPARSE_BLOCK)) {
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+    if (!p->linear_solver_data) {
+      numerics_printf_verbose(
+          2, "NM_LDLT_factorize: flag set but sparse factor data missing, resetting");
+      NM_internalData(A)->isLDLTfactorized = false;
+    }
+  }
 
   if (!NM_LDLT_factorized(Ao)) {
 #ifdef FACTORIZATION_DEBUG

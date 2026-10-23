@@ -312,6 +312,9 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_NSN_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_nsn_gfc2d_1.c )
+  new_tests_collection(
+    DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_NSGS_WR_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc2d_1.c test_nsgs_wr_gfc2d_1.c )
 
   # Minimal sanity test for the 2D global nonsmooth Newton Alart-Curnier solver
   new_test(NAME test_nsn_gfc2d_single_particle SOURCES test_nsn_gfc2d_single_particle.c)
@@ -324,6 +327,16 @@ if(WITH_TESTING)
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
+
+  # Compute rho for Alart-Curnier formulations
+  new_test(NAME fc3d_compute_rho_test SOURCES fc3d_compute_rho_test.c)
+
+  # GFC3D NSN solver with user-provided rho vector
+  new_test(NAME test_gfc3d_nsn_user_rho SOURCES test_gfc3d_nsn_user_rho.c)
+
+  # Global friction contact reformulation for various 2D/3D matrix storage types
+  new_test(NAME test_globalFrictionContact_reformulation
+           SOURCES test_globalFrictionContact_reformulation.c)
 
   # Vectorized complementarity error vs scalar reference
   new_test(NAME test_compute_error_vectorized SOURCES test_compute_error_vectorized.c)

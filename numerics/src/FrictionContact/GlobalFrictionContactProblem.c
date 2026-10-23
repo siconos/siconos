@@ -19,6 +19,7 @@
 
 #include <assert.h>  // for assert
 #include <errno.h>   // for errno
+#include <float.h>   // for DBL_EPSILON
 #include <stdlib.h>  // for free, malloc, exit, EXIT_FAILURE
 #include <string.h>  // for memcpy
 
@@ -251,7 +252,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
 
   size_t nc = to_size_t(problem->numberOfContacts);
   size_t n = to_size_t(problem->M->size0);
-  size_t m = 3 * nc;
+  size_t m = to_size_t(problem->dimension) * nc;
   GlobalFrictionContactProblem* new = globalFrictionContactProblem_new();
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
@@ -305,13 +306,28 @@ int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* pr
   return info;
 }
 
-FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
+FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
     GlobalFrictionContactProblem* problem) {
+  NumericsMatrix* M_orig = problem->M;
+  NumericsMatrix* H_orig = problem->H;
+  NumericsMatrix* M_sparse = NULL;
+  NumericsMatrix* H_sparse = NULL;
+
+  /* Mixed storage types are not handled directly: fall back to sparse copies of
+   * both matrices. The original matrices are restored before returning so the
+   * caller's problem is left unchanged. */
+  if (H_orig->storageType != M_orig->storageType) {
+    printf(" H->storageType (%i) != M->storageType (%i) : falling back to NM_SPARSE\n",
+           H_orig->storageType, M_orig->storageType);
+    M_sparse = NM_copy_to_sparse(M_orig, DBL_EPSILON);
+    H_sparse = NM_copy_to_sparse(H_orig, DBL_EPSILON);
+    problem->M = M_sparse;
+    problem->H = H_sparse;
+  }
+
   NumericsMatrix* M = problem->M;
   NumericsMatrix* H = problem->H;
 
-  NM_display(M);
-  NM_display(H);
   const size_t n = to_size_t(M->size0);
   const size_t m = to_size_t(H->size1);
   const blasint n_blas = to_blasint(n);
@@ -322,15 +338,6 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
   localproblem->dimension = problem->dimension;
   localproblem->mu = (double*)calloc(to_size_t(problem->numberOfContacts), sizeof(double));
   cblas_dcopy_msan(problem->numberOfContacts, problem->mu, 1, localproblem->mu, 1);
-
-  if (H->storageType != M->storageType) {
-    //     if(verbose==1)
-    printf(
-        " H->storageType (%i) != M->storageType (%i) : This case is not taken into account\n",
-        H->storageType, M->storageType);
-
-    return NULL;
-  }
 #ifdef OUTPUT_DEBUG
   FILE* fileout;
 #endif
@@ -371,7 +378,17 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     // Compute W <-  H^T M^1 H
 
     assert(H->dense);
-    if (!Htmp) return NULL;
+    if (!Htmp) {
+      if (M_sparse) {
+        problem->M = M_orig;
+        problem->H = H_orig;
+        NM_clear(M_sparse);
+        free(M_sparse);
+        NM_clear(H_sparse);
+        free(H_sparse);
+      }
+      return NULL;
+    }
     assert(Wnum->dense);
 
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m_blas, m_blas, n_blas, 1.0, H->dense,
@@ -398,7 +415,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     cblas_dgemv(CblasColMajor, CblasTrans, n_blas, m_blas, 1.0, H->dense, n_blas, qtmp, 1, 1.0,
                 localproblem->q, 1);
 
-    frictionContact_display(localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
 
     free(Htmp);
     free(qtmp);
@@ -486,11 +503,9 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
 
       if (is_diagonal_block_matrix) {
         numerics_printf_verbose(1, "the matrix is block diagonal\n");
-        numerics_printf_verbose(1, "block_number = %i\n", block_number);
+        numerics_printf_verbose(1, "block_number = %zu\n", block_number);
         /* for (size_t k = 0; k < block_number; k++) */
         /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
-        block_number = to_size_t(M->size0) / 3;
-        for (size_t k = 0; k < block_number; k++) blocksizes[k] = 3;
         Minv = NM_inverse_diagonal_block_matrix(M, block_number, blocksizes);
         free(blocksizes);
         blocksizes = NULL;
@@ -551,8 +566,23 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     DEBUG_EXPR(frictionContact_display(localproblem););
     // getchar();
   } else {
-    printf("globalFrictionContact_reformulation_FrictionContact :: unknown matrix storage");
+    printf("globalFrictionContact_reduce_to_FrictionContact :: unknown matrix storage");
     exit(EXIT_FAILURE);
   }
+
+  if (M_sparse) {
+    problem->M = M_orig;
+    problem->H = H_orig;
+    NM_clear(M_sparse);
+    free(M_sparse);
+    NM_clear(H_sparse);
+    free(H_sparse);
+  }
   return localproblem;
+}
+
+/* Backward compatibility function name (deprecated) */
+FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
+    GlobalFrictionContactProblem* problem) {
+  return globalFrictionContact_reduce_to_FrictionContact(problem);
 }

@@ -216,6 +216,8 @@ enum FRICTION_SOLVER {
   SICONOS_GLOBAL_FRICTION_2D_VI_FPP = 721,
   /** VI formulation, Extra Gradient, global 2D formulation */
   SICONOS_GLOBAL_FRICTION_2D_VI_EG = 722,
+  /** Non-smooth Gauss-Seidel, global 2D formulation with wrapper */
+  SICONOS_GLOBAL_FRICTION_2D_NSGS_WR = 723,
 
 }; /* end of enum FRICTION_SOLVER */
 
@@ -540,6 +542,8 @@ enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY {
   SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM = 3,
   /** An adaptive strategy for rho is used */
   SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE = 4,
+  /** A user-provided vector of rho values is used (pointed to by options->solverData) */
+  SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_USER_PROVIDED = 5,
 };
 
 enum SICONOS_FRICTION_3D_NSN_FORMULATION {

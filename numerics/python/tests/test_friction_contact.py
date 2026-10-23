@@ -17,6 +17,7 @@
 #
 
 import numpy as np
+import pytest
 import scipy.sparse as sp
 import siconos.numerics as sn
 
@@ -110,6 +111,96 @@ def test_friction_contact_sparse_build():
     print(problem.M())  # just to check if it's still alive
     print(problem.q())  # just to check if it's still alive
     del problem
+
+
+def test_compute_rho():
+    nc = 2
+    dim = 3 * nc
+
+    # Dense problem with non-trivial diagonal blocks
+    M = np.eye(dim, dtype=np.float64, order="F")
+    M[1, 1] = 4.0
+    M[2, 2] = 9.0
+    M[4, 4] = 2.0
+    M[5, 5] = 5.0
+    q = np.zeros(dim, dtype=np.float64)
+    mu = np.ones(nc, dtype=np.float64)
+    problem = sn.FrictionContactProblem(3, nc, M, q, mu)
+
+    rho_strat = sn.params.SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_enum
+
+    # Constant strategy
+    rho_const = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT, 0.5
+    )
+    assert rho_const.shape == (nc, 3)
+    assert np.allclose(rho_const, 0.5)
+
+    # Split spectral norm strategy
+    rho_split = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM
+    )
+    assert rho_split.shape == (nc, 3)
+    assert np.allclose(rho_split[:, 0], 1.0)
+    assert rho_split[0, 1] > 0.0
+    assert rho_split[0, 2] > 0.0
+
+    # Split spectral norm cond strategy
+    rho_split_cond = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND
+    )
+    assert rho_split_cond.shape == (nc, 3)
+    assert np.allclose(rho_split_cond[:, 0], 1.0)
+    assert rho_split_cond[0, 1] > 0.0
+    assert rho_split_cond[0, 2] > 0.0
+
+    # Spectral norm strategy
+    rho_spec = problem.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM
+    )
+    assert rho_spec.shape == (nc, 3)
+    assert np.allclose(rho_spec[:, 0], 1.0)
+
+    # Sparse problem
+    data = np.array(
+        [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            4.0,
+            1.0,
+            1.0,
+            9.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            2.0,
+            1.0,
+            1.0,
+            5.0,
+            1.0,
+        ],
+        dtype=np.float64,
+    )
+    indices = np.array(
+        [0, 1, 2, 0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 3, 4, 5],
+        dtype=np.int64,
+    )
+    indptr = np.array([0, 3, 6, 9, 12, 15, 18], dtype=np.int64)
+    M_sparse = sp.csc_matrix(
+        (data, indices, indptr), shape=(dim, dim), dtype=np.float64
+    )
+    problem_sparse = sn.FrictionContactProblem(3, nc, M_sparse, q, mu)
+    rho_sparse = problem_sparse.compute_rho(
+        rho_strat.SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM
+    )
+    assert rho_sparse.shape == (nc, 3)
+    assert np.allclose(rho_sparse[:, 0], 1.0)
+    assert rho_sparse[0, 1] > 0.0
+    assert rho_sparse[0, 2] > 0.0
 
 
 def create_rfcpb(dim, nc):
@@ -330,3 +421,52 @@ def test_global_rolling_friction_contact_sparse_build():
     print(problem.M())  # just to check if it's still alive
     print(problem.q())  # just to check if it's still alive
     del problem
+
+
+def test_global_friction_contact_solve_with_rho():
+    n = 3
+    nc = 1
+    dim = 3 * nc
+
+    # Simple one-contact problem: M = H = I, so it reduces to a local FC3D.
+    M = np.eye(n, dtype=np.float64, order="F")
+    H = np.eye(n, dim, dtype=np.float64, order="F")
+    q = np.array([-1.0, 0.0, 0.0], dtype=np.float64)
+    b = np.zeros(n, dtype=np.float64)
+    mu = np.array([0.3], dtype=np.float64)
+
+    problem = sn.GlobalFrictionContactProblem(3, nc, M, H, q, mu, b)
+
+    reaction = np.zeros(dim, dtype=np.float64)
+    velocity = np.zeros(dim, dtype=np.float64)
+    global_velocity = np.zeros(n, dtype=np.float64)
+
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_NSN_AC)
+    options.iparam[
+        sn.params.SICONOS_FRICTION_3D_NSN_IPARAM_enum.SICONOS_FRICTION_3D_NSN_FORMULATION
+    ] = sn.params.SICONOS_FRICTION_3D_NSN_FORMULATION_enum.SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD
+    options.dparam[
+        sn.params.SICONOS_FRICTION_3D_NSN_DPARAM_enum.SICONOS_FRICTION_3D_NSN_RHO
+    ] = 1.0
+    options.iparam[sn.params.SICONOS_IPARAM_enum.SICONOS_IPARAM_MAX_ITER] = 100
+    options.dparam[sn.params.SICONOS_DPARAM_enum.SICONOS_DPARAM_TOL] = 1e-4
+
+    # Solve with constant rho
+    info = problem.solve(reaction, velocity, global_velocity, options)
+    assert info == 0
+    assert np.isclose(reaction[0], 1.0)
+
+    # Solve with user-provided rho
+    reaction[:] = 0.0
+    velocity[:] = 0.0
+    global_velocity[:] = 0.0
+    rho = np.array([0.5, 0.5, 0.5], dtype=np.float64)
+    info = problem.solve(reaction, velocity, global_velocity, options, rho=rho)
+    assert info == 0
+    assert np.isclose(reaction[0], 1.0)
+
+    # Wrong size must raise
+    with pytest.raises(RuntimeError):
+        problem.solve(
+            reaction, velocity, global_velocity, options, rho=np.ones(dim + 1)
+        )

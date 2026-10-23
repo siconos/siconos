@@ -960,9 +960,21 @@ restart:
   info[0] = 1; /* Default to non-convergence. */
   iteration = 0;
 
-  /* Initialize rho from the current NSN rho parameter. */
-  for (unsigned int i = 0; i < num_contact_dofs; ++i) {
-    rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+  /* Initialize rho from the current NSN rho parameter or from a user-provided
+   * vector when the corresponding strategy is selected. */
+  if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
+      SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_USER_PROVIDED) {
+    if (!options->solverData) {
+      *info = numerics_error("gfc3d_nonsmooth_Newton_AlartCurnier",
+                             "USER_PROVIDED rho strategy selected but options->solverData is "
+                             "NULL.");
+      return;
+    }
+    memcpy(rho, options->solverData, num_contact_dofs * sizeof(double));
+  } else {
+    for (unsigned int i = 0; i < num_contact_dofs; ++i) {
+      rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+    }
   }
 
   DEBUG_EXPR(for (unsigned int i = 0; i < num_contact_dofs; ++i)

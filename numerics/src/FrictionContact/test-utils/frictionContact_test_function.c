@@ -103,7 +103,7 @@ int frictionContact_test_function(TestCase* current) {
     char filename[100];
     snprintf(filename, sizeof(filename), "gfc3d_%d.hdf5", rand());
 
-    GlobalFrictionContactProblem* gfc3d = fc3d_reformulation_global_problem(problem);
+    GlobalFrictionContactProblem* gfc3d = fc3d_expand_to_global_problem(problem);
 
     char* title = "--";
     char* description = "--";
