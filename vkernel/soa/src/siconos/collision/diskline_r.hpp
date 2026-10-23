@@ -2,6 +2,7 @@
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/line.hpp"
+#include "siconos/collision/shape_of.hpp"
 // #include "siconos/model/model.hpp"
 
 namespace siconos::collision {
@@ -21,17 +22,14 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
 
     decltype(auto) compute_h(auto step, auto& ds) {
       auto& q = storage::attr<"q">(ds, step);
-      return line().distance(q) -
-             make_handle(self()->data(), prop<"shape", storage::config_declared>(ds)).radius();
+      return line().distance(q) - collision::disk_radius(ds);
     }
 
     void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
       auto& data = self()->data();
 
       auto& q = storage::attr<"q">(ds, step);
-      auto& r =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds))
-              .radius();
+      auto r = collision::disk_radius(ds);
 
       auto& x = q(0);
       auto& y = q(1);

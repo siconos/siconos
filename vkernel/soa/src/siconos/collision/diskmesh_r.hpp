@@ -2,6 +2,7 @@
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/mesh.hpp"
+#include "siconos/collision/shape_of.hpp"
 
 namespace siconos::collision {
 
@@ -30,9 +31,7 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
 
       auto& cindex = self()->contact_index();
 
-      return mesh().segments().distance(q1, cindex) -
-             make_handle(self()->data(), prop<"shape", storage::config_declared>(ds1))
-                 .radius();
+      return mesh().segments().distance(q1, cindex) - collision::disk_radius(ds1);
     }
 
     template <typename I, match::handle<model::lagrangian_ds> DS1,
@@ -43,9 +42,7 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
 
       auto& q1 = hds1.q(step);
 
-      auto& r =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(hds1))
-              .radius();
+      auto r = collision::disk_radius(hds1);
 
       /* disk coordinates */
       const scalar& xb = q1(0);

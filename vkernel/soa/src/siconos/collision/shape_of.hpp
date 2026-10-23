@@ -160,4 +160,22 @@ decltype(auto) bodies_with(Data& data) {
   return detail::kind_set<Item, Shape>(data);
 }
 
+/// radius of the disk shape of ds. Throws when ds has no disk shape, also
+/// when no ds of this type can have one: a disk relation is then an
+/// alternative of an interaction's relation variant that std::visit
+/// instantiates but that is never bound to such a ds. A polytope's radius()
+/// is its circumradius, so reading it here would be a silent wrong gap.
+template <typename DS>
+auto disk_radius(DS& ds) {
+  using scalar = typename decltype(ds.env())::scalar;
+  if constexpr (may_have_shape<shape::disk, DS>()) {
+    return static_cast<scalar>(shape_of<shape::disk>(ds).radius());
+  } else {
+    throw std::runtime_error(
+        "collision::disk_radius: the body has no disk shape; a disk relation was "
+        "bound to a body of another shape kind");
+    return scalar{};
+  }
+}
+
 }  // namespace siconos::collision

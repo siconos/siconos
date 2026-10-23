@@ -53,8 +53,7 @@ struct polytopefsegment_r : item,
       auto& data = self()->data();
 
       auto& q = storage::attr<"q">(ds, step);
-      auto sh =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
+      auto sh = collision::shape_of<shape::polytope>(ds);
       const scalar c = std::cos(q(2)), s = std::sin(q(2));
       const auto n = sh.nvertices();
 

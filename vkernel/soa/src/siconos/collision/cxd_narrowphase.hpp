@@ -433,6 +433,7 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
 }  // namespace siconos::collision
 
 #include "siconos/collision/collision_head.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/simul/topology.hpp"
 
@@ -523,8 +524,7 @@ struct cxd_narrowphase : item {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
       auto& data = self()->data();
-      auto sh =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
+      auto sh = collision::shape_of<shape::polytope>(ds);
       auto& q = storage::attr<"q">(ds, step);
       const scalar c = std::cos(q(2)), s = std::sin(q(2));
       const auto n = sh.nvertices();
@@ -552,12 +552,7 @@ struct cxd_narrowphase : item {
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
         auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
-        auto poly_shape = [&](auto& ds) {
-          auto sh =
-              storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
-          using shape_t = typename std::decay_t<decltype(sh)>::type;
-          return std::derived_from<shape_t, shape::polytope>;
-        };
+        auto poly_shape = [](auto& ds) { return collision::has_shape<shape::polytope>(ds); };
         auto& relvar = storage::attr<"relation">(inter);
         // Case A: polytope x polytope (ds1 != ds2), generic binder diskdisk_r
         if (ds1.index().value() != ds2.index().value() && poly_shape(ds1) && poly_shape(ds2) &&

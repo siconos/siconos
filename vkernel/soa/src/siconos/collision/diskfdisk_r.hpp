@@ -2,6 +2,7 @@
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/collision/translated.hpp"
 // #include "siconos/model/model.hpp"
 
@@ -28,8 +29,7 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
       auto& data = self()->data();
       auto& q = storage::attr<"q">(ds, step);
       return collision::distance(q, translated_disk_shape().translation()) -
-             make_handle(data, prop<"shape", storage::config_declared>(ds)).radius() -
-             translated_disk_shape().translated().radius();
+             collision::disk_radius(ds) - translated_disk_shape().translated().radius();
     }
 
     [[gnu::always_inline]] void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
@@ -38,9 +38,7 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
 
       const auto& q1 = storage::attr<"q">(ds, step);
       const auto& q2 = translated_disk_shape().translation();
-      const scalar& r1 =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds))
-              .radius();
+      const scalar r1 = collision::disk_radius(ds);
 
       //      const scalar& r2 =
       //        translated_disk_shape().item().radius();

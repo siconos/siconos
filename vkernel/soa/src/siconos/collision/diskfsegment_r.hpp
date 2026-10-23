@@ -2,6 +2,7 @@
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/segment.hpp"
+#include "siconos/collision/shape_of.hpp"
 // #include "siconos/model/model.hpp"
 
 namespace siconos::collision {
@@ -27,8 +28,7 @@ struct diskfsegment_r : item, model::relation1, model::any_lagrangian_relation {
 
     [[gnu::always_inline]] decltype(auto) compute_h(auto step, auto& ds) {
       auto& q = storage::attr<"q">(ds, step);
-      return segment().distance(q) -
-             make_handle(self()->data(), prop<"shape", storage::config_declared>(ds)).radius();
+      return segment().distance(q) - collision::disk_radius(ds);
     }
 
     [[gnu::always_inline]] void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
@@ -36,9 +36,7 @@ struct diskfsegment_r : item, model::relation1, model::any_lagrangian_relation {
       using scalar = typename decltype(self()->env())::scalar;
 
       const auto& q = storage::attr<"q">(ds, step);
-      const scalar& r =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds))
-              .radius();
+      const scalar r = collision::disk_radius(ds);
 
       const scalar& x = q(0);
       const scalar& y = q(1);

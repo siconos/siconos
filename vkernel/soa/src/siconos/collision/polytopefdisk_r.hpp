@@ -3,6 +3,7 @@
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
@@ -149,8 +150,7 @@ struct polytopefdisk_r : item, model::relation1, model::any_lagrangian_relation 
 
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
-      auto sh =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds1));
+      auto sh = collision::shape_of<shape::polytope>(ds1);
       const scalar c = std::cos(q1(2)), s = std::sin(q1(2));
       const auto n = sh.nvertices();
 

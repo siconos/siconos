@@ -53,8 +53,7 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
       auto& data = self()->data();
 
       auto& q1 = storage::attr<"q">(ds1, step);
-      auto sh =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds1));
+      auto sh = collision::shape_of<shape::polytope>(ds1);
       const scalar c = std::cos(q1(2)), s = std::sin(q1(2));
       const auto n = sh.nvertices();
 

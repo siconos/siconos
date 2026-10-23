@@ -7,6 +7,7 @@
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
@@ -21,38 +22,22 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    // diskdisk_r is the generic radius-based binder: it is right for a disk and
-    // for nothing else (a polytope exposes radius() as its circumradius). The
-    // shape kind is fixed per ds type by the storage config, so the check below
-    // is decided at compile time, but it is a throw and NOT a static_assert: the
-    // relation list of an interaction is a std::variant and std::visit
-    // instantiates every alternative, so in a polytope world diskdisk_r is a
-    // legitimate placeholder that the cxd narrowphase stage rebinds before any
-    // gap is computed. Reaching the throw means the placeholder was never
-    // rebound, which is exactly the silent circumradius bug.
+    // diskdisk_r is the generic radius-based binder: it is right for two disks
+    // and for nothing else (a polytope exposes radius() as its circumradius).
+    // disk_radius throws for a body without a disk shape: decided at compile
+    // time for a static "shape" declaration, by the disk set membership for
+    // per-kind shapes. It is a throw and NOT a static_assert because std::visit
+    // instantiates every relation alternative of an interaction, so in a
+    // polytope world diskdisk_r is a legitimate placeholder that the cxd
+    // narrowphase stage rebinds before any gap is computed. Reaching the throw
+    // means the placeholder was never rebound: the silent circumradius bug.
     template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>
     [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
-      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
-          self()->data(), storage::prop<"shape", storage::config_declared>(ds1)))>::type;
-      using shape2_t = typename std::decay_t<decltype(storage::make_handle(
-          self()->data(), storage::prop<"shape", storage::config_declared>(ds2)))>::type;
-      if constexpr (!(std::derived_from<shape1_t, shape::disk> &&
-                      std::derived_from<shape2_t, shape::disk>)) {
-        throw std::runtime_error(
-            "diskdisk_r: a body shape is not a disk. Bind a shape-specific "
-            "relation for this pair, or register the cxd narrowphase stage "
-            "(the diskdisk_r binding is only a placeholder here).");
-      }
-
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 = storage::make_handle(self()->data(),
-                                      storage::prop<"shape", storage::config_declared>(ds1))
-                     .radius();
-      auto& r2 = storage::make_handle(self()->data(),
-                                      storage::prop<"shape", storage::config_declared>(ds2))
-                     .radius();
+      auto r1 = collision::disk_radius(ds1);
+      auto r2 = collision::disk_radius(ds2);
 
       auto dx = q2[0] - q1[0];
       auto dy = q2[1] - q1[1];
@@ -64,29 +49,13 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
               match::handle<model::lagrangian_ds> DS2, typename M>
     [[gnu::always_inline]] void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1,
                                               M& h_matrix2) {
-      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
-          self()->data(), storage::prop<"shape", storage::config_declared>(ds1)))>::type;
-      using shape2_t = typename std::decay_t<decltype(storage::make_handle(
-          self()->data(), storage::prop<"shape", storage::config_declared>(ds2)))>::type;
-      if constexpr (!(std::derived_from<shape1_t, shape::disk> &&
-                      std::derived_from<shape2_t, shape::disk>)) {
-        throw std::runtime_error(
-            "diskdisk_r: a body shape is not a disk. Bind a shape-specific "
-            "relation for this pair, or register the cxd narrowphase stage "
-            "(the diskdisk_r binding is only a placeholder here).");
-      }
-
       auto& data = self()->data();
 
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds1))
-              .radius();
-      auto& r2 =
-          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds2))
-              .radius();
+      auto r1 = collision::disk_radius(ds1);
+      auto r2 = collision::disk_radius(ds2);
 
       auto x1 = q1(0);
       auto y1 = q1(1);
