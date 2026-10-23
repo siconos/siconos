@@ -84,4 +84,18 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(polytopemesh Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(polytopefdisk Eigen3::Eigen numerics pthread)
 
+
+  # ctest --test-dir <build>/vkernel/soa/src/siconos/tests
+  # fem_t3 is not registered: its mesh square_200.msh and reference
+  # T3_square_200.ref are not in the repository.
+  enable_testing()
+  foreach(test t1 bouncing_ball bouncing_ball_registry bouncing_ball_split
+      registry_remove unbounded_bouncing_ball bouncing_balls bouncing_disk
+      bouncing_disk_line bouncing_disks fixed_disks cxd_batch_smoke polytope_cxd
+      bouncing_polytopes churn_polytopes polytope_fsegment polytopemesh
+      polytopefdisk)
+    add_test(NAME vkernel_${test} COMMAND ${test}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  endforeach()
+
 endif()

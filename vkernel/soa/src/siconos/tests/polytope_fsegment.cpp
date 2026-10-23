@@ -1,4 +1,12 @@
-/* Unit tests for polytope x fixed-segment narrowphase (item 4). */
+/* Unit test for polytopefsegment_r (polytope x fixed segment).
+
+   A side-2 square at the origin and a fixed segment from (0,3) to (0,5):
+   the gap is exactly 2 (square top edge y=1 to segment bottom y=3), normal
+   (0,1), cp1=(0,1), cp2=(0,3).
+
+   The relation is bound on the self interaction, as
+   space_filter::polytopefsegment_activation does; the cxd_narrowphase stage
+   handles polytope x polytope pairs only and must leave it untouched. */
 
 #include <cassert>
 #include <cmath>
@@ -52,13 +60,14 @@ namespace {
 auto check = [](bool ok, auto&& what) {
   if (!ok) throw std::runtime_error(std::string("CHECK FAILED: ") + what);
 };
+auto near = [](double a, double b, double tol = 1e-9) { return std::fabs(a - b) <= tol; };
 }  // namespace
 
 int main() {
   using namespace siconos;
   config::data_t data;
 
-  // a square polytope
+  /* polytope: side-2 square centered at origin, vertices CCW */
   auto sh = storage::add<config::polytope_shape>(data);
   sh.nvertices() = 4;
   sh.vertices()[0] = {1, -1};
@@ -66,43 +75,46 @@ int main() {
   sh.vertices()[2] = {-1, 1};
   sh.vertices()[3] = {-1, -1};
 
-  // a ds with that shape
   auto ds = storage::add<config::polytope_ds>(data);
   storage::prop<"shape", storage::config_declared>(ds) = sh;
   storage::attr<"q">(ds, 0) = Eigen::Vector3d(0, 0, 0);
 
-  // a fixed segment from (0,3) to (0,5) -- separated by 2 along y
+  /* fixed segment from (0,3) to (0,5) */
   auto seg = storage::add<config::segment_shape>(data);
   seg.set_p1_p2(std::array<double, 6>{0, 3, 0, 0, 5, 0}, 0);
   seg.set_maxpoints(2);
   seg.initialize(0);
 
-  // topology + narrowphase
   auto topo = storage::add<config::topo>(data);
   auto np = storage::add<config::cxd_narrowphase>(data);
   np.topology() = topo;
-  // np has no dsds_r set (not needed for polytopefsegment); leave default
 
-  // interaction: topo.link(ds) (self), relation = diskfsegment_r with segment
   auto inter = topo.link(ds);
-  auto dsr = storage::add<config::diskfsegment_r>(data);
-  dsr.segment() = seg;
-  inter.relation() = dsr;
+  auto rel = storage::add<config::polytopefsegment_r>(data);
+  rel.segment() = seg;
+  inter.relation() = rel;
   inter.nslaw() = storage::add<config::nslaw>(data);
 
-  // run the stage
+  /* the stage rebinds polytope x polytope pairs only */
   np.ensure(0);
-
-  // relation should now be rebound to polytopefsegment_r
   using poly_fs_index = storage::index<config::polytopefsegment_r, std::size_t>;
   check(std::holds_alternative<poly_fs_index>(inter.relation()),
-        "relation rebound to polytopefsegment_r");
+        "stage leaves polytopefsegment_r bound");
 
-  auto rel = storage::make_handle(data, std::get<poly_fs_index>(inter.relation()));
+  /* h: gap = 2, normal (0,1), cp1=(0,1), cp2=(0,3) */
+  double h = rel.compute_h(0, ds);
+  std::print("polytopefsegment: h = {}\n", h);
+  check(near(h, 2), "h == 2 (gap)");
+  check(near(rel.status(), 0), "status separated");
+  check(near(rel.normal()[0], 0) && near(rel.normal()[1], 1), "normal (0,1)");
+  check(near(rel.cp1()[0], 0) && near(rel.cp1()[1], 1), "cp1 (0,1)");
+  check(near(rel.cp2()[0], 0) && near(rel.cp2()[1], 3), "cp2 (0,3)");
 
-  // h should be finite (separated: distance from square to segment ~ 2)
-  std::print("polytopefsegment: h = {}\n", rel.h());
-  check(std::isfinite(rel.h()), "h finite");
+  /* G: nx=0, ny=1, tx=-1, ty=0; arm1 = cp1 - q = (0,1), za1 = (-1,0) */
+  Eigen::MatrixXd g1(2, 3);
+  rel.compute_jachq(0, ds, g1);
+  check(near(g1(0, 0), 0) && near(g1(0, 1), -1) && near(g1(0, 2), 0), "G1 normal row");
+  check(near(g1(1, 0), 1) && near(g1(1, 1), 0) && near(g1(1, 2), -1), "G1 tangent row");
 
   std::print("polytope_fsegment: all checks pass\n");
   return 0;
