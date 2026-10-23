@@ -279,26 +279,45 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
 
   if (tie_a.size() == 1 && tie_b.size() == 1) return {va[tie_a[0]], vb[tie_b[0]]};
 
-  if (tie_a.size() == 1) {  // vertex on A, face on B: perpendicular foot
+  // the supporting face of a tie set: its two extreme vertices along the
+  // tangent. Tied vertices are not consecutive in index order when the face
+  // wraps around index 0, so front()/back() of the tie set is not the face.
+  const V tng{-n[1], n[0]};
+  const auto face_ends = [&](const auto& view, const std::vector<std::size_t>& tie) {
+    std::size_t lo = tie.front(), hi = tie.front();
+    for (auto i : tie) {
+      if (vdot(tng, view[i]) < vdot(tng, view[lo])) lo = i;
+      if (vdot(tng, view[i]) > vdot(tng, view[hi])) hi = i;
+    }
+    return std::pair{lo, hi};
+  };
+  // closest point of the face [a, b] to the vertex p
+  const auto foot_of = [](const V& p, const V& a, const V& b) {
+    const auto [foot, t] = foot_on_segment(vsub2(a, p), vsub2(b, p));
+    return vadd(foot, p);
+  };
+
+  if (tie_a.size() == 1) {  // vertex on A, face on B
     const V p = va[tie_a[0]];
-    const auto [foot, t] = foot_on_segment(vb[tie_b.front()], vb[tie_b.back()]);
-    return {p, foot};
+    const auto [b0, b1] = face_ends(vb, tie_b);
+    return {p, foot_of(p, vb[b0], vb[b1])};
   }
   if (tie_b.size() == 1) {  // face on A, vertex on B
     const V p = vb[tie_b[0]];
-    const auto [foot, t] = foot_on_segment(va[tie_a.front()], va[tie_a.back()]);
-    return {foot, p};
+    const auto [a0, a1] = face_ends(va, tie_a);
+    return {foot_of(p, va[a0], va[a1]), p};
   }
 
   // both faces (parallel edges): midpoint of the overlap window along the
-  // common edge direction
-  const V e0 = vsub2(vb[tie_b.back()], vb[tie_b.front()]);
-  const scalar el = vnorm(e0);
-  const V e = el > scalar{0} ? vscale(scalar{1} / el, e0) : V{1, 0};
-  const scalar pa0 = vdot(e, va[tie_a.front()]);
-  const scalar pa1 = vdot(e, va[tie_a.back()]);
-  const scalar pb0 = vdot(e, vb[tie_b.front()]);
-  const scalar pb1 = vdot(e, vb[tie_b.back()]);
+  // tangent
+  const auto [ia0, ia1] = face_ends(va, tie_a);
+  const auto [ib0, ib1] = face_ends(vb, tie_b);
+  const scalar tl = vnorm(tng);
+  const V e = tl > scalar{0} ? vscale(scalar{1} / tl, tng) : V{1, 0};
+  const scalar pa0 = vdot(e, va[ia0]);
+  const scalar pa1 = vdot(e, va[ia1]);
+  const scalar pb0 = vdot(e, vb[ib0]);
+  const scalar pb1 = vdot(e, vb[ib1]);
   const scalar lo = std::max(std::min(pa0, pa1), std::min(pb0, pb1));
   const scalar hi = std::min(std::max(pa0, pa1), std::max(pb0, pb1));
   const scalar tm = scalar{0.5} * (lo + hi);
@@ -309,8 +328,7 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
     const scalar t = std::max(scalar{0}, std::min(scalar{1}, (tm - p0) / denom));
     return vadd(view[i0], vscale(t, vsub2(view[i1], view[i0])));
   };
-  return {lerp_on(va, tie_a.front(), tie_a.back(), pa0, pa1),
-          lerp_on(vb, tie_b.front(), tie_b.back(), pb0, pb1)};
+  return {lerp_on(va, ia0, ia1, pa0, pa1), lerp_on(vb, ib0, ib1, pb0, pb1)};
 }
 
 }  // namespace detail

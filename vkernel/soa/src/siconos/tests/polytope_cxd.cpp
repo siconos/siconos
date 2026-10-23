@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <print>
+#include <string>
 
 #include "siconos/siconos.hpp"
 #include "siconos/storage/registry.hpp"
@@ -69,6 +70,10 @@ std::vector<std::array<double, 2>> square_at(double cx, double cy) {
 std::vector<std::array<double, 2>> diamond_at_origin() {
   const double r = 1.4142135623730951;
   return {{r, 0}, {0, r}, {-r, 0}, {0, -r}};
+}
+std::vector<std::array<double, 2>> diamond_at(double cx, double cy) {
+  const double r = 1.4142135623730951;
+  return {{cx + r, cy}, {cx, cy + r}, {cx - r, cy}, {cx, cy - r}};
 }
 auto near = [](std::array<double, 2> a, std::array<double, 2> e, double tol = 1e-9) {
   return std::abs(a[0] - e[0]) <= tol && std::abs(a[1] - e[1]) <= tol;
@@ -208,6 +213,42 @@ void test_batch_engine() {
    std::array<float,2>, the pair record is float, and the tolerance is
    raised above the float epsilon instead of staying at 1e-10 (which no
    float GJK could reach). */
+/* contact points of a vertex against a face away from the origin: the
+   witness on the face is the foot of the VERTEX, not of the origin (the
+   symmetric cases above cannot tell the two apart) */
+void test_witnesses_off_axis() {
+  const double r = 1.4142135623730951;
+  // vertex of A on the face of B, separated: diamond east vertex (r, 0.5)
+  // facing the square's west face x = 2
+  {
+    auto in = make_input({diamond_at(0, 0.5), square_at(3, 0)}, {{0, 1}});
+    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    check(out[0].status == 0, "vertex-face separated");
+    check(nears(out[0].h, 2 - r), "vertex-face h == 2-sqrt(2)");
+    check(near(out[0].cp1, {r, 0.5}), "vertex-face cp1 == diamond east vertex");
+    check(near(out[0].cp2, {2, 0.5}), "vertex-face cp2 == foot of the vertex");
+  }
+  // face of A, vertex of B, separated: square east face x = 1, diamond west
+  // vertex (2, 0.5)
+  {
+    auto in = make_input({square_at(0, 0), diamond_at(2 + r, 0.5)}, {{0, 1}});
+    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    check(out[0].status == 0, "face-vertex separated");
+    check(nears(out[0].h, 1), "face-vertex h == 1");
+    check(near(out[0].cp1, {1, 0.5}), "face-vertex cp1 == foot of the vertex");
+    check(near(out[0].cp2, {2, 0.5}), "face-vertex cp2 == diamond west vertex");
+  }
+  // vertex of A into the face of B, enclosed by 0.1
+  {
+    auto in = make_input({diamond_at(2.1 - r, 0.5), square_at(3, 0)}, {{0, 1}});
+    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    check(out[0].status == 1, "vertex-face enclosed");
+    check(nears(out[0].h, -0.1, 1e-6), "vertex-face h == -0.1");
+    check(near(out[0].cp1, {2.1, 0.5}, 1e-6), "enclosed cp1 == diamond east vertex");
+    check(near(out[0].cp2, {2, 0.5}, 1e-6), "enclosed cp2 == foot of the vertex");
+  }
+}
+
 void test_batch_engine_float() {
   using siconos::collision::narrowphase_input;
   narrowphase_input<float> in;
@@ -285,6 +326,59 @@ void test_polytopepolytope_relation(siconos::config::data_t& data) {
     }
   }
   std::print("polytopepolytope_r: G exact pins pass\n");
+}
+
+/* the normal row of G is the gradient of h: central finite differences of
+   the batch gap over the 6 dofs of two rotated, off-centre squares, against
+   the relation's compute_jachq fed with the batch normal and contact points.
+   Separated generic configuration (one vertex against one face), so the
+   contact features do not switch under the perturbation. */
+void test_jacobian_finite_differences(siconos::config::data_t& data) {
+  using siconos::storage::add;
+  const std::array<std::array<double, 2>, 4> local = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
+  auto world = [&](const std::array<double, 3>& q) {
+    std::vector<std::array<double, 2>> w;
+    const double c = std::cos(q[2]), s = std::sin(q[2]);
+    for (auto& v : local)
+      w.push_back({q[0] + c * v[0] - s * v[1], q[1] + s * v[0] + c * v[1]});
+    return w;
+  };
+  auto batch = [&](const std::array<double, 3>& q1, const std::array<double, 3>& q2) {
+    auto in = make_input({world(q1), world(q2)}, {{0, 1}});
+    return siconos::collision::narrowphase_batch(std::move(in))[0];
+  };
+
+  const std::array<double, 3> q1 = {0., 0., 0.3}, q2 = {2.9, 0.7, -0.2};
+  const auto c0 = batch(q1, q2);
+  check(c0.status == 0, "FD configuration is separated");
+
+  auto ds1 = add<siconos::config::polytope_ds>(data);
+  auto ds2 = add<siconos::config::polytope_ds>(data);
+  ds1.q() = {q1[0], q1[1], q1[2]};
+  ds2.q() = {q2[0], q2[1], q2[2]};
+  auto rel = add<siconos::config::polytopepolytope_r>(data);
+  rel.status() = c0.status;
+  rel.h() = c0.h;
+  rel.normal() = {c0.normal[0], c0.normal[1]};
+  rel.cp1() = {c0.cp1[0], c0.cp1[1]};
+  rel.cp2() = {c0.cp2[0], c0.cp2[1]};
+  Eigen::Matrix<double, 2, 3> g1, g2;
+  rel.compute_jachq(0, ds1, ds2, g1, g2);
+
+  const double eps = 1e-6;
+  for (int body = 0; body < 2; ++body) {
+    for (int k = 0; k < 3; ++k) {
+      auto qp1 = q1, qm1 = q1, qp2 = q2, qm2 = q2;
+      (body == 0 ? qp1 : qp2)[k] += eps;
+      (body == 0 ? qm1 : qm2)[k] -= eps;
+      const double fd = (batch(qp1, qp2).h - batch(qm1, qm2).h) / (2 * eps);
+      const double gk = body == 0 ? g1(0, k) : g2(0, k);
+      check(std::abs(fd - gk) <= 1e-6, "normal row of G == dh/dq (body " +
+                                           std::to_string(body + 1) + ", dof " +
+                                           std::to_string(k) + ")");
+    }
+  }
+  std::print("polytopepolytope_r: G normal row matches finite differences\n");
 }
 
 /* ---- Task 5: cxd_narrowphase stage — rebind + batch + write-back + cache ---- */
@@ -495,9 +589,11 @@ int main() {
   siconos::config::data_t data;
   test_polytope_item(data);
   test_batch_engine();
+  test_witnesses_off_axis();
   test_batch_engine_float();
   test_failed_subdistance_status();
   test_polytopepolytope_relation(data);
+  test_jacobian_finite_differences(data);
   test_narrowphase_stage(data);
   test_narrowphase_pair_set_cache(data);
   test_narrowphase_scan_once(data);
