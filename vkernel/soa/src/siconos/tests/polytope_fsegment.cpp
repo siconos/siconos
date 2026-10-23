@@ -98,7 +98,6 @@ int main() {
         "relation rebound to polytopefsegment_r");
 
   auto rel = storage::make_handle(data, std::get<poly_fs_index>(inter.relation()));
-  check(rel.narrowphase().value() == np.index().value(), "narrowphase bound");
 
   // h should be finite (separated: distance from square to segment ~ 2)
   std::print("polytopefsegment: h = {}\n", rel.h());

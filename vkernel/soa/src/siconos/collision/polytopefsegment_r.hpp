@@ -3,6 +3,7 @@
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/cxd_narrowphase.hpp"
+#include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/shape/segment.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
@@ -11,79 +12,99 @@ namespace siconos::collision {
 
 /* Polytope x fixed-segment contact relation (2D convex polygon vs a fixed
    segment). The segment is treated as a 2-vertex polytope with STATIC world
-   vertices (no per-step transform) and is batched by the cxd_narrowphase
-   stage alongside the polytope x polytope pairs.
-
-   Structural reference: diskfsegment_r (item + model::relation1 +
-   any_lagrangian_relation, single body, fixed segment stored as an
-   item_ref<shape::segment>). The relation is batch-BACKED: the stage fills
-   the cached status/h/normal/cp1/cp2, and compute_h/compute_jachq read the
-   cache. An unbound narrowphase ref (standalone hand-cached relation) no-ops. */
+   vertices (no per-step transform). Analytic-ish: geometry is evaluated per
+   pair via a one-pair cxd batch, so this relation does not depend on the
+   cxd_narrowphase stage. Consistent with diskmesh_r / polytopemesh_r. */
 
 template <typename Topo>
-struct polytopefsegment_r : item, model::relation1, model::any_lagrangian_relation {
-  using dof = some::indice_parameter<"dof">;
-  using narrowphase_t = cxd_narrowphase<Topo>;
-
-  // no attached properties: the segment ref lives on the relation side
-
+struct polytopefsegment_r : item,
+                            mesh_relation,
+                            model::relation1,
+                            model::any_lagrangian_relation {
   struct attributes {
-    // loaded once at rebind time by the stage; unbound = standalone
-    some::item_ref<narrowphase_t> narrowphase;
     // the fixed segment this relation is bound to
     some::item_ref<shape::segment> segment;
-    some::indice status;  // 0 separated, 1 enclosed (cxd::status value)
-    some::scalar h;       // +distance when separated / -depth when enclosed
-    some::vector<some::scalar, some::indice_value<2>> normal;  // 1 -> 2 (polytope -> segment)
-    some::vector<some::scalar, some::indice_value<2>> cp1;     // on the polytope
-    some::vector<some::scalar, some::indice_value<2>> cp2;     // on the segment
-    some::vector<some::scalar, some::indice_value<2>> init_dir;  // batch warm start
-    some::indice cache_pair_checksum;
+    some::indice status;
+    some::scalar h;
+    some::vector<some::scalar, some::indice_value<2>> normal;
+    some::vector<some::scalar, some::indice_value<2>> cp1;
+    some::vector<some::scalar, some::indice_value<2>> cp2;
   };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) status() { return storage::attr<"status">(*self()); }
-    decltype(auto) h() { return storage::attr<"h">(*self()); }
-    decltype(auto) narrowphase() { return storage::attr<"narrowphase">(*self()); }
     decltype(auto) segment() {
       return storage::make_ref_handle(self()->data(), storage::attr<"segment">(*self()));
     }
+    decltype(auto) shape() { return self()->segment(); }
+    decltype(auto) status() { return storage::attr<"status">(*self()); }
+    decltype(auto) h() { return storage::attr<"h">(*self()); }
     decltype(auto) normal() { return storage::attr<"normal">(*self()); }
     decltype(auto) cp1() { return storage::attr<"cp1">(*self()); }
     decltype(auto) cp2() { return storage::attr<"cp2">(*self()); }
-    decltype(auto) init_dir() { return storage::attr<"init_dir">(*self()); }
-    decltype(auto) cache_pair_checksum() {
-      return storage::attr<"cache_pair_checksum">(*self());
-    }
 
-    void ensure(auto step) {
+    /* run cxd on this single polytope x segment pair and cache the result */
+    template <match::handle<model::lagrangian_ds> DS>
+    void evaluate(auto step, DS& ds) {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
       auto& data = self()->data();
-      auto& ref = storage::attr<"narrowphase">(*self());
-      using np_t = typename std::decay_t<decltype(ref)>::type;
-      const auto n_stage = std::size(storage::handles<np_t>(data));
-      if (ref.value() >= n_stage) return;  // unbound: standalone relation
-      storage::make_ref_handle(data, ref).ensure(step);
+
+      auto& q = storage::attr<"q">(ds, step);
+      auto sh =
+          storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
+      const scalar c = std::cos(q(2)), s = std::sin(q(2));
+      const auto n = sh.nvertices();
+
+      narrowphase_input<scalar> in;
+      // entry 0: polytope (world vertices)
+      const std::uint32_t off0 = 0;
+      for (std::size_t i = 0; i < n; ++i) {
+        const auto& v = sh.vertices()[i];
+        in.vertices.push_back(
+            std::array<scalar, 2>{q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]});
+      }
+      in.entries.push_back({off0, static_cast<std::uint32_t>(n)});
+      const std::uint32_t slot0 = 0;
+      // entry 1: segment endpoints (static world coords)
+      auto seg = self()->segment();
+      const std::uint32_t off1 = static_cast<std::uint32_t>(in.vertices.size());
+      in.vertices.push_back(std::array<scalar, 2>{seg.x1(), seg.y1()});
+      in.vertices.push_back(std::array<scalar, 2>{seg.x2(), seg.y2()});
+      in.entries.push_back({off1, 2});
+      const std::uint32_t slot1 = 1;
+
+      in.ids_a.push_back(slot0);
+      in.ids_b.push_back(slot1);
+      in.init_dirs.push_back({1.0, 0.0});
+
+      auto out = narrowphase_batch(std::move(in));
+      const auto& res = out[0];
+      storage::attr<"status">(*self()) = res.status;
+      storage::attr<"h">(*self()) = res.h;
+      storage::attr<"normal">(*self()) = {res.normal[0], res.normal[1]};
+      storage::attr<"cp1">(*self()) = {res.cp1[0], res.cp1[1]};
+      storage::attr<"cp2">(*self()) = {res.cp2[0], res.cp2[1]};
     }
 
     template <match::handle<model::lagrangian_ds> DS>
     [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS& ds) {
-      ensure(step);
+      evaluate(step, ds);
       return storage::attr<"h">(*self());
     }
 
     template <typename S, match::handle<model::lagrangian_ds> DS, typename M>
     [[gnu::always_inline]] void compute_jachq(S step, DS& ds, M& g1) {
-      ensure(step);
+      evaluate(step, ds);
 
-      using env_t = decltype(self()->env());
-      using scalar = typename env_t::scalar;
+      using scalar = typename decltype(self()->env())::scalar;
 
       auto& q = storage::attr<"q">(ds, step);
       auto& n = storage::attr<"normal">(*self());
       auto& c1 = storage::attr<"cp1">(*self());
+      auto& c2 = storage::attr<"cp2">(*self());
 
       const scalar nx = n[0];
       const scalar ny = n[1];
