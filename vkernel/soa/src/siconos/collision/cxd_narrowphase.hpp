@@ -440,6 +440,8 @@ namespace siconos::collision {
 
 template <typename Topo>
 struct polytopepolytope_r;  // polytopepolytope_r.hpp (Task 4)
+template <typename Topo>
+struct polytopefsegment_r;  // polytopefsegment_r.hpp (item 4)
 
 /* ---- the narrowphase stage item (Task 5) ----
    Owns the world's polytope interactions: rebinds generic ds-ds relations
@@ -451,6 +453,7 @@ struct cxd_narrowphase : item {
   using topology = Topo;
   using finteraction = typename topology::finteraction;
   using poly_r_t = polytopepolytope_r<Topo>;
+  using poly_fs_t = polytopefsegment_r<Topo>;
 
   struct attributes {
     some::item_ref<topology> topology;
@@ -552,16 +555,16 @@ struct cxd_narrowphase : item {
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
         auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
-        if (ds1.index().value() == ds2.index().value()) continue;
         auto poly_shape = [&](auto& ds) {
           auto sh =
               storage::make_handle(data, storage::prop<"shape", storage::config_declared>(ds));
           using shape_t = typename std::decay_t<decltype(sh)>::type;
           return std::derived_from<shape_t, shape::polytope>;
         };
-        if (!poly_shape(ds1) || !poly_shape(ds2)) continue;
         auto& relvar = storage::attr<"relation">(inter);
-        if (std::holds_alternative<storage::index<collision::diskdisk_r, std::size_t>>(
+        // Case A: polytope x polytope (ds1 != ds2), generic binder diskdisk_r
+        if (ds1.index().value() != ds2.index().value() && poly_shape(ds1) && poly_shape(ds2) &&
+            std::holds_alternative<storage::index<collision::diskdisk_r, std::size_t>>(
                 relvar)) {
           // generic binder still attached: give this pair a polytope relation
           const auto i1 = ds1.index().value(), i2 = ds2.index().value();
@@ -587,6 +590,27 @@ struct cxd_narrowphase : item {
             rmap[key] = rel;
             return rel;
           }();
+          rel.narrowphase() = *self();
+          inter.relation() = rel;
+        }
+        // Case B: polytope x fixed segment (self interaction, ds1==ds2),
+        // generic binder diskfsegment_r. Rebind to polytopefsegment_r,
+        // carrying the segment ref.
+        if (ds1.index().value() == ds2.index().value() && poly_shape(ds1) &&
+            std::holds_alternative<storage::index<collision::diskfsegment_r, std::size_t>>(
+                relvar)) {
+          auto old_rel = storage::make_handle(
+              data, std::get<storage::index<collision::diskfsegment_r, std::size_t>>(relvar));
+          auto seg = old_rel.segment();
+          auto rel = storage::add<poly_fs_t>(data);
+          rel.status() = static_cast<std::size_t>(cxd::status::invalid_input);
+          rel.h() = 0;
+          rel.cache_pair_checksum() = 0;
+          rel.normal() = {0, 0};
+          rel.cp1() = {0, 0};
+          rel.cp2() = {0, 0};
+          rel.init_dir() = {0, 0};
+          rel.segment() = seg;
           rel.narrowphase() = *self();
           inter.relation() = rel;
         }
@@ -621,6 +645,26 @@ struct cxd_narrowphase : item {
               fnv_mix(hsh, &v[1], sizeof v[1]);
             });
           }
+        } else if (std::holds_alternative<storage::index<poly_fs_t, std::size_t>>(relvar)) {
+          auto ds = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+          auto rel = storage::make_handle(
+              data, std::get<storage::index<poly_fs_t, std::size_t>>(relvar));
+          const auto idx = ds.index().value();
+          fnv_mix(hsh, &idx, sizeof idx);
+          if (!seen[idx]) {
+            seen[idx] = true;
+            for_each_world_vertex(ds, step, [&](const auto& v) {
+              fnv_mix(hsh, &v[0], sizeof v[0]);
+              fnv_mix(hsh, &v[1], sizeof v[1]);
+            });
+          }
+          // segment endpoints are static but include them for completeness
+          auto seg = rel.segment();
+          const auto sx1 = seg.x1(), sy1 = seg.y1(), sx2 = seg.x2(), sy2 = seg.y2();
+          fnv_mix(hsh, &sx1, sizeof sx1);
+          fnv_mix(hsh, &sy1, sizeof sy1);
+          fnv_mix(hsh, &sx2, sizeof sx2);
+          fnv_mix(hsh, &sy2, sizeof sy2);
         }
       }
       storage::attr<"t_checksum">(*self()) += seconds_since(t0);
@@ -690,6 +734,7 @@ struct cxd_narrowphase : item {
       const auto t0 = std::chrono::steady_clock::now();
       narrowphase_input<scalar> in;
       std::unordered_map<std::size_t, std::uint32_t> slot;
+      std::unordered_map<std::size_t, std::uint32_t> seg_slot;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -710,6 +755,34 @@ struct cxd_narrowphase : item {
           }
           in.ids_a.push_back(slot[ds1.index().value()]);
           in.ids_b.push_back(slot[ds2.index().value()]);
+          in.init_dirs.push_back({rel.init_dir()[0], rel.init_dir()[1]});
+        } else if (std::holds_alternative<storage::index<poly_fs_t, std::size_t>>(relvar)) {
+          auto rel = storage::make_handle(
+              data, std::get<storage::index<poly_fs_t, std::size_t>>(relvar));
+          auto ds = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+          // polytope entry (dedup by ds index)
+          if (!slot.count(ds.index().value())) {
+            const std::uint32_t offset = static_cast<std::uint32_t>(in.vertices.size());
+            for (const auto& v : world_vertices(ds, step)) {
+              in.vertices.push_back(v);
+            }
+            in.entries.push_back(
+                {offset, static_cast<std::uint32_t>(in.vertices.size() - offset)});
+            slot[ds.index().value()] = static_cast<std::uint32_t>(in.entries.size()) - 1;
+          }
+          // segment entry (static 2 vertices, dedup by segment item index)
+          auto seg = rel.segment();
+          const std::size_t seg_key = seg.index().value();
+          if (!seg_slot.count(seg_key)) {
+            const std::uint32_t offset = static_cast<std::uint32_t>(in.vertices.size());
+            // segment endpoints are world coords (no transform)
+            in.vertices.push_back({seg.x1(), seg.y1()});
+            in.vertices.push_back({seg.x2(), seg.y2()});
+            in.entries.push_back({offset, 2});
+            seg_slot[seg_key] = static_cast<std::uint32_t>(in.entries.size()) - 1;
+          }
+          in.ids_a.push_back(slot[ds.index().value()]);
+          in.ids_b.push_back(seg_slot[seg_key]);
           in.init_dirs.push_back({rel.init_dir()[0], rel.init_dir()[1]});
         }
       }
@@ -775,6 +848,32 @@ struct cxd_narrowphase : item {
             } else if (c.h > 0) {
               // separated: the warm start points from body 1 to body 2, i.e.
               // -(cp1 - cp2)/h (cp2 - cp1 = h * normal for a separated pair)
+              using scalar = typename std::decay_t<decltype(self()->env())>::scalar;
+              const scalar dx = rel.cp2()[0] - rel.cp1()[0];
+              const scalar dy = rel.cp2()[1] - rel.cp1()[1];
+              const scalar d = std::hypot(dx, dy);
+              if (d > scalar{0}) rel.init_dir() = {dx / d, dy / d};
+            }
+          } else if (std::holds_alternative<storage::index<poly_fs_t, std::size_t>>(relvar)) {
+            auto rel = storage::make_handle(
+                data, std::get<storage::index<poly_fs_t, std::size_t>>(relvar));
+            auto ds = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+            rel.cache_pair_checksum() = body_vertex_hash(ds, step);
+            const auto& c = out[k++];
+            if (c.status == static_cast<int>(cxd::status::max_iterations) ||
+                c.status == static_cast<int>(cxd::status::invalid_input)) {
+              continue;
+            }
+            rel.status() = c.status;
+            rel.h() = c.h;
+            rel.normal() = {c.normal[0], c.normal[1]};
+            rel.cp1() = {c.cp1[0], c.cp1[1]};
+            rel.cp2() = {c.cp2[0], c.cp2[1]};
+            ++n_written;
+            if (c.status == static_cast<int>(cxd::status::enclosed)) {
+              ++n_enclosed;
+              rel.init_dir() = {rel.normal()[0], rel.normal()[1]};
+            } else if (c.h > 0) {
               using scalar = typename std::decay_t<decltype(self()->env())>::scalar;
               const scalar dx = rel.cp2()[0] - rel.cp1()[0];
               const scalar dy = rel.cp2()[1] - rel.cp1()[1];
