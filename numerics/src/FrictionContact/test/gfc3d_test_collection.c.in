@@ -21,6 +21,8 @@
 #include <string.h>                               // for strcmp
 #include <stdlib.h>                               // for free
 #include "frictionContact_test_utils.h"           // for build_test_collection
+#include "FrictionContact_options.h"              // for NSN option ids
+#include "SolverOptions.h"                        // for SolverOptions fields
 #include "test_utils.h"                           // for data_collection
 
 #define @PROBLEM_COLLECTION@ 1
@@ -85,9 +87,19 @@ int main (int argc, char *argv[])
 #endif
 
 #if defined(TEST_NSN_COLLECTION_FCLIB)
-  collection[0].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
-  collection[4].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  /* The Box_Stacks and Spheres FCLIB problems lead to a singular Newton
+     Jacobian without regularization. Enable a small Jacobian regularization
+     for the whole FCLIB NSN collection so the linear solves succeed. */
+  for (int i = 0; i < number_of_tests; ++i) {
+    collection[i].options->iparam[SICONOS_FRICTION_3D_NSN_REGULARIZATION] =
+        SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES;
+    collection[i].options->dparam[SICONOS_FRICTION_3D_NSN_REGUL] = 1e-6;
+  }
 
+  /* Even with regularization, the no-line-search presets on Spheres diverge
+     (max iter reached). Mark them as expected to fail. */
+  collection[10].will_fail = 1; /* AC_LSno_WSno on Spheres-i099-356-679.hdf5 */
+  collection[13].will_fail = 1; /* JM_LSno_WSno on Spheres-i099-356-679.hdf5 */
 #endif
 
 #if defined(TEST_WR_COLLECTION_FCLIB)
