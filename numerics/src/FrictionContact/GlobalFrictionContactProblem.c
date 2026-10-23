@@ -306,7 +306,7 @@ int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* pr
   return info;
 }
 
-FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
+FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
     GlobalFrictionContactProblem* problem) {
   NumericsMatrix* M_orig = problem->M;
   NumericsMatrix* H_orig = problem->H;
@@ -566,7 +566,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     DEBUG_EXPR(frictionContact_display(localproblem););
     // getchar();
   } else {
-    printf("globalFrictionContact_reformulation_FrictionContact :: unknown matrix storage");
+    printf("globalFrictionContact_reduce_to_FrictionContact :: unknown matrix storage");
     exit(EXIT_FAILURE);
   }
 
@@ -579,4 +579,10 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     free(H_sparse);
   }
   return localproblem;
+}
+
+/* Backward compatibility function name (deprecated) */
+FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
+    GlobalFrictionContactProblem* problem) {
+  return globalFrictionContact_reduce_to_FrictionContact(problem);
 }

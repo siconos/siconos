@@ -173,7 +173,15 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
 int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* problem,
                                                 double* reaction, double* globalVelocity);
 
-/** Refomulation into local problem */
+/** Reduce the global friction-contact problem to a local FrictionContactProblem.
+ *
+ *  This eliminates the global velocity by computing the reduced matrix and
+ *  vector of the equivalent local problem.
+ */
+FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
+    GlobalFrictionContactProblem* problem);
+
+/* Backward compatibility function name (deprecated) */
 FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
     GlobalFrictionContactProblem* problem);
 #if defined(__cplusplus)

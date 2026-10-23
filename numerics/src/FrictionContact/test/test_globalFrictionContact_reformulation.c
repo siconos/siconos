@@ -17,7 +17,7 @@
  */
 
 /*!\file test_globalFrictionContact_reformulation.c
- * \brief Example/test for globalFrictionContact_reformulation_FrictionContact
+ * \brief Example/test for globalFrictionContact_reduce_to_FrictionContact
  *        with various NumericsMatrix storage types in 2D and 3D.
  *
  * For each data file we build a reference reduced FC problem with dense
@@ -149,8 +149,7 @@ static void test_combination(GlobalFrictionContactProblem* source, NM_types M_ty
   printf("  Testing M=%s, H=%s\n", storage_type_name(M_type), storage_type_name(H_type));
   GlobalFrictionContactProblem* problem = problem_with_storage(source, M_type, H_type);
 
-  FrictionContactProblem* reduced =
-      globalFrictionContact_reformulation_FrictionContact(problem);
+  FrictionContactProblem* reduced = globalFrictionContact_reduce_to_FrictionContact(problem);
 
   assert(reduced);
   assert(reduced->numberOfContacts == problem->numberOfContacts);
@@ -202,7 +201,7 @@ int main() {
     GlobalFrictionContactProblem* ref_problem =
         problem_with_storage(source, NM_DENSE, NM_DENSE);
     FrictionContactProblem* reference =
-        globalFrictionContact_reformulation_FrictionContact(ref_problem);
+        globalFrictionContact_reduce_to_FrictionContact(ref_problem);
     assert(reference);
     globalFrictionContact_free(ref_problem);
 

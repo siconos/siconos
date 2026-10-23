@@ -47,7 +47,7 @@ int main() {
   /* Reformulate the GFC3D problem as an FC3D problem. The resulting local matrix
    * is W = H^T M^{-1} H and the local vector is q = H^T M^{-1} q_global + b. */
   FrictionContactProblem* local_problem =
-      globalFrictionContact_reformulation_FrictionContact(problem_copy);
+      globalFrictionContact_reduce_to_FrictionContact(problem_copy);
   assert(local_problem);
   assert(local_problem->numberOfContacts == nc);
   assert(local_problem->dimension == 3);

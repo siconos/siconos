@@ -159,7 +159,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
         numerics_printf_verbose(
             1, "Reformulation info a reduced problem onto local variables ...\n");
         FrictionContactProblem* localproblem =
-            globalFrictionContact_reformulation_FrictionContact(problem);
+            globalFrictionContact_reduce_to_FrictionContact(problem);
         DEBUG_EXPR(frictionContact_display(localproblem););
 
         // call solver for the local problem

@@ -54,7 +54,7 @@ void gfc2d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
     FrictionContactProblem* reduced_problem =
-        globalFrictionContact_reformulation_FrictionContact(problem);
+        globalFrictionContact_reduce_to_FrictionContact(problem);
 
     DEBUG_EXPR(frictionContact_display(reduced_problem););
     if (verbose) {

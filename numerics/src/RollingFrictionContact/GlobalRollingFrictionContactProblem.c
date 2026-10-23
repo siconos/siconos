@@ -312,7 +312,7 @@ globalRollingFrictionContact_reformulation_RollingFrictionContact(
   gfc3d->b = problem->b;
   gfc3d->mu = problem->mu;
 
-  FrictionContactProblem* fc3d = globalFrictionContact_reformulation_FrictionContact(gfc3d);
+  FrictionContactProblem* fc3d = globalFrictionContact_reduce_to_FrictionContact(gfc3d);
 
   RollingFrictionContactProblem* localproblem = rollingFrictionContactProblem_new();
 
