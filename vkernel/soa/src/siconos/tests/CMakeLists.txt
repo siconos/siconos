@@ -29,6 +29,7 @@ if(WITH_vkernel_TESTING)
   add_executable(churn_polytopes churn_polytopes.cpp)
   add_executable(polytope_fsegment polytope_fsegment.cpp)
   add_executable(polytopemesh polytopemesh.cpp)
+  add_executable(polytopefdisk polytopefdisk.cpp)
 
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
 
@@ -55,6 +56,7 @@ if(WITH_vkernel_TESTING)
   set_target_properties(churn_polytopes PROPERTIES COMPILE_FLAGS "${flags}")
   set_target_properties(polytope_fsegment PROPERTIES COMPILE_FLAGS "${flags}")
   set_target_properties(polytopemesh PROPERTIES COMPILE_FLAGS "${flags}")
+  set_target_properties(polytopefdisk PROPERTIES COMPILE_FLAGS "${flags}")
 
 
   target_link_libraries(t1 Eigen3::Eigen numerics pthread)
@@ -80,5 +82,6 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(churn_polytopes Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(polytope_fsegment Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(polytopemesh Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
+  target_link_libraries(polytopefdisk Eigen3::Eigen numerics pthread)
 
 endif()

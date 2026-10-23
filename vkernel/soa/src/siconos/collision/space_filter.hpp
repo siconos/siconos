@@ -13,6 +13,7 @@
 #include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/point.hpp"
+#include "siconos/collision/polytopefdisk_r.hpp"
 #include "siconos/collision/polytopefsegment_r.hpp"
 #include "siconos/collision/polytopemesh_r.hpp"
 #include "siconos/collision/shape/chained_segment.hpp"
@@ -101,6 +102,9 @@ struct space_filter : item {
     some::map<some::array<some::scalar, some::indice_value<4>>,
               some::item_ref<polytopefsegment_r<Topology>>>
         polytopefsegments;
+    some::map<some::array<some::scalar, some::indice_value<2>>,
+              some::item_ref<collision::polytopefdisk_r<Topology>>>
+        polytopefdisks;
     some::map<some::array<some::indice, some::indice_value<2>>,
               some::item_ref<polytopemesh_r<Topology>>>
         polytopemeshes;
@@ -136,6 +140,8 @@ struct space_filter : item {
     decltype(auto) diskfsegments() { return storage::attr<"diskfsegments">(*self()); }
 
     decltype(auto) polytopefsegments() { return storage::attr<"polytopefsegments">(*self()); }
+
+    decltype(auto) polytopefdisks() { return storage::attr<"polytopefdisks">(*self()); }
 
     decltype(auto) polytopemeshes() { return storage::attr<"polytopemeshes">(*self()); }
 
@@ -668,6 +674,49 @@ struct space_filter : item {
       }
     }
 
+    void polytopefdisk_activation(auto& body1, auto& body2, auto& intermap) {
+      auto& data = self()->data();
+      auto nslaw = self()->nslaw();
+      auto topo = self()->topology();
+      auto& relmap = self()->polytopefdisks();
+
+      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
+          data, storage::prop<"shape", storage::config_declared>(body1)))>::type;
+      if constexpr (!std::derived_from<shape1_t, collision::shape::polytope>) {
+        throw std::runtime_error(
+            "polytopefdisk_r requires a polytope-shaped ds; no narrowphase "
+            "relation exists for this shape pair");
+      }
+
+      auto fdisk = body2;
+      auto& translat = fdisk.translation();
+      auto coefs = std::array{translat[0], translat[1]};
+
+      auto& ds1 = body1;
+
+      auto find_inter = intermap.find(mp::make_pair(ds1.index().value(), coefs));
+
+      if (find_inter != intermap.end()) {
+        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+        storage::prop<"activation", Topology>(inter) = true;
+      } else {
+        auto inter = topo.link(body1);
+        inter.nslaw() = nslaw;
+
+        using poly_fd_t = collision::polytopefdisk_r<Topology>;
+        if (auto search = relmap.find(coefs); search != relmap.end()) {
+          inter.relation() = search->second;
+        } else {
+          auto dl = storage::add<poly_fd_t>(data);
+          dl.disk() = fdisk.translated_disk_shape();
+          inter.relation() = dl;
+          relmap[coefs] = dl;
+        }
+        storage::prop<"activation", Topology>(inter) = true;
+        intermap[mp::make_pair(ds1.index().value(), coefs)] = inter;
+      }
+    }
+
     void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
       auto& data = self()->data();
       auto gid1 = body1.collision_group();
@@ -1003,7 +1052,17 @@ struct space_filter : item {
                       } else if constexpr (std::derived_from<system2_t,
                                                              collision::translated<
                                                                  collision::shape::disk>>) {
-                        diskfdisk_activation(body1, body2, ds_fdisk_prox);
+                        // body2 is a fixed disk
+                        using fdisk_shape1_t =
+                            typename std::decay_t<decltype(storage::make_handle(
+                                data, storage::prop<"shape", storage::config_declared>(
+                                          body1)))>::type;
+                        if constexpr (std::derived_from<fdisk_shape1_t,
+                                                        collision::shape::polytope>) {
+                          polytopefdisk_activation(body1, body2, ds_fdisk_prox);
+                        } else {
+                          diskfdisk_activation(body1, body2, ds_fdisk_prox);
+                        }
                       }
                     }
                   }
