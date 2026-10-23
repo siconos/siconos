@@ -105,16 +105,26 @@ int main() {
   double h = rel.compute_h(0, ds);
   std::print("polytopefsegment: h = {}\n", h);
   check(near(h, 2), "h == 2 (gap)");
-  check(near(rel.status(), 0), "status separated");
-  check(near(rel.normal()[0], 0) && near(rel.normal()[1], 1), "normal (0,1)");
-  check(near(rel.cp1()[0], 0) && near(rel.cp1()[1], 1), "cp1 (0,1)");
-  check(near(rel.cp2()[0], 0) && near(rel.cp2()[1], 3), "cp2 (0,3)");
+  const auto ct = rel.contact(0, ds);
+  check(ct.status == 0, "status separated");
+  check(near(ct.normal[0], 0) && near(ct.normal[1], 1), "normal (0,1)");
+  check(near(ct.cp1[0], 0) && near(ct.cp1[1], 1), "cp1 (0,1)");
+  check(near(ct.cp2[0], 0) && near(ct.cp2[1], 3), "cp2 (0,3)");
 
   /* G: nx=0, ny=1, tx=-1, ty=0; arm1 = cp1 - q = (0,1), za1 = (-1,0) */
   Eigen::MatrixXd g1(2, 3);
   rel.compute_jachq(0, ds, g1);
   check(near(g1(0, 0), 0) && near(g1(0, 1), -1) && near(g1(0, 2), 0), "G1 normal row");
   check(near(g1(1, 0), 1) && near(g1(1, 1), 0) && near(g1(1, 2), -1), "G1 tangent row");
+
+  /* the relation serves every polytope near the segment: a second body
+     evaluated through it does not change the first body's contact */
+  auto ds2 = storage::add<config::polytope_ds>(data);
+  storage::prop<"shape", storage::config_declared>(ds2) = sh;
+  storage::attr<"q">(ds2, 0) = Eigen::Vector3d(0, 1.5, 0);
+  check(near(rel.compute_h(0, ds2), 0.5), "second body: h == 0.5");
+  check(near(rel.compute_h(0, ds), 2), "first body still h == 2");
+  check(near(rel.contact(0, ds).cp1[1], 1), "first body still cp1 (0,1)");
 
   std::print("polytope_fsegment: all checks pass\n");
   return 0;

@@ -15,18 +15,15 @@ namespace siconos::collision {
    call, since meshes may deform for FEM). Analytic-ish: geometry is evaluated
    per pair via a one-pair cxd batch, so this relation does not depend on the
    cxd_narrowphase stage. Consistent with diskmesh_r / polytopefsegment_r.
-   The contact normal (from cxd) points body1 (polytope) -> body2 (mesh edge). */
+   The contact normal (from cxd) points body1 (polytope) -> body2 (mesh edge).
+   One relation item serves every polytope near this edge, so it holds no
+   per-pair state: contact() evaluates the pair and returns the result. */
 
 template <typename Topo>
 struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagrangian_relation {
   struct attributes {
     some::item_ref<shape::mesh> mesh;
     some::indice contact_index;
-    some::indice status;
-    some::scalar h;
-    some::vector<some::scalar, some::indice_value<2>> normal;
-    some::vector<some::scalar, some::indice_value<2>> cp1;
-    some::vector<some::scalar, some::indice_value<2>> cp2;
   };
 
   template <typename Handle>
@@ -38,16 +35,11 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
     }
     decltype(auto) shape() { return self()->mesh(); }
     decltype(auto) contact_index() { return storage::attr<"contact_index">(*self()); }
-    decltype(auto) status() { return storage::attr<"status">(*self()); }
-    decltype(auto) h() { return storage::attr<"h">(*self()); }
-    decltype(auto) normal() { return storage::attr<"normal">(*self()); }
-    decltype(auto) cp1() { return storage::attr<"cp1">(*self()); }
-    decltype(auto) cp2() { return storage::attr<"cp2">(*self()); }
 
-    /* run cxd on this single polytope x segment pair and cache the result */
+    /* run cxd on this single polytope x mesh edge pair */
     template <match::handle<model::lagrangian_ds> DS1,
               match::handle<model::elastic_lagrangian_ds> DS2>
-    void evaluate(auto step, DS1& ds1, DS2& ds2) {
+    auto contact(auto step, DS1& ds1, DS2& ds2) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
       auto& data = self()->data();
@@ -82,33 +74,26 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
       in.ids_b.push_back(slot1);
       in.init_dirs.push_back({1.0, 0.0});
 
-      auto out = narrowphase_batch(std::move(in));
-      const auto& res = out[0];
-      storage::attr<"status">(*self()) = res.status;
-      storage::attr<"h">(*self()) = res.h;
-      storage::attr<"normal">(*self()) = {res.normal[0], res.normal[1]};
-      storage::attr<"cp1">(*self()) = {res.cp1[0], res.cp1[1]};
-      storage::attr<"cp2">(*self()) = {res.cp2[0], res.cp2[1]};
+      return narrowphase_batch(std::move(in))[0];
     }
 
     template <match::handle<model::lagrangian_ds> DS1,
               match::handle<model::elastic_lagrangian_ds> DS2>
-    [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
-      evaluate(step, ds1, ds2);
-      return storage::attr<"h">(*self());
+    [[gnu::always_inline]] auto compute_h(auto step, DS1& ds1, DS2& ds2) {
+      return contact(step, ds1, ds2).h;
     }
 
     template <typename S, match::handle<model::lagrangian_ds> DS1,
               match::handle<model::elastic_lagrangian_ds> DS2, typename M1, typename M2>
     void compute_jachq(S step, DS1& ds1, DS2& ds2, M1& g1, M2& g2) {
-      evaluate(step, ds1, ds2);
+      const auto ct = contact(step, ds1, ds2);
 
       using scalar = typename decltype(self()->env())::scalar;
 
       auto& q1 = storage::attr<"q">(ds1, step);
-      auto& n = storage::attr<"normal">(*self());
-      auto& c1 = storage::attr<"cp1">(*self());
-      auto& c2 = storage::attr<"cp2">(*self());
+      const auto& n = ct.normal;
+      const auto& c1 = ct.cp1;
+      const auto& c2 = ct.cp2;
 
       const scalar nx = n[0];
       const scalar ny = n[1];

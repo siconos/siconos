@@ -84,10 +84,11 @@ int main() {
   double h = rel.compute_h(0, pd, md);
   std::print("polytopemesh: h = {}\n", h);
   check(near(h, 2), "h == 2 (gap)");
-  check(near(rel.status(), 0), "status separated");
-  check(near(rel.normal()[0], 0) && near(rel.normal()[1], 1), "normal (0,1)");
-  check(near(rel.cp1()[0], 0) && near(rel.cp1()[1], 1), "cp1 (0,1)");
-  check(near(rel.cp2()[0], 0) && near(rel.cp2()[1], 3), "cp2 (0,3)");
+  const auto ct = rel.contact(0, pd, md);
+  check(ct.status == 0, "status separated");
+  check(near(ct.normal[0], 0) && near(ct.normal[1], 1), "normal (0,1)");
+  check(near(ct.cp1[0], 0) && near(ct.cp1[1], 1), "cp1 (0,1)");
+  check(near(ct.cp2[0], 0) && near(ct.cp2[1], 3), "cp2 (0,3)");
 
   /* G matrices */
   Eigen::MatrixXd g1(2, 3), g2(2, 4);
