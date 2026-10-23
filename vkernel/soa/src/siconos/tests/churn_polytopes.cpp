@@ -45,6 +45,7 @@
 /* the relation + stage headers must be visible before the config names
    them; the load-bearing cxd include order lives inside cxd_narrowphase.hpp */
 #include "siconos/collision/polytopepolytope_r.hpp"
+#include "siconos/collision/polytopefsegment_r.hpp"
 // clang-format on
 
 namespace siconos::config {
@@ -60,11 +61,12 @@ using diskfsegment_r = collision::diskfsegment_r;
    right after the interaction that names it */
 struct topo;
 using polytopepolytope_r = collision::polytopepolytope_r<topo>;
+using polytopefsegment_r = collision::polytopefsegment_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
-struct interaction
-    : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, polytopepolytope_r> {};
+struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, polytopepolytope_r,
+                                        polytopefsegment_r> {};
 struct topo : simul::topology<polytope, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
@@ -83,8 +85,8 @@ struct env : standard_environment<T> {
 struct data_t
     : storage::make<env, simulation, interaction_manager, polytope, polytope_shape,
                     segment_shape, diskdisk_r, diskfsegment_r, nslaw, interaction, topo,
-                    polytopepolytope_r, cxd_narrowphase, osi, td, osnspb, neighborhood,
-                    space_filter,
+                    polytopepolytope_r, polytopefsegment_r, cxd_narrowphase, osi, td, osnspb,
+                    neighborhood, space_filter,
                     storage::with_properties<
                         storage::wrapped<polytope, some::unbounded_collection>,
                         storage::wrapped<diskdisk_r, some::unbounded_collection>,
@@ -344,6 +346,8 @@ void test_polytope_against_fixed_segment_throws(siconos::config::data_t& data) {
   ngbh.update(0);
   ngbh.search();
 
+  // With polytope x fixed-segment support wired, this no longer throws:
+  // a polytope body near a fixed segment binds polytopefsegment_r.
   bool threw = false;
   try {
     spacef.update_index_set0(0);
@@ -351,10 +355,10 @@ void test_polytope_against_fixed_segment_throws(siconos::config::data_t& data) {
     threw = true;
     std::print("polytope vs fixed segment: {}\n", e.what());
   }
-  check(threw,
-        "a polytope near a fixed segment must throw instead of binding "
-        "diskfsegment_r and returning the circumradius gap");
-  std::print("space_filter: polytope vs fixed segment fails loudly\n");
+  check(!threw,
+        "a polytope near a fixed segment must now bind polytopefsegment_r, "
+        "not throw");
+  std::print("space_filter: polytope vs fixed segment binds polytopefsegment_r\n");
 }
 }  // namespace
 

@@ -13,6 +13,7 @@
 #include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/point.hpp"
+#include "siconos/collision/polytopefsegment_r.hpp"
 #include "siconos/collision/shape/chained_segment.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/mesh.hpp"
@@ -96,6 +97,9 @@ struct space_filter : item {
         diskmeshes;
     some::map<some::array<some::scalar, some::indice_value<4>>, some::item_ref<diskfsegment_r>>
         diskfsegments;
+    some::map<some::array<some::scalar, some::indice_value<4>>,
+              some::item_ref<polytopefsegment_r<Topology>>>
+        polytopefsegments;
     some::map<some::array<some::scalar, some::indice_value<2>>, some::item_ref<diskfdisk_r>>
         diskfdisks;
   };
@@ -126,6 +130,8 @@ struct space_filter : item {
     decltype(auto) diskmeshes() { return storage::attr<"diskmeshes">(*self()); }
 
     decltype(auto) diskfsegments() { return storage::attr<"diskfsegments">(*self()); }
+
+    decltype(auto) polytopefsegments() { return storage::attr<"polytopefsegments">(*self()); }
 
     decltype(auto) diskfdisks() { return storage::attr<"diskfdisks">(*self()); }
 
@@ -231,6 +237,12 @@ struct space_filter : item {
       //   inter.relation() = dl;
       //   inter.nslaw() = nslaw();
       // }
+    }
+
+    void insert_polytopefsegment_r(auto hdl) {
+      storage::attr<"polytopefsegments">(*self())[{hdl.segment().x1(), hdl.segment().x2(),
+                                                   hdl.segment().y1(), hdl.segment().y2()}] =
+          hdl;
     }
 
     void insert_diskfdisk_r(auto tds) {
@@ -372,6 +384,15 @@ struct space_filter : item {
                   // capture by value ok with handles
                   [&, ds1 = ds1, inter = inter]<match::handle<diskfsegment_r> DiskSegmentR>(
                       DiskSegmentR rel) {
+                    auto segment = rel.segment();
+                    auto coefs =
+                        std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                    ds_segment_prox[mp::make_pair(ds1.value(), coefs)] = inter;
+                  },
+                  [&, ds1 = ds1,
+                   inter =
+                       inter]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
+                      PolytopeFsegmentR rel) {
                     auto segment = rel.segment();
                     auto coefs =
                         std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
@@ -577,6 +598,52 @@ struct space_filter : item {
       }
     }
 
+    void polytopefsegment_activation(auto& body1, auto& body2, auto& intermap) {
+      auto& data = self()->data();
+      auto nslaw = self()->nslaw();
+      auto topo = self()->topology();
+      auto& relmap = self()->polytopefsegments();
+
+      using shape1_t = typename std::decay_t<decltype(storage::make_handle(
+          data, storage::prop<"shape", storage::config_declared>(body1)))>::type;
+      if constexpr (!std::derived_from<shape1_t, collision::shape::polytope>) {
+        throw std::runtime_error(
+            "polytopefsegment_r requires a polytope-shaped ds; no narrowphase "
+            "relation exists for this shape pair");
+      }
+
+      auto segment = body2;
+      auto x1 = segment.x1();
+      auto x2 = segment.x2();
+      auto y1 = segment.y1();
+      auto y2 = segment.y2();
+
+      auto& ds1 = body1;
+
+      auto find_inter =
+          intermap.find(mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
+
+      if (find_inter != intermap.end()) {
+        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+        storage::prop<"activation", Topology>(inter) = true;
+      } else {
+        auto inter = topo.link(body1);
+        inter.nslaw() = nslaw;
+
+        using poly_fs_t = collision::polytopefsegment_r<Topology>;
+        if (auto search = relmap.find({x1, x2, y1, y2}); search != relmap.end()) {
+          inter.relation() = search->second;
+        } else {
+          auto dl = storage::add<poly_fs_t>(data);
+          dl.segment() = segment;
+          inter.relation() = dl;
+          relmap[{x1, x2, y1, y2}] = dl;
+        }
+        storage::prop<"activation", Topology>(inter) = true;
+        intermap[mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2})] = inter;
+      }
+    }
+
     void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
       auto& data = self()->data();
       auto gid1 = body1.collision_group();
@@ -692,6 +759,20 @@ struct space_filter : item {
                         throw std::runtime_error(
                             "space_filter::remove_interactions: no proximity map "
                             "entry for this ds-fsegment interaction");
+                      }
+                      ds_segment_prox.erase(finter);
+                    },
+                    [&]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
+                        PolytopeFsegmentR rel) {
+                      auto segment = rel.segment();
+                      auto coefs =
+                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                      auto finter = ds_segment_prox.find(
+                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      if (finter == ds_segment_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this polytope-fsegment interaction");
                       }
                       ds_segment_prox.erase(finter);
                     },
@@ -886,9 +967,15 @@ struct space_filter : item {
                     } else if constexpr (std::derived_from<system1_t, model::lagrangian_ds>) {
                       if constexpr (std::derived_from<system2_t, collision::shape::segment>) {
                         // body2 is a static segment
-                        // for all self edges find the one with the
-                        // corresponding segment
-                        diskfsegment_activation(body1, body2, ds_segment_prox);
+                        using shape1_t = typename std::decay_t<decltype(storage::make_handle(
+                            data,
+                            storage::prop<"shape", storage::config_declared>(body1)))>::type;
+                        if constexpr (std::derived_from<shape1_t,
+                                                        collision::shape::polytope>) {
+                          polytopefsegment_activation(body1, body2, ds_segment_prox);
+                        } else {
+                          diskfsegment_activation(body1, body2, ds_segment_prox);
+                        }
                       } else if constexpr (std::derived_from<system2_t,
                                                              collision::translated<
                                                                  collision::shape::disk>>) {
@@ -918,6 +1005,9 @@ struct space_filter : item {
           std::declval<data_t&>(), storage::index<collision::diskfsegment_r, indice>{}))>;
       using diskfdisk_r_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(), storage::index<collision::diskfdisk_r, indice>{}))>;
+      using polytopefsegment_r_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(),
+          storage::index<collision::polytopefsegment_r<Topology>, indice>{}))>;
       using segment_handle_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(), storage::index<collision::shape::segment, indice>{}))>;
       // a handle, not an index: python passes handles, and pybind would
@@ -930,6 +1020,8 @@ struct space_filter : item {
           method("update_index_set0", &interface<Handle>::update_index_set0<indice>),
           method("insert_diskfsegment_r",
                  &interface<Handle>::insert_diskfsegment_r<diskfsegment_r_t>),
+          method("insert_polytopefsegment_r",
+                 &interface<Handle>::insert_polytopefsegment_r<polytopefsegment_r_t>),
           method("insert_diskfdisk_r", &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
           method("insert_nonsmooth_law",
                  &interface<Handle>::insert_nonsmooth_law<ref_nslaw_t, indice, indice>),
