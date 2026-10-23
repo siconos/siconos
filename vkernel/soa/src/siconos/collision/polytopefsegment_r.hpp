@@ -17,10 +17,7 @@ namespace siconos::collision {
    cxd_narrowphase stage. Consistent with diskmesh_r / polytopemesh_r. */
 
 template <typename Topo>
-struct polytopefsegment_r : item,
-                            mesh_relation,
-                            model::relation1,
-                            model::any_lagrangian_relation {
+struct polytopefsegment_r : item, model::relation1, model::any_lagrangian_relation {
   struct attributes {
     // the fixed segment this relation is bound to
     some::item_ref<shape::segment> segment;

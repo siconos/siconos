@@ -559,7 +559,7 @@ struct moreau_jean_element : item {
                     assert(false);
                     return 0.;
                   },
-                  [&](match::handle<collision::diskmesh_r> auto rrel) {
+                  [&](match::handle<collision::mesh_relation> auto rrel) {
                     using vector_4d = typename env::template vector<scalar, 4>;
                     using ds1_t = typename decltype(hds1)::type;
 

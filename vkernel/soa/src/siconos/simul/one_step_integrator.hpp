@@ -595,7 +595,7 @@ struct one_step_integrator {
               // contact index in original mesh
               variant::visit(data, rel,
                              mp::overload(
-                                 [&](match::handle<collision::diskmesh_r> auto rrel) {
+                                 [&](match::handle<collision::mesh_relation> auto rrel) {
                                    auto base_idx = 4 * rrel.contact_index();
                                    auto dof0 = rrel.mesh().global_indices()[base_idx];
                                    auto dof1 = rrel.mesh().global_indices()[base_idx + 1];

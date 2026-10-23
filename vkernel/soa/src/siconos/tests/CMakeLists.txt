@@ -32,6 +32,7 @@ if(WITH_vkernel_TESTING)
   add_executable(polytopefdisk polytopefdisk.cpp)
   add_executable(rigid_shapes rigid_shapes.cpp)
   add_executable(mixed_bodies mixed_bodies.cpp)
+  add_executable(polytope_on_fem polytope_on_fem.cpp)
 
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
 
@@ -61,6 +62,7 @@ if(WITH_vkernel_TESTING)
   set_target_properties(polytopefdisk PROPERTIES COMPILE_FLAGS "${flags}")
   set_target_properties(rigid_shapes PROPERTIES COMPILE_FLAGS "${flags}")
   set_target_properties(mixed_bodies PROPERTIES COMPILE_FLAGS "${flags}")
+  set_target_properties(polytope_on_fem PROPERTIES COMPILE_FLAGS "${flags}")
 
 
   target_link_libraries(t1 Eigen3::Eigen numerics pthread)
@@ -89,6 +91,7 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(polytopefdisk Eigen3::Eigen numerics pthread)
   target_link_libraries(rigid_shapes Eigen3::Eigen numerics pthread)
   target_link_libraries(mixed_bodies Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
+  target_link_libraries(polytope_on_fem Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
 
 
   # ctest --test-dir <build>/vkernel/soa/src/siconos/tests
@@ -99,7 +102,8 @@ if(WITH_vkernel_TESTING)
       registry_remove unbounded_bouncing_ball bouncing_balls bouncing_disk
       bouncing_disk_line bouncing_disks fixed_disks cxd_batch_smoke polytope_cxd
       bouncing_polytopes churn_polytopes polytope_fsegment polytopemesh
-      polytopefdisk rigid_shapes mixed_bodies)
+      polytopefdisk rigid_shapes mixed_bodies
+      polytope_on_fem)
     add_test(NAME vkernel_${test} COMMAND ${test}
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   endforeach()
