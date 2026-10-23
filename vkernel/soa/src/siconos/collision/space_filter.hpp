@@ -421,6 +421,13 @@ struct space_filter : item {
                     auto coefs = std::array{translat[0], translat[1]};
                     ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] = inter;
                   },
+                  [&, ds1 = ds1,
+                   inter = inter]<match::handle<polytopefdisk_r<Topology>> PolytopeFdiskR>(
+                      PolytopeFdiskR rel) {
+                    auto& translat = rel.translated_disk_shape().translation();
+                    auto coefs = std::array{translat[0], translat[1]};
+                    ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] = inter;
+                  },
                   []<bool flag = false>(auto) {
                     // hardening: this used to be a silent no-op in release
                     // (assert compiled out); a self interaction must bind a
@@ -428,7 +435,8 @@ struct space_filter : item {
                     throw std::runtime_error(
                         "space_filter::build_proximity_maps: unhandled relation "
                         "for a self interaction (ds1 == ds2); only "
-                        "diskfsegment_r/diskfdisk_r are supported");
+                        "diskfsegment_r, diskfdisk_r, polytopefsegment_r and polytopefdisk_r "
+                        "are supported");
                   }));
         }
       }
@@ -716,7 +724,7 @@ struct space_filter : item {
           inter.relation() = search->second;
         } else {
           auto dl = storage::add<poly_fd_t>(data);
-          dl.disk() = fdisk.translated_disk_shape();
+          dl.translated_disk_shape() = fdisk;
           inter.relation() = dl;
           relmap[coefs] = dl;
         }
@@ -865,13 +873,28 @@ struct space_filter : item {
                       }
                       ds_fdisk_prox.erase(finter);
                     },
+                    [&]<match::handle<polytopefdisk_r<Topology>> PolytopeFdiskR>(
+                        PolytopeFdiskR rel) {
+                      auto& translat = rel.translated_disk_shape().translation();
+                      auto coefs = std::array{translat[0], translat[1]};
+                      auto finter = ds_fdisk_prox.find(
+                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      if (finter == ds_fdisk_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this polytope-fdisk interaction");
+                      }
+                      ds_fdisk_prox.erase(finter);
+                    },
                     []<bool flag = false>(auto) {
                       // hardening: this used to be a silent no-op in release
                       // (assert compiled out), leaking the interaction
                       throw std::runtime_error(
                           "space_filter::remove_interactions: unhandled relation "
                           "for a self interaction (ds1 == ds2); only "
-                          "diskfsegment_r/diskfdisk_r are supported");
+                          "diskfsegment_r, diskfdisk_r, polytopefsegment_r and "
+                          "polytopefdisk_r "
+                          "are supported");
                     }));
             //            print("  REMOVE ds segment interaction between {}
             //            {},{},{})\n",
