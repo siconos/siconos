@@ -14,6 +14,7 @@
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/polytopefsegment_r.hpp"
+#include "siconos/collision/polytopemesh_r.hpp"
 #include "siconos/collision/shape/chained_segment.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/mesh.hpp"
@@ -100,6 +101,9 @@ struct space_filter : item {
     some::map<some::array<some::scalar, some::indice_value<4>>,
               some::item_ref<polytopefsegment_r<Topology>>>
         polytopefsegments;
+    some::map<some::array<some::indice, some::indice_value<2>>,
+              some::item_ref<polytopemesh_r<Topology>>>
+        polytopemeshes;
     some::map<some::array<some::scalar, some::indice_value<2>>, some::item_ref<diskfdisk_r>>
         diskfdisks;
   };
@@ -132,6 +136,8 @@ struct space_filter : item {
     decltype(auto) diskfsegments() { return storage::attr<"diskfsegments">(*self()); }
 
     decltype(auto) polytopefsegments() { return storage::attr<"polytopefsegments">(*self()); }
+
+    decltype(auto) polytopemeshes() { return storage::attr<"polytopemeshes">(*self()); }
 
     decltype(auto) diskfdisks() { return storage::attr<"diskfdisks">(*self()); }
 
@@ -243,6 +249,11 @@ struct space_filter : item {
       storage::attr<"polytopefsegments">(*self())[{hdl.segment().x1(), hdl.segment().x2(),
                                                    hdl.segment().y1(), hdl.segment().y2()}] =
           hdl;
+    }
+
+    void insert_polytopemesh_r(auto hdl) {
+      storage::attr<"polytopemeshes">(
+          *self())[{hdl.mesh().index().value(), hdl.contact_index()}] = hdl;
     }
 
     void insert_diskfdisk_r(auto tds) {
@@ -484,18 +495,12 @@ struct space_filter : item {
       }
       auto nslaw = storage::make_handle(data, search->second);
       auto diskmeshes = self()->diskmeshes();
+      auto polytopemeshes = self()->polytopemeshes();
 
-      // diskmesh_r reads shape.radius() on the ds side, which is correct only
-      // for a disk: a polytope exposes radius() as its circumradius. The shape
-      // type is fixed per ds type by the storage config, so the decision is
-      // compile time and the throw exists only in the branch that can reach it.
+      // The shape kind is fixed per ds type, so the decision is compile time
+      // and the throw exists only in the branch that can reach it.
       using shape1_t = typename std::decay_t<decltype(storage::make_handle(
           data, storage::prop<"shape", storage::config_declared>(ds1)))>::type;
-      if constexpr (!std::derived_from<shape1_t, collision::shape::disk>) {
-        throw std::runtime_error(
-            "diskmesh_r requires a disk-shaped ds; no narrowphase relation "
-            "exists for this shape pair");
-      }
 
       auto mesh = hp2.shape();
       auto contact_index = hp2.seg_index();
@@ -506,13 +511,28 @@ struct space_filter : item {
         // keep this edge
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
         storage::prop<"activation", Topology>(inter) = true;
-      } else {
-        // create the edge
-        auto inter = topo.link(ds1, ds2);
-        inter.nslaw() = nslaw;  // one nslaw for the moment
+        return;
+      }
 
-        storage::prop<"activation", Topology>(inter) = true;
+      // create the edge
+      auto inter = topo.link(ds1, ds2);
+      inter.nslaw() = nslaw;  // one nslaw for the moment
+      storage::prop<"activation", Topology>(inter) = true;
 
+      if constexpr (std::derived_from<shape1_t, collision::shape::polytope>) {
+        // polytope x mesh edge
+        if (auto search = polytopemeshes.find({mesh.index().value(), contact_index});
+            search != polytopemeshes.end()) {
+          inter.relation() = search->second;
+        } else {
+          auto rel = storage::add<collision::polytopemesh_r<Topology>>(data);
+          rel.mesh() = mesh;
+          rel.contact_index() = contact_index;
+          inter.relation() = rel;
+          polytopemeshes[{mesh.index().value(), contact_index}] = rel;
+        }
+      } else if constexpr (std::derived_from<shape1_t, collision::shape::disk>) {
+        // disk x mesh edge
         if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
             search != diskmeshes.end()) {
           inter.relation() = search->second;
@@ -523,8 +543,12 @@ struct space_filter : item {
           inter.relation() = rel;
           diskmeshes[{mesh.index().value(), contact_index}] = rel;
         }
-        dmap[mp::make_tuple(ds1.index().value(), ds2.index().value(), contact_index)] = inter;
+      } else {
+        throw std::runtime_error(
+            "diskmesh_r/polytopemesh_r requires a disk- or polytope-shaped ds; "
+            "no narrowphase relation exists for this shape pair");
       }
+      dmap[mp::make_tuple(ds1.index().value(), ds2.index().value(), contact_index)] = inter;
     }
 
     void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {
@@ -1008,6 +1032,9 @@ struct space_filter : item {
       using polytopefsegment_r_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(),
           storage::index<collision::polytopefsegment_r<Topology>, indice>{}))>;
+      using polytopemesh_r_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(),
+          storage::index<collision::polytopemesh_r<Topology>, indice>{}))>;
       using segment_handle_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(), storage::index<collision::shape::segment, indice>{}))>;
       // a handle, not an index: python passes handles, and pybind would
@@ -1022,6 +1049,8 @@ struct space_filter : item {
                  &interface<Handle>::insert_diskfsegment_r<diskfsegment_r_t>),
           method("insert_polytopefsegment_r",
                  &interface<Handle>::insert_polytopefsegment_r<polytopefsegment_r_t>),
+          method("insert_polytopemesh_r",
+                 &interface<Handle>::insert_polytopemesh_r<polytopemesh_r_t>),
           method("insert_diskfdisk_r", &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
           method("insert_nonsmooth_law",
                  &interface<Handle>::insert_nonsmooth_law<ref_nslaw_t, indice, indice>),
