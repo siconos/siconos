@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "siconos/siconos.hpp"
+#include "siconos/storage/registry.hpp"
 
 // clang-format off
 #include "siconos/collision/polytopemesh_r.hpp"
@@ -30,8 +31,8 @@ template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
-struct data_t
-    : storage::make<env, polytope_ds, polytope_shape, mesh_ds, mesh_shape, polytopemesh_r,
+struct data_t : storage::make_runtime_database<
+                    env, polytope_ds, polytope_shape, mesh_ds, mesh_shape, polytopemesh_r,
                     storage::with_properties<
                         storage::wrapped<polytope_ds, some::unbounded_collection>,
                         storage::wrapped<mesh_ds, some::unbounded_collection>,

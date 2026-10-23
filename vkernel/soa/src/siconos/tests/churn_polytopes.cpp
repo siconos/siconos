@@ -40,6 +40,7 @@
 #include <utility>
 
 #include "siconos/siconos.hpp"
+#include "siconos/storage/registry.hpp"
 
 // clang-format off
 /* the relation + stage headers must be visible before the config names
@@ -83,24 +84,24 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make<env, simulation, interaction_manager, polytope, polytope_shape,
-                    segment_shape, diskdisk_r, diskfsegment_r, nslaw, interaction, topo,
-                    polytopepolytope_r, polytopefsegment_r, cxd_narrowphase, osi, td, osnspb,
-                    neighborhood, space_filter,
-                    storage::with_properties<
-                        storage::wrapped<polytope, some::unbounded_collection>,
-                        storage::wrapped<diskdisk_r, some::unbounded_collection>,
-                        storage::wrapped<diskfsegment_r, some::unbounded_collection>,
-                        storage::wrapped<pointd, some::unbounded_collection>,
-                        storage::wrapped<pointl, some::unbounded_collection>,
-                        storage::wrapped<interaction, some::unbounded_collection>,
-                        storage::wrapped<polytopepolytope_r, some::unbounded_collection>,
-                        storage::attached<polytope, storage::pattern::symbol<"shape">,
-                                          storage::some::item_ref<polytope_shape>>,
-                        storage::time_invariant<storage::pattern::attr_t<polytope, "fext">>,
-                        storage::diagonal<storage::pattern::attr_t<polytope, "mass_matrix">>,
-                        storage::assembled_diagonal<storage::pattern::attr_t<
-                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+    : storage::make_runtime_database<
+          env, simulation, interaction_manager, polytope, polytope_shape, segment_shape,
+          diskdisk_r, diskfsegment_r, nslaw, interaction, topo, polytopepolytope_r,
+          polytopefsegment_r, cxd_narrowphase, osi, td, osnspb, neighborhood, space_filter,
+          storage::with_properties<
+              storage::wrapped<polytope, some::unbounded_collection>,
+              storage::wrapped<diskdisk_r, some::unbounded_collection>,
+              storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+              storage::wrapped<pointd, some::unbounded_collection>,
+              storage::wrapped<pointl, some::unbounded_collection>,
+              storage::wrapped<interaction, some::unbounded_collection>,
+              storage::wrapped<polytopepolytope_r, some::unbounded_collection>,
+              storage::attached<polytope, storage::pattern::symbol<"shape">,
+                                storage::some::item_ref<polytope_shape>>,
+              storage::time_invariant<storage::pattern::attr_t<polytope, "fext">>,
+              storage::diagonal<storage::pattern::attr_t<polytope, "mass_matrix">>,
+              storage::assembled_diagonal<storage::pattern::attr_t<
+                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {

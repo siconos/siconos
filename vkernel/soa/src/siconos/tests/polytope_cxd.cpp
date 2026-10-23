@@ -6,6 +6,7 @@
 #include <print>
 
 #include "siconos/siconos.hpp"
+#include "siconos/storage/registry.hpp"
 
 // clang-format off
 /* before the config block: the world wires these types directly. The
@@ -36,8 +37,8 @@ template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
-struct data_t
-    : storage::make<env, polytope_ds, polytope_shape, diskdisk_r, nslaw, interaction, topo,
+struct data_t : storage::make_runtime_database<
+                    env, polytope_ds, polytope_shape, diskdisk_r, nslaw, interaction, topo,
                     polytopepolytope_r, cxd_narrowphase, osi, td, osnspb,
                     storage::with_properties<
                         storage::wrapped<polytope_ds, some::unbounded_collection>,

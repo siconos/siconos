@@ -2,6 +2,7 @@
 #include <print>
 
 #include "siconos/siconos.hpp"
+#include "siconos/storage/registry.hpp"
 
 namespace siconos::config {
 namespace some = siconos::storage::some;
@@ -35,7 +36,7 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t : storage::make_compile_time_database<
+struct data_t : storage::make_runtime_database<
                     env, simulation, interaction_manager, neighborhood, space_filter, io, disk,
                     diskdisk_r, diskfdisk_r, diskfsegment_r, pointl, pointd, pointtds,
                     interaction, segment_shape, disk_shape,
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]) {
     auto d1 = storage::add<config::disk>(data);
     //  auto d2 = storage::add<config::disk>(data);
 
-    storage::prop<"id">(d1) = i + 1;
+    storage::prop<"id", config::topo>(d1) = i + 1;
 
     d1.q() = {0, position_init * (i + 1), 0};
     d1.velocity() = {0, velocity_init, 0};

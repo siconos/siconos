@@ -20,6 +20,7 @@
 #include <string>
 
 #include "siconos/siconos.hpp"
+#include "siconos/storage/registry.hpp"
 
 // clang-format off
 /* the relation + stage headers must be visible before the config names
@@ -56,8 +57,8 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t
-    : storage::make<env, simulation, interaction_manager, polytope, polytope_shape, diskdisk_r,
+struct data_t : storage::make_runtime_database<
+                    env, simulation, interaction_manager, polytope, polytope_shape, diskdisk_r,
                     nslaw, interaction, topo, polytopepolytope_r, cxd_narrowphase, osi, td,
                     osnspb, neighborhood, space_filter,
                     storage::with_properties<

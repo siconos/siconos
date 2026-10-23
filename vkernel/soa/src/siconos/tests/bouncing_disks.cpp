@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "siconos/siconos.hpp"
+#include "siconos/storage/registry.hpp"
 
 namespace siconos::config {
 namespace some = siconos::storage::some;
@@ -37,7 +38,7 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t : storage::make_compile_time_database<
+struct data_t : storage::make_runtime_database<
                     env, simulation, interaction_manager, io, segment_shape, disk_shape,
                     storage::with_properties<
                         storage::wrapped<disk, some::unbounded_collection>,
@@ -99,7 +100,7 @@ int main(int argc, char* argv[]) {
 
   for (std::size_t i = 0; i < disks.size(); ++i) {
     auto& disk = disks[i];
-    storage::prop<"id">(disk) = static_cast<uint>(i + 1);
+    storage::prop<"id", config::topo>(disk) = static_cast<uint>(i + 1);
 
     disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
     disk.velocity() = {0, velocity_init, 0};
