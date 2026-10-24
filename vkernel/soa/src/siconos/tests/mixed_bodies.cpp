@@ -108,7 +108,7 @@ struct world {
   decltype(siconos::storage::add<siconos::config::disk_shape>(data)) dsh;
   decltype(siconos::storage::add<siconos::config::polytope_shape>(data)) psh;
 
-  world()
+  explicit world(double mu = 0.)
       : simulation(siconos::storage::add<siconos::config::simulation>(data)),
         spacef(siconos::storage::add<siconos::config::space_filter>(data)),
         ngbh(siconos::storage::add<siconos::config::neighborhood>(data)),
@@ -123,6 +123,7 @@ struct world {
 
     auto nslaw = storage::add<config::nslaw>(data);
     nslaw.e() = 0.;
+    nslaw.mu() = mu;
 
     auto fc2d = storage::add<config::fc2d>(data);
     fc2d.create();
@@ -285,6 +286,47 @@ void test_tilted_square_settles() {
   check(std::abs(q(1) - 0.5) < 2e-2, "the tilted square rests on the ground");
 }
 
+/* the same on a polytope pair: a tilted square dropped on a square resting
+   on the ground; the upper pair has two manifold points too. With friction:
+   frictionless, the residual tilt inclines the contact face and the normal
+   reaction slides the squares apart, which is right but not what is tested
+   here. */
+void test_tilted_square_on_square_settles() {
+  using namespace siconos;
+  world w(0.5);
+  auto lower = w.add_square(0., 0.5);
+  auto upper = w.add_square(0., 1.8);
+  storage::attr<"q">(upper, 0)(2) = 0.05;
+  w.finalize();
+  double t_rest = -1.;
+  std::size_t npp = 0;
+  using pp_t = storage::index<config::polytopepolytope_r, std::size_t>;
+  while (w.simulation.has_next_event()) {
+    w.step();
+    const auto s = w.simulation.current_step();
+    std::size_t n = 0;
+    for (auto inter : storage::handles<config::interaction>(w.data, s))
+      n += std::holds_alternative<pp_t>(inter.relation());
+    npp = std::max(npp, n);
+    const double om = std::abs(storage::attr<"velocity">(upper, s)(2)) +
+                      std::abs(storage::attr<"velocity">(lower, s)(2));
+    if (om >= 1e-6)
+      t_rest = -1.;
+    else if (t_rest < 0)
+      t_rest = s * 0.005;
+  }
+  const auto s = w.simulation.current_step();
+  const auto& q = storage::attr<"q">(upper, s);
+  std::print(stderr,
+             "tilted square on square: q = ({:.6f}, {:.6f}, {:.3e}), at rest from t = {}\n",
+             q(0), q(1), q(2), t_rest);
+  check(npp == 2, "the polytope pair has two interactions (manifold points 0 and 1)");
+  check(t_rest >= 0 && t_rest < 1.5, "the stack stops rotating and does not rock");
+  check(std::abs(q(2)) < 3e-2,
+        "the residual tilt is of the order of the velocity-level drift");
+  check(std::abs(q(1) - 1.5) < 3e-2, "the upper square rests on the lower one");
+}
+
 void test_disk_polytope_neighbors_throw() {
   world w;
   w.add_disk(0., 0.7);
@@ -303,6 +345,7 @@ void test_disk_polytope_neighbors_throw() {
 int main() {
   test_two_columns();
   test_tilted_square_settles();
+  test_tilted_square_on_square_settles();
   test_disk_polytope_neighbors_throw();
   std::print("mixed_bodies: all checks pass\n");
   return 0;

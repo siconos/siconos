@@ -686,6 +686,7 @@ narrowphase_contact<Scalar> manifold_point(const narrowphase_contact<Scalar>& c,
 
 }  // namespace siconos::collision
 
+#include "siconos/collision/array_hash.hpp"
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
@@ -737,9 +738,9 @@ struct cxd_narrowphase : item {
     some::indice n_pairs;
     some::indice n_contacts;
     some::indice n_enclosed;
-    some::map<some::array<some::indice, some::indice_value<2>>,
-              some::item_ref<poly_r_t>>
-        rel_map;  // ordered ds-index pair -> polytope relation reuse map
+    // (ordered ds-index pair, manifold point) -> polytope relation reuse map
+    some::map<some::array<some::indice, some::indice_value<3>>, some::item_ref<poly_r_t>>
+        rel_map;
   };
 
   template <typename Handle>
@@ -803,45 +804,72 @@ struct cxd_narrowphase : item {
     void rebind(auto step) {
       auto& data = self()->data();
       const auto t0 = std::chrono::steady_clock::now();
+      using poly_index_t = storage::index<poly_r_t, std::size_t>;
+      const auto pair_key = [](auto& ds1, auto& ds2) {
+        const std::size_t i1 = ds1.index().value(), i2 = ds2.index().value();
+        return i1 < i2 ? std::array{i1, i2} : std::array{i2, i1};
+      };
+      const auto poly_pair = [](auto& ds1, auto& ds2) {
+        return ds1.index().value() != ds2.index().value() &&
+               collision::has_shape<shape::polytope>(ds1) &&
+               collision::has_shape<shape::polytope>(ds2);
+      };
+      using key2_t = std::array<std::size_t, 2>;
+
+      // the manifold points already bound, per pair: a placeholder takes
+      // the lowest free one
+      std::unordered_map<key2_t, unsigned> used;
+      for (auto inter : storage::handles<finteraction>(data, step)) {
+        auto& relvar = storage::attr<"relation">(inter);
+        if (!std::holds_alternative<poly_index_t>(relvar)) continue;
+        auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
+        auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
+        auto rel = storage::make_handle(data, std::get<poly_index_t>(relvar));
+        used[pair_key(ds1, ds2)] |= 1u << rel.point_index();
+      }
+
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
         auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
-        auto poly_shape = [](auto& ds) { return collision::has_shape<shape::polytope>(ds); };
         auto& relvar = storage::attr<"relation">(inter);
-        // Case A: polytope x polytope (ds1 != ds2), generic binder diskdisk_r
-        if (ds1.index().value() != ds2.index().value() && poly_shape(ds1) && poly_shape(ds2) &&
-            std::holds_alternative<storage::index<collision::diskdisk_r, std::size_t>>(
-                relvar)) {
-          // generic binder still attached: give this pair a polytope relation
-          const auto i1 = ds1.index().value(), i2 = ds2.index().value();
-          const std::array<std::decay_t<decltype(i1)>, 2> key =
-              i1 < i2 ? std::array{i1, i2} : std::array{i2, i1};
-          auto& rmap = rel_map();
-          auto rel = [&] {
-            if (auto it = rmap.find(key); it != rmap.end()) {
-              return storage::make_handle(data, it->second);
-            }
-            auto rel = storage::add<poly_r_t>(data);
-            // fresh vector attrs are uninitialized storage (Eigen default);
-            // give the first batch a well-defined direction: the engine maps
-            // a zero init_dir to {1, 0} (spec §5). status/h define the
-            // keep-previous baseline: no valid result yet.
-            rel.status() = static_cast<std::size_t>(cxd::status::invalid_input);
-            rel.h() = 0;
-            rel.cache_pair_checksum() = 0;
-            rel.normal() = {0, 0};
-            rel.cp1() = {0, 0};
-            rel.cp2() = {0, 0};
-            rel.init_dir() = {0, 0};
-            rmap[key] = rel;
-            return rel;
-          }();
-          rel.narrowphase() = *self();
-          inter.relation() = rel;
+        // polytope x polytope still on the generic binder diskdisk_r
+        if (!(poly_pair(ds1, ds2) &&
+              std::holds_alternative<storage::index<collision::diskdisk_r, std::size_t>>(
+                  relvar)))
+          continue;
+        const auto key2 = pair_key(ds1, ds2);
+        auto& mask = used[key2];
+        const std::size_t pi = (mask & 1u) == 0 ? 0 : (mask & 2u) == 0 ? 1 : 2;
+        if (pi > 1) {
+          throw std::runtime_error(
+              "cxd_narrowphase::rebind: more than two interactions for one polytope "
+              "pair (a 2D contact manifold has at most two points)");
         }
-        // Case B: polytope x fixed segment (self interaction, ds1==ds2),
-        // generic binder diskfsegment_r. Rebind to polytopefsegment_r,
-        // carrying the segment ref.
+        mask |= 1u << pi;
+        const std::array<std::size_t, 3> key{key2[0], key2[1], pi};
+        auto& rmap = rel_map();
+        auto rel = [&] {
+          if (auto it = rmap.find(key); it != rmap.end()) {
+            return storage::make_handle(data, it->second);
+          }
+          auto rel = storage::add<poly_r_t>(data);
+          // fresh vector attrs are uninitialized storage (Eigen default);
+          // give the first batch a well-defined direction: the engine maps
+          // a zero init_dir to {1, 0} (spec §5). status/h define the
+          // keep-previous baseline: no valid result yet.
+          rel.point_index() = pi;
+          rel.status() = static_cast<std::size_t>(cxd::status::invalid_input);
+          rel.h() = 0;
+          rel.cache_pair_checksum() = 0;
+          rel.normal() = {0, 0};
+          rel.cp1() = {0, 0};
+          rel.cp2() = {0, 0};
+          rel.init_dir() = {0, 0};
+          rmap[key] = rel;
+          return rel;
+        }();
+        rel.narrowphase() = *self();
+        inter.relation() = rel;
       }
       storage::attr<"t_rebind">(*self()) += seconds_since(t0);
     }
@@ -942,7 +970,9 @@ struct cxd_narrowphase : item {
       const auto t0 = std::chrono::steady_clock::now();
       narrowphase_input<scalar> in;
       std::unordered_map<std::size_t, std::uint32_t> slot;
-      std::unordered_map<std::size_t, std::uint32_t> seg_slot;
+      // one batch pair per ds pair: its manifold serves every interaction
+      // (manifold point) of the pair
+      std::unordered_map<std::array<std::size_t, 2>, std::uint32_t> pair_slot;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -961,6 +991,9 @@ struct cxd_narrowphase : item {
             // shape ids are ENTRY indices, not vertex offsets
             slot[ds->index().value()] = static_cast<std::uint32_t>(in.entries.size()) - 1;
           }
+          const std::array<std::size_t, 2> key{ds1.index().value(), ds2.index().value()};
+          if (pair_slot.count(key)) continue;
+          pair_slot[key] = static_cast<std::uint32_t>(in.ids_a.size());
           in.ids_a.push_back(slot[ds1.index().value()]);
           in.ids_b.push_back(slot[ds2.index().value()]);
           in.init_dirs.push_back({rel.init_dir()[0], rel.init_dir()[1]});
@@ -968,7 +1001,7 @@ struct cxd_narrowphase : item {
       }
       storage::attr<"n_pairs">(*self()) = static_cast<indice_t>(in.ids_a.size());
       storage::attr<"t_pack">(*self()) += seconds_since(t0);
-      return in;
+      return std::pair{std::move(in), std::move(pair_slot)};
     }
 
     /* 3. batch + write-back: statuses/h/normal/cps go to the relations;
@@ -979,7 +1012,7 @@ struct cxd_narrowphase : item {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
       auto& data = self()->data();
-      auto in = pack(step);
+      auto [in, pair_slot] = pack(step);
       if (!in.ids_a.empty()) {
         const auto t_batch0 = std::chrono::steady_clock::now();
         auto out = narrowphase_batch(std::move(in));
@@ -997,7 +1030,6 @@ struct cxd_narrowphase : item {
           ds_h.emplace(key, h);
           return h;
         };
-        std::size_t k = 0;
         std::size_t n_written = 0;
         std::size_t n_enclosed = 0;
         for (auto inter : storage::handles<finteraction>(data, step)) {
@@ -1011,7 +1043,9 @@ struct cxd_narrowphase : item {
             // kept the previous row: stamp it so relation reads skip the scan
             rel.cache_pair_checksum() = pair_signature(
                 ds1.index().value(), ds2.index().value(), hash_ds(ds1), hash_ds(ds2));
-            const auto& c = out[k++];
+            const auto c =
+                manifold_point(out[pair_slot.at({ds1.index().value(), ds2.index().value()})],
+                               rel.point_index());
             if (c.status == static_cast<int>(cxd::status::max_iterations) ||
                 c.status == static_cast<int>(cxd::status::invalid_input)) {
               continue;  // keep-previous: the whole cached row stays

@@ -29,6 +29,9 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
     // loaded once at rebind time by the stage; unbound = stage-less
     // standalone (manually cached) relation
     some::item_ref<narrowphase_t> narrowphase;
+    // which point of the pair's contact manifold (0 or 1) this relation
+    // stands for: a polytope pair has one interaction per manifold point
+    some::indice point_index;
     some::indice status;  // 0 separated, 1 enclosed (cxd::status value)
     some::scalar h;       // +distance when separated / -depth when enclosed
     some::vector<some::scalar, some::indice_value<2>> normal;  // 1 -> 2
@@ -45,6 +48,7 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
     using default_interface<Handle>::self;
 
     decltype(auto) status() { return storage::attr<"status">(*self()); }
+    decltype(auto) point_index() { return storage::attr<"point_index">(*self()); }
     decltype(auto) h() { return storage::attr<"h">(*self()); }
     // the stage writes this ref at its rebind step (cxd_narrowphase's rebind
     // sets rel.narrowphase() = the stage handle)

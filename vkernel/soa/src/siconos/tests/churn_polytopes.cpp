@@ -225,11 +225,14 @@ void test_space_filter_churn(siconos::config::data_t& data) {
 
   // scripted body2 y positions by step: in, deeper, out, back in
   const std::array<double, 4> y2_by_step = {4.0, 3.0, 100.0, 4.0};
-  const std::array<size_t, 4> ninter_by_step = {1, 1, 0, 1};
+  // two interactions per polytope pair: one per contact manifold point
+  const std::array<size_t, 4> ninter_by_step = {2, 2, 0, 2};
   // step 2 keeps the previous h (1.0): no batch runs when the pair is out
   const std::array<double, 4> h_by_step = {2.0, 1.0, 1.0, 2.0};
 
-  std::size_t rel_idx0 = static_cast<std::size_t>(-1);
+  // the relation item of each manifold point, recorded at the first step
+  std::array<std::size_t, 2> rel_idx0 = {static_cast<std::size_t>(-1),
+                                         static_cast<std::size_t>(-1)};
 
   for (size_t step = 0; step < y2_by_step.size(); ++step) {
     const auto s = simulation.current_step();
@@ -250,10 +253,12 @@ void test_space_filter_churn(siconos::config::data_t& data) {
       check(std::holds_alternative<poly_r_index>(inter.relation()),
             "the ds-ds interaction is rebound to polytopepolytope_r");
       auto rel = storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
-      if (rel_idx0 == static_cast<std::size_t>(-1)) {
-        rel_idx0 = rel.index().value();
+      const std::size_t pi = rel.point_index();
+      check(pi < 2, "a polytope relation stands for manifold point 0 or 1");
+      if (rel_idx0[pi] == static_cast<std::size_t>(-1)) {
+        rel_idx0[pi] = rel.index().value();
       } else {
-        check(rel.index().value() == rel_idx0,
+        check(rel.index().value() == rel_idx0[pi],
               "the relation item is recycled (same storage index) after removal");
       }
       check(std::abs(rel.h() - h_by_step[step]) <= 1e-6,

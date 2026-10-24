@@ -171,9 +171,14 @@ int main() {
 
   simulation.initialize();
 
-  auto inter = topo_h.link(body1, body2);
-  inter.nslaw() = nslaw;
-  inter.relation() = dsds;
+  // one interaction per point of the contact manifold (two in 2D), as
+  // space_filter::dsds_activation creates them for a polytope pair; the
+  // stage gives them manifold points 0 and 1
+  for (int pi = 0; pi < 2; ++pi) {
+    auto inter = topo_h.link(body1, body2);
+    inter.nslaw() = nslaw;
+    inter.relation() = dsds;
+  }
 
   bool have_prev = false;
   double prev_h = 0.;

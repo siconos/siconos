@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include "siconos/algebra/algebra.hpp"
+#include "siconos/collision/array_hash.hpp"
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/diskdisk_r.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
@@ -28,56 +29,6 @@
 #include "siconos/utils/variant.hpp"
 
 namespace std {
-
-// std::array<T, 2>
-template <typename T>
-struct hash<std::array<T, 2>> {
-  size_t operator()(const std::array<T, 2>& arr) const noexcept {
-    size_t h1 = std::hash<T>{}(arr[0]);
-    size_t h2 = std::hash<T>{}(arr[1]);
-    // boost::hash_combine
-    return h1 ^ (h2 + 0x9e3779b97f4a7c15 + (h1 << 6) + (h1 >> 2));
-  }
-};
-
-// std::array<T, 4>
-template <typename T>
-struct hash<std::array<T, 4>> {
-  size_t operator()(const std::array<T, 4>& arr) const noexcept {
-    size_t seed = 0;
-    for (size_t i = 0; i < 4; ++i) {
-      size_t h = std::hash<T>{}(arr[i]);
-      seed ^= h + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
-    }
-    return seed;
-  }
-};
-
-// std::array<T, 3>, std::array<T, 5>: proximity keys with a manifold point
-// index
-template <typename T>
-struct hash<std::array<T, 3>> {
-  size_t operator()(const std::array<T, 3>& arr) const noexcept {
-    size_t seed = 0;
-    for (size_t i = 0; i < 3; ++i) {
-      size_t h = std::hash<T>{}(arr[i]);
-      seed ^= h + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
-    }
-    return seed;
-  }
-};
-
-template <typename T>
-struct hash<std::array<T, 5>> {
-  size_t operator()(const std::array<T, 5>& arr) const noexcept {
-    size_t seed = 0;
-    for (size_t i = 0; i < 5; ++i) {
-      size_t h = std::hash<T>{}(arr[i]);
-      seed ^= h + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
-    }
-    return seed;
-  }
-};
 
 // siconos::storage::mp::pair
 template <typename First, typename Second>
@@ -412,6 +363,31 @@ struct space_filter : item {
       }
     }
 
+    /* key of a ds-ds interaction: the ds pair (ordered as make_ipair) and
+       the manifold point the interaction stands for. Polytope relations
+       carry a point_index (a polytope pair has one interaction per point of
+       its contact manifold); the others stand for the whole pair: 0. */
+    template <typename Index1, typename Index2>
+    auto make_ikey(Index1 ids1, Index2 ids2, std::size_t pi) {
+      auto i1 = ids1.value();
+      auto i2 = ids2.value();
+      if constexpr (std::is_same_v<Index1, Index2>) {
+        if (i2 < i1) std::swap(i1, i2);
+      }
+      return mp::make_tuple(i1, i2, static_cast<decltype(i1)>(pi));
+    }
+
+    std::size_t point_of(auto inter) {
+      return siconos::variant::visit(self()->data(), inter.relation(),
+                                     [](auto rrel) -> std::size_t {
+                                       if constexpr (requires { rrel.point_index(); }) {
+                                         return rrel.point_index();
+                                       } else {
+                                         return 0;
+                                       }
+                                     });
+    }
+
     void build_proximity_maps(auto& ds_ds_prox, auto& ds_segment_prox, auto& ds_fdisk_prox,
                               const auto& ds1s, const auto& ds2s, const auto& interactions) {
       auto& data = self()->data();
@@ -419,7 +395,7 @@ struct space_filter : item {
       // build (ds ds -> inter) & (ds segment -> inter) maps
       for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, interactions)) {
         if (ds1 != ds2) {
-          ds_ds_prox[make_ipair(ds1, ds2)] = inter;
+          ds_ds_prox[make_ikey(ds1, ds2, point_of(inter))] = inter;
         } else {
           siconos::variant::visit(
               data, inter.relation(),
@@ -503,19 +479,25 @@ struct space_filter : item {
       }
       auto nslaw = storage::make_handle(data, search->second);
       auto diskdisk_r = self()->diskdisk_r();
-      auto diskmeshes = self()->diskmeshes();
 
-      // at most one edge between 2 ds !!
-      auto find_inter = fmap.find(make_ipair(ds1.index(), ds2.index()));
-      if (find_inter != fmap.end()) {
-        // keep this edge
-        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
-        storage::prop<"activation", Topology>(inter) = true;
-      } else {
-        // the generic binder serves disk x disk, and polytope x polytope until
-        // the cxd stage rebinds it; no disk x polytope relation exists yet
-        if (collision::has_shape<collision::shape::polytope>(ds1) !=
-            collision::has_shape<collision::shape::polytope>(ds2)) {
+      const bool polytope1 = collision::has_shape<collision::shape::polytope>(ds1);
+      const bool polytope2 = collision::has_shape<collision::shape::polytope>(ds2);
+
+      // one edge per disk pair; one per manifold point (two in 2D) for a
+      // polytope pair, which the cxd stage rebinds to polytopepolytope_r
+      const std::size_t npoints = polytope1 && polytope2 ? 2 : 1;
+      for (std::size_t pi = 0; pi < npoints; ++pi) {
+        auto find_inter = fmap.find(make_ikey(ds1.index(), ds2.index(), pi));
+        if (find_inter != fmap.end()) {
+          // keep this edge
+          auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+          storage::prop<"activation", Topology>(inter) = true;
+          continue;
+        }
+        // the generic binder serves disk x disk, and polytope x polytope
+        // until the cxd stage rebinds it; no disk x polytope relation exists
+        // yet
+        if (polytope1 != polytope2) {
           throw std::runtime_error(
               "space_filter: a disk and a polytope are neighbors; no disk x "
               "polytope narrowphase relation exists yet");
@@ -528,7 +510,7 @@ struct space_filter : item {
         storage::prop<"activation", Topology>(inter) = true;
 
         inter.relation() = diskdisk_r;
-        fmap[make_ipair(ds1.index(), ds2.index())] = inter;
+        fmap[make_ikey(ds1.index(), ds2.index(), pi)] = inter;
       }
     }
 
@@ -844,8 +826,9 @@ struct space_filter : item {
           //          print("START REMOVE interaction {}\n", inter.get());
 
           if (storage::prop<"ds1", Topology>(inter) != storage::prop<"ds2", Topology>(inter)) {
-            auto finter = ds_ds_prox.find(make_ipair(storage::prop<"ds1", Topology>(inter),
-                                                     storage::prop<"ds2", Topology>(inter)));
+            auto finter = ds_ds_prox.find(make_ikey(storage::prop<"ds1", Topology>(inter),
+                                                    storage::prop<"ds2", Topology>(inter),
+                                                    point_of(inter)));
 
             // hardening: duplicate ds pairs (the proximity map keeps only
             // the last interaction per pair) or a map rebuilt out of sync
@@ -990,7 +973,7 @@ struct space_filter : item {
       using scalar = typename env::scalar;
 
       using map_ds_ds_prox_t =
-          typename env::template map<mp::pair<indice, indice>,
+          typename env::template map<mp::tuple<indice, indice, indice>,
                                      storage::index<finteraction, indice>>;
 
       using map_ds_dds_prox_t =
