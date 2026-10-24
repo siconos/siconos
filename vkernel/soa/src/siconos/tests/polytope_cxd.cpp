@@ -111,7 +111,7 @@ int test_polytope_item(siconos::config::data_t& data) {
   sh.nvertices() = 4;
   check(std::abs(sh.rmax() - std::sqrt(2.0)) < 1e-12, "rmax == sqrt(2)");
 
-  // non-convex polygon rejected by __init__
+  // non-convex polygon rejected by check_convex
   auto sh2 = add<siconos::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 5> arrow = {{{0, 0}, {2, 0}, {1, 1}, {2, 2}, {0, 2}}};
   for (int i = 0; i < 5; ++i) sh2.vertices()[i] = {arrow[i][0], arrow[i][1]};
@@ -119,28 +119,68 @@ int test_polytope_item(siconos::config::data_t& data) {
   {
     bool threw = false;
     try {
-      sh2.__init__();
+      sh2.check_convex();
     } catch (const std::runtime_error&) {
       threw = true;
     }
-    check(threw, "non-convex polygon rejected by __init__");
+    check(threw, "non-convex polygon rejected by check_convex");
   }
 
-  // the vertex column is a fixed 16-slot array; __init__ must reject a
+  // the vertex column is a fixed 16-slot array; check_convex must reject a
   // larger count instead of indexing past the column
   auto sh3 = add<siconos::config::polytope_shape>(data);
   sh3.nvertices() = 17;
   {
     bool threw = false;
     try {
-      sh3.__init__();
+      sh3.check_convex();
     } catch (const std::runtime_error&) {
       threw = true;
     }
-    check(threw, "nvertices above the 16-vertex capacity rejected by __init__");
+    check(threw, "nvertices above the 16-vertex capacity rejected by check_convex");
   }
   std::print("polytope item ok, rmax={}\n", sh.rmax());
   return 0;
+}
+
+/* shape::polytope::set_vertices: validation and counter-clockwise storage */
+void test_set_vertices(siconos::config::data_t& data) {
+  auto sh = siconos::storage::add<siconos::config::polytope_shape>(data);
+  auto throws = [&](Eigen::MatrixXd m) {
+    try {
+      sh.set_vertices(m);
+    } catch (const std::runtime_error&) {
+      return true;
+    }
+    return false;
+  };
+  Eigen::MatrixXd cw(4, 2);
+  cw << -1, -1, -1, 1, 1, 1, 1, -1;  // clockwise square
+  sh.set_vertices(cw);
+  check(sh.nvertices() == 4, "set_vertices: 4 vertices");
+  double area2 = 0;
+  for (std::size_t i = 0; i < 4; ++i) {
+    const auto& a = sh.vertices()[i];
+    const auto& b = sh.vertices()[(i + 1) % 4];
+    area2 += a[0] * b[1] - b[0] * a[1];
+  }
+  check(area2 > 0, "set_vertices: a clockwise list is stored counter-clockwise");
+  Eigen::MatrixXd with_z(3, 3);
+  with_z << 0, 0, 7, 1, 0, 7, 0, 1, 7;
+  sh.set_vertices(with_z);
+  check(sh.nvertices() == 3 && sh.vertices()[1][0] == 1,
+        "set_vertices: a third column is ignored");
+  Eigen::MatrixXd concave(4, 2);
+  concave << 0, 0, 2, 0, 0.5, 0.5, 0, 2;
+  check(throws(concave), "set_vertices: a non-convex polygon throws");
+  Eigen::MatrixXd flat(3, 2);
+  flat << 0, 0, 1, 0, 2, 0;
+  check(throws(flat), "set_vertices: a polygon of zero area throws");
+  check(throws(Eigen::MatrixXd::Zero(2, 2)), "set_vertices: fewer than 3 vertices throw");
+  Eigen::MatrixXd many(17, 2);
+  for (int i = 0; i < 17; ++i) many.row(i) << std::cos(i * 0.3695), std::sin(i * 0.3695);
+  check(throws(many), "set_vertices: more than 16 vertices throw");
+  std::print("polytope item: set_vertices validates and orders\n");
 }
 
 void test_batch_engine() {
@@ -672,6 +712,7 @@ void test_narrowphase_scan_once(siconos::config::data_t& data) {
 int main() {
   siconos::config::data_t data;
   test_polytope_item(data);
+  test_set_vertices(data);
   test_batch_engine();
   test_witnesses_off_axis();
   test_manifold();
