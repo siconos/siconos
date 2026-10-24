@@ -575,7 +575,7 @@ int NM_clear_other_storages(NumericsMatrix* M, NM_types storageType) {
   return 0;
 }
 
-void NM_internalData_new(NumericsMatrix* M) {
+void NM_internalData_alloc(NumericsMatrix* M) {
   M->internalData = (NumericsMatrixInternalData*)malloc(sizeof(NumericsMatrixInternalData));
   M->internalData->iWork = NULL;
   M->internalData->iWorkSize = 0;
@@ -620,7 +620,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
     }
   } else {
     if (!B->internalData) {
-      NM_internalData_new(B);
+      NM_internalData_alloc(B);
     }
 
     size_t sizeof_elt = A->internalData->sizeof_elt;
@@ -670,7 +670,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B) {
 }
 NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A) {
   if (!A->internalData) {
-    NM_internalData_new(A);
+    NM_internalData_alloc(A);
   }
   NM_version_sync(A);
   return A->internalData;

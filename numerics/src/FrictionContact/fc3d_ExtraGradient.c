@@ -310,7 +310,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
   }
 }
 
-void fc3d_eg_set_default(SolverOptions* options) {
+void fc3d_extra_gradient_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = -1.0;  // rho is variable by default
 }
 
@@ -339,7 +339,7 @@ static void fc3d_eg_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(FC3D_EG, "FC3D_EG", "Extra Gradient for 3D Friction Contact",
                 fc3d_eg_init_wrap, fc3d_eg_solve_wrap, fc3d_eg_free_wrap, NULL,
-                fc3d_eg_set_default, /* set_default */
-                1000,                /* default_max_iter */
-                1e-4,                /* default_tol */
+                fc3d_extra_gradient_set_default, /* set_default */
+                1000,                            /* default_max_iter */
+                1e-4,                            /* default_tol */
                 0 /* is_local_solver */)

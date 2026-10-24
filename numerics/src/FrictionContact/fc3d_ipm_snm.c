@@ -70,7 +70,7 @@ static void primalResidual_s_for_local_friction(const double* velocity, const do
  * Implementation contains the following functions:
  *  - fc3d_IPM_SNM_init - initialize solver (allocate memory)
  *  - fc3d_IPM_SNM_free - deallocate memory
- *  - fc3d_ipm_snm_set_default - setup default solver parameters
+ *  - fc3d_IPM_SNM_set_default - setup default solver parameters
  *  - fc3d_IPM_SNM - optimization method
  *
  * NOTE: Friction contact (local) has the same structure of velocity and reaction with Global
@@ -978,7 +978,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   *info = hasNotConverged;
 }
 
-void fc3d_ipm_snm_set_default(SolverOptions* options) {
+void fc3d_IPM_SNM_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
       SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
@@ -1033,7 +1033,7 @@ static void fc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
 REGISTER_SOLVER(FC3D_IPM_SNM, "FC3D_IPM_SNM",
                 "Interior Point Method with Smoothing and Newton for 3D Friction Contact",
                 fc3d_ipm_snm_init_wrap, fc3d_ipm_snm_solve_wrap, fc3d_ipm_snm_free_wrap, NULL,
-                fc3d_ipm_snm_set_default, /* set_default */
+                fc3d_IPM_SNM_set_default, /* set_default */
                 500,                      /* default_max_iter - from set_default */
                 1e-10,                    /* default_tol - from set_default */
                 0 /* is_local_solver */)

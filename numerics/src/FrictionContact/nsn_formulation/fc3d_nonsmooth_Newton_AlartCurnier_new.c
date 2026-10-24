@@ -91,9 +91,9 @@ static void FC3D_compute_AWpB(void* data_opaque, double* reaction, double* veloc
   dat->AwpB_data_computed = false;
 }
 
-void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, double* reaction,
-                                            double* velocity, int* info,
-                                            SolverOptions* options) {
+void fc3d_nonsmooth_Newton_AlartCurnier_reformulated(FrictionContactProblem* problem,
+                                                     double* reaction, double* velocity,
+                                                     int* info, SolverOptions* options) {
   assert(problem);
   assert(reaction);
   assert(velocity);
@@ -198,8 +198,8 @@ void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, dou
   free(opaque_data.Bx);
 }
 
-void fc3d_nsn_ac_new_set_default(SolverOptions* options) {
-  /* Same as fc3d_nsn_ac_set_default but adapted for newton_LSA
+void fc3d_nonsmooth_newton_alart_curnier_reformulated_set_default(SolverOptions* options) {
+  /* Same as fc3d_nonsmooth_newton_alart_curnier_set_default but adapted for newton_LSA
    * - iparam[5] = 1 (force arc search) removed - arc search requires get_set_from_problem_data
    * - iparam[3] = nzmax removed - index 3 is SICONOS_IPARAM_LSA_NONMONOTONE_LS in newton_LSA
    */
@@ -236,8 +236,8 @@ static int fc3d_nsn_ac_new_init_wrap(void* problem, SolverOptions* options) {
 static int fc3d_nsn_ac_new_solve_wrap(void* problem, double* reaction, double* velocity,
                                       SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_nonsmooth_Newton_AlartCurnier_new((FrictionContactProblem*)problem, reaction, velocity,
-                                         &info, options);
+  fc3d_nonsmooth_Newton_AlartCurnier_reformulated((FrictionContactProblem*)problem, reaction,
+                                                  velocity, &info, options);
   return info;
 }
 
@@ -245,5 +245,5 @@ REGISTER_SOLVER(
     FC3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
     "Nonsmooth Newton method based on Alart-Curnier formulation (new implementation)",
     fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL,
-    fc3d_nsn_ac_new_set_default, /* set_default */
+    fc3d_nonsmooth_newton_alart_curnier_reformulated_set_default, /* set_default */
     200, 1e-6, 0);

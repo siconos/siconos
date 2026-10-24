@@ -996,7 +996,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   }
 }
 
-void gfc3d_admm_set_default(SolverOptions* options) {
+void gfc3d_alternating_direction_method_of_multipliers_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 50;
@@ -1049,7 +1049,7 @@ void gfc3d_admm_set_default(SolverOptions* options) {
  */
 
 static int gfc3d_admm_init_wrap(void* problem, SolverOptions* options) {
-  //  gfc3d_admm_set_default(options);
+  //  gfc3d_alternating_direction_method_of_multipliers_set_default(options);
   (void)problem;
   (void)options;
 
@@ -1075,7 +1075,8 @@ REGISTER_SOLVER_3VAR(
     GFC3D_ADMM, "GFC3D_ADMM",
     "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
     gfc3d_admm_init_wrap, gfc3d_admm_solve_wrap, gfc3d_admm_free_wrap,
-    NULL,                          /* error function */
-    gfc3d_admm_set_default, 20000, /* default_max_iter */
-    1e-6,                          /* default_tol */
+    NULL, /* error function */
+    gfc3d_alternating_direction_method_of_multipliers_set_default,
+    20000, /* default_max_iter */
+    1e-6,  /* default_tol */
     0 /* is_local_solver */);

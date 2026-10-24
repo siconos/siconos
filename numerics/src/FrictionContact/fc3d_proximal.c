@@ -138,7 +138,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
     } else if (internalsolver_options->solverId == FC3D_NSN_AC) {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier;
     } else if (internalsolver_options->solverId == FC3D_NSN_AC_NEW) {
-      internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier_new;
+      internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier_reformulated;
     } else if (internalsolver_options->solverId == FC3D_NSN_FB) {
       internalsolver = &fc3d_nonsmooth_Newton_FischerBurmeister;
     } else if (internalsolver_options->solverId == FC3D_IPM_SNM) {

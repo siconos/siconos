@@ -2233,7 +2233,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   gfc3d_IPM_SNM_cleanup(&cd, info);
 }
 
-void gfc3d_ipm_snm_set_default(SolverOptions* options) {
+void gfc3d_IPM_SNM_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
       SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
@@ -2280,7 +2280,7 @@ REGISTER_SOLVER_3VAR(
     GFC3D_IPM_SNM, "GFC3D_IPM_SNM",
     "Interior Point Method with Smoothing and Newton for Global 3D Friction Contact",
     gfc3d_ipm_snm_init_wrap, gfc3d_ipm_snm_solve_wrap, gfc3d_ipm_snm_free_wrap, NULL,
-    gfc3d_ipm_snm_set_default, /* set_default */
+    gfc3d_IPM_SNM_set_default, /* set_default */
     500,                       /* default_max_iter - from set_default */
     1e-10,                     /* default_tol - from set_default */
     0 /* is_local_solver */)

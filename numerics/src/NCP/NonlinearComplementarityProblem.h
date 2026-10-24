@@ -58,7 +58,7 @@ extern "C" {
  *
  *  \param ncp structure to free
  */
-void freeNCP(NonlinearComplementarityProblem* ncp);
+void NCP_free(NonlinearComplementarityProblem* ncp);
 
 /** create an empty NCP problem
  *

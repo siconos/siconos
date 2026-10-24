@@ -1273,7 +1273,7 @@ restart:
  * \param[in,out] options the solver options structure to initialize
  */
 
-void gfc3d_nsn_ac_set_default(SolverOptions* options) {
+void gfc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;
@@ -1337,8 +1337,8 @@ static void gfc3d_nsn_ac_free_wrap(void* problem, SolverOptions* options) {
 REGISTER_SOLVER_3VAR(GFC3D_NSN_AC, "GFC3D_NSN_AC",
                      "Non-smooth Newton Alart-Curnier for 3D Global Friction Contact",
                      gfc3d_nsn_ac_init_wrap, gfc3d_nsn_ac_solve_wrap, gfc3d_nsn_ac_free_wrap,
-                     NULL,                     /* error function */
-                     gfc3d_nsn_ac_set_default, /* set_default */
-                     100,                      /* default_max_iter */
-                     1e-6,                     /* default_tol */
+                     NULL,                                             /* error function */
+                     gfc3d_nonsmooth_newton_alart_curnier_set_default, /* set_default */
+                     100,                                              /* default_max_iter */
+                     1e-6,                                             /* default_tol */
                      0 /* is_local_solver */);

@@ -93,7 +93,7 @@ int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename);
  *
  *  \param avi  pointer to a AffineVariationalInequalities to delete
  */
-void freeAVI(AffineVariationalInequalities* avi);
+void AVI_free(AffineVariationalInequalities* avi);
 
 /** Create an empty AVI struct
  *

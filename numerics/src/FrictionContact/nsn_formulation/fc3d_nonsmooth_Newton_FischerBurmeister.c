@@ -111,7 +111,7 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem
   }
 }
 
-void fc3d_nsn_fb_set_default(SolverOptions* options) {
+void fc3d_nonsmooth_newton_fischer_burmeister_set_default(SolverOptions* options) {
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;

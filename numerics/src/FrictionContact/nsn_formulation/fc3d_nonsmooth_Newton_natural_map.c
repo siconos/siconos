@@ -103,7 +103,7 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* probl
   }
 }
 
-void fc3d_nsn_nm_set_default(SolverOptions* options) {
+void fc3d_nonsmooth_newton_jean_moreau_set_default(SolverOptions* options) {
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;

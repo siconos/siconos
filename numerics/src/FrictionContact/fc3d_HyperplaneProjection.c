@@ -203,7 +203,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction
   free(reactiontmp3);
 }
 
-void fc3d_hp_set_default(SolverOptions* options) {
+void fc3d_hyperplane_projection_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 50;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] = 0.99;
@@ -235,7 +235,7 @@ static void fc3d_hp_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(FC3D_HP, "FC3D_HP", "Hyperplane Projection for 3D Friction Contact",
                 fc3d_hp_init_wrap, fc3d_hp_solve_wrap, fc3d_hp_free_wrap, NULL,
-                fc3d_hp_set_default, /* set_default */
-                1000,                /* default_max_iter */
-                1e-3,                /* default_tol - uses 1e-3 in set_default */
+                fc3d_hyperplane_projection_set_default, /* set_default */
+                1000,                                   /* default_max_iter */
+                1e-3, /* default_tol - uses 1e-3 in set_default */
                 0 /* is_local_solver */)

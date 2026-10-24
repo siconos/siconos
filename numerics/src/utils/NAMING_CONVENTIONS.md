@@ -147,7 +147,9 @@ The following files have been updated with the naming conventions header:
 
 ## Deprecated Names
 
-The following names are deprecated and should not be used in new code:
+The following names are deprecated and should not be used in new code.  Backward-compatibility aliases are centralized in `numerics/src/utils/deprecated_numerics_api.h`.
+
+### Variable naming
 
 | Deprecated | Replacement |
 |-----------|-------------|
@@ -160,9 +162,36 @@ The following names are deprecated and should not be used in new code:
 | `dparam[0]` | `SOLVER_TOL()` |
 | `iparam[0]` | `SOLVER_MAX_ITER()` |
 
+### Public function names
+
+| Deprecated | Replacement |
+|-----------|-------------|
+| `fc3d_dsfp_set_default` | `fc3d_de_saxce_fixed_point_set_default` |
+| `fc3d_fpp_set_default` | `fc3d_fixed_point_projection_set_default` |
+| `fc3d_hp_set_default` | `fc3d_hyperplane_projection_set_default` |
+| `fc3d_eg_set_default` | `fc3d_extra_gradient_set_default` |
+| `fc3d_pfp_set_default` | `fc3d_panagiotopoulos_fixed_point_set_default` |
+| `fc3d_aclmfp_set_default` | `fc3d_alart_curnier_lm_fixed_point_set_default` |
+| `fc3d_tfp_set_default` | `fc3d_tresca_fixed_point_set_default` |
+| `fc3d_nsn_ac_set_default` | `fc3d_nonsmooth_newton_alart_curnier_set_default` |
+| `fc3d_nsn_fb_set_default` | `fc3d_nonsmooth_newton_fischer_burmeister_set_default` |
+| `fc3d_nsn_nm_set_default` | `fc3d_nonsmooth_newton_jean_moreau_set_default` |
+| `fc3d_nsn_ac_new_set_default` | `fc3d_nonsmooth_newton_alart_curnier_reformulated_set_default` |
+| `fc3d_ipm_snm_set_default` | `fc3d_IPM_SNM_set_default` |
+| `gfc3d_nsn_ac_set_default` | `gfc3d_nonsmooth_newton_alart_curnier_set_default` |
+| `gfc3d_admm_set_default` | `gfc3d_alternating_direction_method_of_multipliers_set_default` |
+| `gfc3d_aclmfp_set_default` | `gfc3d_alart_curnier_lm_fixed_point_set_default` |
+| `gfc3d_ipm_snm_set_default` | `gfc3d_IPM_SNM_set_default` |
+| `computeAlartCurnier2D_new` | `computeAlartCurnier2D_reformulated` |
+| `fc3d_nonsmooth_Newton_AlartCurnier_new` | `fc3d_nonsmooth_Newton_AlartCurnier_reformulated` |
+| `gfc3d_nonsmooth_Newton_AlartCurnier_new_wr` | `gfc3d_nonsmooth_Newton_AlartCurnier_reformulated_wr` |
+| `NM_internalData_new` | `NM_internalData_alloc` |
+| `freeAVI` | `AVI_free` |
+| `freeNCP` | `NCP_free` |
+
 ## Future Work
 
-- Gradually replace deprecated names in existing code
-- Add compiler warnings for deprecated patterns
-- Update documentation and examples
+- Apply expanded names to remaining cryptic abbreviations in the public API
+- Remove deprecated aliases after one release cycle
+- Update external examples and tutorials to use canonical names
 - Apply conventions to remaining solver files

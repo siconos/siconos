@@ -166,7 +166,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem,
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 }
 
-void gfc3d_aclmfp_set_default(SolverOptions* options) {
+void gfc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 2.0;
@@ -193,7 +193,7 @@ void gfc3d_aclmfp_set_default(SolverOptions* options) {
  */
 
 static int gfc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
-  gfc3d_aclmfp_set_default(options);
+  gfc3d_alart_curnier_lm_fixed_point_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -214,8 +214,8 @@ static void gfc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
 REGISTER_SOLVER_3VAR(GFC3D_ACLMFP, "GFC3D_ACLMFP",
                      "Alart-Curnier Lemke Fixed Point for 3D Global Friction Contact",
                      gfc3d_aclmfp_init_wrap, gfc3d_aclmfp_solve_wrap, gfc3d_aclmfp_free_wrap,
-                     NULL,                     /* error function */
-                     gfc3d_aclmfp_set_default, /* set_default */
-                     1000,                     /* default_max_iter */
-                     1e-4,                     /* default_tol */
+                     NULL,                                           /* error function */
+                     gfc3d_alart_curnier_lm_fixed_point_set_default, /* set_default */
+                     1000,                                           /* default_max_iter */
+                     1e-4,                                           /* default_tol */
                      0 /* is_local_solver */);

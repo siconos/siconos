@@ -323,7 +323,8 @@ void computeAlartCurnier2D_JeanMoreau(double* reaction, double* velocity, double
  * \brief Backward-compatible wrapper that defaults to the Alart--Curnier
  *        formulation with the corrected Jacobian.
  */
-void computeAlartCurnier2D_new(double* reaction, double* velocity, double mu, double* rho,
-                               double* residual, double* jacobian_u, double* jacobian_r) {
+void computeAlartCurnier2D_reformulated(double* reaction, double* velocity, double mu,
+                                        double* rho, double* residual, double* jacobian_u,
+                                        double* jacobian_r) {
   computeAlartCurnier2D_AC(reaction, velocity, mu, rho, residual, jacobian_u, jacobian_r);
 }

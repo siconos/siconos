@@ -229,7 +229,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
   free(reactiontmp);
 }
 
-void fc3d_fpp_set_default(SolverOptions* options) {
+void fc3d_fixed_point_projection_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }
 
@@ -259,7 +259,7 @@ static void fc3d_fpp_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(FC3D_FPP, "FC3D_FPP", "Fixed Point Projection for 3D Friction Contact",
                 fc3d_fpp_init_wrap, fc3d_fpp_solve_wrap, fc3d_fpp_free_wrap, NULL,
-                fc3d_fpp_set_default, /* set_default */
-                1000,                 /* default_max_iter */
-                1e-4,                 /* default_tol */
+                fc3d_fixed_point_projection_set_default, /* set_default */
+                1000,                                    /* default_max_iter */
+                1e-4,                                    /* default_tol */
                 0 /* is_local_solver */)

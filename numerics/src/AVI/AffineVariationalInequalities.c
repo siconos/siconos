@@ -95,7 +95,7 @@ int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename) {
   return info;
 }
 
-void freeAVI(AffineVariationalInequalities* avi) {
+void AVI_free(AffineVariationalInequalities* avi) {
   assert(avi);
   if (avi->M) {
     NM_clear(avi->M);

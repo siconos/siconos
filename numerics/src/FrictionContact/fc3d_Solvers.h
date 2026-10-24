@@ -333,11 +333,11 @@ void fc3d_lcp_gams_path(FrictionContactProblem* problem, double* reaction, doubl
 void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
                           int* info, SolverOptions* options);
 
-void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem* problem, double* reaction,
-                                            double* velocity, int* info,
-                                            SolverOptions* options);
+void fc3d_nonsmooth_Newton_AlartCurnier_reformulated(FrictionContactProblem* problem,
+                                                     double* reaction, double* velocity,
+                                                     int* info, SolverOptions* options);
 
-void fc3d_nsn_ac_new_set_default(SolverOptions* options);
+void fc3d_nonsmooth_newton_alart_curnier_reformulated_set_default(SolverOptions* options);
 
 /*
  * Info to complete
@@ -347,7 +347,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* problem, double* reaction, double* vel
 
 void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options);
 
-void fc3d_ipm_snm_set_default(SolverOptions* options);
+void fc3d_IPM_SNM_set_default(SolverOptions* options);
 
 /** \addtogroup SetSolverOptions
  * @{
@@ -355,16 +355,16 @@ void fc3d_ipm_snm_set_default(SolverOptions* options);
 void fc3d_nsgs_set_default(SolverOptions* options);
 void fc3d_nsgs_velocity_set_default(SolverOptions* options);
 void fc3d_proximal_set_default(SolverOptions* options);
-void fc3d_tfp_set_default(SolverOptions* options);
-void fc3d_nsn_ac_set_default(SolverOptions* options);
-void fc3d_dsfp_set_default(SolverOptions* options);
-void fc3d_hp_set_default(SolverOptions* options);
-void fc3d_fpp_set_default(SolverOptions* options);
-void fc3d_eg_set_default(SolverOptions* options);
-void fc3d_nsn_fb_set_default(SolverOptions* options);
-void fc3d_aclmfp_set_default(SolverOptions* options);
-void fc3d_nsn_nm_set_default(SolverOptions* options);
-void fc3d_pfp_set_default(SolverOptions* options);
+void fc3d_tresca_fixed_point_set_default(SolverOptions* options);
+void fc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options);
+void fc3d_de_saxce_fixed_point_set_default(SolverOptions* options);
+void fc3d_hyperplane_projection_set_default(SolverOptions* options);
+void fc3d_fixed_point_projection_set_default(SolverOptions* options);
+void fc3d_extra_gradient_set_default(SolverOptions* options);
+void fc3d_nonsmooth_newton_fischer_burmeister_set_default(SolverOptions* options);
+void fc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options);
+void fc3d_nonsmooth_newton_jean_moreau_set_default(SolverOptions* options);
+void fc3d_panagiotopoulos_fixed_point_set_default(SolverOptions* options);
 void fc3d_admm_set_default(SolverOptions* options);
 void fc3d_onecontact_nsn_set_default(SolverOptions* options);
 void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options);

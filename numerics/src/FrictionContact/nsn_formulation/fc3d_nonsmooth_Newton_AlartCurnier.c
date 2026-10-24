@@ -142,7 +142,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem* problem, double*
   }
 }
 
-void fc3d_nsn_ac_set_default(SolverOptions* options) {
+void fc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options) {
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
@@ -169,7 +169,7 @@ void fc3d_nsn_ac_set_default(SolverOptions* options) {
 }
 
 // static int fc3d_nsn_ac_init_wrap(void *problem, SolverOptions *options) {
-//   fc3d_nsn_ac_set_default(options);
+//   fc3d_nonsmooth_newton_alart_curnier_set_default(options);
 //   return NUMERICS_OK;
 // }
 

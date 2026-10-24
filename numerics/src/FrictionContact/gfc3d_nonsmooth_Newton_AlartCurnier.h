@@ -105,7 +105,7 @@ int gfc3d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* react
  *
  * \param[in,out] options the solver options structure to initialize
  */
-void gfc3d_nsn_ac_set_default(SolverOptions* options);
+void gfc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options);
 
 /**
  * \brief No-op initialization hook for the sparse global Alart--Curnier

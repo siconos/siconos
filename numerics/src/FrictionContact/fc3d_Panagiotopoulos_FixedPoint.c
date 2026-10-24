@@ -277,7 +277,7 @@ int fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double* rea
   return 0;
 }
 
-void fc3d_pfp_set_default(SolverOptions* options) {
+void fc3d_panagiotopoulos_fixed_point_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
@@ -308,7 +308,7 @@ void fc3d_pfp_set_default(SolverOptions* options) {
 
 static int fc3d_pfp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  fc3d_pfp_set_default(options);
+  fc3d_panagiotopoulos_fixed_point_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -327,7 +327,7 @@ static void fc3d_pfp_free_wrap(void* problem, SolverOptions* options) {
 
 REGISTER_SOLVER(FC3D_PFP, "FC3D_PFP", "Panagiotopoulos Fixed Point for 3D Friction Contact",
                 fc3d_pfp_init_wrap, fc3d_pfp_solve_wrap, fc3d_pfp_free_wrap, NULL,
-                fc3d_pfp_set_default, /* set_default */
-                1000,                 /* default_max_iter */
-                1e-4,                 /* default_tol */
+                fc3d_panagiotopoulos_fixed_point_set_default, /* set_default */
+                1000,                                         /* default_max_iter */
+                1e-4,                                         /* default_tol */
                 0 /* is_local_solver */)

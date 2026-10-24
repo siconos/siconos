@@ -85,7 +85,7 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* probl
 /** Set default solver options for FC3D_NSN_NM
  *  \param options the solver options
  */
-void fc3d_nsn_nm_set_default(SolverOptions* options);
+void fc3d_nonsmooth_newton_jean_moreau_set_default(SolverOptions* options);
 
 #if defined(__cplusplus)
 }

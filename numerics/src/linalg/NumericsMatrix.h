@@ -303,7 +303,7 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
  *
  *  \param M the matrix to modify
  */
-void NM_internalData_new(NumericsMatrix* M);
+void NM_internalData_alloc(NumericsMatrix* M);
 
 /** Copy the internalData structure
  *
