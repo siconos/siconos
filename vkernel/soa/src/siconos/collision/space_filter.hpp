@@ -14,6 +14,7 @@
 #include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/point.hpp"
+#include "siconos/collision/polytopedisk_r.hpp"
 #include "siconos/collision/polytopefdisk_r.hpp"
 #include "siconos/collision/polytopefsegment_r.hpp"
 #include "siconos/collision/polytopemesh_r.hpp"
@@ -90,6 +91,9 @@ struct space_filter : item {
         polytopemeshes;
     some::map<some::array<some::scalar, some::indice_value<2>>, some::item_ref<diskfdisk_r>>
         diskfdisks;
+    // the disk x polytope relation is stateless: one item, under key 0,
+    // serves every mixed pair
+    some::map<some::indice, some::item_ref<polytopedisk_r<Topology>>> polytopedisks;
   };
 
   template <typename Handle>
@@ -126,6 +130,7 @@ struct space_filter : item {
     decltype(auto) polytopemeshes() { return storage::attr<"polytopemeshes">(*self()); }
 
     decltype(auto) diskfdisks() { return storage::attr<"diskfdisks">(*self()); }
+    decltype(auto) polytopedisks() { return storage::attr<"polytopedisks">(*self()); }
 
     // void create_relations()
     // {
@@ -503,15 +508,37 @@ struct space_filter : item {
           storage::prop<"activation", Topology>(inter) = true;
           continue;
         }
-        // the generic binder serves disk x disk, and polytope x polytope
-        // until the cxd stage rebinds it; no disk x polytope relation exists
-        // yet
         if (polytope1 != polytope2) {
-          throw std::runtime_error(
-              "space_filter: a disk and a polytope are neighbors; no disk x "
-              "polytope narrowphase relation exists yet");
+          // disk x polytope: linked disk first, as polytopedisk_r expects
+          using ds_t = std::decay_t<decltype(ds1)>;
+          using pd_index_t = storage::index<collision::polytopedisk_r<Topology>, std::size_t>;
+          using inter_t = decltype(topo.link(ds1, ds2));
+          if constexpr (collision::may_have_shape<collision::shape::polytope, ds_t>() &&
+                        collision::may_have_shape<collision::shape::disk, ds_t>()) {
+            if constexpr (requires(inter_t h, pd_index_t i) { h.relation() = i; }) {
+              auto inter = polytope1 ? topo.link(ds2, ds1) : topo.link(ds1, ds2);
+              inter.nslaw() = nslaw;
+              storage::prop<"activation", Topology>(inter) = true;
+              auto& rmap = self()->polytopedisks();
+              if (auto search = rmap.find(0); search != rmap.end()) {
+                inter.relation() = search->second;
+              } else {
+                auto rel = storage::add<collision::polytopedisk_r<Topology>>(data);
+                inter.relation() = rel;
+                rmap[0] = rel;
+              }
+              fmap[make_ikey(ds1.index(), ds2.index(), pi)] = inter;
+            } else {
+              throw std::runtime_error(
+                  "space_filter: a disk and a polytope are neighbors, but the interaction "
+                  "relations of this world do not include polytopedisk_r");
+            }
+          }
+          continue;
         }
 
+        // the generic binder serves disk x disk, and polytope x polytope
+        // until the cxd stage rebinds it
         // create the edge
         auto inter = topo.link(ds1, ds2);
         inter.nslaw() = nslaw;  // one nslaw for the moment

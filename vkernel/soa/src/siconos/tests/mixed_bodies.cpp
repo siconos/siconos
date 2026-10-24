@@ -9,9 +9,8 @@
       polytopefsegment_r), both columns must come to rest stacked (centres
       near y = 0.5 and 1.5) and the two columns must agree to 1e-8.
 
-   2. a disk and a square inside the neighborhood radius: there is no
-      disk x polytope relation yet, so the space filter must throw instead
-      of binding the radius-based diskdisk_r to a polytope. */
+   2. a disk and a square inside the neighborhood radius: the pair is bound to
+      polytopedisk_r, linked disk first. */
 
 #include <array>
 #include <cmath>
@@ -25,6 +24,7 @@
 // clang-format off
 #include "siconos/collision/polytopepolytope_r.hpp"
 #include "siconos/collision/polytopefsegment_r.hpp"
+#include "siconos/collision/polytopedisk_r.hpp"
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
@@ -42,11 +42,12 @@ using diskfsegment_r = collision::diskfsegment_r;
 struct topo;
 using polytopepolytope_r = collision::polytopepolytope_r<topo>;
 using polytopefsegment_r = collision::polytopefsegment_r<topo>;
+using polytopedisk_r = collision::polytopedisk_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, polytopepolytope_r,
-                                        polytopefsegment_r> {};
+                                        polytopefsegment_r, polytopedisk_r> {};
 struct topo : simul::topology<body, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
@@ -77,6 +78,7 @@ struct data_t
               storage::wrapped<diskfsegment_r, some::unbounded_collection>,
               storage::wrapped<polytopepolytope_r, some::unbounded_collection>,
               storage::wrapped<polytopefsegment_r, some::unbounded_collection>,
+              storage::wrapped<polytopedisk_r, some::unbounded_collection>,
               storage::wrapped<pointd, some::unbounded_collection>,
               storage::wrapped<pointl, some::unbounded_collection>,
               storage::wrapped<interaction, some::unbounded_collection>,
@@ -327,18 +329,26 @@ void test_tilted_square_on_square_settles() {
   check(std::abs(q(1) - 1.5) < 3e-2, "the upper square rests on the lower one");
 }
 
-void test_disk_polytope_neighbors_throw() {
+/* a disk and a square inside the neighborhood radius: the pair is bound to
+   polytopedisk_r, disk first (tests/polytopedisk checks the physics) */
+void test_disk_polytope_neighbors() {
+  using namespace siconos;
   world w;
-  w.add_disk(0., 0.7);
-  w.add_square(1.2, 0.7);
+  auto d = w.add_disk(0., 0.7);
+  auto p = w.add_square(1.2, 0.7);
   w.finalize();
-  bool thrown = false;
-  try {
-    w.step();
-  } catch (const std::runtime_error& e) {
-    thrown = std::string(e.what()).find("disk x polytope") != std::string::npos;
+  w.step();
+  using pd_t = storage::index<config::polytopedisk_r, std::size_t>;
+  std::size_t n = 0;
+  for (auto inter :
+       storage::handles<config::interaction>(w.data, w.simulation.current_step())) {
+    if (!std::holds_alternative<pd_t>(inter.relation())) continue;
+    ++n;
+    check(storage::prop<"ds1", config::topo>(inter).value() == d.index().value() &&
+              storage::prop<"ds2", config::topo>(inter).value() == p.index().value(),
+          "the mixed pair is linked disk first");
   }
-  check(thrown, "a disk and a polytope as neighbors throw");
+  check(n == 1, "a disk and a polytope as neighbors get one polytopedisk_r interaction");
 }
 }  // namespace
 
@@ -346,7 +356,7 @@ int main() {
   test_two_columns();
   test_tilted_square_settles();
   test_tilted_square_on_square_settles();
-  test_disk_polytope_neighbors_throw();
+  test_disk_polytope_neighbors();
   std::print("mixed_bodies: all checks pass\n");
   return 0;
 }
