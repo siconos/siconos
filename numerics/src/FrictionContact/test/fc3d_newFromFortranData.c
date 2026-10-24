@@ -45,7 +45,7 @@ int main(void) {
 
   FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, NM, q, mu);
 
-  //  frictionContact_display(FC);
+  //  frictionContactProblem_display(FC);
 
   assert(FC->M->sparse_block->blocksize0[2] == 9);
   assert(FC->M->sparse_block->blocksize0[1] == 6);

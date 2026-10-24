@@ -311,7 +311,7 @@ static void acceptLocalReactionFiltered(int dimension, SolverOptions* local_opts
                                         double* reaction, double localreaction[3]) {
   if (isnan(SOLVER_RESIDUAL(local_opts)) || isinf(SOLVER_RESIDUAL(local_opts)) ||
       SOLVER_RESIDUAL(local_opts) > 1.0) {
-    DEBUG_EXPR(frictionContact_display(localproblem));
+    DEBUG_EXPR(frictionContactProblem_display(localproblem));
 
     DEBUG_PRINTF(
         "Discard local reaction for contact %i at iteration %i "
@@ -737,7 +737,7 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   /*     fccounter++; */
   /*     snprintf(fname, sizeof(fname), "problem_%i_%i.dat", nc,itermax); */
   /*     FILE * file = fopen(fname, "w"); */
-  /*     frictionContact_printInFile(problem, file); */
+  /*     frictionContactProblem_printInFile(problem, file); */
   /*     fclose(file); */
   /*   }  */
 

@@ -36,7 +36,7 @@ void Function_VI_GFC3D(void* self, int n_notused, double* x, double* F) {
   GlobalFrictionContactProblem_as_VI* pb = (GlobalFrictionContactProblem_as_VI*)vi->env;
   GlobalFrictionContactProblem* gfc3d = pb->gfc3d;
 
-  // DEBUG_EXPR(globalFrictionContact_display(gfc3d););
+  // DEBUG_EXPR(globalFrictionContactProblem_display(gfc3d););
   int nLocal = gfc3d->dimension;
 
   int m = gfc3d->numberOfContacts * gfc3d->dimension;
@@ -67,7 +67,7 @@ void Function_VI_GFC3D(void* self, int n_notused, double* x, double* F) {
              localvelocity[contact * nLocal + 2] * localvelocity[contact * nLocal + 2]);
     localvelocity[contact * nLocal] += (gfc3d->mu[contact] * normUT);
   }
-  // frictionContact_display(gfc3d);
+  // frictionContactProblem_display(gfc3d);
 
   DEBUG_EXPR(NM_vector_display(F, n + m));
   DEBUG_END("Function_VI_FC3D(void * self, double *x, double *F)\n")
@@ -79,7 +79,7 @@ void Projection_VI_GFC3D(void* viIn, double* x, double* PX) {
   VariationalInequality* vi = (VariationalInequality*)viIn;
   GlobalFrictionContactProblem_as_VI* pb = (GlobalFrictionContactProblem_as_VI*)vi->env;
   GlobalFrictionContactProblem* gfc3d = pb->gfc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nLocal = gfc3d->dimension;
   int m = gfc3d->numberOfContacts * nLocal;

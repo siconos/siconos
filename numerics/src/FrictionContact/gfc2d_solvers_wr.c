@@ -56,7 +56,7 @@ void gfc2d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc2d solver ...\n");
     }

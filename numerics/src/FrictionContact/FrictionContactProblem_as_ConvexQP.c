@@ -36,7 +36,7 @@ void Projection_ConvexQP_FC3D_Cylinder(void* cqpIn, double* x, double* PX) {
   FrictionContactProblem_as_ConvexQP* pb = (FrictionContactProblem_as_ConvexQP*)cqp->env;
   FrictionContactProblem* fc3d = pb->fc3d;
   SolverOptions* options = pb->options;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nLocal = fc3d->dimension;
@@ -54,7 +54,7 @@ void Projection_ConvexQP_FC3D_Disk(void* cqpIn, double* x, double* PX) {
   FrictionContactProblem_as_ConvexQP* pb = (FrictionContactProblem_as_ConvexQP*)cqp->env;
   FrictionContactProblem* fc3d = pb->fc3d;
   SolverOptions* options = pb->options;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nLocal = 2;
   int n = fc3d->numberOfContacts * nLocal;

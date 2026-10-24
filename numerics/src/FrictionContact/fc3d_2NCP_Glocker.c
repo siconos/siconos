@@ -25,7 +25,7 @@
 */
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
-#include "fc3d_2NCP_Glocker.h"  // for Compute_NCP_error1, Compute_NC...
+#include "fc3d_2NCP_Glocker.h"
 
 #include <math.h>   // for sqrt, cos, sin
 #include <stdio.h>  // for printf, NULL
@@ -357,42 +357,7 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date) {
   *jacobianFOut = jacobianFGlocker; /* pointer link */
 }
 
-/* Compute error for the NCP formulation*/
-
-/*  error = sum_i [(zi*F(zi)_+ + (zi)_- + (F(zi))_-] */
-
-double Compute_NCP_error1(int i, double error) {
-  printf("--------------contact =  %i\n", i);
-
-  double Fz;
-  printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);
-  printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
-
-  Fz = FGlocker[i] * reactionGlocker[i];
-  if (Fz > 0) error += Fz;
-  if (reactionGlocker[i] < 0) error += reactionGlocker[i];
-  if (FGlocker[i] < 0) error += FGlocker[i];
-  return error;
-}
-
-/*  error = sum_i sqrt[((zi*F(zi)_+)^2 + (sqrt(zi^2 + (F(zi))^2) - zi - F(zi))^2 ] */
-
-double Compute_NCP_error2(int i, double error) {
-  double Fz;
-  //      printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);
-  //      printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
-
-  Fz = FGlocker[i] * reactionGlocker[i];
-  if (Fz > 0) error += Fz * Fz;
-  error += (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) -
-            FGlocker[i] - reactionGlocker[i]) *
-           (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) -
-            FGlocker[i] - reactionGlocker[i]);
-  error = sqrt(error);
-  return error;
-}
-
-void compute_Z_GlockerFixedP(int i, double* reactionstep) {
+void compute_Z_Glocker_fixed_point(int i, double* reactionstep) {
   double rho = 1.;
   if (reactionGlocker[i] - rho * FGlocker[i] > 0.) {
     reactionstep[i] = rho * FGlocker[i] - reactionGlocker[i];

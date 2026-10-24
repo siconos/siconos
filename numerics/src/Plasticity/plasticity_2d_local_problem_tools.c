@@ -23,23 +23,17 @@
 #endif
 #include <stdlib.h>  // for malloc, NULL
 
-#include "NumericsMatrix.h"     // for NM_create_with_data, NumericsMatrix
-#include "PlasticityProblem.h"  // for PlasticityProblem,
-#include "SparseBlockMatrix.h"  // IWYU pragma: keep
+#include "NumericsMatrix.h"         // for NM_create_with_data, NumericsMatrix
+#include "PlasticityProblem.h"      // for PlasticityProblem,
+#include "SparseBlockMatrix.h"      // IWYU pragma: keep
+#include "local_problem_toolkit.h"  // for local_problem_toolkit_new
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 struct LocalPLASTICITY_2DProblemFunctionToolkit* localPLASTICITY_2DProblemFunctionToolkit_new(
     void) {
-  struct LocalPLASTICITY_2DProblemFunctionToolkit* lpft =
-      (struct LocalPLASTICITY_2DProblemFunctionToolkit*)malloc(
-          sizeof(struct LocalPLASTICITY_2DProblemFunctionToolkit));
-
-  lpft->local_solver = NULL;
-  lpft->update_local_problem = NULL;
-  lpft->post_processed_local_result = NULL;
-  lpft->free_local_solver = NULL;
-  return lpft;
+  return (struct LocalPLASTICITY_2DProblemFunctionToolkit*)local_problem_toolkit_new(
+      sizeof(struct LocalPLASTICITY_2DProblemFunctionToolkit));
 }
 
 void localPLASTICITY_2DProblemFunctionToolkit_display(

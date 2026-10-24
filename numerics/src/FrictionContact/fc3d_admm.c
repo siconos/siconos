@@ -127,7 +127,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
                                 double rho, int is_rho_variable, double norm_q,
                                 LinearSolverPtr linear_solver) {
   /* verbose=2;  */
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -524,7 +524,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
                                  int* restrict info, SolverOptions* restrict options,
                                  double rho, int is_rho_variable, double norm_q) {
   /* verbose=2; */
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -971,7 +971,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                double* restrict velocity, int* restrict info,
                SolverOptions* restrict options) {
   /* verbose=1; */
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
 
   /* Number of contacts */
   int nc = problem->numberOfContacts;

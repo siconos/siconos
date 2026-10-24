@@ -58,7 +58,8 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void) {
   return problem;
 }
 
-int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FILE* file) {
+int globalFrictionContactProblem_printInFile(GlobalFrictionContactProblem* problem,
+                                             FILE* file) {
   if (!problem) {
     CHECK_ARG(0, "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
   }
@@ -148,8 +149,8 @@ GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char
   return problem;
 }
 
-int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem,
-                                          const char* filename) {
+int globalFrictionContactProblem_printInFilename(GlobalFrictionContactProblem* problem,
+                                                 const char* filename) {
   int info = 0;
   FILE* file = fopen(filename, "w");
 
@@ -157,13 +158,13 @@ int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem,
     return errno;
   }
 
-  info = globalFrictionContact_printInFile(problem, file);
+  info = globalFrictionContactProblem_printInFile(problem, file);
 
   fclose(file);
   return info;
 }
 
-void globalFrictionContact_free(GlobalFrictionContactProblem* problem) {
+void globalFrictionContactProblem_free(GlobalFrictionContactProblem* problem) {
   if (problem->M) {
     NM_clear(problem->M);
     free(problem->M);
@@ -198,12 +199,13 @@ void globalFrictionContact_free(GlobalFrictionContactProblem* problem) {
   problem->M_inverse = NULL;
 
   if (problem->env)
-    assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
+    assert(0 &&
+           "globalFrictionContactProblem_free :: problem->env != NULL, don't know what to do");
 
   free(problem);
 }
 
-void globalFrictionContact_display(GlobalFrictionContactProblem* problem) {
+void globalFrictionContactProblem_display(GlobalFrictionContactProblem* problem) {
   assert(problem);
   int i, n = problem->dimension * problem->numberOfContacts;
   printf("GlobalFrictionContact Display :\n-------------\n");
@@ -415,7 +417,7 @@ FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
     cblas_dgemv(CblasColMajor, CblasTrans, n_blas, m_blas, 1.0, H->dense, n_blas, qtmp, 1, 1.0,
                 localproblem->q, 1);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContactProblem_display(localproblem););
 
     free(Htmp);
     free(qtmp);
@@ -563,7 +565,7 @@ FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
     free(Htrans);
     free(qtmp);
 
-    DEBUG_EXPR(frictionContact_display(localproblem););
+    DEBUG_EXPR(frictionContactProblem_display(localproblem););
     // getchar();
   } else {
     printf("globalFrictionContact_reduce_to_FrictionContact :: unknown matrix storage");

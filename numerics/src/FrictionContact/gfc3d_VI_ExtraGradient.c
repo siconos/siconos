@@ -77,7 +77,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* react
 
   gfc3d_as_vi->vi = vi;
   gfc3d_as_vi->gfc3d = problem;
-  /* frictionContact_display(fc3d_as_vi->fc3d); */
+  /* frictionContactProblem_display(fc3d_as_vi->fc3d); */
 
   DEBUG_EXPR(NV_display(reaction, m););
   DEBUG_EXPR(NV_display(globalVelocity, n););
@@ -131,7 +131,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* react
  * - Elimination of giant switch statements in drivers
  */
 
-void gfc3d_vi_eg_set_default(SolverOptions* options) {
+void gfc3d_VI_extra_gradient_set_default(SolverOptions* options) {
   /* VI_EG doesn't use internal solvers, but we call the VI set_default for proper
    * initialization */
   variationalInequality_ExtraGradient_set_default(options);
@@ -161,8 +161,8 @@ static void gfc3d_vi_eg_free_wrap(void* problem, SolverOptions* options) {
 REGISTER_SOLVER_3VAR(GFC3D_VI_EG, "GFC3D_VI_EG",
                      "Variational Inequality Extra Gradient for 3D Global Friction Contact",
                      gfc3d_vi_eg_init_wrap, gfc3d_vi_eg_solve_wrap, gfc3d_vi_eg_free_wrap,
-                     NULL,                    /* error function */
-                     gfc3d_vi_eg_set_default, /* set_default */
-                     1000,                    /* default_max_iter */
-                     1e-4,                    /* default_tol */
+                     NULL,                                /* error function */
+                     gfc3d_VI_extra_gradient_set_default, /* set_default */
+                     1000,                                /* default_max_iter */
+                     1e-4,                                /* default_tol */
                      0 /* is_local_solver */);

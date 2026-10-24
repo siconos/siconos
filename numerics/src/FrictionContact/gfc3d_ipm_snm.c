@@ -1650,7 +1650,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   NumericsMatrix* M_original = NULL;
   NumericsMatrix* H_tilde = NULL;
 
-  /* globalFrictionContact_display(problem); */
+  /* globalFrictionContactProblem_display(problem); */
 
   gfc3d_IPM_SNM_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde);
 

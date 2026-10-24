@@ -40,7 +40,7 @@ static void Ftest_0(void* self, int n_unused, double* x, double* F) {
   VariationalInequality* vi = (VariationalInequality*)self;
   Problems* pb = (Problems*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nc = fc3d->numberOfContacts;
   int nLocal = fc3d->dimension;
@@ -61,7 +61,7 @@ static void PXtest_0(void* viIn, double* x, double* PX) {
   VariationalInequality* vi = (VariationalInequality*)viIn;
   Problems* pb = (Problems*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -96,7 +96,7 @@ static int test_0(void) {
 
   pb->vi = &vi;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   vi.size = n;
@@ -129,7 +129,7 @@ static void Ftest_1(void* self, int n_unused, double* x, double* F) {
   VariationalInequality* vi = (VariationalInequality*)self;
   Problems* pb = (Problems*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nc = fc3d->numberOfContacts;
   int nLocal = fc3d->dimension;
@@ -150,7 +150,7 @@ static void PXtest_1(void* viIn, double* x, double* PX) {
   VariationalInequality* vi = (VariationalInequality*)viIn;
   Problems* pb = (Problems*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -186,7 +186,7 @@ static int test_1(void) {
 
   pb->vi = &vi;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   vi.size = n;
@@ -217,7 +217,7 @@ static void Ftest_2(void* self, int n_unused, double* x, double* F) {
   VariationalInequality* vi = (VariationalInequality*)self;
   Problems* pb = (Problems*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nc = fc3d->numberOfContacts;
   int nLocal = fc3d->dimension;
@@ -238,7 +238,7 @@ static void PXtest_2(void* viIn, double* x, double* PX) {
   VariationalInequality* vi = (VariationalInequality*)viIn;
   Problems* pb = (Problems*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -273,7 +273,7 @@ static int test_2(void) {
 
   pb->vi = &vi;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   vi.size = n;

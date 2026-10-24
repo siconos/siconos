@@ -177,7 +177,7 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
 
   /* solver_options_print(&numerics_solver_options); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
-  /* globalFrictionContact_printInFile(problem, file); */
+  /* globalFrictionContactProblem_printInFile(problem, file); */
   /* fclose(file); */
   int rinfo =
       gfc3d_driver(problem, reaction, velocity, globalVelocity, numerics_solver_options);
@@ -186,7 +186,7 @@ int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity,
   dparam[SICONOS_DPARAM_TOL] = numerics_solver_options->dparam[SICONOS_DPARAM_TOL];
 
   /* FILE * file1  =  fopen("tutu.dat", "w"); */
-  /* globalFrictionContact_printInFile(problem, file1); */
+  /* globalFrictionContactProblem_printInFile(problem, file1); */
   /* fclose(file1); */
   if (outputFile == 1) {
     /* dump in C format */

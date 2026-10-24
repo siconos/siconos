@@ -63,7 +63,7 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double* react
 
   fc3d_as_vi->vi = vi;
   fc3d_as_vi->fc3d = problem;
-  /* frictionContact_display(fc3d_as_vi->fc3d); */
+  /* frictionContactProblem_display(fc3d_as_vi->fc3d); */
   variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 
   /* **** Criterium convergence **** */
@@ -115,7 +115,7 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
   fc3d_as_vi->vi = vi;
   fc3d_as_vi->fc3d = problem;
   fc3d_as_vi->options = options;
-  /* frictionContact_display(fc3d_as_vi->fc3d); */
+  /* frictionContactProblem_display(fc3d_as_vi->fc3d); */
   options->solverId = SICONOS_VI_FPP;
   variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 

@@ -38,7 +38,7 @@ void Function_VI_FC3D(void* self, int n_notused, double* x, double* F) {
   VariationalInequality* vi = (VariationalInequality*)self;
   FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nLocal = fc3d->dimension;
   int n = fc3d->numberOfContacts * fc3d->dimension;
@@ -61,7 +61,7 @@ void Projection_VI_FC3D(void* viIn, double* x, double* PX) {
   VariationalInequality* vi = (VariationalInequality*)viIn;
   FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nLocal = fc3d->dimension;
@@ -77,7 +77,7 @@ void Function_VI_FC3D_Cylinder(void* self, int n_notused, double* x, double* F) 
   VariationalInequality* vi = (VariationalInequality*)self;
   FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int n = fc3d->numberOfContacts * fc3d->dimension;
 
@@ -92,7 +92,7 @@ void Projection_VI_FC3D_Cylinder(void* viIn, double* x, double* PX) {
   FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
   SolverOptions* options = pb->options;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nLocal = fc3d->dimension;
@@ -125,7 +125,7 @@ void Projection_VI_FC3D_Disk(void* viIn, double* x, double* PX) {
   FrictionContactProblem_as_VI* pb = (FrictionContactProblem_as_VI*)vi->env;
   FrictionContactProblem* fc3d = pb->fc3d;
   SolverOptions* options = pb->options;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int nLocal = 2;
   int n = fc3d->numberOfContacts * nLocal;

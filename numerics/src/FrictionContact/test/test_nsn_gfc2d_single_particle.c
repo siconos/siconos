@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
   free(reaction);
   free(velocity);
   free(globalvelocity);
-  globalFrictionContact_free(problem);
+  globalFrictionContactProblem_free(problem);
 
   return test_ok ? 0 : 1;
 }

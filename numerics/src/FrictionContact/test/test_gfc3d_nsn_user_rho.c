@@ -62,7 +62,7 @@ int main() {
   /* Release the reformulated problem and the copy; the original problem is kept
    * unmodified for the GFC3D solver. */
   frictionContactProblem_free(local_problem);
-  globalFrictionContact_free(problem_copy);
+  globalFrictionContactProblem_free(problem_copy);
 
   /* Allocate output arrays for the GFC3D solver. */
   double* reaction = (double*)calloc((size_t)dim, sizeof(double));
@@ -88,7 +88,7 @@ int main() {
 
   /* solver_options_delete frees options->solverData, i.e. the rho vector. */
   solver_options_delete(options);
-  globalFrictionContact_free(problem);
+  globalFrictionContactProblem_free(problem);
 
   free(reaction);
   free(velocity);

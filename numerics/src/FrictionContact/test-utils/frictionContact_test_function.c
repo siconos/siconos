@@ -88,7 +88,7 @@ int frictionContact_test_function(TestCase* current) {
 
   FrictionContactProblem* problem = frictionContact_new_from_filename(current->filename);
   FILE* foutput = fopen("checkinput.dat", "w");
-  info = frictionContact_printInFile(problem, foutput);
+  info = frictionContactProblem_printInFile(problem, foutput);
 
 #ifdef WITH_FCLIB
   int global_hdf5_output = 0;

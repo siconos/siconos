@@ -188,6 +188,31 @@ The following names are deprecated and should not be used in new code.  Backward
 | `NM_internalData_new` | `NM_internalData_alloc` |
 | `freeAVI` | `AVI_free` |
 | `freeNCP` | `NCP_free` |
+| `gfc3d_vi_eg_set_default` | `gfc3d_VI_extra_gradient_set_default` |
+| `gfc3d_vi_fpp_set_default` | `gfc3d_VI_fixed_point_projection_set_default` |
+| `gfc2d_vi_eg_set_default` | `gfc2d_VI_extra_gradient_set_default` |
+| `fc3d_FixedP_initialize` | `fc3d_fixed_point_initialize` |
+| `fc3d_FixedP_solve` | `fc3d_fixed_point_solve` |
+| `fc3d_FixedP_free` | `fc3d_fixed_point_free` |
+| `fc3d_FixedP_computeError` | `fc3d_fixed_point_compute_error` |
+| `F_GlockerFixedP` | `F_Glocker_fixed_point` |
+| `compute_Z_GlockerFixedP` | `compute_Z_Glocker_fixed_point` |
+| `frictionContact_display` | `frictionContactProblem_display` |
+| `frictionContact_printInFile` | `frictionContactProblem_printInFile` |
+| `frictionContact_printInFilename` | `frictionContactProblem_printInFilename` |
+| `globalFrictionContact_display` | `globalFrictionContactProblem_display` |
+| `globalFrictionContact_free` | `globalFrictionContactProblem_free` |
+| `globalFrictionContact_printInFile` | `globalFrictionContactProblem_printInFile` |
+| `globalFrictionContact_printInFileName` | `globalFrictionContactProblem_printInFilename` |
+
+### Removed public functions
+
+The following functions had no active call sites in Siconos and were removed rather than renamed:
+
+| Removed | Rationale |
+|---------|-----------|
+| `Compute_NCP_error1` | Dead code; only referenced in commented-out lines |
+| `Compute_NCP_error2` | Dead code; only referenced in commented-out lines |
 
 ## Future Work
 

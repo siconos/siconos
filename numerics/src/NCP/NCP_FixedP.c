@@ -21,7 +21,7 @@
 
 #include "SiconosBlas.h"  // for cblas_dnrm2
 #include "SolverOptions.h"
-#include "fc3d_2NCP_Glocker.h"  // for compute_Z_GlockerFixedP
+#include "fc3d_2NCP_Glocker.h"  // for compute_Z_Glocker_fixed_point
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "stdio.h"  // for printf
@@ -52,7 +52,7 @@ int Fixe(int n, double* z, int* iparam, double* dparam) {
     ++niter;
 
     // printf(" ============= Fixed Point Iteration ============= %i\n",niter);
-    for (i = 0; i < n; ++i) compute_Z_GlockerFixedP(i, www);
+    for (i = 0; i < n; ++i) compute_Z_Glocker_fixed_point(i, www);
 
     terminationCriterion = cblas_dnrm2(n, www, 1);
     // printf(" error = %14.7e\n", terminationCriterion);

@@ -25,19 +25,14 @@
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"       // IWYU pragma: keep
+#include "local_problem_toolkit.h"   // for local_problem_toolkit_new
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "safe_casts.h"
 
 struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new(void) {
-  struct LocalProblemFunctionToolkit* lpft =
-      (struct LocalProblemFunctionToolkit*)malloc(sizeof(struct LocalProblemFunctionToolkit));
-
-  lpft->local_solver = NULL;
-  lpft->update_local_problem = NULL;
-  lpft->post_processed_local_result = NULL;
-  lpft->free_local_solver = NULL;
-  return lpft;
+  return (struct LocalProblemFunctionToolkit*)local_problem_toolkit_new(
+      sizeof(struct LocalProblemFunctionToolkit));
 }
 
 void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit* lpft) {

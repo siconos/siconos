@@ -303,8 +303,8 @@ void gfc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options);
 void gfc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options);
 void gfc3d_alternating_direction_method_of_multipliers_set_default(SolverOptions* options);
 void gfc3d_nsgs_set_default(SolverOptions* options);
-void gfc3d_vi_eg_set_default(SolverOptions* options);
-void gfc3d_vi_fpp_set_default(SolverOptions* options);
+void gfc3d_VI_extra_gradient_set_default(SolverOptions* options);
+void gfc3d_VI_fixed_point_projection_set_default(SolverOptions* options);
 
 /** @} */
 

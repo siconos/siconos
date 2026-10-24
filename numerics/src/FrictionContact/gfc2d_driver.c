@@ -98,7 +98,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   printf("Dump %s file\n", fname);
 
   FILE* foutput = fopen(fname, "w");
-  globalFrictionContact_printInFile(problem, foutput);
+  globalFrictionContactProblem_printInFile(problem, foutput);
   fclose(foutput);
 #endif
 
@@ -160,7 +160,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
             1, "Reformulation info a reduced problem onto local variables ...\n");
         FrictionContactProblem* localproblem =
             globalFrictionContact_reduce_to_FrictionContact(problem);
-        DEBUG_EXPR(frictionContact_display(localproblem););
+        DEBUG_EXPR(frictionContactProblem_display(localproblem););
 
         // call solver for the local problem
         info = fc2d_driver(localproblem, reaction, velocity, options);

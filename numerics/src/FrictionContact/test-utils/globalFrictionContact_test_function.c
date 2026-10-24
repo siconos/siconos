@@ -62,7 +62,7 @@ int globalFrictionContact_test_function(TestCase* current) {
 
   problem_name = strtok(problem_name, ".");
 
-  /* globalFrictionContact_display(problem); */
+  /* globalFrictionContactProblem_display(problem); */
 
   /* /\* print problem data in Matlab file *\/ */
   /* char *fname; */
@@ -88,7 +88,7 @@ int globalFrictionContact_test_function(TestCase* current) {
   /* strcat(fsolname, "_sol.m"); */
 
   /* FILE * foutput  =  fopen("checkinput.dat", "w"); */
-  /* info = globalFrictionContact_printInFile(problem, foutput); */
+  /* info = globalFrictionContactProblem_printInFile(problem, foutput); */
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -192,7 +192,7 @@ int globalFrictionContact_test_function(TestCase* current) {
   free(globalvelocity);
   /* fclose(foutput); */
   free(problem->name);
-  globalFrictionContact_free(problem);
+  globalFrictionContactProblem_free(problem);
   return info;
 }
 

@@ -71,7 +71,6 @@ static int fccounter = -1;
 /*   double err = INFINITY; */
 /*   for (i = 0 ; i < m ; ++i) */
 /*   { */
-/*     *error += Compute_NCP_error1(i, err); */
 /*   } */
 /* } */
 
@@ -211,11 +210,11 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
 
     /* Fixed Point solver (Glocker Formulation) */
     case FC3D_NCPG_FP: {
-      local_function_toolkit->local_solver = &fc3d_FixedP_solve;
+      local_function_toolkit->local_solver = &fc3d_fixed_point_solve;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
-      local_function_toolkit->free_local_solver = &fc3d_FixedP_free;
+      local_function_toolkit->free_local_solver = &fc3d_fixed_point_free;
       /* *computeError = &fake_compute_error_nsgs; */
-      fc3d_FixedP_initialize(problem, localproblem, local_opts);
+      fc3d_fixed_point_initialize(problem, localproblem, local_opts);
       break;
     }
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder: {
@@ -319,7 +318,7 @@ static void acceptLocalReactionFiltered(FrictionContactProblem* localproblem,
   if (isnan(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
       isinf(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
       localsolver_options->dparam[SICONOS_DPARAM_RESIDU] > 1.0) {
-    DEBUG_EXPR(frictionContact_display(localproblem));
+    DEBUG_EXPR(frictionContactProblem_display(localproblem));
     DEBUG_PRINTF(
         "Discard local reaction for contact %i at iteration %i "
         "with local_error = %e\n",

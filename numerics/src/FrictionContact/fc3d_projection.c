@@ -351,7 +351,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
                                                   double* reaction, SolverOptions* options) {
   DEBUG_BEGIN("fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
 
-  DEBUG_EXPR(frictionContact_display(localproblem););
+  DEBUG_EXPR(frictionContactProblem_display(localproblem););
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;

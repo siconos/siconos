@@ -63,7 +63,6 @@ static int fccounter = -1;
 /*   double err = INFINITY; */
 /*   for (i = 0 ; i < m ; ++i) */
 /*   { */
-/*     *error += Compute_NCP_error1(i, err); */
 /*   } */
 /* } */
 

@@ -117,7 +117,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void);
  *
  *  \param[in] problem to be displayed
  */
-void globalFrictionContact_display(GlobalFrictionContactProblem* problem);
+void globalFrictionContactProblem_display(GlobalFrictionContactProblem* problem);
 
 /**
    Saves problem struct into a file.
@@ -126,7 +126,8 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem);
    \param[in] file file descriptor
    \return file status (1 if everything has worked properly)
 */
-int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FILE* file);
+int globalFrictionContactProblem_printInFile(GlobalFrictionContactProblem* problem,
+                                             FILE* file);
 
 /**
    Saves problem struct into a file.
@@ -135,8 +136,8 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem* problem, FIL
    \param[in] filename name of the input file
    \return file status (1 if everything has worked properly)
 */
-int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem,
-                                          const char* filename);
+int globalFrictionContactProblem_printInFilename(GlobalFrictionContactProblem* problem,
+                                                 const char* filename);
 
 /** read a GlobalFrictionContactProblem from a file descriptor
  *
@@ -158,7 +159,7 @@ GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char
 
    \param[inout] problem global-Friction problem structure to be freed
 */
-void globalFrictionContact_free(GlobalFrictionContactProblem* problem);
+void globalFrictionContactProblem_free(GlobalFrictionContactProblem* problem);
 
 GlobalFrictionContactProblem* globalFrictionContact_copy(
     GlobalFrictionContactProblem* problem);

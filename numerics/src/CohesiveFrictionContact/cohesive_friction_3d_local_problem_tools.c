@@ -25,21 +25,13 @@
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
+#include "local_problem_toolkit.h"  // for local_problem_toolkit_new
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 struct CohesiveLocalProblemFunctionToolkit* cohesiveLocalProblemFunctionToolkit_new(void) {
-  struct CohesiveLocalProblemFunctionToolkit* lpft =
-      (struct CohesiveLocalProblemFunctionToolkit*)malloc(
-          sizeof(struct CohesiveLocalProblemFunctionToolkit));
-
-  lpft->local_solver_cohesion = NULL;
-  lpft->local_solver_contact = NULL;
-  lpft->update_local_problem = NULL;
-  lpft->post_processed_local_result = NULL;
-  lpft->free_local_solver_cohesion = NULL;
-  lpft->free_local_solver_contact = NULL;
-  return lpft;
+  return (struct CohesiveLocalProblemFunctionToolkit*)local_problem_toolkit_new(
+      sizeof(struct CohesiveLocalProblemFunctionToolkit));
 }
 
 void cohesiveLocalProblemFunctionToolkit_display(

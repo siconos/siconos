@@ -60,7 +60,7 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
 
   soclcp_as_vi->vi = vi;
   soclcp_as_vi->soclcp = problem;
-  /* frictionContact_display(fc3d_as_vi->fc3d); */
+  /* frictionContactProblem_display(fc3d_as_vi->fc3d); */
 
   variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 

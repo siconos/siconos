@@ -38,7 +38,7 @@
 #include "fclib_interface.h"
 #endif
 
-void frictionContact_display(FrictionContactProblem* problem) {
+void frictionContactProblem_display(FrictionContactProblem* problem) {
   assert(problem);
   int n = problem->dimension * problem->numberOfContacts;
   printf("FrictionContact Display :\n-------------\n");
@@ -64,7 +64,7 @@ void frictionContact_display(FrictionContactProblem* problem) {
     printf("No mu vector:\n");
 }
 
-int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
+int frictionContactProblem_printInFile(FrictionContactProblem* problem, FILE* file) {
   if (!problem) {
     CHECK_ARG(0, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
   }
@@ -89,7 +89,7 @@ int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
   return 0;
 }
 
-int frictionContact_printInFilename(FrictionContactProblem* problem, char* filename) {
+int frictionContactProblem_printInFilename(FrictionContactProblem* problem, char* filename) {
   int info = 0;
   FILE* file = fopen(filename, "w");
 
@@ -97,7 +97,7 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
     return errno;
   }
 
-  info = frictionContact_printInFile(problem, file);
+  info = frictionContactProblem_printInFile(problem, file);
 
   fclose(file);
   return info;

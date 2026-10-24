@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "fc3d_NCPGlockerFixedPoint.h"  // for F_GlockerFixedP, fc3d_FixedP_...
+#include "fc3d_NCPGlockerFixedPoint.h"  // for F_Glocker_fixed_point, fc3d_FixedP_...
 
 #include <assert.h>
 #include <stdio.h>   // for NULL, fprintf, stderr
@@ -39,7 +39,7 @@ static int Fsize;
 
 /** writes \f$ F(z) \f$ using Glocker formulation
  */
-void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date) {
+void F_Glocker_fixed_point(int sizeF, double* reaction, double* FVector, int up2Date) {
   /* Glocker formulation */
   double* FGlocker = NULL;
   computeFGlocker(&FGlocker, up2Date);
@@ -56,9 +56,9 @@ void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date) 
  * function.
  */
 
-void fc3d_FixedP_initialize(FrictionContactProblem* problem,
-                            FrictionContactProblem* localproblem,
-                            SolverOptions* localsolver_options) {
+void fc3d_fixed_point_initialize(FrictionContactProblem* problem,
+                                 FrictionContactProblem* localproblem,
+                                 SolverOptions* localsolver_options) {
   /*
      Initialize solver (Compute F) according to the chosen formulation.
   */
@@ -72,8 +72,8 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
   }
 }
 
-int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
-                      SolverOptions* options) {
+int fc3d_fixed_point_solve(FrictionContactProblem* localproblem, double* reaction,
+                           SolverOptions* options) {
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
@@ -89,11 +89,12 @@ int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_FixedP_free(FrictionContactProblem* localproblem,
-                      SolverOptions* localsolver_option) {}
+void fc3d_fixed_point_free(FrictionContactProblem* localproblem,
+                           SolverOptions* localsolver_option) {}
 
 /*
-double fc3d_FixedP_computeError(int contact, int dimReaction, double* reaction, double * error)
+double fc3d_fixed_point_compute_error(int contact, int dimReaction, double* reaction, double *
+error)
 {
   return 0.0;
 }
@@ -116,7 +117,7 @@ static int fc3d_ncpg_fp_init_wrap(void* problem, SolverOptions* options) {
 static int fc3d_ncpg_fp_solve_wrap(void* problem, double* reaction, double* velocity,
                                    SolverOptions* options) {
   (void)velocity;
-  return fc3d_FixedP_solve((FrictionContactProblem*)problem, reaction, options);
+  return fc3d_fixed_point_solve((FrictionContactProblem*)problem, reaction, options);
 }
 
 REGISTER_SOLVER(FC3D_NCPG_FP, "FC3D_NCPG_FP", "NCP Glocker Fixed Point (local solver)",

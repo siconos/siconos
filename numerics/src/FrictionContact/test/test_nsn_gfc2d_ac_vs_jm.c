@@ -136,7 +136,7 @@ static int solve_scenario(const Scenario* s, int formulation, double* out_error,
   free(reaction);
   free(velocity);
   free(globalvelocity);
-  globalFrictionContact_free(problem);
+  globalFrictionContactProblem_free(problem);
 
   return ok ? 0 : 1;
 }

@@ -36,7 +36,7 @@ void Projection_ConvexQP_GFC3D_DualCone(void* cqpIn, double* x, double* PX) {
       (GlobalFrictionContactProblem_as_ConvexQP*)cqp->env;
   GlobalFrictionContactProblem* gfc3d = pb->gfc3d;
 
-  // globalFrictionContact_display(gfc3d);
+  // globalFrictionContactProblem_display(gfc3d);
 
   int contact = 0;
   int nLocal = gfc3d->dimension;

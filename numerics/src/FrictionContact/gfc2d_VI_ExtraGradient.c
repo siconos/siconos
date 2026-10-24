@@ -129,7 +129,7 @@ void gfc2d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* react
  * - Elimination of giant switch statements in drivers
  */
 
-void gfc2d_vi_eg_set_default(SolverOptions* options) {
+void gfc2d_VI_extra_gradient_set_default(SolverOptions* options) {
   /* VI_EG doesn't use internal solvers, but we call the VI set_default for proper
    * initialization */
   variationalInequality_ExtraGradient_set_default(options);
@@ -159,8 +159,8 @@ static void gfc2d_vi_eg_free_wrap(void* problem, SolverOptions* options) {
 REGISTER_SOLVER_3VAR(GFC2D_VI_EG, "GFC2D_VI_EG",
                      "Variational Inequality Extra Gradient for 2D Global Friction Contact",
                      gfc2d_vi_eg_init_wrap, gfc2d_vi_eg_solve_wrap, gfc2d_vi_eg_free_wrap,
-                     NULL,                    /* error function */
-                     gfc2d_vi_eg_set_default, /* set_default */
-                     1000,                    /* default_max_iter */
-                     1e-4,                    /* default_tol */
+                     NULL,                                /* error function */
+                     gfc2d_VI_extra_gradient_set_default, /* set_default */
+                     1000,                                /* default_max_iter */
+                     1e-4,                                /* default_tol */
                      0 /* is_local_solver */);

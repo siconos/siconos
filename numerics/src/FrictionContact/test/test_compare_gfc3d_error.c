@@ -106,7 +106,7 @@ int main(void) {
       printf("| %-46s |     N/A     |  read failed  |", filename);
       for (int s = 0; s < n_scalings; ++s) printf("               |");
       printf("\n");
-      if (problem) globalFrictionContact_free(problem);
+      if (problem) globalFrictionContactProblem_free(problem);
       continue;
     }
 
@@ -115,7 +115,7 @@ int main(void) {
       printf("| %-46s |     N/A     |  dim != 3     |", filename);
       for (int s = 0; s < n_scalings; ++s) printf("               |");
       printf("\n");
-      globalFrictionContact_free(problem);
+      globalFrictionContactProblem_free(problem);
       continue;
     }
 
@@ -171,7 +171,7 @@ int main(void) {
       free(globalvelocity);
     }
 
-    globalFrictionContact_free(problem);
+    globalFrictionContactProblem_free(problem);
   }
 
   printf(

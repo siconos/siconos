@@ -356,7 +356,7 @@ GlobalFrictionContactProblem* gfc3d_balancing_free(
       (GlobalFrictionContactProblem_balancing_data*)balanced_problem->env;
   if (balancing_data) {
     balanced_problem->env = gfc3d_balancing_data_free(balancing_data);
-    globalFrictionContact_free(balanced_problem);
+    globalFrictionContactProblem_free(balanced_problem);
     return NULL;
   } else
     return balanced_problem;

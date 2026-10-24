@@ -33,7 +33,7 @@ void Function_VI_SOCLCP(void* self, int n_notused, double* x, double* F) {
   SecondOrderConeLinearComplementarityProblem_as_VI* pb =
       (SecondOrderConeLinearComplementarityProblem_as_VI*)vi->env;
   SecondOrderConeLinearComplementarityProblem* soclcp = pb->soclcp;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int n = soclcp->n;
 

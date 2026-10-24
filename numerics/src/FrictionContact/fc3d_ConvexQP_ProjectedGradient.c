@@ -67,7 +67,7 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem,
   fc3d_as_cqp->cqp = cqp;
   fc3d_as_cqp->fc3d = problem;
   fc3d_as_cqp->options = options;
-  /* frictionContact_display(fc3d_as_cqp->fc3d); */
+  /* frictionContactProblem_display(fc3d_as_cqp->fc3d); */
   // options->solverId = SICONOS_CONVEXQP_PG;
 
   // Warning : a new solver options is required here, because dWork

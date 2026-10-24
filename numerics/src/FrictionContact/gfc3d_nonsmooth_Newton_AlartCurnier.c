@@ -1252,7 +1252,7 @@ restart:
     printf("GLOBALAC: dumping problem\n");
     snprintf(filename, sizeof(filename), "GLOBALAC_failure%d.dat", file_counter++);
     FILE* file = fopen(filename, "w");
-    frictionContact_printInFile(problem, file);
+    frictionContactProblem_printInFile(problem, file);
     fclose(file);
   }
 #endif

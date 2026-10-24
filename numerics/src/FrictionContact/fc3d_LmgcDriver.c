@@ -55,7 +55,7 @@ int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, d
 
   FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, nc, NM, q, mu);
 
-  /* frictionContact_display(FC); */
+  /* frictionContactProblem_display(FC); */
 
   SolverOptions* numerics_solver_options = solver_options_create(solver_id);
 
@@ -82,7 +82,7 @@ int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, d
     for (unsigned int k = 0; k < 3 * nc; k++) reaction_guess[k] = reaction[k];
     for (unsigned int k = 0; k < 3 * nc; k++) velocity_guess[k] = velocity[k];
   }
-  DEBUG_EXPR(frictionContact_display(FC););
+  DEBUG_EXPR(frictionContactProblem_display(FC););
   DEBUG_EXPR(solver_options_print(numerics_solver_options););
 
   int info = fc3d_driver(FC, reaction, velocity, numerics_solver_options);
@@ -135,7 +135,7 @@ int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, d
     printf("LMGC_FC3D-i%.5d-%zu-%.5d.dat",
            numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     FILE* foutput = fopen(fname, "w");
-    frictionContact_printInFile(FC, foutput);
+    frictionContactProblem_printInFile(FC, foutput);
     fclose(foutput);
   } else if (outputFile == 3) {
 #ifdef WITH_FCLIB

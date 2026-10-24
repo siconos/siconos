@@ -462,9 +462,9 @@ int globalFrictionContact_fclib_write(GlobalFrictionContactProblem* problem, cha
     DEBUG_PRINT("zero contacts");
     return rinfo;
   }
-  /* globalFrictionContact_display(problem); */
+  /* globalFrictionContactProblem_display(problem); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
-  /* globalFrictionContact_printInFile(problem, file); */
+  /* globalFrictionContactProblem_printInFile(problem, file); */
 
   fclib_global* fclib_problem;
   fclib_problem = (fclib_global*)malloc(sizeof(fclib_global));
@@ -644,9 +644,9 @@ int globalRollingFrictionContact_fclib_write(GlobalRollingFrictionContactProblem
     DEBUG_PRINT("zero contacts");
     return rinfo;
   }
-  /* globalFrictionContact_display(problem); */
+  /* globalFrictionContactProblem_display(problem); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
-  /* globalFrictionContact_printInFile(problem, file); */
+  /* globalFrictionContactProblem_printInFile(problem, file); */
 
   fclib_global_rolling* fclib_problem;
   fclib_problem = (fclib_global_rolling*)malloc(sizeof(fclib_global_rolling));

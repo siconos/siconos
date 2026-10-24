@@ -526,7 +526,7 @@ struct GlobalFrictionContactProblemWrapper {
       std::memcpy(Harray.mutable_data(), problem->H->dense, n * dim * nc * sizeof(double));
       matrixH = Harray;
     } else {
-      globalFrictionContact_free(problem);
+      globalFrictionContactProblem_free(problem);
       throw std::runtime_error(
           "GlobalFrictionContactProblem.from_file only supports dense matrices");
     }
@@ -538,14 +538,14 @@ struct GlobalFrictionContactProblemWrapper {
     py::array_t<double> barray(dim * nc);
     std::memcpy(barray.mutable_data(), problem->b, dim * nc * sizeof(double));
 
-    globalFrictionContact_free(problem);
+    globalFrictionContactProblem_free(problem);
 
     return std::make_unique<GlobalFrictionContactProblemWrapper>(dim, nc, matrixM, matrixH,
                                                                  qarray, muarray, barray);
   }
 
   int write_to_file(const std::string& fname) const {
-    return globalFrictionContact_printInFileName(problem, fname.c_str());
+    return globalFrictionContactProblem_printInFilename(problem, fname.c_str());
   }
 
 #if defined(WITH_FCLIB)

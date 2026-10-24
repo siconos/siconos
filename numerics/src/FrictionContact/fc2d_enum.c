@@ -43,7 +43,7 @@ void fc2d_enum(FrictionContactProblem* problem, double* reaction, double* veloci
       (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
 
   fc2d_tolcp(problem, lcp_problem);
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
   /* linearComplementarity_display(lcp_problem); */
 
   double* zlcp = (double*)calloc(lcp_problem->size, sizeof(double));

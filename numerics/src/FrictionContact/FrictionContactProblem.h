@@ -118,7 +118,7 @@ void frictionContactProblem_free(FrictionContactProblem* problem);
  *
  *  \param problem the problem to display
  */
-void frictionContact_display(FrictionContactProblem* problem);
+void frictionContactProblem_display(FrictionContactProblem* problem);
 
 /** print a FrictionContactProblem in a file (numerics .dat format)
  *
@@ -126,7 +126,7 @@ void frictionContact_display(FrictionContactProblem* problem);
  *  \param file the dest file
  *  \return 0 if successfull
  */
-int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file);
+int frictionContactProblem_printInFile(FrictionContactProblem* problem, FILE* file);
 
 /** print a FrictionContactProblem in a file (numerics dat format)
  *
@@ -134,7 +134,7 @@ int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file);
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int frictionContact_printInFilename(FrictionContactProblem* problem, char* filename);
+int frictionContactProblem_printInFilename(FrictionContactProblem* problem, char* filename);
 
 /** read a FrictionContactProblem from a file descriptor
  *

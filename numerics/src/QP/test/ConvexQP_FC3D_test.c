@@ -20,7 +20,7 @@ static void PXtest_0(void* cqpIn, double* x, double* PX) {
   ConvexQP* cqp = (ConvexQP*)cqpIn;
   Problems* pb = (Problems*)cqp->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -53,7 +53,7 @@ static int test_0(void) {
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -89,7 +89,7 @@ static void PXtest_1(void* cqpIn, double* x, double* PX) {
   ConvexQP* cqp = (ConvexQP*)cqpIn;
   Problems* pb = (Problems*)cqp->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -125,7 +125,7 @@ static int test_1(void) {
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -177,7 +177,7 @@ static void PXtest_2(void* cqpIn, double* x, double* PX) {
   ConvexQP* cqp = (ConvexQP*)cqpIn;
   Problems* pb = (Problems*)cqp->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -215,7 +215,7 @@ static int test_2(void) {
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -267,7 +267,7 @@ static void PXtest_3(void* cqpIn, double* x, double* PX) {
   ConvexQP* cqp = (ConvexQP*)cqpIn;
   Problems* pb = (Problems*)cqp->env;
   FrictionContactProblem* fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -301,7 +301,7 @@ static int test_3(void) {
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;

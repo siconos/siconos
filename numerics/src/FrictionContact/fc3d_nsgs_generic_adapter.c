@@ -168,8 +168,8 @@ static FrictionContactProblem* fc3d_nsgs_local_problem_new(FrictionContactProble
       fc3d_Path_initialize(problem, localproblem, localsolver_options);
       break;
     case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint:
-      solver = &fc3d_FixedP_solve;
-      fc3d_FixedP_initialize(problem, localproblem, localsolver_options);
+      solver = &fc3d_fixed_point_solve;
+      fc3d_fixed_point_initialize(problem, localproblem, localsolver_options);
       break;
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder:
       solver = &fc3d_projectionOnCylinder_solve;

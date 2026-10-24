@@ -168,7 +168,7 @@ static void test_combination(GlobalFrictionContactProblem* source, NM_types M_ty
   assert(compare_vectors(reduced->M->size0, reduced->q, reference->q, tol));
 
   frictionContactProblem_free(reduced);
-  globalFrictionContact_free(problem);
+  globalFrictionContactProblem_free(problem);
 }
 
 int main() {
@@ -203,7 +203,7 @@ int main() {
     FrictionContactProblem* reference =
         globalFrictionContact_reduce_to_FrictionContact(ref_problem);
     assert(reference);
-    globalFrictionContact_free(ref_problem);
+    globalFrictionContactProblem_free(ref_problem);
 
     /* Original storage types from the data file. */
     printf("  Original M=%s, H=%s\n", storage_type_name(source->M->storageType),
@@ -219,7 +219,7 @@ int main() {
     test_combination(source, NM_SPARSE, NM_DENSE, reference, tol);
 
     frictionContactProblem_free(reference);
-    globalFrictionContact_free(source);
+    globalFrictionContactProblem_free(source);
     printf("  OK\n");
   }
 

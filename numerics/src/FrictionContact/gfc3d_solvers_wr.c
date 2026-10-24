@@ -63,7 +63,7 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
@@ -130,7 +130,7 @@ void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
                             "Reformulation info a reduced problem onto local variables ...\n");
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
@@ -178,7 +178,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* proble
                             "Reformulation info a reduced problem onto local variables ...\n");
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
 
     numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
 
@@ -231,7 +231,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier_reformulated_wr(GlobalFrictionContactPr
                             "this make take a while");
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
 
     numerics_printf(
         "gfc3d_nonsmooth_Newton_AlartCurnier_reformulated_wr - Call to the fc3d solver ...\n");
@@ -277,7 +277,7 @@ void gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double* react
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
@@ -324,8 +324,8 @@ void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double* reaction,
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
     }
@@ -373,7 +373,7 @@ void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double* r
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
@@ -420,7 +420,7 @@ void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double* re
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
 
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");
@@ -465,7 +465,7 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
                             "this make take a while");
     FrictionContactProblem* reduced_problem =
         globalFrictionContact_reduce_to_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(reduced_problem););
+    DEBUG_EXPR(frictionContactProblem_display(reduced_problem););
 
     if (verbose) {
       printf("Call to the fc3d solver ...\n");

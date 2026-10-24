@@ -34,16 +34,16 @@
 extern "C" {
 #endif
 
-void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date);
+void F_Glocker_fixed_point(int sizeF, double* reaction, double* FVector, int up2Date);
 
 /** Initialize friction-contact 3D Fixed Point solver
  * \param problem to solve
  * \param localproblem to solve
  * \param localsolver_options of the solver
  */
-void fc3d_FixedP_initialize(FrictionContactProblem* problem,
-                            FrictionContactProblem* localproblem,
-                            SolverOptions* localsolver_options);
+void fc3d_fixed_point_initialize(FrictionContactProblem* problem,
+                                 FrictionContactProblem* localproblem,
+                                 SolverOptions* localsolver_options);
 
 /** solve friction-contact 3D problem with Fixed Point
     \param localproblem to solve
@@ -51,11 +51,12 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
     \param  options of the solver
     \return 0 iff successful
  */
-int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
-                      SolverOptions* options);
+int fc3d_fixed_point_solve(FrictionContactProblem* localproblem, double* reaction,
+                           SolverOptions* options);
 
 /** free memory for friction contact 3D Fixed Point solver */
-void fc3d_FixedP_free(FrictionContactProblem* localproblem, SolverOptions* localsolver_option);
+void fc3d_fixed_point_free(FrictionContactProblem* localproblem,
+                           SolverOptions* localsolver_option);
 
 /** compute error for friction-contact 3D problem with Fixed Point
  * \param dimension of the global problem

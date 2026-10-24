@@ -66,7 +66,6 @@ static int fccounter = -1;
 /*   double err = INFINITY; */
 /*   for (i = 0 ; i < m ; ++i) */
 /*   { */
-/*     *error += Compute_NCP_error1(i, err); */
 /*   } */
 /* } */
 
@@ -227,11 +226,11 @@ int fc3d_nsgs_initialize_local_solver(
 
     /* Fixed Point solver (Glocker Formulation) */
     case FC3D_NCPG_FP: {
-      local_function_toolkit->local_solver = &fc3d_FixedP_solve;
+      local_function_toolkit->local_solver = &fc3d_fixed_point_solve;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
-      local_function_toolkit->free_local_solver = &fc3d_FixedP_free;
+      local_function_toolkit->free_local_solver = &fc3d_fixed_point_free;
       /* *computeError = &fake_compute_error_nsgs; */
-      fc3d_FixedP_initialize(problem, localproblem, local_opts);
+      fc3d_fixed_point_initialize(problem, localproblem, local_opts);
       break;
     }
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder: {
@@ -337,7 +336,7 @@ static void acceptLocalReactionFiltered(FrictionContactProblem* localproblem,
                                         int iter, double* reaction, double localreaction[3]) {
   if (isnan(SOLVER_RESIDUAL(local_opts)) || isinf(SOLVER_RESIDUAL(local_opts)) ||
       SOLVER_RESIDUAL(local_opts) > 1.0) {
-    DEBUG_EXPR(frictionContact_display(localproblem));
+    DEBUG_EXPR(frictionContactProblem_display(localproblem));
 
     DEBUG_PRINTF(
         "Discard local reaction for contact %i at iteration %i "
@@ -885,7 +884,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /*     fccounter++; */
   /*     snprintf(fname, sizeof(fname), "problem_%i_%i.dat", nc,itermax); */
   /*     FILE * file = fopen(fname, "w"); */
-  /*     frictionContact_printInFile(problem, file); */
+  /*     frictionContactProblem_printInFile(problem, file); */
   /*     fclose(file); */
   /*   }  */
 
