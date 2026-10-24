@@ -62,11 +62,23 @@ namespace siconos::collision {
    struct -- it is a storage descriptor, not a type), and cxd's packed pool
    needs the point type to be a trivially copyable std::array. */
 template <typename Scalar>
+struct narrowphase_point {
+  Scalar h;  // gap of this point along the contact normal
+  std::array<Scalar, 2> cp1, cp2;
+};
+
+template <typename Scalar>
 struct narrowphase_contact {
   int status;                    // cxd::status value
   Scalar h;                      // siconos gap: +distance / -depth
   std::array<Scalar, 2> normal;  // contact normal, body 1 -> body 2
   std::array<Scalar, 2> cp1, cp2;
+  // contact manifold: up to two points with their own gap, from
+  // reference / incident face clipping, sorted along the tangent
+  // (-normal[1], normal[0]). A contact whose closest features are not a
+  // face (vertex against vertex) has the single point (h, cp1, cp2).
+  std::size_t npoints;
+  std::array<narrowphase_point<Scalar>, 2> points;
 };
 
 template <typename Scalar>
@@ -387,6 +399,114 @@ inline auto sat_contact(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b
   return std::pair{best, best_n};
 }
 
+/* Reference / incident face clipping (Box2D b2CollidePolygons style): the
+   contact manifold of a face contact along the normal n (A -> B).
+
+   On each shape the face whose outward normal is closest to +n (on A) or to
+   -n (on B); the more parallel one is the reference face, the other the
+   incident face (ties go to A, so the choice does not flip between equal
+   faces). The incident edge is clipped to the extent of the reference face:
+   at most two points, each with its own gap measured along the reference
+   normal, and its witness on the reference face. A segment (2 vertices) is a
+   single face with both normals. When n is not a face normal of either shape
+   (the closest features are two vertices) there is no face contact and 0 is
+   returned. */
+template <typename Pool, typename Scalar>
+inline std::size_t clip_manifold(const Pool& pool, std::uint32_t id_a, std::uint32_t id_b,
+                                 const typename Pool::vector& n,
+                                 std::array<narrowphase_point<Scalar>, 2>& out) {
+  using V = typename Pool::vector;
+  using scalar = typename Pool::scalar;
+  const cxd::shape_view<Pool> va{pool, id_a};
+  const cxd::shape_view<Pool> vb{pool, id_b};
+  const auto nverts = [](const auto& view) {
+    return static_cast<std::size_t>(std::distance(view.begin(), view.end()));
+  };
+
+  struct face {
+    std::size_t i0, i1;
+    V normal;
+    scalar align;
+  };
+  const auto best_face = [&](const auto& view, const V& d) {
+    const std::size_t nv = nverts(view);
+    scalar area2 = scalar{0};
+    for (std::size_t i = 0; i < nv; ++i) {
+      const V& a = view[i];
+      const V& b = view[(i + 1) % nv];
+      area2 += a[0] * b[1] - b[0] * a[1];
+    }
+    const scalar orient = area2 >= scalar{0} ? scalar{1} : scalar{-1};
+    face best{0, 0, V{0, 0}, -std::numeric_limits<scalar>::infinity()};
+    for (std::size_t i = 0; i < nv; ++i) {
+      const V e = vsub2(view[(i + 1) % nv], view[i]);
+      const scalar len = vnorm(e);
+      if (len <= scalar{0}) continue;
+      V o{e[1] / len, -e[0] / len};
+      if (nv >= 3) {
+        o = vscale(orient, o);
+      } else if (vdot(o, d) < scalar{0}) {
+        o = vscale(scalar{-1}, o);  // a segment faces both ways
+      }
+      const scalar al = vdot(o, d);
+      if (al > best.align) best = face{i, (i + 1) % nv, o, al};
+    }
+    return best;
+  };
+
+  const face fa = best_face(va, n);
+  const face fb = best_face(vb, vscale(scalar{-1}, n));
+  constexpr scalar face_tol = scalar{1e-6};
+  if (std::max(fa.align, fb.align) < scalar{1} - face_tol) return 0;
+
+  const bool ref_a = !(fb.align > fa.align + scalar{1e-3});
+  const auto& rview = ref_a ? va : vb;
+  const auto& iview = ref_a ? vb : va;
+  const face& rf = ref_a ? fa : fb;
+  const face& inc = ref_a ? fb : fa;
+
+  const V r0 = rview[rf.i0];
+  const V r1 = rview[rf.i1];
+  const V p0 = iview[inc.i0];
+  const V p1 = iview[inc.i1];
+  const V rt = vsub2(r1, r0);
+  const scalar len = vnorm(rt);
+  if (len <= scalar{0}) return 0;
+  const V t = vscale(scalar{1} / len, rt);
+  const scalar s0 = vdot(t, vsub2(p0, r0));
+  const scalar s1 = vdot(t, vsub2(p1, r0));
+
+  // the part of [p0, p1] whose tangential coordinate is in [0, len]
+  scalar lmin, lmax;
+  if (std::abs(s1 - s0) <= scalar{1e-12} * (scalar{1} + len)) {
+    if (s0 < scalar{0} || s0 > len) return 0;
+    lmin = scalar{0};
+    lmax = scalar{1};
+  } else {
+    const scalar la = (scalar{0} - s0) / (s1 - s0);
+    const scalar lb = (len - s0) / (s1 - s0);
+    lmin = std::max(scalar{0}, std::min(la, lb));
+    lmax = std::min(scalar{1}, std::max(la, lb));
+    if (lmin > lmax) return 0;
+  }
+  const V dp = vsub2(p1, p0);
+  std::array<V, 2> q{vadd(p0, vscale(lmin, dp)), vadd(p0, vscale(lmax, dp))};
+  const std::size_t nq = (lmax - lmin) * vnorm(dp) > scalar{1e-12} * (scalar{1} + len) ? 2 : 1;
+
+  for (std::size_t k = 0; k < nq; ++k) {
+    const scalar gap = vdot(rf.normal, vsub2(q[k], r0));
+    const V w = vsub2(q[k], vscale(gap, rf.normal));
+    out[k].h = static_cast<Scalar>(gap);
+    out[k].cp1 = ref_a ? w : q[k];
+    out[k].cp2 = ref_a ? q[k] : w;
+  }
+  if (nq == 2) {
+    const V tng{-n[1], n[0]};
+    if (vdot(tng, out[1].cp1) < vdot(tng, out[0].cp1)) std::swap(out[0], out[1]);
+  }
+  return nq;
+}
+
 }  // namespace detail
 
 template <typename Scalar>
@@ -403,6 +523,7 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
     c.normal = V{0, 0};
     c.cp1 = V{0, 0};
     c.cp2 = V{0, 0};
+    c.npoints = 0;
   }
 
   if (in.entries.size() == 0) {
@@ -523,6 +644,20 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
       case status::invalid_input:
       default:
         break;  // keep-previous contract (already zeroed)
+    }
+  }
+
+  // the contact manifold of every answered pair
+  for (std::size_t k = 0; k < npairs; ++k) {
+    auto& c = out[k];
+    if (c.status != static_cast<int>(cxd::status::separated) &&
+        c.status != static_cast<int>(cxd::status::enclosed))
+      continue;
+    c.npoints = detail::clip_manifold(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, c.normal,
+                                      c.points);
+    if (c.npoints == 0) {
+      c.npoints = 1;
+      c.points[0] = {c.h, c.cp1, c.cp2};
     }
   }
   return out;

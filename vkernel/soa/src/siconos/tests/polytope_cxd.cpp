@@ -249,6 +249,74 @@ void test_witnesses_off_axis() {
   }
 }
 
+/* the contact manifold: reference / incident face clipping, one gap per
+   point, at most two points */
+void test_manifold() {
+  using siconos::collision::narrowphase_batch;
+  // parallel faces, separated by 0.5, partial overlap x in [-0.5, 1]
+  {
+    auto in = make_input({square_at(0, 0), square_at(0.5, 2.5)}, {{0, 1}});
+    auto c = narrowphase_batch(std::move(in))[0];
+    check(c.npoints == 2, "parallel faces: two points");
+    for (auto& p : c.points) {
+      check(nears(p.h, 0.5), "parallel faces: each gap 0.5");
+      check(nears(p.cp1[1], 1) && nears(p.cp2[1], 1.5), "parallel faces: points on the faces");
+      check(nears(p.cp1[0], p.cp2[0]), "parallel faces: witnesses face each other");
+    }
+    const double x0 = c.points[0].cp1[0], x1 = c.points[1].cp1[0];
+    check(nears(std::min(x0, x1), -0.5) && nears(std::max(x0, x1), 1),
+          "parallel faces: the points bound the overlap window");
+  }
+  // the upper square tilted by 0.1: its two bottom corners, two gaps
+  {
+    const double th = 0.1, cy = 2.5, c = std::cos(th), sn = std::sin(th);
+    std::vector<std::array<double, 2>> tilted;
+    for (auto [x, y] :
+         std::vector<std::pair<double, double>>{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}})
+      tilted.push_back({c * x - sn * y, cy + sn * x + c * y});
+    // the lower body is wide enough for both corners to lie over its face
+    const std::vector<std::array<double, 2>> wide = {{-2, -1}, {2, -1}, {2, 1}, {-2, 1}};
+    auto in = make_input({wide, tilted}, {{0, 1}});
+    auto ct = narrowphase_batch(std::move(in))[0];
+    check(ct.npoints == 2, "tilted face: two points");
+    check(near(ct.normal, {0, 1}), "tilted face: the reference normal is A's top face");
+    const std::array<double, 2> left{c * -1 - sn * -1, cy + sn * -1 + c * -1};
+    const std::array<double, 2> right{c * 1 - sn * -1, cy + sn * 1 + c * -1};
+    bool has_left = false, has_right = false;
+    for (auto& p : ct.points) {
+      check(nears(p.cp1[1], 1) && nears(p.cp1[0], p.cp2[0]),
+            "tilted face: witness on A's top face, below the corner");
+      check(nears(p.h, p.cp2[1] - 1), "tilted face: the gap is the corner height");
+      has_left = has_left || near(p.cp2, left);
+      has_right = has_right || near(p.cp2, right);
+    }
+    check(has_left && has_right, "tilted face: the points are the two bottom corners");
+    check(!nears(ct.points[0].h, ct.points[1].h, 1e-3), "tilted face: the gaps differ");
+  }
+  // corner against corner (diagonal squares): the normal is no face normal,
+  // the single closest point
+  {
+    auto in = make_input({square_at(0, 0), square_at(3, 3)}, {{0, 1}});
+    auto c = narrowphase_batch(std::move(in))[0];
+    check(c.npoints == 1, "vertex contact: one point");
+    check(nears(c.points[0].h, c.h) && near(c.points[0].cp1, c.cp1) &&
+              near(c.points[0].cp2, c.cp2),
+          "vertex contact: the single point is the closest pair");
+  }
+  // a square above a long segment: the two bottom corners of the square
+  {
+    auto in = make_input({square_at(0, 1.2), {{-5, 0}, {5, 0}}}, {{0, 1}});
+    auto c = narrowphase_batch(std::move(in))[0];
+    check(c.npoints == 2, "square on segment: two points");
+    for (auto& p : c.points) {
+      check(nears(p.h, 0.2), "square on segment: gap 0.2");
+      check(nears(std::abs(p.cp1[0]), 1) && nears(p.cp1[1], 0.2) && nears(p.cp2[1], 0),
+            "square on segment: the bottom corners and their feet");
+    }
+  }
+  std::print("narrowphase_batch engine: contact manifolds pass\n");
+}
+
 void test_batch_engine_float() {
   using siconos::collision::narrowphase_input;
   narrowphase_input<float> in;
@@ -606,6 +674,7 @@ int main() {
   test_polytope_item(data);
   test_batch_engine();
   test_witnesses_off_axis();
+  test_manifold();
   test_batch_engine_float();
   test_failed_subdistance_status();
   test_polytopepolytope_relation(data);
