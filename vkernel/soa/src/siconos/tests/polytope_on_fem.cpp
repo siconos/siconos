@@ -13,6 +13,7 @@
    block must deflect. This fails when polytopemesh_r is not assembled on
    the mesh side (one_step_integrator, moreau_jean_element). */
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <print>
@@ -112,7 +113,10 @@ struct result {
   std::size_t n_mesh_contacts;
 };
 
-result run(bool square) {
+/* the block, a rigid body above its top edge (disk or square), the filter
+   and the simulation; body(...) runs the scenario */
+template <typename F>
+auto with_fem_world(bool square, F&& body) {
   using namespace siconos;
   config::data_t data;
 
@@ -200,23 +204,69 @@ result run(bool square) {
   ngbh.add_point_sets(0);
   simulation.initialize();
 
-  result res{};
-  std::size_t& n_mesh_contacts = res.n_mesh_contacts;
-  while (simulation.has_next_event()) {
-    const auto s = simulation.current_step();
-    ngbh.update(s);
-    ngbh.search();
-    spacef.update_index_set0(s);
-    n_mesh_contacts = std::max(n_mesh_contacts,
-                               std::size(storage::handles<config::rt_interaction>(data, s)));
-    simulation.compute_one_step();
-    res.body_y.push_back(storage::attr<"q">(b, simulation.current_step())(1));
-    res.top_y.push_back(storage::attr<"q">(f, simulation.current_step())(5));
-  }
-  const auto s = simulation.current_step();
-  const auto& fq = storage::attr<"q">(f, s);
-  for (int i = 0; i < n; ++i) res.fem_q.push_back(fq(i));
-  return res;
+  return body(data, b, f, simulation, ngbh, spacef);
+}
+
+result run(bool square) {
+  return with_fem_world(
+      square, [&](auto& data, auto& b, auto& f, auto& simulation, auto& ngbh, auto& spacef) {
+        using namespace siconos;
+        const int n = 8;
+        result res{};
+        std::size_t& n_mesh_contacts = res.n_mesh_contacts;
+        while (simulation.has_next_event()) {
+          const auto s = simulation.current_step();
+          ngbh.update(s);
+          ngbh.search();
+          spacef.update_index_set0(s);
+          n_mesh_contacts = std::max(
+              n_mesh_contacts, std::size(storage::handles<config::rt_interaction>(data, s)));
+          simulation.compute_one_step();
+          res.body_y.push_back(storage::attr<"q">(b, simulation.current_step())(1));
+          res.top_y.push_back(storage::attr<"q">(f, simulation.current_step())(5));
+        }
+        const auto s = simulation.current_step();
+        const auto& fq = storage::attr<"q">(f, s);
+        for (int i = 0; i < n; ++i) res.fem_q.push_back(fq(i));
+        return res;
+      });
+}
+
+/* the filter removes the ds-mesh interactions of a body that leaves the
+   edge, and creates them again (same relation items) when it comes back */
+void test_mesh_churn(bool square) {
+  with_fem_world(
+      square, [&](auto& data, auto& b, auto& f, auto& simulation, auto& ngbh, auto& spacef) {
+        using namespace siconos;
+        const std::size_t npoints = square ? 2 : 1;
+        // body above the edge, far away, back: scripted, no dynamics in between
+        const std::array<double, 3> y_by_step = {1.15, 10., 1.15};
+        const std::array<std::size_t, 3> n_by_step = {npoints, 0, npoints};
+        std::vector<std::size_t> rels0;
+        for (std::size_t k = 0; k < y_by_step.size(); ++k) {
+          const auto s = simulation.current_step();
+          storage::attr<"q">(b, s)(1) = y_by_step[k];
+          storage::attr<"velocity">(b, s).setZero();
+          ngbh.update(s);
+          ngbh.search();
+          spacef.update_index_set0(s);
+          auto inters = storage::handles<config::rt_interaction>(data, s);
+          check(std::size(inters) == n_by_step[k], std::string(square ? "square" : "disk") +
+                                                       ": mesh interaction count at step " +
+                                                       std::to_string(k));
+          std::vector<std::size_t> rels;
+          for (auto inter : inters)
+            rels.push_back(siconos::variant::visit(data, inter.relation(), [](auto rrel) {
+              return static_cast<std::size_t>(rrel.index().value());
+            }));
+          std::ranges::sort(rels);
+          if (k == 0) rels0 = rels;
+          if (k == 2)
+            check(rels == rels0, "the relation items are reused when the body is back");
+          simulation.compute_one_step();
+        }
+        return 0;
+      });
 }
 }  // namespace
 
@@ -246,6 +296,8 @@ int main() {
   for (int i = 0; i < 8; ++i)
     check(std::abs(square.fem_q[i] - disk.fem_q[i]) < 1e-8,
           "final block displacement matches (dof " + std::to_string(i) + ")");
+  test_mesh_churn(false);
+  test_mesh_churn(true);
   std::print("polytope_on_fem: all checks pass\n");
   return 0;
 }

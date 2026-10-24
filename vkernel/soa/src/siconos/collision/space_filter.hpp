@@ -537,8 +537,8 @@ struct space_filter : item {
             std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
       }
       auto nslaw = storage::make_handle(data, search->second);
-      auto diskmeshes = self()->diskmeshes();
-      auto polytopemeshes = self()->polytopemeshes();
+      auto& diskmeshes = self()->diskmeshes();
+      auto& polytopemeshes = self()->polytopemeshes();
 
       auto mesh = hp2.shape();
       auto contact_index = hp2.seg_index();
@@ -785,7 +785,7 @@ struct space_filter : item {
       }
       auto nslaw = storage::make_handle(data, search->second);
       auto topo = self()->topology();
-      auto diskfdisks = self()->diskfdisks();
+      auto& diskfdisks = self()->diskfdisks();
 
       auto fdisk = body2;
       auto& translat = fdisk.translation();
@@ -985,6 +985,46 @@ struct space_filter : item {
       //      print("size of ds segment map: {}\n", ds_segment_prox.size());
     }
 
+    /* remove the ds-mesh interactions the filter did not re-activate this
+       step (bodies that left the edge's neighborhood); same move_back
+       removal as remove_interactions, the proximity entry goes too */
+    void remove_dinteractions(auto& ds_dds_prox) {
+      using env = decltype(self()->env());
+      using indice = typename env::indice;
+      auto& data = self()->data();
+
+      auto& activations = storage::prop_values<dfinteraction, "activation", Topology>(data, 0);
+      auto& ds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, 0);
+      auto& ds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, 0);
+
+      for (auto [activation, ds1, ds2, inter] :
+           view::zip(activations, ds1s, ds2s, storage::handles<dfinteraction>(data, 0))) {
+        if (activation) continue;
+        auto contact_index = variant::visit(data, inter.relation(),
+                                            [](auto& rrel) { return rrel.contact_index(); });
+        auto finter = ds_dds_prox.find(mp::make_tuple(
+            ds1.value(), ds2.value(), edge_point_slot(contact_index, point_of(inter))));
+        if (finter == ds_dds_prox.end() ||
+            std::get<1>(*finter).value() != inter.index().value()) {
+          throw std::runtime_error(
+              "space_filter::remove_dinteractions: no proximity map entry for this "
+              "ds-mesh interaction (stale filter state or duplicate key)");
+        }
+        ds_dds_prox.erase(finter);
+      }
+
+      // with move_back the last interaction takes the removed index: search
+      // again from the same position
+      auto fact = std::ranges::find(activations, false);
+      while (fact != activations.end()) {
+        const auto fact_index = fact - activations.begin();
+        storage::remove(data, storage::make_handle(
+                                  data, storage::index<dfinteraction, indice>(fact_index)));
+        auto remaining = std::ranges::subrange(fact, activations.end());
+        fact = fact + (std::ranges::find(remaining, false) - remaining.begin());
+      }
+    }
+
     void update_index_set0(auto step) {
       using env = decltype(self()->env());
       using indice = typename env::indice;
@@ -1007,7 +1047,7 @@ struct space_filter : item {
                                      storage::index<finteraction, indice>>;
 
       auto& data = self()->data();
-      auto diskfsegments = self()->diskfsegments();
+      auto& diskfsegments = self()->diskfsegments();
 
       auto ngbh = self()->neighborhood();
       using ngbh_t = typename std::decay_t<decltype(ngbh)>::type;
@@ -1151,8 +1191,9 @@ struct space_filter : item {
         });
       });
       remove_interactions<finteraction>(ds_ds_prox, ds_segment_prox, ds_fdisk_prox);
-      //      remove_interactions<dfinteraction>(ds_dds_prox, ds_segment_prox,
-      //                                         ds_fdisk_prox);
+      if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        remove_dinteractions(ds_dds_prox);
+      }
     }
 
     auto methods() {
