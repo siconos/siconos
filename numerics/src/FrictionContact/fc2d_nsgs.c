@@ -31,6 +31,7 @@
 #include "fc2d_compute_error.h"  // for fc2d_compute_error
 #include "fc3d_short_names.h"    // for FC2D_NSGS
 #include "naming_conventions.h"
+#include "nsgs_utils.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "solver_registry.h"
@@ -124,13 +125,11 @@ static void shuffle(unsigned int size, unsigned int* randnum)  // size is the gi
   }
 }
 
-static inline double light_error_squared(double localreaction[2], double* oldreaction) {
-  double x0 = oldreaction[0] - localreaction[0];
-  double x1 = oldreaction[1] - localreaction[1];
-  return x0 * x0 + x1 * x1;
+static double light_error_squared(double localreaction[2], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 2);
 }
-static inline double squared_norm(double localreaction[2]) {
-  return (localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1]);
+static double squared_norm(double localreaction[2]) {
+  return nsgs_squared_norm(localreaction, 2);
 }
 
 static inline void accumulateLightErrorSum(double* light_error_sum, double localreaction[2],

@@ -31,6 +31,7 @@
 #include "SolverOptions.h"       // for SolverOptions
 #include "SparseBlockMatrix.h"
 #include "naming_conventions.h"
+#include "nsgs_utils.h"
 #include "numerics_errors.h"  // for numerics_printf
 #include "numerics_verbose.h"
 #include "op3x3.h"
@@ -66,20 +67,16 @@ static int fccounter = -1;
 /*   } */
 /* } */
 
-static inline void performRelaxation_3(double localstress[3], double* oldstress,
-                                       double omega) {
-  localstress[0] = omega * localstress[0] + (1.0 - omega) * oldstress[0];
-  localstress[1] = omega * localstress[1] + (1.0 - omega) * oldstress[1];
-  localstress[2] = omega * localstress[2] + (1.0 - omega) * oldstress[2];
+static void performRelaxation_3(double localstress[3], double* oldstress, double omega) {
+  nsgs_relaxation(localstress, oldstress, 3, omega);
 }
 
-static inline double light_error_squared_3(double localstress[3], double* oldstress) {
-  return (pow(oldstress[0] - localstress[0], 2) + pow(oldstress[1] - localstress[1], 2) +
-          pow(oldstress[2] - localstress[2], 2));
+static double light_error_squared_3(double localstress[3], double* oldstress) {
+  return nsgs_light_error_squared(localstress, oldstress, 3);
 }
 
-static inline double squared_norm_3(double localstress[3]) {
-  return (pow(localstress[0], 2) + pow(localstress[1], 2) + pow(localstress[2], 2));
+static double squared_norm_3(double localstress[3]) {
+  return nsgs_squared_norm(localstress, 3);
 }
 
 static double calculateLightError(double light_error_sum, size_t nc, double* stress,

@@ -29,6 +29,7 @@
 #include "SolverOptions.h"  // for SolverOptions, SICONOS...
 #include "SparseBlockMatrix.h"
 #include "naming_conventions.h"
+#include "nsgs_utils.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "rolling_fc_Solvers.h"                       // for RollingComputeErrorPtr
@@ -156,23 +157,14 @@ static int solveLocalReaction(RollingUpdatePtr update_localproblem,
 }
 
 static void performRelaxation(double r_local[5], double* old_r_local, double omega) {
-  r_local[0] = omega * r_local[0] + (1.0 - omega) * old_r_local[0];
-  r_local[1] = omega * r_local[1] + (1.0 - omega) * old_r_local[1];
-  r_local[2] = omega * r_local[2] + (1.0 - omega) * old_r_local[2];
-  r_local[3] = omega * r_local[3] + (1.0 - omega) * old_r_local[3];
-  r_local[4] = omega * r_local[4] + (1.0 - omega) * old_r_local[4];
+  nsgs_relaxation(r_local, old_r_local, 5, omega);
 }
 
 static double light_error_squared(double r_local[5], double* old_r_local) {
-  return (pow(old_r_local[0] - r_local[0], 2) + pow(old_r_local[1] - r_local[1], 2) +
-          pow(old_r_local[2] - r_local[2], 2) + pow(old_r_local[3] - r_local[3], 2) +
-          pow(old_r_local[4] - r_local[4], 2));
+  return nsgs_light_error_squared(r_local, old_r_local, 5);
 }
 
-static double squared_norm(double r_local[5]) {
-  return (pow(r_local[0], 2) + pow(r_local[1], 2) + pow(r_local[2], 2) + pow(r_local[3], 2) +
-          pow(r_local[4], 2));
-}
+static double squared_norm(double r_local[5]) { return nsgs_squared_norm(r_local, 5); }
 
 static void acceptLocalReactionFiltered(RollingFrictionContactProblem* localproblem,
                                         SolverOptions* local_opts, size_t contact, int iter,

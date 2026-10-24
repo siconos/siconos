@@ -56,21 +56,16 @@
 typedef int (*CohesiveComputeErrorPtr)(CohesiveFrictionContactProblem*, double*, double*,
                                        double, SolverOptions*, double, double*);
 
-static inline void performRelaxation_3(double localreaction[3], double* oldreaction,
-                                       double omega) {
-  localreaction[0] = omega * localreaction[0] + (1.0 - omega) * oldreaction[0];
-  localreaction[1] = omega * localreaction[1] + (1.0 - omega) * oldreaction[1];
-  localreaction[2] = omega * localreaction[2] + (1.0 - omega) * oldreaction[2];
+static void performRelaxation_3(double localreaction[3], double* oldreaction, double omega) {
+  nsgs_relaxation(localreaction, oldreaction, 3, omega);
 }
 
-static inline double light_error_squared_3(double localreaction[3], double* oldreaction) {
-  return (pow(oldreaction[0] - localreaction[0], 2) +
-          pow(oldreaction[1] - localreaction[1], 2) +
-          pow(oldreaction[2] - localreaction[2], 2));
+static double light_error_squared_3(double localreaction[3], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 3);
 }
 
-static inline double squared_norm_3(double localreaction[3]) {
-  return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
+static double squared_norm_3(double localreaction[3]) {
+  return nsgs_squared_norm(localreaction, 3);
 }
 
 static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,

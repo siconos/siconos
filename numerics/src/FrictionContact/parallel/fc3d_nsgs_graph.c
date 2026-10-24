@@ -44,6 +44,7 @@
 #include "gfc3d_ipm.h"
 #include "graph_tools.h"
 #include "naming_conventions.h"
+#include "nsgs_utils.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_printf
 #include "op3x3.h"
@@ -74,21 +75,16 @@ static int fccounter = -1;
 /*   } */
 /* } */
 
-static inline void performRelaxation_3(double localreaction[3], double* oldreaction,
-                                       double omega) {
-  localreaction[0] = omega * localreaction[0] + (1.0 - omega) * oldreaction[0];
-  localreaction[1] = omega * localreaction[1] + (1.0 - omega) * oldreaction[1];
-  localreaction[2] = omega * localreaction[2] + (1.0 - omega) * oldreaction[2];
+static void performRelaxation_3(double localreaction[3], double* oldreaction, double omega) {
+  nsgs_relaxation(localreaction, oldreaction, 3, omega);
 }
 
-static inline double light_error_squared_3(double localreaction[3], double* oldreaction) {
-  return (pow(oldreaction[0] - localreaction[0], 2) +
-          pow(oldreaction[1] - localreaction[1], 2) +
-          pow(oldreaction[2] - localreaction[2], 2));
+static double light_error_squared_3(double localreaction[3], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 3);
 }
 
-static inline double squared_norm_3(double localreaction[3]) {
-  return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
+static double squared_norm_3(double localreaction[3]) {
+  return nsgs_squared_norm(localreaction, 3);
 }
 
 static void fc3d_nsgs_update_parallel(int contact, FrictionContactProblem* problem,
@@ -305,10 +301,6 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
   copyLocalReaction(&(reaction[contact * (unsigned int)problem->dimension]), localreaction);
 
   return (*local_solver)(localproblem, localreaction, local_opts);
-}
-
-static double squared_norm(double localreaction[3]) {
-  return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
 }
 
 static void acceptLocalReactionFiltered(FrictionContactProblem* localproblem,

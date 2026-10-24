@@ -41,6 +41,7 @@
 #include "fc3d_unitary_enumerative.h"
 #include "gfc3d_ipm.h"
 #include "naming_conventions.h"
+#include "nsgs_utils.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_printf
 #include "op3x3.h"             // For cpy3
@@ -69,21 +70,16 @@ static int fccounter = -1;
 /*   } */
 /* } */
 
-static inline void performRelaxation_3(double localreaction[3], double* oldreaction,
-                                       double omega) {
-  localreaction[0] = omega * localreaction[0] + (1.0 - omega) * oldreaction[0];
-  localreaction[1] = omega * localreaction[1] + (1.0 - omega) * oldreaction[1];
-  localreaction[2] = omega * localreaction[2] + (1.0 - omega) * oldreaction[2];
+static void performRelaxation_3(double localreaction[3], double* oldreaction, double omega) {
+  nsgs_relaxation(localreaction, oldreaction, 3, omega);
 }
 
-static inline double light_error_squared_3(double localreaction[3], double* oldreaction) {
-  return (pow(oldreaction[0] - localreaction[0], 2) +
-          pow(oldreaction[1] - localreaction[1], 2) +
-          pow(oldreaction[2] - localreaction[2], 2));
+static double light_error_squared_3(double localreaction[3], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 3);
 }
 
-static inline double squared_norm_3(double localreaction[3]) {
-  return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
+static double squared_norm_3(double localreaction[3]) {
+  return nsgs_squared_norm(localreaction, 3);
 }
 
 static double calculateLightError(double light_error_sum, size_t nc, double* reaction,
@@ -449,10 +445,11 @@ static int determine_convergence(double error, double tolerance, int iter,
   return hasNotConverged;
 }
 
-static inline void nsgs_print_iteration_stats(int iter, double incremental_error,
-                                              double full_error, double tolerance,
-                                              double user_tolerance, int frozen, size_t nc,
-                                              int hasNotConverged, int verbose) {
+static inline void fc3d_nsgs_print_iteration_stats(int iter, double incremental_error,
+                                                   double full_error, double tolerance,
+                                                   double user_tolerance, int frozen,
+                                                   size_t nc, int hasNotConverged,
+                                                   int verbose) {
   if (verbose <= 0 || iter % verbose != 0) return;
 
   /* Print header on first iteration */
@@ -865,8 +862,9 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           }
         }
       }
-      nsgs_print_iteration_stats(iter, incr_error, full_error, tolerance, SOLVER_TOL(options),
-                                 frozen_contact, nc, hasNotConverged, verbose);
+      fc3d_nsgs_print_iteration_stats(iter, incr_error, full_error, tolerance,
+                                      SOLVER_TOL(options), frozen_contact, nc, hasNotConverged,
+                                      verbose);
     }
     free(light_error_2);
   }
