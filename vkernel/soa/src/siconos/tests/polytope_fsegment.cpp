@@ -92,6 +92,7 @@ int main() {
   auto inter = topo.link(ds);
   auto rel = storage::add<config::polytopefsegment_r>(data);
   rel.segment() = seg;
+  rel.point_index() = 0;
   inter.relation() = rel;
   inter.nslaw() = storage::add<config::nslaw>(data);
 
@@ -116,6 +117,15 @@ int main() {
   rel.compute_jachq(0, ds, g1);
   check(near(g1(0, 0), 0) && near(g1(0, 1), -1) && near(g1(0, 2), 0), "G1 normal row");
   check(near(g1(1, 0), 1) && near(g1(1, 1), 0) && near(g1(1, 2), -1), "G1 tangent row");
+
+  /* the second manifold point: the segment is the incident face, clipped to
+     the square's top face, so its far endpoint (0,5) with gap 4 */
+  auto rel1 = storage::add<config::polytopefsegment_r>(data);
+  rel1.segment() = seg;
+  rel1.point_index() = 1;
+  const auto ct1 = rel1.contact(0, ds);
+  check(near(ct1.h, 4) && near(ct1.cp2[1], 5) && near(ct1.cp1[1], 1),
+        "point 1: the far endpoint, gap 4");
 
   /* the relation serves every polytope near the segment: a second body
      evaluated through it does not change the first body's contact */

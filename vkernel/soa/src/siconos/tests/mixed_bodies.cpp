@@ -253,6 +253,38 @@ void test_two_columns() {
     check(std::abs(storage::attr<"q">(*b, s)(2)) < 1e-6, "no torque on the squares");
 }
 
+/* a tilted square dropped on the ground: the two corners of its bottom
+   face are two contact rows (manifold points 0 and 1), which stop the
+   rotation once both are in contact. Moreau-Jean closes gaps at the
+   velocity level: the first corner penetrates by ~ v h (2.4 m/s x 0.005)
+   before the second row acts, so a residual tilt of order 1e-2 over the unit
+   width remains, frozen, instead of a rocking motion. */
+void test_tilted_square_settles() {
+  using namespace siconos;
+  world w;
+  auto p = w.add_square(0., 0.8);
+  storage::attr<"q">(p, 0)(2) = 0.05;
+  w.finalize();
+  double t_rest = -1.;
+  while (w.simulation.has_next_event()) {
+    w.step();
+    const auto s = w.simulation.current_step();
+    const double om = storage::attr<"velocity">(p, s)(2);
+    if (std::abs(om) >= 1e-6)
+      t_rest = -1.;
+    else if (t_rest < 0)
+      t_rest = s * 0.005;
+  }
+  const auto s = w.simulation.current_step();
+  const auto& q = storage::attr<"q">(p, s);
+  std::print(stderr, "tilted square: q = ({:.6f}, {:.6f}, {:.3e}), at rest from t = {}\n",
+             q(0), q(1), q(2), t_rest);
+  check(t_rest >= 0 && t_rest < 1., "the tilted square stops rotating and does not rock");
+  check(std::abs(q(2)) < 2e-2,
+        "the residual tilt is of the order of the velocity-level drift");
+  check(std::abs(q(1) - 0.5) < 2e-2, "the tilted square rests on the ground");
+}
+
 void test_disk_polytope_neighbors_throw() {
   world w;
   w.add_disk(0., 0.7);
@@ -270,6 +302,7 @@ void test_disk_polytope_neighbors_throw() {
 
 int main() {
   test_two_columns();
+  test_tilted_square_settles();
   test_disk_polytope_neighbors_throw();
   std::print("mixed_bodies: all checks pass\n");
   return 0;

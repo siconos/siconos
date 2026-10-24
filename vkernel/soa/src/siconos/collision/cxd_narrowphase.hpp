@@ -663,6 +663,27 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
   return out;
 }
 
+/// gap given to a manifold point that does not exist (the manifold has one
+/// point): far beyond any activation threshold, so its row stays inactive
+template <typename Scalar>
+constexpr Scalar inactive_gap() {
+  return Scalar{1e30};
+}
+
+/// point i of the manifold of c, as a single-point contact (h, cp1, cp2);
+/// a point the manifold does not have is the first point at inactive_gap
+template <typename Scalar>
+narrowphase_contact<Scalar> manifold_point(const narrowphase_contact<Scalar>& c,
+                                           std::size_t i) {
+  auto r = c;
+  if (c.npoints == 0) return r;  // unanswered pair: the failure row as is
+  const auto& p = c.points[i < c.npoints ? i : 0];
+  r.h = i < c.npoints ? p.h : inactive_gap<Scalar>();
+  r.cp1 = p.cp1;
+  r.cp2 = p.cp2;
+  return r;
+}
+
 }  // namespace siconos::collision
 
 #include "siconos/collision/collision_head.hpp"

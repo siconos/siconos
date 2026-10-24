@@ -53,6 +53,32 @@ struct hash<std::array<T, 4>> {
   }
 };
 
+// std::array<T, 3>, std::array<T, 5>: proximity keys with a manifold point
+// index
+template <typename T>
+struct hash<std::array<T, 3>> {
+  size_t operator()(const std::array<T, 3>& arr) const noexcept {
+    size_t seed = 0;
+    for (size_t i = 0; i < 3; ++i) {
+      size_t h = std::hash<T>{}(arr[i]);
+      seed ^= h + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
+template <typename T>
+struct hash<std::array<T, 5>> {
+  size_t operator()(const std::array<T, 5>& arr) const noexcept {
+    size_t seed = 0;
+    for (size_t i = 0; i < 5; ++i) {
+      size_t h = std::hash<T>{}(arr[i]);
+      seed ^= h + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
 // siconos::storage::mp::pair
 template <typename First, typename Second>
 struct hash<siconos::storage::mp::pair<First, Second>> {
@@ -100,7 +126,8 @@ struct space_filter : item {
         diskmeshes;
     some::map<some::array<some::scalar, some::indice_value<4>>, some::item_ref<diskfsegment_r>>
         diskfsegments;
-    some::map<some::array<some::scalar, some::indice_value<4>>,
+    // keyed by (segment x1 x2 y1 y2, manifold point index)
+    some::map<some::array<some::scalar, some::indice_value<5>>,
               some::item_ref<polytopefsegment_r<Topology>>>
         polytopefsegments;
     some::map<some::array<some::scalar, some::indice_value<2>>,
@@ -253,9 +280,10 @@ struct space_filter : item {
     }
 
     void insert_polytopefsegment_r(auto hdl) {
-      storage::attr<"polytopefsegments">(*self())[{hdl.segment().x1(), hdl.segment().x2(),
-                                                   hdl.segment().y1(), hdl.segment().y2()}] =
-          hdl;
+      using scalar = std::decay_t<decltype(hdl.segment().x1())>;
+      storage::attr<"polytopefsegments">(
+          *self())[{hdl.segment().x1(), hdl.segment().x2(), hdl.segment().y1(),
+                    hdl.segment().y2(), static_cast<scalar>(hdl.point_index())}] = hdl;
     }
 
     void insert_polytopemesh_r(auto hdl) {
@@ -402,7 +430,8 @@ struct space_filter : item {
                       DiskSegmentR rel) {
                     auto segment = rel.segment();
                     auto coefs =
-                        std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                        std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(),
+                                   std::decay_t<decltype(segment.x1())>{0}};
                     ds_segment_prox[mp::make_pair(ds1.value(), coefs)] = inter;
                   },
                   [&, ds1 = ds1,
@@ -410,8 +439,9 @@ struct space_filter : item {
                        inter]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
                       PolytopeFsegmentR rel) {
                     auto segment = rel.segment();
-                    auto coefs =
-                        std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                    auto coefs = std::array{
+                        segment.x1(), segment.x2(), segment.y1(), segment.y2(),
+                        static_cast<std::decay_t<decltype(segment.x1())>>(rel.point_index())};
                     ds_segment_prox[mp::make_pair(ds1.value(), coefs)] = inter;
                   },
                   [&, ds1 = ds1,
@@ -613,8 +643,8 @@ struct space_filter : item {
 
       auto& ds1 = body1;
 
-      auto find_inter =
-          intermap.find(mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
+      auto find_inter = intermap.find(mp::make_pair(
+          ds1.index().value(), std::array{x1, x2, y1, y2, std::decay_t<decltype(x1)>{0}}));
 
       if (find_inter != intermap.end()) {
         auto inter = storage::make_handle(data, std::get<1>(*find_inter));
@@ -644,7 +674,9 @@ struct space_filter : item {
           relmap[{x1, x2, y1, y2}] = dl;
         }
         storage::prop<"activation", Topology>(inter) = true;
-        intermap[mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2})] = inter;
+        intermap[mp::make_pair(ds1.index().value(),
+                               std::array{x1, x2, y1, y2, std::decay_t<decltype(x1)>{0}})] =
+            inter;
       }
     }
 
@@ -665,30 +697,36 @@ struct space_filter : item {
       auto x2 = segment.x2();
       auto y1 = segment.y1();
       auto y2 = segment.y2();
+      using scalar = std::decay_t<decltype(x1)>;
 
       auto& ds1 = body1;
 
-      auto find_inter =
-          intermap.find(mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2}));
+      // one interaction per point of the contact manifold (at most two in
+      // 2D); a point the manifold does not have keeps an inactive gap
+      using poly_fs_t = collision::polytopefsegment_r<Topology>;
+      for (std::size_t pi = 0; pi < 2; ++pi) {
+        const std::array key{x1, x2, y1, y2, static_cast<scalar>(pi)};
+        auto find_inter = intermap.find(mp::make_pair(ds1.index().value(), key));
 
-      if (find_inter != intermap.end()) {
-        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
-        storage::prop<"activation", Topology>(inter) = true;
-      } else {
-        auto inter = topo.link(body1);
-        inter.nslaw() = nslaw;
-
-        using poly_fs_t = collision::polytopefsegment_r<Topology>;
-        if (auto search = relmap.find({x1, x2, y1, y2}); search != relmap.end()) {
-          inter.relation() = search->second;
+        if (find_inter != intermap.end()) {
+          auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+          storage::prop<"activation", Topology>(inter) = true;
         } else {
-          auto dl = storage::add<poly_fs_t>(data);
-          dl.segment() = segment;
-          inter.relation() = dl;
-          relmap[{x1, x2, y1, y2}] = dl;
+          auto inter = topo.link(body1);
+          inter.nslaw() = nslaw;
+
+          if (auto search = relmap.find(key); search != relmap.end()) {
+            inter.relation() = search->second;
+          } else {
+            auto dl = storage::add<poly_fs_t>(data);
+            dl.segment() = segment;
+            dl.point_index() = pi;
+            inter.relation() = dl;
+            relmap[key] = dl;
+          }
+          storage::prop<"activation", Topology>(inter) = true;
+          intermap[mp::make_pair(ds1.index().value(), key)] = inter;
         }
-        storage::prop<"activation", Topology>(inter) = true;
-        intermap[mp::make_pair(ds1.index().value(), std::array{x1, x2, y1, y2})] = inter;
       }
     }
 
@@ -837,7 +875,8 @@ struct space_filter : item {
                     [&]<match::handle<diskfsegment_r> DiskSegmentR>(DiskSegmentR rel) {
                       auto segment = rel.segment();
                       auto coefs =
-                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(),
+                                     std::decay_t<decltype(segment.x1())>{0}};
                       auto finter = ds_segment_prox.find(
                           mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
                       if (finter == ds_segment_prox.end()) {
@@ -851,7 +890,9 @@ struct space_filter : item {
                         PolytopeFsegmentR rel) {
                       auto segment = rel.segment();
                       auto coefs =
-                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2()};
+                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(),
+                                     static_cast<std::decay_t<decltype(segment.x1())>>(
+                                         rel.point_index())};
                       auto finter = ds_segment_prox.find(
                           mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
                       if (finter == ds_segment_prox.end()) {
@@ -957,7 +998,7 @@ struct space_filter : item {
                                      storage::index<dfinteraction, indice>>;
 
       using map_ds_segment_prox_t =
-          typename env::template map<mp::pair<indice, std::array<scalar, 4>>,
+          typename env::template map<mp::pair<indice, std::array<scalar, 5>>,
                                      storage::index<finteraction, indice>>;
 
       using map_ds_fdisk_prox_t =
