@@ -163,6 +163,57 @@ Experimental high-performance numerics additions:
    - Old: `globalFrictionContactProblem_reformulate_*` / `*_restore`
    - New: `globalFrictionContactProblem_reduce_*` / `expand_*` (deprecated aliases kept)
 
+7. **Numerics public API cleanup**:
+   - Expanded cryptic abbreviations in FrictionContact/GlobalFrictionContact solver option setters
+     - `fc3d_dsfp_set_default` → `fc3d_de_saxce_fixed_point_set_default`
+     - `fc3d_fpp_set_default` → `fc3d_fixed_point_projection_set_default`
+     - `fc3d_hp_set_default` → `fc3d_hyperplane_projection_set_default`
+     - `fc3d_eg_set_default` → `fc3d_extra_gradient_set_default`
+     - `fc3d_pfp_set_default` → `fc3d_panagiotopoulos_fixed_point_set_default`
+     - `fc3d_aclmfp_set_default` → `fc3d_alart_curnier_lm_fixed_point_set_default`
+     - `fc3d_tfp_set_default` → `fc3d_tresca_fixed_point_set_default`
+     - `fc3d_nsn_ac_set_default` → `fc3d_nonsmooth_newton_alart_curnier_set_default`
+     - `fc3d_nsn_fb_set_default` → `fc3d_nonsmooth_newton_fischer_burmeister_set_default`
+     - `fc3d_nsn_nm_set_default` → `fc3d_nonsmooth_newton_jean_moreau_set_default`
+     - `fc3d_nsn_ac_new_set_default` → `fc3d_nonsmooth_newton_alart_curnier_reformulated_set_default`
+     - `fc3d_ipm_snm_set_default` → `fc3d_IPM_SNM_set_default`
+     - `gfc3d_nsn_ac_set_default` → `gfc3d_nonsmooth_newton_alart_curnier_set_default`
+     - `gfc3d_admm_set_default` → `gfc3d_alternating_direction_method_of_multipliers_set_default`
+     - `gfc3d_aclmfp_set_default` → `gfc3d_alart_curnier_lm_fixed_point_set_default`
+     - `gfc3d_ipm_snm_set_default` → `gfc3d_IPM_SNM_set_default`
+   - Renamed misleading `_new` suffixes
+     - `computeAlartCurnier2D_new` → `computeAlartCurnier2D_reformulated`
+     - `fc3d_nonsmooth_Newton_AlartCurnier_new` → `fc3d_nonsmooth_Newton_AlartCurnier_reformulated`
+     - `gfc3d_nonsmooth_Newton_AlartCurnier_new_wr` → `gfc3d_nonsmooth_Newton_AlartCurnier_reformulated_wr`
+     - `NM_internalData_new` → `NM_internalData_alloc`
+   - Standardized problem struct lifecycle verbs
+     - `freeAVI` → `AVI_free`
+     - `freeNCP` → `NCP_free`
+   - Deprecated aliases are centralized in `numerics/src/utils/deprecated_numerics_api.h`
+
+8. **Numerics public API cleanup — wave 2**:
+   - Expanded remaining cryptic abbreviations
+     - `gfc3d_vi_eg_set_default` → `gfc3d_VI_extra_gradient_set_default`
+     - `gfc3d_vi_fpp_set_default` → `gfc3d_VI_fixed_point_projection_set_default`
+     - `gfc2d_vi_eg_set_default` → `gfc2d_VI_extra_gradient_set_default`
+     - `fc3d_FixedP_initialize` → `fc3d_fixed_point_initialize`
+     - `fc3d_FixedP_solve` → `fc3d_fixed_point_solve`
+     - `fc3d_FixedP_free` → `fc3d_fixed_point_free`
+     - `fc3d_FixedP_computeError` → `fc3d_fixed_point_compute_error`
+     - `F_GlockerFixedP` → `F_Glocker_fixed_point`
+     - `compute_Z_GlockerFixedP` → `compute_Z_Glocker_fixed_point`
+   - Standardized `FrictionContactProblem` and `GlobalFrictionContactProblem` lifecycle/display verbs
+     - `frictionContact_display` → `frictionContactProblem_display`
+     - `frictionContact_printInFile` → `frictionContactProblem_printInFile`
+     - `frictionContact_printInFilename` → `frictionContactProblem_printInFilename`
+     - `globalFrictionContact_display` → `globalFrictionContactProblem_display`
+     - `globalFrictionContact_free` → `globalFrictionContactProblem_free`
+     - `globalFrictionContact_printInFile` → `globalFrictionContactProblem_printInFile`
+     - `globalFrictionContact_printInFileName` → `globalFrictionContactProblem_printInFilename`
+   - Removed dead NCP error helpers
+     - `Compute_NCP_error1`
+     - `Compute_NCP_error2`
+
 ### Build System
 
 - **SWIG is being phased out**; pybind11 is the future for Python bindings
@@ -186,6 +237,7 @@ Experimental high-performance numerics additions:
 2. Replace `MohrCoulomb2DProblem` with `Plasticity2DProblem`
 3. Update solver enum names if using plasticity solvers
 4. Update GFC reformulation function names if used directly
+5. Update renamed numerics function names or include `numerics/src/utils/deprecated_numerics_api.h` for backward-compatible aliases
 
 ### For C++ Users
 

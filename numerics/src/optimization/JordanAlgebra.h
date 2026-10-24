@@ -65,6 +65,13 @@ NumericsMatrix* Reflect_mat(const size_t size, NM_types type);
 NumericsMatrix* Quad_repr(const double* const vec, const size_t vecSize,
                           const size_t varsCount);
 
+/** Nesterov-Todd vector for the pair (vec1, vec2).
+ * \param vec1 first input vector
+ * \param vec2 second input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \param out result NT vector
+ */
 void NesterovToddVector(const double* const vec1, const double* const vec2,
                         const size_t vecSize, const size_t varsCount, double* out);
 
@@ -149,95 +156,185 @@ void JA_inv(const double* const vec, const size_t vecSize, const size_t varsCoun
 void JA_det(const double* const vec, const size_t vecSize, const size_t varsCount,
             double* out);
 
-/*
-  \return the 2-norm of a vector - uses long double - based on blas_dnrm2
-  \param n size of the vector
-  \param x the input vector
-*/
+/** Euclidean 2-norm of a vector, computed in long double precision.
+ * \param n size of the vector
+ * \param x input vector
+ * \return long-double value ||x||_2
+ */
 float_type dnrm2l(const size_t n, const double* x);
 
-/*
-  \return the square of 2-norm of a vector - uses long double - based on blas_dnrm2
-  \param n size of the vector
-  \param x the input vector
-*/
+/** Squared Euclidean 2-norm of a vector, computed in long double precision.
+ * \param n size of the vector
+ * \param x input vector
+ * \return long-double value ||x||_2^2
+ */
 float_type dnrm2sqrl(const size_t n, const double* x);
 
-/* PA: Return the product Q_sqrt(x)*y */
+/** Quadratic representation applied to a vector: out = Q(x)^{1/2} y.
+ * \param x input vector defining the quadratic representation
+ * \param y input vector being mapped
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x and y
+ * \param out result vector Q(x)^{1/2} y
+ */
 void Qx05y(const double* const x, const double* const y, const size_t vecSize,
            const size_t varsCount, double* out);
 
-/* PA: Return the product Q_inv_sqrt(x)*y */
+/** Inverse quadratic representation applied to a vector: out = Q(x)^{-1/2} y.
+ * \param x input vector defining the quadratic representation
+ * \param y input vector being mapped
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x and y
+ * \param out result vector Q(x)^{-1/2} y
+ */
 void Qx50y(const double* const x, const double* const y, const size_t vecSize,
            const size_t varsCount, double* out);
 
-/* PA: Jordan algebra, returns inv(x) */
+/** Jordan algebra inverse: out = x^{-1}.
+ * \param x input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x
+ * \param out result vector x^{-1}
+ */
 void Jinv(const double* const x, const size_t vecSize, const size_t varsCount, double* out);
 
-/* PA: Return J_sqrt(x) */
+/** Jordan algebra square root: out = x^{1/2}.
+ * \param x input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x
+ * \param out result vector x^{1/2}
+ */
 void Jsqrt(const double* const x, const size_t vecSize, const size_t varsCount, double* out);
 
-/* PA: Return J_sqrtinv(x) */
+/** Jordan algebra inverse square root: out = x^{-1/2}.
+ * \param x input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x
+ * \param out result vector x^{-1/2}
+ */
 void Jsqrtinv(const double* const x, const size_t vecSize, const size_t varsCount,
               double* out);
 
-/* PA: Return the Nesterov-Todd vector */
+/** Nesterov-Todd vector p for the pair (x, y).
+ * \param T selector for the formulation variant
+ * \param x first input vector
+ * \param y second input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x and y
+ * \param p result NT vector
+ */
 void Nesterov_Todd_vector(short T, const double* const x, const double* const y,
                           const size_t vecSize, const size_t varsCount, double* p);
 
-/* PA: Return the Nesterov-Todd vector by means of the second formula */
+/** Nesterov-Todd vector p for the pair (x, y), alternative formula.
+ * \param x first input vector
+ * \param y second input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x and y
+ * \param p result NT vector
+ */
 void Nesterov_Todd_vector_b(const double* const x, const double* const y, const size_t vecSize,
                             const size_t varsCount, double* p);
 
-/* Computation of Qx*y by means of the formula 2*(x'*y)*x - det(x)*R*y */
+/** Quadratic representation applied to a vector: z = Q(x) y.
+ * Uses the formula 2 (x^T y) x - det(x) R y.
+ * \param x input vector defining the quadratic representation
+ * \param y input vector being mapped
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in x and y
+ * \param z result vector Q(x) y
+ */
 void Qxy(const double* const x, const double* const y, const size_t vecSize,
          const size_t varsCount, double* z);
 
-/* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
+/** Scaling by the Nesterov-Todd vector: out = Q(p) z with p = NT(x, y).
+ * \param x first input vector defining the NT scaling point
+ * \param y second input vector defining the NT scaling point
+ * \param z input vector being scaled
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \param out result vector Q(p) z
+ */
 void QNTpz(const double* const x, const double* const y, const double* const z,
            const size_t vecSize, const size_t varsCount, double* out);
 
-/* Returns the product Q_{p^{-1}}*z where p is the NT vector related to the pair (x,y) */
+/** Inverse NT scaling: out = Q(p)^{-1} z with p = NT(x, y).
+ * \param x first input vector defining the NT scaling point
+ * \param y second input vector defining the NT scaling point
+ * \param z input vector being scaled
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \param out result vector Q(p)^{-1} z
+ */
 void QNTpinvz(const double* const x, const double* const y, const double* const z,
               const size_t vecSize, const size_t varsCount, double* out);
 
-/* Returns the product Q_{p^{-2}}*z where p is the NT vector related to the pair (x,y) */
+/** Squared inverse NT scaling: out = Q(p)^{-2} z with p = NT(x, y).
+ * \param x first input vector defining the NT scaling point
+ * \param y second input vector defining the NT scaling point
+ * \param z input vector being scaled
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \param out result vector Q(p)^{-2} z
+ */
 void QNTpinv2z(const double* const x, const double* const y, const double* const z,
                const size_t vecSize, const size_t varsCount, double* out);
 
-/* returns the Jordan product x^{-1} o y by using the formula x^{-1} = R*x/det(x), where R is
- * the reflection matrix */
+/** Jordan product of the inverse of x with y: out = x^{-1} \circ y.
+ * Uses the formula x^{-1} = R x / det(x), where R is the reflection matrix.
+ * \param x input vector to be inverted
+ * \param y input vector for the Jordan product
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \param out result vector x^{-1} \circ y
+ */
 void Jxinvprody(const double* const x, const double* const y, const size_t vecSize,
                 const size_t varsCount, double* out);
 
-/* returns the quadratic representation of a vector vec */
+/** Quadratic representation matrix Q(vec) of a vector.
+ * \param vec input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors) in vec
+ * \return newly allocated matrix Q(vec)
+ */
 NumericsMatrix* QRmat(const double* const vec, const size_t vecSize, const size_t varsCount);
 
-/* Returns a long double as the square root of determinant of a vector related to the Jordan
- * product */
+/** Square root of the determinant of a Jordan-algebra element.
+ * \param x input vector
+ * \param dimension dimension of each Jordan-algebra block
+ * \return long-double value sqrt(det(x))
+ */
 float_type ld_gammal(const double* const x, const size_t dimension);
 
-/*
-   Returns the NT matrix by performing computation as in
-   Solving semidefinite-linear programs using SDPT3
-   by Tutuncu, Toh and Todd, Math.Prog 2003, pp. 195-196
-*/
+/** Nesterov-Todd scaling matrix W(x, z).
+ * Computed following the procedure in Tütüncü, Toh and Todd,
+ * "Solving semidefinite-linear programs using SDPT3", Math. Prog. 2003, pp. 195-196.
+ * \param x first input vector
+ * \param z second input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \return newly allocated NT scaling matrix
+ */
 NumericsMatrix* NTmat(const double* const x, const double* const z, const size_t vecSize,
                       const size_t varsCount);
 
-/*
-   Returns the inverse of NT matrix by performing computation as in
-   Solving semidefinite-linear programs using SDPT3
-   by Tutuncu, Toh and Todd, Math.Prog 2003, pp. 195-196
-*/
+/** Inverse of the Nesterov-Todd scaling matrix W(x, z)^{-1}.
+ * \param x first input vector
+ * \param z second input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \return newly allocated inverse NT scaling matrix
+ */
 NumericsMatrix* NTmatinv(const double* const x, const double* const z, const size_t vecSize,
                          const size_t varsCount);
 
-/*
-   Returns the square of NT matrix by performing computation as in
-   Solving semidefinite-linear programs using SDPT3
-   by Tutuncu, Toh and Todd, Math.Prog 2003, pp. 195-196
-*/
+/** Square of the Nesterov-Todd scaling matrix W(x, z)^2.
+ * \param x first input vector
+ * \param z second input vector
+ * \param vecSize length of the vector data
+ * \param varsCount number of Jordan-algebra variables (subvectors)
+ * \return newly allocated squared NT scaling matrix
+ */
 NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const size_t vecSize,
                          const size_t varsCount);
 

@@ -27,7 +27,9 @@
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_daxpy
 #include "SolverOptions.h"                 // for SolverOptions
+#include "error_computation.h"             // for error_compute_alloc_pair
 #include "fc2d_compute_error.h"
+#include "friction_error_toolkit.h"  // for friction_error_toolkit_...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
@@ -83,31 +85,19 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   double* tmp = options->dWork;
   double* rhs = &options->dWork[n];
 
-  /* rhs = q */
-  cblas_dcopy_msan(n, problem->q, 1, rhs, 1);
-
-  /* tmp = H * reaction; rhs += tmp */
-  if (problem->numberOfContacts > 0) {
-    NM_gemv(1.0, problem->H, reaction, 0.0, tmp);
-    cblas_daxpy(n, 1.0, tmp, 1, rhs, 1);
-  }
-  const double norm_Hr = cblas_dnrm2(n, tmp, 1);
-
-  /* tmp = -M * globalVelocity; rhs += tmp */
-  NM_gemv(-1.0, problem->M, globalVelocity, 0.0, tmp);
-  cblas_daxpy(n, 1.0, tmp, 1, rhs, 1);
-
-  const double norm_Mv = cblas_dnrm2(n, tmp, 1);
+  double norm_Hr = 0.0, norm_Mv = 0.0;
+  *error = friction_error_toolkit_global_primal_residual(problem->M, problem->H, problem->q,
+                                                         reaction, globalVelocity, n, nc > 0,
+                                                         tmp, rhs, &norm_Hr, &norm_Mv);
 
   const double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
-  *error = cblas_dnrm2(n, rhs, 1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
 
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
 
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, problem->H, globalVelocity, 1.0, velocity);
+  friction_error_toolkit_recompute_local_velocity(problem->H, problem->b, globalVelocity, m,
+                                                  velocity);
   DEBUG_PRINTF("norm of velocity %e\n", cblas_dnrm2(m, velocity, 1));
 
   double error_complementarity = 0.0;
@@ -124,11 +114,9 @@ int gfc2d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
     error_complementarity = sqrt(err_sq);
   } else {
     /* Scaled path: delegate to the vectorized 2D complementarity error. */
-    double* comp_work = (double*)malloc(nc * sizeof(double));
-    double* comp_tmp = (double*)malloc(m * sizeof(double));
-    if (comp_work == NULL || comp_tmp == NULL) {
-      free(comp_work);
-      free(comp_tmp);
+    double* comp_work = NULL;
+    double* comp_tmp = NULL;
+    if (error_compute_alloc_pair(nc, m, &comp_work, &comp_tmp)) {
       return numerics_error("gfc2d_compute_error", "bad alloc");
     }
     error_complementarity = fc2d_compute_complementarity_error(

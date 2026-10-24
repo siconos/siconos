@@ -26,8 +26,9 @@
 
 #include "FrictionContactProblem.h"  // IWYU pragma: keep - For FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "NumericsMatrix.h"  // for NM_prod_mv_3x3, NM_gemv
-#include "SolverOptions.h"   // IWYU pragma: keep - for SolverOptions
+#include "NumericsMatrix.h"     // for NM_prod_mv_3x3, NM_gemv
+#include "SolverOptions.h"      // IWYU pragma: keep - for SolverOptions
+#include "error_computation.h"  // for error_compute_alloc_pair
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -316,11 +317,9 @@ int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
     reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
     alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
   }
-  double* comp_work = (double*)malloc(nc * sizeof(double));
-  double* comp_tmp = (double*)malloc(n * sizeof(double));
-  if (comp_work == NULL || comp_tmp == NULL) {
-    free(comp_work);
-    free(comp_tmp);
+  double* comp_work = NULL;
+  double* comp_tmp = NULL;
+  if (error_compute_alloc_pair(nc, n, &comp_work, &comp_tmp)) {
     return numerics_error("fc3d_compute_error", "bad alloc");
   }
   *error = fc3d_compute_complementarity_error(nc, z, w, mu, norm_id, scope, reduction, alpha,

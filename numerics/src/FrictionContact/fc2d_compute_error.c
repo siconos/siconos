@@ -25,10 +25,11 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "NumericsMatrix.h"  // for NM_gemv
-#include "SOC_scaling.h"     // for SOC_scaling_*
-#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dnrm2, cblas_dscal
-#include "SolverOptions.h"   // for SolverOptions
+#include "NumericsMatrix.h"     // for NM_gemv
+#include "SOC_scaling.h"        // for SOC_scaling_*
+#include "SiconosBlas.h"        // for cblas_dcopy, cblas_dnrm2, cblas_dscal
+#include "SolverOptions.h"      // for SolverOptions
+#include "error_computation.h"  // for error_compute_alloc_pair
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_error, verbose
 
@@ -301,11 +302,9 @@ int fc2d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
     alpha = options->dparam[SICONOS_FRICTION_2D_SCALING_ALPHA];
   }
 
-  double* comp_work = (double*)malloc(nc * sizeof(double));
-  double* comp_tmp = (double*)malloc(n * sizeof(double));
-  if (comp_work == NULL || comp_tmp == NULL) {
-    free(comp_work);
-    free(comp_tmp);
+  double* comp_work = NULL;
+  double* comp_tmp = NULL;
+  if (error_compute_alloc_pair(nc, n, &comp_work, &comp_tmp)) {
     return numerics_error("fc2d_compute_error", "bad alloc");
   }
   *error = fc2d_compute_complementarity_error(nc, z, w, mu, norm, scope, reduction, alpha,

@@ -40,6 +40,7 @@
 #include "VI_cst.h"                         // for SICONOS_VI_DPARAM_RHO
 #include "fc2d_AlartCurnier_functions.h"    // for computeAlartCurnier2D
 #include "fc3d_short_names.h"               // for GFC2D_NSN_AC
+#include "friction_error_toolkit.h"         // for friction_error_toolkit_...
 #include "gfc2d_VI_FixedPointProjection.h"  // for warm-start
 #include "gfc2d_compute_error.h"            // for gfc2d_compute_error
 #include "numerics_verbose.h"
@@ -706,8 +707,8 @@ restart:
   /* ====================================================================== *
    * Initialize local velocity from the provided global velocity
    * ====================================================================== */
-  cblas_dcopy(num_contact_dofs, problem->b, 1, velocity, 1);
-  NM_tgemv(1., problem->H, globalVelocity, 1, velocity);
+  friction_error_toolkit_recompute_local_velocity(problem->H, problem->b, globalVelocity,
+                                                  (int)num_contact_dofs, velocity);
 
   const double norm_velocity = cblas_dnrm2(num_contact_dofs, velocity, 1);
   if (fabs(norm_velocity) < DBL_EPSILON) {

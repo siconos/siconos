@@ -26,6 +26,7 @@
 #include "SolverOptions.h"   // for SolverOptions, SICONOS_DPA...
 #include "fc3d_Solvers.h"    // for fc3d_nsgs_set_default
 #include "fc3d_short_names.h"
+#include "friction_error_toolkit.h"  // for friction_error_toolkit_...
 #include "gfc3d_Solvers.h"
 #include "gfc3d_Solvers.h"        // for ComputeErrorGlobalPtr, gfc...
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
@@ -130,11 +131,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
     if (nc > 0) {
       /* Compute current local velocity */
-      /*      velocity <--b */
-      cblas_dcopy(m, b, 1, velocity, 1);
-
-      /* velocity <-- H^T globalVelocity + velocity*/
-      NM_tgemv(1., H, globalVelocity, 1., velocity);
+      friction_error_toolkit_recompute_local_velocity(H, b, globalVelocity, m, velocity);
       DEBUG_EXPR(NM_vector_display(velocity, m););
 
       /* Loop through the contact points */

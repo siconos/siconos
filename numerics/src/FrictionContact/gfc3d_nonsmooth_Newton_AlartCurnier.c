@@ -43,6 +43,7 @@
 #include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_AlartCurnierFun...
 #include "fc3d_short_names.h"                    // for GFC3D_NSN_AC
+#include "friction_error_toolkit.h"              // for friction_error_toolkit_...
 #include "gfc3d_Solvers.h"                       // for gfc3d_nonsmooth_Newt...
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
 #include "numerics_verbose.h"
@@ -987,8 +988,8 @@ restart:
   /* ====================================================================== *
    * Initialize local velocity from the provided global velocity
    * ====================================================================== */
-  cblas_dcopy(num_contact_dofs, problem->b, 1, velocity, 1);
-  NM_tgemv(1., problem->H, globalVelocity, 1, velocity);
+  friction_error_toolkit_recompute_local_velocity(problem->H, problem->b, globalVelocity,
+                                                  (int)num_contact_dofs, velocity);
 
   const double norm_velocity = cblas_dnrm2(num_contact_dofs, velocity, 1);
   if (fabs(norm_velocity) < DBL_EPSILON) {

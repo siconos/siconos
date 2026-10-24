@@ -24,6 +24,7 @@
 #include "NumericsMatrix.h"                // for NM_gemv, NM_tgemv, Numeric...
 #include "SiconosBlas.h"                   // for cblas_dcopy
 #include "VariationalInequality.h"         // for VariationalInequality
+#include "friction_error_toolkit.h"        // for friction_error_toolkit_...
 #include "projectionOnCone.h"              // for projectionOnCone
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -58,8 +59,8 @@ void Function_VI_GFC3D(void* self, int n_notused, double* x, double* F) {
   /* NM_gemv(1.0, gfc3d->H, reaction, 1.0, F); /\* F= M v -q - Hr  *\/ */
 
   double* localvelocity = &F[n];
-  cblas_dcopy(m, gfc3d->b, 1, localvelocity, 1);             /* localvelocity = b */
-  NM_tgemv(1., gfc3d->H, globalVelocity, 1., localvelocity); /* localvelocity = b + H^T V*/
+  friction_error_toolkit_recompute_local_velocity(
+      gfc3d->H, gfc3d->b, globalVelocity, m, localvelocity); /* localvelocity = b + H^T V*/
 
   for (int contact = 0; contact < gfc3d->numberOfContacts; ++contact) {
     double normUT =
@@ -134,8 +135,8 @@ void Function_VI_GFC2D(void* self, int n_notused, double* x, double* F) {
   NM_gemv(-1.0, gfc2d->H, reaction, 1.0, F);      /* F = M v - q - H r */
 
   double* localvelocity = &F[n];
-  cblas_dcopy(m, gfc2d->b, 1, localvelocity, 1);             /* localvelocity = b */
-  NM_tgemv(1., gfc2d->H, globalVelocity, 1., localvelocity); /* localvelocity = b + H^T v */
+  friction_error_toolkit_recompute_local_velocity(
+      gfc2d->H, gfc2d->b, globalVelocity, m, localvelocity); /* localvelocity = b + H^T v */
 
   for (int contact = 0; contact < gfc2d->numberOfContacts; ++contact) {
     double absT = fabs(localvelocity[contact * nLocal + 1]);
