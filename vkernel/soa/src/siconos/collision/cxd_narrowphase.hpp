@@ -1080,6 +1080,12 @@ struct cxd_narrowphase : item {
       // the hash reads, so ensure() stamps the value it already has
     }
 
+    auto methods() {
+      // types only (see storage::methods)
+      using indice = typename decltype(self()->env())::indice;
+      return collect(method("ensure", &interface<Handle>::template ensure<indice>));
+    }
+
     /* ensure(step): rebind is idempotent and cheap, so it runs every call;
        the batch re-runs only on a new step tag or a changed world checksum */
     void ensure(auto step) {

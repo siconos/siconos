@@ -6,6 +6,13 @@
 #include "siconos/collision/collision.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
 #include "siconos/collision/diskfsegment_r.hpp"
+#include "siconos/collision/diskmesh_r.hpp"
+#include "siconos/collision/polytopedisk_r.hpp"
+#include "siconos/collision/polytopefdisk_r.hpp"
+#include "siconos/collision/polytopefsegment_r.hpp"
+#include "siconos/collision/polytopemesh_r.hpp"
+#include "siconos/collision/polytopepolytope_r.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/pattern/base.hpp"
@@ -98,14 +105,23 @@ struct io : item {
       using scalar = typename env_t::scalar;
 
       auto& ids = storage::prop_values<system, "id", topology>(data, step);
-      auto& shapes =
-          storage::prop_values<system, "shape", storage::config_declared>(data, step);
 
       attr<"radii_info">(*self()).clear();
 
-      for (auto [id, shape] : view::zip(ids, shapes)) {
-        attr<"radii_info">(*self()).push_back(
-            {(scalar)id, storage::make_handle(data, shape).radius()});
+      // a disk's radius; a polytope's circumradius (vview scales the disk
+      // glyphs with it, polytopes are drawn from their vertices)
+      for (auto [id, h] : view::zip(ids, storage::handles<system>(data, step))) {
+        using h_t = std::decay_t<decltype(h)>;
+        scalar r = 0;
+        if constexpr (collision::may_have_shape<collision::shape::disk, h_t>()) {
+          if (collision::has_shape<collision::shape::disk>(h))
+            r = collision::shape_of<collision::shape::disk>(h).radius();
+        }
+        if constexpr (collision::may_have_shape<collision::shape::polytope, h_t>()) {
+          if (collision::has_shape<collision::shape::polytope>(h))
+            r = collision::shape_of<collision::shape::polytope>(h).rmax();
+        }
+        attr<"radii_info">(*self()).push_back({(scalar)id, r});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 2>>(
@@ -215,19 +231,37 @@ struct io : item {
 
           vect cb;
 
-          if (ds1 != ds2) {
-            /* 2 disks */
-            scalar dc2c1 = collision::distance(c2, c1);
+          // a contact given by its two points and its normal (1 -> 2)
+          auto from_contact = [&](const auto& ct) {
+            ca = {ct.cp1[0], ct.cp1[1], 0.};
+            cb = {ct.cp2[0], ct.cp2[1], 0.};
+            cn = {ct.normal[0], ct.normal[1], 0.};
+          };
 
-            cn = (c2 - c1) / dc2c1;
-            ca = c1 + storage::make_handle(
-                          data, storage::prop<"shape", storage::config_declared>(hds1))
-                              .radius() *
-                          cn;
-            cb = c2 - storage::make_handle(
-                          data, storage::prop<"shape", storage::config_declared>(hds2))
-                              .radius() *
-                          cn;
+          if (ds1 != ds2) {
+            variant::visit(
+                data, relation,
+                mp::overload(
+                    /* 2 disks */
+                    [&](match::handle<collision::diskdisk_r> auto) {
+                      scalar dc2c1 = collision::distance(c2, c1);
+                      cn = (c2 - c1) / dc2c1;
+                      ca = c1 + collision::disk_radius(hds1) * cn;
+                      cb = c2 - collision::disk_radius(hds2) * cn;
+                    },
+                    /* 2 polytopes: the stage's cached manifold point */
+                    [&](match::handle<collision::polytopepolytope_r<topology>> auto rrel) {
+                      ca = {rrel.cp1()[0], rrel.cp1()[1], 0.};
+                      cb = {rrel.cp2()[0], rrel.cp2()[1], 0.};
+                      cn = {rrel.normal()[0], rrel.normal()[1], 0.};
+                    },
+                    /* disk / polytope */
+                    [&](match::handle<collision::polytopedisk_r<topology>> auto rrel) {
+                      from_contact(rrel.contact(step, hds1, hds2));
+                    },
+                    [&](auto) {
+                      throw(std::runtime_error("io::contact_points: unknown ds-ds relation"));
+                    }));
           } else {
             variant::visit(
                 data, relation,
@@ -245,11 +279,14 @@ struct io : item {
                       cb = segment.p1() + t * segment.dp2p1();
                       scalar dcbc1 = collision::distance(cb, c1);
                       cn = (cb - c1) / dcbc1;
-                      ca =
-                          c1 + cn * storage::make_handle(
-                                        data,
-                                        storage::prop<"shape", storage::config_declared>(hds1))
-                                        .radius();
+                      ca = c1 + cn * collision::disk_radius(hds1);
+                    },
+                    /* polytope / fixed segment, polytope / fixed disk */
+                    [&](match::handle<collision::polytopefsegment_r<topology>> auto rrel) {
+                      from_contact(rrel.contact(step, hds1));
+                    },
+                    [&](match::handle<collision::polytopefdisk_r<topology>> auto rrel) {
+                      from_contact(rrel.contact(step, hds1));
                     },
                     /* disk / fixed disk */
                     [&](storage::index<collision::diskfdisk_r, indice> rrel) {
@@ -262,11 +299,7 @@ struct io : item {
                       scalar dc2c1 = collision::distance(c2, c1);
 
                       cn = (c2 - c1) / dc2c1;
-                      ca = c1 +
-                           storage::make_handle(
-                               data, storage::prop<"shape", storage::config_declared>(hds1))
-                                   .radius() *
-                               cn;
+                      ca = c1 + collision::disk_radius(hds1) * cn;
                       cb = c2 - radius2 * cn;
                     },
                     [&](auto) {
@@ -356,11 +389,14 @@ struct io : item {
                           fmax(0, fmin(1, algebra::dot(d1, dp) / algebra::dot(dp, dp)));
                       cb = p1 + t * dp;
                       cn = (cb - c1) / collision::distance(cb, c1);
-                      ca =
-                          c1 + cn * storage::make_handle(
-                                        data,
-                                        storage::prop<"shape", storage::config_declared>(hds1))
-                                        .radius();
+                      ca = c1 + cn * collision::disk_radius(hds1);
+                    },
+                    /* polytope / mesh segment */
+                    [&](match::handle<collision::polytopemesh_r<topology>> auto rrel) {
+                      const auto ct = rrel.contact(step, hds1, hds2);
+                      ca = {ct.cp1[0], ct.cp1[1], 0.};
+                      cb = {ct.cp2[0], ct.cp2[1], 0.};
+                      cn = {ct.normal[0], ct.normal[1], 0.};
                     },
                     [&](auto) {
                       throw(std::runtime_error("Error: not a disk-mesh relation"));

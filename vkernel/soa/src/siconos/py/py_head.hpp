@@ -13,9 +13,16 @@
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/point.hpp"
+#include "siconos/collision/polytopedisk_r.hpp"
+#include "siconos/collision/polytopefdisk_r.hpp"
+#include "siconos/collision/polytopefsegment_r.hpp"
+#include "siconos/collision/polytopemesh_r.hpp"
+#include "siconos/collision/polytopepolytope_r.hpp"
+#include "siconos/collision/rigid_body.hpp"
 #include "siconos/collision/shape/chained_segment.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/mesh.hpp"
+#include "siconos/collision/shape/polytope.hpp"
 #include "siconos/collision/shape/segment.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/collision/translated.hpp"
@@ -31,7 +38,9 @@ namespace py = pybind11;
 
 namespace siconos::config::disks {
 
-struct disk : model::lagrangian_ds {};
+// one rigid body type for disks and polytopes: the shape kind is per body
+// (per-kind sets, collision/shape_of.hpp)
+struct body : collision::rigid_body {};
 struct fem : model::elastic_lagrangian_ds {
   using without_batch_bindings = void;
 };
@@ -46,16 +55,26 @@ using disk_shape = collision::shape::disk;
 using mesh_shape = collision::shape::mesh;
 using chained_segment_shape = collision::shape::chained_segment;
 using translated_disk_shape = collision::translated<disk_shape>;
+using polytope_shape = collision::shape::polytope;
+struct topo;
+using polytopepolytope_r = collision::polytopepolytope_r<topo>;
+using polytopefsegment_r = collision::polytopefsegment_r<topo>;
+using polytopefdisk_r = collision::polytopefdisk_r<topo>;
+using polytopedisk_r = collision::polytopedisk_r<topo>;
+using polytopemesh_r = collision::polytopemesh_r<topo>;
+using cxd_narrowphase = collision::cxd_narrowphase<topo>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
 using trace_params = simul::trace_params;
-struct ct_interaction : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
-struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r> {};
-struct topo : simul::topology<disk, ct_interaction, fem, rt_interaction> {};
+struct ct_interaction
+    : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r, polytopepolytope_r,
+                         polytopefsegment_r, polytopefdisk_r, polytopedisk_r> {};
+struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r, polytopemesh_r> {};
+struct topo : simul::topology<body, ct_interaction, fem, rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
-using pointd = collision::point<disk, collision::empty_shape>;
+using pointd = collision::point<body, collision::empty_shape>;
 using pointf = collision::point<fem, mesh_shape>;
 using pointl = collision::point<storage::pattern::empty_item, segment_shape>;
 using pointtds = collision::point<storage::pattern::empty_item, translated_disk_shape>;
@@ -94,8 +113,15 @@ struct maker
     : world_maker<
           config::env, config::simulation, config::interaction_manager, config::io,
           config::segment_shape, config::disk_shape, config::mesh_shape,
+          config::polytope_shape, config::cxd_narrowphase,
           storage::with_properties<
-              storage::wrapped<config::disk, some::unbounded_collection>,
+              storage::wrapped<config::body, some::unbounded_collection>,
+              storage::wrapped<config::polytope_shape, some::unbounded_collection>,
+              storage::wrapped<config::polytopepolytope_r, some::unbounded_collection>,
+              storage::wrapped<config::polytopefsegment_r, some::unbounded_collection>,
+              storage::wrapped<config::polytopefdisk_r, some::unbounded_collection>,
+              storage::wrapped<config::polytopedisk_r, some::unbounded_collection>,
+              storage::wrapped<config::polytopemesh_r, some::unbounded_collection>,
               storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
               storage::wrapped<config::diskfsegment_r, some::unbounded_collection>,
               storage::wrapped<config::diskmesh_r, some::unbounded_collection>,
@@ -110,8 +136,14 @@ struct maker
               storage::wrapped<config::mesh_shape, some::unbounded_collection>,
               storage::wrapped<config::disk_shape, some::unbounded_collection>,
               storage::wrapped<config::translated_disk_shape, some::unbounded_collection>,
-              storage::attached<config::disk, storage::pattern::symbol<"shape">,
-                                storage::some::item_ref<config::disk_shape>>,
+              // the shape kind of a body: set with body.set_disk_shape /
+              // set_polytope_shape (one kind per body), not bound as is
+              storage::without_binding<storage::dynamic_storage<
+                  storage::attached<config::body, storage::pattern::symbol<"disk_shape">,
+                                    storage::some::item_ref<config::disk_shape>>>>,
+              storage::without_binding<storage::dynamic_storage<
+                  storage::attached<config::body, storage::pattern::symbol<"polytope_shape">,
+                                    storage::some::item_ref<config::polytope_shape>>>>,
               storage::attached<config::fem, storage::pattern::symbol<"shape">,
                                 storage::some::item_ref<config::mesh_shape>>,
               storage::sparse<storage::pattern::attr_t<config::fem, "mass_matrix">>,
@@ -119,11 +151,15 @@ struct maker
               storage::unbounded<storage::pattern::attr_t<config::fem, "q">>,
               storage::unbounded<storage::pattern::attr_t<config::fem, "velocity">>,
               storage::unbounded<storage::pattern::attr_t<config::fem, "fext">>,
-              storage::time_invariant<storage::pattern::attr_t<config::disk, "fext">>,
-              storage::diagonal<storage::pattern::attr_t<config::disk, "mass_matrix">>,
+              storage::time_invariant<storage::pattern::attr_t<config::body, "fext">>,
+              storage::diagonal<storage::pattern::attr_t<config::body, "mass_matrix">>,
               storage::assembled_diagonal<storage::pattern::attr_t<
                   typename config::osi::assembled_osi_t, "mass_matrix_assembled">>,
-              storage::bind<config::disk, "disk">, storage::bind<config::fem, "fem">,
+              storage::bind<config::body, "body">, storage::bind<config::fem, "fem">,
+              storage::bind<config::polytope_shape, "polytope_shape">,
+              storage::bind<config::polytopefsegment_r, "polytopefsegment_r">,
+              storage::bind<config::polytopefdisk_r, "polytopefdisk_r">,
+              storage::bind<config::cxd_narrowphase, "cxd_narrowphase">,
               storage::bind<config::nslaw, "nslaw">,
               storage::bind<config::diskdisk_r, "diskdisk_r">,
               storage::bind<config::diskfdisk_r, "diskfdisk_r">,

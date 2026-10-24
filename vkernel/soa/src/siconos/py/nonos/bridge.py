@@ -38,6 +38,9 @@ class SpaceFilter(Stored):
         self._handle = vkernel.disks.add_space_filter(self.data())
         self._handle.set_neighborhood(self._ngbh)
         self._handle.set_diskdisk_r(vkernel.disks.add_diskdisk_r(self.data()))
+        # the cxd narrowphase stage: gives the polytope pairs the filter binds
+        # on the generic diskdisk_r their polytopepolytope_r relations
+        self._narrowphase = vkernel.disks.add_cxd_narrowphase(self.data())
         self._fdisks = {}
 
     # Fixed segment
@@ -159,6 +162,7 @@ class SpaceFilter(Stored):
 
         self._ngbh.search()
         self._handle.update_index_set0(step)
+        self._narrowphase.ensure(step)
         self._ngbh.sort()
 
     def removeStaticBody(self, body):
@@ -385,14 +389,39 @@ class Body(BodyBase):
         self.set_count(self.count() + 1)
         self._ident = self.count()
 
-        body = vkernel.disks.add_disk(self.data())
+        body = vkernel.disks.add_body(self.data())
         self._handle = body
         body.set_id(self._ident)
         body.set_collision_group(collision_group)
         body.set_q(array(position))
         body.set_velocity(array(velocity))
         body.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
-        body.set_shape(self.disk_shape(radius))
+        body.set_disk_shape(self.disk_shape(radius))
+        body.set_fext(array([0, 0, 0]))  # default
+
+    def init_polytope(self, vertices, mass, inertia, position, velocity):
+        """A convex polygon: vertices (n x 2, 3 <= n <= 16) relative to the
+        centre of mass, any orientation; inertia about the centre of mass."""
+
+        self.set_count(self.count() + 1)
+        self._ident = self.count()
+
+        body = vkernel.disks.add_body(self.data())
+        self._handle = body
+        body.set_id(self._ident)
+        body.set_q(array(position))
+        body.set_velocity(array(velocity))
+        body.set_mass_matrix(array([mass, mass, inertia]))
+
+        key = ("polytope", tuple(map(tuple, np.asarray(vertices, dtype=float)[:, :2])))
+        if key in self.shapes():
+            polytope_shape = self.shapes()[key]
+        else:
+            polytope_shape = vkernel.disks.add_polytope_shape(self.data())
+            polytope_shape.set_vertices(np.asarray(vertices, dtype=float))
+            self.shapes()[key] = polytope_shape
+
+        body.set_polytope_shape(polytope_shape)
         body.set_fext(array([0, 0, 0]))  # default
 
     def getMassValue(self):
@@ -470,7 +499,7 @@ class Bodies(BodyBase):
         self.set_count(self.count() + len(positions))
         self._ident = np.arange(start, self.count() + 1)
 
-        bodies = vkernel.disks.multiple_add_disk(self.data(), len(positions))
+        bodies = vkernel.disks.multiple_add_body(self.data(), len(positions))
         self._handle = bodies
         bodies.multiple_set_id(self._ident)
         bodies.multiple_set_q(array(positions))
@@ -485,11 +514,8 @@ class Bodies(BodyBase):
             if values.ndim > 1 or (values.ndim == 1 and values.shape[0] != n):
                 raise ValueError(f"{what} must be a scalar or have one value per grain")
 
-        if radii.ndim == 0:
-            bodies.set_shape(self.disk_shape(radii))
-        else:
-            for member, r in zip(bodies.get(), radii):
-                member.set_shape(self.disk_shape(r))
+        for body, r in zip(bodies.get(), np.broadcast_to(radii, n)):
+            body.set_disk_shape(self.disk_shape(r))
 
         if radii.ndim == 0 and masses.ndim == 0:
             m, r = float(masses), float(radii)
