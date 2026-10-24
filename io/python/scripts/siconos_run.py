@@ -51,22 +51,62 @@ parser.add_argument(
     type=float,
     help="alternative to -p, specify simulation frequency in Hz" + " (default=200 Hz)",
 )
+parser.add_argument(
+    "-b",
+    "--backend",
+    type=str,
+    default="bullet",
+    help="collision backend: bullet, native or vnative (vectorized kernel); "
+    "default bullet",
+)
+parser.add_argument(
+    "--neighborhood-radius",
+    type=float,
+    help="vnative: broadphase radius, larger than the largest body extent "
+    "plus the contact gap (default: the vnative default)",
+)
+parser.add_argument(
+    "--min-radius",
+    type=float,
+    help="vnative: smallest body size, sets the sampling of the static "
+    "segments (default: the vnative default)",
+)
 parser.add_argument("-V", "--version", action="version", version="@SICONOS_VERSION@")
 
 args = parser.parse_args()
 
 if args.frequency is not None:
-    args.p = 1.0 / args.frequency
+    args.period = 1.0 / args.frequency
 
 # Heavier imports after command line parsing
-from siconos.io.mechanics_run import MechanicsHdf5Runner
+from siconos.io.mechanics_run import (
+    MechanicsHdf5Runner,
+    MechanicsHdf5Runner_run_options,
+    RunnerConfig,
+)
+
+run_options = MechanicsHdf5Runner_run_options()
+run_options["output_frequency"] = args.every
+run_options["T"] = args.T
+run_options["h"] = args.period
+if args.backend == "vnative":
+    import nonos.bridge
+
+    vnative_options = nonos.bridge.SpaceFilterOptions()
+    if args.neighborhood_radius is not None:
+        vnative_options.neighborhood_radius = args.neighborhood_radius
+    if args.min_radius is not None:
+        vnative_options.min_radius = args.min_radius
+    run_options["vnative_options"] = vnative_options
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with MechanicsHdf5Runner(mode="r+", io_filename=args.file[0]) as io:
+with MechanicsHdf5Runner(
+    mode="r+", io_filename=args.file[0], config=RunnerConfig(args.backend)
+) as io:
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
-    io.run(output_frequency=args.every, T=args.T, h=args.period)
+    io.run(run_options)

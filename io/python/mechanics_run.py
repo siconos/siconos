@@ -22,7 +22,7 @@ import json
 import numbers
 import shutil
 import sys
-from math import acos, atan, cos, pi, sin, sqrt
+from math import atan, atan2, cos, pi, sin, sqrt
 
 import numpy as np
 import scipy.constants
@@ -54,6 +54,42 @@ from siconos.mechanics import czm
 
 
 # rotation around the origin
+def convex_hull_2d(points):
+    """Convex hull of 2D points, counter-clockwise, collinear points dropped
+    (Andrew's monotone chain)."""
+    pts = sorted(set(map(tuple, np.asarray(points, dtype=float)[:, :2])))
+    if len(pts) < 3:
+        return np.array(pts)
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return np.array(lower[:-1] + upper[:-1])
+
+
+def polygon_mass_properties(vertices):
+    """Area, area centroid and polar second moment of area about the
+    centroid of a simple polygon (counter-clockwise vertices)."""
+    v = np.asarray(vertices, dtype=float)
+    x, y = v[:, 0], v[:, 1]
+    xn, yn = np.roll(x, -1), np.roll(y, -1)
+    cr = x * yn - xn * y
+    area = 0.5 * cr.sum()
+    cx = ((x + xn) * cr).sum() / (6 * area)
+    cy = ((y + yn) * cr).sum() / (6 * area)
+    j0 = ((x * x + x * xn + xn * xn + y * y + y * yn + yn * yn) * cr).sum() / 12
+    return area, np.array([cx, cy]), j0 - area * (cx * cx + cy * cy)
+
+
 def rotate_point(x, y, alpha):
     x_new = x * cos(alpha) - y * sin(alpha)
     y_new = x * sin(alpha) + y * cos(alpha)
@@ -1155,6 +1191,35 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     body.handle().set_fext(fesolid.fext_vector())
                     body.handle().set_velocity(fesolid.velocity())
                     body.handle().set_bc_velocities_0(boundary_conditions)
+
+                elif self._shape.attributes(ctor.shape_name)["type"] == "convex":
+                    # a 2D convex polygon (at most 16 vertices): a rigid
+                    # body with a polytope shape. q is the centre of mass, so
+                    # the vertices must be centred on their area centroid
+                    # (siconos.mechanics.collision.convexhull.ConvexHull2d
+                    # gives it).
+                    points = self._shape._io.shapes()[ctor.shape_name][:]
+                    hull = convex_hull_2d(points)
+                    area, centroid, polar = polygon_mass_properties(hull)
+                    extent = np.ptp(hull, axis=0).max()
+                    if np.linalg.norm(centroid) > 1e-6 * extent:
+                        raise ValueError(
+                            f"vnative: the vertices of the convex shape {ctor.shape_name} must be "
+                            f"centred on their centroid, found {centroid}"
+                        )
+                    if given_inertia is None:
+                        inertia = mass * polar / area
+                    else:
+                        gi = np.asarray(given_inertia, dtype=float)
+                        inertia = float(gi.ravel()[0] if gi.size == 1 else gi[2, 2])
+
+                    initial_pos = np.concatenate([translation, orientation], axis=0)
+                    self._q0.append(initial_pos.copy())
+                    self._v0.append(velocity)
+
+                    body = body_class()
+                    body.init_polytope(hull, mass, inertia, self._q0[-1], self._v0[-1])
+                    self._set_external_forces(body)
 
                 elif self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
                     initial_pos = np.concatenate([translation, orientation], axis=0)
@@ -2268,7 +2333,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             xvel[7],
                         )
                         if self._dimension == 2:
-                            angle = 2.0 * acos(translation[2])
+                            # rotation about z: (qw, 0, 0, qz) =
+                            # (cos(angle / 2), 0, 0, sin(angle / 2))
+                            angle = 2.0 * atan2(orientation[3], orientation[0])
                             orientation = (angle,)
                             translation = (translation[0], translation[1])
                             velocity = (velocity[0], velocity[1], velocity[5])
@@ -3608,6 +3675,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # if solver_option is None --> we leave Siconos/kernel choosing the default option
         # else we use the user solver_options
         solver_options = run_options.get("solver_options")
+        if solver_options is None and self.config.backend == "vnative":
+            # the vnative FrictionContact needs its options (2D frictional
+            # contact): the default solver of the other backends
+            solver_options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
         osnspb_max_size = run_options.get("osnspb_max_size")
         osnspb_assembly_type = run_options.get("osns_assembly_type")
         friction_contact_trace_params = run_options.get("friction_contact_trace_params")
