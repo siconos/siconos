@@ -84,7 +84,8 @@ struct space_filter : item {
     some::map<some::array<some::scalar, some::indice_value<2>>,
               some::item_ref<collision::polytopefdisk_r<Topology>>>
         polytopefdisks;
-    some::map<some::array<some::indice, some::indice_value<2>>,
+    // keyed by (mesh, edge, manifold point index)
+    some::map<some::array<some::indice, some::indice_value<3>>,
               some::item_ref<polytopemesh_r<Topology>>>
         polytopemeshes;
     some::map<some::array<some::scalar, some::indice_value<2>>, some::item_ref<diskfdisk_r>>
@@ -239,7 +240,7 @@ struct space_filter : item {
 
     void insert_polytopemesh_r(auto hdl) {
       storage::attr<"polytopemeshes">(
-          *self())[{hdl.mesh().index().value(), hdl.contact_index()}] = hdl;
+          *self())[{hdl.mesh().index().value(), hdl.contact_index(), hdl.point_index()}] = hdl;
     }
 
     void insert_diskfdisk_r(auto tds) {
@@ -448,6 +449,13 @@ struct space_filter : item {
       }
     }
 
+    /* third slot of a ds-mesh proximity key: the mesh edge and the manifold
+       point of the interaction on it (a polytope has one interaction per
+       point, two in 2D; a disk has one, point 0) */
+    static auto edge_point_slot(auto edge, std::size_t pi) {
+      return static_cast<decltype(edge)>(2 * edge + pi);
+    }
+
     void build_dproximity_maps(auto& ds_dds_prox, const auto& ds1s, const auto& ds2s,
                                const auto& dinteractions) {
       auto& data = self()->data();
@@ -456,7 +464,8 @@ struct space_filter : item {
       for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, dinteractions)) {
         auto contact_index = variant::visit(data, inter.relation(),
                                             [](auto& rrel) { return rrel.contact_index(); });
-        ds_dds_prox[mp::make_tuple(ds1.value(), ds2.value(), contact_index)] = inter;
+        ds_dds_prox[mp::make_tuple(ds1.value(), ds2.value(),
+                                   edge_point_slot(contact_index, point_of(inter)))] = inter;
       }
     }
 
@@ -533,15 +542,6 @@ struct space_filter : item {
 
       auto mesh = hp2.shape();
       auto contact_index = hp2.seg_index();
-      // at most one edge between 2 ds !!
-      auto find_inter =
-          dmap.find(mp::make_tuple(ds1.index().value(), ds2.index().value(), contact_index));
-      if (find_inter != dmap.end()) {
-        // keep this edge
-        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
-        storage::prop<"activation", Topology>(inter) = true;
-        return;
-      }
 
       // the shape kind decides the relation: compile time for a static shape
       // declaration, a set membership for per-kind shapes. Decided before
@@ -555,42 +555,60 @@ struct space_filter : item {
             "no narrowphase relation exists for this shape pair");
       }
 
-      // create the edge
-      auto inter = topo.link(ds1, ds2);
-      inter.nslaw() = nslaw;  // one nslaw for the moment
-      storage::prop<"activation", Topology>(inter) = true;
+      // one edge per (ds, mesh edge) for a disk, one per manifold point (two
+      // in 2D) for a polytope
+      const std::size_t npoints = polytope1 ? 2 : 1;
+      for (std::size_t pi = 0; pi < npoints; ++pi) {
+        const auto key = mp::make_tuple(ds1.index().value(), ds2.index().value(),
+                                        edge_point_slot(contact_index, pi));
+        if (auto find_inter = dmap.find(key); find_inter != dmap.end()) {
+          // keep this edge
+          auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+          storage::prop<"activation", Topology>(inter) = true;
+          continue;
+        }
 
-      if constexpr (collision::may_have_shape<collision::shape::polytope, ds1_t>()) {
-        if (polytope1) {
-          // polytope x mesh edge
-          if (auto search = polytopemeshes.find({mesh.index().value(), contact_index});
-              search != polytopemeshes.end()) {
-            inter.relation() = search->second;
-          } else {
-            auto rel = storage::add<collision::polytopemesh_r<Topology>>(data);
-            rel.mesh() = mesh;
-            rel.contact_index() = contact_index;
-            inter.relation() = rel;
-            polytopemeshes[{mesh.index().value(), contact_index}] = rel;
+        // create the edge
+        auto inter = topo.link(ds1, ds2);
+        inter.nslaw() = nslaw;  // one nslaw for the moment
+        storage::prop<"activation", Topology>(inter) = true;
+
+        if constexpr (collision::may_have_shape<collision::shape::polytope, ds1_t>()) {
+          if (polytope1) {
+            // polytope x mesh edge, manifold point pi
+            using indice = std::decay_t<decltype(mesh.index().value())>;
+            const std::array<indice, 3> rkey{mesh.index().value(),
+                                             static_cast<indice>(contact_index),
+                                             static_cast<indice>(pi)};
+            if (auto search = polytopemeshes.find(rkey); search != polytopemeshes.end()) {
+              inter.relation() = search->second;
+            } else {
+              auto rel = storage::add<collision::polytopemesh_r<Topology>>(data);
+              rel.mesh() = mesh;
+              rel.contact_index() = contact_index;
+              rel.point_index() = pi;
+              inter.relation() = rel;
+              polytopemeshes[rkey] = rel;
+            }
           }
         }
-      }
-      if constexpr (collision::may_have_shape<collision::shape::disk, ds1_t>()) {
-        if (disk1) {
-          // disk x mesh edge
-          if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
-              search != diskmeshes.end()) {
-            inter.relation() = search->second;
-          } else {
-            auto rel = storage::add<collision::diskmesh_r>(data);
-            rel.mesh() = mesh;
-            rel.contact_index() = contact_index;
-            inter.relation() = rel;
-            diskmeshes[{mesh.index().value(), contact_index}] = rel;
+        if constexpr (collision::may_have_shape<collision::shape::disk, ds1_t>()) {
+          if (disk1) {
+            // disk x mesh edge
+            if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
+                search != diskmeshes.end()) {
+              inter.relation() = search->second;
+            } else {
+              auto rel = storage::add<collision::diskmesh_r>(data);
+              rel.mesh() = mesh;
+              rel.contact_index() = contact_index;
+              inter.relation() = rel;
+              diskmeshes[{mesh.index().value(), contact_index}] = rel;
+            }
           }
         }
+        dmap[key] = inter;
       }
-      dmap[mp::make_tuple(ds1.index().value(), ds2.index().value(), contact_index)] = inter;
     }
 
     void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {

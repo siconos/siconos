@@ -16,14 +16,18 @@ namespace siconos::collision {
    per pair via a one-pair cxd batch, so this relation does not depend on the
    cxd_narrowphase stage. Consistent with diskmesh_r / polytopefsegment_r.
    The contact normal (from cxd) points body1 (polytope) -> body2 (mesh edge).
-   One relation item serves every polytope near this edge, so it holds no
-   per-pair state: contact() evaluates the pair and returns the result. */
+   One relation item per (edge, manifold point) serves every polytope near
+   the edge, so it holds no per-pair state: contact() evaluates the pair and
+   returns the point_index-th point of its contact manifold. */
 
 template <typename Topo>
 struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagrangian_relation {
   struct attributes {
     some::item_ref<shape::mesh> mesh;
     some::indice contact_index;
+    // which point of the contact manifold (0 or 1) this relation stands for:
+    // a polytope near the edge has one interaction per manifold point
+    some::indice point_index;
   };
 
   template <typename Handle>
@@ -35,6 +39,7 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
     }
     decltype(auto) shape() { return self()->mesh(); }
     decltype(auto) contact_index() { return storage::attr<"contact_index">(*self()); }
+    decltype(auto) point_index() { return storage::attr<"point_index">(*self()); }
 
     /* run cxd on this single polytope x mesh edge pair */
     template <match::handle<model::lagrangian_ds> DS1,
@@ -74,7 +79,7 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
       in.ids_b.push_back(slot1);
       in.init_dirs.push_back({1.0, 0.0});
 
-      return narrowphase_batch(std::move(in))[0];
+      return manifold_point(narrowphase_batch(std::move(in))[0], point_index());
     }
 
     template <match::handle<model::lagrangian_ds> DS1,

@@ -7,8 +7,8 @@
    edge, once as a disk of radius 0.1 and once as a square of half side
    0.1, in a world with one rigid body type (per-kind shapes, registry).
 
-   Along the normal the square's face contact is the midpoint of the overlap
-   window, the point below its centre: it has the disk's gap, G and nodal
+   Along the normal the square's two manifold points (its bottom corners,
+   symmetric about the centre) carry together the disk's gap, G and nodal
    split. So the two runs must agree, rigid body and block alike, and the
    block must deflect. This fails when polytopemesh_r is not assembled on
    the mesh side (one_step_integrator, moreau_jean_element). */
@@ -233,7 +233,9 @@ int main() {
              "disk: final y = {:.9f}, max |top y| = {:.3e}; square: final y = {:.9f}; "
              "max |dy| = {:.3e}, max |dtop| = {:.3e}\n",
              disk.body_y.back(), max_top, square.body_y.back(), max_dy, max_dtop);
-  check(disk.n_mesh_contacts > 0 && square.n_mesh_contacts > 0, "both bodies touch the mesh");
+  check(disk.n_mesh_contacts == 1, "the disk has one interaction with the edge");
+  check(square.n_mesh_contacts == 2,
+        "the square has two interactions with the edge (manifold points 0 and 1)");
   check(square.body_y.size() == disk.body_y.size(), "same number of steps");
   // the block is undamped: the top oscillates around the static deflection
   // (weight / 2 nodes / k ~ 4.9e-4), so test the amplitude, not the sign

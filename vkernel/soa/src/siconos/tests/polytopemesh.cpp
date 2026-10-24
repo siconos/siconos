@@ -79,6 +79,7 @@ int main() {
   auto rel = storage::add<config::polytopemesh_r>(data);
   rel.mesh() = msh;
   rel.contact_index() = 0;
+  rel.point_index() = 0;
 
   /* h: gap = 2, normal (0,1), cp1=(0,1), cp2=(0,3) */
   double h = rel.compute_h(0, pd, md);
@@ -102,6 +103,15 @@ int main() {
         "G2 normal row");
   check(near(g2(1, 0), -1) && near(g2(1, 1), 0) && near(g2(1, 2), 0) && near(g2(1, 3), 0),
         "G2 tangent row");
+
+  /* manifold point 1: the edge is the incident face, clipped to the square's
+     top face, so its far endpoint (0,5) with gap 4 */
+  auto rel1 = storage::add<config::polytopemesh_r>(data);
+  rel1.mesh() = msh;
+  rel1.contact_index() = 0;
+  rel1.point_index() = 1;
+  const auto ct1 = rel1.contact(0, pd, md);
+  check(near(ct1.h, 4) && near(ct1.cp2[1], 5), "point 1: the far endpoint, gap 4");
 
   std::print("polytopemesh: all checks pass\n");
   return 0;
