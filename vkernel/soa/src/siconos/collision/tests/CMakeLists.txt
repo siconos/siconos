@@ -18,11 +18,12 @@ if(WITH_vkernel_TESTING)
   add_executable(polytope_on_fem polytope_on_fem.cpp)
   add_executable(bouncing_disks bouncing_disks.cpp)
   add_executable(fixed_disks fixed_disks.cpp)
+  add_executable(io_contact_points io_contact_points.cpp)
 
   foreach(t cxd_batch_smoke polytope_cxd bouncing_polytopes churn_polytopes
             polytope_fsegment polytopemesh polytopefdisk polytopedisk
             rigid_shapes mixed_bodies polytope_on_fem bouncing_disks
-            fixed_disks)
+            fixed_disks io_contact_points)
     set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
   endforeach()
 
@@ -39,12 +40,13 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(polytope_on_fem Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(bouncing_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(fixed_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
+  target_link_libraries(io_contact_points Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
 
   enable_testing()
   foreach(test cxd_batch_smoke polytope_cxd bouncing_polytopes churn_polytopes
-              polytope_fsegment polytopemesh polytopefdisk polytopedisk
-              rigid_shapes mixed_bodies polytope_on_fem bouncing_disks
-              fixed_disks)
+             polytope_fsegment polytopemesh polytopefdisk polytopedisk
+             rigid_shapes mixed_bodies polytope_on_fem bouncing_disks
+             fixed_disks io_contact_points)
     add_test(NAME vkernel_${test} COMMAND ${test}
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   endforeach()

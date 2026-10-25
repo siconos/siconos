@@ -524,6 +524,13 @@ struct moreau_jean_element : item {
       // global h_matrix is not assembled at this stage
       for (auto [y, ydot, hm1, hm2, ds1, ds2, nds, inter] :
            view::zip(ys, ydots, h_matrices1, h_matrices2, ds1s, ds2s, ndss, inters)) {
+        // y[1] (the tangential gap row) is only written by the linear branch
+        // below; the nonlinear relation branches set y[0] from compute_h() and
+        // leave y[1] untouched. Zero the whole vector so io::contact_points
+        // never reads uninitialized y[1] (HDF5 column 15) on nonlinear
+        // relations (diskdisk_r, polytopepolytope_r, polytopefsegment_r,
+        // polytopefdisk_r, polytopedisk_r).
+        algebra::set_zero(y);
         bool linear_case = siconos::variant::visit(
             data, inter.relation(),
             mp::overload([&](match::linear_relation auto rrel) { return true; },
