@@ -1,7 +1,7 @@
 #include <fstream>
 #include <print>
-#include <vector>
 
+#include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/registry.hpp"
 
@@ -25,12 +25,11 @@ struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
 using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
-// using pointtds = collision::point<translated_disk_shape>;
-struct neighborhood : collision::neighborhood<pointd, pointl> {};
+using pointtds = collision::point<storage::pattern::empty_item, translated_disk_shape>;
+struct neighborhood : collision::neighborhood<pointd, pointl, pointtds> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
-struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
-
+struct simulation : simul::time_stepping<td, osi, osnspb> {};
 struct io : siconos::io::io<osi> {};
 
 template <typename T>
@@ -39,15 +38,18 @@ struct env : standard_environment<T> {
 };
 
 struct data_t : storage::make_runtime_database<
-                    env, simulation, interaction_manager, io, segment_shape, disk_shape,
+                    env, simulation, interaction_manager, neighborhood, space_filter, io, disk,
+                    diskdisk_r, diskfdisk_r, diskfsegment_r, pointl, pointd, pointtds,
+                    interaction, segment_shape, disk_shape,
                     storage::with_properties<
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
                         storage::wrapped<disk, some::unbounded_collection>,
                         storage::wrapped<diskdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfdisk_r, some::unbounded_collection>,
                         storage::wrapped<diskfsegment_r, some::unbounded_collection>,
                         storage::wrapped<pointl, some::unbounded_collection>,
                         storage::wrapped<pointd, some::unbounded_collection>,
-                        //          storage::wrapped<pointtds,
-                        //          some::unbounded_collection>,
+                        storage::wrapped<pointtds, some::unbounded_collection>,
                         storage::wrapped<interaction, some::unbounded_collection>,
                         storage::wrapped<segment_shape, some::unbounded_collection>,
                         storage::wrapped<disk_shape, some::unbounded_collection>,
@@ -78,7 +80,7 @@ int main(int argc, char* argv[]) {
   double m = 1.;               // Disk mass
   double g = 9.81;             // Gravity
 
-  unsigned int ndisks = 3;
+  unsigned int ndisks = 1;
 
   std::print("====> Model loading ...\n");
 
@@ -90,26 +92,20 @@ int main(int argc, char* argv[]) {
   auto disk_shape = storage::add<config::disk_shape>(data);
   disk_shape.radius() = radius;
 
-  /* storage::add(data, count) returns a LAZY view that calls add() again on
-     every walk; materialise the handles once so the world gets exactly
-     ndisks disks instead of growing on each walk (see roam note d5c5481a) */
-  using disk_handle_t = decltype(storage::add<config::disk>(data));
-  std::vector<disk_handle_t> disks;
-  disks.reserve(ndisks);
-  for (std::size_t i = 0; i < ndisks; ++i) disks.push_back(storage::add<config::disk>(data));
+  for (unsigned int i = 0; i < ndisks; ++i) {
+    auto d1 = storage::add<config::disk>(data);
+    //  auto d2 = storage::add<config::disk>(data);
 
-  for (std::size_t i = 0; i < disks.size(); ++i) {
-    auto& disk = disks[i];
-    storage::prop<"id", config::topo>(disk) = static_cast<uint>(i + 1);
+    storage::prop<"id", config::topo>(d1) = i + 1;
 
-    disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
-    disk.velocity() = {0, velocity_init, 0};
-    disk.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+    d1.q() = {0, position_init * (i + 1), 0};
+    d1.velocity() = {0, velocity_init, 0};
+    d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-    prop<"shape">(disk) = disk_shape;
+    storage::make_handle(data, prop<"shape">(d1)) = disk_shape;
 
     // -- Set external forces (weight) --
-    disk.fext() = {0., -m * g, 0.};
+    d1.fext() = {0., -m * g, 0.};
     //  d2.fext() = {-m * g, 0., 0.};
   }
 
@@ -151,24 +147,23 @@ int main(int argc, char* argv[]) {
 
   auto ngbh = storage::add<config::neighborhood>(data);
 
-  ngbh.create(0.6);  // radius
+  ngbh.create(0.6);  // radius for broadphase detection
 
-  auto segment = storage::add<config::segment_shape>(data);
   auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-  auto ground_r = storage::add<config::diskfsegment_r>(data);
-  ground_r.segment() = segment;
-  segment.x1() = -10.;
-  segment.y1() = 0.;
-  segment.x2() = 10.;
-  segment.y2() = 0.;
-  segment.initialize();
-  segment.maxpoints() = 10;
+  auto ground_r = storage::add<config::diskfdisk_r>(data);
+  auto tds = storage::add<config::translated_disk_shape>(data);
+  auto big_disk = storage::add<config::disk_shape>(data);
+  big_disk.radius() = 1;
+  big_disk.maxpoints() = 100;
+  tds.translated() = big_disk;
+  tds.translation() = {0., 0., 0.};
+  ground_r.translated_disk_shape() = tds;
 
   auto spacef = storage::add<config::space_filter>(data);
   spacef.neighborhood() = ngbh;
   spacef.diskdisk_r() = diskdisk_r;
   spacef.insert_nonsmooth_law(nslaw, 0, 0);
-  spacef.insert_diskfsegment_r(ground_r);
+  spacef.insert_diskfdisk_r(ground_r);
   spacef.make_points();
   ngbh.add_point_sets(0);
   // =========================== End of model definition
@@ -178,14 +173,14 @@ int main(int argc, char* argv[]) {
 
   //  auto fd = io::open<ascii>("result.dat");
 
-  //  auto disks = storage::handles<config::disk>(data, 0);
-  auto disk1 = disks.front();
-  auto disk2 = disks.back();
+  auto disks = storage::handles<config::disk>(data, 0);
+  auto disk1 = (disks | view::take(1)).front();
+  auto disk2 = (disks | view::take(2)).back();
 
   // fix this for constant fext
   simulation.initialize();
 
-  std::fstream result_file("result-many.dat");
+  std::ofstream result_file("result-many.dat");
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
   // std::ofstream cout("result.dat");

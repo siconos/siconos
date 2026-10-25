@@ -38,6 +38,7 @@
 #include <utility>
 #include <vector>
 
+#include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 
 // clang-format off

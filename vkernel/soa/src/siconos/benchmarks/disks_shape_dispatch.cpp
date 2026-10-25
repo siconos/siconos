@@ -23,6 +23,7 @@
 #include <cstring>
 #include <print>
 
+#include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/registry.hpp"
 

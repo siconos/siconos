@@ -84,7 +84,7 @@ with MechanicsHdf5Runner(mode="w", io_filename=fname, config=config) as io:
             )
             k += 1
     io.add_primitive_shape(
-        "Ground", "Box2d", (25, 1), insideMargin=0.0, outsideMargin=0.0
+        "Ground", "Box2d", (25, 0.1), insideMargin=0.0, outsideMargin=0.0
     )
     io.add_object("ground", [Contactor("Ground")], translation=[0, -0.5 - 0.2])
     io.add_Newton_impact_friction_nsl("contact", mu=0.1, e=0.5)

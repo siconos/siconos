@@ -102,7 +102,7 @@ constexpr auto vdot(V a, V b) {
 }
 template <typename V>
 inline auto vnorm(V a) {
-  return std::hypot(a[0], a[1]);
+  return std::sqrt(a[0] * a[0] + a[1] * a[1]);
 }
 template <typename V>
 inline V vadd(V a, V b) {
@@ -148,17 +148,18 @@ inline auto closest_to_origin(const std::array<support_t<V>, 3>& w, std::size_t 
   using scalar = typename V::value_type;
   std::array<scalar, 3> alpha{};
   V best_foot{};
-  scalar best_norm = std::numeric_limits<scalar>::infinity();
+  scalar best_norm2 = std::numeric_limits<scalar>::infinity();
   bool best_is_vertex = false;
   std::size_t best_index = 0;
 
   // vertex features
   for (std::size_t i = 0; i < n; ++i) {
     const auto& p = support_pos(w[i]);
-    if (const scalar d = vnorm(p); d < best_norm) {
+    const scalar d2 = vdot(p, p);
+    if (d2 < best_norm2) {
       std::array<scalar, 3> a{};
       a[i] = scalar{1};
-      best_norm = d;
+      best_norm2 = d2;
       best_foot = p;
       best_is_vertex = true;
       best_index = i;
@@ -170,11 +171,12 @@ inline auto closest_to_origin(const std::array<support_t<V>, 3>& w, std::size_t 
     const auto& p = support_pos(w[i]);
     const auto& q = support_pos(w[(i + 1) % n]);
     const auto [foot, t] = foot_on_segment(p, q);
-    if (const scalar d = vnorm(foot); d < best_norm) {
+    const scalar d2 = vdot(foot, foot);
+    if (d2 < best_norm2) {
       std::array<scalar, 3> a{};
       a[i] = scalar{1} - t;
       a[(i + 1) % n] = t;
-      best_norm = d;
+      best_norm2 = d2;
       best_foot = foot;
       best_is_vertex = (t == scalar{0} || t == scalar{1});  // degenerate to a vertex
       best_index = i;
@@ -272,59 +274,76 @@ inline auto face_witnesses(const Pool& pool, std::uint32_t id_a, std::uint32_t i
   const auto nverts = [](const auto& view) {
     return static_cast<std::size_t>(std::distance(view.begin(), view.end()));
   };
+  const std::size_t nva = nverts(va);
+  const std::size_t nvb = nverts(vb);
   const scalar amax = [&] {
     scalar m = -std::numeric_limits<scalar>::infinity();
-    for (std::size_t i = 0; i < nverts(va); ++i) m = std::max(m, vdot(n, va[i]));
+    for (std::size_t i = 0; i < nva; ++i) m = std::max(m, vdot(n, va[i]));
     return m;
   }();
   const scalar bmin = [&] {
     scalar m = std::numeric_limits<scalar>::infinity();
-    for (std::size_t j = 0; j < nverts(vb); ++j) m = std::min(m, vdot(n, vb[j]));
+    for (std::size_t j = 0; j < nvb; ++j) m = std::min(m, vdot(n, vb[j]));
     return m;
   }();
   const scalar eps = scalar{1e-9} * (scalar{1} + std::abs(amax) + std::abs(bmin));
 
-  std::vector<std::size_t> tie_a, tie_b;
-  for (std::size_t i = 0; i < nverts(va); ++i)
-    if (vdot(n, va[i]) >= amax - eps) tie_a.push_back(i);
-  for (std::size_t j = 0; j < nverts(vb); ++j)
-    if (vdot(n, vb[j]) <= bmin + eps) tie_b.push_back(j);
-
-  if (tie_a.size() == 1 && tie_b.size() == 1) return {va[tie_a[0]], vb[tie_b[0]]};
-
-  // the supporting face of a tie set: its two extreme vertices along the
-  // tangent. Tied vertices are not consecutive in index order when the face
-  // wraps around index 0, so front()/back() of the tie set is not the face.
+  // Supporting face of each shape along the normal: collect, without any
+  // heap allocation, the count and the two extreme vertices along the
+  // tangent among the tied (max-support) vertices. A supporting face of a
+  // convex polygon has at most two vertices, so two slots suffice; a third
+  // tied vertex can never be an extreme along the tangent and is ignored.
   const V tng{-n[1], n[0]};
-  const auto face_ends = [&](const auto& view, const std::vector<std::size_t>& tie) {
-    std::size_t lo = tie.front(), hi = tie.front();
-    for (auto i : tie) {
-      if (vdot(tng, view[i]) < vdot(tng, view[lo])) lo = i;
-      if (vdot(tng, view[i]) > vdot(tng, view[hi])) hi = i;
+  std::size_t cnt_a = 0, cnt_b = 0;
+  std::size_t a_first = 0, a_lo = 0, a_hi = 0;
+  std::size_t b_first = 0, b_lo = 0, b_hi = 0;
+  bool fa_first = true, fb_first = true;
+  for (std::size_t i = 0; i < nva; ++i) {
+    if (vdot(n, va[i]) >= amax - eps) {
+      if (fa_first) {
+        a_first = a_lo = a_hi = i;
+        fa_first = false;
+      } else {
+        if (vdot(tng, va[i]) < vdot(tng, va[a_lo])) a_lo = i;
+        if (vdot(tng, va[i]) > vdot(tng, va[a_hi])) a_hi = i;
+      }
+      ++cnt_a;
     }
-    return std::pair{lo, hi};
-  };
+  }
+  for (std::size_t j = 0; j < nvb; ++j) {
+    if (vdot(n, vb[j]) <= bmin + eps) {
+      if (fb_first) {
+        b_first = b_lo = b_hi = j;
+        fb_first = false;
+      } else {
+        if (vdot(tng, vb[j]) < vdot(tng, vb[b_lo])) b_lo = j;
+        if (vdot(tng, vb[j]) > vdot(tng, vb[b_hi])) b_hi = j;
+      }
+      ++cnt_b;
+    }
+  }
+
   // closest point of the face [a, b] to the vertex p
   const auto foot_of = [](const V& p, const V& a, const V& b) {
     const auto [foot, t] = foot_on_segment(vsub2(a, p), vsub2(b, p));
     return vadd(foot, p);
   };
 
-  if (tie_a.size() == 1) {  // vertex on A, face on B
-    const V p = va[tie_a[0]];
-    const auto [b0, b1] = face_ends(vb, tie_b);
-    return {p, foot_of(p, vb[b0], vb[b1])};
+  if (cnt_a == 1 && cnt_b == 1) return {va[a_first], vb[b_first]};
+
+  if (cnt_a == 1) {  // vertex on A, face on B
+    const V p = va[a_first];
+    return {p, foot_of(p, vb[b_lo], vb[b_hi])};
   }
-  if (tie_b.size() == 1) {  // face on A, vertex on B
-    const V p = vb[tie_b[0]];
-    const auto [a0, a1] = face_ends(va, tie_a);
-    return {foot_of(p, va[a0], va[a1]), p};
+  if (cnt_b == 1) {  // face on A, vertex on B
+    const V p = vb[b_first];
+    return {foot_of(p, va[a_lo], va[a_hi]), p};
   }
 
   // both faces (parallel edges): midpoint of the overlap window along the
   // tangent
-  const auto [ia0, ia1] = face_ends(va, tie_a);
-  const auto [ib0, ib1] = face_ends(vb, tie_b);
+  const std::size_t ia0 = a_lo, ia1 = a_hi;
+  const std::size_t ib0 = b_lo, ib1 = b_hi;
   const scalar tl = vnorm(tng);
   const V e = tl > scalar{0} ? vscale(scalar{1} / tl, tng) : V{1, 0};
   const scalar pa0 = vdot(e, va[ia0]);
@@ -428,7 +447,7 @@ inline std::size_t clip_manifold(const Pool& pool, std::uint32_t id_a, std::uint
     V normal;
     scalar align;
   };
-  const auto best_face = [&](const auto& view, const V& d) {
+  const auto best_face = [&](const auto& view, const V& d, std::uint32_t /*sid*/) {
     const std::size_t nv = nverts(view);
     scalar area2 = scalar{0};
     for (std::size_t i = 0; i < nv; ++i) {
@@ -454,8 +473,8 @@ inline std::size_t clip_manifold(const Pool& pool, std::uint32_t id_a, std::uint
     return best;
   };
 
-  const face fa = best_face(va, n);
-  const face fb = best_face(vb, vscale(scalar{-1}, n));
+  const face fa = best_face(va, n, id_a);
+  const face fb = best_face(vb, vscale(scalar{-1}, n), id_b);
   constexpr scalar face_tol = scalar{1e-6};
   if (std::max(fa.align, fb.align) < scalar{1} - face_tol) return 0;
 
@@ -491,7 +510,9 @@ inline std::size_t clip_manifold(const Pool& pool, std::uint32_t id_a, std::uint
   }
   const V dp = vsub2(p1, p0);
   std::array<V, 2> q{vadd(p0, vscale(lmin, dp)), vadd(p0, vscale(lmax, dp))};
-  const std::size_t nq = (lmax - lmin) * vnorm(dp) > scalar{1e-12} * (scalar{1} + len) ? 2 : 1;
+  const scalar nq_lhs = (lmax - lmin) * (lmax - lmin) * vdot(dp, dp);
+  const scalar nq_rhs = scalar{1e-12} * (scalar{1} + len);
+  const std::size_t nq = nq_lhs > nq_rhs * nq_rhs ? 2 : 1;
 
   for (std::size_t k = 0; k < nq; ++k) {
     const scalar gap = vdot(rf.normal, vsub2(q[k], r0));
@@ -552,17 +573,34 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
       std::max(Scalar{1e-10}, Scalar{8} * std::numeric_limits<Scalar>::epsilon()));
   const cxd::gjk_options opts{.tolerance = tol, .max_iterations = 64};
 
-  const auto results = cxd::gjk_batch<2>(pool, pairs, opts);
+  // By-ref batch core: the result buffer is caller-owned and reused across
+  // simulation steps (capacity built on the first step is kept), so the
+  // per-step allocation cost is zero after the first warm call.
+  thread_local std::vector<cxd::batch_result<typename cxd::packed_pool<V>::support, 3>>
+      results;
+  cxd::gjk_batch<2>(pool, pairs, opts, results);
 
   // The enclosed pairs get their depth and normal from cxd's EPA. The 2D
   // EPA bootstraps a non-degenerate seed when the GJK hands one that is
   // degenerate -- the case a flush, axis-aligned overlap always is, since
   // the GJK's direction then collapses onto the line through the origin.
-  std::vector<std::uint32_t> hit_pairs;
+  thread_local std::vector<std::uint32_t> hit_pairs;
+  hit_pairs.clear();
+  hit_pairs.reserve(npairs);
   for (std::size_t k = 0; k < npairs; ++k)
     if (results[k].st == status::enclosed) hit_pairs.push_back(static_cast<std::uint32_t>(k));
-  const auto epa_answers = cxd::epa_batch<2>(pool, pairs, hit_pairs, results, opts);
-  std::size_t hit_i = 0;
+  // By-ref batch core: the answer buffer and the per-step EPA arena are
+  // caller-owned and reused across steps (assign keeps the heap block, and
+  // the arena only grows), so the per-step allocation cost is zero after
+  // one warm call.
+  thread_local std::vector<cxd::epa_result<Scalar, 2>> epa_answers;
+  thread_local cxd::epa_arena<cxd::packed_pool<V>, 2> epa_arena_;
+  cxd::epa_batch<2>(pool, pairs, hit_pairs, results, opts, epa_answers, epa_arena_);
+  // map each pair index -> its position in epa_answers (for enclosed pairs)
+  thread_local std::vector<int> epa_idx;
+  epa_idx.assign(npairs, -1);
+  for (std::size_t j = 0; j < hit_pairs.size(); ++j)
+    epa_idx[hit_pairs[j]] = static_cast<int>(j);
 
   // the separating-axis answer for a pair the GJK / EPA path left
   // unanswered; returns false (failure status kept) only for shapes with no
@@ -582,12 +620,22 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
     return true;
   };
 
+  // pairwise-independent, disjoint-index write-back over the caller's
+  // (thread_local) buffers. The buffers are captured into shared references so
+  // OpenMP workers operate on the caller's instance, not each worker's own
+  // empty thread_local one. Each pair is a pure function of its own slot, so the
+  // result is identical to the single-threaded run (the checksum tests rely on
+  // this).
+  auto& results_ref = results;
+  auto& epa_answers_ref = epa_answers;
+  auto& epa_idx_ref = epa_idx;
+#pragma omp parallel for schedule(static)
   for (std::size_t k = 0; k < npairs; ++k) {
     auto& c = out[k];
-    switch (results[k].st) {
+    switch (results_ref[k].st) {
       case status::enclosed: {
         c.status = static_cast<int>(cxd::status::enclosed);
-        const auto& [depth, epa_normal] = epa_answers[hit_i++];
+        const auto& [depth, epa_normal, ring_vertices] = epa_answers_ref[epa_idx_ref[k]];
         // a touching pair can come back with a finite depth 0 and a zero
         // normal: that is no answer either
         if (std::isfinite(depth) && std::isfinite(epa_normal[0]) &&
@@ -647,7 +695,9 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
     }
   }
 
-  // the contact manifold of every answered pair
+  // the contact manifold of every answered pair (loop 1 finished above, so c
+  // holds the status/h/normal for this pair; disjoint out[k] writes only)
+#pragma omp parallel for schedule(static)
   for (std::size_t k = 0; k < npairs; ++k) {
     auto& c = out[k];
     if (c.status != static_cast<int>(cxd::status::separated) &&
@@ -818,7 +868,11 @@ struct cxd_narrowphase : item {
 
       // the manifold points already bound, per pair: a placeholder takes
       // the lowest free one
-      std::unordered_map<key2_t, unsigned> used;
+      // reuse a thread-local map so node allocations happen only on first growth
+      thread_local static std::unordered_map<key2_t, unsigned> used_cache;
+      used_cache.clear();
+      auto& used = used_cache;
+      used.reserve(256);
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (!std::holds_alternative<poly_index_t>(relvar)) continue;
@@ -882,7 +936,19 @@ struct cxd_narrowphase : item {
       auto& data = self()->data();
       const auto t0 = std::chrono::steady_clock::now();
       std::uint64_t hsh = kFnvBasis;
-      std::unordered_map<std::size_t, bool> seen;
+      struct ck_cache_t {
+        const void* stage = nullptr;
+        std::size_t step = 0;
+        std::vector<char> seen;
+      };
+      thread_local static ck_cache_t ck_cache;
+      // seen dedups ds within ONE checksum() call (a body in several
+      // interactions is hashed once). Clear it every call: keying the
+      // call-scoped dedup on (stage, step) made a same-step ensure(step)
+      // re-run skip bodies already hashed on a prior call, hiding a
+      // configuration mutation from the world checksum.
+      ck_cache.seen.clear();
+      auto& seen = ck_cache.seen;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -894,12 +960,11 @@ struct cxd_narrowphase : item {
           fnv_mix(hsh, &i2, sizeof i2);
           for (auto* ds : {&ds1, &ds2}) {
             const auto idx = ds->index().value();
+            if (idx >= seen.size()) seen.resize(idx + 1, 0);
             if (seen[idx]) continue;
-            seen[idx] = true;
-            for_each_world_vertex(*ds, step, [&](const auto& v) {
-              fnv_mix(hsh, &v[0], sizeof v[0]);
-              fnv_mix(hsh, &v[1], sizeof v[1]);
-            });
+            seen[idx] = 1;
+            const auto bh = body_hash(*ds, step);
+            fnv_mix(hsh, &bh, sizeof bh);
           }
         }
       }
@@ -921,12 +986,90 @@ struct cxd_narrowphase : item {
        two bodies' hashes, and the batch writeback memoises this per-ds
        hash so a body attached to several pairs is hashed once per run */
     auto body_vertex_hash(auto& ds, auto step) {
+      const auto& wv = cached_world_vertices(ds, step);
       std::uint64_t hsh = kFnvBasis;
-      for_each_world_vertex(ds, step, [&](const auto& v) {
+      for (const auto& v : wv) {
         fnv_mix(hsh, &v[0], sizeof v[0]);
         fnv_mix(hsh, &v[1], sizeof v[1]);
-      });
+      }
       return hsh;
+    }
+
+    using scalar_t = double;
+
+    /* Thread-local per-(stage, step) cache of body hashes AND world vertices,
+       so cos/sin and hashing are paid once per (step, ds) across checksum,
+       pack, body_hash and relation reads. Vectors grow once to the max ds
+       index and are reused across steps (clear on step change). */
+    struct body_cache_t {
+      const void* stage = nullptr;
+      std::size_t step = 0;
+      std::vector<std::uint64_t> hash;
+      std::vector<unsigned char> hash_set;
+      std::vector<std::vector<std::array<scalar_t, 2>>> verts;
+      // q-stamp (q(0), q(1), q(2)) per cached ds: detects a body whose
+      // configuration changed at the SAME step tag. The cache is otherwise keyed
+      // by (stage, step); without this stamp a mid-step q mutation between two
+      // ensure(step) calls leaves the cached world vertices stale, which makes the
+      // world checksum blind to the move and the stage skips its batch re-run.
+      std::vector<std::array<scalar_t, 3>> q_stamp;
+    };
+    static inline thread_local body_cache_t body_cache;
+    static inline thread_local std::unordered_map<std::array<std::size_t, 2>, std::uint32_t>
+        pair_slot_cache;
+
+    void ensure_body_cache(auto& ds, auto step) {
+      if (body_cache.stage != static_cast<const void*>(self()) ||
+          body_cache.step != static_cast<std::size_t>(step)) {
+        body_cache.stage = static_cast<const void*>(self());
+        body_cache.step = static_cast<std::size_t>(step);
+        body_cache.hash.clear();
+        body_cache.hash_set.clear();
+        body_cache.verts.clear();
+        body_cache.q_stamp.clear();
+      }
+      const auto key = ds.index().value();
+      if (key >= body_cache.verts.size()) {
+        body_cache.hash.resize(key + 1);
+        body_cache.hash_set.resize(key + 1, 0);
+        body_cache.verts.resize(key + 1);
+        body_cache.q_stamp.resize(key + 1);
+      }
+      // Read the current configuration the way for_each_world_vertex does and
+      // stamp it. Recompute world vertices only when the stamp changed (a real
+      // move/rotation since the last read at this step tag) or the ds was never
+      // cached; otherwise keep the (potentially reused) heap buffer. A recompute
+      // also drops the memoized hash, since it is derived from the vertices.
+      auto& q = storage::attr<"q">(ds, step);
+      const std::array<scalar_t, 3> stamp = {static_cast<scalar_t>(q(0)),
+                                             static_cast<scalar_t>(q(1)),
+                                             static_cast<scalar_t>(q(2))};
+      if (body_cache.verts[key].empty() || body_cache.q_stamp[key] != stamp) {
+        body_cache.verts[key].clear();
+        for_each_world_vertex(ds, step,
+                              [&](const auto& v) { body_cache.verts[key].push_back(v); });
+        body_cache.q_stamp[key] = stamp;
+        body_cache.hash_set[key] = 0;
+      }
+    }
+
+    auto body_hash(auto& ds, auto step) {
+      ensure_body_cache(ds, step);
+      const auto key = ds.index().value();
+      if (body_cache.hash_set[key]) return body_cache.hash[key];
+      std::uint64_t hsh = kFnvBasis;
+      for (const auto& v : body_cache.verts[key]) {
+        fnv_mix(hsh, &v[0], sizeof v[0]);
+        fnv_mix(hsh, &v[1], sizeof v[1]);
+      }
+      body_cache.hash[key] = hsh;
+      body_cache.hash_set[key] = 1;
+      return hsh;
+    }
+
+    const auto& cached_world_vertices(auto& ds, auto step) {
+      ensure_body_cache(ds, step);
+      return body_cache.verts[ds.index().value()];
     }
 
     /* combine the two ds indices and their per-body vertex hashes, order
@@ -954,8 +1097,8 @@ struct cxd_narrowphase : item {
     auto pair_checksum(auto& ds1, auto& ds2, auto step) {
       const auto i1 = ds1.index().value();
       const auto i2 = ds2.index().value();
-      const auto h1 = body_vertex_hash(ds1, step);
-      const auto h2 = body_vertex_hash(ds2, step);
+      const auto h1 = body_hash(ds1, step);
+      const auto h2 = body_hash(ds2, step);
       return pair_signature(i1, i2, h1, h2);
     }
 
@@ -969,10 +1112,28 @@ struct cxd_narrowphase : item {
       auto& data = self()->data();
       const auto t0 = std::chrono::steady_clock::now();
       narrowphase_input<scalar> in;
-      std::unordered_map<std::size_t, std::uint32_t> slot;
+      // reuse capacity across steps (vectors are consumed by the batch, but
+      // reserving to the previous step's size avoids per-step growth reallocs)
+      struct pk_cache_t {
+        const void* stage = nullptr;
+        std::size_t n_verts = 0, n_entries = 0, n_pairs = 0;
+        std::vector<std::uint32_t> slot;
+      };
+      thread_local static pk_cache_t pk_cache;
+      if (pk_cache.stage != static_cast<const void*>(self()))
+        pk_cache.stage = static_cast<const void*>(self());
+      in.vertices.reserve(pk_cache.n_verts);
+      in.entries.reserve(pk_cache.n_entries);
+      in.ids_a.reserve(pk_cache.n_pairs);
+      in.ids_b.reserve(pk_cache.n_pairs);
+      in.init_dirs.reserve(pk_cache.n_pairs);
+      std::vector<std::uint32_t>& slot = pk_cache.slot;
+      slot.clear();
       // one batch pair per ds pair: its manifold serves every interaction
-      // (manifold point) of the pair
-      std::unordered_map<std::array<std::size_t, 2>, std::uint32_t> pair_slot;
+      // (manifold point) of the pair. Reuse a thread-local map so node
+      // allocations happen only on first growth, not every step.
+      pair_slot_cache.clear();
+      auto& pair_slot = pair_slot_cache;
       for (auto inter : storage::handles<finteraction>(data, step)) {
         auto& relvar = storage::attr<"relation">(inter);
         if (std::holds_alternative<storage::index<poly_r_t, std::size_t>>(relvar)) {
@@ -981,15 +1142,17 @@ struct cxd_narrowphase : item {
           auto ds1 = storage::make_handle(data, storage::prop<"ds1", Topo>(inter));
           auto ds2 = storage::make_handle(data, storage::prop<"ds2", Topo>(inter));
           for (auto* ds : {&ds1, &ds2}) {
-            if (slot.count(ds->index().value())) continue;
+            const auto didx = ds->index().value();
+            if (didx < slot.size() && slot[didx] != std::numeric_limits<std::uint32_t>::max())
+              continue;
+            if (didx >= slot.size())
+              slot.resize(didx + 1, std::numeric_limits<std::uint32_t>::max());
             const std::uint32_t offset = static_cast<std::uint32_t>(in.vertices.size());
-            for (const auto& v : world_vertices(*ds, step)) {
-              in.vertices.push_back(v);
-            }
+            for (const auto& v : cached_world_vertices(*ds, step)) in.vertices.push_back(v);
             in.entries.push_back(
                 {offset, static_cast<std::uint32_t>(in.vertices.size() - offset)});
             // shape ids are ENTRY indices, not vertex offsets
-            slot[ds->index().value()] = static_cast<std::uint32_t>(in.entries.size()) - 1;
+            slot[didx] = static_cast<std::uint32_t>(in.entries.size()) - 1;
           }
           const std::array<std::size_t, 2> key{ds1.index().value(), ds2.index().value()};
           if (pair_slot.count(key)) continue;
@@ -999,9 +1162,12 @@ struct cxd_narrowphase : item {
           in.init_dirs.push_back({rel.init_dir()[0], rel.init_dir()[1]});
         }
       }
+      pk_cache.n_verts = in.vertices.size();
+      pk_cache.n_entries = in.entries.size();
+      pk_cache.n_pairs = in.ids_a.size();
       storage::attr<"n_pairs">(*self()) = static_cast<indice_t>(in.ids_a.size());
       storage::attr<"t_pack">(*self()) += seconds_since(t0);
-      return std::pair{std::move(in), std::move(pair_slot)};
+      return std::move(in);
     }
 
     /* 3. batch + write-back: statuses/h/normal/cps go to the relations;
@@ -1012,7 +1178,7 @@ struct cxd_narrowphase : item {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
       auto& data = self()->data();
-      auto [in, pair_slot] = pack(step);
+      auto in = pack(step);
       if (!in.ids_a.empty()) {
         const auto t_batch0 = std::chrono::steady_clock::now();
         auto out = narrowphase_batch(std::move(in));
@@ -1020,14 +1186,31 @@ struct cxd_narrowphase : item {
         const auto t_wb0 = std::chrono::steady_clock::now();
         // each ds' vertex hash is memoised: a body attached to several
         // pairs is hashed once per run instead of once per pair
-        std::unordered_map<std::size_t, std::uint64_t> ds_h;
-        ds_h.reserve(in.ids_a.size());
+        struct wb_cache_t {
+          const void* stage = nullptr;
+          std::size_t step = 0;
+          std::vector<std::uint64_t> val;
+          std::vector<unsigned char> set;
+        };
+        thread_local static wb_cache_t wb_cache;
+        // hash_ds memoises a body's hash across the writeback loop of THIS
+        // run() only. Clear it every run() call (not just on step change) so
+        // a same-step batch re-run stamps relations from the current
+        // geometry rather than a stale, step-memoised hash.
+        wb_cache.val.clear();
+        wb_cache.set.clear();
+        auto& ds_h_val = wb_cache.val;
+        auto& ds_h_set = wb_cache.set;
         auto hash_ds = [&](auto& ds) -> std::uint64_t {
           const auto key = ds.index().value();
-          const auto it = ds_h.find(key);
-          if (it != ds_h.end()) return it->second;
-          const auto h = body_vertex_hash(ds, step);
-          ds_h.emplace(key, h);
+          if (key < ds_h_set.size() && ds_h_set[key]) return ds_h_val[key];
+          if (key >= ds_h_set.size()) {
+            ds_h_val.resize(key + 1, 0);
+            ds_h_set.resize(key + 1, 0);
+          }
+          const auto h = body_hash(ds, step);
+          ds_h_val[key] = h;
+          ds_h_set[key] = 1;
           return h;
         };
         std::size_t n_written = 0;
@@ -1043,9 +1226,9 @@ struct cxd_narrowphase : item {
             // kept the previous row: stamp it so relation reads skip the scan
             rel.cache_pair_checksum() = pair_signature(
                 ds1.index().value(), ds2.index().value(), hash_ds(ds1), hash_ds(ds2));
-            const auto c =
-                manifold_point(out[pair_slot.at({ds1.index().value(), ds2.index().value()})],
-                               rel.point_index());
+            const auto c = manifold_point(
+                out[pair_slot_cache.at({ds1.index().value(), ds2.index().value()})],
+                rel.point_index());
             if (c.status == static_cast<int>(cxd::status::max_iterations) ||
                 c.status == static_cast<int>(cxd::status::invalid_input)) {
               continue;  // keep-previous: the whole cached row stays
@@ -1065,7 +1248,7 @@ struct cxd_narrowphase : item {
               using scalar = typename std::decay_t<decltype(self()->env())>::scalar;
               const scalar dx = rel.cp2()[0] - rel.cp1()[0];
               const scalar dy = rel.cp2()[1] - rel.cp1()[1];
-              const scalar d = std::hypot(dx, dy);
+              const scalar d = std::sqrt(dx * dx + dy * dy);
               if (d > scalar{0}) rel.init_dir() = {dx / d, dy / d};
             }
           }
@@ -1089,6 +1272,14 @@ struct cxd_narrowphase : item {
     /* ensure(step): rebind is idempotent and cheap, so it runs every call;
        the batch re-runs only on a new step tag or a changed world checksum */
     void ensure(auto step) {
+      // Drop the per-step world-vertex / hash memoization so a configuration
+      // mutated between two ensure(step) calls at the SAME step tag is
+      // re-hashed. The caches below key on (stage, step); without this reset a
+      // mid-step move/rotation is invisible to the world checksum and the
+      // batch is wrongly skipped (stale h returned to the relation). Within
+      // this ensure the caches refill and stay live for checksum -> pack ->
+      // run, so the cost is one extra scan per ensure, not per body.
+      body_cache.stage = nullptr;
       storage::attr<"cache_scan_count">(*self()) += 1;
       // the phase timers describe THIS call: reset them so they never
       // accumulate across steps (a cache-hit step reports ~0)

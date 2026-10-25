@@ -1087,6 +1087,11 @@ struct space_filter : item {
 
       auto ds_fdisk_prox = map_ds_fdisk_prox_t();
 
+      const auto n_inter = storage::handles<finteraction>(data, step).size();
+      ds_ds_prox.reserve(n_inter * 2);
+      ds_segment_prox.reserve(n_inter * 2);
+      ds_fdisk_prox.reserve(n_inter * 2);
+
       auto& ds1s = storage::prop_values<finteraction, "ds1", Topology>(data, step);
       auto& ds2s = storage::prop_values<finteraction, "ds2", Topology>(data, step);
 

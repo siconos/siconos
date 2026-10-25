@@ -1,6 +1,7 @@
 #include <fstream>
 #include <print>
 
+#include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 
 namespace siconos::config {

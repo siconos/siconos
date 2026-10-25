@@ -1426,9 +1426,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         x2 = shp.params[2]
                         y2 = shp.params[3]
                         d = sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
-                        shp = siconos.mechanics.collision.SiconosBox2d(d, 0.0)
-                        shp.setInsideMargin(0.0)
-                        shp.setOutsideMargin(0.01)
+                        shp = siconos.mechanics.collision.SiconosBox2d(d, 1.0)
+                        shp.setInsideMargin(0.01)
+                        shp.setOutsideMargin(0.3)
                         trans = [(x1 + x2) / 2, (y1 + y2) / 2, 0.0]
                         c.translation = trans
                         if x2 != x1:
@@ -4111,8 +4111,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         self._time_stepping_clasimu.__name__,
                         " has no exploded version",
                     )
+                    if self.config.backend == "vnative":
+                        self.log(self._simulation.updateInteractions, with_timer)()
                     self.log(self._simulation.computeOneStep, with_timer)()
             else:
+                # vnative compute_one_step does not run the space filter: this
+                # call is the only per-step contact detection
                 if self.config.backend == "vnative":
                     self.log(self._simulation.updateInteractions, with_timer)()
                 self.log(self._simulation.computeOneStep, with_timer)()
