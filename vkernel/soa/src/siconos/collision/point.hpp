@@ -33,6 +33,8 @@ template <match::item Item>
 struct point<Item, empty_shape> : item {
   using items = gather<Item>;
   using item_t = Item;
+  // moving lagrangian body: its centre is re-sampled every step
+  static constexpr bool is_dynamic_v = true;
 
   struct attributes {
     some::boolean flag;
@@ -67,6 +69,8 @@ template <match::item Shape>
 struct point<empty_item, Shape> {
   using items = gather<Shape>;
   using item_t = Shape;
+  // fixed shape: probes never move, so CompactNSearch skips position updates
+  static constexpr bool is_dynamic_v = false;
 
   struct attributes {
     some::boolean flag;
@@ -102,6 +106,8 @@ struct point<Item, Shape> {
   using item_t = Item;
   using shape_t = Shape;
   using items = gather<item_t, shape_t>;
+  // mesh of a moving (FEM) body: re-sampled every step
+  static constexpr bool is_dynamic_v = true;
 
   struct attributes {
     some::boolean flag;

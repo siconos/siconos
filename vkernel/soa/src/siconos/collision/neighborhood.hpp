@@ -55,7 +55,12 @@ struct neighborhood : storage::data_holder<CompactNSearch::NeighborhoodSearch> {
           float dummy[3] = {0, 0, 0};
           psid[i++] = instance->add_point_set(dummy, 0);
         } else {
-          psid[i++] = instance->add_point_set(coords.front().data(), coords.size());
+          // fixed-shape point kinds (empty_item specializations: segments,
+          // fixed disks) are kinematic: CompactNSearch must not recompute
+          // their positions every search; only moving bodies (pointd) and,
+          // when present, the FEM mesh probes (pointf) are dynamic.
+          psid[i++] = instance->add_point_set(coords.front().data(), coords.size(),
+                                              Point::is_dynamic_v);
         }
       });
     }
