@@ -139,10 +139,13 @@ class SpaceFilter(Stored):
         if not self._initialized:
             self._handle.make_points()
             self._ngbh.add_point_sets(step)
-            self._ngbh.set_active(0, 0, True)  # disk - disk
-            self._ngbh.set_active(0, 1, True)  # disk - mesh
-            self._ngbh.set_active(0, 2, True)  # disk - segment
-            self._ngbh.set_active(0, 3, True)  # disk - fixed disk
+            # point sets, in the order of config::neighborhood (py_head.hpp):
+            # 0 rigid body centre (disk or polytope), 1 mesh, 2 fixed segment,
+            # 3 fixed disk. Only body probes search.
+            self._ngbh.set_active(0, 0, True)  # body - body
+            self._ngbh.set_active(0, 1, True)  # body - mesh
+            self._ngbh.set_active(0, 2, True)  # body - segment
+            self._ngbh.set_active(0, 3, True)  # body - fixed disk
             self._ngbh.set_active(1, 1, False)
             self._ngbh.set_active(2, 2, False)
             self._ngbh.set_active(3, 3, False)
@@ -163,7 +166,12 @@ class SpaceFilter(Stored):
         self._ngbh.search()
         self._handle.update_index_set0(step)
         self._narrowphase.ensure(step)
-        self._ngbh.sort()
+        # the z-order sort only improves memory locality, and it makes the
+        # next search rebuild the whole hash table (static segment points
+        # included) instead of updating the moved points
+        freq = self._options.sort_frequency
+        if freq > 0 and step % freq == 0:
+            self._ngbh.sort()
 
     def removeStaticBody(self, body):
         self._ngbh.search()  # needed after sort
@@ -680,6 +688,8 @@ class MechanicsIO(Stored):
 class SpaceFilterOptions:
     neighborhood_radius = 2.1
     min_radius = 0.5
+    # z-order sort of the point sets every sort_frequency steps (0: never)
+    sort_frequency = 100
 
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__)
