@@ -255,6 +255,21 @@ endif()
 target_compile_definitions(numerics PUBLIC NCOMPLEX) # We don't need the complex interface of CXSparse
 #  set(NCOMPLEX 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
 
+# - NSGS batched passes experiment -
+option(SICONOS_NSGS_FC3D_BATCHED_PASSES
+  "Use separated batched passes in fc3d_nsgs.c (experimental)" OFF)
+if(SICONOS_NSGS_FC3D_BATCHED_PASSES)
+  set_property(SOURCE src/FrictionContact/fc3d_nsgs.c
+               APPEND PROPERTY COMPILE_DEFINITIONS NSGS_FC3D_BATCHED_PASSES)
+endif()
+
+option(SICONOS_NSGS_FC2D_BATCHED_PASSES
+  "Use separated batched passes in fc2d_nsgs.c (experimental)" OFF)
+if(SICONOS_NSGS_FC2D_BATCHED_PASSES)
+  set_property(SOURCE src/FrictionContact/fc2d_nsgs.c
+               APPEND PROPERTY COMPILE_DEFINITIONS NSGS_FC2D_BATCHED_PASSES)
+endif()
+
 # - MLCP Simplex -
 find_package(MlcpSimplex QUIET)
 if(MlcpSimplex_FOUND)

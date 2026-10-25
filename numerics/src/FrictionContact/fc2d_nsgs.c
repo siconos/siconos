@@ -448,6 +448,63 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
     }  // end while loop
     free(light_error_2);
   } else {
+#ifdef NSGS_FC2D_BATCHED_PASSES
+    double* local_solutions = calloc(nc * 2, sizeof(double));
+    double* reaction_old = calloc(nc * 2, sizeof(double));
+
+    while ((iter < itermax) && has_not_converged) {
+      ++iter;
+      double light_error_sum = 0.0;
+
+      memcpy(reaction_old, reaction, nc * 2 * sizeof(double));
+
+      /* Pass 1: local solve and accept (GS update). */
+      for (unsigned int pos = 0, contact = 0; contact < nc; ++contact, ++pos, ++pos) {
+        /* store old reaction */
+        localreaction[0] = reaction[pos];
+        localreaction[1] = reaction[pos + 1];
+
+        /* Local problem formalization */
+        fc2d_nsgs_buildLocalProblem(contact, problem, diagonal_blocks, local_problem,
+                                    reaction);
+
+        /* Solve local problem */
+        fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
+                              local_problem->q, problem->mu[contact], localreaction);
+
+        local_solutions[pos] = localreaction[0];
+        local_solutions[pos + 1] = localreaction[1];
+
+        reaction[pos] = localreaction[0];
+        reaction[pos + 1] = localreaction[1];
+      }
+
+      /* Pass 2: error evaluation over contiguous buffers. */
+      if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+              SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
+          iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+              SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+        for (unsigned int pos = 0, contact = 0; contact < nc; ++contact, ++pos, ++pos) {
+          light_error_sum += light_error_squared(&local_solutions[pos], &reaction_old[pos]);
+        }
+      }
+
+      /* error evaluation */
+      if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
+        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        has_not_converged = determine_convergence(error, tolerance, iter, options);
+      } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        has_not_converged = determine_convergence_with_full_final(
+            problem, options, reaction, velocity, &tolerance, norm_q, error, iter);
+      }
+    }  // end while loop
+
+    free(local_solutions);
+    free(reaction_old);
+#else
     while ((iter < itermax) && has_not_converged) {
       ++iter;
       double light_error_sum = 0.0;
@@ -488,6 +545,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
             problem, options, reaction, velocity, &tolerance, norm_q, error, iter);
       }
     }  // end while loop
+#endif
   }
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
