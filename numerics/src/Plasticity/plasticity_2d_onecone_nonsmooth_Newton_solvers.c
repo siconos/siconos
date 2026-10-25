@@ -82,7 +82,7 @@ static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
   return current_error;
 }
 
-static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* problem,
+static int plasticity_2d_onecone_nonsmooth_newton_initialize(PlasticityProblem* problem,
                                                              PlasticityProblem* localproblem,
                                                              SolverOptions* options) {
   /** In initialize, these operators are "connected" to their corresponding static variables,
@@ -91,7 +91,7 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
    */
 
   DEBUG_PRINTF(
-      "plasticity_2d_onecone_nonsmooth_Newton_initialize starts with "
+      "plasticity_2d_onecone_nonsmooth_newton_initialize starts with "
       "options->iparam[PLASTICITY_NSN_FORMULATION] = "
       "%i\n",
       options->iparam[PLASTICITY_NSN_FORMULATION]);
@@ -137,7 +137,7 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
       rho = &options->dWork[3 * cone + nc];
     }
     /* numerics_printf_verbose(2, */
-    /*     "plasticity_2d_onecone_nonsmooth_Newton_initialize" */
+    /*     "plasticity_2d_onecone_nonsmooth_newton_initialize" */
     /*     " plasticity_2d_compute rho for cone = %i", */
     /*     cone); */
 
@@ -160,10 +160,10 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
       rho[2] = options->dparam[PLASTICITY_NSN_RHO];
     } else if (options->iparam[PLASTICITY_NSN_RHO_STRATEGY] ==
                PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
-      return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
+      return numerics_error("plasticity_2d_onecone_nonsmooth_newton_initialize",
                             "Adaptive strategy for computing rho not yet implemented");
     } else
-      return numerics_error("plasticity_2d_onecone_nonsmooth_Newton_initialize",
+      return numerics_error("plasticity_2d_onecone_nonsmooth_newton_initialize",
                             "unknown strategy for computing rho");
 
     if (verbose > 0) {
@@ -183,7 +183,7 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
         m_row_norm = max(sum, m_row_norm);
       }
       numerics_printf_verbose(2,
-                              "plasticity_2d_onecone_nonsmooth_Newton_initialize : "
+                              "plasticity_2d_onecone_nonsmooth_newton_initialize : "
                               "cone = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e, "
                               "||M||^-1 = %4.2e, ||M||_row^-1 = %4.2e ",
                               cone, rho[0], rho[1], rho[2],
@@ -193,13 +193,13 @@ static int plasticity_2d_onecone_nonsmooth_Newton_initialize(PlasticityProblem* 
     DEBUG_EXPR(NM_display(localproblem->M););
   }
   numerics_printf(
-      "plasticity_2d_onecone_nonsmooth_Newton_initialize"
+      "plasticity_2d_onecone_nonsmooth_newton_initialize"
       " Avg. rho value = %e\t%e\t%e\t",
       avg_rho[0] / (double)nc, avg_rho[1] / (double)nc, avg_rho[2] / (double)nc);
   return 0;
 }
 
-static void plasticity_2d_AC_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
+static void plasticity_2d_ac_free(PlasticityProblem* problem, PlasticityProblem* localproblem,
                                   SolverOptions* localsolver_options) {
   F = NULL;
   jacobianF = NULL;
@@ -215,7 +215,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_initialize(
   if (localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP_HYBRID) {
-    plasticity_2d_onecone_nonsmooth_Newton_initialize(problem, localproblem,
+    plasticity_2d_onecone_nonsmooth_newton_initialize(problem, localproblem,
                                                       localsolver_options);
 
     return 0;
@@ -304,7 +304,7 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_free(PlasticityProblem* prob
   if (localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP ||
       localsolver_options->solverId == PLASTICITY_2D_ONECONE_NSN_GP_HYBRID) {
-    plasticity_2d_AC_free(problem, localproblem, localsolver_options);
+    plasticity_2d_ac_free(problem, localproblem, localsolver_options);
   }
 }
 
@@ -334,7 +334,7 @@ void plasticity_2d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* 
   /*   free(FGlobal); */
 }
 #ifdef DEBUG_CHECK
-static int plasticity_2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* velocity,
+static int plasticity_2d_onecone_nonsmooth_newton_ac_debug(double* R, double* velocity,
                                                            double theta, double* rho,
                                                            double* MLocal, double* F,
                                                            double* A, double* B,
@@ -479,7 +479,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(
     scal3x3(-1., AWplusB);
 
 #ifdef DEBUG_CHECK
-    plasticity_2d_onecone_nonsmooth_Newton_AC_debug(s_local, e_local, theta, rho, MLocal, F, A,
+    plasticity_2d_onecone_nonsmooth_newton_ac_debug(s_local, e_local, theta, rho, MLocal, F, A,
                                                     B, AWplusB, iparam);
 #endif
 
@@ -536,10 +536,10 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_direct(
 }
 
 #undef DEBUG_MESSAGES
-static int LineSearchGP(PlasticityProblem* localproblem, computeNonsmoothFunction Function,
-                        double* t_opt, double R[3], double dR[3], double* rho, int LSitermax,
-                        double* F, double* A, double* B, double* velocity) {
-  numerics_printf_verbose(2, "-- LineSearchGP starts");
+static int line_search_gp(PlasticityProblem* localproblem, computeNonsmoothFunction Function,
+                          double* t_opt, double R[3], double dR[3], double* rho, int LSitermax,
+                          double* F, double* A, double* B, double* velocity) {
+  numerics_printf_verbose(2, "-- line_search_gp starts");
 
   double alpha = *t_opt;
 
@@ -649,7 +649,7 @@ static int LineSearchGP(PlasticityProblem* localproblem, computeNonsmoothFunctio
       *t_opt = alpha;
 
       numerics_printf_verbose(
-          2, "-- LineSearchGP success number of iteration = %i  alpha = %.10e", iter, alpha);
+          2, "-- line_search_gp success number of iteration = %i  alpha = %.10e", iter, alpha);
       return 0;
 
     } else if (!C1) {
@@ -676,10 +676,10 @@ static int LineSearchGP(PlasticityProblem* localproblem, computeNonsmoothFunctio
       alpha = 10 * alpha;
     }
   }
-  numerics_printf_verbose(
-      2,
-      "-- LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e",
-      LSitermax, alpha);
+  numerics_printf_verbose(2,
+                          "-- line_search_gp not succeed max number of iteration reached  = "
+                          "%i  with alpha = %.10e",
+                          LSitermax, alpha);
   *t_opt = alpha;
   return -1;
 }
@@ -768,7 +768,7 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
     scal3x3(-1., AWplusB);
 
 #ifdef DEBUG_CHECK
-    plasticity_2d_onecone_nonsmooth_Newton_AC_debug(s_local, e_local, theta, rho, MLocal, F, A,
+    plasticity_2d_onecone_nonsmooth_newton_ac_debug(s_local, e_local, theta, rho, MLocal, F, A,
                                                     B, AWplusB, iparam);
 #endif
 
@@ -786,8 +786,8 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve_damped(
     if (!info_solv3x3) {
       /* Perform Line Search */
       t_opt = t_init;
-      LineSearchGP(localproblem, Function, &t_opt, s_local, dR, rho, LSitermax, F, A, B,
-                   e_local);
+      line_search_gp(localproblem, Function, &t_opt, s_local, dR, rho, LSitermax, F, A, B,
+                     e_local);
       t = t_opt;
     }
 

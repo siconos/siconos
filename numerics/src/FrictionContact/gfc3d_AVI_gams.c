@@ -39,7 +39,7 @@
 #include "siconos_debug.h"
 #define NB_APPROX 10
 
-static ptrdiff_t SN_rm_normal_part_on_H(ptrdiff_t i, ptrdiff_t j, double val, void* env) {
+static ptrdiff_t sn_rm_normal_part_on_h(ptrdiff_t i, ptrdiff_t j, double val, void* env) {
   if (j % 3 == 0) {
     return 0;
   } else {
@@ -47,7 +47,7 @@ static ptrdiff_t SN_rm_normal_part_on_H(ptrdiff_t i, ptrdiff_t j, double val, vo
   }
 }
 
-static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* mus) {
+static void fc3d_gams_generate_first_constraints(NumericsMatrix* Akmat, double* mus) {
   unsigned nb_contacts = (unsigned)Akmat->size1 / 3;
   assert(nb_contacts * 3 == (unsigned)Akmat->size1);
   unsigned nb_approx = (unsigned)Akmat->size0 / nb_contacts;
@@ -69,7 +69,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   }
 }
 
-static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* reaction,
+static int gfc3d_avi_gams_base(GlobalFrictionContactProblem* problem, double* reaction,
                                double* velocity, SolverOptions* options,
                                const char* solverName) {
   CHECK_NULL(problem);
@@ -116,7 +116,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
                                      NB_APPROX * problem->numberOfContacts * 3, 1, 1);
   CSparseMatrix* Ak_triplet = Akmat.sparse->triplet;
 
-  FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
+  fc3d_gams_generate_first_constraints(&Akmat, problem->mu);
 
   SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model,
                    sysdir, "/fc_vi.gms");
@@ -176,7 +176,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   optSetIntStr(Optr, "Keep", 0);
 
-  cs_fkeep(NM_csc(Htmat), &SN_rm_normal_part_on_H, NULL);
+  cs_fkeep(NM_csc(Htmat), &sn_rm_normal_part_on_h, NULL);
 
   cblas_dcopy(size, problem->b, 1, reaction, 1);
   for (unsigned i = 0; i < size; i += 3) {
@@ -221,12 +221,12 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
 void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double* reaction,
                          double* velocity, int* info, SolverOptions* options) {
-  *info = gfc3d_AVI_gams_base(problem, reaction, velocity, options, "path");
+  *info = gfc3d_avi_gams_base(problem, reaction, velocity, options, "path");
 }
 
 void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double* reaction,
                            double* velocity, int* info, SolverOptions* options) {
-  *info = gfc3d_AVI_gams_base(problem, reaction, velocity, options, "pathvi");
+  *info = gfc3d_avi_gams_base(problem, reaction, velocity, options, "pathvi");
 }
 
 #else

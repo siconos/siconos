@@ -68,8 +68,9 @@
    f = m-vector
    H = n*d x m matrix
    w = n*d-vector */
-static void printDataProbMatlabFile(NumericsMatrix* M, double* f, NumericsMatrix* H, double* w,
-                                    int d, int n, int m, double* mu, FILE* file) {
+static void print_data_prob_matlab_file(NumericsMatrix* M, double* f, NumericsMatrix* H,
+                                        double* w, int d, int n, int m, double* mu,
+                                        FILE* file) {
   fprintf(file, "d = %3i;\n", d);
   fprintf(file, "n = %6i;\n", n);
   fprintf(file, "m = %6i;\n", m);
@@ -289,17 +290,17 @@ int* read_fricprob_block(const char* path, int type, int blk_index) {
   return out;
 }
 
-static int NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const size_t start_i,
+static int nm_insert_arrow_to_triplet(CSparseMatrix* triplet, const size_t start_i,
                                       const size_t start_j, const double* const vec,
                                       const size_t vecSize, const size_t varsCount) {
   size_t dimension = (size_t)(vecSize / varsCount);
   size_t pos;
   size_t total_element = (dimension * 3 - 2) * varsCount;
   if (!(total_element <= LLONG_MAX))  // To detect bad conversion with nzmax type
-    return numerics_error("NM_insert_Arrow_to_Triplet", "value too large for an int64_t");
+    return numerics_error("nm_insert_arrow_to_triplet", "value too large for an int64_t");
 
   if (triplet->nzmax < ((int64_t)total_element + triplet->nz)) {
-    return numerics_error("NM_insert_Arrow_to_Triplet",
+    return numerics_error("nm_insert_arrow_to_triplet",
                           " Size of allocated triplet memory is not sufficient.");
   }
 
@@ -334,7 +335,7 @@ static int NM_insert_Arrow_to_Triplet(CSparseMatrix* triplet, const size_t start
  * storage. Outputs M (may point to problem->M or a fresh copy), the original
  * problem->M if it was symmetrized (NULL otherwise), and H_tilde (a transpose or a
  * sparse copy of the transpose). */
-static void gfc3d_IPM_SNM_prepare_problem(GlobalFrictionContactProblem* problem,
+static void gfc3d_ipm_snm_prepare_problem(GlobalFrictionContactProblem* problem,
                                           SolverOptions* options, size_t m, size_t nd,
                                           NumericsMatrix** M_out,
                                           NumericsMatrix** M_original_out,
@@ -385,7 +386,7 @@ static void gfc3d_IPM_SNM_prepare_problem(GlobalFrictionContactProblem* problem,
 
 /* Apply the friction-coefficient scaling (P_mu) to H_tilde and w, then build the derived
  * matrices needed by the IPM iterations (-H, -H^T, H^T, -M). */
-static void gfc3d_IPM_SNM_scale_problem(NumericsMatrix* M, NumericsMatrix* H_tilde,
+static void gfc3d_ipm_snm_scale_problem(NumericsMatrix* M, NumericsMatrix* H_tilde,
                                         GlobalFrictionContactProblem* problem,
                                         Gfc3d_IPM_init_data* data, size_t nd,
                                         NumericsMatrix** H_out, double** w_out,
@@ -422,7 +423,7 @@ static void gfc3d_IPM_SNM_scale_problem(NumericsMatrix* M, NumericsMatrix* H_til
 
 /* Initialize the IPM iterate (reaction, velocity, globalVelocity, s) with a default interior
  * point and, if load_starting_point is enabled, overwrite it from a solution file. */
-static void gfc3d_IPM_SNM_compute_starting_point(size_t m, size_t nd, size_t d, size_t n,
+static void gfc3d_ipm_snm_compute_starting_point(size_t m, size_t nd, size_t d, size_t n,
                                                  NumericsMatrix* M, NumericsMatrix* H,
                                                  const double* f, const char* strToken,
                                                  double* reaction, double* velocity,
@@ -449,7 +450,7 @@ static void gfc3d_IPM_SNM_compute_starting_point(size_t m, size_t nd, size_t d, 
     }
   } else {
     numerics_printf_verbose(
-        2, "gfc3d_IPM_SNM_compute_starting_point: using LU after previous Cholesky failure");
+        2, "gfc3d_ipm_snm_compute_starting_point: using LU after previous Cholesky failure");
     int info_lu = NM_LU_solve(M, globalVelocity, 1);
     if (info_lu) {
       numerics_printf_verbose(1, "LU failed. We continue as if M is the identity matrix");
@@ -607,7 +608,7 @@ typedef struct {
 
 /* Single cleanup routine for gfc3d_IPM_SNM.  Restores the original scaling, frees memory, and
  * writes back convergence info. */
-static void gfc3d_IPM_SNM_cleanup(gfc3d_IPM_SNM_cleanup_data* cd, int* info) {
+static void gfc3d_ipm_snm_cleanup(gfc3d_IPM_SNM_cleanup_data* cd, int* info) {
   /* ----- return to original variables ------ */
   NM_gemv(1.0, cd->data->P_mu->inv_mat, cd->velocity, 0.0, cd->data->tmp_point->t_velocity);
   cblas_dcopy(cd->nd, cd->data->tmp_point->t_velocity, 1, cd->velocity, 1);
@@ -742,7 +743,7 @@ typedef struct {
 } gfc3d_IPM_SNM_workspace;
 
 /* ---- per-linear-system-formulation step helpers ---- */
-static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
+static void gfc3d_ipm_snm_step_noscal(gfc3d_IPM_SNM_workspace* ws) {
   /* locals not carried in the workspace struct */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -1001,8 +1002,8 @@ static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
         J->sparse->triplet->nz = J_nz_captured;  // nz goes back the end point of fixed data
 
         // Replace the matrix content, without reallocation
-        NM_insert_Arrow_to_Triplet(J->sparse->triplet, m, m, reaction, nd, n);
-        NM_insert_Arrow_to_Triplet(J->sparse->triplet, m, m + nd, velocity, nd, n);
+        nm_insert_arrow_to_triplet(J->sparse->triplet, m, m, reaction, nd, n);
+        nm_insert_arrow_to_triplet(J->sparse->triplet, m, m + nd, velocity, nd, n);
 
         CSparseMatrix* J_cs = J->sparse->triplet;
 
@@ -1218,7 +1219,7 @@ static void gfc3d_IPM_SNM_step_NOSCAL(gfc3d_IPM_SNM_workspace* ws) {
   ws->Qp2 = Qp2;
 }
 
-static void gfc3d_IPM_SNM_step_QP2(gfc3d_IPM_SNM_workspace* ws) {
+static void gfc3d_ipm_snm_step_qp2(gfc3d_IPM_SNM_workspace* ws) {
   /* locals not carried in the workspace struct */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -1652,7 +1653,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
   /* globalFrictionContactProblem_display(problem); */
 
-  gfc3d_IPM_SNM_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde);
+  gfc3d_ipm_snm_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde);
 
   // initialize solver if it is not set
   int internal_allocation = 0;
@@ -1674,7 +1675,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   NumericsMatrix* minus_Ht = NULL;
   NumericsMatrix* Ht = NULL;
   NumericsMatrix* minus_M = NULL;
-  gfc3d_IPM_SNM_scale_problem(M, H_tilde, problem, data, nd, &H, &w, &w_ori, &minus_H,
+  gfc3d_ipm_snm_scale_problem(M, H_tilde, problem, data, nd, &H, &w, &w_ori, &minus_H,
                               &minus_Ht, &Ht, &minus_M);
   no_nd++;
 
@@ -1881,7 +1882,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
     iterates = fopen(matlab_name, "w");
-    printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates);
+    print_data_prob_matlab_file(M, f, H, w, d, n, m, problem->mu, iterates);
   }
 
   /* check the full criterion */
@@ -1896,7 +1897,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   //  ComputeErrorGlobalPtr computeError = NULL;
   // computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
 
-  gfc3d_IPM_SNM_compute_starting_point(m, nd, d, n, M, H, f, strToken, reaction, velocity,
+  gfc3d_ipm_snm_compute_starting_point(m, nd, d, n, M, H, f, strToken, reaction, velocity,
                                        globalVelocity, s, data);
 
   // Reset params
@@ -2036,7 +2037,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
          [         s - |ub|         ]  n
       */
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_NOSCAL:
-        gfc3d_IPM_SNM_step_NOSCAL(&ws);
+        gfc3d_ipm_snm_step_noscal(&ws);
         break;
 
         /*  Build the Jacobian matrix without reducing the linear system.
@@ -2064,7 +2065,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
           [         s - |ub|         ]  n
        */
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_QP2:
-        gfc3d_IPM_SNM_step_QP2(&ws);
+        gfc3d_ipm_snm_step_qp2(&ws);
         break;
 
       default: {
@@ -2230,7 +2231,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   cd.iterates = iterates;
   cd.iterates_2 = iterates_2;
 
-  gfc3d_IPM_SNM_cleanup(&cd, info);
+  gfc3d_ipm_snm_cleanup(&cd, info);
 }
 
 void gfc3d_IPM_SNM_set_default(SolverOptions* options) {

@@ -55,22 +55,22 @@ typedef struct {
   bool AwpB_data_computed;
 } FC3D_Newton_data;
 
-static void FC3D_compute_F(void* data_opaque, double* reaction, double* velocity) {
+static void fc3d_compute_f(void* data_opaque, double* reaction, double* velocity) {
   FrictionContactProblem* problem = ((FC3D_Newton_data*)data_opaque)->problem;
   // velocity <- M*reaction + qfree
   cblas_dcopy(problem->M->size1, problem->q, 1, velocity, 1);
   NM_gemv(1., problem->M, reaction, 1., velocity);
 }
 
-static void FC3D_compute_error(void* data_opaque, double* reaction, double* velocity,
-                               double* Jac_F_merit, double tol, double* err) {
+static void fc3d_compute_error_local(void* data_opaque, double* reaction, double* velocity,
+                                     double* Jac_F_merit, double tol, double* err) {
   FC3D_Newton_data* dat = (FC3D_Newton_data*)data_opaque;
   FrictionContactProblem* problem = dat->problem;
 
   fc3d_compute_error(problem, reaction, velocity, tol, NULL, err);
 }
 
-static void FC3D_compute_F_merit(void* data_opaque, double* reaction, double* velocity,
+static void fc3d_compute_f_merit(void* data_opaque, double* reaction, double* velocity,
                                  double* F) {
   FC3D_Newton_data* dat = (FC3D_Newton_data*)data_opaque;
   FrictionContactProblem* problem = dat->problem;
@@ -81,7 +81,7 @@ static void FC3D_compute_F_merit(void* data_opaque, double* reaction, double* ve
   dat->AwpB_data_computed = true;
 }
 
-static void FC3D_compute_AWpB(void* data_opaque, double* reaction, double* velocity,
+static void fc3d_compute_awpb(void* data_opaque, double* reaction, double* velocity,
                               double* workV1, double* workV2, NumericsMatrix* AWpB) {
   FC3D_Newton_data* dat = (FC3D_Newton_data*)data_opaque;
   assert(dat->AwpB_data_computed);
@@ -157,9 +157,9 @@ void fc3d_nonsmooth_Newton_AlartCurnier_reformulated(FrictionContactProblem* pro
   opaque_data.AwpB_data_computed = false;
 
   functions_LSA functions_AC;
-  init_lsa_functions(&functions_AC, &FC3D_compute_F, &FC3D_compute_F_merit);
-  functions_AC.compute_H = &FC3D_compute_AWpB;
-  functions_AC.compute_error = &FC3D_compute_error;
+  init_lsa_functions(&functions_AC, &fc3d_compute_f, &fc3d_compute_f_merit);
+  functions_AC.compute_H = &fc3d_compute_awpb;
+  functions_AC.compute_error = &fc3d_compute_error_local;
   functions_AC.get_set_from_problem_data = NULL;
 
   set_lsa_params_data(options, problem->M);

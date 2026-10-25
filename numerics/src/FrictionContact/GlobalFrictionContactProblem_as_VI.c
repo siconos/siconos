@@ -100,7 +100,7 @@ void Projection_VI_GFC3D(void* viIn, double* x, double* PX) {
 /** Projection on the 2D Coulomb cone:
  *  K = { (r_N, r_T) | r_N >= 0, |r_T| <= mu * r_N }
  */
-static void projectionOn2DCone(double* r, double mu) {
+static void projection_on_2d_cone(double* r, double mu) {
   double absT = fabs(r[1]);
   if (mu * absT <= -r[0]) {
     r[0] = 0.0;
@@ -163,7 +163,7 @@ void Projection_VI_GFC2D(void* viIn, double* x, double* PX) {
   double* reaction = &PX[n];
 
   for (int contact = 0; contact < gfc2d->numberOfContacts; ++contact) {
-    projectionOn2DCone(&reaction[contact * nLocal], gfc2d->mu[contact]);
+    projection_on_2d_cone(&reaction[contact * nLocal], gfc2d->mu[contact]);
   }
   DEBUG_EXPR(NM_vector_display(PX, n + m));
   DEBUG_END("Projection_VI_GFC2D(void *viIn, double *x, double *PX)\n");

@@ -44,10 +44,10 @@
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u
    and the relative 2-norm of this vector: rnorm = |out|/max{|Wr|, |q|, |velocity|, |Es|} */
-static void primalResidual_s_for_local_friction(const double* velocity, const double* reaction,
-                                                NumericsMatrix* W, const double* q,
-                                                const double* s, double* out, double* rnorm,
-                                                const double tol) {
+static void primal_residual_s_for_local_friction(const double* velocity,
+                                                 const double* reaction, NumericsMatrix* W,
+                                                 const double* q, const double* s, double* out,
+                                                 double* rnorm, const double tol) {
   const size_t nd = to_size_t(W->size0);
   double rn;
   const blasint blasnd = to_blasint(nd);
@@ -69,7 +69,7 @@ static void primalResidual_s_for_local_friction(const double* velocity, const do
 /*
  * Implementation contains the following functions:
  *  - fc3d_IPM_SNM_init - initialize solver (allocate memory)
- *  - fc3d_IPM_SNM_free - deallocate memory
+ *  - fc3d_ipm_snm_free - deallocate memory
  *  - fc3d_IPM_SNM_set_default - setup default solver parameters
  *  - fc3d_IPM_SNM - optimization method
  *
@@ -152,7 +152,7 @@ void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options) 
   for (size_t i = 0; i < 10; ++i) data->tmp_vault_nd[i] = (double*)calloc(nd, sizeof(double));
 }
 
-static void fc3d_IPM_SNM_free(FrictionContactProblem* problem, Gfc3d_IPM_init_data* data) {
+static void fc3d_ipm_snm_free(FrictionContactProblem* problem, Gfc3d_IPM_init_data* data) {
   if (!data) return;
 
   if (data->P_mu) {
@@ -371,7 +371,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
     fprintf(iterates, "%% data = struct;\n");
     fprintf(iterates, "data(end+1).name = \"%s\";\n", strToken);
     fprintf(iterates, "data(end).val = [\n");
-    // printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates_2);
+    // print_data_prob_matlab_file(M, f, H, w, d, n, m, problem->mu, iterates_2);
   }
   free(str);
   /* check the full criterion */
@@ -500,8 +500,8 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
         // MEHROTRA scheme
         if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA] ==
             SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA_YES) {
-          primalResidual_s_for_local_friction(velocity, reaction, W, q, s, primalConstraint,
-                                              &pinfeas, tol);
+          primal_residual_s_for_local_friction(velocity, reaction, W, q, s, primalConstraint,
+                                               &pinfeas, tol);
           JA_prod(velocity, reaction, nd, n, complemConstraint);
 
           cblas_dcopy(blasnd, primalConstraint, 1, rhs, 1);
@@ -577,8 +577,8 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
         else  // Not MEHROTRA
         {
           if (iteration == 0) {
-            primalResidual_s_for_local_friction(velocity, reaction, W, q, s, primalConstraint,
-                                                &pinfeas, tol);
+            primal_residual_s_for_local_friction(velocity, reaction, W, q, s, primalConstraint,
+                                                 &pinfeas, tol);
             JA_prod(velocity, reaction, nd, n, complemConstraint);
             for (size_t k = 0; k < nd; complemConstraint[k] -= 2 * barr_param, k += d);
           }
@@ -715,8 +715,8 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
      - complementarity: u o r
      - projection error: r - proj(r-u)
     */
-    primalResidual_s_for_local_friction(velocity, reaction, W, q, s, primalConstraint,
-                                        &pinfeas, tol);
+    primal_residual_s_for_local_friction(velocity, reaction, W, q, s, primalConstraint,
+                                         &pinfeas, tol);
     // complem =
     complemResidualNorm(velocity, reaction, nd, n);
     udotr = cblas_ddot(blasnd, velocity, 1, reaction, 1) / (double)n;
@@ -950,7 +950,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
   if (internal_allocation) {
-    fc3d_IPM_SNM_free(problem, data);
+    fc3d_ipm_snm_free(problem, data);
     options->solverData = NULL;
   }
 
@@ -1025,7 +1025,7 @@ static int fc3d_ipm_snm_solve_wrap(void* problem, double* reaction, double* velo
 
 static void fc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  fc3d_IPM_SNM_free((FrictionContactProblem*)problem,
+  fc3d_ipm_snm_free((FrictionContactProblem*)problem,
                     (Gfc3d_IPM_init_data*)options->solverData);
   options->solverData = NULL;
 }

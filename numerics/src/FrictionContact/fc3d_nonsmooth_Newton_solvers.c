@@ -56,7 +56,7 @@
 #include "siconos_debug.h"  // for DEBUG_EXPR_WE
 #include "solver_registry.h"
 
-static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size,
+static void nm_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size,
                                       size_t block_col_size) {
   /* TODO  CSC, CSR version*/
   assert(A);
@@ -78,7 +78,7 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
   }
 }
 
-static void computeDenseAWpB(double* A, NumericsMatrix* W, double* B, NumericsMatrix* AWpB) {
+static void compute_dense_awpb(double* A, NumericsMatrix* W, double* B, NumericsMatrix* AWpB) {
   unsigned problemSize = W->size0;
 
   double* result = AWpB->dense;
@@ -108,8 +108,8 @@ static void computeDenseAWpB(double* A, NumericsMatrix* W, double* B, NumericsMa
   }
 }
 
-static void computeSparseBlockAWpB(double* A, NumericsMatrix* W, double* B,
-                                   NumericsMatrix* AWpB) {
+static void compute_sparse_block_awpb(double* A, NumericsMatrix* W, double* B,
+                                      NumericsMatrix* AWpB) {
   /* unsigned int problemSize = W->size0; */
 
   SparseBlockStructuredMatrix* Wb = W->sparse_block;
@@ -153,7 +153,8 @@ static void computeSparseBlockAWpB(double* A, NumericsMatrix* W, double* B,
   NM_clearSparseStorage(AWpB);
 }
 
-static void computeSparseAWpB(double* A, NumericsMatrix* W, double* B, NumericsMatrix* AWpB) {
+static void compute_sparse_awpb(double* A, NumericsMatrix* W, double* B,
+                                NumericsMatrix* AWpB) {
   unsigned problemSize = W->size0;
   assert(problemSize >= 3);
 
@@ -164,8 +165,8 @@ static void computeSparseAWpB(double* A, NumericsMatrix* W, double* B, NumericsM
   NumericsMatrix* Amat = NM_create(NM_SPARSE, problemSize, problemSize);
   NumericsMatrix* Bmat = NM_create(NM_SPARSE, problemSize, problemSize);
 
-  NM_dense_to_sparse_diag_t(A, Amat, 3, 3);
-  NM_dense_to_sparse_diag_t(B, Bmat, 3, 3);
+  nm_dense_to_sparse_diag_t(A, Amat, 3, 3);
+  nm_dense_to_sparse_diag_t(B, Bmat, 3, 3);
 
   /* AWpB = B */
   NumericsMatrix* Bmat_copy = NM_copy(Bmat);
@@ -187,15 +188,15 @@ void fc3d_nonsmooth_Newton_computeAWpB(double* A, NumericsMatrix* W, double* B,
                                        NumericsMatrix* AWpB) {
   switch (W->storageType) {
     case NM_DENSE: {
-      computeDenseAWpB(A, W, B, AWpB);
+      compute_dense_awpb(A, W, B, AWpB);
       break;
     }
     case NM_SPARSE_BLOCK: {
-      computeSparseBlockAWpB(A, W, B, AWpB);
+      compute_sparse_block_awpb(A, W, B, AWpB);
       break;
     }
     case NM_SPARSE: {
-      computeSparseAWpB(A, W, B, AWpB);
+      compute_sparse_awpb(A, W, B, AWpB);
       break;
     }
     default: {
@@ -537,7 +538,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       *info = numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
                              "unknown strategy for computing rho");
     numerics_printf_verbose(2,
-                            "fc3d_AC_initialize"
+                            "fc3d_ac_initialize"
                             "contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
                             contact, rho[3 * contact], rho[3 * contact + 1],
                             rho[3 * contact + 2]);

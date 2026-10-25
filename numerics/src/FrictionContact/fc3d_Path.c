@@ -36,7 +36,7 @@ typedef void (*UpdateSolverPtr)(int, double*);
 
 /** writes \f$ F(z) \f$ using Glocker formulation
  */
-static void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector) {
+static void f_glocker_path(void* env, int sizeF, double* reaction, double* FVector) {
   /* Glocker formulation */
   int up2Date = 0;
   double* FGlocker = NULL;
@@ -53,8 +53,8 @@ static void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVecto
 /** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister
  * function.
  */
-static void jacobianF_GlockerPath(void* env, int sizeF, double* reaction,
-                                  NumericsMatrix* jacobianFMatrix) {
+static void jacobian_f_glocker_path(void* env, int sizeF, double* reaction,
+                                    NumericsMatrix* jacobianFMatrix) {
   int up2Date = 0;
   /* Glocker formulation */
   double *FGlocker = NULL, *jacobianFGlocker = NULL;
@@ -86,7 +86,7 @@ void fc3d_Path_initialize(FrictionContactProblem* problem,
 
 int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
                     SolverOptions* options) {
-  NonlinearComplementarityProblem NCP_struct = {5, &F_GlockerPath, &jacobianF_GlockerPath,
+  NonlinearComplementarityProblem NCP_struct = {5, &f_glocker_path, &jacobian_f_glocker_path,
                                                 NULL, NULL};
 
   double Fvec[5];

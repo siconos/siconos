@@ -531,8 +531,8 @@ double norm2VecDiff(const double* vec1, const double* vec2, const size_t vecSize
 
 /* Returns the product Q_{p}*H where p is the NT vector related to the pair (x,y) and H is the
  * matrix of the linear constraint. */
-static NumericsMatrix* QNTpH(const double* const x, const double* const y, NumericsMatrix* H,
-                             const size_t vecSize, const size_t varsCount) {
+static NumericsMatrix* qnt_ph(const double* const x, const double* const y, NumericsMatrix* H,
+                              const size_t vecSize, const size_t varsCount) {
   double* a = (double*)calloc(vecSize, sizeof(double));
   double* b = (double*)calloc(vecSize, sizeof(double));
 
@@ -637,7 +637,7 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
       break;
     } break;
     default:
-      fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
+      fprintf(stderr, "Numerics, GFC3D IPM, qnt_ph failed, unknown storage type for H.\n");
       return NULL;
   }
   free(a);
@@ -655,8 +655,9 @@ static NumericsMatrix* QNTpH(const double* const x, const double* const y, Numer
    f = m-vector
    H = n*d x m matrix
    w = n*d-vector */
-static void printDataProbMatlabFile(NumericsMatrix* M, double* f, NumericsMatrix* H, double* w,
-                                    int d, int n, int m, double* mu, FILE* file) {
+static void print_data_prob_matlab_file(NumericsMatrix* M, double* f, NumericsMatrix* H,
+                                        double* w, int d, int n, int m, double* mu,
+                                        FILE* file) {
   fprintf(file, "d = %3i;\n", d);
   fprintf(file, "n = %6i;\n", n);
   fprintf(file, "m = %6i;\n", m);
@@ -1121,7 +1122,7 @@ void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* option
  * block-diagonal inverse Minv needed by the 1x1 QPH formulation. Outputs M (may point to
  * problem->M or a fresh copy), the original problem->M if it was symmetrized (NULL otherwise),
  * H_tilde and Minv. */
-static void gfc3d_IPM_prepare_problem(GlobalFrictionContactProblem* problem,
+static void gfc3d_ipm_prepare_problem(GlobalFrictionContactProblem* problem,
                                       SolverOptions* options, size_t m, size_t nd,
                                       NumericsMatrix** M_out, NumericsMatrix** M_original_out,
                                       NumericsMatrix** H_tilde_out,
@@ -1182,7 +1183,7 @@ static void gfc3d_IPM_prepare_problem(GlobalFrictionContactProblem* problem,
 
 /* Apply the friction-coefficient scaling (P_mu) to H_tilde and w, then build the derived
  * matrices needed by the IPM iterations (-H, -H^T, H^T, -M). */
-static void gfc3d_IPM_scale_problem(NumericsMatrix* M, NumericsMatrix* H_tilde,
+static void gfc3d_ipm_scale_problem(NumericsMatrix* M, NumericsMatrix* H_tilde,
                                     GlobalFrictionContactProblem* problem,
                                     Gfc3d_IPM_init_data* data, size_t nd,
                                     NumericsMatrix** H_out, double** w_out,
@@ -1215,7 +1216,7 @@ static void gfc3d_IPM_scale_problem(NumericsMatrix* M, NumericsMatrix* H_tilde,
 
 /* Initialize the IPM iterate (reaction, velocity, globalVelocity) with a default interior
  * point. */
-static void gfc3d_IPM_compute_starting_point(size_t m, size_t nd, size_t d, NumericsMatrix* M,
+static void gfc3d_ipm_compute_starting_point(size_t m, size_t nd, size_t d, NumericsMatrix* M,
                                              NumericsMatrix* H, const double* f,
                                              double* reaction, double* velocity,
                                              double* globalVelocity,
@@ -1237,7 +1238,7 @@ static void gfc3d_IPM_compute_starting_point(size_t m, size_t nd, size_t d, Nume
     }
   } else {
     numerics_printf_verbose(
-        2, "gfc3d_IPM_compute_starting_point: using LU after previous Cholesky failure");
+        2, "gfc3d_ipm_compute_starting_point: using LU after previous Cholesky failure");
     int info_lu = NM_LU_solve(NM_preserve(M), globalVelocity, 1);
     if (info_lu) {
       numerics_printf_verbose(1, "LU failed. We continue as if M is the identity matrix");
@@ -1307,7 +1308,7 @@ typedef struct {
 } gfc3d_IPM_cleanup_data;
 
 /* Single cleanup routine for gfc3d_IPM and gfc3d_IPM_fixed. */
-static void gfc3d_IPM_cleanup(gfc3d_IPM_cleanup_data* cd, int* info) {
+static void gfc3d_ipm_cleanup(gfc3d_IPM_cleanup_data* cd, int* info) {
   Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)cd->options->solverData;
 
   if (cd->restore_scaling) {
@@ -1454,7 +1455,7 @@ typedef struct {
 
 /* ---- per-linear-system-formulation step helpers ---- */
 
-static void gfc3d_IPM_predictor_3X3_NOSCAL(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_predictor_3x3_noscal(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -1671,7 +1672,7 @@ static void gfc3d_IPM_predictor_3X3_NOSCAL(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_predictor_3X3_QP2(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_predictor_3x3_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -1867,7 +1868,7 @@ static void gfc3d_IPM_predictor_3X3_QP2(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_predictor_3X3_QPH(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_predictor_3x3_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -1990,7 +1991,7 @@ static void gfc3d_IPM_predictor_3X3_QPH(gfc3d_IPM_workspace* ws) {
       NM_triplet_alloc(J, J_nzmax);
       J->sparse->origin = NSM_TRIPLET;
 
-      NumericsMatrix* minusQpH = QNTpH(velocity, reaction, H, nd, n);
+      NumericsMatrix* minusQpH = qnt_ph(velocity, reaction, H, nd, n);
       NM_scal(-1.0, minusQpH);
       NumericsMatrix* minusQpHt = NM_transpose(minusQpH);
 
@@ -2081,7 +2082,7 @@ static void gfc3d_IPM_predictor_3X3_QPH(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_predictor_2X2_QP2(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_predictor_2x2_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -2280,7 +2281,7 @@ static void gfc3d_IPM_predictor_2X2_QP2(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_predictor_2X2_QPH(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_predictor_2x2_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -2404,7 +2405,7 @@ static void gfc3d_IPM_predictor_2X2_QPH(gfc3d_IPM_workspace* ws) {
       NM_triplet_alloc(JR, JR_nzmax);
       JR->sparse->origin = NSM_TRIPLET;
 
-      NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
+      NumericsMatrix* QpH = qnt_ph(velocity, reaction, H, nd, n);
       NumericsMatrix* QpHt = NM_transpose(QpH);
 
       NM_insert(JR, minus_M, 0, 0);
@@ -2490,7 +2491,7 @@ static void gfc3d_IPM_predictor_2X2_QPH(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_predictor_1X1_QPH(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_predictor_1x1_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -2616,7 +2617,7 @@ static void gfc3d_IPM_predictor_1X1_QPH(gfc3d_IPM_workspace* ws) {
       NumericsMatrix* JR_a = NULL;
       NumericsMatrix* JR_b = NULL;
 
-      NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
+      NumericsMatrix* QpH = qnt_ph(velocity, reaction, H, nd, n);
       NumericsMatrix* QpHt = NM_transpose(QpH);
 
       JR_a = NM_multiply(Minv, QpHt);
@@ -2715,7 +2716,7 @@ static void gfc3d_IPM_predictor_1X1_QPH(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_corrector_3X3_NOSCAL(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_corrector_3x3_noscal(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -2910,7 +2911,7 @@ static void gfc3d_IPM_corrector_3X3_NOSCAL(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_corrector_3X3_QP2(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_corrector_3x3_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -3109,7 +3110,7 @@ static void gfc3d_IPM_corrector_3X3_QP2(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_corrector_3X3_QPH(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_corrector_3x3_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -3303,7 +3304,7 @@ static void gfc3d_IPM_corrector_3X3_QPH(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_corrector_2X2_QP2(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_corrector_2x2_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -3507,7 +3508,7 @@ static void gfc3d_IPM_corrector_2X2_QP2(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_corrector_2X2_QPH(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_corrector_2x2_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -3727,7 +3728,7 @@ static void gfc3d_IPM_corrector_2X2_QPH(gfc3d_IPM_workspace* ws) {
   ws->unitur = unitur;
 }
 
-static void gfc3d_IPM_corrector_1X1_QPH(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_corrector_1x1_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -3958,7 +3959,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   /* globalFrictionContactProblem_display(problem); */
 
   NumericsMatrix* Minv = NULL;
-  gfc3d_IPM_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde, &Minv);
+  gfc3d_ipm_prepare_problem(problem, options, m, nd, &M, &M_original, &H_tilde, &Minv);
 
   // initialize solver if it is not set
   int internal_allocation = 0;
@@ -3982,7 +3983,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   NumericsMatrix* minus_Ht = NULL;
   NumericsMatrix* Ht = NULL;
   NumericsMatrix* minus_M = NULL;
-  gfc3d_IPM_scale_problem(M, H_tilde, problem, data, nd, &H, &w, &minus_H, &minus_Ht, &Ht,
+  gfc3d_ipm_scale_problem(M, H_tilde, problem, data, nd, &H, &w, &minus_H, &minus_Ht, &Ht,
                           &minus_M);
 
   double alpha_primal = data->internal_params->alpha_primal;
@@ -3996,7 +3997,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
   /* COMPUTATION OF A NEW STARTING POINT */
-  gfc3d_IPM_compute_starting_point(m, nd, d, M, H, f, reaction, velocity, globalVelocity,
+  gfc3d_ipm_compute_starting_point(m, nd, d, M, H, f, reaction, velocity, globalVelocity,
                                    data);
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
@@ -4215,7 +4216,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
     iterates = fopen(matlab_name, "w");
-    printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates);
+    print_data_prob_matlab_file(M, f, H, w, d, n, m, problem->mu, iterates);
   }
 
   // ComputeErrorGlobalPtr computeError = NULL;
@@ -4525,7 +4526,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
      *
      *  where QpH = Qp * H.
      *
-     *  The matrix QpH is computed by means of the function QNTpH.
+     *  The matrix QpH is computed by means of the function qnt_ph.
      *
      * Case of a non-reduced system. Building the right-hand side related to the first system
 
@@ -4557,27 +4558,27 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     ws.jacobian_is_nan = 0;
     switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM]) {
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
-        gfc3d_IPM_predictor_3X3_NOSCAL(&ws);
+        gfc3d_ipm_predictor_3x3_noscal(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
-        gfc3d_IPM_predictor_3X3_QP2(&ws);
+        gfc3d_ipm_predictor_3x3_qp2(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH:
-        gfc3d_IPM_predictor_3X3_QPH(&ws);
+        gfc3d_ipm_predictor_3x3_qph(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QP2:
-        gfc3d_IPM_predictor_2X2_QP2(&ws);
+        gfc3d_ipm_predictor_2x2_qp2(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH:
-        gfc3d_IPM_predictor_2X2_QPH(&ws);
+        gfc3d_ipm_predictor_2x2_qph(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH:
-        gfc3d_IPM_predictor_1X1_QPH(&ws);
+        gfc3d_ipm_predictor_1x1_qph(&ws);
         break;
 
       default: {
@@ -4652,27 +4653,27 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM]) {
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
-        gfc3d_IPM_corrector_3X3_NOSCAL(&ws);
+        gfc3d_ipm_corrector_3x3_noscal(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
-        gfc3d_IPM_corrector_3X3_QP2(&ws);
+        gfc3d_ipm_corrector_3x3_qp2(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH:
-        gfc3d_IPM_corrector_3X3_QPH(&ws);
+        gfc3d_ipm_corrector_3x3_qph(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QP2:
-        gfc3d_IPM_corrector_2X2_QP2(&ws);
+        gfc3d_ipm_corrector_2x2_qp2(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH:
-        gfc3d_IPM_corrector_2X2_QPH(&ws);
+        gfc3d_ipm_corrector_2x2_qph(&ws);
         break;
 
       case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH:
-        gfc3d_IPM_corrector_1X1_QPH(&ws);
+        gfc3d_ipm_corrector_1x1_qph(&ws);
         break;
 
       default: {
@@ -4857,10 +4858,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cd.d_velocity = d_velocity;
   cd.d_reaction = d_reaction;
 
-  gfc3d_IPM_cleanup(&cd, info);
+  gfc3d_ipm_cleanup(&cd, info);
 }
 
-static void gfc3d_IPM_fixed_step(gfc3d_IPM_workspace* ws) {
+static void gfc3d_ipm_fixed_step(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -5313,7 +5314,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   ws.strToken = strToken;
 
   while (iteration < max_iter) {
-    gfc3d_IPM_fixed_step(&ws);
+    gfc3d_ipm_fixed_step(&ws);
 
     /* ---- sync main-loop locals from workspace ---- */
     hasNotConverged = ws.hasNotConverged;
@@ -5347,7 +5348,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     NM_triplet_alloc(J, J_nzmax);
     J->sparse->origin = NSM_TRIPLET;
 
-    NumericsMatrix* QpH = QNTpH(velocity, reaction, H, nd, n);
+    NumericsMatrix* QpH = qnt_ph(velocity, reaction, H, nd, n);
     NumericsMatrix* QpHt = NM_transpose(QpH);
 
     NM_insert(J, minus_M, 0, 0);
@@ -5502,7 +5503,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   cd.write_matlab_footer = 1;
   cd.restore_scaling = 0;
 
-  gfc3d_IPM_cleanup(&cd, info);
+  gfc3d_ipm_cleanup(&cd, info);
 }
 
 /* Solver registration system */

@@ -95,10 +95,10 @@ static SparseBlockCoordinateMatrix* fc3d_free_diagonal_blocks(
   return NULL;
 }
 
-static void fc2d_nsgs_buildLocalProblem(int contact, FrictionContactProblem* problem,
-                                        SparseBlockCoordinateMatrix* diagonal_blocks,
-                                        LinearComplementarityProblem* local_problem,
-                                        double* reaction) {
+static void fc2d_nsgs_build_local_problem(int contact, FrictionContactProblem* problem,
+                                          SparseBlockCoordinateMatrix* diagonal_blocks,
+                                          LinearComplementarityProblem* local_problem,
+                                          double* reaction) {
   // NM_extract_diag_block2(problem->M, contact, &local_problem->M->dense);
   local_problem->M->dense = diagonal_blocks->block[contact];
 
@@ -132,14 +132,14 @@ static double squared_norm(double localreaction[2]) {
   return nsgs_squared_norm(localreaction, 2);
 }
 
-static inline void accumulateLightErrorSum(double* light_error_sum, double localreaction[2],
-                                           double* oldreaction) {
+static inline void accumulate_light_error_sum(double* light_error_sum, double localreaction[2],
+                                              double* oldreaction) {
   double x0 = oldreaction[0] - localreaction[0];
   double x1 = oldreaction[1] - localreaction[1];
   *light_error_sum += x0 * x0 + x1 * x1;
 }
-static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,
-                                  double* norm_r) {
+static double calculate_light_error(double light_error_sum, unsigned int nc, double* reaction,
+                                    double* norm_r) {
   double error = sqrt(light_error_sum);
   *norm_r = cblas_dnrm2(nc * 2, reaction, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
@@ -163,9 +163,9 @@ static int determine_convergence(double error, double tolerance, unsigned int it
   return has_not_converged;
 }
 
-static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOptions* options,
-                                      double* reaction, double* velocity, double tolerance,
-                                      double norm_q) {
+static double calculate_full_error_final(FrictionContactProblem* problem,
+                                         SolverOptions* options, double* reaction,
+                                         double* velocity, double tolerance, double norm_q) {
   double absolute_error;
   /* (*computeError)(problem, reaction , velocity, tolerance, */
   /*                 options, norm_q, &absolute_error); */
@@ -201,8 +201,8 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
         "Residual = %14.7e < %7.3e",
         iter, error, *tolerance);
 
-    double absolute_error = calculateFullErrorFinal(problem, options, reaction, velocity,
-                                                    SOLVER_TOL(options), norm_q);
+    double absolute_error = calculate_full_error_final(problem, options, reaction, velocity,
+                                                       SOLVER_TOL(options), norm_q);
     if (absolute_error > SOLVER_TOL(options)) {
       *tolerance = error / absolute_error * SOLVER_TOL(options);
       assert(*tolerance > 0.0 && "tolerance has to be positive");
@@ -389,8 +389,8 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
         localreaction[1] = reaction[pos + 1];
 
         /* Local problem formalization */
-        fc2d_nsgs_buildLocalProblem(contact, problem, diagonal_blocks, local_problem,
-                                    reaction);
+        fc2d_nsgs_build_local_problem(contact, problem, diagonal_blocks, local_problem,
+                                      reaction);
 
         /* Solve local problem */
         fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
@@ -436,11 +436,11 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
       /* error evaluation */
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         has_not_converged = determine_convergence(error, tolerance, iter, options);
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         has_not_converged = determine_convergence_with_full_final(
             problem, options, reaction, velocity, &tolerance, norm_q, error, iter);
       }
@@ -465,8 +465,8 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
         localreaction[1] = reaction[pos + 1];
 
         /* Local problem formalization */
-        fc2d_nsgs_buildLocalProblem(contact, problem, diagonal_blocks, local_problem,
-                                    reaction);
+        fc2d_nsgs_build_local_problem(contact, problem, diagonal_blocks, local_problem,
+                                      reaction);
 
         /* Solve local problem */
         fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
@@ -492,11 +492,11 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
       /* error evaluation */
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         has_not_converged = determine_convergence(error, tolerance, iter, options);
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         has_not_converged = determine_convergence_with_full_final(
             problem, options, reaction, velocity, &tolerance, norm_q, error, iter);
       }
@@ -515,8 +515,8 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
         localreaction[1] = reaction[pos + 1];
 
         /* Local problem formalization */
-        fc2d_nsgs_buildLocalProblem(contact, problem, diagonal_blocks, local_problem,
-                                    reaction);
+        fc2d_nsgs_build_local_problem(contact, problem, diagonal_blocks, local_problem,
+                                      reaction);
 
         /* Solve local problem */
         fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
@@ -526,7 +526,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
             iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
-          accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[pos]);
+          accumulate_light_error_sum(&light_error_sum, localreaction, &reaction[pos]);
 
         reaction[pos] = localreaction[0];
         reaction[pos + 1] = localreaction[1];
@@ -536,11 +536,11 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
       /*  error evaluation */
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         has_not_converged = determine_convergence(error, tolerance, iter, options);
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+        error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         has_not_converged = determine_convergence_with_full_final(
             problem, options, reaction, velocity, &tolerance, norm_q, error, iter);
       }
@@ -550,7 +550,8 @@ void fc2d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    error = calculateFullErrorFinal(problem, options, reaction, velocity, tolerance, norm_q);
+    error =
+        calculate_full_error_final(problem, options, reaction, velocity, tolerance, norm_q);
 
     has_not_converged = determine_convergence(error, SOLVER_TOL(options), iter, options);
   }

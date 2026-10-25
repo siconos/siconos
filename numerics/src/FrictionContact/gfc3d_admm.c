@@ -185,7 +185,7 @@ static inline void compute_sliding_direction(int nc, double* u, double* sliding_
   }
 }
 
-static inline void gfc3d_ADMM_compute_full_b(int nc, double* u, double* mu, double* b,
+static inline void gfc3d_admm_compute_full_b(int nc, double* u, double* mu, double* b,
                                              double* b_s, SolverOptions* options, int update_b,
                                              double* normUT_work)
 
@@ -203,7 +203,7 @@ static inline void gfc3d_ADMM_compute_full_b(int nc, double* u, double* mu, doub
   }
 }
 
-static inline void gfc3d_ADMM_compute_full_H(int nc, double* u, double* mu, NumericsMatrix* H,
+static inline void gfc3d_admm_compute_full_h(int nc, double* u, double* mu, NumericsMatrix* H,
                                              NumericsMatrix* H_full, double* normUT_work) {
   NumericsMatrix* H_correction = NM_create(NM_SPARSE, 3 * nc, 3 * nc);
   NM_triplet_alloc(H_correction, 3 * nc);
@@ -572,7 +572,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     /********************/
     /*  0 - Compute b   */
     /********************/
-    gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options, update_b, normUT_work);
+    gfc3d_admm_compute_full_b(nc, u, mu, b, b_full, options, update_b, normUT_work);
 
     /********************/
     /*  1 - Compute v */
@@ -607,7 +607,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
         if (criteria > 1e-01) {
           /* printf("Recompute H_full\n"); */
-          gfc3d_ADMM_compute_full_H(nc, u, mu, H, H_full, normUT_work);
+          gfc3d_admm_compute_full_h(nc, u, mu, H, H_full, normUT_work);
           cblas_dcopy(3 * nc, u, 1, u_old, 1);
           has_full_H_changed = 1;
         } else {
@@ -636,7 +636,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
     /* q +  rho H*( u -b + reaction_k) --> v */
     cblas_dcopy(m, u_hat, 1, tmp_m, 1);
-    gfc3d_ADMM_compute_full_b(nc, u_hat, mu, b, b_full, options, update_b, normUT_work);
+    gfc3d_admm_compute_full_b(nc, u_hat, mu, b, b_full, options, update_b, normUT_work);
     cblas_daxpy(m, -1.0, b_full, 1, tmp_m, 1);
     if (with_full_Jacobian) {
       NM_gemv(rho, H_full, tmp_m, 1.0, v);
@@ -661,7 +661,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     /********************/
 
     /* H^T v_k - reaction_k + b */
-    gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options, 0, normUT_work);
+    gfc3d_admm_compute_full_b(nc, u, mu, b, b_full, options, 0, normUT_work);
 
     cblas_dcopy(m, b_full, 1, u, 1);
     cblas_daxpy(m, -1.0, reaction_hat, 1, u, 1);
@@ -689,7 +689,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     NM_gemv(-1.0, Htrans, v, 0.0, reaction);
     double norm_HTv = cblas_dnrm2(m, reaction, 1);
 
-    gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options, 0, normUT_work);
+    gfc3d_admm_compute_full_b(nc, u, mu, b, b_full, options, 0, normUT_work);
     norm_b_full = cblas_dnrm2(m, b_full, 1);
 
     cblas_daxpy(m, -1.0, b_full, 1, reaction, 1);

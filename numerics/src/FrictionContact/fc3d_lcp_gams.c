@@ -136,7 +136,7 @@ static inline double rad2deg(double rad)
   return rad*180/M_PI;
 }
 
-static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env)
+static CS_INT sn_rm_normal_part(CS_INT i, CS_INT j, double val, void* env)
 {
   if(i%3 == 0)
   {
@@ -241,7 +241,7 @@ static double solve_iterative_refinement3x3_t(double* restrict A, double* restri
   return res_l1;
 }
 
-static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict slack_r, double* restrict slack_y, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* tildeW, double* restrict tilde_omega, double* restrict tilde_omegat, NumericsMatrix* tildeWt, NumericsMatrix* Emat, NumericsMatrix* Akmat)
+static int fc3d_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr, char* sysdir, char* model, const char* base_name, double* restrict slack_r, double* restrict slack_y, double* restrict tmpq, double* restrict lambda_r, double* restrict lambda_y, NumericsMatrix* tildeW, double* restrict tilde_omega, double* restrict tilde_omegat, NumericsMatrix* tildeWt, NumericsMatrix* Emat, NumericsMatrix* Akmat)
 {
 
   char msg[GMS_SSSIZE];
@@ -288,7 +288,7 @@ static int FC3D_gams_inner_loop_condensed(unsigned iter, idxHandle_t Xptr, gamsx
 
   /* XXX ParmFile is not a string option */
 //  optSetStrStr(Optr, "ParmFile", paramFileName);
-//  setDashedOptions("filename", gdxFileName, paramFileName);
+//  set_dashed_options("filename", gdxFileName, paramFileName);
   optSetStrStr(Optr, "User1", gdxFileName);
   optSetStrStr(Optr, "User2", solFileName);
 
@@ -690,7 +690,7 @@ static size_t fc3d_lcp_data_generation_one_reaction_force(double mu, size_t nb_a
 }
 
 
-static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, NumericsMatrix* Emat, double* restrict mus, double* restrict omega, double* restrict tilde_omega, double* restrict tilde_omegat, double* restrict changeBasis)
+static void fc3d_gams_generate_first_constraints(NumericsMatrix* Akmat, NumericsMatrix* Emat, double* restrict mus, double* restrict omega, double* restrict tilde_omega, double* restrict tilde_omegat, double* restrict changeBasis)
 {
   unsigned nb_contacts = (unsigned)Akmat->size1/3;
   assert(nb_contacts*3 == (unsigned)Akmat->size1);
@@ -883,7 +883,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   double* tilde_omega = (double*) malloc(3*problem->numberOfContacts*sizeof(double));
   double* tilde_omegat = (double*) malloc(3*problem->numberOfContacts*sizeof(double));
   /* Fills Akmat and Ab.x  */
-  FC3D_gams_generate_first_constraints(&Akmat, &Emat, problem->mu, problem->q, tilde_omega, tilde_omegat, NM_csc(&Ab)->x);
+  fc3d_gams_generate_first_constraints(&Akmat, &Emat, problem->mu, problem->q, tilde_omega, tilde_omegat, NM_csc(&Ab)->x);
 
   NumericsMatrix* tmpWmat = NM_create(NM_SPARSE, 3*problem->numberOfContacts, 3*problem->numberOfContacts);
 
@@ -957,7 +957,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     NM_update_size(&tildeW);
 
     /* Now compute tildeWt */
-    cs_fkeep(NM_csc(tmpWmat), &SN_rm_normal_part, NULL);
+    cs_fkeep(NM_csc(tmpWmat), &sn_rm_normal_part, NULL);
     numericsSparseMatrix(&tildeWt)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
     NM_update_size(&tildeWt);
 
@@ -973,7 +973,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     DEBUG_PRINT("FC3D_LCP_GAMS :: tildeWt matrix constructed\n");
 
 
-    int solverStat = FC3D_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, slack_r, slack_y, tmpq, lambda_r, lambda_y, &tildeW, tilde_omega, tilde_omegat, &tildeWt, &Emat, &Akmat);
+    int solverStat = fc3d_gams_inner_loop_condensed(iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, slack_r, slack_y, tmpq, lambda_r, lambda_y, &tildeW, tilde_omega, tilde_omegat, &tildeWt, &Emat, &Akmat);
     SN_logh5_vec_double(size, slack_r, "reaction_slack", logger_s->group);
     SN_logh5_vec_double(size, slack_y, "velocity_slack", logger_s->group);
 

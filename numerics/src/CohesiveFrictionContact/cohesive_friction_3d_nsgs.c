@@ -56,7 +56,7 @@
 typedef int (*CohesiveComputeErrorPtr)(CohesiveFrictionContactProblem*, double*, double*,
                                        double, SolverOptions*, double, double*);
 
-static void performRelaxation_3(double localreaction[3], double* oldreaction, double omega) {
+static void perform_relaxation_3(double localreaction[3], double* oldreaction, double omega) {
   nsgs_relaxation(localreaction, oldreaction, 3, omega);
 }
 
@@ -68,22 +68,22 @@ static double squared_norm_3(double localreaction[3]) {
   return nsgs_squared_norm(localreaction, 3);
 }
 
-static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,
-                                  double* norm_r) {
+static double calculate_light_error(double light_error_sum, unsigned int nc, double* reaction,
+                                    double* norm_r) {
   double error = sqrt(light_error_sum);
   *norm_r = cblas_dnrm2(nc * 3, reaction, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
   return error;
 }
 
-static void acceptLocalReactionUnconditionally(unsigned int contact, double* reaction,
-                                               double localreaction[3]) {
+static void accept_local_reaction_unconditionally(unsigned int contact, double* reaction,
+                                                  double localreaction[3]) {
   memcpy(&reaction[contact * 3], localreaction, sizeof(double) * 3);
 }
 
-static void statsIterationCallback(CohesiveFrictionContactProblem* problem,
-                                   SolverOptions* options, double* reaction, double* velocity,
-                                   double error) {
+static void stats_iteration_callback(CohesiveFrictionContactProblem* problem,
+                                     SolverOptions* options, double* reaction,
+                                     double* velocity, double error) {
   if (options->callback) {
     options->callback->collectStatsIteration(options->callback->env,
                                              problem->numberOfContacts * 3, reaction, velocity,
@@ -138,7 +138,7 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
 
   if (problem->dimension == 3) {
     local_function_toolkit->copy_local_reaction = cpy3;
-    local_function_toolkit->perform_relaxation = &performRelaxation_3;
+    local_function_toolkit->perform_relaxation = &perform_relaxation_3;
     local_function_toolkit->light_error_squared = &light_error_squared_3;
     local_function_toolkit->squared_norm = &squared_norm_3;
   }
@@ -225,8 +225,8 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
 
   return 0;
 }
-static unsigned int* allocShuffledContacts(CohesiveFrictionContactProblem* problem,
-                                           SolverOptions* options) {
+static unsigned int* alloc_shuffled_contacts(CohesiveFrictionContactProblem* problem,
+                                             SolverOptions* options) {
   unsigned int* scontacts = 0;
   unsigned int nc = problem->numberOfContacts;
   unsigned int ncoh = problem->numberOfCohesivePoints;
@@ -246,8 +246,8 @@ static unsigned int* allocShuffledContacts(CohesiveFrictionContactProblem* probl
   }
   return scontacts;
 }
-static unsigned int* allocfreezingContacts(CohesiveFrictionContactProblem* problem,
-                                           SolverOptions* options) {
+static unsigned int* alloc_freezing_contacts(CohesiveFrictionContactProblem* problem,
+                                             SolverOptions* options) {
   unsigned int* fcontacts = 0;
   unsigned int nc = problem->numberOfContacts;
   unsigned int ncoh = problem->numberOfCohesivePoints;
@@ -260,7 +260,7 @@ static unsigned int* allocfreezingContacts(CohesiveFrictionContactProblem* probl
   return fcontacts;
 }
 
-static int solveLocalReaction(
+static int solve_local_reaction(
     struct CohesiveLocalProblemFunctionToolkit* localProblemFunctionToolkit,
     unsigned int contact, CohesiveFrictionContactProblem* problem,
     CohesiveFrictionContactProblem* localproblem, FrictionContactProblem* localproblem_contact,
@@ -301,9 +301,9 @@ static int file_exists(const char* fname) {
 }
 #endif
 
-static void acceptLocalReactionFiltered(int dimension, SolverOptions* local_opts,
-                                        unsigned int contact, unsigned int iter,
-                                        double* reaction, double localreaction[3]) {
+static void accept_local_reaction_filtered(int dimension, SolverOptions* local_opts,
+                                           unsigned int contact, unsigned int iter,
+                                           double* reaction, double localreaction[3]) {
   if (isnan(SOLVER_RESIDUAL(local_opts)) || isinf(SOLVER_RESIDUAL(local_opts)) ||
       SOLVER_RESIDUAL(local_opts) > 1.0) {
     DEBUG_EXPR(frictionContactProblem_display(localproblem));
@@ -321,10 +321,11 @@ static void acceptLocalReactionFiltered(int dimension, SolverOptions* local_opts
     memcpy(&reaction[contact * dimension], localreaction, sizeof(double) * dimension);
 }
 
-static double calculateFullErrorFinal(CohesiveFrictionContactProblem* problem,
-                                      SolverOptions* options,
-                                      CohesiveComputeErrorPtr computeError, double* reaction,
-                                      double* velocity, double tolerance, double norm_q) {
+static double calculate_full_error_final(CohesiveFrictionContactProblem* problem,
+                                         SolverOptions* options,
+                                         CohesiveComputeErrorPtr computeError,
+                                         double* reaction, double* velocity, double tolerance,
+                                         double norm_q) {
   double absolute_error;
   (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &absolute_error);
 
@@ -382,8 +383,8 @@ static int check_convergence_with_adaptation(CohesiveFrictionContactProblem* pro
   /*     "Residual = %14.7e < %7.3e", */
   /*     iter, incr_error, tm->working_tolerance); */
 
-  *full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                        SOLVER_TOL(options), norm_q);
+  *full_error = calculate_full_error_final(problem, options, computeError, reaction, velocity,
+                                           SOLVER_TOL(options), norm_q);
 
   /* Use tolerance manager to handle adaptation logic */
   SolverOptions* local_opts =
@@ -424,11 +425,11 @@ static int determine_convergence_with_full_final(CohesiveFrictionContactProblem*
 
   return result;
 }
-static double calculateFullErrorAdaptiveInterval(CohesiveFrictionContactProblem* problem,
-                                                 CohesiveComputeErrorPtr computeError,
-                                                 SolverOptions* options, int iter,
-                                                 double* reaction, double* velocity,
-                                                 double tolerance, double norm_q) {
+static double calculate_full_error_adaptive_interval(CohesiveFrictionContactProblem* problem,
+                                                     CohesiveComputeErrorPtr computeError,
+                                                     SolverOptions* options, int iter,
+                                                     double* reaction, double* velocity,
+                                                     double tolerance, double norm_q) {
   double error = 1e+24;
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] > 0) {
     if (iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0) {
@@ -536,8 +537,8 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
                                              options);
 
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
-  scontacts = allocShuffledContacts(problem, options);
-  freeze_contacts = allocfreezingContacts(problem, options);
+  scontacts = alloc_shuffled_contacts(problem, options);
+  freeze_contacts = alloc_freezing_contacts(problem, options);
 
   /*****  Check solver options *****/
   if (!(options->iparam[SICONOS_NSGS_SHUFFLE] == SICONOS_NSGS_SHUFFLE_FALSE ||
@@ -610,9 +611,9 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
       /*   } */
       /* } */
 
-      solveLocalReaction(localProblemFunctionToolkit, contact, problem, localproblem_cohesion,
-                         localproblem_contact, reaction, local_opts_contact,
-                         local_opts_cohesion, localreaction);
+      solve_local_reaction(localProblemFunctionToolkit, contact, problem,
+                           localproblem_cohesion, localproblem_contact, reaction,
+                           local_opts_contact, local_opts_cohesion, localreaction);
 
       /* if (options->iparam[SICONOS_NSGS_RELAXATION] == SICONOS_NSGS_RELAXATION_TRUE) */
       /*   localProblemFunctionToolkit->perform_relaxation(localreaction, &reaction[contact *
@@ -670,19 +671,19 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
       if (options->iparam[SICONOS_NSGS_FILTER_LOCAL_SOLUTION] ==
           SICONOS_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
-        acceptLocalReactionFiltered(localproblem_contact->dimension, local_opts_contact,
-                                    contact, iter, reaction, localreaction);
+        accept_local_reaction_filtered(localproblem_contact->dimension, local_opts_contact,
+                                       contact, iter, reaction, localreaction);
       else
-        acceptLocalReactionUnconditionally(contact, reaction, localreaction);
+        accept_local_reaction_unconditionally(contact, reaction, localreaction);
     }
 
     if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
         SICONOS_NSGS_ERROR_EVALUATION_LIGHT) {
-      incr_error = calculateLightError(light_error_sum, nc + ncoh, reaction, norm_r);
+      incr_error = calculate_light_error(light_error_sum, nc + ncoh, reaction, norm_r);
       hasNotConverged = nsgs_determine_convergence(incr_error, tolerance, iter, options);
     } else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                SICONOS_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-      incr_error = calculateLightError(light_error_sum, nc + ncoh, reaction, norm_r);
+      incr_error = calculate_light_error(light_error_sum, nc + ncoh, reaction, norm_r);
       hasNotConverged = determine_convergence_with_full_final(
           problem, options, computeError, reaction, velocity, &tolerance, norm_q, incr_error,
           &full_error, iter);
@@ -695,13 +696,13 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
     } else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                SICONOS_NSGS_ERROR_EVALUATION_FULL) {
-      full_error = calculateFullErrorAdaptiveInterval(problem, computeError, options, iter,
-                                                      reaction, velocity, tolerance, norm_q);
-      incr_error = calculateLightError(light_error_sum, nc + ncoh, reaction, norm_r);
+      full_error = calculate_full_error_adaptive_interval(
+          problem, computeError, options, iter, reaction, velocity, tolerance, norm_q);
+      incr_error = calculate_light_error(light_error_sum, nc + ncoh, reaction, norm_r);
       hasNotConverged = nsgs_determine_convergence(full_error, tolerance, iter, options);
     }
 
-    statsIterationCallback(problem, options, reaction, velocity, incr_error);
+    stats_iteration_callback(problem, options, reaction, velocity, incr_error);
     if (verbose > 0) {
       frozen_contact = 0;
       /* if (options->iparam[SICONOS_NSGS_FREEZING_CONTACT] > 0) { */
@@ -720,8 +721,8 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   /* Full criterium */
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                         tolerance, norm_q);
+    full_error = calculate_full_error_final(problem, options, computeError, reaction, velocity,
+                                            tolerance, norm_q);
 
     hasNotConverged =
         nsgs_determine_convergence(full_error, SOLVER_TOL(options), iter, options);

@@ -102,20 +102,21 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem,
   free(fc3d_as_cqp);
 }
 
-static void fc3d_ConvexQP_ProjectedGradient_Cylinder_set_default(SolverOptions* options) {
+static void fc3d_convex_qp_projected_gradient_cylinder_set_default(SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int fc3d_ConvexQP_ProjectedGradient_Cylinder_init_wrap(void* problem,
-                                                              SolverOptions* options) {
+static int fc3d_convex_qp_projected_gradient_cylinder_init_wrap(void* problem,
+                                                                SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap(void* problem, double* reaction,
-                                                               double* velocity,
-                                                               SolverOptions* options) {
+static int fc3d_convex_qp_projected_gradient_cylinder_solve_wrap(void* problem,
+                                                                 double* reaction,
+                                                                 double* velocity,
+                                                                 SolverOptions* options) {
   (void)velocity;
   int info = NUMERICS_OK;
   fc3d_ConvexQP_ProjectedGradient_Cylinder((FrictionContactProblem*)problem, reaction,
@@ -126,6 +127,6 @@ static int fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap(void* problem, do
 REGISTER_SOLVER(SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER,
                 "SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER",
                 "Projection on Cylinder with Local Iteration (local solver)",
-                fc3d_ConvexQP_ProjectedGradient_Cylinder_init_wrap,
-                fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap, NULL, NULL,
-                fc3d_ConvexQP_ProjectedGradient_Cylinder_set_default, 1000, 1e-4, 1)
+                fc3d_convex_qp_projected_gradient_cylinder_init_wrap,
+                fc3d_convex_qp_projected_gradient_cylinder_solve_wrap, NULL, NULL,
+                fc3d_convex_qp_projected_gradient_cylinder_set_default, 1000, 1e-4, 1)

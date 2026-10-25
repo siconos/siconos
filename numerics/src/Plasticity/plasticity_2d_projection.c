@@ -344,38 +344,38 @@ void plasticity_2d_poc_set_default(SolverOptions* options) {
  */
 
 /* Wrapper for projection on cone (local solver) - Note: local solvers use 3 args */
-static void plasticity_2d_projectionOnCone_set_default(SolverOptions* options) {
+static void plasticity_2d_projection_on_cone_set_default(SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int plasticity_2d_projectionOnCone_init_wrap(void* problem, SolverOptions* options) {
+static int plasticity_2d_projection_on_cone_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int plasticity_2d_projectionOnCone_solve_wrap(void* localproblem, double* reaction,
-                                                     double* velocity,
-                                                     SolverOptions* options) {
+static int plasticity_2d_projection_on_cone_solve_wrap(void* localproblem, double* reaction,
+                                                       double* velocity,
+                                                       SolverOptions* options) {
   (void)velocity; /* Local solvers don't use velocity parameter */
   return plasticity_2d_projectionOnCone_solve((PlasticityProblem*)localproblem, reaction,
                                               options);
 }
 
 /* Wrapper for projection on cone with local iteration (local solver) */
-static void plasticity_2d_projectionOnConeWithLocalIteration_set_default(
+static void plasticity_2d_projection_on_cone_with_local_iteration_set_default(
     SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int plasticity_2d_projectionOnConeWithLocalIteration_init_wrap(void* problem,
-                                                                      SolverOptions* options) {
+static int plasticity_2d_projection_on_cone_with_local_iteration_init_wrap(
+    void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap(
+static int plasticity_2d_projection_on_cone_with_local_iteration_solve_wrap(
     void* localproblem, double* reaction, double* velocity, SolverOptions* options) {
   (void)velocity; /* Local solvers don't use velocity parameter */
   return plasticity_2d_projectionOnConeWithLocalIteration_solve(
@@ -384,18 +384,18 @@ static int plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap(
 
 REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnCone, "PLASTICITY_2D_ONECONE_PROJECTION",
                 "Projection on cone for 2D Mohr Coulomb (one cone)",
-                plasticity_2d_projectionOnCone_init_wrap,
-                plasticity_2d_projectionOnCone_solve_wrap, NULL, NULL,
-                plasticity_2d_projectionOnCone_set_default, 100, /* default_max_iter */
-                1e-14,                                           /* default_tol */
-                1);                                              /* is_local */
+                plasticity_2d_projection_on_cone_init_wrap,
+                plasticity_2d_projection_on_cone_solve_wrap, NULL, NULL,
+                plasticity_2d_projection_on_cone_set_default, 100, /* default_max_iter */
+                1e-14,                                             /* default_tol */
+                1);                                                /* is_local */
 
 REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
                 "PLASTICITY_2D_ONECONE_PROJECTION_LI",
                 "Projection on cone with local iteration for 2D Mohr Coulomb (one cone)",
-                plasticity_2d_projectionOnConeWithLocalIteration_init_wrap,
-                plasticity_2d_projectionOnConeWithLocalIteration_solve_wrap, NULL, NULL,
-                plasticity_2d_projectionOnConeWithLocalIteration_set_default,
+                plasticity_2d_projection_on_cone_with_local_iteration_init_wrap,
+                plasticity_2d_projection_on_cone_with_local_iteration_solve_wrap, NULL, NULL,
+                plasticity_2d_projection_on_cone_with_local_iteration_set_default,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
                 1);    /* is_local */
@@ -436,16 +436,16 @@ int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
 void plasticity_2d_vonmises_set_default(SolverOptions* options) { (void)options; }
 
 /* Wrapper for Von Mises projection (local solver) */
-static int plasticity_2d_projectionOnVonMises_init_wrap(void* problem,
-                                                        SolverOptions* options) {
+static int plasticity_2d_projection_on_von_mises_init_wrap(void* problem,
+                                                           SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int plasticity_2d_projectionOnVonMises_solve_wrap(void* localproblem, double* reaction,
-                                                         double* velocity,
-                                                         SolverOptions* options) {
+static int plasticity_2d_projection_on_von_mises_solve_wrap(void* localproblem,
+                                                            double* reaction, double* velocity,
+                                                            SolverOptions* options) {
   (void)velocity; /* Local solvers don't use velocity parameter */
   return plasticity_2d_projectionOnVonMises_solve((PlasticityProblem*)localproblem, reaction,
                                                   options);
@@ -453,8 +453,8 @@ static int plasticity_2d_projectionOnVonMises_solve_wrap(void* localproblem, dou
 
 REGISTER_SOLVER(PLASTICITY_2D_ONECONE_VONMISES, "PLASTICITY_2D_ONECONE_VONMISES",
                 "Radial return projection for Von Mises plasticity (one cone)",
-                plasticity_2d_projectionOnVonMises_init_wrap,
-                plasticity_2d_projectionOnVonMises_solve_wrap, NULL, NULL,
+                plasticity_2d_projection_on_von_mises_init_wrap,
+                plasticity_2d_projection_on_von_mises_solve_wrap, NULL, NULL,
                 plasticity_2d_vonmises_set_default, 100, /* default_max_iter */
                 1e-14,                                   /* default_tol */
                 1);                                      /* is_local */
