@@ -44,36 +44,23 @@ struct polytopefsegment_r : item, model::relation1, model::any_lagrangian_relati
     auto contact(auto step, DS& ds) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
-      auto& data = self()->data();
-
       auto& q = storage::attr<"q">(ds, step);
       auto sh = collision::shape_of<shape::polytope>(ds);
       const scalar c = std::cos(q(2)), s = std::sin(q(2));
       const auto n = sh.nvertices();
 
-      narrowphase_input<scalar> in;
-      // entry 0: polytope (world vertices)
-      const std::uint32_t off0 = 0;
+      // polytope world vertices (at most shape::polytope's capacity, 16)
+      std::array<std::array<scalar, 2>, 16> pv;
       for (std::size_t i = 0; i < n; ++i) {
         const auto& v = sh.vertices()[i];
-        in.vertices.push_back(
-            std::array<scalar, 2>{q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]});
+        pv[i] = {q(0) + c * v[0] - s * v[1], q(1) + s * v[0] + c * v[1]};
       }
-      in.entries.push_back({off0, static_cast<std::uint32_t>(n)});
-      const std::uint32_t slot0 = 0;
-      // entry 1: segment endpoints (static world coords)
+      // segment endpoints (static world coords)
       auto seg = self()->segment();
-      const std::uint32_t off1 = static_cast<std::uint32_t>(in.vertices.size());
-      in.vertices.push_back(std::array<scalar, 2>{seg.x1(), seg.y1()});
-      in.vertices.push_back(std::array<scalar, 2>{seg.x2(), seg.y2()});
-      in.entries.push_back({off1, 2});
-      const std::uint32_t slot1 = 1;
+      const std::array<std::array<scalar, 2>, 2> sv{
+          {{seg.x1(), seg.y1()}, {seg.x2(), seg.y2()}}};
 
-      in.ids_a.push_back(slot0);
-      in.ids_b.push_back(slot1);
-      in.init_dirs.push_back({1.0, 0.0});
-
-      return manifold_point(narrowphase_batch(std::move(in))[0], point_index());
+      return manifold_point(narrowphase_two(pv.data(), n, sv.data(), 2), point_index());
     }
 
     template <match::handle<model::lagrangian_ds> DS>

@@ -528,33 +528,168 @@ inline std::size_t clip_manifold(const Pool& pool, std::uint32_t id_a, std::uint
   return nq;
 }
 
+/* spec §5 tolerance/budget: tight tolerance, default iteration budget.
+   cxd's gjk_options carries the tolerance as a double; keep the float case
+   above epsilon so the GJK can terminate. */
+template <typename Scalar>
+inline cxd::gjk_options gjk_opts() {
+  const double tol = static_cast<double>(
+      std::max(Scalar{1e-10}, Scalar{8} * std::numeric_limits<Scalar>::epsilon()));
+  return cxd::gjk_options{.tolerance = tol, .max_iterations = 64};
+}
+
+/* The whole narrowphase of ONE pair of a packed pool: GJK status, EPA depth
+   and normal when enclosed, separation sub-distance when separated, the
+   separating-axis fallback, the witnesses and the contact manifold.
+
+   Serial on purpose: a pair costs a few hundred nanoseconds, below the cost
+   of entering an OpenMP region, and the relations evaluate single pairs
+   inside compute_h / compute_jachq. The cxd per-pair kernels are called
+   directly (gjk_batch_pair, epa_penetration_2d) because cxd::gjk_batch runs
+   its pair loop in an OpenMP region. arena only grows. */
+template <typename Pool, typename Scalar>
+inline narrowphase_contact<Scalar> narrowphase_pair(const Pool& pool,
+                                                    const cxd::pair_record<Scalar, 2>& pair,
+                                                    const cxd::gjk_options& opts,
+                                                    std::size_t subdistance_budget,
+                                                    cxd::epa_arena<Pool, 2>& arena) {
+  using cxd::status;
+  using V = std::array<Scalar, 2>;
+  const auto id_a = pair.shape_id_A;
+  const auto id_b = pair.shape_id_B;
+
+  narrowphase_contact<Scalar> c;
+  c.status = static_cast<int>(status::invalid_input);
+  c.h = Scalar{0};
+  c.normal = V{0, 0};
+  c.cp1 = V{0, 0};
+  c.cp2 = V{0, 0};
+  c.npoints = 0;
+
+  // the separating-axis answer for a pair the GJK / EPA path left
+  // unanswered; returns false (failure status kept) only for shapes with no
+  // edge at all
+  const auto sat_fallback = [&]() {
+    const auto sat = sat_contact(pool, id_a, id_b);
+    if (!sat) return false;
+    const auto& [sep, nrm] = *sat;
+    const auto [cp1, cp2] = face_witnesses(pool, id_a, id_b, nrm);
+    c.status = static_cast<int>(sep > Scalar{0} ? status::separated : status::enclosed);
+    c.h = sep;
+    c.normal = nrm;
+    c.cp1 = cp1;
+    c.cp2 = cp2;
+    return true;
+  };
+
+  const auto gjk = cxd::gjk_batch_pair<2>(pool, pair, opts);
+  switch (gjk.st) {
+    case status::enclosed: {
+      c.status = static_cast<int>(status::enclosed);
+      // The enclosed pairs get their depth and normal from cxd's EPA. The 2D
+      // EPA bootstraps a non-degenerate seed when the GJK hands one that is
+      // degenerate -- the case a flush, axis-aligned overlap always is,
+      // since the GJK's direction then collapses onto the line through the
+      // origin. The arena bound is epa_batch's: one vertex per point of the
+      // two shapes.
+      arena.reserve(static_cast<std::size_t>(pool.entries[id_a].vertex_count) +
+                    static_cast<std::size_t>(pool.entries[id_b].vertex_count));
+      const auto [depth, epa_normal, ring_vertices] =
+          cxd::epa_penetration_2d(pool, id_a, id_b, gjk.seed, opts, arena);
+      // a touching pair can come back with a finite depth 0 and a zero
+      // normal: that is no answer either
+      if (std::isfinite(depth) && std::isfinite(epa_normal[0]) &&
+          std::isfinite(epa_normal[1]) &&
+          std::hypot(epa_normal[0], epa_normal[1]) > Scalar{0.5}) {
+        const V nrm{epa_normal[0], epa_normal[1]};
+        // the witnesses are the supporting faces along EPA's normal; h is
+        // EPA's depth (the spec's mapping: enclosed = -depth)
+        const auto [cp1, cp2] = face_witnesses(pool, id_a, id_b, nrm);
+        c.normal = nrm;
+        c.cp1 = cp1;
+        c.cp2 = cp2;
+        c.h = -depth;
+      } else if (!sat_fallback()) {
+        // EPA refused (non-finite depth/normal) and no separating axis:
+        // a failure status, so the stage keeps its previous cached row
+        c.status = static_cast<int>(status::invalid_input);
+        c.h = Scalar{0};
+        c.normal = V{0, 0};
+        c.cp1 = V{0, 0};
+        c.cp2 = V{0, 0};
+      }
+      break;
+    }
+    case status::separated: {
+      c.status = static_cast<int>(status::separated);
+      const V dir0{pair.init_dir[0], pair.init_dir[1]};
+      const auto sub = subdistance_gjk(pool, id_a, id_b, dir0, subdistance_budget);
+      if (sub) {
+        const auto& [distance, foot, w, n] = *sub;
+        const Scalar fn = vnorm(foot);
+        c.normal = fn > Scalar{0} ? vscale(-Scalar{1} / fn, foot) : V{0, 0};
+        // supporting-face witnesses along the contact normal; h from the
+        // witness pair keeps h and the cps mutually consistent
+        const auto [cp1, cp2] = face_witnesses(pool, id_a, id_b, c.normal);
+        c.cp1 = cp1;
+        c.cp2 = cp2;
+        const Scalar h_wit = vdot(c.normal, vsub2(cp2, cp1));
+        c.h = h_wit > Scalar{0} ? h_wit : distance;
+      } else if (!sat_fallback()) {
+        // no separation certificate and no separating axis: a failure
+        // status, so the stage keeps its previous cached row
+        c.status = static_cast<int>(status::max_iterations);
+      }
+      break;
+    }
+    case status::max_iterations:
+      // the GJK exhausted its budget: the separating axis still answers
+      if (!sat_fallback()) c.status = static_cast<int>(status::max_iterations);
+      break;
+    case status::invalid_input:
+    default:
+      break;  // keep-previous contract (already zeroed)
+  }
+
+  // the contact manifold of an answered pair
+  if (c.status == static_cast<int>(status::separated) ||
+      c.status == static_cast<int>(status::enclosed)) {
+    c.npoints = clip_manifold(pool, id_a, id_b, c.normal, c.points);
+    if (c.npoints == 0) {
+      c.npoints = 1;
+      c.points[0] = {c.h, c.cp1, c.cp2};
+    }
+  }
+  return c;
+}
+
 }  // namespace detail
 
 template <typename Scalar>
 inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
     narrowphase_input<Scalar>&& in, std::size_t subdistance_budget = 64) {
-  using cxd::status;
   using V = std::array<Scalar, 2>;
+  using pool_t = cxd::packed_pool<V>;
 
   const std::size_t npairs = in.ids_a.size();
   std::vector<narrowphase_contact<Scalar>> out(npairs);
-  for (auto& c : out) {
-    c.status = static_cast<int>(cxd::status::invalid_input);
-    c.h = Scalar{0};
-    c.normal = V{0, 0};
-    c.cp1 = V{0, 0};
-    c.cp2 = V{0, 0};
-    c.npoints = 0;
-  }
-
   if (in.entries.size() == 0) {
+    for (auto& c : out) {
+      c.status = static_cast<int>(cxd::status::invalid_input);
+      c.h = Scalar{0};
+      c.normal = V{0, 0};
+      c.cp1 = V{0, 0};
+      c.cp2 = V{0, 0};
+      c.npoints = 0;
+    }
     return out;
   }
 
   // the pool takes ownership of the vertex buffer
-  cxd::packed_pool<V> pool{std::move(in.vertices), std::move(in.entries)};
+  const pool_t pool{std::move(in.vertices), std::move(in.entries)};
+  const auto opts = detail::gjk_opts<Scalar>();
+  thread_local cxd::epa_arena<pool_t, 2> arena;
 
-  std::vector<cxd::pair_record<Scalar, 2>> pairs(npairs);
   for (std::size_t k = 0; k < npairs; ++k) {
     V d0 = in.init_dirs[k];
     const Scalar n0 = std::hypot(d0[0], d0[1]);
@@ -563,154 +698,32 @@ inline std::vector<narrowphase_contact<Scalar>> narrowphase_batch(
     else {
       d0 = V{d0[0] / n0, d0[1] / n0};
     }
-    pairs[k] = cxd::pair_record<Scalar, 2>{in.ids_a[k], in.ids_b[k], {d0[0], d0[1]}};
-  }
-
-  // spec §5 tolerance/budget: tight tolerance, default iteration budget.
-  // cxd's gjk_options carries the tolerance as a double; keep the float
-  // case above epsilon so the GJK can terminate.
-  const double tol = static_cast<double>(
-      std::max(Scalar{1e-10}, Scalar{8} * std::numeric_limits<Scalar>::epsilon()));
-  const cxd::gjk_options opts{.tolerance = tol, .max_iterations = 64};
-
-  // By-ref batch core: the result buffer is caller-owned and reused across
-  // simulation steps (capacity built on the first step is kept), so the
-  // per-step allocation cost is zero after the first warm call.
-  thread_local std::vector<cxd::batch_result<typename cxd::packed_pool<V>::support, 3>>
-      results;
-  cxd::gjk_batch<2>(pool, pairs, opts, results);
-
-  // The enclosed pairs get their depth and normal from cxd's EPA. The 2D
-  // EPA bootstraps a non-degenerate seed when the GJK hands one that is
-  // degenerate -- the case a flush, axis-aligned overlap always is, since
-  // the GJK's direction then collapses onto the line through the origin.
-  thread_local std::vector<std::uint32_t> hit_pairs;
-  hit_pairs.clear();
-  hit_pairs.reserve(npairs);
-  for (std::size_t k = 0; k < npairs; ++k)
-    if (results[k].st == status::enclosed) hit_pairs.push_back(static_cast<std::uint32_t>(k));
-  // By-ref batch core: the answer buffer and the per-step EPA arena are
-  // caller-owned and reused across steps (assign keeps the heap block, and
-  // the arena only grows), so the per-step allocation cost is zero after
-  // one warm call.
-  thread_local std::vector<cxd::epa_result<Scalar, 2>> epa_answers;
-  thread_local cxd::epa_arena<cxd::packed_pool<V>, 2> epa_arena_;
-  cxd::epa_batch<2>(pool, pairs, hit_pairs, results, opts, epa_answers, epa_arena_);
-  // map each pair index -> its position in epa_answers (for enclosed pairs)
-  thread_local std::vector<int> epa_idx;
-  epa_idx.assign(npairs, -1);
-  for (std::size_t j = 0; j < hit_pairs.size(); ++j)
-    epa_idx[hit_pairs[j]] = static_cast<int>(j);
-
-  // the separating-axis answer for a pair the GJK / EPA path left
-  // unanswered; returns false (failure status kept) only for shapes with no
-  // edge at all
-  const auto sat_fallback = [&](std::size_t k, narrowphase_contact<Scalar>& c) {
-    const auto sat = detail::sat_contact(pool, pairs[k].shape_id_A, pairs[k].shape_id_B);
-    if (!sat) return false;
-    const auto& [sep, nrm] = *sat;
-    const auto [cp1, cp2] =
-        detail::face_witnesses(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, nrm);
-    c.status =
-        static_cast<int>(sep > Scalar{0} ? cxd::status::separated : cxd::status::enclosed);
-    c.h = sep;
-    c.normal = nrm;
-    c.cp1 = cp1;
-    c.cp2 = cp2;
-    return true;
-  };
-
-  // pairwise-independent, disjoint-index write-back over the caller's
-  // (thread_local) buffers. The buffers are captured into shared references so
-  // OpenMP workers operate on the caller's instance, not each worker's own
-  // empty thread_local one. Each pair is a pure function of its own slot, so the
-  // result is identical to the single-threaded run (the checksum tests rely on
-  // this).
-  auto& results_ref = results;
-  auto& epa_answers_ref = epa_answers;
-  auto& epa_idx_ref = epa_idx;
-#pragma omp parallel for schedule(static)
-  for (std::size_t k = 0; k < npairs; ++k) {
-    auto& c = out[k];
-    switch (results_ref[k].st) {
-      case status::enclosed: {
-        c.status = static_cast<int>(cxd::status::enclosed);
-        const auto& [depth, epa_normal, ring_vertices] = epa_answers_ref[epa_idx_ref[k]];
-        // a touching pair can come back with a finite depth 0 and a zero
-        // normal: that is no answer either
-        if (std::isfinite(depth) && std::isfinite(epa_normal[0]) &&
-            std::isfinite(epa_normal[1]) &&
-            std::hypot(epa_normal[0], epa_normal[1]) > Scalar{0.5}) {
-          const V nrm{epa_normal[0], epa_normal[1]};
-          // the witnesses are the supporting faces along EPA's normal; h is
-          // EPA's depth (the spec's mapping: enclosed = -depth)
-          const auto [cp1, cp2] =
-              detail::face_witnesses(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, nrm);
-          c.normal = nrm;
-          c.cp1 = cp1;
-          c.cp2 = cp2;
-          c.h = -depth;
-        } else if (!sat_fallback(k, c)) {
-          // EPA refused (non-finite depth/normal) and no separating axis:
-          // a failure status, so the stage keeps its previous cached row
-          c.status = static_cast<int>(cxd::status::invalid_input);
-          c.h = Scalar{0};
-          c.normal = V{0, 0};
-          c.cp1 = V{0, 0};
-          c.cp2 = V{0, 0};
-        }
-        break;
-      }
-      case status::separated: {
-        c.status = static_cast<int>(cxd::status::separated);
-        const V dir0{pairs[k].init_dir[0], pairs[k].init_dir[1]};
-        const auto sub = detail::subdistance_gjk(
-            pool, pairs[k].shape_id_A, pairs[k].shape_id_B, dir0, subdistance_budget);
-        if (sub) {
-          const auto& [distance, foot, w, n] = *sub;
-          const Scalar fn = detail::vnorm(foot);
-          c.normal = fn > Scalar{0} ? detail::vscale(-Scalar{1} / fn, foot) : V{0, 0};
-          // supporting-face witnesses along the contact normal; h from the
-          // witness pair keeps h and the cps mutually consistent
-          const auto [cp1, cp2] =
-              detail::face_witnesses(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, c.normal);
-          c.cp1 = cp1;
-          c.cp2 = cp2;
-          const Scalar h_wit = detail::vdot(c.normal, detail::vsub2(cp2, cp1));
-          c.h = h_wit > Scalar{0} ? h_wit : distance;
-        } else if (!sat_fallback(k, c)) {
-          // no separation certificate and no separating axis: a failure
-          // status, so the stage keeps its previous cached row
-          c.status = static_cast<int>(cxd::status::max_iterations);
-        }
-        break;
-      }
-      case status::max_iterations:
-        // the GJK exhausted its budget: the separating axis still answers
-        if (!sat_fallback(k, c)) c.status = static_cast<int>(cxd::status::max_iterations);
-        break;
-      case status::invalid_input:
-      default:
-        break;  // keep-previous contract (already zeroed)
-    }
-  }
-
-  // the contact manifold of every answered pair (loop 1 finished above, so c
-  // holds the status/h/normal for this pair; disjoint out[k] writes only)
-#pragma omp parallel for schedule(static)
-  for (std::size_t k = 0; k < npairs; ++k) {
-    auto& c = out[k];
-    if (c.status != static_cast<int>(cxd::status::separated) &&
-        c.status != static_cast<int>(cxd::status::enclosed))
-      continue;
-    c.npoints = detail::clip_manifold(pool, pairs[k].shape_id_A, pairs[k].shape_id_B, c.normal,
-                                      c.points);
-    if (c.npoints == 0) {
-      c.npoints = 1;
-      c.points[0] = {c.h, c.cp1, c.cp2};
-    }
+    const cxd::pair_record<Scalar, 2> pair{in.ids_a[k], in.ids_b[k], {d0[0], d0[1]}};
+    out[k] = detail::narrowphase_pair(pool, pair, opts, subdistance_budget, arena);
   }
   return out;
+}
+
+/* The narrowphase of one pair given by its two world-vertex sets (a, na)
+   and (b, nb), for the relations that evaluate a single pair inside
+   compute_h / compute_jachq. Same answer as a one-pair narrowphase_batch
+   with init_dir {1, 0}, without its per-call heap allocations: the pool is
+   a per-thread scratch whose capacity is kept across calls. */
+template <typename Scalar>
+inline narrowphase_contact<Scalar> narrowphase_two(const std::array<Scalar, 2>* a,
+                                                   std::size_t na,
+                                                   const std::array<Scalar, 2>* b,
+                                                   std::size_t nb) {
+  using V = std::array<Scalar, 2>;
+  using pool_t = cxd::packed_pool<V>;
+  thread_local pool_t pool;
+  thread_local cxd::epa_arena<pool_t, 2> arena;
+  pool.vertex_buffer.assign(a, a + na);
+  pool.vertex_buffer.insert(pool.vertex_buffer.end(), b, b + nb);
+  pool.entries.assign({{0, static_cast<std::uint32_t>(na)},
+                       {static_cast<std::uint32_t>(na), static_cast<std::uint32_t>(nb)}});
+  const cxd::pair_record<Scalar, 2> pair{0, 1, {Scalar{1}, Scalar{0}}};
+  return detail::narrowphase_pair(pool, pair, detail::gjk_opts<Scalar>(), 64, arena);
 }
 
 /// gap given to a manifold point that does not exist (the manifold has one

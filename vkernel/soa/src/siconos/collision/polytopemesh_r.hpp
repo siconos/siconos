@@ -47,39 +47,25 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
     auto contact(auto step, DS1& ds1, DS2& ds2) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
-      auto& data = self()->data();
-
       auto& q1 = storage::attr<"q">(ds1, step);
       auto sh = collision::shape_of<shape::polytope>(ds1);
       const scalar c = std::cos(q1(2)), s = std::sin(q1(2));
       const auto n = sh.nvertices();
 
-      narrowphase_input<scalar> in;
-      // entry 0: polytope (world vertices)
-      const std::uint32_t off0 = 0;
+      // polytope world vertices (at most shape::polytope's capacity, 16)
+      std::array<std::array<scalar, 2>, 16> pv;
       for (std::size_t i = 0; i < n; ++i) {
         const auto& v = sh.vertices()[i];
-        in.vertices.push_back(
-            std::array<scalar, 2>{q1(0) + c * v[0] - s * v[1], q1(1) + s * v[0] + c * v[1]});
+        pv[i] = {q1(0) + c * v[0] - s * v[1], q1(1) + s * v[0] + c * v[1]};
       }
-      in.entries.push_back({off0, static_cast<std::uint32_t>(n)});
-      const std::uint32_t slot0 = 0;
-      // entry 1: mesh edge endpoints (static world coords within this step)
+      // mesh edge endpoints (static world coords within this step)
       auto mesh = self()->mesh();
       auto ci = self()->contact_index();
-      const std::uint32_t off1 = static_cast<std::uint32_t>(in.vertices.size());
-      in.vertices.push_back(
-          std::array<scalar, 2>{mesh.segments().x1(ci), mesh.segments().y1(ci)});
-      in.vertices.push_back(
-          std::array<scalar, 2>{mesh.segments().x2(ci), mesh.segments().y2(ci)});
-      in.entries.push_back({off1, 2});
-      const std::uint32_t slot1 = 1;
+      const std::array<std::array<scalar, 2>, 2> ev{
+          {{mesh.segments().x1(ci), mesh.segments().y1(ci)},
+           {mesh.segments().x2(ci), mesh.segments().y2(ci)}}};
 
-      in.ids_a.push_back(slot0);
-      in.ids_b.push_back(slot1);
-      in.init_dirs.push_back({1.0, 0.0});
-
-      return manifold_point(narrowphase_batch(std::move(in))[0], point_index());
+      return manifold_point(narrowphase_two(pv.data(), n, ev.data(), 2), point_index());
     }
 
     template <match::handle<model::lagrangian_ds> DS1,
