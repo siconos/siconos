@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
 #include "Friction_tools.h"  // for ComputeErrorPtr
 #include "JordanAlgebra.h"
@@ -872,39 +873,11 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
 
   W = NM_free(W);
 
-  double somme[3];
-  double dur[3];
-  double cesp = sqrt(DBL_EPSILON);
-  double ns;
-  int nsc = 0;
-  int nN = 0;
-  int nB = 0;
-  int nR = 0;
-  for (size_t i = 0; i < n; i++) {
-    somme[0] = velocity[3 * i] + reaction[3 * i];
-    somme[1] = velocity[3 * i + 1] + reaction[3 * i + 1];
-    somme[2] = velocity[3 * i + 2] + reaction[3 * i + 2];
-    dur[0] = velocity[3 * i] - reaction[3 * i];
-    dur[1] = velocity[3 * i + 1] - reaction[3 * i + 1];
-    dur[2] = velocity[3 * i + 2] - reaction[3 * i + 2];
-
-    ns = somme[0] - cblas_dnrm2(2, somme + 1, 1);
-    // dur = dur[0] - cblas_dnrm2(2, dur + 1, 1);
-    if (ns > cesp * cblas_dnrm2(3, somme, 1)) {
-      nsc += 1;
-      if (dur[0] >= cblas_dnrm2(2, dur + 1, 1))
-        nN += 1;
-      else if (-dur[0] >= cblas_dnrm2(2, dur + 1, 1))
-        nB += 1;
-      else
-        nR += 1;
-    } else
-      // printf("cone %i %9.2e %9.2e\n", i, somme[0], cblas_dnrm2(2,somme+1, 1));
-      printf(
-          "cone %04zu: (u+r)_0 = %9.2e,  |(u+r)_bar| = %9.2e, (u+r)_0 - |(u+r)_bar| = "
-          "%9.40e\n",
-          i, somme[0], cblas_dnrm2(2, somme + 1, 1), ns);
-  }
+  int nB = 0, nN = 0, nR = 0;
+  double ns = 0.0;
+  double somme_norm = 0.0;
+  int nsc = FrictionContactProblem_compute_strict_complementarity_3d_bnrt(
+      velocity, reaction, n, &nB, &nN, &nR, &ns, &somme_norm, 1);
   if (nsc < (int)n) {
     printf("Ratio of Strict complementarity solutions: %4i / %4zu = %4.2f,\n", nsc, n,
            (double)nsc / (double)n);
@@ -912,7 +885,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
            nN, nR, n);
   } else
     printf("Strict complementarity satisfied: %4i / %4zu  %9.2e %9.2e  %4i %4i %4i\n", nsc, n,
-           ns, ns / cblas_dnrm2(3, somme, 1), nB, nN, nR);
+           ns, ns / somme_norm, nB, nN, nR);
 
   // Store solution into file
   if (save_sol_point) {

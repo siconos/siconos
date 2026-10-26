@@ -19,6 +19,7 @@
 
 #include <assert.h>  // for assert
 #include <errno.h>   // for errno
+#include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs
 #include <stdio.h>   // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>  // for malloc, free, exit, EXIT_FAILURE
@@ -386,4 +387,163 @@ void frictionContact_rescaling(FrictionContactProblem* problem, double alpha, do
   NM_scal(alpha * gamma * gamma, problem->M);
   /* scaling of q */
   cblas_dscal(n, alpha * gamma, problem->q, 1);
+}
+
+int FrictionContactProblem_compute_contact_status_3d_bnrt(const double velocity[3],
+                                                          const double reaction[3]) {
+  double somme[3];
+  double dur[3];
+  for (int i = 0; i < 3; ++i) {
+    somme[i] = velocity[i] + reaction[i];
+    dur[i] = velocity[i] - reaction[i];
+  }
+
+  const double cesp = sqrt(DBL_EPSILON);
+  const double somme_norm =
+      sqrt(somme[0] * somme[0] + somme[1] * somme[1] + somme[2] * somme[2]);
+  const double somme_tang_norm = sqrt(somme[1] * somme[1] + somme[2] * somme[2]);
+  const double dur_tang_norm = sqrt(dur[1] * dur[1] + dur[2] * dur[2]);
+
+  const double ns = somme[0] - somme_tang_norm;
+  if (ns <= cesp * somme_norm) {
+    return SICONOS_FRICTION_CONTACT_STATUS_T;
+  }
+  if (dur[0] >= dur_tang_norm) {
+    return SICONOS_FRICTION_CONTACT_STATUS_N;
+  }
+  if (-dur[0] >= dur_tang_norm) {
+    return SICONOS_FRICTION_CONTACT_STATUS_B;
+  }
+  return SICONOS_FRICTION_CONTACT_STATUS_R;
+}
+
+void FrictionContactProblem_get_contact_statuses_3d_bnrt(const double* velocity,
+                                                         const double* reaction, size_t n,
+                                                         int* statuses) {
+  for (size_t i = 0; i < n; ++i) {
+    statuses[i] = FrictionContactProblem_compute_contact_status_3d_bnrt(&velocity[3 * i],
+                                                                        &reaction[3 * i]);
+  }
+}
+
+void FrictionContactProblem_count_contact_statuses_3d_bnrt(const double* velocity,
+                                                           const double* reaction, size_t n,
+                                                           int* nB, int* nN, int* nR,
+                                                           int* nT) {
+  int local_B = 0, local_N = 0, local_R = 0, local_T = 0;
+  for (size_t i = 0; i < n; ++i) {
+    switch (FrictionContactProblem_compute_contact_status_3d_bnrt(&velocity[3 * i],
+                                                                  &reaction[3 * i])) {
+      case SICONOS_FRICTION_CONTACT_STATUS_B:
+        local_B++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_N:
+        local_N++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_R:
+        local_R++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_T:
+        local_T++;
+        break;
+    }
+  }
+  if (nB) *nB = local_B;
+  if (nN) *nN = local_N;
+  if (nR) *nR = local_R;
+  if (nT) *nT = local_T;
+}
+
+int FrictionContactProblem_compute_strict_complementarity_3d_bnrt(
+    const double* velocity, const double* reaction, size_t n, int* nB, int* nN, int* nR,
+    double* ns, double* norm_sum, int verbose) {
+  int local_B = 0, local_N = 0, local_R = 0;
+  int nsc = 0;
+  int* statuses = (int*)malloc(n * sizeof(int));
+  FrictionContactProblem_get_contact_statuses_3d_bnrt(velocity, reaction, n, statuses);
+
+  for (size_t i = 0; i < n; ++i) {
+    switch (statuses[i]) {
+      case SICONOS_FRICTION_CONTACT_STATUS_B:
+        local_B++;
+        nsc++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_N:
+        local_N++;
+        nsc++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_R:
+        local_R++;
+        nsc++;
+        break;
+      default: {
+        double somme0 = velocity[3 * i] + reaction[3 * i];
+        double somme_tang = hypot(velocity[3 * i + 1] + reaction[3 * i + 1],
+                                  velocity[3 * i + 2] + reaction[3 * i + 2]);
+        if (verbose) {
+          printf(
+              "cone %04zu: (u+r)_0 = %9.2e,  |(u+r)_bar| = %9.2e, (u+r)_0 - |(u+r)_bar| = "
+              "%9.40e\n",
+              i, somme0, somme_tang, somme0 - somme_tang);
+        } else {
+          printf("cone %zu %9.2e %9.2e\n", i, somme0, somme_tang);
+        }
+      }
+    }
+  }
+  free(statuses);
+
+  if (ns) *ns = 0.0;
+  if (norm_sum) *norm_sum = 0.0;
+  if (nsc == (int)n) {
+    double somme0 = velocity[3 * (n - 1)] + reaction[3 * (n - 1)];
+    double somme_tang = hypot(velocity[3 * (n - 1) + 1] + reaction[3 * (n - 1) + 1],
+                              velocity[3 * (n - 1) + 2] + reaction[3 * (n - 1) + 2]);
+    if (ns) *ns = somme0 - somme_tang;
+    if (norm_sum) *norm_sum = hypot(somme0, somme_tang);
+  }
+
+  if (nB) *nB = local_B;
+  if (nN) *nN = local_N;
+  if (nR) *nR = local_R;
+  return nsc;
+}
+
+int FrictionContactProblem_compute_contact_status_2d(const double velocity[2],
+                                                     const double reaction[2], double mu) {
+  const double tol = 1e-10;
+  const double rN = reaction[0];
+  const double rT = reaction[1];
+  const double uT = velocity[1];
+  const double radius = mu * rN;
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  if (fabs(rT) < radius - tol && fabs(uT) <= tol) {
+    return 1; /* stick */
+  }
+  if (uT > tol) {
+    return 2; /* slip in the positive tangent direction */
+  }
+  if (uT < -tol) {
+    return 3; /* slip in the negative tangent direction */
+  }
+  /* Near the boundary: use the sign of the friction force. */
+  return (rT < 0.0) ? 2 : 3;
+}
+
+int FrictionContactProblem_compute_contact_status_3d(const double velocity[3],
+                                                     const double reaction[3], double mu) {
+  const double tol = 1e-10;
+  const double rN = reaction[0];
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  const double rT_norm = hypot(reaction[1], reaction[2]);
+  const double uT_norm = hypot(velocity[1], velocity[2]);
+  const double radius = mu * rN;
+  if (rT_norm < radius - tol && uT_norm <= tol) {
+    return 1; /* stick */
+  }
+  return 2; /* slip */
 }

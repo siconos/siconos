@@ -192,6 +192,88 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem);
 */
 void frictionContact_rescaling(FrictionContactProblem* problem, double alpha, double gamma);
 
+/** Status codes returned by FrictionContactProblem_compute_contact_status_3d_bnrt. */
+enum SiconosFrictionContactStatus {
+  SICONOS_FRICTION_CONTACT_STATUS_B =
+      0, /**< Both velocity and reaction are in the friction cone. */
+  SICONOS_FRICTION_CONTACT_STATUS_N, /**< Reaction is in the cone, velocity in the dual cone
+                                        (no contact). */
+  SICONOS_FRICTION_CONTACT_STATUS_R, /**< Sliding / rolling mode. */
+  SICONOS_FRICTION_CONTACT_STATUS_T  /**< Take-off: sum is not in the friction cone. */
+};
+
+/** Classify a single 3D contact from its local velocity and reaction using the
+ *  BNRT convention used by the IPM solvers.
+ *
+ *  B = both velocity and reaction are in the friction cone,
+ *  N = reaction in cone, velocity in dual cone (non-contact),
+ *  R = sliding/rolling regime,
+ *  T = take-off (sum not in the cone).
+ *
+ *  \param[in] velocity local relative velocity of the contact (3 components)
+ *  \param[in] reaction local reaction of the contact (3 components)
+ *  \return a SiconosFrictionContactStatus value
+ */
+int FrictionContactProblem_compute_contact_status_3d_bnrt(const double velocity[3],
+                                                          const double reaction[3]);
+
+/** Fill an array with the BNRT status of each 3D contact.
+ *
+ *  \param[in] velocity local relative velocity array (3*n components)
+ *  \param[in] reaction local reaction array (3*n components)
+ *  \param[in] n number of contacts
+ *  \param[out] statuses array of n ints, each a SiconosFrictionContactStatus value
+ */
+void FrictionContactProblem_get_contact_statuses_3d_bnrt(const double* velocity,
+                                                         const double* reaction, size_t n,
+                                                         int* statuses);
+
+/** Count BNRT statuses for a set of 3D contacts.
+ *
+ *  \param[in] velocity local relative velocity array (3*n components)
+ *  \param[in] reaction local reaction array (3*n components)
+ *  \param[in] n number of contacts
+ *  \param[out] nB,nN,nR,nT status counters (any may be NULL)
+ */
+void FrictionContactProblem_count_contact_statuses_3d_bnrt(const double* velocity,
+                                                           const double* reaction, size_t n,
+                                                           int* nB, int* nN, int* nR, int* nT);
+
+/** Classify a 3D BNRT solution and print non-strict-complementarity cones.
+ *
+ *  \param[in] velocity local relative velocity array (3*n components)
+ *  \param[in] reaction local reaction array (3*n components)
+ *  \param[in] n number of contacts
+ *  \param[out] nB,nN,nR BNRT counters (any may be NULL)
+ *  \param[out] ns if all contacts are strict complementarity, the gap
+ *                 (u+r)_0 - |(u+r)_bar| of the last contact
+ *  \param[out] norm_sum if all contacts are strict complementarity, the
+ *                 Euclidean norm of the last contact's u+r vector
+ *  \param[in] verbose if nonzero, print detailed cone diagnostics for
+ *                 non-strict-complementarity contacts
+ *  \return the number of strict-complementarity contacts
+ */
+int FrictionContactProblem_compute_strict_complementarity_3d_bnrt(
+    const double* velocity, const double* reaction, size_t n, int* nB, int* nN, int* nR,
+    double* ns, double* norm_sum, int verbose);
+
+/** Classify a single 2D contact from its local velocity, reaction and friction
+ *  coefficient.
+ *
+ *  \return 0 = no-contact, 1 = stick, 2 = slip in the positive tangent
+ *          direction, 3 = slip in the negative tangent direction.
+ */
+int FrictionContactProblem_compute_contact_status_2d(const double velocity[2],
+                                                     const double reaction[2], double mu);
+
+/** Classify a single 3D contact from its local velocity, reaction and friction
+ *  coefficient.
+ *
+ *  \return 0 = no-contact, 1 = stick, 2 = slip.
+ */
+int FrictionContactProblem_compute_contact_status_3d(const double velocity[3],
+                                                     const double reaction[3], double mu);
+
 #if defined(__cplusplus)
 }
 #endif

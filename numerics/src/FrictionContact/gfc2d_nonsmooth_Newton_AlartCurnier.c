@@ -29,8 +29,9 @@
 #include <stdlib.h>  // for calloc, free, malloc, realloc
 #include <string.h>  // for memcpy
 
-#include "CSparseMatrix.h"                  // for CSparseMatrix, CSpar...
-#include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_...
+#include "CSparseMatrix.h"            // for CSparseMatrix, CSpar...
+#include "FrictionContactProblem.h"   // for FrictionContactProblem_compute_contact_status_2d
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_...
 #include "GlobalFrictionContactProblem.h"   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                 // for NM_triplet, Numerics...
 #include "NumericsSparseMatrix.h"           // for NSM_new, NumericsSpa...
@@ -470,8 +471,7 @@ int gfc2d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* react
                                           options);
 }
 
-/* Forward declarations for contact-status helpers used by the solver. */
-static int gfc2d_contact_status_2d(double rN, double rT, double uT, double mu);
+/* Forward declaration for the contact-status summary printer. */
 static void gfc2d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* problem,
                                               double* reaction, double* velocity);
 
@@ -886,10 +886,9 @@ restart:
     unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
     unsigned int stabilized = 0;
     for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
-      const double rN = current_reaction[2 * contact];
-      const double rT = current_reaction[2 * contact + 1];
-      const double uT = current_velocity[2 * contact + 1];
-      const int status = gfc2d_contact_status_2d(rN, rT, uT, problem->mu[contact]);
+      const int status = FrictionContactProblem_compute_contact_status_2d(
+          &current_velocity[2 * contact], &current_reaction[2 * contact],
+          problem->mu[contact]);
       current_contact_status[contact] = status;
       if (status == 0)
         no_contact++;
@@ -956,31 +955,6 @@ restart:
 }
 
 /**
- * \brief Classify a single 2D contact into a discrete status.
- *
- * \return 0 = no-contact, 1 = stick, 2 = slip in the positive tangent
- *         direction, 3 = slip in the negative tangent direction.
- */
-static int gfc2d_contact_status_2d(double rN, double rT, double uT, double mu) {
-  const double tol = 1e-10;
-  const double radius = mu * rN;
-  if (rN <= tol) {
-    return 0; /* no-contact */
-  }
-  if (fabs(rT) < radius - tol && fabs(uT) <= tol) {
-    return 1; /* stick */
-  }
-  if (uT > tol) {
-    return 2; /* slip+ */
-  }
-  if (uT < -tol) {
-    return 3; /* slip- */
-  }
-  /* Near the boundary: use the sign of the friction force. */
-  return (rT < 0.0) ? 2 : 3;
-}
-
-/**
  * \brief Print a contact-status summary for a 2D global friction contact solution.
  */
 static void gfc2d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* problem,
@@ -989,8 +963,8 @@ static void gfc2d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* prob
   unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
 
   for (unsigned int i = 0; i < nc; ++i) {
-    const int status = gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1],
-                                               velocity[2 * i + 1], problem->mu[i]);
+    const int status = FrictionContactProblem_compute_contact_status_2d(
+        &velocity[2 * i], &reaction[2 * i], problem->mu[i]);
     if (status == 0)
       no_contact++;
     else if (status == 1)

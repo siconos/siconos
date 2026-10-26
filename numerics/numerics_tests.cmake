@@ -306,6 +306,9 @@ if(WITH_TESTING)
   # exact/perturbed, balanced/extreme-magnitude conditions.
   new_test(NAME test_scaling_regimes SOURCES test_scaling_regimes.c)
 
+  # Consistency of the 2D/3D contact-status helpers against independent references.
+  new_test(NAME test_contact_status_consistency SOURCES test_contact_status_consistency.c)
+
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )

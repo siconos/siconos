@@ -30,16 +30,17 @@
 #include <stdlib.h>  // for calloc, free, malloc, realloc
 #include <string.h>  // for memcpy
 
-#include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
-#include "CSparseMatrix.h"                       // for CSparseMatrix, CSpar...
-#include "FrictionContact_options.h"             // for SICONOS_FRICTION_3D_...
-#include "NumericsMatrix.h"                      // for NM_triplet, Numerics...
-#include "NumericsSparseMatrix.h"                // for NSM_new, NumericsSpa...
-#include "NumericsVector.h"                      // for NV_display
-#include "SiconosBlas.h"                         // for cblas_daxpy, cblas_d...
-#include "SolverOptions.h"                       // for SolverOptions, SICON...
-#include "VI_cst.h"                              // for SICONOS_VI_DPARAM_RHO
-#include "cond.h"                                // for cond
+#include "AlartCurnierGenerated.h"    // for fc3d_AlartCurnierFun...
+#include "CSparseMatrix.h"            // for CSparseMatrix, CSpar...
+#include "FrictionContactProblem.h"   // for FrictionContactProblem_compute_contact_status_3d
+#include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_...
+#include "NumericsMatrix.h"           // for NM_triplet, Numerics...
+#include "NumericsSparseMatrix.h"     // for NSM_new, NumericsSpa...
+#include "NumericsVector.h"           // for NV_display
+#include "SiconosBlas.h"              // for cblas_daxpy, cblas_d...
+#include "SolverOptions.h"            // for SolverOptions, SICON...
+#include "VI_cst.h"                   // for SICONOS_VI_DPARAM_RHO
+#include "cond.h"                     // for cond
 #include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_AlartCurnierFun...
 #include "fc3d_short_names.h"                    // for GFC3D_NSN_AC
@@ -592,27 +593,6 @@ int gfc3d_nsn_ac_warm_start(GlobalFrictionContactProblem* problem, double* react
 }
 
 /**
- * \brief Classify a single 3D contact into a discrete status.
- *
- * The tangential norms are expected to be precomputed by the caller (e.g. with
- * NV_cone_tangential_norms_3d) when the classification is performed over the
- * whole contact list.
- *
- * \return 0 = no-contact, 1 = stick, 2 = slip.
- */
-static int gfc3d_contact_status_3d(double rN, double rT_norm, double uT_norm, double mu) {
-  const double tol = 1e-10;
-  const double radius = mu * rN;
-  if (rN <= tol) {
-    return 0; /* no-contact */
-  }
-  if (rT_norm < radius - tol && uT_norm <= tol) {
-    return 1; /* stick */
-  }
-  return 2; /* slip */
-}
-
-/**
  * \brief Print a contact-status summary for a 3D global friction contact solution.
  */
 static void gfc3d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* problem,
@@ -620,14 +600,9 @@ static void gfc3d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* prob
   const unsigned int nc = (unsigned int)problem->numberOfContacts;
   unsigned int no_contact = 0, stick = 0, slip = 0;
 
-  double* rT_norm = (double*)malloc(nc * sizeof(double));
-  double* uT_norm = (double*)malloc(nc * sizeof(double));
-  NV_cone_tangential_norms_3d(reaction, nc, rT_norm);
-  NV_cone_tangential_norms_3d(velocity, nc, uT_norm);
-
   for (unsigned int i = 0; i < nc; ++i) {
-    const int status =
-        gfc3d_contact_status_3d(reaction[3 * i], rT_norm[i], uT_norm[i], problem->mu[i]);
+    const int status = FrictionContactProblem_compute_contact_status_3d(
+        &velocity[3 * i], &reaction[3 * i], problem->mu[i]);
     if (status == 0)
       no_contact++;
     else if (status == 1)
@@ -635,9 +610,6 @@ static void gfc3d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* prob
     else
       slip++;
   }
-
-  free(rT_norm);
-  free(uT_norm);
 
   numerics_printf_verbose(1,
                           "---- GFC3D - NSN_AC - contact status: "
@@ -948,8 +920,6 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   /* Track contact statuses across Newton iterations to report how many
    * contacts have reached a stable status. */
   int* previous_contact_status = (int*)malloc(problem->numberOfContacts * sizeof(int));
-  double* rT_norm = (double*)malloc(problem->numberOfContacts * sizeof(double));
-  double* uT_norm = (double*)malloc(problem->numberOfContacts * sizeof(double));
 
   /* Automatic warm start: only run VI-FPP if the first Newton linear solve
    * fails.  Warm start is applied at most once. */
@@ -1188,12 +1158,10 @@ restart:
      * the previous Newton iteration). */
     unsigned int no_contact = 0, stick = 0, slip = 0;
     unsigned int stabilized = 0;
-    NV_cone_tangential_norms_3d(current_reaction, problem->numberOfContacts, rT_norm);
-    NV_cone_tangential_norms_3d(current_velocity, problem->numberOfContacts, uT_norm);
     for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
-      const double rN = current_reaction[3 * contact];
-      const int status = gfc3d_contact_status_3d(rN, rT_norm[contact], uT_norm[contact],
-                                                 problem->mu[contact]);
+      const int status = FrictionContactProblem_compute_contact_status_3d(
+          &current_velocity[3 * contact], &current_reaction[3 * contact],
+          problem->mu[contact]);
       if (status == 0)
         no_contact++;
       else if (status == 1)
@@ -1264,8 +1232,6 @@ restart:
     NM_free(reg_eye);
   }
   free(previous_contact_status);
-  free(rT_norm);
-  free(uT_norm);
 }
 
 /**

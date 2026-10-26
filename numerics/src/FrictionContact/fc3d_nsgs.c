@@ -957,17 +957,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           accept_local_reaction_unconditionally(contact, reaction, localreaction);
       }
 
-      /* DEBUG_EXPR( */
-      /*   if(options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
-      /*   { */
-      /*     int frozen_contact=0; */
-      /*     for(unsigned int ii = 0 ; ii < nc ; ++ii) if (freeze_contacts[ii] >0)
-       * frozen_contact++; */
-      /*     numerics_printf_verbose(1,"number of frozen contacts %i at iter : %i",
-       * frozen_contact, iter ); */
-      /*   } */
-      /*   ); */
-
       if (with_error_evaluation_light) {
         incr_error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         hasNotConverged = determine_convergence(incr_error, tolerance, iter, options);

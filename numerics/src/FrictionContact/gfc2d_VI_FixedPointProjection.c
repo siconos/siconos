@@ -23,6 +23,7 @@
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
 
+#include "FrictionContactProblem.h"  // for FrictionContactProblem_compute_contact_status_2d
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
 #include "NumericsFwd.h"                         // for VariationalInequality
@@ -43,31 +44,6 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
-
-/**
- * \brief Classify a single 2D contact into a discrete status.
- *
- * \return 0 = no-contact, 1 = stick, 2 = slip in the positive tangent
- *         direction, 3 = slip in the negative tangent direction.
- */
-static int gfc2d_contact_status_2d(double rN, double rT, double uT, double mu) {
-  const double tol = 1e-10;
-  const double radius = mu * rN;
-  if (rN <= tol) {
-    return 0; /* no-contact */
-  }
-  if (fabs(rT) < radius - tol && fabs(uT) <= tol) {
-    return 1; /* stick */
-  }
-  if (uT > tol) {
-    return 2; /* slip+ */
-  }
-  if (uT < -tol) {
-    return 3; /* slip- */
-  }
-  /* Near the boundary: use the sign of the friction force. */
-  return (rT < 0.0) ? 2 : 3;
-}
 
 typedef struct {
   GlobalFrictionContactProblem* problem;
@@ -99,8 +75,8 @@ static void gfc2d_vi_fpp_status_callback(void* env, size_t size, double* x, doub
   unsigned int stabilized = 0;
 
   for (int i = 0; i < nc; ++i) {
-    const int status = gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1],
-                                               local_velocity[2 * i + 1], problem->mu[i]);
+    const int status = FrictionContactProblem_compute_contact_status_2d(
+        &local_velocity[2 * i], &reaction[2 * i], problem->mu[i]);
     status_env->current_status[i] = status;
     if (status == 0)
       no_contact++;
@@ -219,8 +195,8 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
   if (verbose > 0) {
     unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
     for (int i = 0; i < nc; ++i) {
-      const int status = gfc2d_contact_status_2d(reaction[2 * i], reaction[2 * i + 1],
-                                                 velocity[2 * i + 1], problem->mu[i]);
+      const int status = FrictionContactProblem_compute_contact_status_2d(
+          &velocity[2 * i], &reaction[2 * i], problem->mu[i]);
       if (status == 0)
         no_contact++;
       else if (status == 1)
