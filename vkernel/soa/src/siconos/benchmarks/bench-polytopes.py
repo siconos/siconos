@@ -22,6 +22,7 @@
 import argparse
 import math
 import random
+import resource
 import sys
 import time
 
@@ -332,6 +333,13 @@ if args.compare_steps > 0:
     )
     # the hdf5 output is not part of the step: write only the first steps
     run_options["output_frequency"] = 0
+    # Bullet embeds contact detection inside computeOneStep. Exploding the
+    # step in Python makes updateInteractions a separate timed call so the
+    # contact-detection time is reported for both backends. For vnative this
+    # is a no-op: its time-stepping class is not TimeStepping, so the runner
+    # falls through to the same updateInteractions + computeOneStep calls.
+    if backend == "bullet":
+        run_options["explode_computeOneStep_in_python"] = True
     t0 = time.perf_counter()
     with MechanicsHdf5Runner(
         io_filename=io_filename, mode="r+", config=runner_config
@@ -340,20 +348,32 @@ if args.compare_steps > 0:
         timing = dict(io._timing)
     elapsed = time.perf_counter() - t0
 
-    # per-step means over the timed loop only (setup excluded). vnative runs
-    # the space filter + narrowphase in updateInteractions, bullet inside
-    # computeOneStep: their sum is the comparable step cost.
     def mean_ms(name):
         v = timing.get(name, [])
         return 1000.0 * sum(v) / len(v) if v else 0.0
 
-    nsteps = len(timing.get("computeOneStep", []))
-    ui_ms = mean_ms("updateInteractions")
-    cos_ms = mean_ms("computeOneStep")
+    contact_detection_ms = mean_ms("updateInteractions")
+    if backend == "vnative":
+        nsteps = len(timing.get("computeOneStep", []))
+        compute_one_step_ms = mean_ms("computeOneStep")
+    else:
+        nsteps = len(timing.get("computeOneStep_python", []))
+        compute_one_step_ms = mean_ms("computeOneStep_python") - contact_detection_ms
+
+    per_step_ms = contact_detection_ms + compute_one_step_ms
+
+    # Peak resident set size in MB (ru_maxrss is KB on Linux).
+    mem_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+
     print(
-        "compare: elapsed={:.4f}s steps={} updateInteractions={:.3f}ms "
-        "computeOneStep={:.3f}ms per_step={:.3f}ms".format(
-            elapsed, nsteps, ui_ms, cos_ms, ui_ms + cos_ms
+        "compare: elapsed={:.4f}s steps={} contact_detection={:.3f}ms "
+        "compute_one_step={:.3f}ms per_step={:.3f}ms memory={:.1f}MB".format(
+            elapsed,
+            nsteps,
+            contact_detection_ms,
+            compute_one_step_ms,
+            per_step_ms,
+            mem_mb,
         ),
         flush=True,
     )

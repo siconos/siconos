@@ -1,7 +1,7 @@
 #!/bin/sh
 # settle N grains with vnative, dump positions, then time K steps on both
 # vnative and bullet loading that static configuration. Prints a report at
-# the end.
+# the end including memory, contact-detection time, and computeOneStep time.
 # Usage: bench-polytopes-compare.sh <N> [K]
 [ -f bench-polytopes.py ] || { cd "$(dirname "$0")" || exit 1; }
 
@@ -26,19 +26,32 @@ echo "$vout"
 bout=$($PY bench-polytopes.py bullet "$N" --load "$dump" --compare-steps "$K" 2>&1)
 echo "$bout"
 
-# Extract per_step ms (value after "per_step=" up to the trailing "ms"): the
-# mean of updateInteractions + computeOneStep over the timed loop.
-vstep=$(echo "$vout" | sed -n 's/.*per_step=\([0-9.]*\)ms.*/\1/p')
-bstep=$(echo "$bout" | sed -n 's/.*per_step=\([0-9.]*\)ms.*/\1/p')
+# Extract timing and memory metrics from the compare output line.
+# Format: ... contact_detection=X ms compute_one_step=X ms per_step=X ms memory=X MB
+extract() {
+  echo "$1" | sed -n "s/.*${2}=\([0-9.]*\)${3}.*/\1/p"
+}
+
+vs=$(extract "$vout" contact_detection "ms")
+vc=$(extract "$vout" compute_one_step "ms")
+vp=$(extract "$vout" per_step "ms")
+vm=$(extract "$vout" memory "MB")
+
+bs=$(extract "$bout" contact_detection "ms")
+bc=$(extract "$bout" compute_one_step "ms")
+bp=$(extract "$bout" per_step "ms")
+bm=$(extract "$bout" memory "MB")
 
 cat <<EOF
 
 =================== POLYTOPES COMPARE REPORT ===================
 N=${N} grains, K=${K} steps, static settled geometry
-vnative : ${vstep} ms/step
-bullet  : ${bstep} ms/step
+
+                       contact_detect   compute_step   per_step   memory
+vnative :              ${vs} ms       ${vc} ms       ${vp} ms   ${vm} MB
+bullet  :              ${bs} ms       ${bc} ms       ${bp} ms   ${bm} MB
 EOF
-if [ -n "$vstep" ] && [ -n "$bstep" ] && [ "$bstep" != "0" ]; then
-  awk -v v="$vstep" -v b="$bstep" 'BEGIN { printf "speedup (vnative/bullet): %.2fx\n", v/b }'
+if [ -n "$vp" ] && [ -n "$bp" ] && [ "$bp" != "0" ]; then
+  awk -v v="$vp" -v b="$bp" 'BEGIN { printf "speedup (vnative/bullet): %.2fx\n", v/b }'
 fi
-echo "================================================================="
+echo "==============================================================="
