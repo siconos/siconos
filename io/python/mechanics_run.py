@@ -2106,12 +2106,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # For vnative backend, create bodies efficiently
         ctor = contactor
         radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
+        radii = obj["radii"][:] if "radii" in obj else None
 
         # Only dynamic objects
         assert mass is not None
 
+        # Polydisperse if a per-grain radii dataset is present; otherwise
+        # every grain shares the shape radius (fast path).
+        grain_radii = (
+            np.asarray(radii, dtype=np.float64) if radii is not None else radius
+        )
         bodies = self.config.default_bodies_class(
-            radius, mass, positions, velocities, contactor.collision_group
+            grain_radii, mass, positions, velocities, contactor.collision_group
         )
         np.vectorize(self._nsds.insertDynamicalSystem)(bodies.get())
         np.vectorize(self._set_external_forces)(bodies.get())

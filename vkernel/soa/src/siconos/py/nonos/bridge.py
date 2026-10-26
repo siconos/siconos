@@ -474,17 +474,42 @@ class Bodies(BodyBase):
         bodies.multiple_set_id(self._ident)
         bodies.multiple_set_q(array(positions))
         bodies.multiple_set_velocity(array(velocities))
-        bodies.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
 
-        disk_shape = None
-        if radius in self.shapes():
-            disk_shape = self.shapes()[radius]
+        radii = np.asarray(radius, dtype=np.float64)
+        if radii.ndim == 0:
+            # Fast path: every grain shares the same radius.
+            r = float(radii)
+            bodies.set_mass_matrix(array([mass, mass, mass * r * r / 2]))
+            disk_shape = None
+            if r in self.shapes():
+                disk_shape = self.shapes()[r]
+            else:
+                disk_shape = vkernel.disks.add_disk_shape(self.data())
+                disk_shape.set_radius(r)
+                self.shapes()[r] = disk_shape
+            bodies.set_shape(disk_shape)
         else:
-            disk_shape = vkernel.disks.add_disk_shape(self.data())
-            disk_shape.set_radius(radius)
-            self.shapes()[radius] = disk_shape
+            # Polydisperse grains: one cached shape per unique radius,
+            # assigned to each body individually. np.vectorize would not
+            # vectorize here (the C++ storage calls are already bulk); the
+            # per-body cost is one set_shape handle swap each.
+            if radii.shape[0] != len(positions):
+                raise ValueError("len(radii) must match the number of grains")
+            for r in np.unique(radii):
+                rkey = float(r)
+                if rkey not in self.shapes():
+                    disk_shape = vkernel.disks.add_disk_shape(self.data())
+                    disk_shape.set_radius(rkey)
+                    self.shapes()[rkey] = disk_shape
+            members = bodies.get()
+            for i, r in enumerate(radii):
+                members[i].set_shape(self.shapes()[float(r)])
+            mm = np.empty((len(radii), 3), dtype=np.float64)
+            mm[:, 0] = mass
+            mm[:, 1] = mass
+            mm[:, 2] = mass * radii * radii / 2
+            bodies.multiple_set_mass_matrix(mm)
 
-        bodies.set_shape(disk_shape)
         bodies.set_fext(array([0, 0, 0]))  # default
         bodies.set_collision_group(collision_group)
 

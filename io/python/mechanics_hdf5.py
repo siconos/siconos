@@ -124,7 +124,6 @@ def add_line(dataset, line):
 # fix ctr.'name' in old hdf5 files
 #
 def upgrade_io_format(filename):
-
     with MechanicsHdf5(filename, mode="a") as io:
         for instance_name in io.instances():
             for contactor_instance_name in io.instances()[instance_name]:
@@ -647,7 +646,6 @@ class MechanicsHdf5:
     def add_external_function(
         self, name, body_name, function_name, plugin_name, plugin_function_name
     ):
-
         if name not in self._external_functions:
             ext_fun = group(self._external_functions, name)
             ext_fun.attrs["body_name"] = body_name
@@ -658,7 +656,6 @@ class MechanicsHdf5:
     def add_external_bc_function(
         self, name, body_name, bc_indices, plugin_name, plugin_function_name
     ):
-
         if name not in self._external_functions:
             ext_fun = group(self._external_functions, name)
             ext_fun.attrs["body_name"] = body_name
@@ -1228,14 +1225,18 @@ class MechanicsHdf5:
         velocities=None,
         mass=None,
         inertia=None,
+        radii=None,
         time_of_birth=-1,
         time_of_death=-1,
     ):
         """
         Add an aggregate of objects (e.g., granular material) with shared properties.
 
-        All objects share the same shape, mass and inertia. Only translations,
-        orientations and velocities are specific to each grain.
+        All objects share the same shape. Mass, inertia and velocity are shared
+        by default; only translations, orientations and velocities are specific
+        to each grain. Per-grain radii may be given through ``radii`` to create a
+        polydisperse packing; when ``radii`` is omitted, every grain inherits the
+        radius of the shared disk shape.
 
         Parameters
         ----------
@@ -1253,6 +1254,10 @@ class MechanicsHdf5:
             Mass for each grain (all grains have same mass).
         inertia: array_like, optional
             Inertia for each grain (all grains have same inertia).
+        radii: array_like (N,) or scalar, optional
+            Per-grain radii. A scalar (or None) keeps the shared-radius fast
+            path; an array of length N enables a polydisperse packing where
+            each disk keeps its own radius and inertia.
         """
         if name in self._input:
             return
@@ -1303,6 +1308,22 @@ class MechanicsHdf5:
             compression="gzip" if self._use_compression else None,
         )
         obj.attrs["count"] = len(translations)
+
+        # Per-grain radii for a polydisperse packing. A scalar radius is
+        # stored as an attribute (shared-radius fast path); an array of
+        # length N is stored as a dataset (read back per grain at import).
+        if radii is not None:
+            radii = np.asarray(radii, dtype=np.float64)
+            if radii.ndim == 0:
+                obj.attrs["radius"] = float(radii)
+            else:
+                if radii.shape[0] != len(translations):
+                    raise ValueError("len(radii) must match the number of grains")
+                obj.create_dataset(
+                    "radii",
+                    data=radii,
+                    compression="gzip" if self._use_compression else None,
+                )
 
         # Handle orientations
         if orientations is None:
