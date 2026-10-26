@@ -1,5 +1,5 @@
-/* CXD is a program dedicated to convex collision detection
- * (currently part of the Siconos software).
+/* CXD is a program dedicated to convex collision detection.
+ * It is part of the Siconos Software.
  *
  * Copyright 2026 INRIA.
  *

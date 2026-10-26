@@ -1,5 +1,5 @@
-/* CXD is a program dedicated to convex collision detection
- * (currently part of the Siconos software).
+/* CXD is a program dedicated to convex collision detection.
+ * It is part of the Siconos Software.
  *
  * Copyright 2026 INRIA.
  *
@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -51,6 +52,16 @@ template <typename Support, std::size_t N>
 struct batch_result {
   status st;
   std::array<Support, N> seed;
+};
+
+// Result of an EPA penetration query: depth, normal, and the vertex indices
+// (idx in shape A, idx in shape B) of each vertex of the deepest face.
+// 2D: 2 vertices (edge). 3D: 3 vertices (triangle).
+template <typename Scalar, std::size_t Dim>
+struct epa_result {
+  Scalar depth;
+  std::array<Scalar, Dim> normal;
+  std::array<std::pair<std::size_t, std::size_t>, Dim> vertices{};
 };
 
 // One packed pool: every shape's vertices concatenated into a single buffer,
@@ -169,6 +180,10 @@ struct shape_view {
 
   const_iterator end() const { return vertices + count; }
 
+  bool empty() const { return count == 0; }
+
+  size_type size() const { return count; }
+
  private:
   const point_type* vertices;
   size_type count;
@@ -186,14 +201,192 @@ auto pool_diff_support(const Pool& pool, const std::uint32_t id_a,
                            shape_view<Pool>{pool, id_b}, direction);
 }
 
+// ---------------------------------------------------------------------------
+// Pool bounds: the O(pool) picture the batch stages share. One centre and
+// one circumradius per shape, computed once per pool build, feeds the
+// O(1) prefilter: a pair whose centre distance exceeds rA + rB plus the
+// tolerance is separated before any simplex work, and the SAT stages can
+// answer the rejection with real numbers (the unit axis A -> B and the
+// ball-gap lower bound). Non-finite vertices are skipped for centre and
+// radius: a shape is bounded by its finite vertices alone, so popular
+// garbage-in rows that would stall a support query far apart are turned
+// into a definite separated answer instead. The convex flag (2D) says the
+// vertices walk a convex polygon in the stored order, which is the fast
+// row-check the SAT scan needs; 3D leaves it zero (no flag there).
+// ---------------------------------------------------------------------------
+template <typename Scalar, std::size_t Dim>
+struct pool_bounds {
+  std::vector<Scalar> centre;        // Dim per shape
+  std::vector<Scalar> radius;        // one per shape
+  std::vector<std::uint8_t> convex;  // one per shape
+};
+
+// 2D cyclic convexity over stored vertices: every strict turn must keep one
+// sign AND the accumulated turning must be exactly one revolution. Sign
+// consistency alone is not sufficient: a star walk through a golden-angle
+// spiral crosses itself while turning the same way at every step, and SAT
+// over such an order's edge normals is not SAT over the shape's convex
+// hull, so the total turn is required to close at +-2pi. Collinear turns
+// (cross == 0) are allowed -- the duplicate axis they leave behind is
+// harmless for the SAT scan -- but a reversal (a 180-degree u-turn), a zero
+// edge, and fewer than three vertices are not. The check the bounds fill
+// marks per shape is this one, and the scalar SAT entry runs it per call,
+// so a pool built without bounds still takes the same fast scan when the
+// shapes allow it.
+template <typename It>
+bool cyclic_convex_2d(const It first, const It last)
+{
+  using point = std::remove_cvref_t<decltype(*first)>;
+  using scalar = typename decltype(env(point{}))::scalar;
+
+  const auto count = static_cast<std::size_t>(std::distance(first, last));
+  if (count < 3) return false;
+
+  constexpr scalar one_turn = scalar(6.28318530717958647692);
+  constexpr scalar slack = scalar(1e-9);
+
+  std::uint8_t sign = 0;
+  scalar turning{};
+  for (std::size_t i = 0; i < count; ++i) {
+    const point& p0 = *std::next(first, static_cast<std::ptrdiff_t>(i));
+    const point& p1 =
+        *std::next(first, static_cast<std::ptrdiff_t>((i + 1) % count));
+    const point& p2 =
+        *std::next(first, static_cast<std::ptrdiff_t>((i + 2) % count));
+    const scalar ex0 = p1[0] - p0[0], ey0 = p1[1] - p0[1];
+    const scalar ex1 = p2[0] - p1[0], ey1 = p2[1] - p1[1];
+    // a zero edge is a duplicate vertex: not a clean polygon
+    if (ex0 * ex0 + ey0 * ey0 == scalar{}) return false;
+    const scalar cross = ex0 * ey1 - ey0 * ex1;
+    // a u-turn (zero cross against the negative dot) folds the polygon
+    // back over its own edge: not a walk around a convex region
+    if (cross == scalar{} && ex0 * ex1 + ey0 * ey1 < scalar{}) return false;
+    if (cross > scalar{}) {
+      // consistent right-hand turning stays under one revolution
+      if (sign == std::uint8_t{2}) return false;
+      sign = std::uint8_t{1};
+      turning += std::atan2(cross, ex0 * ex1 + ey0 * ey1);
+      if (turning > one_turn + slack) return false;
+    }
+    else if (cross < scalar{}) {
+      if (sign == std::uint8_t{1}) return false;
+      sign = std::uint8_t{2};
+      turning += std::atan2(cross, ex0 * ex1 + ey0 * ey1);
+      if (turning < -one_turn - slack) return false;
+    }
+  }
+  // exactly one revolution's worth of turning must be walked, either way
+  return turning > one_turn - slack && turning < one_turn + slack;
+}
+
+template <std::size_t Dim, typename Pool>
+  requires(Dim == 2 || Dim == 3)
+void compute_pool_bounds(const Pool& pool,
+                         pool_bounds<typename Pool::scalar, Dim>& out)
+{
+  using point = typename Pool::vector;
+  using scalar = typename Pool::scalar;
+
+  const auto* entries = pool.entries.data();
+  out.centre.assign(pool.entries.size() * Dim, scalar{});
+  out.radius.assign(pool.entries.size(), scalar{});
+  out.convex.assign(pool.entries.size(), std::uint8_t{0});
+
+  for (std::size_t id = 0; id < pool.entries.size(); ++id) {
+    const auto begin = entries[id].vertex_offset;
+    const auto count = entries[id].vertex_count;
+
+    // the centre is the mean of the finite vertices, the radius the
+    // largest squared distance of a finite vertex to that centre
+    scalar c[Dim];
+    for (std::size_t k = 0; k < Dim; ++k) c[k] = scalar{};
+    std::size_t finite = 0;
+    for (std::size_t i = 0; i < count; ++i) {
+      const auto& p = pool.vertex_buffer[begin + i];
+      bool ok = true;
+      for (std::size_t k = 0; k < Dim && ok; ++k) ok = std::isfinite(p[k]);
+      if (!ok) continue;
+      ++finite;
+      for (std::size_t k = 0; k < Dim; ++k) c[k] += p[k];
+    }
+    if (finite > 0) {
+      for (std::size_t k = 0; k < Dim; ++k) c[k] /= scalar(finite);
+    }
+    scalar r2 = scalar{};
+    for (std::size_t i = 0; i < count; ++i) {
+      const auto& p = pool.vertex_buffer[begin + i];
+      bool ok = true;
+      for (std::size_t k = 0; k < Dim && ok; ++k) ok = std::isfinite(p[k]);
+      if (!ok) continue;
+      scalar d2 = scalar{};
+      for (std::size_t k = 0; k < Dim; ++k) {
+        const scalar diff = p[k] - c[k];
+        d2 += diff * diff;
+      }
+      r2 = std::max(r2, d2);
+    }
+    for (std::size_t k = 0; k < Dim; ++k) out.centre[id * Dim + k] = c[k];
+    out.radius[id] = std::sqrt(r2);
+  }
+
+  // 2D convexity: the shared cyclic walk over the stored order. A shape
+  // that fails it keeps the flag off and every pair it enters takes the
+  // hull path instead of the fast scan.
+  if constexpr (Dim == 2) {
+    for (std::size_t id = 0; id < pool.entries.size(); ++id) {
+      const auto begin = entries[id].vertex_offset;
+      const auto count = entries[id].vertex_count;
+      const auto vertices =
+          pool.vertex_buffer.begin() + static_cast<std::ptrdiff_t>(begin);
+      const bool convex = cyclic_convex_2d(vertices, vertices + count);
+      out.convex[id] = convex ? std::uint8_t{1} : std::uint8_t{0};
+    }
+  }
+}
+
+template <std::size_t Dim, typename Pool>
+  requires(Dim == 2 || Dim == 3)
+auto compute_pool_bounds(const Pool& pool)
+    -> pool_bounds<typename Pool::scalar, Dim>
+{
+  pool_bounds<typename Pool::scalar, Dim> out;
+  compute_pool_bounds<Dim>(pool, out);
+  return out;
+}
+
+// The O(1) prefilter over the bounds. Positive when the centre distance
+// exceeds both radii plus the tolerance: then no point of the pair can sit
+// closer than the slack, and every stage may answer separated without
+// reading a vertex.
+template <std::size_t Dim, typename Pool, typename Bounds>
+  requires(Dim == 2 || Dim == 3)
+constexpr bool bounds_separated(const Pool& pool, const Bounds& bounds,
+                                const std::uint32_t id_a,
+                                const std::uint32_t id_b,
+                                const typename Pool::scalar tolerance)
+{
+  using scalar = typename Pool::scalar;
+  const auto* entries = pool.entries.data();
+  (void)entries;
+  scalar d2 = scalar{};
+  for (std::size_t k = 0; k < Dim; ++k) {
+    const scalar diff = bounds.centre[std::size_t{id_a} * Dim + k] -
+                        bounds.centre[std::size_t{id_b} * Dim + k];
+    d2 += diff * diff;
+  }
+  const scalar sum = bounds.radius[id_a] + bounds.radius[id_b] + tolerance;
+  return d2 > sum * sum;
+}
+
 // Per-pair evaluator: gjk_inter's search over the pool. Everything the scalar
 // path reports by throwing comes back as a status instead, and the seed is
 // written only on the enclosed path -- every other status leaves it
 // untouched.
 template <std::size_t Dim, typename Pool, typename PairRecord>
   requires(Dim == 2 || Dim == 3)
-auto gjk_batch_pair(const Pool& pool, const PairRecord& pair,
-                    const gjk_options options)
+auto gjk_batch_pair(
+    const Pool& pool, const PairRecord& pair, const gjk_options options,
+    const pool_bounds<typename Pool::scalar, Dim>* bounds = nullptr)
     -> batch_result<typename Pool::support, Dim + 1>
 {
   using result_type = batch_result<typename Pool::support, Dim + 1>;
@@ -263,6 +456,15 @@ auto gjk_batch_pair(const Pool& pool, const PairRecord& pair,
     const auto tolerance_squared = options.tolerance * options.tolerance;
     if (num::inner_prod(init, init) <= tolerance_squared)
       return invalid_input();
+
+    // O(1) ball prefilter: a pair whose centre distance goes beyond the
+    // radii sum plus the tolerance is separated before any simplex work.
+    // Only the compute path shrinks; the row is exactly what the full GJK
+    // would return for a pair this far apart.
+    if (bounds != nullptr &&
+        bounds_separated<Dim>(pool, *bounds, pair.shape_id_A, pair.shape_id_B,
+                              options.tolerance))
+      return separated();
 
     const auto is_near_zero = [&tolerance_squared](const vector& v) {
       return num::inner_prod(v, v) <= tolerance_squared;
@@ -350,6 +552,15 @@ auto gjk_batch_pair(const Pool& pool, const PairRecord& pair,
     const auto tolerance_squared = options.tolerance * options.tolerance;
     if (num::inner_prod(init, init) <= tolerance_squared)
       return invalid_input();
+
+    // O(1) ball prefilter: a pair whose centre distance goes beyond the
+    // radii sum plus the tolerance is separated before any simplex work.
+    // Only the compute path shrinks; the row is exactly what the full GJK
+    // would return for a pair this far apart.
+    if (bounds != nullptr &&
+        bounds_separated<Dim>(pool, *bounds, pair.shape_id_A, pair.shape_id_B,
+                              options.tolerance))
+      return separated();
 
     const auto is_near_zero = [&tolerance_squared](const vector& v) {
       return num::inner_prod(v, v) <= tolerance_squared;
@@ -623,7 +834,7 @@ auto gjk_batch_pair(const Pool& pool, const PairRecord& pair,
                 diff_support(pair.shape_id_A, pair.shape_id_B, ddir);
             if (origin_in_prism) {
               return enclosed(stall_compacted[0], stall_compacted[1],
-                              stall_compacted[2], stall_compacted[3]);
+                              stall_compacted[2], stall_wit4);
             }
             // No separation certificate was found: GJK's early-out is the
             // only sound separation answer and it did not fire, so the
@@ -632,7 +843,7 @@ auto gjk_batch_pair(const Pool& pool, const PairRecord& pair,
             // pairs are caught by the loop-state stall terminal instead,
             // which sees the actual axis-aligned separation).
             return enclosed(stall_compacted[0], stall_compacted[1],
-                            stall_compacted[2], stall_compacted[3]);
+                            stall_compacted[2], stall_wit4);
           }
         }
       }
@@ -931,30 +1142,80 @@ auto gjk_batch_pair(const Pool& pool, const PairRecord& pair,
   }
 }
 
-// The batched intersection pass: one pair list, one packed shape pool, one
-// status per pair. Validation that depends on the options alone (a
-// non-positive tolerance or a zero iteration budget) rejects every pair;
-// everything else is decided per pair by gjk_batch_pair.
+// Per-pair wall-clock rows, one bucket per stage a batch stage runs.
+// A stage keeps its own batch_timing instance; when the pointer is null
+// the stage does no timing at all.
+struct batch_timing {
+  std::vector<double>
+      seconds;  // one row per pair (per hit, for EPA), per call
+};
+
+// The batched intersection pass (core, by reference): one pair list, one
+// packed shape pool, one status per pair, written into a caller-owned result
+// buffer. The buffer may be reused across simulation steps: assign re-fills
+// it to the current pair count and overwrites every entry, so no stale state
+// survives a call. Options-only validation (a non-positive tolerance or a
+// zero iteration budget) rejects every pair; everything else is decided per
+// pair by gjk_batch_pair.
+//
+// bounds, when given, feeds the O(1) ball prefilter (per-pair rejection
+// before any simplex work); timing, when given, collects one wall-clock row
+// per pair. Both are null by default and cost nothing when unset -- the
+// stage stages stay untouched for callers that do not want them.
+
+template <std::size_t Dim, typename Pool, typename PairRecord,
+          typename Support>
+  requires(Dim == 2 || Dim == 3)
+void gjk_batch(
+    const Pool& pool, const std::vector<PairRecord>& pairs,
+    const gjk_options options,
+    std::vector<batch_result<Support, Dim + 1>>& results,
+    const pool_bounds<typename Pool::scalar, Dim>* bounds = nullptr,
+    batch_timing* timing = nullptr)
+{
+  using result_type = batch_result<typename Pool::support, Dim + 1>;
+
+  assert_device_contract<Pool, Dim>();
+
+  // assign (not resize) so the vector is re-filled even after the content
+  // it held is stale; a buffer kept across calls is emptied and re-added
+  // without losing its heap block, and its capacity from the previous step
+  // is reused.
+  results.assign(pairs.size(), result_type{});
+
+  if (options.tolerance <= 0. || options.max_iterations == 0) {
+    for (auto& entry : results) entry.st = status::invalid_input;
+    return;
+  }
+
+  if (timing != nullptr) {
+    timing->seconds.assign(pairs.size(), 0.);
+    for (std::size_t i = 0; i < pairs.size(); ++i) {
+      const auto start = std::chrono::steady_clock::now();
+      results[i] = gjk_batch_pair<Dim>(pool, pairs[i], options, bounds);
+      timing->seconds[i] = std::chrono::duration<double>(
+                               std::chrono::steady_clock::now() - start)
+                               .count();
+    }
+    return;
+  }
+
+  for (std::size_t i = 0; i < pairs.size(); ++i)
+    results[i] = gjk_batch_pair<Dim>(pool, pairs[i], options, bounds);
+}
+
+// The batched intersection pass (allocating form): allocates the result
+// buffer itself and forwards to the core overload above. Kept as a
+// convenience for callers that buffer once per call; the by-reference core
+// is the intended form for the per-step batch stage.
 template <std::size_t Dim, typename Pool, typename PairRecord>
   requires(Dim == 2 || Dim == 3)
 auto gjk_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
                const gjk_options options = {})
     -> std::vector<batch_result<typename Pool::support, Dim + 1>>
 {
-  using result_type = batch_result<typename Pool::support, Dim + 1>;
-
-  assert_device_contract<Pool, Dim>();
-
-  std::vector<result_type> results(pairs.size());
-
-  if (options.tolerance <= 0. || options.max_iterations == 0) {
-    for (auto& entry : results) entry.st = status::invalid_input;
-    return results;
-  }
-
-  for (std::size_t i = 0; i < pairs.size(); ++i)
-    results[i] = gjk_batch_pair<Dim>(pool, pairs[i], options);
-
+  std::vector<batch_result<typename Pool::support, Dim + 1>> results;
+  gjk_batch<Dim>(pool, pairs, options, results);
   return results;
 }
 
@@ -1016,12 +1277,13 @@ auto gjk_batch(const std::vector<std::vector<std::array<double, 3>>>& a,
 // rejected hit comes back as NaN in place instead -- invalid-input rejection
 // without a throw, and every position of the result stays indexable.
 template <typename Scalar, std::size_t Dim>
-auto unanswered() -> std::pair<Scalar, std::array<Scalar, Dim>>
+auto unanswered() -> epa_result<Scalar, Dim>
 {
   const Scalar nan = std::numeric_limits<Scalar>::quiet_NaN();
-  std::array<Scalar, Dim> normal{};
-  normal.fill(nan);
-  return {nan, normal};
+  epa_result<Scalar, Dim> r{};
+  r.depth = nan;
+  r.normal.fill(nan);
+  return r;
 }
 
 // One growable region of the polytope arena. While the polytope fits Capacity
@@ -1174,10 +1436,16 @@ struct polytope_solid {
   polytope_region<Vector, epa_sbo_capacity> vertices;
   polytope_region<face, 2 * epa_sbo_capacity> faces;
 
+  // Fixed-size support tracking for vertex index extraction (no heap alloc).
+  std::array<std::pair<std::size_t, std::size_t>, epa_sbo_capacity>
+      vert_support_ids{};
+  std::size_t vert_support_count = 0;
+
   void reset()
   {
     vertices.reset();
     faces.reset();
+    vert_support_count = 0;
   }
 
   // Euler's bound: a convex polytope of V vertices carries at most 2V - 4
@@ -1197,14 +1465,31 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
                         const std::array<typename Pool::support, 3>& seed,
                         const gjk_options options,
                         polytope_ring<typename Pool::support>& arena)
-    -> std::pair<typename Pool::scalar, std::array<typename Pool::scalar, 2>>
+    -> epa_result<typename Pool::scalar, 2>
 {
   using vector = typename Pool::vector;
   using scalar = typename Pool::scalar;
   using support = typename Pool::support;
-  using answer = std::pair<scalar, std::array<scalar, 2>>;
+  using answer = epa_result<scalar, 2>;
 
-  const auto rejected = []() -> answer { return unanswered<scalar, 2>(); };
+  const auto rejected = []() -> answer {
+    answer r{};
+    r.depth = std::numeric_limits<scalar>::quiet_NaN();
+    r.normal.fill(std::numeric_limits<scalar>::quiet_NaN());
+    return r;
+  };
+
+  const auto make_result = [](scalar depth, const vector& normal_vec,
+                              const support& v0,
+                              const support& v1) -> answer {
+    answer r{};
+    r.depth = depth;
+    r.normal = {static_cast<scalar>(normal_vec[0]),
+                static_cast<scalar>(normal_vec[1])};
+    r.vertices[0] = {std::get<0>(v0), std::get<1>(v0)};
+    r.vertices[1] = {std::get<0>(v1), std::get<1>(v1)};
+    return r;
+  };
 
   const auto diff_support = [&pool](const std::uint32_t a,
                                     const std::uint32_t b,
@@ -1257,8 +1542,7 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
         const vector normal = distance > options.tolerance
                                   ? vector{p[0] / distance, p[1] / distance}
                                   : vector{0., 0.};
-        return {distance,
-                {static_cast<scalar>(normal[0]), static_cast<scalar>(normal[1])}};
+        return make_result(distance, normal, tri[i0], tri[i0]);
       }
       const vector line = support_vector(tri[i1]) - support_vector(tri[i0]);
       const scalar line_length = std::sqrt(num::inner_prod(line, line));
@@ -1277,7 +1561,8 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
               options.tolerance * options.tolerance)
             continue;
           const support candidate = diff_support(id_a, id_b, probe);
-          const vector off = support_vector(candidate) - support_vector(tri[i0]);
+          const vector off =
+              support_vector(candidate) - support_vector(tri[i0]);
           const scalar perpendicular_distance =
               std::abs(line[0] * off[1] - line[1] * off[0]) / line_length;
           if (perpendicular_distance > options.tolerance) {
@@ -1300,12 +1585,13 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
             if (t > 1.) t = 1.;
           }
           const vector closest = support_vector(tri[i0]) + t * d;
-          const scalar distance = std::sqrt(num::inner_prod(closest, closest));
-          const vector normal = distance > options.tolerance
-                                    ? vector{closest[0] / distance, closest[1] / distance}
-                                    : vector{-d[1], d[0]};
-          return {distance,
-                  {static_cast<scalar>(normal[0]), static_cast<scalar>(normal[1])}};
+          const scalar distance =
+              std::sqrt(num::inner_prod(closest, closest));
+          const vector normal =
+              distance > options.tolerance
+                  ? vector{closest[0] / distance, closest[1] / distance}
+                  : vector{-d[1], d[0]};
+          return make_result(distance, normal, tri[i0], tri[i1]);
         }
       }
     }
@@ -1363,18 +1649,18 @@ auto epa_penetration_2d(const Pool& pool, const std::uint32_t id_a,
     const scalar candidate_distance =
         num::inner_prod(support_vector(candidate), closest_normal);
     if (candidate_distance - closest_distance <= options.tolerance)
-      return {static_cast<scalar>(candidate_distance),
-              {static_cast<scalar>(closest_normal[0]),
-               static_cast<scalar>(closest_normal[1])}};
+      return make_result(static_cast<scalar>(candidate_distance),
+                         closest_normal, ring[closest_edge],
+                         ring[(closest_edge + 1) % ring.size()]);
 
     for (std::size_t i = 0; i < ring.size(); ++i) {
       const vector difference =
           support_vector(candidate) - support_vector(ring[i]);
       if (num::inner_prod(difference, difference) <=
           options.tolerance * options.tolerance)
-        return {static_cast<scalar>(closest_distance),
-                {static_cast<scalar>(closest_normal[0]),
-                 static_cast<scalar>(closest_normal[1])}};
+        return make_result(static_cast<scalar>(closest_distance),
+                           closest_normal, ring[closest_edge],
+                           ring[(closest_edge + 1) % ring.size()]);
     }
 
     if (ring.size() == max_polytope) return rejected();
@@ -1426,15 +1712,20 @@ auto epa_penetration_3d(
     const std::array<typename Pool::support, 4>& seed,
     const gjk_options options,
     polytope_solid<typename Pool::vector, typename Pool::scalar>& arena)
-    -> std::pair<typename Pool::scalar, std::array<typename Pool::scalar, 3>>
+    -> epa_result<typename Pool::scalar, 3>
 {
   using vector = typename Pool::vector;
   using scalar = typename Pool::scalar;
   using support = typename Pool::support;
   using face = typename polytope_solid<vector, scalar>::face;
-  using answer = std::pair<scalar, std::array<scalar, 3>>;
+  using answer = epa_result<scalar, 3>;
 
-  const auto rejected = []() -> answer { return unanswered<scalar, 3>(); };
+  const auto rejected = []() -> answer {
+    answer r{};
+    r.depth = std::numeric_limits<scalar>::quiet_NaN();
+    r.normal.fill(std::numeric_limits<scalar>::quiet_NaN());
+    return r;
+  };
 
   const auto diff_support = [&pool](const std::uint32_t a,
                                     const std::uint32_t b,
@@ -1784,10 +2075,12 @@ auto epa_penetration_3d(
         // (that point is always the last one appended to `distinct`).
         const auto [depth, out_normal] =
             project_onto_points(distinct.data(), distinct.size() - 1);
-        return {static_cast<scalar>(depth),
-                {static_cast<scalar>(out_normal[0]),
-                 static_cast<scalar>(out_normal[1]),
-                 static_cast<scalar>(out_normal[2])}};
+        epa_result<scalar, 3> r{};
+        r.depth = static_cast<scalar>(depth);
+        r.normal = {static_cast<scalar>(out_normal[0]),
+                    static_cast<scalar>(out_normal[1]),
+                    static_cast<scalar>(out_normal[2])};
+        return r;
       }
     }
     else if (final_info.have_plane) {
@@ -1942,6 +2235,23 @@ auto epa_penetration_3d(
   vertices.push_back(c);
   vertices.push_back(d);
 
+  arena.vert_support_count = 0;
+  if (arena.vert_support_count < epa_sbo_capacity) {
+    arena.vert_support_ids[arena.vert_support_count++] = {
+        std::get<0>(seed[0]), std::get<1>(seed[0])};
+  }
+  if (arena.vert_support_count < epa_sbo_capacity) {
+    arena.vert_support_ids[arena.vert_support_count++] = {
+        std::get<0>(seed[1]), std::get<1>(seed[1])};
+  }
+  if (arena.vert_support_count < epa_sbo_capacity) {
+    arena.vert_support_ids[arena.vert_support_count++] = {
+        std::get<0>(seed[2]), std::get<1>(seed[2])};
+  }
+  if (arena.vert_support_count < epa_sbo_capacity) {
+    arena.vert_support_ids[arena.vert_support_count++] = {
+        std::get<0>(seed[3]), std::get<1>(seed[3])};
+  }
   faces.push_back(make_face(0, 2, 1));  // ACB
   faces.push_back(make_face(0, 1, 3));  // ABD
   faces.push_back(make_face(0, 3, 2));  // ADC
@@ -1975,11 +2285,20 @@ auto epa_penetration_3d(
         diff_support(id_a, id_b, faces[closest_face].normal);
     const scalar candidate_distance = num::inner_prod(
         support_vector(candidate), faces[closest_face].normal);
-    if (candidate_distance - closest_distance <= options.tolerance)
-      return {static_cast<scalar>(closest_distance),
-              {static_cast<scalar>(faces[closest_face].normal[0]),
-               static_cast<scalar>(faces[closest_face].normal[1]),
-               static_cast<scalar>(faces[closest_face].normal[2])}};
+    if (candidate_distance - closest_distance <= options.tolerance) {
+      answer r{};
+      r.depth = static_cast<scalar>(closest_distance);
+      r.normal = {static_cast<scalar>(faces[closest_face].normal[0]),
+                  static_cast<scalar>(faces[closest_face].normal[1]),
+                  static_cast<scalar>(faces[closest_face].normal[2])};
+      for (std::size_t k = 0; k < 3; ++k) {
+        const std::size_t vi = faces[closest_face].indices[k];
+        if (vi < epa_sbo_capacity && vi < arena.vert_support_count) {
+          r.vertices[k] = arena.vert_support_ids[vi];
+        }
+      }
+      return r;
+    }
 
     const vector candidate_vec = support_vector(candidate);
     bool duplicate = false;
@@ -1991,16 +2310,26 @@ auto epa_penetration_3d(
         break;
       }
     }
-    if (duplicate)
-      return {static_cast<scalar>(closest_distance),
-              {static_cast<scalar>(faces[closest_face].normal[0]),
-               static_cast<scalar>(faces[closest_face].normal[1]),
-               static_cast<scalar>(faces[closest_face].normal[2])}};
+    if (duplicate) {
+      answer r{};
+      r.depth = static_cast<scalar>(closest_distance);
+      r.normal = {static_cast<scalar>(faces[closest_face].normal[0]),
+                  static_cast<scalar>(faces[closest_face].normal[1]),
+                  static_cast<scalar>(faces[closest_face].normal[2])};
+      return r;
+    }
 
     if (vertices.size() >= max_polytope) return rejected();
 
     const std::size_t new_index = vertices.size();
     vertices.push_back(candidate_vec);
+    if (arena.vert_support_count < epa_sbo_capacity) {
+      arena.vert_support_ids[arena.vert_support_count++] = {
+          std::get<0>(candidate), std::get<1>(candidate)};
+    }
+    else {
+      ++arena.vert_support_count;  // track count even if not stored
+    }
 
     // Remove every face the new vertex is in front of.
     for (std::size_t i = 0; i < faces.size(); ++i) {
@@ -2017,10 +2346,18 @@ auto epa_penetration_3d(
       }
     }
     if (all_faces_removed) {
-      return {static_cast<scalar>(closest_distance),
-              {static_cast<scalar>(faces[closest_face].normal[0]),
-               static_cast<scalar>(faces[closest_face].normal[1]),
-               static_cast<scalar>(faces[closest_face].normal[2])}};
+      answer r{};
+      r.depth = static_cast<scalar>(closest_distance);
+      r.normal = {static_cast<scalar>(faces[closest_face].normal[0]),
+                  static_cast<scalar>(faces[closest_face].normal[1]),
+                  static_cast<scalar>(faces[closest_face].normal[2])};
+      for (std::size_t k = 0; k < 3; ++k) {
+        const std::size_t vi = faces[closest_face].indices[k];
+        if (vi < epa_sbo_capacity && vi < arena.vert_support_count) {
+          r.vertices[k] = arena.vert_support_ids[vi];
+        }
+      }
+      return r;
     }
 
     // Keep each retained face's edges in their original winding order:
@@ -2074,46 +2411,53 @@ auto epa_penetration_3d(
   return rejected();
 }
 
-// The batched penetration pass: the second pass over the same pool and the
-// same pair list as gjk_batch. `pairs` is the pair list that pass evaluated
-// and `gjk_results` is parallel to it, so a hit's shape ids come from its own
-// pair record and its seed from its own result -- no GJK run to recover
-// either. hit_pairs[k] = j selects result and pair j, so answer k belongs to
-// hit_pairs[k]; a hit the batch cannot answer is NaN in place rather than
-// missing from the result.
+// The per-hit polytope storage the EPA evaluators work in: the 2D branch
+// keeps the ring of support points, the 3D branch the vertex set and the
+// face list built on it. A caller running one batch per simulation step owns
+// one arena across the batches: the evaluators reset what they use per hit,
+// and reserve() only grows, so the capacity built for the previous step is
+// reused instead of rebuilt per batch.
+template <typename Pool, std::size_t Dim>
+  requires(Dim == 2 || Dim == 3)
+using epa_arena = std::conditional_t<
+    Dim == 2, polytope_ring<typename Pool::support>,
+    polytope_solid<typename Pool::vector, typename Pool::scalar>>;
+
+// The batched penetration pass (core, by reference): the second pass over
+// the same pool and the same pair list as gjk_batch. `pairs` is the pair
+// list that pass evaluated and `gjk_results` is parallel to it, so a hit's
+// shape ids come from its own pair record and its seed from its own result
+// -- no GJK run to recover either. hit_pairs[k] = j selects result and pair
+// j, so answer k belongs to hit_pairs[k]; a hit the batch cannot answer is
+// NaN in place rather than missing from the result. The answer buffer and
+// the arena are caller-owned: every entry is assigned before it is read, so
+// a buffer kept across steps is safe to reuse with stale contents.
 template <std::size_t Dim, typename Pool, typename PairRecord,
           typename Support>
   requires(Dim == 2 || Dim == 3)
-auto epa_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
+void epa_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
                const std::vector<std::uint32_t>& hit_pairs,
                const std::vector<batch_result<Support, Dim + 1>>& gjk_results,
-               const gjk_options options = {})
-    -> std::vector<std::pair<typename Pool::scalar,
-                             std::array<typename Pool::scalar, Dim>>>
+               const gjk_options options,
+               std::vector<epa_result<typename Pool::scalar, Dim>>& answers,
+               epa_arena<Pool, Dim>& arena, batch_timing* timing = nullptr)
 {
   using scalar = typename Pool::scalar;
-  using answer = std::pair<scalar, std::array<scalar, Dim>>;
 
   assert_device_contract<Pool, Dim>();
-
-  // The per-hit polytope storage, owned by the evaluator and reused for every
-  // hit (each branch resets what it uses): the 2D branch keeps the ring of
-  // support points, the 3D branch the vertex set and the face list built on
-  // it. Pre-sized once per batch by the loop below.
-  using arena_type = std::conditional_t<
-      Dim == 2, polytope_ring<typename Pool::support>,
-      polytope_solid<typename Pool::vector, typename Pool::scalar>>;
 
   const std::size_t pair_count = gjk_results.size();
   const std::size_t record_count = pairs.size();
 
-  std::vector<answer> answers(hit_pairs.size(), unanswered<scalar, Dim>());
+  // assign (not resize) so the buffer is re-filled even after the answers it
+  // held are stale; a buffer kept across calls is emptied and re-added
+  // without losing its heap block, and its capacity from the previous step
+  // is reused.
+  answers.assign(hit_pairs.size(), unanswered<scalar, Dim>());
 
   // Validation that depends on the options alone, the way epa rejects them:
   // every hit goes unanswered.
-  if (options.tolerance <= 0. || options.max_iterations == 0) return answers;
-
-  arena_type arena;
+  if (options.tolerance <= 0. || options.max_iterations == 0) return;
 
   // Pre-size the arena once, before the hit loop, from the exact bound the
   // guards already use. The polytope can hold at most one vertex per point of
@@ -2154,6 +2498,8 @@ auto epa_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
     arena.reserve(worst_vertices, 2 * worst_vertices);
   }
 
+  if (timing != nullptr) timing->seconds.assign(hit_pairs.size(), 0.);
+
   for (std::size_t i = 0; i < hit_pairs.size(); ++i) {
     // A hit that names a pair this batch never evaluated is unanswered in
     // place: there is no result to read a seed from, so every position stays
@@ -2169,17 +2515,498 @@ auto epa_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
         pair.shape_id_B >= pool.entries.size())
       continue;
 
+    const auto hit_start = std::chrono::steady_clock::now();
+
     if constexpr (Dim == 2)
       answers[i] = epa_penetration_2d(pool, pair.shape_id_A, pair.shape_id_B,
                                       gjk_results[hit].seed, options, arena);
     else
       answers[i] = epa_penetration_3d(pool, pair.shape_id_A, pair.shape_id_B,
                                       gjk_results[hit].seed, options, arena);
+
+    // Skipped rows (invalid hit records) keep their assigned 0 so the row
+    // count stays one per hit.
+    if (timing != nullptr)
+      timing->seconds[i] = std::chrono::duration<double>(
+                               std::chrono::steady_clock::now() - hit_start)
+                               .count();
   }
 
+  return;
+}
+
+// The batched penetration pass (allocating form): allocates the answer
+// buffer and the arena and forwards to the core overload above. Kept as a
+// convenience for callers that buffer once per call; the by-reference core
+// is the intended form for the per-step batch stage.
+template <std::size_t Dim, typename Pool, typename PairRecord,
+          typename Support>
+  requires(Dim == 2 || Dim == 3)
+auto epa_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
+               const std::vector<std::uint32_t>& hit_pairs,
+               const std::vector<batch_result<Support, Dim + 1>>& gjk_results,
+               const gjk_options options = {})
+    -> std::vector<epa_result<typename Pool::scalar, Dim>>
+{
+  std::vector<epa_result<typename Pool::scalar, Dim>> answers;
+  epa_arena<Pool, Dim> arena;
+  epa_batch<Dim>(pool, pairs, hit_pairs, gjk_results, options, answers,
+                 arena);
   return answers;
 }
 
+// ---------------------------------------------------------------------------
+// SAT batch: Separating Axis Theorem as a batched narrowphase, carrying
+// answers and not just statuses: one sat_result per pair -- the status,
+// the normal oriented A -> B, and a signed gap h, positive for separated
+// pairs (the largest gap the axis set found, a lower bound on the true
+// gap) and negative for enclosed pairs (the min-overlap depth, the sign
+// convention siconos re-derives per pair today). No witness set leaves
+// this section: response construction stays with the GJK/EPA path, where
+// EPA answers with the seeded ring vertices, and SAT is the answering
+// path for small convex polygons and the gate for everything else. This
+// keep the three asks (2) prefilter, (3) SAT answers) in one surface.
+// ---------------------------------------------------------------------------
+
+// The SAT answer row. st mirrors batch_result's vocabulary with
+// max_iterations unreachable (SAT decides per axis, not iteratively);
+// invalid_input happens only in the batch wrappers, the scalar entry
+// reports it by throwing the way sat_inter does.
+template <typename Scalar, std::size_t Dim>
+struct sat_result {
+  status st{};
+  std::array<Scalar, Dim> normal{};  // oriented A -> B
+  Scalar h{};                        // +gap separated, -depth enclosed
+};
+
+// The tuple sat_intersect_* returns, wrapped once: enclosed rows carry the
+// positive min-overlap, separated rows the negated gap (it tracks the
+// deepest separation), so the flip to reach h = +gap / -depth is a single
+// sign and the axis needs no re-orientation -- the intersect functions
+// already leave it A -> B.
+template <std::size_t Dim, typename Tuple>
+  requires(Dim == 2 || Dim == 3)
+auto sat_from_tuple(const Tuple& res)
+    -> sat_result<typename decltype(env(std::get<1>(res)))::scalar, Dim>
+{
+  using scalar = typename decltype(env(std::get<1>(res)))::scalar;
+  using answer = sat_result<scalar, Dim>;
+
+  answer entry{};
+  const bool inter = std::get<0>(res);
+  entry.st = inter ? status::enclosed : status::separated;
+  const auto& axis = std::get<1>(res);
+  for (std::size_t k = 0; k < Dim; ++k) entry.normal[k] = scalar(axis[k]);
+  entry.h = -std::get<2>(res);
+  return entry;
+}
+
+// The scan over stored convex-clean polygons: the same maths as
+// sat_intersect_2d -- edge-normal axes, projection min/max, the gap kept
+// as a max, the overlap kept as a min and clamped, both axes oriented
+// A -> B by the final centroid flip -- without the per-call hull build
+// and axis dedup. Duplicate parallel axes (collinear triples) decide the
+// same way, so they are harmless and kept. The caller runs
+// cyclic_convex_2d first: the scan assumes a zero-edge-free walk.
+template <typename ShapeA, typename ShapeB>
+auto sat_2d_scan(const ShapeA& sa, const ShapeB& sb,
+                 const gjk_options& options)
+    -> std::tuple<bool, std::remove_cvref_t<decltype(sa[0])>,
+                  typename decltype(env(sa[0]))::scalar>
+{
+  using point = std::remove_cvref_t<decltype(sa[0])>;
+  using vector = point;
+  using scalar = typename decltype(env(point{}))::scalar;
+
+  const auto count_of = [](const auto& shape) {
+    return static_cast<std::size_t>(
+        std::distance(shape.begin(), shape.end()));
+  };
+  const std::size_t na = count_of(sa);
+  const std::size_t nb = count_of(sb);
+
+  bool intersect = true;
+  vector sep_axis{};
+  scalar sep_gap = 0;
+  vector min_axis{};
+  scalar min_overlap = (scalar)1e300;
+
+  auto project_axis = [](const auto& shape, const std::size_t n,
+                         const vector& axis) {
+    scalar mn = (scalar)1e300, mx = (scalar)-1e300;
+    for (std::size_t i = 0; i < n; ++i) {
+      const auto& p = shape[i];
+      const scalar d = p[0] * axis[0] + p[1] * axis[1];
+      mn = std::min(mn, d);
+      mx = std::max(mx, d);
+    }
+    return std::pair{mn, mx};
+  };
+
+  for (std::size_t side = 0; side < 2; ++side) {
+    const auto& shape = side == 0 ? sa : sb;
+    const std::size_t n = side == 0 ? na : nb;
+    for (std::size_t i = 0; i < n; ++i) {
+      const auto& p0 = shape[i];
+      const auto& p1 = shape[(i + 1) % n];
+      vector nrm{};
+      nrm[0] = -(p1[1] - p0[1]);  // the edge normal, then normalized
+      nrm[1] = p1[0] - p0[0];
+      const scalar len = std::sqrt(nrm[0] * nrm[0] + nrm[1] * nrm[1]);
+      if (len <= options.tolerance) continue;
+      nrm[0] /= len;
+      nrm[1] /= len;
+
+      const auto [mnA, mxA] = project_axis(sa, na, nrm);
+      const auto [mnB, mxB] = project_axis(sb, nb, nrm);
+      if (mxA < mnB - options.tolerance || mxB < mnA - options.tolerance) {
+        intersect = false;
+        const scalar gap = std::max(mnB - mxA, mnA - mxB);
+        if (gap > sep_gap) {
+          sep_gap = gap;
+          sep_axis = nrm;
+        }
+      }
+      else {
+        const scalar overlap = std::min(mxA, mxB) - std::max(mnA, mnB);
+        if (overlap < min_overlap) {
+          min_overlap = overlap;
+          min_axis = nrm;
+        }
+      }
+    }
+  }
+
+  if (intersect) {
+    if (min_overlap < 0) min_overlap = 0;
+    scalar cA = 0, cB = 0;
+    for (std::size_t i = 0; i < na; ++i)
+      cA += sa[i][0] * min_axis[0] + sa[i][1] * min_axis[1];
+    for (std::size_t i = 0; i < nb; ++i)
+      cB += sb[i][0] * min_axis[0] + sb[i][1] * min_axis[1];
+    cA /= static_cast<scalar>(na);
+    cB /= static_cast<scalar>(nb);
+    if (cB - cA < 0) {
+      min_axis[0] = -min_axis[0];
+      min_axis[1] = -min_axis[1];
+    }
+    return std::tuple<bool, vector, scalar>{true, min_axis, min_overlap};
+  }
+
+  scalar centerA = 0, centerB = 0;
+  for (std::size_t i = 0; i < na; ++i)
+    centerA += sa[i][0] * sep_axis[0] + sa[i][1] * sep_axis[1];
+  for (std::size_t i = 0; i < nb; ++i)
+    centerB += sb[i][0] * sep_axis[0] + sb[i][1] * sep_axis[1];
+  centerA /= static_cast<scalar>(na);
+  centerB /= static_cast<scalar>(nb);
+  if (centerB - centerA < 0) {
+    sep_axis[0] = -sep_axis[0];
+    sep_axis[1] = -sep_axis[1];
+  }
+  return std::tuple<bool, vector, scalar>{false, sep_axis, -sep_gap};
+}
+
+// The scalar per-pair answer, usable on its own and the engine the batch
+// wrappers call: validates shapes and options the way sat_inter does
+// (throwing invalid_argument), then answers 2D through the no-alloc scan
+// when both shapes walk a convex polygon in their stored order --
+// re-checked per call, cheap and allocation-free -- through
+// sat_intersect_2d's hull build otherwise, and through sat_intersect_3d's
+// face axes always.
+template <std::size_t Dim, typename ShapeA, typename ShapeB>
+  requires(Dim == 2 || Dim == 3)
+auto sat_pair(const ShapeA& sa, const ShapeB& sb,
+              const gjk_options options = {})
+    -> sat_result<typename decltype(env(sa[0]))::scalar, Dim>
+{
+  if constexpr (Dim == 2) {
+    validate_shape_2d(sa, "first shape");
+    validate_shape_2d(sb, "second shape");
+    validate_options(options);
+    const bool clean = cyclic_convex_2d(sa.begin(), sa.end()) &&
+                       cyclic_convex_2d(sb.begin(), sb.end());
+    return clean ? sat_from_tuple<Dim>(sat_2d_scan(sa, sb, options))
+                 : sat_from_tuple<Dim>(sat_intersect_2d(sa, sb, options));
+  }
+  else {
+    validate_shape_3d(sa, "first shape");
+    validate_shape_3d(sb, "second shape");
+    validate_options(options);
+    return sat_from_tuple<Dim>(sat_intersect_3d(sa, sb, options));
+  }
+}
+
+// The batched SAT pass, per pair: the same validation shape as
+// gjk_batch_pair (every scalar rejection lands as invalid_input, no throw
+// crosses the batch edge), then the O(1) ball prefilter when bounds are
+// given -- answering separated with the unit axis A -> B and the ball-gap
+// lower bound dist - (rA + rB), which the true gap exceeds, without
+// reading a vertex -- and the scalar engine otherwise. With bounds and
+// both shapes flagged convex by compute_pool_bounds, the per-pair
+// convexity walk is skipped and the scan runs on the pool windows
+// directly.
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+auto sat_batch_pair(
+    const Pool& pool, const PairRecord& pair, const gjk_options options,
+    const pool_bounds<typename Pool::scalar, Dim>* bounds = nullptr)
+    -> sat_result<typename Pool::scalar, Dim>
+{
+  using scalar = typename Pool::scalar;
+  using answer = sat_result<scalar, Dim>;
+
+  const auto invalid_input = []() {
+    answer entry{};
+    entry.st = status::invalid_input;
+    return entry;
+  };
+
+  const auto& entries = pool.entries;
+  if (pair.shape_id_A >= entries.size() ||
+      pair.shape_id_B >= entries.size() ||
+      entries[pair.shape_id_A].vertex_count == 0 ||
+      entries[pair.shape_id_B].vertex_count == 0 ||
+      std::size(pair.init_dir) != Dim ||
+      pool.vertex_buffer[entries[pair.shape_id_A].vertex_offset].size() !=
+          Dim ||
+      pool.vertex_buffer[entries[pair.shape_id_B].vertex_offset].size() !=
+          Dim)
+    return invalid_input();
+
+  if (options.tolerance <= 0. || options.max_iterations == 0)
+    return invalid_input();
+
+  // The prefilter answers without reading a vertex: the axis A -> B and
+  // the gap lower bound dist - (rA + rB). A zero centre difference leaves
+  // no direction to name, so the normal stays zero on that guard; it is
+  // unreachable with positive radii and a rejecting distance anyway.
+  if (bounds != nullptr &&
+      bounds_separated<Dim>(pool, *bounds, pair.shape_id_A, pair.shape_id_B,
+                            options.tolerance)) {
+    answer entry{};
+    entry.st = status::separated;
+    scalar d2{};
+    for (std::size_t k = 0; k < Dim; ++k) {
+      const scalar diff =
+          bounds->centre[std::size_t{pair.shape_id_B} * Dim + k] -
+          bounds->centre[std::size_t{pair.shape_id_A} * Dim + k];
+      d2 += diff * diff;
+      entry.normal[k] = diff;
+    }
+    const scalar dist = std::sqrt(d2);
+    if (dist > scalar{}) {
+      for (std::size_t k = 0; k < Dim; ++k) entry.normal[k] /= dist;
+    }
+    entry.h = dist - (bounds->radius[pair.shape_id_A] +
+                      bounds->radius[pair.shape_id_B]);
+    return entry;
+  }
+
+  if constexpr (Dim == 2) {
+    // the pool flags carry the convexity verdict, so the per-pair walk
+    // sat_pair would run is already done
+    if (bounds != nullptr && bounds->convex[pair.shape_id_A] != 0 &&
+        bounds->convex[pair.shape_id_B] != 0) {
+      try {
+        return sat_from_tuple<Dim>(
+            sat_2d_scan(shape_view<Pool>{pool, pair.shape_id_A},
+                        shape_view<Pool>{pool, pair.shape_id_B}, options));
+      }
+      catch (...) {
+        return invalid_input();
+      }
+    }
+  }
+
+  try {
+    return sat_pair<Dim>(shape_view<Pool>{pool, pair.shape_id_A},
+                         shape_view<Pool>{pool, pair.shape_id_B}, options);
+  }
+  catch (...) {
+    return invalid_input();
+  }
+}
+
+// The batched SAT pass (core, by reference): one pair list, one answer
+// buffer, written by the rules the by-ref gjk_batch core follows -- assign
+// re-fills, the capacity from the previous step reused, zero stale rows.
+// Invalid options reject every pair; everything else is per pair. bounds
+// rides through to the pair kernel, timing collects one wall-clock row
+// per pair (null by default, zero cost when unset).
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+void sat_batch(
+    const Pool& pool, const std::vector<PairRecord>& pairs,
+    const gjk_options options,
+    std::vector<sat_result<typename Pool::scalar, Dim>>& answers,
+    const pool_bounds<typename Pool::scalar, Dim>* bounds = nullptr,
+    batch_timing* timing = nullptr)
+{
+  using answer = sat_result<typename Pool::scalar, Dim>;
+
+  assert_device_contract<Pool, Dim>();
+
+  answers.assign(pairs.size(), answer{});
+
+  if (options.tolerance <= 0. || options.max_iterations == 0) {
+    for (auto& entry : answers) entry.st = status::invalid_input;
+    return;
+  }
+
+  if (timing != nullptr) {
+    timing->seconds.assign(pairs.size(), 0.);
+    for (std::size_t i = 0; i < pairs.size(); ++i) {
+      const auto start = std::chrono::steady_clock::now();
+      answers[i] = sat_batch_pair<Dim>(pool, pairs[i], options, bounds);
+      timing->seconds[i] = std::chrono::duration<double>(
+                               std::chrono::steady_clock::now() - start)
+                               .count();
+    }
+    return;
+  }
+
+  for (std::size_t i = 0; i < pairs.size(); ++i)
+    answers[i] = sat_batch_pair<Dim>(pool, pairs[i], options, bounds);
+}
+
+// The batched SAT pass (allocating form): allocates the answer buffer and
+// forwards to the core overload above.
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+auto sat_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
+               const gjk_options options = {})
+    -> std::vector<sat_result<typename Pool::scalar, Dim>>
+{
+  std::vector<sat_result<typename Pool::scalar, Dim>> answers;
+  sat_batch<Dim>(pool, pairs, options, answers);
+  return answers;
+}
+
+// Convenience overload (3D) matching gjk_batch. The init direction stays
+// in the signature for interface parity; SAT ignores it. The rows are
+// sat_result now, the answer kind this section answers with.
+template <std::size_t Dim>
+  requires(Dim == 3)
+auto sat_batch(const std::vector<std::vector<std::array<double, 3>>>& a,
+               const std::vector<std::vector<std::array<double, 3>>>& b,
+               const std::array<double, 3>& init,
+               const gjk_options options = {})
+    -> std::vector<sat_result<double, Dim>>
+{
+  using shape = std::vector<std::array<double, 3>>;
+
+  const std::size_t pair_count = std::min(a.size(), b.size());
+  std::vector<sat_result<double, Dim>> results(pair_count);
+
+  if (a.size() != b.size()) {
+    for (auto& entry : results) entry.st = status::invalid_input;
+    return results;
+  }
+
+  std::vector<shape> pool_shapes;
+  pool_shapes.reserve(a.size() + b.size());
+  pool_shapes.insert(pool_shapes.end(), a.begin(), a.end());
+  pool_shapes.insert(pool_shapes.end(), b.begin(), b.end());
+
+  const auto pool = pack_shapes(pool_shapes);
+
+  const auto offset = static_cast<std::uint32_t>(a.size());
+  std::vector<pair_record<double, 3>> pairs;
+  pairs.reserve(pair_count);
+  for (std::size_t i = 0; i < pair_count; ++i)
+    pairs.push_back(
+        pair_record<double, 3>{static_cast<std::uint32_t>(i),
+                               offset + static_cast<std::uint32_t>(i),
+                               {init[0], init[1], init[2]}});
+
+  return sat_batch<Dim>(pool, pairs, options);
+}
+
+// Penetration-style SAT batch: returns (depth, normal) per hit like
+// epa_batch.
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+auto sat_penetration_batch_pair(const Pool& pool, const PairRecord& pair,
+                                const gjk_options options)
+    -> std::pair<typename Pool::scalar,
+                 std::array<typename Pool::scalar, Dim>>
+{
+  using scalar = typename Pool::scalar;
+  using vector = typename Pool::vector;
+  const auto nan = std::numeric_limits<scalar>::quiet_NaN();
+  auto rejected = [&]() {
+    std::array<scalar, Dim> n{};
+    n.fill(nan);
+    return std::pair<scalar, std::array<scalar, Dim>>{nan, n};
+  };
+
+  const auto& entries = pool.entries;
+  if (pair.shape_id_A >= entries.size() ||
+      pair.shape_id_B >= entries.size() ||
+      entries[pair.shape_id_A].vertex_count == 0 ||
+      entries[pair.shape_id_B].vertex_count == 0 || options.tolerance <= 0. ||
+      options.max_iterations == 0)
+    return rejected();
+
+  std::vector<vector> a, b;
+  const auto& ea = entries[pair.shape_id_A];
+  const auto& eb = entries[pair.shape_id_B];
+  for (std::uint32_t i = 0; i < ea.vertex_count; ++i)
+    a.push_back(pool.vertex_buffer[ea.vertex_offset + i]);
+  for (std::uint32_t i = 0; i < eb.vertex_count; ++i)
+    b.push_back(pool.vertex_buffer[eb.vertex_offset + i]);
+
+  try {
+    auto res = cxd::sat<Dim>(a, b, options);
+    return res;
+  }
+  catch (...) {
+    return rejected();
+  }
+}
+
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+auto sat_penetration_batch(const Pool& pool,
+                           const std::vector<PairRecord>& pairs,
+                           const gjk_options options = {})
+    -> std::vector<epa_result<typename Pool::scalar, Dim>>
+{
+  using scalar = typename Pool::scalar;
+  using answer = epa_result<scalar, Dim>;
+  std::vector<answer> answers(pairs.size());
+  const scalar nan = std::numeric_limits<scalar>::quiet_NaN();
+  if (options.tolerance <= 0. || options.max_iterations == 0) {
+    for (auto& a : answers) {
+      std::array<scalar, Dim> n{};
+      n.fill(nan);
+      a = {nan, n};
+    }
+    return answers;
+  }
+  for (std::size_t i = 0; i < pairs.size(); ++i)
+    answers[i] = sat_penetration_batch_pair<Dim>(pool, pairs[i], options);
+  return answers;
+}
+
+// Aliases
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+auto sat_batch_penetration(const Pool& pool,
+                           const std::vector<PairRecord>& pairs,
+                           const gjk_options options = {})
+{
+  return sat_penetration_batch<Dim>(pool, pairs, options);
+}
+
+template <std::size_t Dim, typename Pool, typename PairRecord>
+  requires(Dim == 2 || Dim == 3)
+auto sat_epa_batch(const Pool& pool, const std::vector<PairRecord>& pairs,
+                   const gjk_options options = {})
+{
+  return sat_penetration_batch<Dim>(pool, pairs, options);
+}
 }  // namespace cxd
 
 #endif

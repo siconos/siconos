@@ -1,5 +1,5 @@
-/* CXD is a program dedicated to convex collision detection
- * (currently part of the Siconos software).
+/* CXD is a program dedicated to convex collision detection.
+ * It is part of the Siconos Software.
  *
  * Copyright 2026 INRIA.
  *
@@ -311,6 +311,23 @@ bool run_corpus(const double depth_tol, const double angle_tol)
                     << " components\n";
           return false;
         }
+        // A zero normal carries no direction: both sides answer zero and
+        // the angle between two zero normals is not defined. Mirror the
+        // host's assert_penetration_agrees zero_normal special case.
+        bool zero_normal = true;
+        for (std::size_t k = 0; k < Dim; ++k)
+          if (g.normal[k] != 0.) zero_normal = false;
+        if (zero_normal) {
+          for (std::size_t k = 0; k < Dim; ++k)
+            if (got[k] < -depth_tol || got[k] > depth_tol) {
+              std::cerr << title << ": row " << (row + hit_pairs[h]) << " ("
+                        << g.name << ") golden zero normal but device normal "
+                        << got[k] << '\n';
+              ok = false;
+            }
+          continue;
+        }
+
         std::array<double, Dim> expected{};
         for (std::size_t k = 0; k < Dim; ++k) expected[k] = g.normal[k];
         const double angle = normal_angle<Dim>(got, expected);
@@ -324,16 +341,11 @@ bool run_corpus(const double depth_tol, const double angle_tol)
       row += pairs.size();
     }
 
-  // Both kinds of hit must be met across the corpus, the way the host
-  // grading counts them: real depths and, in 2D, a refusal the device
-  // restates.
+  // Every hit must be graded: at least one answered hit across the corpus.
+  // The host no longer refuses any 2D hit (the degenerate-witness bootstrap
+  // answers every case), so the device port matches it point-for-point.
   if (graded_answered == 0) {
     std::cerr << title << ": no answered hit graded\n";
-    return false;
-  }
-  constexpr bool must_refuse = (Dim == 2);
-  if (must_refuse && graded_refused == 0) {
-    std::cerr << title << ": 2D corpus graded no refusal\n";
     return false;
   }
 

@@ -1,5 +1,5 @@
-/* CXD is a program dedicated to convex collision detection
- * (currently part of the Siconos software).
+/* CXD is a program dedicated to convex collision detection.
+ * It is part of the Siconos Software.
  *
  * Copyright 2026 INRIA.
  *
@@ -966,6 +966,9 @@ __device__ inline cxd_dev_answer<Scalar, Dim> refused()
 
 namespace cxd_dev_2d {
 
+using cxd_dev::add;
+using cxd_dev::scale;
+
 template <class Scalar>
 __device__ inline cxd_dev_answer<Scalar, 2> dev_epa_pair(
     const cxd_dev::pool_view<Scalar, 2>& pool,
@@ -982,17 +985,129 @@ __device__ inline cxd_dev_answer<Scalar, 2> dev_epa_pair(
       pool.entries[pair.shape_id_B].vertex_count == 0)
     return cxd_dev::refused<Scalar, 2>();
 
-  const cxd_dev::vec<Scalar, 2> a = seeds[0];
-  const cxd_dev::vec<Scalar, 2> b = seeds[1];
-  const cxd_dev::vec<Scalar, 2> c = seeds[2];
+  // Non-const so the degenerate bootstrap and canonicalization can reassign.
+  cxd_dev::vec<Scalar, 2> a = seeds[0];
+  cxd_dev::vec<Scalar, 2> b = seeds[1];
+  cxd_dev::vec<Scalar, 2> c = seeds[2];
   const Scalar area =
       (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
-  if (cxd_dev::dev_abs(area) <= options.tolerance)
-    return cxd_dev::refused<Scalar, 2>();
+  if (cxd_dev::dev_abs(area) <= options.tolerance) {
+    // Degenerate witness bootstrap, mirroring epa_penetration_2d's recovery.
+    // The 2D GJK search direction collapses when the origin lies on the
+    // segment between two supports, so the seed triangle has zero area.
+    cxd_dev::vec<Scalar, 2> distinct[3];
+    std::size_t distinct_count = 0;
+    const cxd_dev::vec<Scalar, 2> seed_arr[3] = {a, b, c};
+    for (std::size_t i = 0; i < 3; ++i) {
+      bool found = false;
+      for (std::size_t j = 0; j < distinct_count; ++j) {
+        const cxd_dev::vec<Scalar, 2> d = sub(seed_arr[i], distinct[j]);
+        if (dot(d, d) <= options.tolerance * options.tolerance) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) distinct[distinct_count++] = seed_arr[i];
+    }
 
-  // The host's clockwise test, term for term.
-  const bool cw = (b[0] * c[1] + a[0] * b[1] + a[1] * c[0] -
-                   (a[1] * b[0] + b[1] * c[0] + a[0] * c[1])) < Scalar(0);
+    if (distinct_count == 1) {
+      // One support: the difference is a point at the origin (touching
+      // contact with no direction).
+      const cxd_dev::vec<Scalar, 2> p = distinct[0];
+      const Scalar distance = cxd_dev::dev_sqrt(dot(p, p));
+      cxd_dev_answer<Scalar, 2> out{};
+      out.depth = distance;
+      if (distance > options.tolerance) {
+        for (std::size_t k = 0; k < 2; ++k) out.normal[k] = p[k] / distance;
+      } else {
+        out.normal[0] = Scalar(0);
+        out.normal[1] = Scalar(0);
+      }
+      return out;
+    }
+
+    // distinct_count == 2: span a line, probe off it for a third support.
+    cxd_dev::vec<Scalar, 2> p0 = distinct[0];
+    cxd_dev::vec<Scalar, 2> p1 = distinct[1];
+    const cxd_dev::vec<Scalar, 2> line = sub(p1, p0);
+    const Scalar line_length = cxd_dev::dev_sqrt(dot(line, line));
+    bool bootstrapped = false;
+    if (line_length > options.tolerance) {
+      const cxd_dev::vec<Scalar, 2> perp{-line[1], line[0]};
+      const cxd_dev::vec<Scalar, 2> oblique_a{line[0] + perp[0],
+                                             line[1] + perp[1]};
+      const cxd_dev::vec<Scalar, 2> oblique_b{line[0] - perp[0],
+                                             line[1] - perp[1]};
+      const cxd_dev::vec<Scalar, 2> neg_perp{-perp[0], -perp[1]};
+      const cxd_dev::vec<Scalar, 2> probes[4] = {
+          perp, neg_perp, oblique_a, oblique_b};
+      for (std::size_t pi = 0; pi < 4 && !bootstrapped; ++pi) {
+        const cxd_dev::vec<Scalar, 2>& probe = probes[pi];
+        if (dot(probe, probe) <=
+            options.tolerance * options.tolerance)
+          continue;
+        const cxd_dev::vec<Scalar, 2> candidate =
+            cxd_dev::diff_support(pool, pair.shape_id_A,
+                                  pair.shape_id_B, probe);
+        const cxd_dev::vec<Scalar, 2> off = sub(candidate, p0);
+        const Scalar perpendicular_distance =
+            cxd_dev::dev_abs(line[0] * off[1] - line[1] * off[0]) /
+            line_length;
+        if (perpendicular_distance > options.tolerance) {
+          a = p0;
+          b = p1;
+          c = candidate;
+          bootstrapped = true;
+        }
+      }
+    }
+
+    if (!bootstrapped) {
+      // The difference polytope really is a segment: closest point on
+      // it to the origin.
+      const cxd_dev::vec<Scalar, 2> d = line;
+      const Scalar dd = dot(d, d);
+      Scalar t = Scalar(0);
+      if (dd > Scalar(0)) {
+        t = -dot(p0, d) / dd;
+        if (t < Scalar(0)) t = Scalar(0);
+        if (t > Scalar(1)) t = Scalar(1);
+      }
+      const cxd_dev::vec<Scalar, 2> closest =
+          add(p0, scale(d, t));
+      const Scalar distance = cxd_dev::dev_sqrt(dot(closest, closest));
+      cxd_dev::vec<Scalar, 2> normal{};
+      if (distance > options.tolerance) {
+        for (std::size_t k = 0; k < 2; ++k)
+          normal[k] = closest[k] / distance;
+      } else if (dd > Scalar(0)) {
+        const Scalar dlen = cxd_dev::dev_sqrt(dd);
+        for (std::size_t k = 0; k < 2; ++k)
+          normal[k] = d[k] / dlen;
+      } else {
+        normal[0] = Scalar(0);
+        normal[1] = Scalar(0);
+      }
+      cxd_dev_answer<Scalar, 2> out{};
+      out.depth = distance;
+      out.normal[0] = normal[0];
+      out.normal[1] = normal[1];
+      return out;
+    }
+  }
+
+  // Orientation canonicalization: canonicalize to counterclockwise so the
+  // exterior normal points away from the origin regardless of the witness
+  // order GJK handed over. After this, cw is always false.
+  const Scalar cross =
+      b[0] * c[1] + a[0] * b[1] + a[1] * c[0] -
+      (a[1] * b[0] + b[1] * c[0] + a[0] * c[1]);
+  if (cross < Scalar(0)) {
+    const cxd_dev::vec<Scalar, 2> tmp = b;
+    b = c;
+    c = tmp;
+  }
+  const bool cw = false;
 
   // The polytope can hold one vertex per point of the two shapes'
   // difference; the fixed ring sits on top of that bound.
@@ -1002,9 +1117,9 @@ __device__ inline cxd_dev_answer<Scalar, 2> dev_epa_pair(
 
   cxd_dev::vec<Scalar, 2> ring[cxd_dev_ring_cap];
   std::size_t ring_size = 0;
-  ring[ring_size++] = seeds[0];
-  ring[ring_size++] = seeds[1];
-  ring[ring_size++] = seeds[2];
+  ring[ring_size++] = a;
+  ring[ring_size++] = b;
+  ring[ring_size++] = c;
 
   for (std::size_t iteration = 0; iteration < options.max_iterations;
        ++iteration) {

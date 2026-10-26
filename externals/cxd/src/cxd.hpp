@@ -1,5 +1,5 @@
-/* CXD is a program dedicated to convex collision detection
- * (currently part of the Siconos software).
+/* CXD is a program dedicated to convex collision detection.
+ * It is part of the Siconos Software.
  *
  * Copyright 2026 INRIA.
  *
@@ -557,7 +557,7 @@ namespace cxd
               if (origin_in_prism)
               {
                 return std::tuple{true, stall_compacted[0], stall_compacted[1],
-                                  stall_compacted[2], stall_compacted[3]};
+                                  stall_compacted[2], stall_wit4};
               }
             // No separation certificate was found: GJK's early-out is the only
             // sound separation answer and it did not fire, so the stalled
@@ -566,7 +566,7 @@ namespace cxd
             // pairs are caught by the loop-state stall terminal instead,
             // which sees the actual axis-aligned separation).
               return std::tuple{true, stall_compacted[0], stall_compacted[1],
-                                stall_compacted[2], stall_compacted[3]};
+                                stall_compacted[2], stall_wit4};
             }
           }
         }
@@ -1765,5 +1765,526 @@ namespace cxd
       return epa<3>(sa, sb, supporta, supportb, supportc, supportd, tol, max_iterations);
     throw std::invalid_argument("unsupported dimension");
   }
+  // ---------------------------------------------------------------------------
+  // SAT: Separating Axis Theorem. For small convex meshes this is often
+  // faster than GJK/EPA. Returns an intersection test (sat_inter) and a
+  // penetration/gap estimate (sat). Both dimensions are supported.
+  // ---------------------------------------------------------------------------
+
+  namespace sat_detail
+  {
+    template <typename Point>
+    auto to_vec(const Point& p) { return p; }
+
+    template <typename Shape>
+    auto convex_hull_2d(const Shape& shape)
+    {
+      using point = std::remove_cvref_t<decltype(shape[0])>;
+      std::vector<point> pts;
+      for (const auto& v : shape) pts.push_back(v);
+      std::sort(pts.begin(), pts.end(), [](const point& a, const point& b) {
+        if (a[0] != b[0]) return a[0] < b[0];
+        return a[1] < b[1];
+      });
+      pts.erase(std::unique(pts.begin(), pts.end(),
+                            [](const point& a, const point& b) {
+                              return (a[0] == b[0]) && (a[1] == b[1]);
+                            }),
+                pts.end());
+      if (pts.size() <= 1) return pts;
+      std::vector<point> lower, upper;
+      for (const auto& p : pts) {
+        while (lower.size() >= 2) {
+          const auto& a = lower[lower.size() - 2];
+          const auto& b = lower.back();
+          const double cross = (b[0] - a[0]) * (p[1] - a[1]) -
+                               (b[1] - a[1]) * (p[0] - a[0]);
+          if (cross <= 0) lower.pop_back();
+          else break;
+        }
+        lower.push_back(p);
+      }
+      for (auto it = pts.rbegin(); it != pts.rend(); ++it) {
+        const auto& p = *it;
+        while (upper.size() >= 2) {
+          const auto& a = upper[upper.size() - 2];
+          const auto& b = upper.back();
+          const double cross = (b[0] - a[0]) * (p[1] - a[1]) -
+                               (b[1] - a[1]) * (p[0] - a[0]);
+          if (cross <= 0) upper.pop_back();
+          else break;
+        }
+        upper.push_back(p);
+      }
+      lower.pop_back();
+      upper.pop_back();
+      lower.insert(lower.end(), upper.begin(), upper.end());
+      return lower;
+    }
+
+    template <typename Shape>
+    auto convex_hull_faces_3d(const Shape& shape)
+    {
+      // returns vector of (normal, list of vertex indices) not needed; we only
+      // need face normals and edges. We'll store as vector of array indices.
+      using point = std::remove_cvref_t<decltype(shape[0])>;
+      const std::size_t n = std::distance(shape.begin(), shape.end());
+      std::vector<std::array<std::size_t, 3>> faces;
+      // centroid
+      point centroid{};
+      for (std::size_t i = 0; i < n; ++i) {
+        const auto& p = shape[i];
+        for (std::size_t k = 0; k < 3; ++k) centroid[k] += p[k];
+      }
+      for (std::size_t k = 0; k < 3; ++k) centroid[k] /= static_cast<double>(n);
+      const double tol = 1e-9;
+      for (std::size_t i = 0; i < n; ++i)
+        for (std::size_t j = i + 1; j < n; ++j)
+          for (std::size_t k = j + 1; k < n; ++k) {
+            const auto& a = shape[i];
+            const auto& b = shape[j];
+            const auto& c = shape[k];
+            // normal = cross(b-a, c-a)
+            double nx = (b[1]-a[1])*(c[2]-a[2]) - (b[2]-a[2])*(c[1]-a[1]);
+            double ny = (b[2]-a[2])*(c[0]-a[0]) - (b[0]-a[0])*(c[2]-a[2]);
+            double nz = (b[0]-a[0])*(c[1]-a[1]) - (b[1]-a[1])*(c[0]-a[0]);
+            double len = std::sqrt(nx*nx+ny*ny+nz*nz);
+            if (len <= tol) continue;
+            nx/=len; ny/=len; nz/=len;
+            // check all points on one side (dot <= tol)
+            bool ok = true;
+            bool hasPos = false, hasNeg = false;
+            for (std::size_t t = 0; t < n; ++t) {
+              const auto& p = shape[t];
+              double dot = nx*(p[0]-a[0]) + ny*(p[1]-a[1]) + nz*(p[2]-a[2]);
+              if (dot > tol) { hasPos = true; }
+              if (dot < -tol) { hasNeg = true; }
+            }
+            if (hasPos && hasNeg) { ok = false; }
+            if (!ok) continue;
+            // orient outward: centroid should be on negative side
+            double cdot = nx*(centroid[0]-a[0]) + ny*(centroid[1]-a[1]) + nz*(centroid[2]-a[2]);
+            if (cdot > 0) { nx=-nx; ny=-ny; nz=-nz; }
+            // store normal as vector? We'll just store face (i,j,k) and recompute normal later.
+            faces.push_back({i,j,k});
+          }
+      // deduplicate faces by normal direction
+      return faces;
+    }
+  }
+
+  template <typename ShapeA, typename ShapeB>
+  auto sat_intersect_2d(const ShapeA& sa, const ShapeB& sb, const gjk_options& options)
+  {
+    using point = std::remove_cvref_t<decltype(sa[0])>;
+    using vector = point;
+    using scalar = typename decltype(env(sa[0]))::scalar;
+
+    const auto hullA = sat_detail::convex_hull_2d(sa);
+    const auto hullB = sat_detail::convex_hull_2d(sb);
+
+    auto project = [&](const auto& hull, const vector& axis) {
+      scalar mn = (scalar)1e300, mx = (scalar)-1e300;
+      if (hull.empty()) {
+        for (const auto& v : sa) { // fallback point
+        }
+      }
+      const auto& H = hull.empty() ? (const std::vector<point>&)sa : hull;
+      // We'll just use provided hull or original
+      return std::pair{mn, mx};
+    };
+
+    // collect axes
+    std::vector<vector> axes;
+    auto add_edge_axes = [&](const auto& hull, const auto& original) {
+      const auto& H = hull.size() >= 2 ? hull : original;
+      const std::size_t n = H.size();
+      if (n < 2) {
+        // point: use coordinate axes
+        vector ax{}; ax[0]=1; ax[1]=0; axes.push_back(ax);
+        vector ay{}; ay[0]=0; ay[1]=1; axes.push_back(ay);
+        return;
+      }
+      for (std::size_t i = 0; i < n; ++i) {
+        const auto& p0 = H[i];
+        const auto& p1 = H[(i+1)%n];
+        vector e = H[0];
+        e[0] = p1[0]-p0[0];
+        e[1] = p1[1]-p0[1];
+        vector nrm = H[0];
+        nrm[0] = -e[1];
+        nrm[1] = e[0];
+        scalar len = std::sqrt(nrm[0]*nrm[0]+nrm[1]*nrm[1]);
+        if (len <= options.tolerance) continue;
+        nrm[0]/=len; nrm[1]/=len;
+        axes.push_back(nrm);
+      }
+    };
+    // Need original references; store
+    std::vector<point> origA(sa.begin(), sa.end());
+    std::vector<point> origB(sb.begin(), sb.end());
+    add_edge_axes(hullA, origA);
+    add_edge_axes(hullB, origB);
+
+    // deduplicate axes
+    std::vector<vector> uniq;
+    for (const auto& ax : axes) {
+      bool dup = false;
+      for (const auto& ux : uniq) {
+        scalar d0 = ux[0]-ax[0], d1 = ux[1]-ax[1];
+        if (std::sqrt(d0*d0+d1*d1) <= options.tolerance) { dup=true; break; }
+      }
+      if (!dup) uniq.push_back(ax);
+    }
+
+    bool intersect = true;
+    vector sep_axis = origA[0];
+    scalar sep_gap = 0;
+    vector min_axis = origA[0];
+    scalar min_overlap = (scalar)1e300;
+
+    auto proj = [&](const std::vector<point>& pts, const vector& axis) {
+      scalar mn = (scalar)1e300, mx = (scalar)-1e300;
+      for (const auto& p : pts) {
+        scalar d = p[0]*axis[0] + p[1]*axis[1];
+        mn = std::min(mn, d);
+        mx = std::max(mx, d);
+      }
+      return std::pair{mn, mx};
+    };
+
+    const auto& HA = hullA.size() >= 2 ? hullA : origA;
+    const auto& HB = hullB.size() >= 2 ? hullB : origB;
+
+    for (const auto& axis : uniq) {
+      auto [mnA, mxA] = proj(HA, axis);
+      auto [mnB, mxB] = proj(HB, axis);
+      if (mxA < mnB - options.tolerance || mxB < mnA - options.tolerance) {
+        // separated
+        intersect = false;
+        scalar gap = std::max(mnB - mxA, mnA - mxB);
+        if (gap > sep_gap) { sep_gap = gap; sep_axis = axis; }
+      } else {
+        scalar overlap = std::min(mxA, mxB) - std::max(mnA, mnB);
+        if (overlap < min_overlap) { min_overlap = overlap; min_axis = axis; }
+      }
+    }
+
+    if (intersect) {
+      if (min_overlap < 0) min_overlap = 0;
+      scalar cA = 0, cB = 0;
+      for (const auto& pp : HA) cA += pp[0]*min_axis[0] + pp[1]*min_axis[1];
+      for (const auto& pp : HB) cB += pp[0]*min_axis[0] + pp[1]*min_axis[1];
+      cA /= HA.size(); cB /= HB.size();
+      if (cB - cA < 0) { min_axis[0] = -min_axis[0]; min_axis[1] = -min_axis[1]; }
+      return std::tuple<bool, vector, scalar>{true, min_axis, min_overlap};
+    } else {
+      // orient sep_axis from A to B? Ensure gap positive; normal points from A to B
+      // Adjust sign: we want normal such that projection of B - A positive
+      scalar centerA = 0, centerB = 0;
+      for (const auto& p : HA) centerA += p[0]*sep_axis[0]+p[1]*sep_axis[1];
+      for (const auto& p : HB) centerB += p[0]*sep_axis[0]+p[1]*sep_axis[1];
+      centerA/=HA.size(); centerB/=HB.size();
+      if (centerB - centerA < 0) { sep_axis[0]=-sep_axis[0]; sep_axis[1]=-sep_axis[1]; }
+      return std::tuple<bool, vector, scalar>{false, sep_axis, -sep_gap};
+    }
+  }
+
+  template <typename ShapeA, typename ShapeB>
+  auto sat_intersect_3d(const ShapeA& sa, const ShapeB& sb, const gjk_options& options)
+  {
+    using point = std::remove_cvref_t<decltype(sa[0])>;
+    using vector = point;
+    using scalar = typename decltype(env(sa[0]))::scalar;
+
+    std::vector<point> origA(sa.begin(), sa.end());
+    std::vector<point> origB(sb.begin(), sb.end());
+
+    auto facesA = sat_detail::convex_hull_faces_3d(origA);
+    auto facesB = sat_detail::convex_hull_faces_3d(origB);
+
+    // face normals
+    std::vector<vector> faceNormalsA, faceNormalsB;
+    auto compute_normal = [&](const std::vector<point>& shape, const std::array<std::size_t,3>& f) {
+      const auto& a = shape[f[0]];
+      const auto& b = shape[f[1]];
+      const auto& c = shape[f[2]];
+      double nx = (b[1]-a[1])*(c[2]-a[2]) - (b[2]-a[2])*(c[1]-a[1]);
+      double ny = (b[2]-a[2])*(c[0]-a[0]) - (b[0]-a[0])*(c[2]-a[2]);
+      double nz = (b[0]-a[0])*(c[1]-a[1]) - (b[1]-a[1])*(c[0]-a[0]);
+      double len = std::sqrt(nx*nx+ny*ny+nz*nz);
+      if (len <= options.tolerance) return shape[0];
+      vector n = origA[0];
+      n[0] = nx/len;
+      n[1] = ny/len;
+      n[2] = nz/len;
+      // centroid
+      point centroid{};
+      for (const auto& p : shape) for (int k=0;k<3;++k) centroid[k]+=p[k];
+      for (int k=0;k<3;++k) centroid[k]/=shape.size();
+      double cdot = n[0]*(centroid[0]-a[0]) + n[1]*(centroid[1]-a[1]) + n[2]*(centroid[2]-a[2]);
+      if (cdot > 0) { n[0]=-n[0]; n[1]=-n[1]; n[2]=-n[2]; }
+      return n;
+    };
+    for (const auto& f : facesA) faceNormalsA.push_back(compute_normal(origA, f));
+    for (const auto& f : facesB) faceNormalsB.push_back(compute_normal(origB, f));
+
+    // edges from faces
+    auto edges_from_faces = [&](const std::vector<std::array<std::size_t,3>>& faces) {
+      std::vector<std::pair<std::size_t,std::size_t>> edges;
+      for (const auto& f : faces) {
+        for (int e=0; e<3; ++e) {
+          std::size_t u=f[e], v=f[(e+1)%3];
+          // store ordered as in face (u,v)
+          edges.push_back({u,v});
+        }
+      }
+      // deduplicate by unordered pair
+      std::vector<std::pair<std::size_t,std::size_t>> uniq;
+      for (const auto& e : edges) {
+        bool dup=false;
+        for (const auto& u : uniq) {
+          if ((u.first==e.first && u.second==e.second) || (u.first==e.second && u.second==e.first)) { dup=true; break; }
+        }
+        if (!dup) uniq.push_back(e);
+      }
+      return uniq;
+    };
+    auto edgesA = edges_from_faces(facesA);
+    auto edgesB = edges_from_faces(facesB);
+
+    // collect axes
+    std::vector<vector> axes;
+    auto add_vec = [&](const vector& v) {
+      double len = std::sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+      if (len <= options.tolerance) return;
+      vector u = origA[0];
+      u[0]=v[0]/len; u[1]=v[1]/len; u[2]=v[2]/len;
+      // dedup
+      for (const auto& a : axes) {
+        double d0=a[0]-u[0], d1=a[1]-u[1], d2=a[2]-u[2];
+        if (std::sqrt(d0*d0+d1*d1+d2*d2) <= options.tolerance) return;
+      }
+      axes.push_back(u);
+    };
+    for (const auto& n : faceNormalsA) add_vec(n);
+    for (const auto& n : faceNormalsB) add_vec(n);
+    for (const auto& eA : edgesA) {
+      vector a = origA[0];
+      a[0] = origA[eA.second][0]-origA[eA.first][0];
+      a[1] = origA[eA.second][1]-origA[eA.first][1];
+      a[2] = origA[eA.second][2]-origA[eA.first][2];
+      for (const auto& eB : edgesB) {
+        vector b = origB[0];
+        b[0] = origB[eB.second][0]-origB[eB.first][0];
+        b[1] = origB[eB.second][1]-origB[eB.first][1];
+        b[2] = origB[eB.second][2]-origB[eB.first][2];
+        // cross a x b
+        vector c = origA[0];
+        c[0] = a[1]*b[2]-a[2]*b[1];
+        c[1] = a[2]*b[0]-a[0]*b[2];
+        c[2] = a[0]*b[1]-a[1]*b[0];
+        add_vec(c);
+      }
+    }
+    // if no axes, use coordinate axes
+    if (axes.empty()) {
+      vector x = origA[0], y = origA[0], z = origA[0];
+      x[0]=1; y[1]=1; z[2]=1;
+      axes.push_back(x); axes.push_back(y); axes.push_back(z);
+    }
+
+    auto proj = [&](const std::vector<point>& pts, const vector& axis) {
+      scalar mn=(scalar)1e300, mx=(scalar)-1e300;
+      for (const auto& p : pts) {
+        scalar d = p[0]*axis[0]+p[1]*axis[1]+p[2]*axis[2];
+        mn=std::min(mn,d); mx=std::max(mx,d);
+      }
+      return std::pair{mn,mx};
+    };
+
+    bool intersect = true;
+    vector sep_axis = origA[0];
+    scalar sep_gap = 0;
+    vector min_axis = origA[0];
+    scalar min_overlap = (scalar)1e300;
+
+    const auto& PA = origA;
+    const auto& PB = origB;
+
+    for (const auto& axis : axes) {
+      auto [mnA, mxA] = proj(PA, axis);
+      auto [mnB, mxB] = proj(PB, axis);
+      if (mxA < mnB - options.tolerance || mxB < mnA - options.tolerance) {
+        intersect = false;
+        scalar gap = std::max(mnB - mxA, mnA - mxB);
+        if (gap > sep_gap) { sep_gap = gap; sep_axis = axis; }
+      } else {
+        scalar overlap = std::min(mxA, mxB) - std::max(mnA, mnB);
+        if (overlap < min_overlap) { min_overlap = overlap; min_axis = axis; }
+      }
+    }
+
+    if (intersect) {
+      if (min_overlap < 0) min_overlap = 0;
+      scalar cA = 0, cB = 0;
+      for (const auto& pp : PA) cA += pp[0]*min_axis[0] + pp[1]*min_axis[1] + pp[2]*min_axis[2];
+      for (const auto& pp : PB) cB += pp[0]*min_axis[0] + pp[1]*min_axis[1] + pp[2]*min_axis[2];
+      cA /= PA.size(); cB /= PB.size();
+      if (cB - cA < 0) { min_axis[0] = -min_axis[0]; min_axis[1] = -min_axis[1]; min_axis[2] = -min_axis[2]; }
+      return std::tuple<bool, vector, scalar>{true, min_axis, min_overlap};
+    } else {
+      // orient sep_axis from A to B
+      scalar centerA=0, centerB=0;
+      for (const auto& p : PA) centerA += p[0]*sep_axis[0]+p[1]*sep_axis[1]+p[2]*sep_axis[2];
+      for (const auto& p : PB) centerB += p[0]*sep_axis[0]+p[1]*sep_axis[1]+p[2]*sep_axis[2];
+      centerA/=PA.size(); centerB/=PB.size();
+      if (centerB - centerA < 0) { sep_axis[0]=-sep_axis[0]; sep_axis[1]=-sep_axis[1]; sep_axis[2]=-sep_axis[2]; }
+      return std::tuple<bool, vector, scalar>{false, sep_axis, -sep_gap};
+    }
+  }
+
+  // Template entry point (Dim explicit)
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat_inter(const ShapesA& sa, const ShapesB& sb,
+                                  const gjk_options options = {})
+  {
+    if constexpr (Dim == 2) {
+      validate_shape_2d(sa, "first shape");
+      validate_shape_2d(sb, "second shape");
+      validate_options(options);
+      return sat_intersect_2d(sa, sb, options);
+    } else {
+      validate_shape_3d(sa, "first shape");
+      validate_shape_3d(sb, "second shape");
+      validate_options(options);
+      return sat_intersect_3d(sa, sb, options);
+    }
+  }
+
+  // Convenience overload (2D default)
+  static constexpr auto sat_inter(const any_vectors auto& sa,
+                                  const any_vectors auto& sb,
+                                  const gjk_options options = {})
+  {
+    return sat_inter<2>(sa, sb, options);
+  }
+
+  // Aliases for intersection
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat_intersect(const ShapesA& sa, const ShapesB& sb,
+                                     const gjk_options options = {})
+  {
+    return sat_inter<Dim>(sa, sb, options);
+  }
+  static constexpr auto sat_intersect(const any_vectors auto& sa,
+                                      const any_vectors auto& sb,
+                                      const gjk_options options = {})
+  {
+    return sat_inter<2>(sa, sb, options);
+  }
+
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat_overlap(const ShapesA& sa, const ShapesB& sb,
+                                    const gjk_options options = {})
+  {
+    return sat_inter<Dim>(sa, sb, options);
+  }
+  static constexpr auto sat_overlap(const any_vectors auto& sa,
+                                    const any_vectors auto& sb,
+                                    const gjk_options options = {})
+  {
+    return sat_inter<2>(sa, sb, options);
+  }
+
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat_test(const ShapesA& sa, const ShapesB& sb,
+                                 const gjk_options options = {})
+  {
+    return sat_inter<Dim>(sa, sb, options);
+  }
+  static constexpr auto sat_test(const any_vectors auto& sa,
+                                 const any_vectors auto& sb,
+                                 const gjk_options options = {})
+  {
+    return sat_inter<2>(sa, sb, options);
+  }
+
+  // Penetration-style SAT: returns (depth, normal) like epa for overlapping
+  // pairs; NaN for separated pairs (mirrors epa's contract).
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat(const ShapesA& sa, const ShapesB& sb,
+                            const gjk_options options = {})
+  {
+    auto res = sat_inter<Dim>(sa, sb, options);
+    using scalar = typename decltype(env(sa[0]))::scalar;
+    const bool inter = std::get<0>(res);
+    if (!inter) {
+      scalar nan = std::numeric_limits<scalar>::quiet_NaN();
+      std::array<scalar, Dim> n{}; n.fill(nan);
+      return std::pair<scalar, std::array<scalar, Dim>>{nan, n};
+    }
+    const auto& axis = std::get<1>(res);
+    scalar depth = std::get<2>(res);
+    std::array<scalar, Dim> n{};
+    for (std::size_t k = 0; k < Dim; ++k) n[k] = (scalar)axis[k];
+    return std::pair<scalar, std::array<scalar, Dim>>{depth, n};
+  }
+
+  static constexpr auto sat(const any_vectors auto& sa,
+                            const any_vectors auto& sb,
+                            const gjk_options options = {})
+  {
+    return sat<2>(sa, sb, options);
+  }
+
+  // signed distance (positive separated, negative depth)
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat_distance(const ShapesA& sa, const ShapesB& sb,
+                                    const gjk_options options = {})
+  {
+    auto res = sat_inter<Dim>(sa, sb, options);
+    using scalar = typename decltype(env(sa[0]))::scalar;
+    const bool inter = std::get<0>(res);
+    const auto& axis = std::get<1>(res);
+    scalar val = std::get<2>(res);
+    if (!inter) val = -val; // val already negative gap? we stored -gap
+    // Actually stored -gap for separated; convert to +gap
+    if (!inter) {
+      // res third is -gap, so distance = +gap = -third
+      val = -std::get<2>(res);
+    }
+    std::array<scalar, Dim> n{};
+    for (std::size_t k = 0; k < Dim; ++k) n[k] = (scalar)axis[k];
+    return std::pair<scalar, std::array<scalar, Dim>>{inter ? -val : val, n};
+  }
+
+  static constexpr auto sat_distance(const any_vectors auto& sa,
+                                    const any_vectors auto& sb,
+                                    const gjk_options options = {})
+  {
+    return sat_distance<2>(sa, sb, options);
+  }
+
+  template <std::size_t Dim, typename ShapesA, typename ShapesB>
+  requires (Dim == 2 || Dim == 3)
+  static constexpr auto sat_gap(const ShapesA& sa, const ShapesB& sb,
+                                const gjk_options options = {})
+  {
+    return sat_distance<Dim>(sa, sb, options);
+  }
+  static constexpr auto sat_gap(const any_vectors auto& sa,
+                                const any_vectors auto& sb,
+                                const gjk_options options = {})
+  {
+    return sat_distance<2>(sa, sb, options);
+  }
+
 }
 #endif
