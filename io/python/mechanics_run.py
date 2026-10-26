@@ -617,7 +617,6 @@ class MechanicsHdf5Runner_run_options(dict):
             print_comment(self._d_comment.get(k))
 
     def check_valid_run_options(self):
-
         if self.get("explode_Newton_solve") is not None:
             msg = "run_options.check_valid_run_options():"
             msg += "explode_Newton_solve option is obsolete."
@@ -989,7 +988,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 x2 = x2a + tx
                 y2 = y2a + ty
 
-                bdy = self._interman.insertSegment(x1, y1, x2, y2)
+                bdy = self._interman.insertSegment(x1, y1, x2, y2, ctor.collision_group)
             elif self._shape.attributes(ctor.shape_name)["primitive"] == "Box2d":
                 thickness = self._shape._io.shapes()[ctor.shape_name][:][0][0]
                 size = self._shape._io.shapes()[ctor.shape_name][:][0][1]
@@ -1028,16 +1027,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 x4 = x4r + tx
                 y4 = y4r + ty
 
-                s1 = self._interman.insertSegment(x1, y1, x2, y2)
-                s2 = self._interman.insertSegment(x2, y2, x3, y3)
-                s3 = self._interman.insertSegment(x3, y3, x4, y4)
-                s4 = self._interman.insertSegment(x4, y4, x1, y1)
+                s1 = self._interman.insertSegment(x1, y1, x2, y2, ctor.collision_group)
+                s2 = self._interman.insertSegment(x2, y2, x3, y3, ctor.collision_group)
+                s3 = self._interman.insertSegment(x3, y3, x4, y4, ctor.collision_group)
+                s4 = self._interman.insertSegment(x4, y4, x1, y1, ctor.collision_group)
 
                 bdy = [s1, s2, s3, s4]
 
             elif self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
                 r = self._shape._io.shapes()[ctor.shape_name][:][0][0]
-                bdy = self._interman.insertTranslatedDisk(r, translation)
+                bdy = self._interman.insertTranslatedDisk(
+                    r, translation, ctor.collision_group
+                )
             else:
                 self.print_verbose(
                     "unknown primitive:{}".format(
@@ -1139,7 +1140,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         segments, dtype=np.uint64
                     ).flatten()  # 20 × 4 = 80 DOFs
 
-                    body.init_fem(mesh_data, fesolid, contact_nodes, global_indices)
+                    body.init_fem(
+                        mesh_data,
+                        fesolid,
+                        contact_nodes,
+                        global_indices,
+                        ctor.collision_group,
+                    )
 
                     body.handle().set_mass_matrix(fesolid.mass())
                     body.handle().set_k_matrix(fesolid.stiffnessMatrix())
@@ -1156,7 +1163,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     body = body_class()
                     radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
-                    body.init_disk(radius, mass, self._q0[-1], self._v0[-1])
+                    body.init_disk(
+                        radius, mass, self._q0[-1], self._v0[-1], ctor.collision_group
+                    )
                     self._set_external_forces(body)
                 else:
                     print("vnative body error!")
@@ -1201,7 +1210,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         birth=False,
         number=None,
     ):
-
         assert self.config.backend == "occ"
 
         if mass is None:
@@ -2102,7 +2110,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Only dynamic objects
         assert mass is not None
 
-        bodies = self.config.default_bodies_class(radius, mass, positions, velocities)
+        bodies = self.config.default_bodies_class(
+            radius, mass, positions, velocities, contactor.collision_group
+        )
         np.vectorize(self._nsds.insertDynamicalSystem)(bodies.get())
         np.vectorize(self._set_external_forces)(bodies.get())
 
@@ -3363,7 +3373,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         return build_from_kwargs
 
     def run_initialize(self):
-
         run_options = self._run_options
 
         run_options.check_valid_run_options()
@@ -3854,7 +3863,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._initializing = False
 
     def solver_verbose(self, number_of_contacts):
-
         so = self._simulation.oneStepNSProblem(0).numericsSolverOptions()
         if self.config.backend == "vnative":
             # need a fix in bridge.py
@@ -4132,7 +4140,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
 
     def run(self, *args, **kwargs):
-
         build_from_kwargs = self.build_run_options_from_old_arguments_in_kwargs(
             *args, **kwargs
         )

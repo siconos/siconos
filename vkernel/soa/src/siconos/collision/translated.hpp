@@ -13,6 +13,7 @@ struct translated : item {
   struct attributes {
     some::item_ref<item_t> translated;
     some::vector<some::scalar, some::indice_value<3>> translation;
+    some::integer collision_group;
   };
 
   template <typename Handle>
@@ -44,6 +45,7 @@ struct translated : item {
     }
 
     decltype(auto) translation() { return storage::attr<"translation">(*self()); }
+    decltype(auto) collision_group() { return storage::attr<"collision_group">(*self()); }
   };
 };
 }  // namespace siconos::collision

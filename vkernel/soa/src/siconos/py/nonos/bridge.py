@@ -41,9 +41,10 @@ class SpaceFilter(Stored):
         self._fdisks = {}
 
     # Fixed segment
-    def insertSegment(self, x1, y1, x2, y2):
+    def insertSegment(self, x1, y1, x2, y2, collision_group=0):
         segment = vkernel.disks.add_segment_shape(self.data())
         segment.set_p1_p2(array([x1, y1, 0, x2, y2, 0]), 0)
+        segment.set_collision_group(collision_group)
 
         mp = int(
             max(
@@ -95,8 +96,7 @@ class SpaceFilter(Stored):
         return line
 
     # Fixed disk
-    def insertTranslatedDisk(self, radius, translation):
-
+    def insertTranslatedDisk(self, radius, translation, collision_group=0):
         disk_shape = None
         if radius in self._fdisks:
             disk_shape = self._fdisks[radius]
@@ -113,6 +113,7 @@ class SpaceFilter(Stored):
             array([translation[0], translation[1], 0])
         )
         translated_disk_shape.translated().set_maxpoints(mp)
+        translated_disk_shape.set_collision_group(collision_group)
 
         # negative for static shape
         translated_disk_shape.set_ident(-self._static_shape_counter)
@@ -126,7 +127,9 @@ class SpaceFilter(Stored):
         return translated_disk_shape
 
     def insertNonSmoothLaw(self, nslaw, gid1, gid2):
-        self._handle.set_nslaw(nslaw.handle())  # one nslaw !
+        # multiple nslaws: store in the matrix of both the space filter
+        # and the interaction manager, indexed by collision groups.
+        self._handle.insert_nonsmooth_law(nslaw.handle(), gid1, gid2)
         self._interman.insert_nonsmooth_law(nslaw.handle(), gid1, gid2)
 
     def updateInteractions(self, step):
@@ -336,8 +339,14 @@ class Body(BodyBase):
     def __init__(self):
         pass
 
-    def init_fem(self, mesh_data, fesolid, contact_nodes, contact_nodes_indices):
-
+    def init_fem(
+        self,
+        mesh_data,
+        fesolid,
+        contact_nodes,
+        contact_nodes_indices,
+        collision_group=0,
+    ):
         self._mesh_data = mesh_data
         self._fesolid = fesolid
         self.set_count(self.count() + 1)
@@ -346,6 +355,7 @@ class Body(BodyBase):
         body = vkernel.disks.add_fem(self.data())
         self._handle = body
         body.set_id(self._ident)
+        body.set_collision_group(collision_group)
         sign = hashlib.sha256(mesh_data.encode("utf-8")).hexdigest()
         if sign in self.shapes():
             mesh_shape = self.shapes()[sign]
@@ -361,14 +371,14 @@ class Body(BodyBase):
 
         body.set_shape(mesh_shape)
 
-    def init_disk(self, radius, mass, position, velocity):
-
+    def init_disk(self, radius, mass, position, velocity, collision_group=0):
         self.set_count(self.count() + 1)
         self._ident = self.count()
 
         body = vkernel.disks.add_disk(self.data())
         self._handle = body
         body.set_id(self._ident)
+        body.set_collision_group(collision_group)
         body.set_q(array(position))
         body.set_velocity(array(velocity))
         body.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
@@ -405,13 +415,11 @@ class Body(BodyBase):
         return self.handle().id()
 
     def setQ0Ptr(self, pos, step=0):
-
         # FIX: next step not necessary 1
         self.handle().set_q_at_step(array(pos), 0)
         self.handle().set_q_at_step(array(pos), 1)
 
     def setVelocity0Ptr(self, vel, step=0):
-
         # FIX: next step not necessary 1
         self.handle().set_velocity_at_step(array(vel), step)
         self.handle().set_velocity_at_step(array([0.0, 0.0, 0.0]), step + 1)
@@ -425,7 +433,6 @@ class Body(BodyBase):
 
 class BodyWrap:
     def __init__(self, bdy):
-
         self._bdy = bdy
 
     def getMassValue(self):
@@ -438,13 +445,11 @@ class BodyWrap:
         return self._bdy.id()
 
     def setQ0Ptr(self, pos, step=0):
-
         # FIX: next step not necessary 1
         self._bdy.set_q_at_step(array(pos), 0)
         self._bdy.set_q_at_step(array(pos), 1)
 
     def setVelocity0Ptr(self, vel, step=0):
-
         # FIX: next step not necessary 1
         self._bdy.set_velocity_at_step(array(vel), step)
         self._bdy.set_velocity_at_step(array([0.0, 0.0, 0.0]), step + 1)
@@ -458,8 +463,7 @@ class BodyWrap:
 
 # many bodies
 class Bodies(BodyBase):
-    def __init__(self, radius, mass, positions, velocities):
-
+    def __init__(self, radius, mass, positions, velocities, collision_group=0):
         # ids from 1, as Body and the hdf5 file
         start = self.count() + 1
         self.set_count(self.count() + len(positions))
@@ -482,6 +486,7 @@ class Bodies(BodyBase):
 
         bodies.set_shape(disk_shape)
         bodies.set_fext(array([0, 0, 0]))  # default
+        bodies.set_collision_group(collision_group)
 
     def get(self):
         return [BodyWrap(bdy) for bdy in self.handle().get()]
@@ -502,13 +507,11 @@ class Bodies(BodyBase):
         return self.handle().id()
 
     def setQ0Ptr(self, pos, step=0):
-
         # FIX: next step not necessary 1
         self.handle().set_q_at_step(array(pos), 0)
         self.handle().set_q_at_step(array(pos), 1)
 
     def setVelocity0Ptr(self, vel, step=0):
-
         # FIX: next step not necessary 1
         self.handle().set_velocity_at_step(array(vel), step)
         self.handle().set_velocity_at_step(array([0.0, 0.0, 0.0]), step + 1)
@@ -532,7 +535,6 @@ class TraceParams(Stored):
 
 class OSNSPB(Stored):
     def __init__(self, dim, solvopts):
-
         self._so = vkernel.disks.add_solver_options(self.data())
 
         if solvopts is not None:

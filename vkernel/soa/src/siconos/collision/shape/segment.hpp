@@ -22,6 +22,7 @@ struct segment : item {
         dp2p1;
     some::scalar maxpoints;
     some::array<some::scalar, some::indice_value<1>> length_sq;
+    some::integer collision_group;
   };
 
   template <typename Handle>
@@ -38,6 +39,7 @@ struct segment : item {
     decltype(auto) y2(indice_t seg_index = 0) { return p2(seg_index)[1]; };
     decltype(auto) dp2p1(indice_t seg_index = 0) { return attr<"dp2p1">(*self())[seg_index]; };
     decltype(auto) maxpoints() { return attr<"maxpoints">(*self()); };
+    decltype(auto) collision_group() { return attr<"collision_group">(*self()); };
     decltype(auto) length_sq(indice_t seg_index = 0) {
       return attr<"length_sq">(*self())[seg_index];
     };

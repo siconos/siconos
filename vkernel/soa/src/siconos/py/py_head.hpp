@@ -67,7 +67,7 @@ struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 struct io : siconos::io::io<osi, segment_shape, translated_disk_shape> {};
 template <typename T>
 struct env : standard_environment<T> {
-  using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
+  using params = map<iparam<"dof", 3>, iparam<"ncgroups", 100>>;
 };
 }  // namespace siconos::config::disks
 

@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <print>
+#include <stdexcept>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
@@ -84,11 +85,10 @@ struct space_filter : item {
   using dfinteraction = typename topology::dfinteraction;
   using nslaw = typename finteraction::nslaw;
   using neighborhood = Neighborhood;
-
   struct attributes {
     some::item_ref<topology> topology;
     some::item_ref<neighborhood> neighborhood;
-    some::item_ref<nslaw> nslaw;
+    some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<nslaw>> nslaws;
     some::item_ref<diskdisk_r> diskdisk_r;
     some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<diskmesh_r>>
         diskmeshes;
@@ -102,7 +102,13 @@ struct space_filter : item {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) nslaw() { return storage::attr<"nslaw">(*self()); }
+    decltype(auto) nslaws() { return storage::attr<"nslaws">(*self()); }
+    decltype(auto) insert_nonsmooth_law(auto nslaw, auto gid1, auto gid2) {
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      nslaws[{static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)}] = nslaw;
+      nslaws[{static_cast<std::size_t>(gid2), static_cast<std::size_t>(gid1)}] = nslaw;
+      return *self();
+    }
     decltype(auto) topology() {
       return storage::make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
     }
@@ -378,7 +384,17 @@ struct space_filter : item {
     void dsds_activation(auto& ds1, auto& ds2, auto& fmap, auto hp1, auto hp2) {
       auto& data = self()->data();
       auto topo = self()->topology();
-      auto nslaw = self()->nslaw();
+      auto gid1 = ds1.collision_group();
+      auto gid2 = ds2.collision_group();
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      auto search =
+          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
+      if (search == nslaws.end()) {
+        throw std::runtime_error(
+            "space_filter: no nonsmooth law registered for collision groups (" +
+            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
+      }
+      auto nslaw = storage::make_handle(data, search->second);
       auto diskdisk_r = self()->diskdisk_r();
       auto diskmeshes = self()->diskmeshes();
 
@@ -403,7 +419,17 @@ struct space_filter : item {
     void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1, auto hp2) {
       auto& data = self()->data();
       auto topo = self()->topology();
-      auto nslaw = self()->nslaw();
+      auto gid1 = ds1.collision_group();
+      auto gid2 = ds2.collision_group();
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      auto search =
+          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
+      if (search == nslaws.end()) {
+        throw std::runtime_error(
+            "space_filter: no nonsmooth law registered for collision groups (" +
+            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
+      }
+      auto nslaw = storage::make_handle(data, search->second);
       auto diskmeshes = self()->diskmeshes();
 
       auto mesh = hp2.shape();
@@ -438,7 +464,17 @@ struct space_filter : item {
 
     void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto nslaw = self()->nslaw();
+      auto gid1 = body1.collision_group();
+      auto gid2 = body2.collision_group();
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      auto search =
+          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
+      if (search == nslaws.end()) {
+        throw std::runtime_error(
+            "space_filter: no nonsmooth law registered for collision groups (" +
+            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
+      }
+      auto nslaw = storage::make_handle(data, search->second);
       auto topo = self()->topology();
       auto& relmap = self()->diskfsegments();
 
@@ -487,7 +523,17 @@ struct space_filter : item {
 
     void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
       auto& data = self()->data();
-      auto nslaw = self()->nslaw();
+      auto gid1 = body1.collision_group();
+      auto gid2 = body2.collision_group();
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      auto search =
+          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
+      if (search == nslaws.end()) {
+        throw std::runtime_error(
+            "space_filter: no nonsmooth law registered for collision groups (" +
+            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
+      }
+      auto nslaw = storage::make_handle(data, search->second);
       auto topo = self()->topology();
       auto diskfdisks = self()->diskfdisks();
 
@@ -781,6 +827,7 @@ struct space_filter : item {
           std::declval<data_t&>(), storage::index<collision::diskfdisk_r, indice>{}))>;
       using segment_handle_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(), storage::index<collision::shape::segment, indice>{}))>;
+      using ref_nslaw_t = storage::index<nslaw, indice>;
 
       return collect(
           method("make_points", &interface<Handle>::make_points),
@@ -788,6 +835,8 @@ struct space_filter : item {
           method("insert_diskfsegment_r",
                  &interface<Handle>::insert_diskfsegment_r<diskfsegment_r_t>),
           method("insert_diskfdisk_r", &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
+          method("insert_nonsmooth_law",
+                 &interface<Handle>::insert_nonsmooth_law<ref_nslaw_t, indice, indice>),
           method("remove_static_segment",
                  &interface<Handle>::template remove_static_item<indice, segment_handle_t>));
     }

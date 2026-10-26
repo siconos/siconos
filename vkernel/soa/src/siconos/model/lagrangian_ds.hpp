@@ -34,6 +34,7 @@ struct lagrangian_ds : item {
     some::vector<some::scalar, dof> velocity;          ///< Velocity vector
     some::matrix<some::scalar, dof, dof> mass_matrix;  ///< Mass matrix
     some::vector<some::scalar, dof> fext;              ///< External forces vector
+    some::integer collision_group;                     ///< Collision group of the body
   };
 
   /**
@@ -61,6 +62,11 @@ struct lagrangian_ds : item {
     /// @brief Access external forces attribute
     decltype(auto) fext() { return attr<"fext">(*self()); }
     decltype(auto) fext(auto step) { return attr<"fext">(*self(), step); }
+    /// @brief Access collision group attribute
+    decltype(auto) collision_group() { return attr<"collision_group">(*self()); }
+    decltype(auto) collision_group(auto step) {
+      return attr<"collision_group">(*self(), step);
+    }
   };
 };
 
@@ -73,6 +79,7 @@ struct elastic_lagrangian_ds : item {
     some::matrix<some::scalar, dof, dof> mass_matrix;  ///< Mass matrix
     some::matrix<some::scalar, dof, dof> k_matrix;     ///< Stiffness matrix
     some::vector<some::scalar, dof> fext;              ///< External forces vector
+    some::integer collision_group;                     ///< Collision group of the body
   };
 
   template <typename Handle>
