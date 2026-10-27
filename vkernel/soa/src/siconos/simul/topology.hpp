@@ -1,6 +1,7 @@
 #pragma once
 
 #include "siconos/algebra/sparse_factor.hpp"
+#include "siconos/simul/index_sets.hpp"
 #include "siconos/simul/relation_sets.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/utils/range.hpp"
@@ -12,13 +13,21 @@
 #define VKERNEL_RELATION_SETS 0
 #endif
 
+// default of the IndexSets switch of the topology: the active interactions
+// and the involved systems of a step also given as sets (1) or by their
+// boolean properties alone (0)
+#ifndef VKERNEL_INDEX_SETS
+#define VKERNEL_INDEX_SETS 0
+#endif
+
 namespace siconos::simul {
 
 template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
           typename DynamicDofDynamicalSystem = empty_item,
           typename DynamicDofFixedDofInteraction = empty_item,
           typename DynamicDofDynamicDofInteraction = empty_item,
-          bool BcVelocitiesDynamic = true, bool RelationSets = VKERNEL_RELATION_SETS>
+          bool BcVelocitiesDynamic = true, bool RelationSets = VKERNEL_RELATION_SETS,
+          bool IndexSets = VKERNEL_INDEX_SETS>
 struct topology : item {
   // fixed dof case
   using dof = some::indice_parameter<"dof">;
@@ -116,7 +125,22 @@ struct topology : item {
                              simul::relation_set_properties_t<ddinteraction>{})),
                          gather<>>;
 
-  using properties = decltype(concat(base_properties{}, relation_sets_properties{}));
+  // the active interactions and the involved systems of a step as sets (see
+  // index_sets.hpp), or their boolean properties alone
+  static constexpr bool index_sets = IndexSets;
+
+  using index_sets_properties = std::conditional_t<
+      IndexSets,
+      decltype(concat(
+          concat(concat(simul::index_set_properties_t<finteraction, active_set_tag>{},
+                        simul::index_set_properties_t<dfinteraction, active_set_tag>{}),
+                 simul::index_set_properties_t<ddinteraction, active_set_tag>{}),
+          concat(simul::index_set_properties_t<fsystem, involved_set_tag>{},
+                 simul::index_set_properties_t<dsystem, involved_set_tag>{}))),
+      gather<>>;
+
+  using properties = decltype(concat(concat(base_properties{}, relation_sets_properties{}),
+                                     index_sets_properties{}));
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

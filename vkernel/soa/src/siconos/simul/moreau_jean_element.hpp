@@ -7,6 +7,7 @@
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/lagrangian_r.hpp"
+#include "siconos/simul/index_sets.hpp"
 #include "siconos/simul/relation_sets.hpp"
 #include "siconos/storage/get.hpp"
 #include "siconos/utils/variant.hpp"
@@ -75,16 +76,18 @@ struct moreau_jean_element : item {
 
         auto& data = self()->data();
         auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-        auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
 
-        indice sum_cols = 0;
-        sum_dofs().clear();
-        sum_dofs().push_back(0.);
-        for (auto [mass_matrix, involved] : view::zip(mass_matrices, involveds)) {
-          if (involved) {
-            sum_cols += algebra::ncols(mass_matrix);
-            sum_dofs().push_back(sum_cols);
-          }
+        // sum_dofs()[index] is the first dof of the involved system of this
+        // index: summed in the order of the indices, which is the order in
+        // which the systems got involved, not the order of the systems
+        indice n = 0;
+        for_each_involved(step, [&n](auto, auto) { ++n; });
+        sum_dofs().assign(n + 1, 0);
+        for_each_involved(step, [&](auto i, auto index) {
+          sum_dofs()[index + 1] = algebra::ncols(mass_matrices[i]);
+        });
+        for (indice k = 0; k < n; ++k) {
+          sum_dofs()[k + 1] += sum_dofs()[k];
         }
       } else {
         // compile time systems => sum dofs useless
@@ -324,17 +327,12 @@ struct moreau_jean_element : item {
                                  std::vector<algebra::factored_block>& blocks) {
       if constexpr (system_with_k_matrix() && runtime_dof()) {
         auto& data = self()->data();
-        auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
-        auto& indices = storage::prop_values<system, "index", topology>(data, step);
         auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-        for (std::size_t i = 0; i < involveds.size(); ++i) {
-          if (involveds[i]) {
-            blocks.push_back(
-                {static_cast<std::ptrdiff_t>(ds_offset() + sum_dofs()[indices[i]]),
-                 static_cast<std::ptrdiff_t>(algebra::ncols(mass_matrices[i])),
-                 &fem_w_factor(step, i, h)});
-          }
-        }
+        for_each_involved(step, [&](auto i, auto index) {
+          blocks.push_back({static_cast<std::ptrdiff_t>(ds_offset() + sum_dofs()[index]),
+                            static_cast<std::ptrdiff_t>(algebra::ncols(mass_matrices[i])),
+                            &fem_w_factor(step, i, h)});
+        });
       }
     }
 
@@ -382,6 +380,18 @@ struct moreau_jean_element : item {
       if constexpr (relation_sets()) {
         simul::sync_relation_sets<interaction, topology>(self()->data(), step);
       }
+    }
+
+    // f(i, row) for every active interaction i, row being its rank among the
+    // active interactions of this element (see index_sets.hpp)
+    void for_each_active(auto step, auto&& f) {
+      simul::for_each_active<interaction, topology>(self()->data(), step, f);
+    }
+
+    // f(i, index) for every involved system i, index being its index among
+    // the involved systems
+    void for_each_involved(auto step, auto&& f) {
+      simul::for_each_involved<system, topology>(self()->data(), step, f);
     }
 
     // f(i, rrel) for every interaction i, rrel being a handle on its relation:
@@ -617,20 +627,14 @@ struct moreau_jean_element : item {
 
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
-      auto activations = storage::prop_values<interaction, "activation", topology>(data, step);
-
-      size_t k = 0;
-      for (auto [lambda, activation] : view::zip(lambdas, activations)) {
-        if (activation) {
-          if constexpr (match::fixed_size_vector<velocity>) {
-            lambda = get_vector(lambda_assembled, k);
-            k++;
-          } else {
-            lambda = get_vector(lambda_assembled, k, lambda.size());
-            k++;
-          }
+      for_each_active(step, [&](auto i, auto k) {
+        auto& lambda = lambdas[i];
+        if constexpr (match::fixed_size_vector<velocity>) {
+          lambda = get_vector(lambda_assembled, k);
+        } else {
+          lambda = get_vector(lambda_assembled, k, lambda.size());
         }
-      }
+      });
     }
 
     void update_velocities(auto step, auto h) {
@@ -639,28 +643,18 @@ struct moreau_jean_element : item {
 
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
-      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
-
-      auto& indices = storage::prop_values<system, "index", topology>(data, step);
-
       auto& bc_velocities_0s =
           storage::prop_values<system, "bc_velocities_0", topology>(data, step);
 
       // involved ds velocities -> ds velocities
-      auto n = vs_next.size();
-      for (std::size_t i = 0; i < n; ++i) {
+      for_each_involved(step, [&](auto i, auto index) {
         auto& v_next = vs_next[i];
-        auto involved = involveds[i];
-        auto index = indices[i];
-
-        if (involved) {
-          if constexpr (match::fixed_size_vector<velocity>) {
-            v_next += get_vector(velo, index);
-          } else {
-            v_next += get_vector(velo, index, v_next.size());
-          }
+        if constexpr (match::fixed_size_vector<velocity>) {
+          v_next += get_vector(velo, index);
+        } else {
+          v_next += get_vector(velo, index, v_next.size());
         }
-      }
+      });
 
       // the free velocities of the systems not involved already satisfy them
       apply_bc_velocities_0(bc_velocities_0s, vs_next);
@@ -688,39 +682,28 @@ struct moreau_jean_element : item {
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
 
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto activations = storage::prop_values<interaction, "activation", topology>(data, step);
 
-      size_t k = 0;
-      for (auto [lambda, nslaw, ydot, activation] :
-           view::zip(lambdas, nslaws, ydots, activations)) {
-        if (activation) {
-          set_value(lambda_vector_assembled(), k, lambda);
+      for_each_active(step, [&](auto i, auto k) {
+        set_value(lambda_vector_assembled(), k, lambdas[i]);
 
-          if constexpr (nslaw_with_friction()) {
-            auto hnslaw = storage::make_handle(data, nslaw);
-            set_value(mu_vector_assembled(), k, hnslaw.mu());
-          }
-
-          set_value(ydot_vector_assembled(), k, ydot);
-          k++;
+        if constexpr (nslaw_with_friction()) {
+          auto hnslaw = storage::make_handle(data, nslaws[i]);
+          set_value(mu_vector_assembled(), k, hnslaw.mu());
         }
-      }
+
+        set_value(ydot_vector_assembled(), k, ydots[i]);
+      });
     }
 
     void assemble_mass_matrix_for_involved_ds(auto step) {
       auto& data = self()->data();
 
       auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
-      auto& indices = storage::prop_values<system, "index", topology>(data, step);
 
       // size may be 0
-      for (auto [mass_matrix, involved, index] :
-           view::zip(mass_matrices, involveds, indices)) {
-        if (involved) {
-          set_value(mass_matrix_assembled(), index, index, mass_matrix);
-        }
-      }
+      for_each_involved(step, [&](auto i, auto index) {
+        set_value(mass_matrix_assembled(), index, index, mass_matrices[i]);
+      });
     }
 
     void assemble_k_matrix_for_involved_ds(auto step) {
@@ -728,15 +711,11 @@ struct moreau_jean_element : item {
         auto& data = self()->data();
 
         auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
-        auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
-        auto& indices = storage::prop_values<system, "index", topology>(data, step);
-        // size may be 0
 
-        for (auto [k_matrix, involved, index] : view::zip(k_matrices, involveds, indices)) {
-          if (involved) {
-            set_value(k_matrix_assembled(), index, index, k_matrix);
-          }
-        }
+        // size may be 0
+        for_each_involved(step, [&](auto i, auto index) {
+          set_value(k_matrix_assembled(), index, index, k_matrices[i]);
+        });
       }
       // else the system is rigid and the sparse k_matrix is not filled.
     }
