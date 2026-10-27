@@ -309,6 +309,9 @@ if(WITH_TESTING)
   # Consistency of the 2D/3D contact-status helpers against independent references.
   new_test(NAME test_contact_status_consistency SOURCES test_contact_status_consistency.c)
 
+  # Compare GFC2D_NSN_AC vs reduced FC2D_NSGS velocities on a large problem.
+  new_test(NAME test_gfc2d_nsn_vs_fc2d_nsgs SOURCES test_gfc2d_nsn_vs_fc2d_nsgs.c)
+
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
