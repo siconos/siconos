@@ -1098,35 +1098,35 @@ struct space_filter : item {
       auto& ds1s = storage::prop_values<finteraction, "ds1", Topology>(data, step);
       auto& ds2s = storage::prop_values<finteraction, "ds2", Topology>(data, step);
 
-      auto& dds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, step);
-      auto& dds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, step);
-
       auto interactions = storage::handles<finteraction>(data, step);
 
       build_proximity_maps(ds_ds_prox, ds_segment_prox, ds_fdisk_prox, ds1s, ds2s,
                            interactions);
 
+      // no column is attached to empty_item (see storage::item_storage)
       if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        auto& dds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, step);
+        auto& dds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, step);
         auto dinteractions = storage::handles<dfinteraction>(data, step);
         build_dproximity_maps(ds_dds_prox, dds1s, dds2s, dinteractions);
       }
 
       auto& activations = storage::prop_values<finteraction, "activation", Topology>(data, 0);
 
-      auto& dactivations =
-          storage::prop_values<dfinteraction, "activation", Topology>(data, 0);
-
       int activations_size = activations.size();
-      int dactivations_size = dactivations.size();
       if (activations_size > 0) {
         for (auto [activation] : view::zip(activations)) {
           activation = false;
         }
       }
 
-      if (dactivations_size > 0) {
-        for (auto [activation] : view::zip(dactivations)) {
-          activation = false;
+      if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        auto& dactivations =
+            storage::prop_values<dfinteraction, "activation", Topology>(data, 0);
+        if (dactivations.size() > 0) {
+          for (auto [activation] : view::zip(dactivations)) {
+            activation = false;
+          }
         }
       }
 

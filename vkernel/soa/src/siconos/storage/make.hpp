@@ -98,8 +98,12 @@ struct item_storage_info {
   using all_attributes_t =
       decltype(mp::flatten(mp::concat_all(all_attributes(std::declval<Items>())...)));
 
-  using all_properties_t =
-      decltype(mp::flatten(mp::concat_all(all_properties(std::declval<Items>())...)));
+  // unique: a property declared for several item kinds that resolve to the
+  // same type (simul::topology's dfinteraction and ddinteraction are both
+  // empty_item without dynamic dof systems) would otherwise be a duplicate
+  // column
+  using all_properties_t = decltype(mp::tuple_unique(
+      mp::flatten(mp::concat_all(all_properties(std::declval<Items>())...))));
 
   using all_attached_storages_t =
       decltype(mp::filter(all_properties_t{}, mp::derive_from<some::attached_storage>));
@@ -118,11 +122,18 @@ struct item_storage {
   template <match::item Item>
   struct unit_type_for {
     using attributes_t = decltype(attributes(Item{}));
-    using attached_storages_t = decltype(mp::filter(
-        typename iinfo::all_properties_t{}, mp::is_a_model<[]<typename T>() {
-          return match::attached_storage<T, Item> &&
-                 !requires { typename T::dynamic_storage_t; };
-        }>));
+    // no column attached to empty_item: it stands for an absent item kind
+    // (a topology without dynamic dof systems), no item of it is ever added
+    using attached_storages_t = decltype([] {
+      if constexpr (match::empty_item<Item>) {
+        return mp::tuple<>{};
+      } else {
+        return mp::filter(typename iinfo::all_properties_t{}, mp::is_a_model<[]<typename T>() {
+                            return match::attached_storage<T, Item> &&
+                                   !requires { typename T::dynamic_storage_t; };
+                          }>);
+      }
+    }());
     using all_attrs_t = decltype(concat(attributes_t{}, attached_storages_t{}));
     using type = decltype(mp::unpack(all_attrs_t{}, []<typename... As>(As...) {
       return typename unit_storage<EnvTemplate<Item>, As...>::type{};

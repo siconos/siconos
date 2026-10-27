@@ -385,16 +385,12 @@ static constexpr std::size_t key_index() {
   return key_table<Pairs...>::template find<typename std::decay_t<decltype(key<T>)>::type>();
 };
 
-// The pipeline emits the same key more than once (97 columns, 17 duplicates
-// for the bouncing_ball configuration). hana::to_map collapsed those
-// silently, keeping the FIRST occurrence, since hana::insert is a no-op on an
-// existing key. A tuple does not, so reproduce that here. Keeping the first
-// occurrence makes key_index below agree with the old lookup exactly.
+// Keep the FIRST occurrence of each key, as hana::to_map did (hana::insert is
+// a no-op on an existing key), so key_index below agrees with the old lookup.
 //
-// This is a workaround, not a fix: the duplicates should not be produced in
-// the first place, and since compile memory is quadratic in the column count
-// removing them at the source is worth noticeably more than removing them
-// here.
+// make_compile_time_database no longer emits duplicates (item_storage_info
+// makes all_properties_t unique, see make.hpp), so there this is a no-op;
+// merge_databases still relies on it, the two databases sharing columns.
 template <typename... Pairs>
 struct unique_keys {
   static constexpr std::size_t n = sizeof...(Pairs);
