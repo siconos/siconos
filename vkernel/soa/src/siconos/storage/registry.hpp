@@ -52,9 +52,7 @@ struct column_base {
 
 namespace registry_detail {
 template <typename T>
-constexpr bool is_sparse_set = false;
-template <typename K, typename V>
-constexpr bool is_sparse_set<storage::sparse_set<K, V>> = true;
+constexpr bool is_sparse_set = storage::is_sparse_set_v<T>;
 }  // namespace registry_detail
 
 /**

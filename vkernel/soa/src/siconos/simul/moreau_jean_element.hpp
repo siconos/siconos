@@ -438,7 +438,6 @@ struct moreau_jean_element : item {
         for (std::size_t i = 0; i < n; ++i) {
           auto& k_mat = k_matrices[i];
           auto& q = qs[i];
-          auto& q_next = qs_next[i];
           auto& v = vs[i];
           auto& v_next = vs_next[i];
           auto& f = fexts[i];
@@ -456,13 +455,12 @@ struct moreau_jean_element : item {
           // simulation
           vector dv = fem_w_factor(step, i, h).solve(rhs);
           v_next = v + dv;
+        }
 
-          // boundary conditions
-          for (auto bc_idx : bc_velocities_0s[i]) {
-            v_next(bc_idx) = 0.0;
-          }
+        apply_bc_velocities_0(bc_velocities_0s, vs_next);
 
-          // update q next:
+        // update q next:
+        for (auto [q, q_next, v, v_next] : view::zip(qs, qs_next, vs, vs_next)) {
           q_next = q + h * theta * v_next + h * (1 - theta) * v;
         }
       }
@@ -477,26 +475,28 @@ struct moreau_jean_element : item {
         auto& bc_velocities_0s =
             storage::prop_values<system, "bc_velocities_0", topology>(data, step);
 
-        auto n = qs.size();
-        for (std::size_t i = 0; i < n; ++i) {
-          auto& q = qs[i];
-          auto& q_next = qs_next[i];
-          auto& v = vs[i];
-          auto& v_next = vs_next[i];
-          auto& minv_f = minv_fs[i];
-          auto& minv_f_next = minv_fs_next[i];
-
+        for (auto [v, v_next, minv_f, minv_f_next] :
+             view::zip(vs, vs_next, minv_fs, minv_fs_next)) {
           v_next = v + h * theta * minv_f_next + h * (1 - theta) * minv_f;
+        }
 
-          // apply boundary conditions
-          for (auto bc_idx : bc_velocities_0s[i]) {
-            v_next(bc_idx) = 0.0;
-          }
+        apply_bc_velocities_0(bc_velocities_0s, vs_next);
 
-          // update q next:
+        // update q next:
+        for (auto [q, q_next, v, v_next] : view::zip(qs, qs_next, vs, vs_next)) {
           q_next = q + h * theta * v_next + h * (1 - theta) * v;
         }
       }
+    }
+
+    // zero the blocked velocity components: only the systems with boundary
+    // conditions are visited when bc_velocities_0 is a sparse set
+    static void apply_bc_velocities_0(auto& bc_velocities_0s, auto& vs) {
+      storage::for_each_entry(bc_velocities_0s, [&vs](auto i, auto& bcs) {
+        for (auto bc_idx : bcs) {
+          vs[i](bc_idx) = 0.0;
+        }
+      });
     }
 
     void compute_output(auto step) {
@@ -504,7 +504,6 @@ struct moreau_jean_element : item {
       using env = decltype(self()->env());
       using scalar = typename env::scalar;
       using indice = typename env::indice;
-      using nslaw_size_vector = typename env::template vector<scalar, nslaw_size_t{}.value>;
 
       auto& ys = storage::attr_values<y>(data, step);
       auto& ydots = storage::attr_values<ydot>(data, step);
@@ -531,75 +530,58 @@ struct moreau_jean_element : item {
         // relations (diskdisk_r, polytopepolytope_r, polytopefsegment_r,
         // polytopefdisk_r, polytopedisk_r).
         algebra::set_zero(y);
-        bool linear_case = siconos::variant::visit(
+
+        // one dispatch on the relation per interaction
+        siconos::variant::visit(
             data, inter.relation(),
-            mp::overload([&](match::linear_relation auto rrel) { return true; },
-                         [&](auto) { return false; }));
+            mp::overload(
+                [&](match::linear_relation auto& rrel) {
+                  y = hm1 * qs[ds1.value()] + rrel.b();
+                  ydot = hm1 * velocities[ds1.value()];
 
-        if (linear_case) {
-          auto b = siconos::variant::visit(
-              data, inter.relation(),
-              mp::overload(
-                  [](match::linear_relation auto& real_relation) { return real_relation.b(); },
-                  // no b() present
-                  [](auto) {
-                    nslaw_size_vector b;
-                    b(0) = 0.;
-                    return b;
-                  }));
-
-          y = hm1 * qs[ds1.value()] + b;
-          ydot = hm1 * velocities[ds1.value()];
-
-          if (nds == 2) {
-            y += hm2 * qs[ds2.value()];
-            ydot += hm2 * velocities[ds2.value()];
-          }
-        } else {
-          auto hds1 = storage::make_handle(data, ds1);
-          auto hds2 = storage::make_handle(data, ds2);
-
-          siconos::variant::visit(
-              data, inter.relation(),
-              mp::overload(
-                  [&](match::linear_relation auto rrel) {
-                    assert(false);
-                    return 0.;
-                  },
-                  [&](match::handle<collision::mesh_relation> auto rrel) {
-                    using vector_4d = typename env::template vector<scalar, 4>;
-                    using ds1_t = typename decltype(hds1)::type;
-
-                    auto& ds1_velocities =
-                        storage::attr_values<ds1_t, "velocity">(self()->data(), step);
-
-                    y[0] = rrel.compute_h(step, hds1, hds2);
-
-                    indice i = 4 * rrel.contact_index();
-                    indice idx1 = rrel.mesh().global_indices()[i];
-                    indice idy1 = rrel.mesh().global_indices()[i + 1];
-                    indice idx2 = rrel.mesh().global_indices()[i + 2];
-                    indice idy2 = rrel.mesh().global_indices()[i + 3];
-
-                    ydot = hm1 * ds1_velocities[ds1.value()];
-
-                    /* segment nodes */
-                    vector_4d local_velocity = {
-                        velocities[ds2.value()][idx1], velocities[ds2.value()][idy1],
-                        velocities[ds2.value()][idx2], velocities[ds2.value()][idy2]};
-
-                    ydot += hm2 * local_velocity;
-                  },
-                  [&](match::relation1 auto rrel) {
-                    y[0] = rrel.compute_h(step, hds1);
-                    ydot = hm1 * velocities[ds1.value()];
-                  },
-                  [&](match::relation2 auto rrel) {
-                    y[0] = rrel.compute_h(step, hds1, hds2);
-                    ydot = hm1 * velocities[ds1.value()];
+                  if (nds == 2) {
+                    y += hm2 * qs[ds2.value()];
                     ydot += hm2 * velocities[ds2.value()];
-                  }));
-        }
+                  }
+                },
+                [&](match::handle<collision::mesh_relation> auto rrel) {
+                  using vector_4d = typename env::template vector<scalar, 4>;
+                  auto hds1 = storage::make_handle(data, ds1);
+                  auto hds2 = storage::make_handle(data, ds2);
+                  using ds1_t = typename decltype(hds1)::type;
+
+                  auto& ds1_velocities =
+                      storage::attr_values<ds1_t, "velocity">(self()->data(), step);
+
+                  y[0] = rrel.compute_h(step, hds1, hds2);
+
+                  indice i = 4 * rrel.contact_index();
+                  indice idx1 = rrel.mesh().global_indices()[i];
+                  indice idy1 = rrel.mesh().global_indices()[i + 1];
+                  indice idx2 = rrel.mesh().global_indices()[i + 2];
+                  indice idy2 = rrel.mesh().global_indices()[i + 3];
+
+                  ydot = hm1 * ds1_velocities[ds1.value()];
+
+                  /* segment nodes */
+                  vector_4d local_velocity = {
+                      velocities[ds2.value()][idx1], velocities[ds2.value()][idy1],
+                      velocities[ds2.value()][idx2], velocities[ds2.value()][idy2]};
+
+                  ydot += hm2 * local_velocity;
+                },
+                [&](match::relation1 auto rrel) {
+                  auto hds1 = storage::make_handle(data, ds1);
+                  y[0] = rrel.compute_h(step, hds1);
+                  ydot = hm1 * velocities[ds1.value()];
+                },
+                [&](match::relation2 auto rrel) {
+                  auto hds1 = storage::make_handle(data, ds1);
+                  auto hds2 = storage::make_handle(data, ds2);
+                  y[0] = rrel.compute_h(step, hds1, hds2);
+                  ydot = hm1 * velocities[ds1.value()];
+                  ydot += hm2 * velocities[ds2.value()];
+                }));
       }
     }
 
@@ -653,12 +635,11 @@ struct moreau_jean_element : item {
           } else {
             v_next += get_vector(velo, index, v_next.size());
           }
-
-          for (auto bc_idx : bc_velocities_0s[i]) {
-            v_next(bc_idx) = 0.0;
-          }
         }
       }
+
+      // the free velocities of the systems not involved already satisfy them
+      apply_bc_velocities_0(bc_velocities_0s, vs_next);
     }
 
     void update_positions(auto step, auto h) {

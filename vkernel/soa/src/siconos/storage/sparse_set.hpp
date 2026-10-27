@@ -191,4 +191,25 @@ struct sparse_set {
   }
 };
 
+template <typename T>
+constexpr bool is_sparse_set_v = false;
+template <typename K, typename V>
+constexpr bool is_sparse_set_v<sparse_set<K, V>> = true;
+
+/// f(key, value) for every entry of a per-item property: the dense side of a
+/// sparse set (the items without an entry are not visited), or every index of
+/// a dense per-item storage.
+template <typename C, typename F>
+void for_each_entry(C& c, F&& f) {
+  if constexpr (is_sparse_set_v<std::remove_const_t<C>>) {
+    for (std::size_t j = 0; j < c.dense_.size(); ++j) {
+      f(c.dense_keys_[j], c.dense_[j]);
+    }
+  } else {
+    for (std::size_t i = 0; i < std::size(c); ++i) {
+      f(i, c[i]);
+    }
+  }
+}
+
 }  // namespace siconos::storage
