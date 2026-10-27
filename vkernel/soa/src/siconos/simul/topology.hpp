@@ -1,8 +1,16 @@
 #pragma once
 
 #include "siconos/algebra/sparse_factor.hpp"
+#include "siconos/simul/relation_sets.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/utils/range.hpp"
+
+// default of the RelationSets switch of the topology: the relation type of an
+// interaction given by per relation type sets (1) or by its relation variant
+// alone (0)
+#ifndef VKERNEL_RELATION_SETS
+#define VKERNEL_RELATION_SETS 0
+#endif
 
 namespace siconos::simul {
 
@@ -10,7 +18,7 @@ template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
           typename DynamicDofDynamicalSystem = empty_item,
           typename DynamicDofFixedDofInteraction = empty_item,
           typename DynamicDofDynamicDofInteraction = empty_item,
-          bool BcVelocitiesDynamic = true>
+          bool BcVelocitiesDynamic = true, bool RelationSets = VKERNEL_RELATION_SETS>
 struct topology : item {
   // fixed dof case
   using dof = some::indice_parameter<"dof">;
@@ -53,7 +61,7 @@ struct topology : item {
                          storage::dynamic_storage<bc_velocities_0_dsys_attr>,
                          bc_velocities_0_dsys_attr>;
 
-  using properties =
+  using base_properties =
       gather<storage::attached<fsystem, symbol<"involved">, some::boolean>,
              storage::attached<fsystem, symbol<"index">, some::indice>,
              storage::attached<fsystem, symbol<"id">, some::indice>,
@@ -95,6 +103,20 @@ struct topology : item {
              storage::attached<ddinteraction, symbol<"ds1">, some::item_ref<dsystem>>,
              storage::attached<ddinteraction, symbol<"ds2">, some::item_ref<dsystem>>,
              storage::attached<ddinteraction, symbol<"activation">, some::boolean>>;
+
+  // the relation type of an interaction as the membership of one set per
+  // relation type (see relation_sets.hpp), or the relation variant alone
+  static constexpr bool relation_sets = RelationSets;
+
+  using relation_sets_properties =
+      std::conditional_t<RelationSets,
+                         decltype(concat(
+                             concat(simul::relation_set_properties_t<finteraction>{},
+                                    simul::relation_set_properties_t<dfinteraction>{}),
+                             simul::relation_set_properties_t<ddinteraction>{})),
+                         gather<>>;
+
+  using properties = decltype(concat(base_properties{}, relation_sets_properties{}));
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

@@ -7,6 +7,7 @@
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/lagrangian_r.hpp"
+#include "siconos/simul/relation_sets.hpp"
 #include "siconos/storage/get.hpp"
 #include "siconos/utils/variant.hpp"
 
@@ -342,40 +343,59 @@ struct moreau_jean_element : item {
 
       auto& h_matrices1 = storage::attr_values<h_matrix1>(data, step);
       auto& h_matrices2 = storage::attr_values<h_matrix2>(data, step);
-      auto& ndss = storage::prop_values<interaction, "nds", topology>(data, step);
 
       auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
       auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
-      auto& relations = storage::attr_values<relation>(data, step);
 
-      for (auto [rel, hm1, hm2, nds, ds1, ds2] :
-           view::zip(relations, h_matrices1, h_matrices2, ndss, ds1s, ds2s)) {
-        // local binding not enough to be passed to lambda...
-        auto& hhm1 = hm1;
-        auto& hhm2 = hm2;
-        auto hds1 = storage::make_handle(data, ds1);
-        auto hds2 = storage::make_handle(data, ds2);
-        auto rnds = nds;
+      // the jacobians of interaction i, of relation rrel
+      auto jachq = [&](auto i, auto& rrel) {
+        auto& hm1 = h_matrices1[i];
+        auto& hm2 = h_matrices2[i];
+        auto hds1 = storage::make_handle(data, ds1s[i]);
+        auto hds2 = storage::make_handle(data, ds2s[i]);
+        using rel_t = std::decay_t<decltype(rrel)>;
 
-        siconos::variant::visit(
-            data, rel,
-            mp::overload(
-                [&step, &hhm1, &hhm2, &hds1, &hds2,
-                 &rnds](match::linear_relation auto&& rrel) {
-                  if (rnds == 1) {
-                    rrel.compute_jachq(step, hds1, hhm1);
-                  } else {
-                    assert(rnds == 2);
-                    rrel.compute_jachq(step, hds1, hds2, hhm1, hhm2);
-                  }
-                },
-                [&step, &hhm1, &hds1](match::relation1 auto& rrel) {
-                  rrel.compute_jachq(step, hds1, hhm1);
-                },
-                [&step, &hhm1, &hhm2, &hds1, &hds2](match::relation2 auto& rrel) {
-                  rrel.compute_jachq(step, hds1, hds2, hhm1, hhm2);
-                },
-                [](auto rrel) { assert(false); }));
+        // the first of relation1, relation2 wins, as the overload_linearly
+        // of the variant visit did: a linear relation that is a relation1
+        // (lagrangian_r) gets the one ds jacobian whatever its nds (the
+        // linear_relation auto&& alternative there never matched an lvalue
+        // handle)
+        if constexpr (match::relation1<rel_t>) {
+          rrel.compute_jachq(step, hds1, hm1);
+        } else if constexpr (match::relation2<rel_t>) {
+          rrel.compute_jachq(step, hds1, hds2, hm1, hm2);
+        } else {
+          assert(false);
+        }
+      };
+
+      for_each_relation(step, jachq);
+    }
+
+    static constexpr bool relation_sets() {
+      return requires { requires topology::relation_sets; };
+    }
+
+    // rebuild the relation sets from the relation variants: once per step,
+    // before the loops that go through for_each_relation
+    void classify_relations(auto step) {
+      if constexpr (relation_sets()) {
+        simul::classify_relations<interaction, topology>(self()->data(), step);
+      }
+    }
+
+    // f(i, rrel) for every interaction i, rrel being a handle on its relation:
+    // relation type by relation type with the relation sets, through a visit
+    // of the relation variant of each interaction otherwise
+    void for_each_relation(auto step, auto&& f) {
+      auto& data = self()->data();
+      if constexpr (relation_sets()) {
+        simul::for_each_relation<interaction, topology>(data, f);
+      } else {
+        auto& relations = storage::attr_values<relation>(data, step);
+        for (std::size_t i = 0; i < std::size(relations); ++i) {
+          siconos::variant::visit(data, relations[i], [&f, i](auto& rrel) { f(i, rrel); });
+        }
       }
     }
 
@@ -518,11 +538,16 @@ struct moreau_jean_element : item {
 
       auto& ndss = storage::prop_values<interaction, "nds", topology>(data, step);
 
-      const auto& inters = storage::handles<interaction>(data, step);
-
       // global h_matrix is not assembled at this stage
-      for (auto [y, ydot, hm1, hm2, ds1, ds2, nds, inter] :
-           view::zip(ys, ydots, h_matrices1, h_matrices2, ds1s, ds2s, ndss, inters)) {
+      auto output = [&](auto inter_index, auto& rel) {
+        auto& y = ys[inter_index];
+        auto& ydot = ydots[inter_index];
+        auto& hm1 = h_matrices1[inter_index];
+        auto& hm2 = h_matrices2[inter_index];
+        auto& ds1 = ds1s[inter_index];
+        auto& ds2 = ds2s[inter_index];
+        auto nds = ndss[inter_index];
+
         // y[1] (the tangential gap row) is only written by the linear branch
         // below; the nonlinear relation branches set y[0] from compute_h() and
         // leave y[1] untouched. Zero the whole vector so io::contact_points
@@ -531,58 +556,57 @@ struct moreau_jean_element : item {
         // polytopefdisk_r, polytopedisk_r).
         algebra::set_zero(y);
 
-        // one dispatch on the relation per interaction
-        siconos::variant::visit(
-            data, inter.relation(),
-            mp::overload(
-                [&](match::linear_relation auto& rrel) {
-                  y = hm1 * qs[ds1.value()] + rrel.b();
-                  ydot = hm1 * velocities[ds1.value()];
+        mp::overload(
+            [&](match::linear_relation auto& rrel) {
+              y = hm1 * qs[ds1.value()] + rrel.b();
+              ydot = hm1 * velocities[ds1.value()];
 
-                  if (nds == 2) {
-                    y += hm2 * qs[ds2.value()];
-                    ydot += hm2 * velocities[ds2.value()];
-                  }
-                },
-                [&](match::handle<collision::mesh_relation> auto rrel) {
-                  using vector_4d = typename env::template vector<scalar, 4>;
-                  auto hds1 = storage::make_handle(data, ds1);
-                  auto hds2 = storage::make_handle(data, ds2);
-                  using ds1_t = typename decltype(hds1)::type;
+              if (nds == 2) {
+                y += hm2 * qs[ds2.value()];
+                ydot += hm2 * velocities[ds2.value()];
+              }
+            },
+            [&](match::handle<collision::mesh_relation> auto rrel) {
+              using vector_4d = typename env::template vector<scalar, 4>;
+              auto hds1 = storage::make_handle(data, ds1);
+              auto hds2 = storage::make_handle(data, ds2);
+              using ds1_t = typename decltype(hds1)::type;
 
-                  auto& ds1_velocities =
-                      storage::attr_values<ds1_t, "velocity">(self()->data(), step);
+              auto& ds1_velocities =
+                  storage::attr_values<ds1_t, "velocity">(self()->data(), step);
 
-                  y[0] = rrel.compute_h(step, hds1, hds2);
+              y[0] = rrel.compute_h(step, hds1, hds2);
 
-                  indice i = 4 * rrel.contact_index();
-                  indice idx1 = rrel.mesh().global_indices()[i];
-                  indice idy1 = rrel.mesh().global_indices()[i + 1];
-                  indice idx2 = rrel.mesh().global_indices()[i + 2];
-                  indice idy2 = rrel.mesh().global_indices()[i + 3];
+              indice k = 4 * rrel.contact_index();
+              indice idx1 = rrel.mesh().global_indices()[k];
+              indice idy1 = rrel.mesh().global_indices()[k + 1];
+              indice idx2 = rrel.mesh().global_indices()[k + 2];
+              indice idy2 = rrel.mesh().global_indices()[k + 3];
 
-                  ydot = hm1 * ds1_velocities[ds1.value()];
+              ydot = hm1 * ds1_velocities[ds1.value()];
 
-                  /* segment nodes */
-                  vector_4d local_velocity = {
-                      velocities[ds2.value()][idx1], velocities[ds2.value()][idy1],
-                      velocities[ds2.value()][idx2], velocities[ds2.value()][idy2]};
+              /* segment nodes */
+              vector_4d local_velocity = {
+                  velocities[ds2.value()][idx1], velocities[ds2.value()][idy1],
+                  velocities[ds2.value()][idx2], velocities[ds2.value()][idy2]};
 
-                  ydot += hm2 * local_velocity;
-                },
-                [&](match::relation1 auto rrel) {
-                  auto hds1 = storage::make_handle(data, ds1);
-                  y[0] = rrel.compute_h(step, hds1);
-                  ydot = hm1 * velocities[ds1.value()];
-                },
-                [&](match::relation2 auto rrel) {
-                  auto hds1 = storage::make_handle(data, ds1);
-                  auto hds2 = storage::make_handle(data, ds2);
-                  y[0] = rrel.compute_h(step, hds1, hds2);
-                  ydot = hm1 * velocities[ds1.value()];
-                  ydot += hm2 * velocities[ds2.value()];
-                }));
-      }
+              ydot += hm2 * local_velocity;
+            },
+            [&](match::relation1 auto rrel) {
+              auto hds1 = storage::make_handle(data, ds1);
+              y[0] = rrel.compute_h(step, hds1);
+              ydot = hm1 * velocities[ds1.value()];
+            },
+            [&](match::relation2 auto rrel) {
+              auto hds1 = storage::make_handle(data, ds1);
+              auto hds2 = storage::make_handle(data, ds2);
+              y[0] = rrel.compute_h(step, hds1, hds2);
+              ydot = hm1 * velocities[ds1.value()];
+              ydot += hm2 * velocities[ds2.value()];
+            })(rel);
+      };
+
+      for_each_relation(step, output);
     }
 
     void keep_lambdas(auto step) {

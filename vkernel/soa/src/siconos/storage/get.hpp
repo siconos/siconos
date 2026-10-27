@@ -186,18 +186,28 @@ static constexpr auto is_dynamic_storage_tagged = mp::is_a_model<[]<typename T>(
          requires { typename T::dynamic_storage_t; };
 }>;
 
+template <typename T, typename Tag>
+concept tagged_exactly = std::same_as<typename T::tag, Tag>;
+
+// a dynamic property of Item whose tag is Tag, which may be any type (a
+// symbol<S> is matched exactly, not as a base)
+template <typename Item, typename Tag>
+static constexpr auto is_dynamic_storage_with_tag = mp::is_a_model<[]<typename T>() constexpr {
+  return match::property<T> && match::attached_storage<T, Item> &&
+         requires { typename T::dynamic_storage_t; } && tagged_exactly<T, Tag>;
+}>;
+
 // Runtime lookup: get or create the sparse_set for a dynamic property.
 // The sparse_set is stored in the database-level _dynamic_properties map.
-// storage::make database: the sparse set lives in a map keyed by name
-template <match::item I, string_literal S, typename prop_t, typename env_t, typename indice>
+// storage::make database: the sparse set lives in a map keyed by the
+// property type
+template <typename prop_t, typename env_t, typename indice>
 static decltype(auto) prop_dynamic_map(auto& data) {
   using attr_t = typename prop_t::type;
   using value_t = typename traits::config<env_t>::template convert<attr_t>::type;
 
-  // Build a unique key for this (Item, S) pair
-  std::string key = std::string(typeid(I).name());
-  key += ":";
-  key += S.value;
+  // a unique key for this (Item, tag, type) property
+  std::string key = std::string(typeid(prop_t).name());
 
   auto& map = data.store()._dynamic_properties;
   auto it = map.find(key);
@@ -234,7 +244,27 @@ static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
     // registration and kept consistent by storage::remove
     return mp::get<prop_t>(data.store());
   } else {
-    return prop_dynamic_map<I, S, prop_t, env_t, indice>(data);
+    return prop_dynamic_map<prop_t, env_t, indice>(data);
+  }
+};
+
+/// prop_dynamic_memory for the dynamic property of I tagged by a type Tag
+/// rather than by a name
+template <match::item I, typename Tag, typename Decl = world_declared>
+static auto prop_dynamic_memory_tagged = [](auto& data) -> decltype(auto) {
+  using data_t = std::decay_t<decltype(data)>;
+  using info_t = get_info_t<data_t>;
+  using env_t = typename info_t::template env<I>;
+  using indice = typename env_t::indice;
+
+  constexpr auto tpl =
+      mp::filter(declared_properties_t<Decl, data_t>{}, is_dynamic_storage_with_tag<I, Tag>);
+  static_assert(mp::size(tpl) >= mp::size_c<1_c>, "dynamic property not found in declarer");
+  using prop_t = std::decay_t<decltype(tpl[0_c])>;
+  if constexpr (requires { data.store()._registry; }) {
+    return mp::get<prop_t>(data.store());
+  } else {
+    return prop_dynamic_map<prop_t, env_t, indice>(data);
   }
 };
 

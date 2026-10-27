@@ -72,6 +72,9 @@ struct time_stepping : item {
 
       // loop over different kind of dynamic systems
       mp::for_each(osi.elements(), [&](auto elem) {
+        // the interactions do not change during the step
+        elem.classify_relations(step);
+
         // udpate M^-1 * fext
         // do nothing if fext is time_invariant
         elem.update_iteration_matrix(step);
