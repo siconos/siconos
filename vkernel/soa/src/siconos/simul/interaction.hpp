@@ -29,7 +29,9 @@ struct interaction : item {
 
     decltype(auto) nslaw() { return attr<"nslaw">(*self()); }
 
-    decltype(auto) relation() { return attr<"relation">(*self()); };
+    // read only: a relation is set by topology::bind, which keeps the
+    // relation sets
+    const auto& relation() { return attr<"relation">(*self()); }
     decltype(auto) h_matrix1() { return attr<"h_matrix1">(*self()); }
     decltype(auto) h_matrix2() { return attr<"h_matrix2">(*self()); }
 
@@ -63,7 +65,9 @@ struct rt_ct_interaction : item {
 
     decltype(auto) nslaw() { return attr<"nslaw">(*self()); }
 
-    decltype(auto) relation() { return attr<"relation">(*self()); };
+    // read only: a relation is set by topology::bind, which keeps the
+    // relation sets
+    const auto& relation() { return attr<"relation">(*self()); }
     decltype(auto) h_matrix1() { return attr<"h_matrix1">(*self()); }
     decltype(auto) h_matrix2() { return attr<"h_matrix2">(*self()); }
 
@@ -96,7 +100,9 @@ struct rt_rt_interaction : item {
 
     decltype(auto) nslaw() { return attr<"nslaw">(*self()); }
 
-    decltype(auto) relation() { return attr<"relation">(*self()); };
+    // read only: a relation is set by topology::bind, which keeps the
+    // relation sets
+    const auto& relation() { return attr<"relation">(*self()); }
     decltype(auto) h_matrix1() { return attr<"h_matrix1">(*self()); }
     decltype(auto) h_matrix2() { return attr<"h_matrix2">(*self()); }
 

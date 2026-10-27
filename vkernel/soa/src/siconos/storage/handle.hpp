@@ -344,6 +344,14 @@ auto make_handle(D& data, index<T, R>& indx) {
   return handle<handle_base, T, R, D>{data, indx};
 }
 
+// from a read only index, e.g. the relation of an interaction (the handle
+// holds a copy of the index)
+template <typename T, typename R, typename D>
+auto make_handle(D& data, const index<T, R>& indx) {
+  index<T, R> copy = indx;
+  return handle<handle_base, T, R, D>{data, static_cast<index<T, R>&&>(copy)};
+}
+
 /**
  * @brief Create a handle from data and rvalue index
  * @tparam T Item type

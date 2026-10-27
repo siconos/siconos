@@ -516,7 +516,9 @@ struct space_filter : item {
           using inter_t = decltype(topo.link(ds1, ds2));
           if constexpr (collision::may_have_shape<collision::shape::polytope, ds_t>() &&
                         collision::may_have_shape<collision::shape::disk, ds_t>()) {
-            if constexpr (requires(inter_t h, pd_index_t i) { h.relation() = i; }) {
+            if constexpr (requires(
+                              std::decay_t<decltype(std::declval<inter_t&>().relation())> v,
+                              pd_index_t i) { v = i; }) {
               auto inter = polytope1 ? topo.link(ds2, ds1) : topo.link(ds1, ds2);
               inter.nslaw() = nslaw;
               storage::prop<"activation", Topology>(inter) = true;

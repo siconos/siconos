@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
   auto interaction = simulation.topology().link(first_ball);
   //  interaction.h_matrix1() << 1., 0., 0., 0., 1., -radius;
   //  interaction.h_matrix2() << 1., 0., 0., 0., 1., -radius;
-  interaction.relation() = relation_f;
+  simulation.topology().bind(interaction, relation_f);
   interaction.nslaw() = nslaw;
   //    });
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
     auto interaction = simulation.topology().link(ball1, ball2);
     //    interaction.h_matrix1() << -1., 0., 0., 0., 1., -radius;
     //    interaction.h_matrix2() << 1., 0., 0., 0., 1., -radius;
-    interaction.relation() = relation_b;
+    simulation.topology().bind(interaction, relation_b);
     interaction.nslaw() = nslaw;
   };
 

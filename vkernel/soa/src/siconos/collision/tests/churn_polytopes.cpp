@@ -287,10 +287,10 @@ void test_duplicate_pair_removal_throws(siconos::config::data_t& data) {
   // the last one, the first becomes stale
   auto inter1 = topo_h.link(ds1, ds2);
   inter1.nslaw() = spacef.nslaw();
-  inter1.relation() = dsds;
+  topo_h.bind(inter1, dsds);
   auto inter2 = topo_h.link(ds1, ds2);
   inter2.nslaw() = spacef.nslaw();
-  inter2.relation() = dsds;
+  topo_h.bind(inter2, dsds);
 
   // update_index_set0 reads searched neighbor lists: broadphase first
   ngbh.update(0);
@@ -323,7 +323,7 @@ void test_unknown_relation_throws(siconos::config::data_t& data) {
   // relation, not a fixed-object one
   auto inter = topo_h.link(ds1);
   inter.nslaw() = spacef.nslaw();
-  inter.relation() = dsds;
+  topo_h.bind(inter, dsds);
 
   // update_index_set0 reads searched neighbor lists: broadphase first
   ngbh.update(0);

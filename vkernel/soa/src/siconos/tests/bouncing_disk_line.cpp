@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
   auto interaction = simulation.topology().link(d1);
   // interaction.h_matrix1() = {1., 0., 0.};
 
-  interaction.relation() = ground_r;
+  simulation.topology().bind(interaction, ground_r);
   interaction.nslaw() = nslaw;
 
   // =========================== End of model definition

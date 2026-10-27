@@ -178,7 +178,7 @@ int main() {
   for (int pi = 0; pi < 2; ++pi) {
     auto inter = topo_h.link(body1, body2);
     inter.nslaw() = nslaw;
-    inter.relation() = dsds;
+    topo_h.bind(inter, dsds);
   }
 
   bool have_prev = false;

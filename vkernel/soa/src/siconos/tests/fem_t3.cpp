@@ -152,7 +152,7 @@ int main(int args, char* argv[]) {
 
       handle inter = simul.topology().link(fe_solid);
       inter.nslaw() = nslaw;
-      inter.relation() = rt_rel;
+      simul.topology().bind(inter, rt_rel);
     }
   }
 

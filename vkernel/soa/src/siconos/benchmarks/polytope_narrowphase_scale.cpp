@@ -280,7 +280,7 @@ void self_check() {
 
   auto inter = topo_h.link(b1, b2);
   inter.nslaw() = nslaw;
-  inter.relation() = dsds;
+  topo_h.bind(inter, dsds);
 
   auto np = storage::add<config::cxd_narrowphase>(data);
   np.dsds_r() = dsds;
@@ -365,7 +365,7 @@ measurement run_scale(std::size_t n, std::size_t n_steps, double spacing_factor,
         storage::make_handle(data, storage::index<config::polytope, std::size_t>(i)),
         storage::make_handle(data, storage::index<config::polytope, std::size_t>(j)));
     inter.nslaw() = nslaw;
-    inter.relation() = dsds;
+    topo_h.bind(inter, dsds);
   }
 
   auto np = storage::add<config::cxd_narrowphase>(data);

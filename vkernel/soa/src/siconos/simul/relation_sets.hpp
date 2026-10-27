@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <utility>
 #include <variant>
 
@@ -24,14 +25,15 @@ namespace siconos::simul {
    linear or not) is decided at compile time.
 
    The sets are kept by the stages that bind the relations: bind_relation
-   moves an interaction from the set of its previous relation type to the
-   set of the new one (the space filter at creation, the cxd narrowphase at
-   its rebind), and storage::remove re-keys them as it moves the last
-   interaction. An interaction whose relation is assigned through its
-   variant alone (inter.relation() = r, as the tests do) is in no set:
-   sync_relation_sets, once per step, rebuilds the sets from the variants
-   when they do not hold every interaction. A relation reassigned through
-   the variant alone is not detected. */
+   (topology::bind) is the only way to set a relation, the relation()
+   accessor of an interaction is read only. It moves the interaction from
+   the set of its previous relation type to the set of the new one (the
+   space filter at creation, the cxd narrowphase at its rebind), and
+   storage::remove re-keys the sets as it moves the last interaction.
+   sync_relation_sets, once per step, checks that the sets hold every
+   interaction: an interaction created and not bound (or a relation written
+   through storage::attr<"relation">) is a bug, an assertion in debug, and
+   the sets are rebuilt from the variants in release. */
 
 /// tag of the set of the interactions whose relation is an R
 template <typename R>
@@ -88,13 +90,15 @@ void classify_relations(auto& data, auto step) {
   }
 }
 
-/// rebuild the relation sets of Inter if an interaction is in none of them
+/// the relation sets of Inter hold every interaction: an assertion in debug,
+/// a rebuild from the relation variants in release
 template <typename Inter, typename Decl>
 void sync_relation_sets(auto& data, auto step) {
   std::size_t n = 0;
   mp::for_each(typename Inter::relations{},
                [&data, &n]<typename R>(R) { n += relation_set<Inter, R, Decl>(data).size(); });
   if (n != std::size(storage::attr_values<attr_t<Inter, "relation">>(data, step))) {
+    assert(false && "an interaction is not bound: set its relation with topology::bind");
     classify_relations<Inter, Decl>(data, step);
   }
 }

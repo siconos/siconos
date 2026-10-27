@@ -10,14 +10,14 @@
 // interaction given by per relation type sets (1) or by its relation variant
 // alone (0)
 #ifndef VKERNEL_RELATION_SETS
-#define VKERNEL_RELATION_SETS 0
+#define VKERNEL_RELATION_SETS 1
 #endif
 
 // default of the IndexSets switch of the topology: the active interactions
 // and the involved systems of a step also given as sets (1) or by their
 // boolean properties alone (0)
 #ifndef VKERNEL_INDEX_SETS
-#define VKERNEL_INDEX_SETS 0
+#define VKERNEL_INDEX_SETS 1
 #endif
 
 namespace siconos::simul {
@@ -218,6 +218,13 @@ struct topology : item {
 
       return inter;
     };
+
+    /* the relation of the interaction inter is rel (a handle or a ref on a
+       relation item): the only way to set it, as it also keeps the relation
+       sets (see relation_sets.hpp) */
+    void bind(auto inter, auto rel) {
+      simul::bind_relation<topology>(self()->data(), inter, rel);
+    }
 
     void set_dynamical_system_id(auto hds, auto id) {
       attr<"system_id">(*self())[id] = hds.index();

@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   handle interaction = simulation.topology().link(ball);
   // interaction.h_matrix1() = {1., 0., 0.};
 
-  interaction.relation() = relation;
+  simulation.topology().bind(interaction, relation);
   interaction.nslaw() = nslaw;
 
   // =========================== End of model definition

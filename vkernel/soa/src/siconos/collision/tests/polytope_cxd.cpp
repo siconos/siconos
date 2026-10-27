@@ -532,7 +532,7 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
   auto topo_h = add<siconos::config::topo>(data);
   auto dsds = add<siconos::config::diskdisk_r>(data);
   auto inter = topo_h.link(ds1, ds2);
-  inter.relation() = dsds;
+  topo_h.bind(inter, dsds);
 
   // the narrowphase stage
   auto np = add<siconos::config::cxd_narrowphase>(data);
@@ -622,7 +622,7 @@ void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
 
   auto link = [&](auto a, auto b) {
     auto inter = topo_h.link(a, b);
-    inter.relation() = dsds;
+    topo_h.bind(inter, dsds);
     return inter;
   };
   link(ds1, ds2);
@@ -675,7 +675,7 @@ void test_narrowphase_scan_once(siconos::config::data_t& data) {
 
   auto link = [&](auto a, auto b) {
     auto inter = topo_h.link(a, b);
-    inter.relation() = dsds;
+    topo_h.bind(inter, dsds);
     return inter;
   };
   auto i12 = link(ds1, ds2);

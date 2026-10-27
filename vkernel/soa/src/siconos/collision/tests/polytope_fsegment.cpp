@@ -94,7 +94,7 @@ int main() {
   auto rel = storage::add<config::polytopefsegment_r>(data);
   rel.segment() = seg;
   rel.point_index() = 0;
-  inter.relation() = rel;
+  topo.bind(inter, rel);
   inter.nslaw() = storage::add<config::nslaw>(data);
 
   /* the stage rebinds polytope x polytope pairs only */
