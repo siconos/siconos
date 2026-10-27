@@ -1,10 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
+#include <numeric>
 #include <utility>
 #include <variant>
 
 #include "siconos/simul/simul_head.hpp"
+#include "siconos/storage/permute.hpp"
 #include "siconos/storage/sparse_set.hpp"
 
 namespace siconos::simul {
@@ -101,6 +104,30 @@ void sync_relation_sets(auto& data, auto step) {
     assert(false && "an interaction is not bound: set its relation with topology::bind");
     classify_relations<Inter, Decl>(data, step);
   }
+}
+
+/// reorder the interactions of type Inter by relation type (the order of the
+/// alternatives of their relation variant), keeping the relative order of
+/// the interactions of a type: each relation set is then a contiguous range
+/// of the interactions, gone through in order by for_each_relation. False
+/// if they were already in this order (nothing done).
+template <typename Inter, typename Decl>
+bool sort_interactions(auto& data, auto step) {
+  auto& relations = storage::attr_values<attr_t<Inter, "relation">>(data, step);
+  std::vector<std::size_t> perm(std::size(relations));
+  std::iota(perm.begin(), perm.end(), std::size_t{0});
+  std::stable_sort(perm.begin(), perm.end(), [&relations](std::size_t a, std::size_t b) {
+    return relations[a].index() < relations[b].index();
+  });
+  if (std::is_sorted(perm.begin(), perm.end())) {
+    return false;
+  }
+  storage::permute<Inter>(data, perm);
+  if constexpr (requires { requires Decl::relation_sets; }) {
+    // re-keyed by the permutation; rebuilt for their dense side in order
+    classify_relations<Inter, Decl>(data, step);
+  }
+  return true;
 }
 
 /// the relation of the interaction inter is rel (a handle or a ref on a

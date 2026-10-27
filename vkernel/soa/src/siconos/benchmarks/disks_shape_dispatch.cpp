@@ -7,14 +7,18 @@
    so the trajectories must be bit-identical: the run prints an FNV hash of
    the final q and velocity of every disk.
 
-   Usage: disks_shape_<variant> [ncols nrows nsteps nreps]
+   Usage: disks_shape_<variant> [ncols nrows nsteps nreps sort]
      a pile of ncols x nrows disks (radius 0.5, spacing 1.001) on a ground
      segment, nsteps Moreau-Jean steps (NSGS), then nreps evaluations of
      compute_h and compute_jachq over every disk-disk interaction (the only
-     place where the shape declaration is read on the hot path).
+     place where the shape declaration is read on the hot path). With sort
+     > 0, the interactions are sorted by relation type
+     (topology::sort_interactions) every sort steps, after the filter: the
+     trajectory then differs from the unsorted one (NSGS order).
 
-   Output: per-step mean of the filter (neighbor search + update_index_set0)
-   and of compute_one_step, the ns per relation evaluation, the hash.
+   Output: per-step mean of the filter (neighbor search + update_index_set0),
+   of the sort and of compute_one_step, the ns per relation evaluation, the
+   hash.
    Run with OMP_NUM_THREADS=1: the neighbor order must be reproducible. */
 
 #include <chrono>
@@ -105,6 +109,7 @@ int main(int argc, char* argv[]) {
   const int nrows = argc > 2 ? std::atoi(argv[2]) : 50;
   const int nsteps = argc > 3 ? std::atoi(argv[3]) : 100;
   const int nreps = argc > 4 ? std::atoi(argv[4]) : 100;
+  const int sort_period = argc > 5 ? std::atoi(argv[5]) : 0;
   const double r = 0.5, m = 1., g = 9.81, spacing = 1.001;
 
   config::data_t data;
@@ -162,7 +167,7 @@ int main(int argc, char* argv[]) {
   ngbh.add_point_sets(0);
   simulation.initialize();
 
-  double t_filter = 0., t_step = 0.;
+  double t_filter = 0., t_sort = 0., t_step = 0.;
   int steps = 0;
   while (simulation.has_next_event()) {
     const auto s = simulation.current_step();
@@ -171,6 +176,11 @@ int main(int argc, char* argv[]) {
     ngbh.search();
     spacef.update_index_set0(s);
     t_filter += seconds(t0);
+    if (sort_period > 0 && steps % sort_period == 0) {
+      t0 = clock_t_::now();
+      simulation.topology().sort_interactions(s);
+      t_sort += seconds(t0);
+    }
     t0 = clock_t_::now();
     simulation.compute_one_step();
     t_step += seconds(t0);
@@ -224,9 +234,10 @@ int main(int argc, char* argv[]) {
   const char* variant = "static";
 #endif
   std::print(stderr,
-             "variant={} disks={} steps={} pairs={} filter_ms={:.3f} step_ms={:.3f} "
-             "h_ns={:.2f} jachq_ns={:.2f} hash={:016x} acc={:.6e}\n",
-             variant, ncols * nrows, steps, npairs, 1e3 * t_filter / steps,
-             1e3 * t_step / steps, 1e9 * t_h / per_eval, 1e9 * t_jac / per_eval, hash, acc);
+             "variant={} disks={} steps={} pairs={} sort={} filter_ms={:.3f} sort_ms={:.3f} "
+             "step_ms={:.3f} h_ns={:.2f} jachq_ns={:.2f} hash={:016x} acc={:.6e}\n",
+             variant, ncols * nrows, steps, npairs, sort_period, 1e3 * t_filter / steps,
+             1e3 * t_sort / steps, 1e3 * t_step / steps, 1e9 * t_h / per_eval,
+             1e9 * t_jac / per_eval, hash, acc);
   return 0;
 }

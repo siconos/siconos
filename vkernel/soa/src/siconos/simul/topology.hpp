@@ -226,6 +226,24 @@ struct topology : item {
       simul::bind_relation<topology>(self()->data(), inter, rel);
     }
 
+    /* reorder the interactions of each type by relation type (see
+       simul::sort_interactions), so that the loops over a relation type go
+       through a contiguous range of the interaction storages. To be called
+       between two steps, e.g. every few steps as the space filter adds and
+       removes interactions. It changes the indices of the interactions,
+       hence the order of the rows of the nonsmooth problem (and the
+       iterates of an order dependent solver such as NSGS): no handle on an
+       interaction may be held across the call. */
+    void sort_interactions(auto step) {
+      auto& data = self()->data();
+      mp::for_each(gather<finteraction, dfinteraction, ddinteraction>{},
+                   [&data, step]<typename Inter>(Inter) {
+                     if constexpr (!std::derived_from<Inter, empty_item>) {
+                       simul::sort_interactions<Inter, topology>(data, step);
+                     }
+                   });
+    }
+
     void set_dynamical_system_id(auto hds, auto id) {
       attr<"system_id">(*self())[id] = hds.index();
     }
@@ -240,9 +258,11 @@ struct topology : item {
       using indice = typename env_t::indice;
       using hds_t = storage::handle<storage::handle_base, fsystem, indice, data_t>;
 
-      return collect(method("set_dynamical_system_id",
-                            &interface<Handle>::set_dynamical_system_id<hds_t, indice>),
-                     method("dynamical_system", &interface<Handle>::dynamical_system<indice>));
+      return collect(
+          method("set_dynamical_system_id",
+                 &interface<Handle>::set_dynamical_system_id<hds_t, indice>),
+          method("dynamical_system", &interface<Handle>::dynamical_system<indice>),
+          method("sort_interactions", &interface<Handle>::sort_interactions<indice>));
     }
   };
 };

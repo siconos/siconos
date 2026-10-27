@@ -46,6 +46,11 @@ struct column_base {
   /// index (swap and pop), in every kept step
   virtual void move_back(std::size_t i, std::size_t last) = 0;
 
+  /// storage::permute: item k becomes the item perm[k] (inverse[perm[k]] ==
+  /// k), in every kept step
+  virtual void permute(const std::vector<std::size_t>& perm,
+                       const std::vector<std::size_t>& inverse) = 0;
+
   /// number of items stored, or no_index for columns that do not number them
   virtual std::size_t item_count() const = 0;
 };
@@ -127,6 +132,35 @@ struct column final : column_base {
         if constexpr (match::push_back<storage_t>) {
           storage[i] = std::move(storage.back());
           storage.pop_back();
+        }
+      }
+    }
+  }
+
+  void permute(const std::vector<std::size_t>& perm,
+               const std::vector<std::size_t>& inverse) override {
+    if constexpr (registry_detail::is_sparse_set<Memory>) {
+      // as storage::permute does for the static database (rekey)
+      using key_t = typename Memory::key_type;
+      Memory out;
+      out.reserve(value.size());
+      for (std::size_t j = 0; j < value.dense_.size(); ++j) {
+        out.emplace(
+            static_cast<key_t>(inverse[static_cast<std::size_t>(value.dense_keys_[j])]),
+            std::move(value.dense_[j]));
+      }
+      value = std::move(out);
+    } else {
+      // as storage::permute does for the static database (gather)
+      for (auto& storage : value) {
+        using storage_t = std::decay_t<decltype(storage)>;
+        if constexpr (match::push_back<storage_t>) {
+          storage_t out;
+          out.reserve(std::size(perm));
+          for (std::size_t k = 0; k < std::size(perm); ++k) {
+            out.push_back(std::move(storage[perm[k]]));
+          }
+          storage = std::move(out);
         }
       }
     }
@@ -277,6 +311,13 @@ struct registry {
     }
     if (count == column_base::no_index || count == 0) return;  // nothing stored
     for (std::size_t id : columns) slots[id]->move_back(i, count - 1);
+  }
+
+  /// storage::permute: item k of Item becomes the item perm[k]
+  template <typename Item>
+  void permute_item(const std::vector<std::size_t>& perm,
+                    const std::vector<std::size_t>& inverse) {
+    for (std::size_t id : registered_kind<Item>()) slots[id]->permute(perm, inverse);
   }
 
  private:

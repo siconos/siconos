@@ -51,13 +51,32 @@ if(WITH_vkernel_TESTING)
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   endforeach()
 
+  # topology::sort_interactions (storage::permute) on both storage backends:
+  # the registry, and the compile time database (_static_db)
+  foreach(backend registry static_db)
+    set(t sort_interactions_${backend})
+    add_executable(${t} sort_interactions.cpp)
+    set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
+    target_compile_options(${t} PRIVATE -UNDEBUG)
+    if(backend STREQUAL static_db)
+      target_compile_definitions(${t} PRIVATE SORT_STATIC_DB)
+    endif()
+    target_link_libraries(${t} Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
+    add_test(NAME vkernel_${t} COMMAND ${t}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    # the neighbor search order, hence the interactions, must be reproducible
+    set_tests_properties(vkernel_${t} PROPERTIES ENVIRONMENT OMP_NUM_THREADS=1)
+  endforeach()
+
   # oracle of the relation and index sets (simul/relation_sets.hpp,
   # simul/index_sets.hpp): the same test without the sets (_sets0) and with
   # them, assertions enabled (_sets1), must print the same output. Covers
   # the space filter (bouncing_disks), the cxd rebind and the removals
   # (churn_polytopes), polytopes, disks and FEM together (mixed_bodies) and
-  # the rt ct interactions (polytope_on_fem).
-  foreach(test bouncing_disks churn_polytopes mixed_bodies polytope_on_fem)
+  # the rt ct interactions (polytope_on_fem) and the sort of the
+  # interactions (sort_interactions).
+  foreach(test bouncing_disks churn_polytopes mixed_bodies polytope_on_fem
+      sort_interactions)
     foreach(sets 0 1)
       add_executable(${test}_sets${sets} ${test}.cpp)
       set_target_properties(${test}_sets${sets} PROPERTIES COMPILE_FLAGS "${flags}")
@@ -72,6 +91,9 @@ if(WITH_vkernel_TESTING)
         -DA=$<TARGET_FILE:${test}_sets0> -DB=$<TARGET_FILE:${test}_sets1>
         -DWD=${CMAKE_CURRENT_BINARY_DIR}/${test}_sets_oracle
         -P ${CMAKE_CURRENT_SOURCE_DIR}/compare_outputs.cmake)
+    # a multithreaded neighbor search creates the interactions in any order
+    set_tests_properties(vkernel_${test}_sets_oracle PROPERTIES
+      ENVIRONMENT OMP_NUM_THREADS=1)
   endforeach()
 
 endif()
