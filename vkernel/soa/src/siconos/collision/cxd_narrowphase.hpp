@@ -936,7 +936,7 @@ struct cxd_narrowphase : item {
           return rel;
         }();
         rel.narrowphase() = *self();
-        inter.relation() = rel;
+        simul::bind_relation<Topo>(data, inter, rel);
       }
       storage::attr<"t_rebind">(*self()) += seconds_since(t0);
     }

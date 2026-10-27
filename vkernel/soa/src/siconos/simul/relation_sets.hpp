@@ -23,10 +23,15 @@ namespace siconos::simul {
    per interaction, and what depends on the relation type (one or two ds,
    linear or not) is decided at compile time.
 
-   The sets are rebuilt from the relation variants once per step
-   (classify_relations): the interactions are created, rebound and removed
-   by the space filter and the narrowphase stages between two steps, through
-   the relation variant. */
+   The sets are kept by the stages that bind the relations: bind_relation
+   moves an interaction from the set of its previous relation type to the
+   set of the new one (the space filter at creation, the cxd narrowphase at
+   its rebind), and storage::remove re-keys them as it moves the last
+   interaction. An interaction whose relation is assigned through its
+   variant alone (inter.relation() = r, as the tests do) is in no set:
+   sync_relation_sets, once per step, rebuilds the sets from the variants
+   when they do not hold every interaction. A relation reassigned through
+   the variant alone is not detected. */
 
 /// tag of the set of the interactions whose relation is an R
 template <typename R>
@@ -80,6 +85,40 @@ void classify_relations(auto& data, auto step) {
           std::get<set_t*>(sets)->emplace(i, ref);
         },
         relations[i]);
+  }
+}
+
+/// rebuild the relation sets of Inter if an interaction is in none of them
+template <typename Inter, typename Decl>
+void sync_relation_sets(auto& data, auto step) {
+  std::size_t n = 0;
+  mp::for_each(typename Inter::relations{},
+               [&data, &n]<typename R>(R) { n += relation_set<Inter, R, Decl>(data).size(); });
+  if (n != std::size(storage::attr_values<attr_t<Inter, "relation">>(data, step))) {
+    classify_relations<Inter, Decl>(data, step);
+  }
+}
+
+/// the relation of the interaction inter is rel (a handle or a ref on a
+/// relation item): its relation variant and, with the relation sets of the
+/// topology Decl, its membership
+template <typename Decl>
+void bind_relation(auto& data, auto inter, auto rel) {
+  auto& relvar = storage::attr<"relation">(inter);
+  if constexpr (requires { requires Decl::relation_sets; }) {
+    using Inter = typename std::decay_t<decltype(inter)>::type;
+    const auto i = inter.index().value();
+    mp::for_each(typename Inter::relations{},
+                 [&data, i]<typename R>(R) { relation_set<Inter, R, Decl>(data).erase(i); });
+    relvar = rel;
+    std::visit(
+        [&data, i](auto& ref) {
+          using R = typename std::decay_t<decltype(ref)>::type;
+          relation_set<Inter, R, Decl>(data).emplace(i, ref);
+        },
+        relvar);
+  } else {
+    relvar = rel;
   }
 }
 

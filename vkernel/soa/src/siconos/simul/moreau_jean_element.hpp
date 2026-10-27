@@ -376,11 +376,11 @@ struct moreau_jean_element : item {
       return requires { requires topology::relation_sets; };
     }
 
-    // rebuild the relation sets from the relation variants: once per step,
-    // before the loops that go through for_each_relation
-    void classify_relations(auto step) {
+    // the relation sets hold every interaction (see relation_sets.hpp): once
+    // per step, before the loops that go through for_each_relation
+    void sync_relation_sets(auto step) {
       if constexpr (relation_sets()) {
-        simul::classify_relations<interaction, topology>(self()->data(), step);
+        simul::sync_relation_sets<interaction, topology>(self()->data(), step);
       }
     }
 

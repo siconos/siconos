@@ -24,6 +24,7 @@
 #include "siconos/collision/shape/segment.hpp"
 #include "siconos/collision/shape_of.hpp"
 #include "siconos/collision/translated.hpp"
+#include "siconos/simul/relation_sets.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/storage.hpp"
 #include "siconos/utils/range.hpp"
@@ -521,10 +522,10 @@ struct space_filter : item {
               storage::prop<"activation", Topology>(inter) = true;
               auto& rmap = self()->polytopedisks();
               if (auto search = rmap.find(0); search != rmap.end()) {
-                inter.relation() = search->second;
+                simul::bind_relation<Topology>(data, inter, search->second);
               } else {
                 auto rel = storage::add<collision::polytopedisk_r<Topology>>(data);
-                inter.relation() = rel;
+                simul::bind_relation<Topology>(data, inter, rel);
                 rmap[0] = rel;
               }
               fmap[make_ikey(ds1.index(), ds2.index(), pi)] = inter;
@@ -545,7 +546,7 @@ struct space_filter : item {
 
         storage::prop<"activation", Topology>(inter) = true;
 
-        inter.relation() = diskdisk_r;
+        simul::bind_relation<Topology>(data, inter, diskdisk_r);
         fmap[make_ikey(ds1.index(), ds2.index(), pi)] = inter;
       }
     }
@@ -608,13 +609,13 @@ struct space_filter : item {
                                              static_cast<indice>(contact_index),
                                              static_cast<indice>(pi)};
             if (auto search = polytopemeshes.find(rkey); search != polytopemeshes.end()) {
-              inter.relation() = search->second;
+              simul::bind_relation<Topology>(data, inter, search->second);
             } else {
               auto rel = storage::add<collision::polytopemesh_r<Topology>>(data);
               rel.mesh() = mesh;
               rel.contact_index() = contact_index;
               rel.point_index() = pi;
-              inter.relation() = rel;
+              simul::bind_relation<Topology>(data, inter, rel);
               polytopemeshes[rkey] = rel;
             }
           }
@@ -624,12 +625,12 @@ struct space_filter : item {
             // disk x mesh edge
             if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
                 search != diskmeshes.end()) {
-              inter.relation() = search->second;
+              simul::bind_relation<Topology>(data, inter, search->second);
             } else {
               auto rel = storage::add<collision::diskmesh_r>(data);
               rel.mesh() = mesh;
               rel.contact_index() = contact_index;
-              inter.relation() = rel;
+              simul::bind_relation<Topology>(data, inter, rel);
               diskmeshes[{mesh.index().value(), contact_index}] = rel;
             }
           }
@@ -690,14 +691,14 @@ struct space_filter : item {
         inter.nslaw() = nslaw;  // one nslaw for the moment
 
         if (auto search = relmap.find({x1, x2, y1, y2}); search != relmap.end()) {
-          inter.relation() = search->second;
+          simul::bind_relation<Topology>(data, inter, search->second);
         } else {
           auto dl = storage::add<diskfsegment_r>(data);
 
           // set segment pointer toward body2
           dl.segment() = segment;
 
-          inter.relation() = dl;
+          simul::bind_relation<Topology>(data, inter, dl);
           relmap[{x1, x2, y1, y2}] = dl;
         }
         storage::prop<"activation", Topology>(inter) = true;
@@ -743,12 +744,12 @@ struct space_filter : item {
           inter.nslaw() = nslaw;
 
           if (auto search = relmap.find(key); search != relmap.end()) {
-            inter.relation() = search->second;
+            simul::bind_relation<Topology>(data, inter, search->second);
           } else {
             auto dl = storage::add<poly_fs_t>(data);
             dl.segment() = segment;
             dl.point_index() = pi;
-            inter.relation() = dl;
+            simul::bind_relation<Topology>(data, inter, dl);
             relmap[key] = dl;
           }
           storage::prop<"activation", Topology>(inter) = true;
@@ -786,11 +787,11 @@ struct space_filter : item {
 
         using poly_fd_t = collision::polytopefdisk_r<Topology>;
         if (auto search = relmap.find(coefs); search != relmap.end()) {
-          inter.relation() = search->second;
+          simul::bind_relation<Topology>(data, inter, search->second);
         } else {
           auto dl = storage::add<poly_fd_t>(data);
           dl.translated_disk_shape() = fdisk;
-          inter.relation() = dl;
+          simul::bind_relation<Topology>(data, inter, dl);
           relmap[coefs] = dl;
         }
         storage::prop<"activation", Topology>(inter) = true;
@@ -838,14 +839,14 @@ struct space_filter : item {
         inter.nslaw() = nslaw;
 
         if (auto search = diskfdisks.find(coefs); search != diskfdisks.end()) {
-          inter.relation() = search->second;
+          simul::bind_relation<Topology>(data, inter, search->second);
         } else {
           auto dfd = storage::add<diskfdisk_r>(data);
 
           // set disk pointer toward body2
           dfd.translated_disk_shape() = fdisk;
 
-          inter.relation() = dfd;
+          simul::bind_relation<Topology>(data, inter, dfd);
           diskfdisks[coefs] = dfd;
         }
         storage::prop<"activation", Topology>(inter) = true;
