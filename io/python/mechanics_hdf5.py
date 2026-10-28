@@ -124,6 +124,7 @@ def add_line(dataset, line):
 # fix ctr.'name' in old hdf5 files
 #
 def upgrade_io_format(filename):
+
     with MechanicsHdf5(filename, mode="a") as io:
         for instance_name in io.instances():
             for contactor_instance_name in io.instances()[instance_name]:
@@ -646,6 +647,7 @@ class MechanicsHdf5:
     def add_external_function(
         self, name, body_name, function_name, plugin_name, plugin_function_name
     ):
+
         if name not in self._external_functions:
             ext_fun = group(self._external_functions, name)
             ext_fun.attrs["body_name"] = body_name
@@ -656,6 +658,7 @@ class MechanicsHdf5:
     def add_external_bc_function(
         self, name, body_name, bc_indices, plugin_name, plugin_function_name
     ):
+
         if name not in self._external_functions:
             ext_fun = group(self._external_functions, name)
             ext_fun.attrs["body_name"] = body_name
@@ -1226,17 +1229,18 @@ class MechanicsHdf5:
         mass=None,
         inertia=None,
         radii=None,
+        density=None,
         time_of_birth=-1,
         time_of_death=-1,
     ):
         """
         Add an aggregate of objects (e.g., granular material) with shared properties.
 
-        All objects share the same shape. Mass, inertia and velocity are shared
-        by default; only translations, orientations and velocities are specific
-        to each grain. Per-grain radii may be given through ``radii`` to create a
-        polydisperse packing; when ``radii`` is omitted, every grain inherits the
-        radius of the shared disk shape.
+        All objects share the same shape. Translations, orientations and
+        velocities are given per grain. Radius and mass are shared by default;
+        ``radii`` and ``mass`` (or ``density``) may be given per grain to create
+        a polydisperse packing. The inertia of each grain is computed from its
+        own mass and radius.
 
         Parameters
         ----------
@@ -1250,22 +1254,40 @@ class MechanicsHdf5:
             Initial orientations. Default: zero rotation.
         velocities: array_like (N, 3) for 2D or (N, 6) for 3D, optional
             Initial velocities. Default: zero.
-        mass: float, optional
-            Mass for each grain (all grains have same mass).
+        mass: float or array_like (N,), optional
+            Mass of the grains, shared or one per grain. With neither mass
+            nor density, the aggregate is static.
         inertia: array_like, optional
-            Inertia for each grain (all grains have same inertia).
-        radii: array_like (N,) or scalar, optional
-            Per-grain radii. A scalar (or None) keeps the shared-radius fast
-            path; an array of length N enables a polydisperse packing where
-            each disk keeps its own radius and inertia.
+            Stored, but not used at import: the inertia is computed from the
+            mass and the radius of each grain.
+        radii: float or array_like (N,), optional
+            Radius of the grains, shared or one per grain. Default: the
+            radius of the disk shape.
+        density: float, optional
+            Instead of mass: the mass of each grain is density * pi * r**2
+            (2D, unit thickness), so that grains of different radii have the
+            same density. Exclusive with mass.
         """
         if name in self._input:
             return
 
+        # check before anything is written to the file
+        if mass is not None and density is not None:
+            raise ValueError("give either mass or density, not both")
+        n = len(translations)
+        if mass is not None:
+            mass = np.asarray(mass, dtype=np.float64)
+            if mass.ndim > 0 and mass.shape != (n,):
+                raise ValueError("mass must be a scalar or of length N")
+        if radii is not None:
+            radii = np.asarray(radii, dtype=np.float64)
+            if radii.ndim > 0 and radii.shape != (n,):
+                raise ValueError("radii must be a scalar or of length N")
+
         obj = group(self._input, name)
 
         # Store as aggregate type
-        if mass is not None:
+        if mass is not None or density is not None:
             obj.attrs["type"] = "dynamic_aggregate"
             obj.attrs["id"] = self._number_of_dynamic_objects + 1
             self._number_of_dynamic_objects += len(translations)
@@ -1287,7 +1309,16 @@ class MechanicsHdf5:
             obj.attrs["group"] = shape_info.collision_group
 
         if mass is not None:
-            obj.attrs["mass"] = mass
+            if mass.ndim == 0:
+                obj.attrs["mass"] = float(mass)
+            else:
+                obj.create_dataset(
+                    "masses",
+                    data=mass,
+                    compression="gzip" if self._use_compression else None,
+                )
+        if density is not None:
+            obj.attrs["density"] = float(density)
         if inertia is not None:
             obj.attrs["inertia"] = np.asarray(inertia, dtype=np.float64)
 
@@ -1309,16 +1340,11 @@ class MechanicsHdf5:
         )
         obj.attrs["count"] = len(translations)
 
-        # Per-grain radii for a polydisperse packing. A scalar radius is
-        # stored as an attribute (shared-radius fast path); an array of
-        # length N is stored as a dataset (read back per grain at import).
+        # A shared radius is an attribute, per-grain radii a dataset.
         if radii is not None:
-            radii = np.asarray(radii, dtype=np.float64)
             if radii.ndim == 0:
                 obj.attrs["radius"] = float(radii)
             else:
-                if radii.shape[0] != len(translations):
-                    raise ValueError("len(radii) must match the number of grains")
                 obj.create_dataset(
                     "radii",
                     data=radii,
@@ -1328,7 +1354,7 @@ class MechanicsHdf5:
         # Handle orientations
         if orientations is None:
             if self._dimension == 2:
-                orientations = np.zeros(len(translations), dtype=np.float64)
+                orientations = np.zeros((len(translations), 1), dtype=np.float64)
             else:
                 orientations = np.tile(
                     np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64),

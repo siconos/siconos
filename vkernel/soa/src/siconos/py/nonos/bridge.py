@@ -334,6 +334,16 @@ class BodyBase(Stored):
     def shapes(cls):
         return cls.__shapes
 
+    # one disk shape per radius, shared by all the bodies
+    @classmethod
+    def disk_shape(cls, radius):
+        radius = float(radius)
+        if radius not in cls.shapes():
+            disk_shape = vkernel.disks.add_disk_shape(cls.data())
+            disk_shape.set_radius(radius)
+            cls.shapes()[radius] = disk_shape
+        return cls.shapes()[radius]
+
 
 class Body(BodyBase):
     def __init__(self):
@@ -382,16 +392,7 @@ class Body(BodyBase):
         body.set_q(array(position))
         body.set_velocity(array(velocity))
         body.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
-
-        disk_shape = None
-        if radius in self.shapes():
-            disk_shape = self.shapes()[radius]
-        else:
-            disk_shape = vkernel.disks.add_disk_shape(self.data())
-            disk_shape.set_radius(radius)
-            self.shapes()[radius] = disk_shape
-
-        body.set_shape(disk_shape)
+        body.set_shape(self.disk_shape(radius))
         body.set_fext(array([0, 0, 0]))  # default
 
     def getMassValue(self):
@@ -475,40 +476,28 @@ class Bodies(BodyBase):
         bodies.multiple_set_q(array(positions))
         bodies.multiple_set_velocity(array(velocities))
 
+        # radius and mass: a scalar shared by all the grains, or one
+        # value per grain (polydisperse packing)
+        n = len(positions)
         radii = np.asarray(radius, dtype=np.float64)
+        masses = np.asarray(mass, dtype=np.float64)
+        for what, values in (("radius", radii), ("mass", masses)):
+            if values.ndim > 1 or (values.ndim == 1 and values.shape[0] != n):
+                raise ValueError(f"{what} must be a scalar or have one value per grain")
+
         if radii.ndim == 0:
-            # Fast path: every grain shares the same radius.
-            r = float(radii)
-            bodies.set_mass_matrix(array([mass, mass, mass * r * r / 2]))
-            disk_shape = None
-            if r in self.shapes():
-                disk_shape = self.shapes()[r]
-            else:
-                disk_shape = vkernel.disks.add_disk_shape(self.data())
-                disk_shape.set_radius(r)
-                self.shapes()[r] = disk_shape
-            bodies.set_shape(disk_shape)
+            bodies.set_shape(self.disk_shape(radii))
         else:
-            # Polydisperse grains: one cached shape per unique radius,
-            # assigned to each body individually. np.vectorize would not
-            # vectorize here (the C++ storage calls are already bulk); the
-            # per-body cost is one set_shape handle swap each.
-            if radii.shape[0] != len(positions):
-                raise ValueError("len(radii) must match the number of grains")
-            for r in np.unique(radii):
-                rkey = float(r)
-                if rkey not in self.shapes():
-                    disk_shape = vkernel.disks.add_disk_shape(self.data())
-                    disk_shape.set_radius(rkey)
-                    self.shapes()[rkey] = disk_shape
-            members = bodies.get()
-            for i, r in enumerate(radii):
-                members[i].set_shape(self.shapes()[float(r)])
-            mm = np.empty((len(radii), 3), dtype=np.float64)
-            mm[:, 0] = mass
-            mm[:, 1] = mass
-            mm[:, 2] = mass * radii * radii / 2
-            bodies.multiple_set_mass_matrix(mm)
+            for member, r in zip(bodies.get(), radii):
+                member.set_shape(self.disk_shape(r))
+
+        if radii.ndim == 0 and masses.ndim == 0:
+            m, r = float(masses), float(radii)
+            bodies.set_mass_matrix(array([m, m, m * r * r / 2]))
+        else:
+            m = np.broadcast_to(masses, n)
+            r = np.broadcast_to(radii, n)
+            bodies.multiple_set_mass_matrix(np.column_stack([m, m, m * r * r / 2]))
 
         bodies.set_fext(array([0, 0, 0]))  # default
         bodies.set_collision_group(collision_group)
