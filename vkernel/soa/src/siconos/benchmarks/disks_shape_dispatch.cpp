@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
   auto spacef = storage::add<config::space_filter>(data);
   spacef.neighborhood() = ngbh;
   spacef.diskdisk_r() = dsds;
-  spacef.nslaw() = nslaw;
+  spacef.insert_nonsmooth_law(nslaw, 0, 0);
   spacef.make_points();
   ngbh.add_point_sets(0);
   simulation.initialize();

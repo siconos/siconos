@@ -108,6 +108,19 @@ struct space_filter : item {
       nslaws[{static_cast<std::size_t>(gid2), static_cast<std::size_t>(gid1)}] = nslaw;
       return *self();
     }
+    // the law of the collision groups of two bodies (or body and static shape)
+    decltype(auto) nonsmooth_law(auto& body1, auto& body2) {
+      auto gid1 = static_cast<std::size_t>(body1.collision_group());
+      auto gid2 = static_cast<std::size_t>(body2.collision_group());
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      auto search = nslaws.find({gid1, gid2});
+      if (search == nslaws.end()) {
+        throw std::runtime_error(
+            "space_filter: no nonsmooth law registered for collision groups (" +
+            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
+      }
+      return storage::make_handle(self()->data(), search->second);
+    }
     decltype(auto) topology() {
       return storage::make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
     }
@@ -298,14 +311,18 @@ struct space_filter : item {
               // radius. A bigger disk gets points on its circle, spaced
               // by half the search radius: any contact point is then
               // within a quarter of the search radius of one of them.
+              // Polytopes keep one point at their center.
               auto npoints = std::size_t{1};
               auto radius = 0.;
-              if constexpr (std::derived_from<shape_t, collision::shape::disk>) {
-                auto search_radius = neighborhood().instance()->radius();
-                radius = storage::make_handle(data, shape_idx).radius();
-                if (2 * radius > search_radius) {
-                  npoints = static_cast<std::size_t>(
-                      std::ceil(2 * std::numbers::pi * radius / (search_radius / 2)));
+              if constexpr (collision::may_have_shape<collision::shape::disk,
+                                                      decltype(ds)>()) {
+                if (collision::has_shape<collision::shape::disk>(ds)) {
+                  auto search_radius = neighborhood().instance()->radius();
+                  radius = collision::shape_of<collision::shape::disk>(ds).radius();
+                  if (2 * radius > search_radius) {
+                    npoints = static_cast<std::size_t>(
+                        std::ceil(2 * std::numbers::pi * radius / (search_radius / 2)));
+                  }
                 }
               }
               for (std::size_t i = 0; i < npoints; ++i) {
@@ -482,17 +499,7 @@ struct space_filter : item {
       }
       auto& data = self()->data();
       auto topo = self()->topology();
-      auto gid1 = ds1.collision_group();
-      auto gid2 = ds2.collision_group();
-      auto& nslaws = storage::attr<"nslaws">(*self());
-      auto search =
-          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
-      if (search == nslaws.end()) {
-        throw std::runtime_error(
-            "space_filter: no nonsmooth law registered for collision groups (" +
-            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
-      }
-      auto nslaw = storage::make_handle(data, search->second);
+      auto nslaw = nonsmooth_law(ds1, ds2);
       auto diskdisk_r = self()->diskdisk_r();
 
       const bool polytope1 = collision::has_shape<collision::shape::polytope>(ds1);
@@ -556,17 +563,7 @@ struct space_filter : item {
     void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1, auto hp2) {
       auto& data = self()->data();
       auto topo = self()->topology();
-      auto gid1 = ds1.collision_group();
-      auto gid2 = ds2.collision_group();
-      auto& nslaws = storage::attr<"nslaws">(*self());
-      auto search =
-          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
-      if (search == nslaws.end()) {
-        throw std::runtime_error(
-            "space_filter: no nonsmooth law registered for collision groups (" +
-            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
-      }
-      auto nslaw = storage::make_handle(data, search->second);
+      auto nslaw = nonsmooth_law(ds1, ds2);
       auto& diskmeshes = self()->diskmeshes();
       auto& polytopemeshes = self()->polytopemeshes();
 
@@ -643,17 +640,7 @@ struct space_filter : item {
 
     void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto gid1 = body1.collision_group();
-      auto gid2 = body2.collision_group();
-      auto& nslaws = storage::attr<"nslaws">(*self());
-      auto search =
-          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
-      if (search == nslaws.end()) {
-        throw std::runtime_error(
-            "space_filter: no nonsmooth law registered for collision groups (" +
-            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
-      }
-      auto nslaw = storage::make_handle(data, search->second);
+      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& relmap = self()->diskfsegments();
 
@@ -712,7 +699,7 @@ struct space_filter : item {
 
     void polytopefsegment_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto nslaw = self()->nslaw();
+      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& relmap = self()->polytopefsegments();
 
@@ -762,7 +749,7 @@ struct space_filter : item {
 
     void polytopefdisk_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto nslaw = self()->nslaw();
+      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& relmap = self()->polytopefdisks();
 
@@ -803,17 +790,7 @@ struct space_filter : item {
 
     void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
       auto& data = self()->data();
-      auto gid1 = body1.collision_group();
-      auto gid2 = body2.collision_group();
-      auto& nslaws = storage::attr<"nslaws">(*self());
-      auto search =
-          nslaws.find({static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)});
-      if (search == nslaws.end()) {
-        throw std::runtime_error(
-            "space_filter: no nonsmooth law registered for collision groups (" +
-            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
-      }
-      auto nslaw = storage::make_handle(data, search->second);
+      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& diskfdisks = self()->diskfdisks();
 

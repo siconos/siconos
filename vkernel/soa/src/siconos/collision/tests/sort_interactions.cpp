@@ -217,7 +217,7 @@ class SortInteractionsTest : public CppUnit::TestFixture {
     auto spacef = storage::add<config::space_filter>(data);
     spacef.neighborhood() = ngbh;
     spacef.diskdisk_r() = dsds;
-    spacef.nslaw() = nslaw;
+    spacef.insert_nonsmooth_law(nslaw, 0, 0);
     spacef.insert_diskfsegment_r(ground_r);
     spacef.make_points();
     ngbh.add_point_sets(0);

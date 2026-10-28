@@ -158,7 +158,7 @@ struct world {
     auto dsds = storage::add<config::diskdisk_r>(data);  // generic ds-ds binder
     spacef.neighborhood() = ngbh;
     spacef.diskdisk_r() = dsds;
-    spacef.nslaw() = nslaw;
+    spacef.insert_nonsmooth_law(nslaw, 0, 0);
     np.topology() = spacef.topology();
     np.dsds_r() = dsds;
   }

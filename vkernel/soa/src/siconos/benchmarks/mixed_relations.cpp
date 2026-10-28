@@ -278,7 +278,7 @@ int main(int argc, char* argv[]) {
   auto spacef = storage::add<config::space_filter>(data);
   spacef.neighborhood() = ngbh;
   spacef.diskdisk_r() = dsds;
-  spacef.nslaw() = nslaw;
+  spacef.insert_nonsmooth_law(nslaw, 0, 0);
   auto np = storage::add<config::cxd_narrowphase>(data);
   np.topology() = spacef.topology();
   np.dsds_r() = dsds;

@@ -90,10 +90,13 @@ def test_add_objects_polydisperse(tmp_path):
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
         io.run(run_options)
 
+        # body id -> radius of its disk shape
+        radius_of = {int(i): r for i, r in np.asarray(io._io.radii(io._nsds))}
+
         def check(ids, expected_radii, expected_masses):
             for i, r, m in zip(ids, expected_radii, expected_masses):
                 body = io._nsds.dynamicalSystem(i)._bdy
-                assert body.shape().radius() == pytest.approx(r)
+                assert radius_of[i] == pytest.approx(r)
                 assert list(body.mass_matrix()) == pytest.approx([m, m, m * r * r / 2])
 
         check(range(1, 5), radii, density * np.pi * radii**2)

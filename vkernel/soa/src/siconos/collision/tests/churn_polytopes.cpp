@@ -193,7 +193,7 @@ auto setup_world(siconos::config::data_t& data, double radius, double ground_y =
   auto spacef = storage::add<config::space_filter>(data);
   spacef.neighborhood() = ngbh;
   spacef.diskdisk_r() = dsds;
-  spacef.nslaw() = nslaw;
+  spacef.insert_nonsmooth_law(nslaw, 0, 0);
 
   return std::tuple{simulation, spacef, ngbh, dsds};
 }
@@ -285,10 +285,10 @@ void test_duplicate_pair_removal_throws(siconos::config::data_t& data) {
   // TWO interactions for the same ds pair: the proximity map keeps only
   // the last one, the first becomes stale
   auto inter1 = topo_h.link(ds1, ds2);
-  inter1.nslaw() = spacef.nslaw();
+  inter1.nslaw() = spacef.nonsmooth_law(ds1, ds2);
   topo_h.bind(inter1, dsds);
   auto inter2 = topo_h.link(ds1, ds2);
-  inter2.nslaw() = spacef.nslaw();
+  inter2.nslaw() = spacef.nonsmooth_law(ds1, ds2);
   topo_h.bind(inter2, dsds);
 
   // update_index_set0 reads searched neighbor lists: broadphase first
@@ -321,7 +321,7 @@ void test_unknown_relation_throws(siconos::config::data_t& data) {
   // ds1 == ds2 removal paths do not handle: diskdisk_r is a ds-ds
   // relation, not a fixed-object one
   auto inter = topo_h.link(ds1);
-  inter.nslaw() = spacef.nslaw();
+  inter.nslaw() = spacef.nonsmooth_law(ds1, ds1);
   topo_h.bind(inter, dsds);
 
   // update_index_set0 reads searched neighbor lists: broadphase first
