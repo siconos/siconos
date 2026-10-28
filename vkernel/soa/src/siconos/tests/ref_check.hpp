@@ -128,7 +128,7 @@ inline RefError relative_error(const Eigen::MatrixXd& dat, const Eigen::MatrixXd
     }                                                                                        \
     const auto ref_check_error =                                                             \
         ::siconos::test::relative_error(ref_check_dat, ref_check_ref);                       \
-    if (ref_check_error.relative > (tol)) {                                                  \
+    if (!(ref_check_error.relative <= (tol))) { /* NaN fails too */                          \
       std::ostringstream ref_check_msg;                                                      \
       ref_check_msg << ref_file << ": relative Frobenius error " << ref_check_error.relative \
                     << " > tolerance " << (tol) << "; worst element at row "                 \

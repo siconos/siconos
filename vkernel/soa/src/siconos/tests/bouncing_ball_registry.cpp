@@ -118,12 +118,12 @@ class BouncingBallRegistryTest : public CppUnit::TestFixture {
     // ================================= Computation
     // =================================
 
-    //  auto fd = io::open<ascii>("result.dat");
+    //  auto fd = io::open<ascii>("bouncing_ball_registry.dat");
 
     // fix this for constant fext
     simulation.initialize();
 
-    std::ofstream result_file("result.dat");
+    std::ofstream result_file("bouncing_ball_registry.dat");
 
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
@@ -150,8 +150,8 @@ class BouncingBallRegistryTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("result.dat"), "bouncing_ball_registry.ref",
-                       1e-8);
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_ball_registry.dat"),
+                       "bouncing_ball_registry.ref", 1e-8);
   }
 };
 

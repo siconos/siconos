@@ -141,13 +141,13 @@ class BouncingDiskTest : public CppUnit::TestFixture {
     // ================================= Computation
     // =================================
 
-    //  auto fd = io::open<ascii>("result.dat");
+    //  auto fd = io::open<ascii>("bouncing_disk.dat");
 
     // fix this for constant fext
     simulation.initialize();
 
-    std::ofstream result_file("result.dat");
-    // std::ofstream cout("result.dat");
+    std::ofstream result_file("bouncing_disk.dat");
+    // std::ofstream cout("bouncing_disk.dat");
 
     // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
@@ -181,7 +181,8 @@ class BouncingDiskTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("result.dat"), "bouncing_disk.ref", 1e-8);
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_disk.dat"), "bouncing_disk.ref",
+                       1e-8);
   }
 };
 

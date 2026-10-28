@@ -192,7 +192,7 @@ class FixedDisksTest : public CppUnit::TestFixture {
     // fix this for constant fext
     simulation.initialize();
 
-    std::ofstream result_file("result-many.dat");
+    std::ofstream result_file("fixed_disks.dat");
 
     // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
     // std::ofstream cout("result.dat");
@@ -234,7 +234,7 @@ class FixedDisksTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("result-many.dat"), "fixed_disks.ref", 1e-8);
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("fixed_disks.dat"), "fixed_disks.ref", 1e-8);
   }
 };
 

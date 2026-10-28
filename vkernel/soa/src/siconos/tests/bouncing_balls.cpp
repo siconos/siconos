@@ -163,7 +163,7 @@ class BouncingBallsTest : public CppUnit::TestFixture {
     // iteration matrix & h_matrices
     simulation.initialize();
 
-    std::ofstream result_file("result-many.dat");
+    std::ofstream result_file("bouncing_balls.dat");
 
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
@@ -216,7 +216,8 @@ class BouncingBallsTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("result-many.dat"), "bouncing_balls.ref", 1e-8);
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_balls.dat"), "bouncing_balls.ref",
+                       1e-8);
   }
 };
 

@@ -31,6 +31,7 @@ int main() {
   // Put tests into the runner
   runner.addTest(registry.makeTest());
 
-  // Run tests
-  runner.run("", false, true, false);
+  // Run tests; a failure is also the exit code, for callers that do not
+  // read the output
+  return runner.run("", false, true, false) ? 0 : 1;
 }
