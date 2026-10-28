@@ -590,14 +590,6 @@ static auto map_value_transform = []<typename M, typename F>(
           hana::first, dup(hana::lockstep(std::forward<F>(f))(hana::first, hana::second)))));
 };
 
-static auto pre_map_value_transform = []<typename M, typename F>(
-                                          M&& m, F&& f) constexpr -> decltype(auto) {
-  return transform(
-      std::forward<M>(m),
-      dup(hana::lockstep(hana::make_pair)(
-          hana::first, dup(hana::lockstep(std::forward<F>(f))(hana::first, hana::second)))));
-};
-
 // compile-time itransform
 static constexpr const auto itransform_ct(const auto& a, auto&& f) {
   using array_type = std::decay_t<decltype(a)>;

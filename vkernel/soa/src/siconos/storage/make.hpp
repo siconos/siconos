@@ -150,54 +150,85 @@ struct item_storage {
 };
 
 /**
- * @brief Transform function that processes storage items based on their
- * attributes
+ * @brief Single-pass computation of the compile-time database columns.
  *
- * @tparam Info The info type
+ * Every column goes through the same three stages as registry::column_of
+ * (attribute refinement, item wrapper or default storage, memory depth), in
+ * one parameter-pack pass over the base storage column keys. The previous
+ * pipeline applied these stages as three whole-tuple hana::transform passes,
+ * each rebuilding the complete tuple of key-value pairs.
  */
-template <typename Info>
-static constexpr auto item_storage_transform =
-    []<typename D>(D&& d, auto&& f) constexpr -> decltype(auto) {
-  using info_t = Info;
+namespace build_detail {
 
-  // Apply transformation to each key-value pair in the storage
-  return mp::transform(d, [&f]<typename P>(P&& key_value) {
-    auto&& key = mp::first(key_value);
-    auto&& value = mp::second(key_value);
-    using key_t = std::decay_t<decltype(key)>;
-    using value_t = std::decay_t<decltype(value)>;
+template <typename Info, match::attribute A>
+struct column_type {
+  using all_properties_t = typename Info::all_properties_t;
+  using item_t = decltype(item_attribute<A>(typename Info::all_items_t{}));
+  using env_t = typename Info::template env<item_t>;
 
-    // Process attributes differently from other key-value pairs
-    if constexpr (match::attribute<typename key_t::type>) {
-      using attr_t = typename key_t::type;
-      return f(item_attribute<attr_t>(typename info_t::all_items_t{}), attr_t{},
-               std::forward<value_t>(value));
+  // attribute level: user refinements over the recursively rebuilt attribute
+  using recursed_t = typename recursive_rebuild<A>::type;
+  using refines_t =
+      decltype(mp::filter(mp::filter(all_properties_t{}, mp::derive_from<property::refine>),
+                          mp::is_inside_type_parent<recursed_t>));
+  using refined_t = decltype([] {
+    if constexpr (mp::size(refines_t{}) > mp::size_c<0_c>) {
+      return typename nth_t<0, refines_t>::template refine<recursed_t>{};
     } else {
-      return std::forward<std::decay_t<P>>(key_value);
+      return recursed_t{};
     }
-  });
+  }());
+  using value_t = typename traits::config<env_t>::template convert<refined_t>::type;
+
+  // item level: item wrapper, wrapped<> property, or the env default storage
+  using wrappers_t =
+      decltype(mp::filter(all_properties_t{}, mp::derive_from<property::wrapped>));
+  using storage_t = decltype([] {
+    if constexpr (match::wrap<item_t>) {
+      return typename traits::config<env_t>::template convert<
+          typename item_t::template wrapper<value_t>>::type{};
+    } else {
+      using wrapped_t = decltype(apply_wrapper<item_t, wrappers_t>(value_t{}));
+      if constexpr (!std::is_same_v<wrapped_t, value_t>) {
+        return typename traits::config<env_t>::template convert<wrapped_t>::type{};
+      } else {
+        return typename env_t::template default_storage<value_t>{};
+      }
+    }
+  }());
+
+  // memory level: keep<> depth
+  using keeps_t = decltype(mp::filter(all_properties_t{}, mp::derive_from<property::keep>));
+  static constexpr std::size_t depth = memory_size<A, keeps_t>();
+  using type = memory_t<storage_t, depth>;
 };
 
-/**
- * @brief Transform function for attribute storage, applying a function to
- * each attribute
- *
- * @param d The storage data to transform
- * @param f The function to apply to each attribute
- * @return The transformed storage
- */
-static constexpr auto attribute_storage_transform =
-    []<typename D, typename F>(D&& d, F&& f) constexpr -> decltype(auto) {
-  return mp::pre_map_value_transform(
-      std::forward<D>(d), [&f]<typename K, typename S>(K, S&& s) {
-        // Only apply function to attribute types
-        if constexpr (match::attribute<typename K::type>) {
-          return std::forward<F>(f)(typename K::type{}, std::forward<S>(s));
-        } else {
-          return std::move(s);
-        }
-      });
+// non-attribute pair (info, attached storages): kept as-is
+template <typename Info, typename Pair>
+struct pair_type {
+  using type = Pair;
 };
+
+// attribute pair: the single-pass column type (a trailing requires clause
+// after ">>" is not accepted by clang, hence the leading form)
+template <typename Info, typename A, typename B>
+  requires(match::attribute<typename A::type>)
+struct pair_type<Info, boost::hana::pair<A, B>> {
+  using type =
+      mp::key_value<typename A::type, typename column_type<Info, typename A::type>::type>;
+};
+
+template <typename Info, typename Pairs>
+struct pack_columns;
+
+template <typename Info, typename... Ps>
+struct pack_columns<Info, boost::hana::tuple<Ps...>> {
+  using type = boost::hana::tuple<typename pair_type<Info, Ps>::type...>;
+
+  static constexpr type build() { return type(typename pair_type<Info, Ps>::type{}...); }
+};
+
+}  // namespace build_detail
 
 /**
  * @brief Factory struct for building a complete compile-time typed database
@@ -221,60 +252,8 @@ struct make_compile_time_database {
   static constexpr decltype(auto) internal_build() {
     using item_storage_t = item_storage<Env, Items...>;
     using info_t = typename item_storage_t::iinfo;
-    auto base_storage = typename item_storage_t::type{};
-    using all_wrappers_t =
-        decltype(pre_map_all_properties_as<property::wrapped>(base_storage));
-    using all_keeps_t = decltype(pre_map_all_properties_as<property::keep>(base_storage));
-
-    // Build the storage through a multi-stage transformation pipeline
-    return mp::to_database(attribute_storage_transform(
-        item_storage_transform<info_t>(
-            attribute_storage_transform(
-                base_storage,
-                // Attribute level: refine attributes based on specifications
-                []<match::attribute Attribute, typename Storage>(
-                    Attribute, Storage& s) -> decltype(auto) {
-                  // Convert attributes using recursive refinement
-                  using item_t =
-                      decltype(item_attribute<Attribute>(typename info_t::all_items_t{}));
-                  using env_t = typename info_t::template env<item_t>;
-
-                  return typename traits::config<env_t>::template convert<
-                      decltype(refine_recursively_attribute(base_storage,
-                                                            Attribute{}))>::type{};
-                }),
-            // Item level: handle collection wrappers for items
-            []<match::item Item, match::attribute Attr>(Item item, Attr attr, auto s) {
-              using storage_t = std::decay_t<decltype(s)>;
-              using env_t = typename info_t::template env<Item>;
-
-              // Handle wrapped items by applying their wrapper
-              if constexpr (match::wrap<Item>) {
-                return mp::key_value<Attr,
-                                     typename traits::config<env_t>::template convert<
-                                         typename Item::template wrapper<storage_t>>::type>{};
-              } else {
-                using storage_wrapped = decltype(apply_wrapper<Item, all_wrappers_t>(s));
-
-                // Apply wrapper if different from original storage type
-                if constexpr (!std::is_same_v<storage_wrapped, storage_t>) {
-                  using storage_wrapped_and_converted =
-                      typename traits::config<env_t>::template convert<storage_wrapped>::type;
-
-                  return mp::key_value<Attr, storage_wrapped_and_converted>{};
-                } else {
-                  // Use environment's default storage if no wrapper
-                  return mp::key_value<
-                      Attr, typename Env<Item>::template default_storage<storage_t>>{};
-                }
-              }
-            }),
-        // Memory level: determine memory size based on keeps properties
-        []<match::attribute Attribute>(Attribute attr, auto s) {
-          using storage_t = std::decay_t<decltype(s)>;
-
-          return memory_t<storage_t, memory_size<Attribute, all_keeps_t>()>{};
-        }));
+    using base_storage_t = typename item_storage_t::type;
+    return mp::to_database(build_detail::pack_columns<info_t, base_storage_t>::build());
   };
 
   using database_t = decltype(internal_build());

@@ -178,14 +178,6 @@ struct sparse : property::sparse_matrix {
 };
 
 template <match::property K>
-static auto pre_map_all_properties_as = []<typename D>(D& data) constexpr -> auto {
-  using info_t = get_info_t<D>;
-  using all_properties_t = typename info_t::all_properties_t;
-
-  return mp::filter(all_properties_t{}, mp::derive_from<K>);
-};
-
-template <match::property K>
 static auto all_properties_as = []<typename D>(D& data) constexpr -> auto {
   using info_t = get_info_t<D>;
   using all_properties_t = typename info_t::all_properties_t;
@@ -254,19 +246,6 @@ static constexpr auto bind_name() {
 template <typename A, typename K, typename D>
 using has_property_t = std::decay_t<decltype(has_property<A, K>(D{}))>;
 
-static auto refine_attribute = []<match::attribute Attr, typename D>(
-                                   const D& data, Attr) constexpr -> decltype(auto) {
-  using refines = decltype(mp::filter(pre_map_all_properties_as<property::refine>(data),
-                                      mp::is_inside_type_parent<Attr>));
-
-  if constexpr (mp::size(refines{}) > mp::size_c<0_c>) {
-    return typename nth_t<0, refines>::template refine<Attr>{};
-  } else {
-    // return attribute as it is
-    return Attr{};
-  }
-};
-
 // recursive type refinement
 template <typename Attr>
 struct recursive_rebuild {
@@ -279,17 +258,6 @@ template <typename Attr>
 struct recursive_rebuild<Attr> {
   using inner = typename recursive_rebuild<typename Attr::type>::type;
   using type = refine_with_type<Attr, inner>;
-};
-
-static constexpr auto refine_recursively_attribute = []<match::attribute Attr>(auto& data,
-                                                                               Attr) {
-  using data_t = std::decay_t<decltype(data)>;
-
-  // rebuild
-  using recursed = typename recursive_rebuild<Attr>::type;
-
-  // user-defined refinements at the top level
-  return refine_attribute(data_t{}, recursed{});
 };
 
 template <typename Handle, typename Data>

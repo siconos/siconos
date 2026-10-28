@@ -406,10 +406,10 @@ using configuration_properties_t = decltype(mp::concat_all([] {
 /**
  * @brief Concrete column type of one attribute key.
  *
- * The same three stages as storage::make_compile_time_database::internal_build (attribute
- * refinement, item wrapper or default storage, memory depth), applied to a
- * single key instead of to the whole database. It is a class template, so it
- * is computed once per key however many access sites ask for it.
+ * The same column computation as make_compile_time_database's build_detail
+ * (attribute refinement, item wrapper or default storage, memory depth),
+ * applied to a single key. It is a class template, so it is computed once
+ * per key however many access sites ask for it.
  */
 template <typename Info, match::attribute A>
 struct column_of {
