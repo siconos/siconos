@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cmath>
 #include <concepts>
+#include <numbers>
 #include <print>
 #include <stdexcept>
 
@@ -276,10 +278,34 @@ struct space_filter : item {
                 }
               }
             } else {
-              // the system has just one point associated
-              auto new_point = storage::add<Point>(data);
-              new_point.item() = ds;
-              new_point.update(0);
+              // With one point at its center, a disk pair is seen by
+              // the neighborhood search iff r1 + r2 <= search radius,
+              // so a single point is only enough for 2 r <= search
+              // radius. A bigger disk gets points on its circle, spaced
+              // by half the search radius: any contact point is then
+              // within a quarter of the search radius of one of them.
+              auto npoints = std::size_t{1};
+              auto radius = 0.;
+              if constexpr (std::derived_from<shape_t, collision::shape::disk>) {
+                auto search_radius = neighborhood().instance()->radius();
+                radius = storage::make_handle(data, shape_idx).radius();
+                if (2 * radius > search_radius) {
+                  npoints = static_cast<std::size_t>(
+                      std::ceil(2 * std::numbers::pi * radius / (search_radius / 2)));
+                }
+              }
+              for (std::size_t i = 0; i < npoints; ++i) {
+                auto new_point = storage::add<Point>(data);
+                new_point.item() = ds;
+                if (npoints == 1) {
+                  new_point.offset() = {0.f, 0.f};
+                } else {
+                  auto t = 2 * std::numbers::pi * i / npoints;
+                  new_point.offset() = {static_cast<float>(radius * std::cos(t)),
+                                        static_cast<float>(radius * std::sin(t))};
+                }
+                new_point.update(0);
+              }
             }
           }
         }
@@ -382,6 +408,10 @@ struct space_filter : item {
     }
 
     void dsds_activation(auto& ds1, auto& ds2, auto& fmap, auto hp1, auto hp2) {
+      // two points of the same big disk are neighbors of each other
+      if constexpr (std::is_same_v<std::decay_t<decltype(ds1)>, std::decay_t<decltype(ds2)>>) {
+        if (ds1.index() == ds2.index()) return;
+      }
       auto& data = self()->data();
       auto topo = self()->topology();
       auto gid1 = ds1.collision_group();

@@ -23,8 +23,11 @@ struct point : item {
   static_assert(always_false<Item, Shape>, "point is not defined for this association");
 };
 
-// Direct association to a lagrangian_ds: just a point associated at
-// the coordinates of the system.
+// Direct association to a lagrangian_ds: a point at the coordinates of
+// the system, shifted by a fixed offset. A small disk has one point with
+// a null offset; a disk too big for the neighborhood radius gets several
+// points on its circle (see space_filter::make_points). The offset is in
+// the global frame: a circle is invariant by rotation.
 template <match::item Item>
   requires(requires { typename Item::lagrangian_dynamical_system_t; })
 struct point<Item, empty_shape> : item {
@@ -34,6 +37,7 @@ struct point<Item, empty_shape> : item {
   struct attributes {
     some::boolean flag;
     some::vector<float, some::indice_value<3>> coord;
+    some::vector<float, some::indice_value<2>> offset;
     some::item_ref<item_t> item;
   };
 
@@ -43,14 +47,14 @@ struct point<Item, empty_shape> : item {
 
     decltype(auto) flags() { return storage::attr<"flag">(*self()); };
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
+    decltype(auto) offset() { return storage::attr<"offset">(*self()); };
     decltype(auto) item() {
       return storage::make_ref_handle(self()->data(), storage::attr<"item">(*self()));
     };
 
     void update(auto step) {
-      // one body / one point
-      coord()[0] = item().q(step)(0);
-      coord()[1] = item().q(step)(1);
+      coord()[0] = item().q(step)(0) + offset()[0];
+      coord()[1] = item().q(step)(1) + offset()[1];
       coord()[2] = 0; /* 2D */
     }
   };
