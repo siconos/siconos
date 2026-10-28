@@ -93,7 +93,11 @@ The `_sets0`/`_sets1` oracle for `bouncing_disks`, `churn_polytopes`,
 `add_executable` + `compare_outputs.cmake` form: it asserts that two builds
 agree with each other, an invariant a single CppUnit process cannot express.
 Its two executables are built from the same sources, which now contain a
-CppUnit suite; the oracle compares their stdout, which stays identical.
+CppUnit suite, so they take `${SIMPLE_TEST_MAIN}` as entry point; the oracle
+compares their stdout, which stays identical (both print the runner's
+`OK (1 tests)` line). A test that checks a reference reads it from its working
+directory, so the oracle's directory gets a copy of the `.ref` at configure
+time.
 
 ### 3.2 Test source shape
 
@@ -118,7 +122,8 @@ removed. No model code is rewritten.
 ### 3.3 Reference helper
 
 New header-only, Eigen-only helper `tests/ref_check.hpp` (shared by both
-test directories):
+test directories; `collision/tests` includes it as
+`"../../tests/ref_check.hpp"`):
 
 - `read_ref(path)` returns an `Eigen::MatrixXd`, skipping a leading
   non-numeric header line of the form `rows cols` (the tutorials format) and
@@ -138,10 +143,17 @@ test directories):
 - Generated references, produced by the current implementation and committed
   next to the source: `bouncing_ball_registry`, `bouncing_ball_split`,
   `unbounded_bouncing_ball`, `bouncing_balls`, `bouncing_disk`,
-  `bouncing_disk_line`, `bouncing_disks`, `fixed_disks`, `fem_t3`.
+  `bouncing_disk_line`, `bouncing_disks`, `fixed_disks`.
   These lock current behaviour against regression; they are not independent
   truth, and the spec records that.
-- Total added reference data is roughly half a megabyte.
+- `fem_t3` gets no reference and stays unregistered: its mesh `square_200.msh`
+  is not in the repository, so the binary aborts before producing anything.
+- Two recording defects are fixed on the way, one token each and with no model
+  change, because without them there is no trajectory to compare:
+  `bouncing_disks` opened its result with `std::fstream`, which does not create
+  the file (nothing was written in a fresh directory), and `bouncing_balls`
+  printed its per-step line to stdout instead of to the result file.
+- Total added reference data is about 1.4 MB (nine files from 31 KB to 224 KB).
 
 ### 3.5 Tolerance
 

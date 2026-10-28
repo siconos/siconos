@@ -1,6 +1,10 @@
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <fstream>
 #include <print>
 
+#include "../../tests/ref_check.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/registry.hpp"
@@ -62,162 +66,178 @@ struct data_t : storage::make_runtime_database<
                             typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[]) {
-  using namespace siconos;
-  using storage::pattern::wrap;
-  using namespace storage;
+namespace {
 
-  config::data_t data;
+class FixedDisksTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(FixedDisksTest);
+  CPPUNIT_TEST(testFixedDisks);
+  CPPUNIT_TEST_SUITE_END();
 
-  // unsigned int nDof = 3;         // degrees of freedom for the disk
-  double t0 = 0;               // initial computation time
-  double tmax = 1;             // final computation time
-  double h = 0.005;            // time step
-  double position_init = 1.0;  // initial position for lowest bead.
-  double velocity_init = 0.0;  // initial velocity for lowest bead.
-  double theta = 0.5;          // theta for MoreauJeanOSI integrator
-  double radius = 0.1;         // Disk radius
-  double m = 1.;               // Disk mass
-  double g = 9.81;             // Gravity
+ public:
+  void testFixedDisks() {
+    using namespace siconos;
+    using storage::pattern::wrap;
+    using namespace storage;
 
-  unsigned int ndisks = 1;
+    config::data_t data;
 
-  std::print("====> Model loading ...\n");
+    // unsigned int nDof = 3;         // degrees of freedom for the disk
+    double t0 = 0;               // initial computation time
+    double tmax = 1;             // final computation time
+    double h = 0.005;            // time step
+    double position_init = 1.0;  // initial position for lowest bead.
+    double velocity_init = 0.0;  // initial velocity for lowest bead.
+    double theta = 0.5;          // theta for MoreauJeanOSI integrator
+    double radius = 0.1;         // Disk radius
+    double m = 1.;               // Disk mass
+    double g = 9.81;             // Gravity
 
-  // --------------------------
-  // -- The dynamical_system --
-  // --------------------------
+    unsigned int ndisks = 1;
 
-  // one disk shape for all disks
-  auto disk_shape = storage::add<config::disk_shape>(data);
-  disk_shape.radius() = radius;
+    std::print("====> Model loading ...\n");
 
-  for (unsigned int i = 0; i < ndisks; ++i) {
-    auto d1 = storage::add<config::disk>(data);
-    //  auto d2 = storage::add<config::disk>(data);
+    // --------------------------
+    // -- The dynamical_system --
+    // --------------------------
 
-    storage::prop<"id", config::topo>(d1) = i + 1;
+    // one disk shape for all disks
+    auto disk_shape = storage::add<config::disk_shape>(data);
+    disk_shape.radius() = radius;
 
-    d1.q() = {0, position_init * (i + 1), 0};
-    d1.velocity() = {0, velocity_init, 0};
-    d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+    for (unsigned int i = 0; i < ndisks; ++i) {
+      auto d1 = storage::add<config::disk>(data);
+      //  auto d2 = storage::add<config::disk>(data);
 
-    storage::make_handle(data, prop<"shape">(d1)) = disk_shape;
+      storage::prop<"id", config::topo>(d1) = i + 1;
 
-    // -- Set external forces (weight) --
-    d1.fext() = {0., -m * g, 0.};
-    //  d2.fext() = {-m * g, 0., 0.};
-  }
+      d1.q() = {0, position_init * (i + 1), 0};
+      d1.velocity() = {0, velocity_init, 0};
+      d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-  // ------------------
-  // -- The relation --
-  // ------------------
+      storage::make_handle(data, prop<"shape">(d1)) = disk_shape;
 
-  // -- nslaw --
-  double e = 0.9;
-  auto nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = e;
-
-  auto fc2d = storage::add<config::fc2d>(data);
-  fc2d.create();
-  fc2d.instance()->dimension = 2;
-  fc2d.instance()->mu = 0;
-
-  // ------------------
-  // --- Simulation ---
-  // ------------------
-  auto simulation = storage::add<config::simulation>(data);
-
-  // auto io = storage::add<config::io>(data);
-
-  simulation.one_step_integrator().theta() = theta;
-  simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-  simulation.time_discretization().t0() = t0;
-  simulation.time_discretization().h() = h;
-
-  simulation.time_discretization().tmax() = tmax;
-  // -- set the formulation for the one step nonsmooth problem --
-  auto osnspb = simulation.one_step_nonsmooth_problem();
-  osnspb.problem() = fc2d;
-
-  // -- set the options --
-  auto so = storage::add<simul::solver_options>(data);
-  so.create(SICONOS_FRICTION_2D_LEMKE);
-  osnspb.options() = so;
-
-  auto ngbh = storage::add<config::neighborhood>(data);
-
-  ngbh.create(0.6);  // radius for broadphase detection
-
-  auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-  auto ground_r = storage::add<config::diskfdisk_r>(data);
-  auto tds = storage::add<config::translated_disk_shape>(data);
-  auto big_disk = storage::add<config::disk_shape>(data);
-  big_disk.radius() = 1;
-  big_disk.maxpoints() = 100;
-  tds.translated() = big_disk;
-  tds.translation() = {0., 0., 0.};
-  ground_r.translated_disk_shape() = tds;
-
-  auto spacef = storage::add<config::space_filter>(data);
-  spacef.neighborhood() = ngbh;
-  spacef.diskdisk_r() = diskdisk_r;
-  spacef.insert_nonsmooth_law(nslaw, 0, 0);
-  spacef.insert_diskfdisk_r(ground_r);
-  spacef.make_points();
-  ngbh.add_point_sets(0);
-  // =========================== End of model definition
-  // ===========================
-  // ================================= Computation
-  // =================================
-
-  //  auto fd = io::open<ascii>("result.dat");
-
-  auto disks = storage::handles<config::disk>(data, 0);
-  auto disk1 = (disks | view::take(1)).front();
-  auto disk2 = (disks | view::take(2)).back();
-
-  // fix this for constant fext
-  simulation.initialize();
-
-  std::ofstream result_file("result-many.dat");
-
-  // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
-  // std::ofstream cout("result.dat");
-  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-             simulation.current_step() * simulation.time_step(),
-             storage::attr<"q">(disk1, simulation.current_step())(1),
-             storage::attr<"q">(disk2, simulation.current_step())(1),
-             storage::attr<"velocity">(disk1, simulation.current_step())(1),
-             storage::attr<"velocity">(disk2, simulation.current_step())(1), 0., 0.);
-
-  // auto& vds = storage::prop_values<config::interaction, "vd">(
-  //     data, simulation.current_step());
-
-  while (simulation.has_next_event()) {
-    ngbh.update(0);
-    ngbh.search();
-    spacef.update_index_set0(simulation.current_step());
-
-    auto ninvds = simulation.compute_one_step();
-
-    // auto& positions = io.positions(0);
-
-    double p0, lambda;
-    if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
-      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    } else {
-      p0 = 0;
-      lambda = 0;
+      // -- Set external forces (weight) --
+      d1.fext() = {0., -m * g, 0.};
+      //  d2.fext() = {-m * g, 0., 0.};
     }
 
+    // ------------------
+    // -- The relation --
+    // ------------------
+
+    // -- nslaw --
+    double e = 0.9;
+    auto nslaw = storage::add<config::nslaw>(data);
+    nslaw.e() = e;
+
+    auto fc2d = storage::add<config::fc2d>(data);
+    fc2d.create();
+    fc2d.instance()->dimension = 2;
+    fc2d.instance()->mu = 0;
+
+    // ------------------
+    // --- Simulation ---
+    // ------------------
+    auto simulation = storage::add<config::simulation>(data);
+
+    // auto io = storage::add<config::io>(data);
+
+    simulation.one_step_integrator().theta() = theta;
+    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+    simulation.time_discretization().t0() = t0;
+    simulation.time_discretization().h() = h;
+
+    simulation.time_discretization().tmax() = tmax;
+    // -- set the formulation for the one step nonsmooth problem --
+    auto osnspb = simulation.one_step_nonsmooth_problem();
+    osnspb.problem() = fc2d;
+
+    // -- set the options --
+    auto so = storage::add<simul::solver_options>(data);
+    so.create(SICONOS_FRICTION_2D_LEMKE);
+    osnspb.options() = so;
+
+    auto ngbh = storage::add<config::neighborhood>(data);
+
+    ngbh.create(0.6);  // radius for broadphase detection
+
+    auto diskdisk_r = storage::add<config::diskdisk_r>(data);
+    auto ground_r = storage::add<config::diskfdisk_r>(data);
+    auto tds = storage::add<config::translated_disk_shape>(data);
+    auto big_disk = storage::add<config::disk_shape>(data);
+    big_disk.radius() = 1;
+    big_disk.maxpoints() = 100;
+    tds.translated() = big_disk;
+    tds.translation() = {0., 0., 0.};
+    ground_r.translated_disk_shape() = tds;
+
+    auto spacef = storage::add<config::space_filter>(data);
+    spacef.neighborhood() = ngbh;
+    spacef.diskdisk_r() = diskdisk_r;
+    spacef.insert_nonsmooth_law(nslaw, 0, 0);
+    spacef.insert_diskfdisk_r(ground_r);
+    spacef.make_points();
+    ngbh.add_point_sets(0);
+    // =========================== End of model definition
+    // ===========================
+    // ================================= Computation
+    // =================================
+
+    //  auto fd = io::open<ascii>("result.dat");
+
+    auto disks = storage::handles<config::disk>(data, 0);
+    auto disk1 = (disks | view::take(1)).front();
+    auto disk2 = (disks | view::take(2)).back();
+
+    // fix this for constant fext
+    simulation.initialize();
+
+    std::ofstream result_file("result-many.dat");
+
+    // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
+    // std::ofstream cout("result.dat");
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(disk1, simulation.current_step())(1),
                storage::attr<"q">(disk2, simulation.current_step())(1),
                storage::attr<"velocity">(disk1, simulation.current_step())(1),
-               storage::attr<"velocity">(disk2, simulation.current_step())(1), p0, lambda);
+               storage::attr<"velocity">(disk2, simulation.current_step())(1), 0., 0.);
+
+    // auto& vds = storage::prop_values<config::interaction, "vd">(
+    //     data, simulation.current_step());
+
+    while (simulation.has_next_event()) {
+      ngbh.update(0);
+      ngbh.search();
+      spacef.update_index_set0(simulation.current_step());
+
+      auto ninvds = simulation.compute_one_step();
+
+      // auto& positions = io.positions(0);
+
+      double p0, lambda;
+      if (ninvds > 0) {
+        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+        lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      } else {
+        p0 = 0;
+        lambda = 0;
+      }
+
+      std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                 simulation.current_step() * simulation.time_step(),
+                 storage::attr<"q">(disk1, simulation.current_step())(1),
+                 storage::attr<"q">(disk2, simulation.current_step())(1),
+                 storage::attr<"velocity">(disk1, simulation.current_step())(1),
+                 storage::attr<"velocity">(disk2, simulation.current_step())(1), p0, lambda);
+    }
+    //  io::close(fd);
+
+    result_file.close();
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("result-many.dat"), "fixed_disks.ref", 1e-8);
   }
-  //  io::close(fd);
-}
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(FixedDisksTest);
+
+}  // namespace

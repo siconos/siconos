@@ -5,6 +5,11 @@ if(WITH_vkernel_TESTING)
     set(COMPACTNSEARCH CompactNSearch)
   endif()
 
+  # The ctest tests of this directory are registered in
+  # vkernel/soa/vkernel_tests.cmake (begin_tests/new_test). This file only
+  # keeps the targets that are not ctest tests: the sort_interactions build per
+  # storage backend and the relation/index sets oracles.
+
   add_executable(cxd_batch_smoke cxd_batch_smoke.cpp)
   add_executable(polytope_cxd polytope_cxd.cpp)
   add_executable(bouncing_polytopes bouncing_polytopes.cpp)
@@ -16,14 +21,11 @@ if(WITH_vkernel_TESTING)
   add_executable(rigid_shapes rigid_shapes.cpp)
   add_executable(mixed_bodies mixed_bodies.cpp)
   add_executable(polytope_on_fem polytope_on_fem.cpp)
-  add_executable(bouncing_disks bouncing_disks.cpp)
-  add_executable(fixed_disks fixed_disks.cpp)
   add_executable(io_contact_points io_contact_points.cpp)
 
   foreach(t cxd_batch_smoke polytope_cxd bouncing_polytopes churn_polytopes
             polytope_fsegment polytopemesh polytopefdisk polytopedisk
-            rigid_shapes mixed_bodies polytope_on_fem bouncing_disks
-            fixed_disks io_contact_points)
+            rigid_shapes mixed_bodies polytope_on_fem io_contact_points)
     set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
   endforeach()
 
@@ -38,15 +40,12 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(rigid_shapes Eigen3::Eigen numerics pthread CPPUNIT::CPPUNIT)
   target_link_libraries(mixed_bodies Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(polytope_on_fem Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(bouncing_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(fixed_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
   target_link_libraries(io_contact_points Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
 
   enable_testing()
   foreach(test cxd_batch_smoke polytope_cxd bouncing_polytopes churn_polytopes
              polytope_fsegment polytopemesh polytopefdisk polytopedisk
-             rigid_shapes mixed_bodies polytope_on_fem bouncing_disks
-             fixed_disks io_contact_points)
+             rigid_shapes mixed_bodies polytope_on_fem io_contact_points)
     add_test(NAME vkernel_${test} COMMAND ${test}
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   endforeach()
@@ -78,14 +77,20 @@ if(WITH_vkernel_TESTING)
   foreach(test bouncing_disks churn_polytopes mixed_bodies polytope_on_fem
       sort_interactions)
     foreach(sets 0 1)
-      add_executable(${test}_sets${sets} ${test}.cpp)
+      add_executable(${test}_sets${sets} ${test}.cpp ${SIMPLE_TEST_MAIN})
       set_target_properties(${test}_sets${sets} PROPERTIES COMPILE_FLAGS "${flags}")
       target_compile_definitions(${test}_sets${sets} PRIVATE
         VKERNEL_RELATION_SETS=${sets} VKERNEL_INDEX_SETS=${sets})
       target_link_libraries(${test}_sets${sets} Eigen3::Eigen numerics pthread
-        ${COMPACTNSEARCH})
+        ${COMPACTNSEARCH} CPPUNIT::CPPUNIT)
     endforeach()
     target_compile_options(${test}_sets1 PRIVATE -UNDEBUG)
+    # a test that checks a reference reads it from its working directory
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${test}_sets_oracle)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${test}.ref)
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${test}.ref
+        ${CMAKE_CURRENT_BINARY_DIR}/${test}_sets_oracle/${test}.ref COPYONLY)
+    endif()
     add_test(NAME vkernel_${test}_sets_oracle
       COMMAND ${CMAKE_COMMAND}
         -DA=$<TARGET_FILE:${test}_sets0> -DB=$<TARGET_FILE:${test}_sets1>

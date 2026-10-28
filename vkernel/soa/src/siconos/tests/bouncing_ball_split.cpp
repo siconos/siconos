@@ -1,117 +1,138 @@
 #include "bouncing_ball_split.hpp"
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <fstream>
 #include <print>
 
-int main(int argc, char* argv[]) {
-  namespace storage = siconos::storage;
-  namespace config = siconos::config;
-  using siconos::storage::handle;
-  using siconos::storage::pattern::param_val;
+#include "ref_check.hpp"
 
-  config::data_t data;
+namespace {
 
-  // unsigned int nDof = 3;         // degrees of freedom for the ball
-  double t0 = 0;               // initial computation time
-  double tmax = 10;            // final computation time
-  double h = 0.005;            // time step
-  double position_init = 1.0;  // initial position for lowest bead.
-  double velocity_init = 0.0;  // initial velocity for lowest bead.
-  double theta = 0.5;          // theta for MoreauJeanOSI integrator
-  double radius = 0.1;         // Ball radius
-  double m = 1.;               // Ball mass
-  double g = 9.81;             // Gravity
+class BouncingBallSplitTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(BouncingBallSplitTest);
+  CPPUNIT_TEST(testBouncingBallSplit);
+  CPPUNIT_TEST_SUITE_END();
 
-  std::print("====> Model loading ...\n");
+ public:
+  void testBouncingBallSplit() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+    using siconos::storage::handle;
+    using siconos::storage::pattern::param_val;
 
-  // --------------------------
-  // -- The dynamical_system --
-  // --------------------------
-  handle ball = storage::add<config::ball>(data);
+    config::data_t data;
 
-  ball.q() = {position_init, 0, 0};
-  ball.velocity() = {velocity_init, 0, 0};
-  ball.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+    // unsigned int nDof = 3;         // degrees of freedom for the ball
+    double t0 = 0;               // initial computation time
+    double tmax = 10;            // final computation time
+    double h = 0.005;            // time step
+    double position_init = 1.0;  // initial position for lowest bead.
+    double velocity_init = 0.0;  // initial velocity for lowest bead.
+    double theta = 0.5;          // theta for MoreauJeanOSI integrator
+    double radius = 0.1;         // Ball radius
+    double m = 1.;               // Ball mass
+    double g = 9.81;             // Gravity
 
-  // -- Set external forces (weight) --
-  ball.fext() = {-m * g, 0., 0.};
+    std::print("====> Model loading ...\n");
 
-  // ------------------
-  // -- The relation --
-  // ------------------
+    // --------------------------
+    // -- The dynamical_system --
+    // --------------------------
+    handle ball = storage::add<config::ball>(data);
 
-  // -- Lagrangian relation --
-  handle relation = storage::add<config::relation>(data);
-  relation.h_matrix() = {-1.0, 0., 0.};
+    ball.q() = {position_init, 0, 0};
+    ball.velocity() = {velocity_init, 0, 0};
+    ball.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-  // -- nslaw --
-  double e = 0.9;
-  handle nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = e;
+    // -- Set external forces (weight) --
+    ball.fext() = {-m * g, 0., 0.};
 
-  handle lcp = storage::add<config::lcp>(data);
-  lcp.create(SICONOS_LCP_LEMKE);
+    // ------------------
+    // -- The relation --
+    // ------------------
 
-  // ------------------
-  // --- Simulation ---
-  // ------------------
-  handle simulation = storage::add<config::simulation>(data);
+    // -- Lagrangian relation --
+    handle relation = storage::add<config::relation>(data);
+    relation.h_matrix() = {-1.0, 0., 0.};
 
-  simulation.one_step_integrator().theta() = theta;
-  simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-  simulation.time_discretization().t0() = t0;
-  simulation.time_discretization().h() = h;
+    // -- nslaw --
+    double e = 0.9;
+    handle nslaw = storage::add<config::nslaw>(data);
+    nslaw.e() = e;
 
-  simulation.time_discretization().tmax() = tmax;
-  // -- set the formulation for the one step nonsmooth problem --
-  handle osnspb = simulation.one_step_nonsmooth_problem();
-  osnspb.problem() = lcp;
+    handle lcp = storage::add<config::lcp>(data);
+    lcp.create(SICONOS_LCP_LEMKE);
 
-  // -- set the options --
-  handle so = storage::add<siconos::simul::solver_options>(data);
-  so.create();
-  osnspb.options() = so;
+    // ------------------
+    // --- Simulation ---
+    // ------------------
+    handle simulation = storage::add<config::simulation>(data);
 
-  // Interaction ball-floor
-  handle interaction = simulation.topology().link(ball);
-  // interaction.h_matrix1() = {1., 0., 0.};
+    simulation.one_step_integrator().theta() = theta;
+    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+    simulation.time_discretization().t0() = t0;
+    simulation.time_discretization().h() = h;
 
-  simulation.topology().bind(interaction, relation);
-  interaction.nslaw() = nslaw;
+    simulation.time_discretization().tmax() = tmax;
+    // -- set the formulation for the one step nonsmooth problem --
+    handle osnspb = simulation.one_step_nonsmooth_problem();
+    osnspb.problem() = lcp;
 
-  // =========================== End of model definition
-  // ===========================
-  // ================================= Computation
-  // =================================
+    // -- set the options --
+    handle so = storage::add<siconos::simul::solver_options>(data);
+    so.create();
+    osnspb.options() = so;
 
-  //  auto fd = io::open<ascii>("result.dat");
+    // Interaction ball-floor
+    handle interaction = simulation.topology().link(ball);
+    // interaction.h_matrix1() = {1., 0., 0.};
 
-  // fix this for constant fext
-  simulation_initialize(data, simulation.index().value());
+    simulation.topology().bind(interaction, relation);
+    interaction.nslaw() = nslaw;
 
-  std::ofstream result_file("result.dat");
+    // =========================== End of model definition
+    // ===========================
+    // ================================= Computation
+    // =================================
 
-  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-             simulation.current_step() * simulation.time_step(),
-             storage::attr<"q">(ball, simulation.current_step())(0),
-             storage::attr<"velocity">(ball, simulation.current_step())(0), 0., 0.);
+    //  auto fd = io::open<ascii>("result.dat");
 
-  while (simulation_has_next_event(data, simulation.index().value())) {
-    uint ninvds = simulation_compute_one_step(data, simulation.index().value());
+    // fix this for constant fext
+    simulation_initialize(data, simulation.index().value());
 
-    double p0, lambda;
-    if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
-      lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    } else {
-      p0 = 0;
-      lambda = 0;
-    }
+    std::ofstream result_file("result.dat");
 
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(ball, simulation.current_step())(0),
-               storage::attr<"velocity">(ball, simulation.current_step())(0), p0, lambda);
+               storage::attr<"velocity">(ball, simulation.current_step())(0), 0., 0.);
+
+    while (simulation_has_next_event(data, simulation.index().value())) {
+      uint ninvds = simulation_compute_one_step(data, simulation.index().value());
+
+      double p0, lambda;
+      if (ninvds > 0) {
+        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+        lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      } else {
+        p0 = 0;
+        lambda = 0;
+      }
+
+      std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                 simulation.current_step() * simulation.time_step(),
+                 storage::attr<"q">(ball, simulation.current_step())(0),
+                 storage::attr<"velocity">(ball, simulation.current_step())(0), p0, lambda);
+    }
+    //  io::close(fd);
+
+    result_file.close();
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("result.dat"), "bouncing_ball_split.ref", 1e-8);
   }
-  //  io::close(fd);
-}
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(BouncingBallSplitTest);
+
+}  // namespace
