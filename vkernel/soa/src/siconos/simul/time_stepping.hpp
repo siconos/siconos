@@ -83,7 +83,7 @@ struct time_stepping : item {
         // do nothing if lagrangian_r is time_invariant
         elem.update_h_matrices(step);
 
-        // vfree stored in v(step+1) & q(step+1)
+        // vfree, qfree stored in v(step+1) & q(step+1)
         elem.compute_free_state(step, time_step());
 
         // -> y & ydot (step & step+1)
@@ -127,18 +127,13 @@ struct time_stepping : item {
           // lambda_vector_assembled -> lambdas
           elem.keep_lambdas(step);
 
-          // velocity_vector_assembled -> velocities
-          elem.update_velocities(step, time_step());
-          elem.update_positions(step, time_step());
+          // velocity_vector_assembled -> velocities and positions of the
+          // involved systems
+          elem.update_velocities_and_positions(step, time_step());
         });
       }
 
-      else {
-        mp::for_each(osi.elements(), [&](auto elem) {
-          // from free velocity
-          elem.update_positions(step, time_step());
-        });
-      }
+      // without contact the free state is the state at step + 1
 
       current_step() += 1;
 

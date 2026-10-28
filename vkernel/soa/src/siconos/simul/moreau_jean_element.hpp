@@ -438,7 +438,7 @@ struct moreau_jean_element : item {
       }
     }
 
-    // update v(step + 1)
+    // free state: v(step + 1) and q(step + 1) without the contact impulses
     void compute_free_state(auto step, auto h) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
@@ -452,6 +452,9 @@ struct moreau_jean_element : item {
       auto& qs = storage::attr_values<system, "q">(data, step);
       auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
 
+      auto& bc_velocities_0s =
+          storage::prop_values<system, "bc_velocities_0", topology>(data, step);
+
       if constexpr (system_with_k_matrix()) {
         // W = M + h^2*theta^2*K
         // RHS = M*v - h^2*theta*(1-theta)*K*v + h*(f_ext - K*q)
@@ -461,15 +464,11 @@ struct moreau_jean_element : item {
 
         auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
 
-        auto& bc_velocities_0s =
-            storage::prop_values<system, "bc_velocities_0", topology>(data, step);
-
         auto n = qs.size();
         for (std::size_t i = 0; i < n; ++i) {
           auto& k_mat = k_matrices[i];
           auto& q = qs[i];
           auto& v = vs[i];
-          auto& v_next = vs_next[i];
           auto& f = fexts[i];
 
           using vector = typename env_t::template unbounded_vector<scalar>;
@@ -484,14 +483,8 @@ struct moreau_jean_element : item {
           // W * dv = RHS, W = M + h^2*theta^2*K factorized once for the
           // simulation
           vector dv = fem_w_factor(step, i, h).solve(rhs);
-          v_next = v + dv;
-        }
-
-        apply_bc_velocities_0(bc_velocities_0s, vs_next);
-
-        // update q next:
-        for (auto [q, q_next, v, v_next] : view::zip(qs, qs_next, vs, vs_next)) {
-          q_next = q + h * theta * v_next + h * (1 - theta) * v;
+          vs_next[i] = v + dv;
+          update_position(qs_next[i], q, v, vs_next[i], h, theta);
         }
       }
 
@@ -502,21 +495,20 @@ struct moreau_jean_element : item {
         auto& minv_fs_next =
             storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
 
-        auto& bc_velocities_0s =
-            storage::prop_values<system, "bc_velocities_0", topology>(data, step);
-
-        for (auto [v, v_next, minv_f, minv_f_next] :
-             view::zip(vs, vs_next, minv_fs, minv_fs_next)) {
+        for (auto [q, q_next, v, v_next, minv_f, minv_f_next] :
+             view::zip(qs, qs_next, vs, vs_next, minv_fs, minv_fs_next)) {
           v_next = v + h * theta * minv_f_next + h * (1 - theta) * minv_f;
-        }
-
-        apply_bc_velocities_0(bc_velocities_0s, vs_next);
-
-        // update q next:
-        for (auto [q, q_next, v, v_next] : view::zip(qs, qs_next, vs, vs_next)) {
-          q_next = q + h * theta * v_next + h * (1 - theta) * v;
+          update_position(q_next, q, v, v_next, h, theta);
         }
       }
+
+      apply_bc_velocities_0(bc_velocities_0s, qs, qs_next, vs, vs_next, h, theta);
+    }
+
+    // theta-method on the positions
+    static void update_position(auto& q_next, const auto& q, const auto& v, const auto& v_next,
+                                auto h, auto theta) {
+      q_next = q + h * (theta * v_next + (1.0 - theta) * v);
     }
 
     // zero the blocked velocity components: only the systems with boundary
@@ -526,6 +518,19 @@ struct moreau_jean_element : item {
         for (auto bc_idx : bcs) {
           vs[i](bc_idx) = 0.0;
         }
+      });
+    }
+
+    // the same, then the positions of these systems again, after a loop that
+    // updated q(step + 1) with the velocities before the boundary conditions
+    static void apply_bc_velocities_0(auto& bc_velocities_0s, auto& qs, auto& qs_next,
+                                      auto& vs, auto& vs_next, auto h, auto theta) {
+      storage::for_each_entry(bc_velocities_0s, [&](auto i, auto& bcs) {
+        if (bcs.size() == 0) return;
+        for (auto bc_idx : bcs) {
+          vs_next[i](bc_idx) = 0.0;
+        }
+        update_position(qs_next[i], qs[i], vs[i], vs_next[i], h, theta);
       });
     }
 
@@ -637,11 +642,18 @@ struct moreau_jean_element : item {
       });
     }
 
-    void update_velocities(auto step, auto h) {
+    // add the contact impulses to v(step + 1) and update q(step + 1), for the
+    // involved systems only: the others keep their free state
+    void update_velocities_and_positions(auto step, auto h) {
       auto& data = self()->data();
       auto&& velo = velocity_vector_assembled();
+      using scalar = typename decltype(self()->env())::scalar;
+      scalar theta = self()->theta();
 
+      auto& vs = storage::attr_values<velocity>(data, step);
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
+      auto& qs = storage::attr_values<system, "q">(data, step);
+      auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
 
       auto& bc_velocities_0s =
           storage::prop_values<system, "bc_velocities_0", topology>(data, step);
@@ -654,10 +666,11 @@ struct moreau_jean_element : item {
         } else {
           v_next += get_vector(velo, index, v_next.size());
         }
+        update_position(qs_next[i], qs[i], vs[i], v_next, h, theta);
       });
 
-      // the free velocities of the systems not involved already satisfy them
-      apply_bc_velocities_0(bc_velocities_0s, vs_next);
+      // the involved systems may have broken them
+      apply_bc_velocities_0(bc_velocities_0s, qs, qs_next, vs, vs_next, h, theta);
     }
 
     void update_positions(auto step, auto h) {
@@ -668,10 +681,8 @@ struct moreau_jean_element : item {
       auto& vs = storage::attr_values<velocity>(data, step);
       auto& vs_next = storage::attr_values<velocity>(data, step + 1);
 
-      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
-      for (auto [x, x_next, v, v_next, involved] :
-           view::zip(xs, xs_next, vs, vs_next, involveds)) {
-        x_next = x + h * (theta() * v_next + (1.0 - theta()) * v);
+      for (auto [x, x_next, v, v_next] : view::zip(xs, xs_next, vs, vs_next)) {
+        update_position(x_next, x, v, v_next, h, theta());
       }
     }
 
