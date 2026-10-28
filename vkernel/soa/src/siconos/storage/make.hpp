@@ -149,21 +149,19 @@ struct item_storage {
                       }))>;
 };
 
-/**
- * @brief Single-pass computation of the compile-time database columns.
- *
- * Every column goes through the same three stages as registry::column_of
- * (attribute refinement, item wrapper or default storage, memory depth), in
- * one parameter-pack pass over the base storage column keys. The previous
- * pipeline applied these stages as three whole-tuple hana::transform passes,
- * each rebuilding the complete tuple of key-value pairs.
- */
 namespace build_detail {
 
-template <typename Info, match::attribute A>
-struct column_type {
+/**
+ * @brief Storage of one attribute column of Item, before its memory depth.
+ *
+ * The three stages shared by both databases: attribute refinement, item
+ * wrapper or default storage, and the keep<> depth. column_type stores the
+ * depth in the type (memory_t), registry::column_of at run time.
+ */
+template <typename Info, match::attribute A, typename Item>
+struct column_storage {
   using all_properties_t = typename Info::all_properties_t;
-  using item_t = decltype(item_attribute<A>(typename Info::all_items_t{}));
+  using item_t = Item;
   using env_t = typename Info::template env<item_t>;
 
   // attribute level: user refinements over the recursively rebuilt attribute
@@ -200,7 +198,15 @@ struct column_type {
   // memory level: keep<> depth
   using keeps_t = decltype(mp::filter(all_properties_t{}, mp::derive_from<property::keep>));
   static constexpr std::size_t depth = memory_size<A, keeps_t>();
-  using type = memory_t<storage_t, depth>;
+};
+
+/**
+ * @brief Column type of one attribute key of the compile-time database.
+ */
+template <typename Info, match::attribute A>
+struct column_type
+    : column_storage<Info, A, decltype(item_attribute<A>(typename Info::all_items_t{}))> {
+  using type = memory_t<typename column_type::storage_t, column_type::depth>;
 };
 
 // non-attribute pair (info, attached storages): kept as-is
@@ -209,8 +215,8 @@ struct pair_type {
   using type = Pair;
 };
 
-// attribute pair: the single-pass column type (a trailing requires clause
-// after ">>" is not accepted by clang, hence the leading form)
+// attribute pair: its column type (a class partial specialization takes its
+// requires clause after the template parameter list only)
 template <typename Info, typename A, typename B>
   requires(match::attribute<typename A::type>)
 struct pair_type<Info, boost::hana::pair<A, B>> {
@@ -218,6 +224,14 @@ struct pair_type<Info, boost::hana::pair<A, B>> {
       mp::key_value<typename A::type, typename column_type<Info, typename A::type>::type>;
 };
 
+/**
+ * @brief Single-pass computation of the compile-time database columns.
+ *
+ * Every column goes through column_type in one parameter-pack pass over the
+ * base storage column keys. The previous pipeline applied its stages as
+ * three whole-tuple hana::transform passes, each rebuilding the complete
+ * tuple of key-value pairs.
+ */
 template <typename Info, typename Pairs>
 struct pack_columns;
 

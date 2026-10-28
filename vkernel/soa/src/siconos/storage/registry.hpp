@@ -406,65 +406,36 @@ using configuration_properties_t = decltype(mp::concat_all([] {
 /**
  * @brief Concrete column type of one attribute key.
  *
- * The same column computation as make_compile_time_database's build_detail
- * (attribute refinement, item wrapper or default storage, memory depth),
+ * build_detail::column_storage (shared with make_compile_time_database),
  * applied to a single key. It is a class template, so it is computed once
  * per key however many access sites ask for it.
  */
+namespace registry_detail {
+// the item of the key: searched in the item closure when the Info has one
+// (world_info, at registration), taken from the key otherwise (world_config,
+// at access sites; paired<> and attached<> both name their item)
 template <typename Info, match::attribute A>
-struct column_of {
-  using all_properties_t = typename Info::all_properties_t;
-  // the item of the key: searched in the item closure when the Info has one
-  // (world_info, at registration), taken from the key otherwise (world_config,
-  // at access sites; paired<> and attached<> both name their item)
-  using item_t = decltype([] {
+struct column_item {
+  using type = decltype([] {
     if constexpr (requires { typename Info::all_items_t; }) {
       return item_attribute<A>(typename Info::all_items_t{});
     } else {
       return typename A::item{};
     }
   }());
-  using env_t = typename Info::template env<item_t>;
+};
+}  // namespace registry_detail
 
-  // attribute level: user refinements over the recursively rebuilt attribute
-  using recursed_t = typename recursive_rebuild<A>::type;
-  using refines_t =
-      decltype(mp::filter(mp::filter(all_properties_t{}, mp::derive_from<property::refine>),
-                          mp::is_inside_type_parent<recursed_t>));
-  using refined_t = decltype([] {
-    if constexpr (mp::size(refines_t{}) > mp::size_c<0_c>) {
-      return typename nth_t<0, refines_t>::template refine<recursed_t>{};
-    } else {
-      return recursed_t{};
-    }
-  }());
-  using value_t = typename traits::config<env_t>::template convert<refined_t>::type;
-
-  // item level: item wrapper, wrapped<> property, or the env default storage
-  using wrappers_t =
-      decltype(mp::filter(all_properties_t{}, mp::derive_from<property::wrapped>));
-  using storage_t = decltype([] {
-    if constexpr (match::wrap<item_t>) {
-      return typename traits::config<env_t>::template convert<
-          typename item_t::template wrapper<value_t>>::type{};
-    } else {
-      using wrapped_t = decltype(apply_wrapper<item_t, wrappers_t>(value_t{}));
-      if constexpr (!std::is_same_v<wrapped_t, value_t>) {
-        return typename traits::config<env_t>::template convert<wrapped_t>::type{};
-      } else {
-        return typename env_t::template default_storage<value_t>{};
-      }
-    }
-  }());
-
-  // memory level: keep<> depth.  The depth is a runtime size, not part of
-  // the type (unlike memory_t's std::array), so that the type of a column
-  // does not depend on which item declares a keep<> on it.  memory(step, m)
-  // indexes m[step % size] either way.  Only meaningful with a world_info
+template <typename Info, match::attribute A>
+struct column_of
+    : build_detail::column_storage<Info, A,
+                                   typename registry_detail::column_item<Info, A>::type> {
+  // the keep<> depth is a runtime size, not part of the type (unlike
+  // memory_t's std::array), so that the type of a column does not depend on
+  // which item declares a keep<> on it.  memory(step, m) indexes
+  // m[step % size] either way.  depth is only meaningful with a world_info
   // (registration): keep<> is declared by items.
-  using keeps_t = decltype(mp::filter(all_properties_t{}, mp::derive_from<property::keep>));
-  static constexpr std::size_t depth = memory_size<A, keeps_t>();
-  using type = std::vector<storage_t>;
+  using type = std::vector<typename column_of::storage_t>;
 };
 
 /**
