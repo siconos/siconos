@@ -14,13 +14,6 @@ if(WITH_vkernel_TESTING)
 
   target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread ${COMPACTNSEARCH})
 
-  # not yet cppunit suites
-  foreach(test nslaws_multi_group polydisperse_disks)
-    add_executable(${test} ${test}.cpp)
-    set_target_properties(${test} PROPERTIES COMPILE_FLAGS "${flags}")
-    target_link_libraries(${test} Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  endforeach()
-
   # fem_t3 is not registered: its mesh square_200.msh and reference
   # T3_square_200.ref are not in the repository.
   # bouncing_disk_sf and tnonos are not built today.

@@ -1,7 +1,11 @@
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <fstream>
 #include <print>
 #include <stdexcept>
 
+#include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 
 namespace siconos::config {
@@ -52,182 +56,194 @@ struct data_t : storage::make_compile_time_database<
                             typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[]) {
-  using namespace siconos;
-  using storage::pattern::wrap;
-  using namespace storage;
+namespace {
 
-  // ============================================================
-  // Part A: two collision groups, laws inserted in ONE order only.
-  // The mirror insert in insert_nonsmooth_law covers both (a,b) and
-  // (b,a), so the non-canonical visit order is not a failure path.
-  // ============================================================
-  {
-    config::data_t data;
+class NslawsMultiGroupTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(NslawsMultiGroupTest);
+  CPPUNIT_TEST(testOneInsertOrder);
+  CPPUNIT_TEST(testUnregisteredPairThrows);
+  CPPUNIT_TEST_SUITE_END();
 
-    double t0 = 0, tmax = 0.5, h = 0.005, theta = 0.5;
-    double radius = 0.1, m = 1., g = 9.81, e = 0.9;
+ public:
+  void testOneInsertOrder() {
+    using namespace siconos;
+    using namespace storage;
 
-    auto disk_shape = storage::add<config::disk_shape>(data);
-    disk_shape.radius() = radius;
+    // ============================================================
+    // Part A: two collision groups, laws inserted in ONE order only.
+    // The mirror insert in insert_nonsmooth_law covers both (a,b) and
+    // (b,a), so the non-canonical visit order is not a failure path.
+    // ============================================================
+    {
+      config::data_t data;
 
-    // disk 1: group 0, disk 2: group 1, disk 3: group 1
-    auto d1 = storage::add<config::disk>(data);
-    auto d2 = storage::add<config::disk>(data);
-    auto d3 = storage::add<config::disk>(data);
-    d1.collision_group() = 0;
-    d2.collision_group() = 1;
-    d3.collision_group() = 1;
+      double t0 = 0, tmax = 0.5, h = 0.005, theta = 0.5;
+      double radius = 0.1, m = 1., g = 9.81, e = 0.9;
 
-    d1.q() = {0, 1.5, 0};
-    d2.q() = {0, 0.5, 0};
-    d3.q() = {2.0, 1.0, 0};
-    for (auto d : {std::ref(d1), std::ref(d2), std::ref(d3)}) {
-      d.get().velocity() = {0, 0, 0};
-      d.get().mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
-      prop<"shape">(d.get()) = disk_shape;
-      d.get().fext() = {0., -m * g, 0.};
-    }
+      auto disk_shape = storage::add<config::disk_shape>(data);
+      disk_shape.radius() = radius;
 
-    auto nslaw = storage::add<config::nslaw>(data);
-    nslaw.e() = e;
+      // disk 1: group 0, disk 2: group 1, disk 3: group 1
+      auto d1 = storage::add<config::disk>(data);
+      auto d2 = storage::add<config::disk>(data);
+      auto d3 = storage::add<config::disk>(data);
+      d1.collision_group() = 0;
+      d2.collision_group() = 1;
+      d3.collision_group() = 1;
 
-    auto fc2d = storage::add<config::fc2d>(data);
-    fc2d.create();
-    fc2d.instance()->dimension = 2;
-    fc2d.instance()->mu = 0;
+      d1.q() = {0, 1.5, 0};
+      d2.q() = {0, 0.5, 0};
+      d3.q() = {2.0, 1.0, 0};
+      for (auto d : {std::ref(d1), std::ref(d2), std::ref(d3)}) {
+        d.get().velocity() = {0, 0, 0};
+        d.get().mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+        prop<"shape">(d.get()) = disk_shape;
+        d.get().fext() = {0., -m * g, 0.};
+      }
 
-    auto simulation = storage::add<config::simulation>(data);
-    simulation.one_step_integrator().theta() = theta;
-    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-    simulation.time_discretization().t0() = t0;
-    simulation.time_discretization().h() = h;
-    simulation.time_discretization().tmax() = tmax;
-    auto osnspb = simulation.one_step_nonsmooth_problem();
-    osnspb.problem() = fc2d;
-    auto so = storage::add<simul::solver_options>(data);
-    so.create(SICONOS_FRICTION_2D_LEMKE);
-    osnspb.options() = so;
+      auto nslaw = storage::add<config::nslaw>(data);
+      nslaw.e() = e;
 
-    auto ngbh = storage::add<config::neighborhood>(data);
-    ngbh.create(0.6);
+      auto fc2d = storage::add<config::fc2d>(data);
+      fc2d.create();
+      fc2d.instance()->dimension = 2;
+      fc2d.instance()->mu = 0;
 
-    auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-    auto ground_r = storage::add<config::diskfsegment_r>(data);
-    auto segment = storage::add<config::segment_shape>(data);
-    ground_r.segment() = segment;
-    segment.x1() = -10.;
-    segment.y1() = 0.;
-    segment.x2() = 10.;
-    segment.y2() = 0.;
-    segment.initialize();
-    segment.maxpoints() = 10;
-    segment.collision_group() = 1;
+      auto simulation = storage::add<config::simulation>(data);
+      simulation.one_step_integrator().theta() = theta;
+      simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+      simulation.time_discretization().t0() = t0;
+      simulation.time_discretization().h() = h;
+      simulation.time_discretization().tmax() = tmax;
+      auto osnspb = simulation.one_step_nonsmooth_problem();
+      osnspb.problem() = fc2d;
+      auto so = storage::add<simul::solver_options>(data);
+      so.create(SICONOS_FRICTION_2D_LEMKE);
+      osnspb.options() = so;
 
-    auto spacef = storage::add<config::space_filter>(data);
-    spacef.neighborhood() = ngbh;
-    spacef.diskdisk_r() = diskdisk_r;
-    // ONE order only: (0,1) for disk-disk, (1,1) for disk-segment.
-    // The mirror insert covers (1,0) and the disk1/segment pair (0,1).
-    spacef.insert_nonsmooth_law(nslaw, 0, 1);
-    spacef.insert_nonsmooth_law(nslaw, 1, 1);
-    spacef.insert_diskfsegment_r(ground_r);
-    spacef.make_points();
-    ngbh.add_point_sets(0);
+      auto ngbh = storage::add<config::neighborhood>(data);
+      ngbh.create(0.6);
 
-    simulation.initialize();
+      auto diskdisk_r = storage::add<config::diskdisk_r>(data);
+      auto ground_r = storage::add<config::diskfsegment_r>(data);
+      auto segment = storage::add<config::segment_shape>(data);
+      ground_r.segment() = segment;
+      segment.x1() = -10.;
+      segment.y1() = 0.;
+      segment.x2() = 10.;
+      segment.y2() = 0.;
+      segment.initialize();
+      segment.maxpoints() = 10;
+      segment.collision_group() = 1;
 
-    int steps = 0;
-    while (simulation.has_next_event()) {
-      ngbh.update(0);
-      ngbh.search();
-      spacef.update_index_set0(simulation.current_step());
-      simulation.compute_one_step();
-      ++steps;
-    }
-    std::print("Part A OK: {} steps, no exception\n", steps);
-  }
+      auto spacef = storage::add<config::space_filter>(data);
+      spacef.neighborhood() = ngbh;
+      spacef.diskdisk_r() = diskdisk_r;
+      // ONE order only: (0,1) for disk-disk, (1,1) for disk-segment.
+      // The mirror insert covers (1,0) and the disk1/segment pair (0,1).
+      spacef.insert_nonsmooth_law(nslaw, 0, 1);
+      spacef.insert_nonsmooth_law(nslaw, 1, 1);
+      spacef.insert_diskfsegment_r(ground_r);
+      spacef.make_points();
+      ngbh.add_point_sets(0);
 
-  // ============================================================
-  // Part B: a colliding pair with NO registered law must fail
-  // loudly (Issue 4). Disk in group 0 and disk in group 2 overlap;
-  // no law for (0,2) or (2,0) is inserted, so update_index_set0
-  // throws std::runtime_error from the space filter path.
-  // ============================================================
-  {
-    config::data_t data;
+      simulation.initialize();
 
-    double radius = 0.1, m = 1., g = 9.81, e = 0.9;
-
-    auto disk_shape = storage::add<config::disk_shape>(data);
-    disk_shape.radius() = radius;
-
-    auto d1 = storage::add<config::disk>(data);
-    auto d2 = storage::add<config::disk>(data);
-    d1.collision_group() = 0;
-    d2.collision_group() = 2;  // no law registered for (0,2) or (2,0)
-
-    // overlap on purpose -> guaranteed neighbor pair
-    d1.q() = {0, 1.0, 0};
-    d2.q() = {0, 1.0, 0};
-    d1.velocity() = {0, 0, 0};
-    d2.velocity() = {0, 0, 0};
-    d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
-    d2.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
-    prop<"shape">(d1) = disk_shape;
-    prop<"shape">(d2) = disk_shape;
-    d1.fext() = {0., -m * g, 0.};
-    d2.fext() = {0., -m * g, 0.};
-
-    auto nslaw = storage::add<config::nslaw>(data);
-    nslaw.e() = e;
-
-    auto fc2d = storage::add<config::fc2d>(data);
-    fc2d.create();
-    fc2d.instance()->dimension = 2;
-    fc2d.instance()->mu = 0;
-
-    auto simulation = storage::add<config::simulation>(data);
-    simulation.one_step_integrator().theta() = 0.5;
-    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-    simulation.time_discretization().t0() = 0;
-    simulation.time_discretization().h() = 0.005;
-    simulation.time_discretization().tmax() = 0.1;
-    auto osnspb = simulation.one_step_nonsmooth_problem();
-    osnspb.problem() = fc2d;
-    auto so = storage::add<simul::solver_options>(data);
-    so.create(SICONOS_FRICTION_2D_LEMKE);
-    osnspb.options() = so;
-
-    auto ngbh = storage::add<config::neighborhood>(data);
-    ngbh.create(0.6);
-
-    auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-
-    auto spacef = storage::add<config::space_filter>(data);
-    spacef.neighborhood() = ngbh;
-    spacef.diskdisk_r() = diskdisk_r;
-    // intentionally NO law for (0,2) / (2,0)
-    spacef.make_points();
-    ngbh.add_point_sets(0);
-
-    simulation.initialize();
-
-    bool threw = false;
-    try {
-      ngbh.update(0);
-      ngbh.search();
-      spacef.update_index_set0(simulation.current_step());
-    } catch (const std::runtime_error& e) {
-      threw = true;
-      std::print("Part B PASS: {}\n", e.what());
-    }
-    if (!threw) {
-      std::print("Part B FAIL: no exception thrown for unregistered pair\n");
-      return 1;
+      int steps = 0;
+      while (simulation.has_next_event()) {
+        ngbh.update(0);
+        ngbh.search();
+        spacef.update_index_set0(simulation.current_step());
+        simulation.compute_one_step();
+        ++steps;
+      }
+      std::print("Part A OK: {} steps, no exception\n", steps);
     }
   }
 
-  std::print("ALL TESTS PASSED\n");
-  return 0;
-}
+  void testUnregisteredPairThrows() {
+    using namespace siconos;
+    using namespace storage;
+
+    // ============================================================
+    // Part B: a colliding pair with NO registered law must fail
+    // loudly (Issue 4). Disk in group 0 and disk in group 2 overlap;
+    // no law for (0,2) or (2,0) is inserted, so update_index_set0
+    // throws std::runtime_error from the space filter path.
+    // ============================================================
+    {
+      config::data_t data;
+
+      double radius = 0.1, m = 1., g = 9.81, e = 0.9;
+
+      auto disk_shape = storage::add<config::disk_shape>(data);
+      disk_shape.radius() = radius;
+
+      auto d1 = storage::add<config::disk>(data);
+      auto d2 = storage::add<config::disk>(data);
+      d1.collision_group() = 0;
+      d2.collision_group() = 2;  // no law registered for (0,2) or (2,0)
+
+      // overlap on purpose -> guaranteed neighbor pair
+      d1.q() = {0, 1.0, 0};
+      d2.q() = {0, 1.0, 0};
+      d1.velocity() = {0, 0, 0};
+      d2.velocity() = {0, 0, 0};
+      d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+      d2.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+      prop<"shape">(d1) = disk_shape;
+      prop<"shape">(d2) = disk_shape;
+      d1.fext() = {0., -m * g, 0.};
+      d2.fext() = {0., -m * g, 0.};
+
+      auto nslaw = storage::add<config::nslaw>(data);
+      nslaw.e() = e;
+
+      auto fc2d = storage::add<config::fc2d>(data);
+      fc2d.create();
+      fc2d.instance()->dimension = 2;
+      fc2d.instance()->mu = 0;
+
+      auto simulation = storage::add<config::simulation>(data);
+      simulation.one_step_integrator().theta() = 0.5;
+      simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+      simulation.time_discretization().t0() = 0;
+      simulation.time_discretization().h() = 0.005;
+      simulation.time_discretization().tmax() = 0.1;
+      auto osnspb = simulation.one_step_nonsmooth_problem();
+      osnspb.problem() = fc2d;
+      auto so = storage::add<simul::solver_options>(data);
+      so.create(SICONOS_FRICTION_2D_LEMKE);
+      osnspb.options() = so;
+
+      auto ngbh = storage::add<config::neighborhood>(data);
+      ngbh.create(0.6);
+
+      auto diskdisk_r = storage::add<config::diskdisk_r>(data);
+
+      auto spacef = storage::add<config::space_filter>(data);
+      spacef.neighborhood() = ngbh;
+      spacef.diskdisk_r() = diskdisk_r;
+      // intentionally NO law for (0,2) / (2,0)
+      spacef.make_points();
+      ngbh.add_point_sets(0);
+
+      simulation.initialize();
+
+      bool threw = false;
+      try {
+        ngbh.update(0);
+        ngbh.search();
+        spacef.update_index_set0(simulation.current_step());
+      } catch (const std::runtime_error& e) {
+        threw = true;
+        std::print("Part B PASS: {}\n", e.what());
+      }
+      CPPUNIT_ASSERT_MESSAGE("no exception thrown for an unregistered pair", threw);
+    }
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(NslawsMultiGroupTest);
+
+}  // namespace

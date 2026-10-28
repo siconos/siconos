@@ -88,6 +88,10 @@ if(WITH_TESTING)
     "${COMPACTNSEARCH}")
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_nslaws_multi_group SOURCES nslaws_multi_group.cpp
+           ${SIMPLE_TEST_MAIN} DEPS "${COMPACTNSEARCH}")
+  new_test(NAME vkernel_polydisperse_disks SOURCES polydisperse_disks.cpp
+           ${SIMPLE_TEST_MAIN} DEPS "${COMPACTNSEARCH}")
 
   begin_tests(
     src/siconos/collision/tests DEPS
@@ -165,6 +169,8 @@ if(WITH_TESTING)
       vkernel_bouncing_disks
       vkernel_fixed_disks
       vkernel_registry_remove
+      vkernel_nslaws_multi_group
+      vkernel_polydisperse_disks
       vkernel_cxd_batch_smoke
       vkernel_polytope_cxd
       vkernel_bouncing_polytopes
