@@ -35,9 +35,13 @@ struct interaction_manager : item {
     }
 
     auto methods() {
+      using data_t = std::decay_t<decltype(self()->data())>;
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
-      using ref_nslaw_t = typename std::decay_t<decltype(attr<"nslaws">(*self()))>::Scalar;
+      // a handle, not an index: python passes handles, and pybind would
+      // reinterpret a handle (data reference first) as an index
+      using ref_nslaw_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(), storage::index<nslaw, indice>{}))>;
 
       return collect(
           method("insert_nonsmooth_law",

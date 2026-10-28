@@ -827,7 +827,10 @@ struct space_filter : item {
           std::declval<data_t&>(), storage::index<collision::diskfdisk_r, indice>{}))>;
       using segment_handle_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(), storage::index<collision::shape::segment, indice>{}))>;
-      using ref_nslaw_t = storage::index<nslaw, indice>;
+      // a handle, not an index: python passes handles, and pybind would
+      // reinterpret a handle (data reference first) as an index
+      using ref_nslaw_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(), storage::index<nslaw, indice>{}))>;
 
       return collect(
           method("make_points", &interface<Handle>::make_points),
