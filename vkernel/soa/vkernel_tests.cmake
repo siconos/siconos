@@ -137,10 +137,18 @@ if(WITH_TESTING)
   new_test(NAME vkernel_io_contact_points SOURCES io_contact_points.cpp
            ${SIMPLE_TEST_MAIN})
 
+  # the same deposit run twice with a multithreaded neighbor search must give
+  # bitwise identical states
+  new_test(NAME vkernel_reproducible_disks SOURCES reproducible_disks.cpp
+           ${SIMPLE_TEST_MAIN})
+  set_property(TEST vkernel_reproducible_disks APPEND PROPERTY ENVIRONMENT
+                                                           OMP_NUM_THREADS=4)
+
   # topology::sort_interactions (storage::permute) on both storage backends: the
   # registry, and the compile time database (_static_db). The neighbor search
-  # order, hence the interactions, must be reproducible, and the assertions of
-  # the library headers must stay enabled in a Release build.
+  # order, hence the interactions, must be reproducible (the neighbor lists are
+  # sorted, whatever the number of threads), and the assertions of the library
+  # headers must stay enabled in a Release build.
   new_test(NAME vkernel_sort_interactions_registry SOURCES
            sort_interactions.cpp ${SIMPLE_TEST_MAIN})
   new_test(
@@ -151,10 +159,6 @@ if(WITH_TESTING)
     ${SIMPLE_TEST_MAIN}
     COMPILE_DEFINITIONS
     SORT_STATIC_DB)
-  set_property(
-    TEST vkernel_sort_interactions_registry vkernel_sort_interactions_static_db
-    APPEND
-    PROPERTY ENVIRONMENT OMP_NUM_THREADS=1)
 
   # the tests were written against the vkernel/soa flags, which include the
   # C++23 standard they need for std::print
@@ -181,6 +185,7 @@ if(WITH_TESTING)
       vkernel_polytopedisk
       vkernel_rigid_shapes
       vkernel_mixed_bodies
+      vkernel_reproducible_disks
       vkernel_polytope_on_fem
       vkernel_io_contact_points
       vkernel_sort_interactions_registry

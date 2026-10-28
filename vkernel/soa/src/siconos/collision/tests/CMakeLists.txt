@@ -39,9 +39,6 @@ if(WITH_vkernel_TESTING)
         -DA=$<TARGET_FILE:${test}_sets0> -DB=$<TARGET_FILE:${test}_sets1>
         -DWD=${CMAKE_CURRENT_BINARY_DIR}/${test}_sets_oracle
         -P ${CMAKE_CURRENT_SOURCE_DIR}/compare_outputs.cmake)
-    # a multithreaded neighbor search creates the interactions in any order
-    set_tests_properties(vkernel_${test}_sets_oracle PROPERTIES
-      ENVIRONMENT OMP_NUM_THREADS=1)
   endforeach()
 
 endif()
