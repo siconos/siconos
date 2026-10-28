@@ -7,6 +7,9 @@
    The relation carries its own mesh/item_ref, so no topology/simulation is
    needed for this direct unit test. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <cassert>
 #include <cmath>
 #include <print>
@@ -43,76 +46,88 @@ struct data_t : storage::make_runtime_database<
 #include <stdexcept>
 
 namespace {
-auto check = [](bool ok, auto&& what) {
-  if (!ok) throw std::runtime_error(std::string("CHECK FAILED: ") + what);
-};
 auto near = [](double a, double b, double tol = 1e-9) { return std::fabs(a - b) <= tol; };
 }  // namespace
 
-int main() {
-  using namespace siconos;
-  config::data_t data;
+namespace {
 
-  /* polytope: side-2 square centered at origin, vertices CCW */
-  auto sh = storage::add<config::polytope_shape>(data);
-  sh.nvertices() = 4;
-  sh.vertices()[0] = {1, -1};
-  sh.vertices()[1] = {1, 1};
-  sh.vertices()[2] = {-1, 1};
-  sh.vertices()[3] = {-1, -1};
+class PolytopeMeshTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(PolytopeMeshTest);
+  CPPUNIT_TEST(testPolytopeMesh);
+  CPPUNIT_TEST_SUITE_END();
 
-  auto pd = storage::add<config::polytope_ds>(data);
-  storage::prop<"shape", storage::config_declared>(pd) = sh;
-  storage::attr<"q">(pd, 0) = Eigen::Vector3d(0, 0, 0);
+ public:
+  void testPolytopeMesh() {
+    using namespace siconos;
+    config::data_t data;
 
-  /* mesh: one segment from (0,3) to (0,5) */
-  auto msh = storage::add<config::mesh_shape>(data);
-  auto seg = msh.segments();
-  seg.insert(0.0, 3.0, 0.0);
-  seg.insert(0.0, 5.0, 0.0);
-  check(near(seg.x1(0), 0) && near(seg.y1(0), 3), "mesh segment p1");
-  check(near(seg.x2(0), 0) && near(seg.y2(0), 5), "mesh segment p2");
+    /* polytope: side-2 square centered at origin, vertices CCW */
+    auto sh = storage::add<config::polytope_shape>(data);
+    sh.nvertices() = 4;
+    sh.vertices()[0] = {1, -1};
+    sh.vertices()[1] = {1, 1};
+    sh.vertices()[2] = {-1, 1};
+    sh.vertices()[3] = {-1, -1};
 
-  auto md = storage::add<config::mesh_ds>(data);
+    auto pd = storage::add<config::polytope_ds>(data);
+    storage::prop<"shape", storage::config_declared>(pd) = sh;
+    storage::attr<"q">(pd, 0) = Eigen::Vector3d(0, 0, 0);
 
-  /* bind polytopemesh_r relation on (mesh, contact_index 0) */
-  auto rel = storage::add<config::polytopemesh_r>(data);
-  rel.mesh() = msh;
-  rel.contact_index() = 0;
-  rel.point_index() = 0;
+    /* mesh: one segment from (0,3) to (0,5) */
+    auto msh = storage::add<config::mesh_shape>(data);
+    auto seg = msh.segments();
+    seg.insert(0.0, 3.0, 0.0);
+    seg.insert(0.0, 5.0, 0.0);
+    CPPUNIT_ASSERT_MESSAGE("mesh segment p1", near(seg.x1(0), 0) && near(seg.y1(0), 3));
+    CPPUNIT_ASSERT_MESSAGE("mesh segment p2", near(seg.x2(0), 0) && near(seg.y2(0), 5));
 
-  /* h: gap = 2, normal (0,1), cp1=(0,1), cp2=(0,3) */
-  double h = rel.compute_h(0, pd, md);
-  std::print("polytopemesh: h = {}\n", h);
-  check(near(h, 2), "h == 2 (gap)");
-  const auto ct = rel.contact(0, pd, md);
-  check(ct.status == 0, "status separated");
-  check(near(ct.normal[0], 0) && near(ct.normal[1], 1), "normal (0,1)");
-  check(near(ct.cp1[0], 0) && near(ct.cp1[1], 1), "cp1 (0,1)");
-  check(near(ct.cp2[0], 0) && near(ct.cp2[1], 3), "cp2 (0,3)");
+    auto md = storage::add<config::mesh_ds>(data);
 
-  /* G matrices */
-  Eigen::MatrixXd g1(2, 3), g2(2, 4);
-  rel.compute_jachq(0, pd, md, g1, g2);
+    /* bind polytopemesh_r relation on (mesh, contact_index 0) */
+    auto rel = storage::add<config::polytopemesh_r>(data);
+    rel.mesh() = msh;
+    rel.contact_index() = 0;
+    rel.point_index() = 0;
 
-  /* nx=0,ny=1,tx=-1,ty=0; arm1=cp1-q1=(0,1); za1=(-1,0) */
-  check(near(g1(0, 0), 0) && near(g1(0, 1), -1) && near(g1(0, 2), 0), "G1 normal row");
-  check(near(g1(1, 0), 1) && near(g1(1, 1), 0) && near(g1(1, 2), -1), "G1 tangent row");
-  /* t=0 -> g2 normal row: x1=0,y1=1,x2=0,y2=0 ; tangent row: x1=-1,y1=0,x2=0,y2=0 */
-  check(near(g2(0, 0), 0) && near(g2(0, 1), 1) && near(g2(0, 2), 0) && near(g2(0, 3), 0),
-        "G2 normal row");
-  check(near(g2(1, 0), -1) && near(g2(1, 1), 0) && near(g2(1, 2), 0) && near(g2(1, 3), 0),
-        "G2 tangent row");
+    /* h: gap = 2, normal (0,1), cp1=(0,1), cp2=(0,3) */
+    double h = rel.compute_h(0, pd, md);
+    std::print("polytopemesh: h = {}\n", h);
+    CPPUNIT_ASSERT_MESSAGE("h == 2 (gap)", near(h, 2));
+    const auto ct = rel.contact(0, pd, md);
+    CPPUNIT_ASSERT_MESSAGE("status separated", ct.status == 0);
+    CPPUNIT_ASSERT_MESSAGE("normal (0,1)", near(ct.normal[0], 0) && near(ct.normal[1], 1));
+    CPPUNIT_ASSERT_MESSAGE("cp1 (0,1)", near(ct.cp1[0], 0) && near(ct.cp1[1], 1));
+    CPPUNIT_ASSERT_MESSAGE("cp2 (0,3)", near(ct.cp2[0], 0) && near(ct.cp2[1], 3));
 
-  /* manifold point 1: the edge is the incident face, clipped to the square's
-     top face, so its far endpoint (0,5) with gap 4 */
-  auto rel1 = storage::add<config::polytopemesh_r>(data);
-  rel1.mesh() = msh;
-  rel1.contact_index() = 0;
-  rel1.point_index() = 1;
-  const auto ct1 = rel1.contact(0, pd, md);
-  check(near(ct1.h, 4) && near(ct1.cp2[1], 5), "point 1: the far endpoint, gap 4");
+    /* G matrices */
+    Eigen::MatrixXd g1(2, 3), g2(2, 4);
+    rel.compute_jachq(0, pd, md, g1, g2);
 
-  std::print("polytopemesh: all checks pass\n");
-  return 0;
-}
+    /* nx=0,ny=1,tx=-1,ty=0; arm1=cp1-q1=(0,1); za1=(-1,0) */
+    CPPUNIT_ASSERT_MESSAGE("G1 normal row",
+                           near(g1(0, 0), 0) && near(g1(0, 1), -1) && near(g1(0, 2), 0));
+    CPPUNIT_ASSERT_MESSAGE("G1 tangent row",
+                           near(g1(1, 0), 1) && near(g1(1, 1), 0) && near(g1(1, 2), -1));
+    /* t=0 -> g2 normal row: x1=0,y1=1,x2=0,y2=0 ; tangent row: x1=-1,y1=0,x2=0,y2=0 */
+    CPPUNIT_ASSERT_MESSAGE("G2 normal row", near(g2(0, 0), 0) && near(g2(0, 1), 1) &&
+                                                near(g2(0, 2), 0) && near(g2(0, 3), 0));
+    CPPUNIT_ASSERT_MESSAGE("G2 tangent row", near(g2(1, 0), -1) && near(g2(1, 1), 0) &&
+                                                 near(g2(1, 2), 0) && near(g2(1, 3), 0));
+
+    /* manifold point 1: the edge is the incident face, clipped to the square's
+       top face, so its far endpoint (0,5) with gap 4 */
+    auto rel1 = storage::add<config::polytopemesh_r>(data);
+    rel1.mesh() = msh;
+    rel1.contact_index() = 0;
+    rel1.point_index() = 1;
+    const auto ct1 = rel1.contact(0, pd, md);
+    CPPUNIT_ASSERT_MESSAGE("point 1: the far endpoint, gap 4",
+                           near(ct1.h, 4) && near(ct1.cp2[1], 5));
+
+    std::print("polytopemesh: all checks pass\n");
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(PolytopeMeshTest);
+
+}  // namespace

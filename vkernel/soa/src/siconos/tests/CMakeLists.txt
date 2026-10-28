@@ -9,12 +9,6 @@ if(WITH_vkernel_TESTING)
   # vkernel/soa/vkernel_tests.cmake (begin_tests/new_test). This file only
   # keeps the targets that are not ctest tests.
 
-  add_executable(registry_remove registry_remove.cpp)
-  set_target_properties(registry_remove PROPERTIES COMPILE_FLAGS "${flags}")
-  target_link_libraries(registry_remove Eigen3::Eigen numerics pthread)
-  add_test(NAME vkernel_registry_remove COMMAND registry_remove
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
   add_executable(fem_t3 fem_t3.cpp)
   set_target_properties(fem_t3 PROPERTIES COMPILE_FLAGS "${flags}")
 

@@ -13,6 +13,9 @@
    output (interactions and a hash of the disks per step) is compared
    without and with the sets by the oracle test. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -82,10 +85,6 @@ struct data_t : storage::make_runtime_database<env, simulation, interaction_mana
 
 namespace {
 
-void check(bool ok, const char* what) {
-  if (!ok) throw std::runtime_error(what);
-}
-
 void fnv(std::uint64_t& h, const void* p, std::size_t n) {
   const auto* b = static_cast<const unsigned char*>(p);
   for (std::size_t i = 0; i < n; ++i) {
@@ -123,13 +122,15 @@ void check_sort(auto& data, auto topo, auto step) {
   auto sorted_after = after;
   std::sort(sorted_before.begin(), sorted_before.end());
   std::sort(sorted_after.begin(), sorted_after.end());
-  check(sorted_before == sorted_after, "sort_interactions changed the interactions");
+  CPPUNIT_ASSERT_MESSAGE("sort_interactions changed the interactions",
+                         sorted_before == sorted_after);
 
   // by relation type, the relative order within a type kept
   auto expected = before;
   std::stable_sort(expected.begin(), expected.end(),
                    [](auto& a, auto& b) { return std::get<0>(a) < std::get<0>(b); });
-  check(expected == after, "sort_interactions: not a stable sort by relation type");
+  CPPUNIT_ASSERT_MESSAGE("sort_interactions: not a stable sort by relation type",
+                         expected == after);
 
   // the relation sets hold the interactions of their type, in order
   if constexpr (config::topo::relation_sets) {
@@ -137,111 +138,124 @@ void check_sort(auto& data, auto topo, auto step) {
     storage::mp::for_each(typename config::interaction::relations{}, [&]<typename R>(R) {
       auto& set = simul::relation_set<config::interaction, R, config::topo>(data);
       for (std::size_t j = 0; j < set.dense_.size(); ++j, ++k) {
-        check(set.dense_keys_[j] == k, "relation set: an interaction out of order");
-        check(set.dense_[j].value() == std::get<3>(after[k]),
-              "relation set: not the relation of the interaction");
+        CPPUNIT_ASSERT_MESSAGE("relation set: an interaction out of order",
+                               set.dense_keys_[j] == k);
+        CPPUNIT_ASSERT_MESSAGE("relation set: not the relation of the interaction",
+                               set.dense_[j].value() == std::get<3>(after[k]));
       }
     });
-    check(k == after.size(), "relation sets: not every interaction");
+    CPPUNIT_ASSERT_MESSAGE("relation sets: not every interaction", k == after.size());
   }
 }
 
 }  // namespace
 
-int main() {
-  using namespace siconos;
-  using namespace storage;
+namespace {
 
-  config::data_t data;
+class SortInteractionsTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(SortInteractionsTest);
+  CPPUNIT_TEST(testSortInteractions);
+  CPPUNIT_TEST_SUITE_END();
 
-  const double r = 0.1, m = 1., g = 9.81, spacing = 0.2005;
-  const int ncols = 6, nrows = 6;
+ public:
+  void testSortInteractions() {
+    using namespace siconos;
+    using namespace storage;
 
-  auto dsh = storage::add<config::disk_shape>(data);
-  dsh.radius() = r;
-  for (int j = 0; j < nrows; ++j) {
-    for (int i = 0; i < ncols; ++i) {
-      auto d = storage::add<config::disk>(data);
-      // shifted every other row, so that the pile collapses
-      d.q() = {i * spacing + (j % 2) * 0.05, r + 0.05 + j * spacing, 0};
-      d.velocity() = {0, 0, 0};
-      d.mass_matrix().diagonal() << m, m, 0.5 * m * r * r;
-      d.fext() = {0., -m * g, 0.};
-      prop<"shape">(d) = dsh;
+    config::data_t data;
+
+    const double r = 0.1, m = 1., g = 9.81, spacing = 0.2005;
+    const int ncols = 6, nrows = 6;
+
+    auto dsh = storage::add<config::disk_shape>(data);
+    dsh.radius() = r;
+    for (int j = 0; j < nrows; ++j) {
+      for (int i = 0; i < ncols; ++i) {
+        auto d = storage::add<config::disk>(data);
+        // shifted every other row, so that the pile collapses
+        d.q() = {i * spacing + (j % 2) * 0.05, r + 0.05 + j * spacing, 0};
+        d.velocity() = {0, 0, 0};
+        d.mass_matrix().diagonal() << m, m, 0.5 * m * r * r;
+        d.fext() = {0., -m * g, 0.};
+        prop<"shape">(d) = dsh;
+      }
     }
+
+    auto nslaw = storage::add<config::nslaw>(data);
+    nslaw.e() = 0.;
+    nslaw.mu() = 0.3;
+    auto fc2d = storage::add<config::fc2d>(data);
+    fc2d.create();
+    fc2d.instance()->dimension = 2;
+    fc2d.instance()->mu = 0;
+
+    auto simulation = storage::add<config::simulation>(data);
+    simulation.one_step_integrator().theta() = 0.5;
+    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+    simulation.time_discretization().t0() = 0.;
+    simulation.time_discretization().h() = 0.005;
+    simulation.time_discretization().tmax() = 0.3;
+    auto osnspb = simulation.one_step_nonsmooth_problem();
+    osnspb.problem() = fc2d;
+    auto so = storage::add<simul::solver_options>(data);
+    so.create(SICONOS_FRICTION_2D_NSGS);
+    osnspb.options() = so;
+
+    auto ngbh = storage::add<config::neighborhood>(data);
+    ngbh.create(0.3);
+    auto segment = storage::add<config::segment_shape>(data);
+    auto dsds = storage::add<config::diskdisk_r>(data);
+    auto ground_r = storage::add<config::diskfsegment_r>(data);
+    ground_r.segment() = segment;
+    segment.x1() = -1.;
+    segment.y1() = 0.;
+    segment.x2() = 2.;
+    segment.y2() = 0.;
+    segment.initialize();
+    segment.maxpoints() = 31;
+
+    auto spacef = storage::add<config::space_filter>(data);
+    spacef.neighborhood() = ngbh;
+    spacef.diskdisk_r() = dsds;
+    spacef.nslaw() = nslaw;
+    spacef.insert_diskfsegment_r(ground_r);
+    spacef.make_points();
+    ngbh.add_point_sets(0);
+    simulation.initialize();
+
+    std::size_t nsorts = 0;
+    std::vector<bool> types_met(3, false);
+    int steps = 0;
+    while (simulation.has_next_event()) {
+      const auto s = simulation.current_step();
+      ngbh.update(s);
+      ngbh.search();
+      spacef.update_index_set0(s);
+      if (steps % 3 == 0) {
+        check_sort(data, simulation.topology(), s);
+        ++nsorts;
+      }
+      simulation.compute_one_step();
+      ++steps;
+
+      const auto snap = snapshot(data, simulation.current_step());
+      for (auto& e : snap) types_met[std::get<0>(e)] = true;
+
+      std::uint64_t h = 14695981039346656037ull;
+      for (auto d : storage::handles<config::disk>(data, simulation.current_step())) {
+        const Eigen::Vector3d q = storage::attr<"q">(d, simulation.current_step());
+        fnv(h, q.data(), 3 * sizeof(double));
+      }
+      std::print("sort_interactions: step {} interactions {} hash {:016x}\n", steps,
+                 snap.size(), h);
+    }
+    // both relation types met, else the sort was not tested
+    CPPUNIT_ASSERT_MESSAGE("a single relation type: the sort is not tested",
+                           std::count(types_met.begin(), types_met.end(), true) >= 2);
+    std::print("sort_interactions: {} sorts, ok\n", nsorts);
   }
+};
 
-  auto nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = 0.;
-  nslaw.mu() = 0.3;
-  auto fc2d = storage::add<config::fc2d>(data);
-  fc2d.create();
-  fc2d.instance()->dimension = 2;
-  fc2d.instance()->mu = 0;
+CPPUNIT_TEST_SUITE_REGISTRATION(SortInteractionsTest);
 
-  auto simulation = storage::add<config::simulation>(data);
-  simulation.one_step_integrator().theta() = 0.5;
-  simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-  simulation.time_discretization().t0() = 0.;
-  simulation.time_discretization().h() = 0.005;
-  simulation.time_discretization().tmax() = 0.3;
-  auto osnspb = simulation.one_step_nonsmooth_problem();
-  osnspb.problem() = fc2d;
-  auto so = storage::add<simul::solver_options>(data);
-  so.create(SICONOS_FRICTION_2D_NSGS);
-  osnspb.options() = so;
-
-  auto ngbh = storage::add<config::neighborhood>(data);
-  ngbh.create(0.3);
-  auto segment = storage::add<config::segment_shape>(data);
-  auto dsds = storage::add<config::diskdisk_r>(data);
-  auto ground_r = storage::add<config::diskfsegment_r>(data);
-  ground_r.segment() = segment;
-  segment.x1() = -1.;
-  segment.y1() = 0.;
-  segment.x2() = 2.;
-  segment.y2() = 0.;
-  segment.initialize();
-  segment.maxpoints() = 31;
-
-  auto spacef = storage::add<config::space_filter>(data);
-  spacef.neighborhood() = ngbh;
-  spacef.diskdisk_r() = dsds;
-  spacef.nslaw() = nslaw;
-  spacef.insert_diskfsegment_r(ground_r);
-  spacef.make_points();
-  ngbh.add_point_sets(0);
-  simulation.initialize();
-
-  std::size_t nsorts = 0;
-  std::vector<bool> types_met(3, false);
-  int steps = 0;
-  while (simulation.has_next_event()) {
-    const auto s = simulation.current_step();
-    ngbh.update(s);
-    ngbh.search();
-    spacef.update_index_set0(s);
-    if (steps % 3 == 0) {
-      check_sort(data, simulation.topology(), s);
-      ++nsorts;
-    }
-    simulation.compute_one_step();
-    ++steps;
-
-    const auto snap = snapshot(data, simulation.current_step());
-    for (auto& e : snap) types_met[std::get<0>(e)] = true;
-
-    std::uint64_t h = 14695981039346656037ull;
-    for (auto d : storage::handles<config::disk>(data, simulation.current_step())) {
-      const Eigen::Vector3d q = storage::attr<"q">(d, simulation.current_step());
-      fnv(h, q.data(), 3 * sizeof(double));
-    }
-    std::print("sort_interactions: step {} interactions {} hash {:016x}\n", steps, snap.size(),
-               h);
-  }
-  // both relation types met, else the sort was not tested
-  check(std::count(types_met.begin(), types_met.end(), true) >= 2,
-        "a single relation type: the sort is not tested");
-  std::print("sort_interactions: {} sorts, ok\n", nsorts);
-  return 0;
-}
+}  // namespace

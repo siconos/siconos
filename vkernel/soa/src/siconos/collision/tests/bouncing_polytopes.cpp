@@ -12,6 +12,9 @@
    the cached h must match the analytic axis-aligned gap |y2 - y1| - 2
    while the pair is separated. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <array>
 #include <cmath>
 #include <limits>
@@ -77,174 +80,185 @@ struct data_t : storage::make_runtime_database<
 }  // namespace siconos::config
 
 namespace {
-// assert() is compiled out under Release: an explicit throwing check keeps
-// the RED/GREEN honest
-void check(bool ok, const std::string& what) {
-  if (!ok) throw std::runtime_error("CHECK FAILED: " + what);
-}
-}  // namespace
 
-int main() {
-  using namespace siconos;
-  using namespace storage;
+class BouncingPolytopesTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(BouncingPolytopesTest);
+  CPPUNIT_TEST(testBouncingPolytopes);
+  CPPUNIT_TEST_SUITE_END();
 
-  config::data_t data;
+ public:
+  void testBouncingPolytopes() {
+    using namespace siconos;
+    using namespace storage;
 
-  const double t0 = 0.;
-  const double tmax = 2.;  // 400 steps of dt = 0.005
-  const double h = 0.005;
-  const double theta = 0.5;  // Moreau-Jean integrator parameter
-  const double m = 1.;
-  const double g = 9.81;
-  const double e = 0.9;
+    config::data_t data;
 
-  // one square shape shared by both bodies (side 2, CCW)
-  auto shape = storage::add<config::polytope_shape>(data);
-  const std::array<std::array<double, 2>, 4> square = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
-  for (int i = 0; i < 4; ++i) shape.vertices()[i] = {square[i][0], square[i][1]};
-  shape.nvertices() = 4;
+    const double t0 = 0.;
+    const double tmax = 2.;  // 400 steps of dt = 0.005
+    const double h = 0.005;
+    const double theta = 0.5;  // Moreau-Jean integrator parameter
+    const double m = 1.;
+    const double g = 9.81;
+    const double e = 0.9;
 
-  // body 1 falls on body 2; body 2 carries no gravity (it is the target,
-  // so the gap really closes -- with the same gravity on both the gap
-  // would never change)
-  auto body1 = storage::add<config::polytope>(data);
-  body1.q() = {0, 5, 0};
-  body1.velocity() = {0, 0, 0};
-  body1.mass_matrix().diagonal() << m, m, 2. / 3.;  // side-2 square: I = (a^2+a^2)/12
-  storage::prop<"shape">(body1) = shape;
-  body1.fext() = {0., -m * g, 0.};
+    // one square shape shared by both bodies (side 2, CCW)
+    auto shape = storage::add<config::polytope_shape>(data);
+    const std::array<std::array<double, 2>, 4> square = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
+    for (int i = 0; i < 4; ++i) shape.vertices()[i] = {square[i][0], square[i][1]};
+    shape.nvertices() = 4;
 
-  auto body2 = storage::add<config::polytope>(data);
-  body2.q() = {0, 0, 0};
-  body2.velocity() = {0, 0, 0};
-  body2.mass_matrix().diagonal() << m, m, 2. / 3.;
-  storage::prop<"shape">(body2) = shape;
-  body2.fext() = {0., 0., 0.};
+    // body 1 falls on body 2; body 2 carries no gravity (it is the target,
+    // so the gap really closes -- with the same gravity on both the gap
+    // would never change)
+    auto body1 = storage::add<config::polytope>(data);
+    body1.q() = {0, 5, 0};
+    body1.velocity() = {0, 0, 0};
+    body1.mass_matrix().diagonal() << m, m, 2. / 3.;  // side-2 square: I = (a^2+a^2)/12
+    storage::prop<"shape">(body1) = shape;
+    body1.fext() = {0., -m * g, 0.};
 
-  // -- the relation --
-  auto nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = e;
+    auto body2 = storage::add<config::polytope>(data);
+    body2.q() = {0, 0, 0};
+    body2.velocity() = {0, 0, 0};
+    body2.mass_matrix().diagonal() << m, m, 2. / 3.;
+    storage::prop<"shape">(body2) = shape;
+    body2.fext() = {0., 0., 0.};
 
-  auto fc2d = storage::add<config::fc2d>(data);
-  fc2d.create();
-  fc2d.instance()->dimension = 2;
-  fc2d.instance()->mu = 0;
+    // -- the relation --
+    auto nslaw = storage::add<config::nslaw>(data);
+    nslaw.e() = e;
 
-  // -- the simulation --
-  auto simulation = storage::add<config::simulation>(data);
-  simulation.one_step_integrator().theta() = theta;
-  simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-  simulation.time_discretization().t0() = t0;
-  simulation.time_discretization().h() = h;
-  simulation.time_discretization().tmax() = tmax;
-  auto osnspb = simulation.one_step_nonsmooth_problem();
-  osnspb.problem() = fc2d;
+    auto fc2d = storage::add<config::fc2d>(data);
+    fc2d.create();
+    fc2d.instance()->dimension = 2;
+    fc2d.instance()->mu = 0;
 
-  auto so = storage::add<simul::solver_options>(data);
-  so.create(SICONOS_FRICTION_2D_LEMKE);
-  osnspb.options() = so;
+    // -- the simulation --
+    auto simulation = storage::add<config::simulation>(data);
+    simulation.one_step_integrator().theta() = theta;
+    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+    simulation.time_discretization().t0() = t0;
+    simulation.time_discretization().h() = h;
+    simulation.time_discretization().tmax() = tmax;
+    auto osnspb = simulation.one_step_nonsmooth_problem();
+    osnspb.problem() = fc2d;
 
-  // -- the broadphase and the filter --
-  auto ngbh = storage::add<config::neighborhood>(data);
-  // the radius must exceed the initial centre distance (5) so that the
-  // pair is a broadphase neighbour from the very first step on
-  ngbh.create(5.5);
+    auto so = storage::add<simul::solver_options>(data);
+    so.create(SICONOS_FRICTION_2D_LEMKE);
+    osnspb.options() = so;
 
-  auto dsds = storage::add<config::diskdisk_r>(data);  // generic ds-ds binder
-  auto spacef = storage::add<config::space_filter>(data);
-  spacef.neighborhood() = ngbh;
-  spacef.diskdisk_r() = dsds;
-  spacef.nslaw() = nslaw;
-  spacef.make_points();
-  ngbh.add_point_sets(0);
+    // -- the broadphase and the filter --
+    auto ngbh = storage::add<config::neighborhood>(data);
+    // the radius must exceed the initial centre distance (5) so that the
+    // pair is a broadphase neighbour from the very first step on
+    ngbh.create(5.5);
 
-  // the ds-ds interaction, created the way space_filter::dsds_activation
-  // does (the filter binds ds-ds pairs through point-SET pairs, so a world
-  // with a single point set -- no ground here -- never produces one): the
-  // relation starts on the generic binder, the stage rebinds it.
-  // It is created after simulation.initialize(), like the filter creates its
-  // interactions inside the loop, so that the step columns know it.
-  auto topo_h = spacef.topology();
+    auto dsds = storage::add<config::diskdisk_r>(data);  // generic ds-ds binder
+    auto spacef = storage::add<config::space_filter>(data);
+    spacef.neighborhood() = ngbh;
+    spacef.diskdisk_r() = dsds;
+    spacef.nslaw() = nslaw;
+    spacef.make_points();
+    ngbh.add_point_sets(0);
 
-  // -- the cxd narrowphase stage --
-  auto np = storage::add<config::cxd_narrowphase>(data);
-  np.dsds_r() = dsds;
+    // the ds-ds interaction, created the way space_filter::dsds_activation
+    // does (the filter binds ds-ds pairs through point-SET pairs, so a world
+    // with a single point set -- no ground here -- never produces one): the
+    // relation starts on the generic binder, the stage rebinds it.
+    // It is created after simulation.initialize(), like the filter creates its
+    // interactions inside the loop, so that the step columns know it.
+    auto topo_h = spacef.topology();
 
-  simulation.initialize();
+    // -- the cxd narrowphase stage --
+    auto np = storage::add<config::cxd_narrowphase>(data);
+    np.dsds_r() = dsds;
 
-  // one interaction per point of the contact manifold (two in 2D), as
-  // space_filter::dsds_activation creates them for a polytope pair; the
-  // stage gives them manifold points 0 and 1
-  for (int pi = 0; pi < 2; ++pi) {
-    auto inter = topo_h.link(body1, body2);
-    inter.nslaw() = nslaw;
-    topo_h.bind(inter, dsds);
-  }
+    simulation.initialize();
 
-  bool have_prev = false;
-  double prev_h = 0.;
-  double prev_vrel = 0.;
-  double min_gap = std::numeric_limits<double>::infinity();
-  double max_dvrel = 0.;
-  std::size_t nsteps = 0;
-
-  while (simulation.has_next_event()) {
-    const auto step = simulation.current_step();
-    // the broadphase is exercised, but space_filter::update_index_set0 is
-    // NOT called here: this world has no ground, so the filter has nothing
-    // to activate, and its remove_interactions assumes every interaction
-    // comes from its own maps (it would dereference an end iterator on the
-    // hand-created ds-ds interaction above).
-    ngbh.update(step);
-    ngbh.search();
-    np.ensure(step);  // <- the only addition to the bouncing_disks loop
-
-    const double v1 = storage::attr<"velocity">(body1, step)(1);
-    const double v2 = storage::attr<"velocity">(body2, step)(1);
-    const double vrel = v1 - v2;
-    const double y1 = storage::attr<"q">(body1, step)(1);
-    const double y2 = storage::attr<"q">(body2, step)(1);
-    const double theta1 = storage::attr<"q">(body1, step)(2);
-    const double theta2 = storage::attr<"q">(body2, step)(2);
-
-    for (auto rel : storage::handles<config::polytopepolytope_r>(data, step)) {
-      const double hval = rel.h();
-      check(std::isfinite(hval), "cached h is finite");
-      // a perfectly aligned normal impact must not excite any torque
-      check(std::abs(theta1) <= 1e-6 && std::abs(theta2) <= 1e-6, "no torque on the bodies");
-      if (have_prev) {
-        // the gap can only change with the relative centre velocity
-        const double bound = 2. * h * std::max(std::abs(vrel), std::abs(prev_vrel));
-        check(std::abs(hval - prev_h) <= bound + 1e-9, "h changes within the velocity bound");
-        // a contact exchanges an impulse: the relative velocity jumps
-        max_dvrel = std::max(max_dvrel, std::abs(vrel - prev_vrel));
-      }
-      // while the pair is separated, the cached h is the analytic gap
-      const double ref_gap = std::abs(y2 - y1) - 2.;
-      if (ref_gap > 0.)
-        check(std::abs(hval - ref_gap) <= 1e-6, "h matches the analytic axis-aligned gap");
-      min_gap = std::min(min_gap, ref_gap);
-      prev_h = hval;
-      prev_vrel = vrel;
-      have_prev = true;
+    // one interaction per point of the contact manifold (two in 2D), as
+    // space_filter::dsds_activation creates them for a polytope pair; the
+    // stage gives them manifold points 0 and 1
+    for (int pi = 0; pi < 2; ++pi) {
+      auto inter = topo_h.link(body1, body2);
+      inter.nslaw() = nslaw;
+      topo_h.bind(inter, dsds);
     }
 
-    simulation.compute_one_step();
-    ++nsteps;
+    bool have_prev = false;
+    double prev_h = 0.;
+    double prev_vrel = 0.;
+    double min_gap = std::numeric_limits<double>::infinity();
+    double max_dvrel = 0.;
+    std::size_t nsteps = 0;
+
+    while (simulation.has_next_event()) {
+      const auto step = simulation.current_step();
+      // the broadphase is exercised, but space_filter::update_index_set0 is
+      // NOT called here: this world has no ground, so the filter has nothing
+      // to activate, and its remove_interactions assumes every interaction
+      // comes from its own maps (it would dereference an end iterator on the
+      // hand-created ds-ds interaction above).
+      ngbh.update(step);
+      ngbh.search();
+      np.ensure(step);  // <- the only addition to the bouncing_disks loop
+
+      const double v1 = storage::attr<"velocity">(body1, step)(1);
+      const double v2 = storage::attr<"velocity">(body2, step)(1);
+      const double vrel = v1 - v2;
+      const double y1 = storage::attr<"q">(body1, step)(1);
+      const double y2 = storage::attr<"q">(body2, step)(1);
+      const double theta1 = storage::attr<"q">(body1, step)(2);
+      const double theta2 = storage::attr<"q">(body2, step)(2);
+
+      for (auto rel : storage::handles<config::polytopepolytope_r>(data, step)) {
+        const double hval = rel.h();
+        CPPUNIT_ASSERT_MESSAGE("cached h is finite", std::isfinite(hval));
+        // a perfectly aligned normal impact must not excite any torque
+        CPPUNIT_ASSERT_MESSAGE("no torque on the bodies",
+                               std::abs(theta1) <= 1e-6 && std::abs(theta2) <= 1e-6);
+        if (have_prev) {
+          // the gap can only change with the relative centre velocity
+          const double bound = 2. * h * std::max(std::abs(vrel), std::abs(prev_vrel));
+          CPPUNIT_ASSERT_MESSAGE("h changes within the velocity bound",
+                                 std::abs(hval - prev_h) <= bound + 1e-9);
+          // a contact exchanges an impulse: the relative velocity jumps
+          max_dvrel = std::max(max_dvrel, std::abs(vrel - prev_vrel));
+        }
+        // while the pair is separated, the cached h is the analytic gap
+        const double ref_gap = std::abs(y2 - y1) - 2.;
+        if (ref_gap > 0.)
+          CPPUNIT_ASSERT_MESSAGE("h matches the analytic axis-aligned gap",
+                                 std::abs(hval - ref_gap) <= 1e-6);
+        min_gap = std::min(min_gap, ref_gap);
+        prev_h = hval;
+        prev_vrel = vrel;
+        have_prev = true;
+      }
+
+      simulation.compute_one_step();
+      ++nsteps;
+    }
+
+    CPPUNIT_ASSERT_MESSAGE("the simulation ran for the expected number of steps",
+                           nsteps > 300);
+    // The contact law is predictive (Moreau-Jean activates the constraint on
+    // the predicted gap), so the solver keeps the bodies apart: the narrowphase
+    // h stays positive and the status stays "separated" -- the impact itself
+    // (the impulse) is what proves the contact was processed.
+    CPPUNIT_ASSERT_MESSAGE("the bodies came into contact range", min_gap < 0.05);
+    CPPUNIT_ASSERT_MESSAGE("the contact impulse was applied (relative velocity jump)",
+                           max_dvrel > 1.);
+    CPPUNIT_ASSERT_MESSAGE("no NaN in the final velocities",
+                           std::isfinite(storage::attr<"velocity">(body1, nsteps)(1)) &&
+                               std::isfinite(storage::attr<"velocity">(body2, nsteps)(1)));
+
+    std::print(
+        "bouncing_polytopes: {} steps, contact processed (min gap {:.6f}), h stays "
+        "consistent\n",
+        nsteps, min_gap);
   }
+};
 
-  check(nsteps > 300, "the simulation ran for the expected number of steps");
-  // The contact law is predictive (Moreau-Jean activates the constraint on
-  // the predicted gap), so the solver keeps the bodies apart: the narrowphase
-  // h stays positive and the status stays "separated" -- the impact itself
-  // (the impulse) is what proves the contact was processed.
-  check(min_gap < 0.05, "the bodies came into contact range");
-  check(max_dvrel > 1., "the contact impulse was applied (relative velocity jump)");
-  check(std::isfinite(storage::attr<"velocity">(body1, nsteps)(1)) &&
-            std::isfinite(storage::attr<"velocity">(body2, nsteps)(1)),
-        "no NaN in the final velocities");
+CPPUNIT_TEST_SUITE_REGISTRATION(BouncingPolytopesTest);
 
-  std::print(
-      "bouncing_polytopes: {} steps, contact processed (min gap {:.6f}), h stays consistent\n",
-      nsteps, min_gap);
-}
+}  // namespace

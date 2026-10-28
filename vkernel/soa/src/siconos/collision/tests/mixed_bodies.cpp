@@ -12,6 +12,9 @@
    2. a disk and a square inside the neighborhood radius: the pair is bound to
       polytopedisk_r, linked disk first. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <array>
 #include <cmath>
 #include <print>
@@ -94,9 +97,6 @@ struct data_t
 }  // namespace siconos::config
 
 namespace {
-void check(bool ok, const std::string& what) {
-  if (!ok) throw std::runtime_error("CHECK FAILED: " + what);
-}
 
 constexpr double m = 1.;
 constexpr double g = 9.81;
@@ -217,24 +217,28 @@ void test_two_columns() {
       auto ds2 = storage::make_handle(w.data, storage::prop<"ds2", config::topo>(inter));
       const bool self = ds1.index().value() == ds2.index().value();
       const bool poly = collision::has_shape<polytope>(ds1);
-      check(poly == collision::has_shape<polytope>(ds2), "no mixed pair");
+      CPPUNIT_ASSERT_MESSAGE("no mixed pair", poly == collision::has_shape<polytope>(ds2));
       auto& rel = inter.relation();
       using dd_t = storage::index<config::diskdisk_r, std::size_t>;
       using df_t = storage::index<config::diskfsegment_r, std::size_t>;
       using pp_t = storage::index<config::polytopepolytope_r, std::size_t>;
       using pf_t = storage::index<config::polytopefsegment_r, std::size_t>;
-      if (!poly && !self) check(std::holds_alternative<dd_t>(rel), "disk pair: diskdisk_r");
+      if (!poly && !self)
+        CPPUNIT_ASSERT_MESSAGE("disk pair: diskdisk_r", std::holds_alternative<dd_t>(rel));
       if (!poly && self)
-        check(std::holds_alternative<df_t>(rel), "disk on ground: diskfsegment_r");
+        CPPUNIT_ASSERT_MESSAGE("disk on ground: diskfsegment_r",
+                               std::holds_alternative<df_t>(rel));
       if (poly && !self)
-        check(std::holds_alternative<pp_t>(rel), "polytope pair: polytopepolytope_r");
+        CPPUNIT_ASSERT_MESSAGE("polytope pair: polytopepolytope_r",
+                               std::holds_alternative<pp_t>(rel));
       if (poly && self)
-        check(std::holds_alternative<pf_t>(rel), "polytope on ground: polytopefsegment_r");
+        CPPUNIT_ASSERT_MESSAGE("polytope on ground: polytopefsegment_r",
+                               std::holds_alternative<pf_t>(rel));
       seen[(poly ? 2 : 0) + (self ? 1 : 0)] += 1;
     }
   }
-  check(seen[0] > 0 && seen[1] > 0 && seen[2] > 0 && seen[3] > 0,
-        "every shape pair produced interactions");
+  CPPUNIT_ASSERT_MESSAGE("every shape pair produced interactions",
+                         seen[0] > 0 && seen[1] > 0 && seen[2] > 0 && seen[3] > 0);
 
   const auto s = w.simulation.current_step();
   auto y = [&](auto& b) { return storage::attr<"q">(b, s)(1); };
@@ -244,17 +248,19 @@ void test_two_columns() {
   // Along the normal a disk and an axis-aligned square of half side r have
   // the same gaps and the same G, so the two columns must evolve alike: this
   // compares the polytope relations with the analytic disk ones.
-  check(std::abs(y(d1) - y(p1)) < 1e-8 && std::abs(y(d2) - y(p2)) < 1e-8,
-        "the disk and square columns evolve alike");
+  CPPUNIT_ASSERT_MESSAGE("the disk and square columns evolve alike",
+                         std::abs(y(d1) - y(p1)) < 1e-8 && std::abs(y(d2) - y(p2)) < 1e-8);
   // Moreau-Jean closes the gap at the velocity level: after a ~4 m/s impact
   // with h = 0.005 the stack keeps a residual interpenetration of ~1e-2
   for (auto* b : {&d1, &p1})
-    check(std::abs(y(*b) - 0.5) < 2e-2, "lower body rests on the ground");
+    CPPUNIT_ASSERT_MESSAGE("lower body rests on the ground", std::abs(y(*b) - 0.5) < 2e-2);
   for (auto* b : {&d2, &p2})
-    check(std::abs(y(*b) - 1.5) < 2e-2, "upper body rests on the lower");
-  for (auto* b : {&d1, &d2, &p1, &p2}) check(v(*b) < 1e-2, "the bodies are at rest");
+    CPPUNIT_ASSERT_MESSAGE("upper body rests on the lower", std::abs(y(*b) - 1.5) < 2e-2);
+  for (auto* b : {&d1, &d2, &p1, &p2})
+    CPPUNIT_ASSERT_MESSAGE("the bodies are at rest", v(*b) < 1e-2);
   for (auto* b : {&p1, &p2})
-    check(std::abs(storage::attr<"q">(*b, s)(2)) < 1e-6, "no torque on the squares");
+    CPPUNIT_ASSERT_MESSAGE("no torque on the squares",
+                           std::abs(storage::attr<"q">(*b, s)(2)) < 1e-6);
 }
 
 /* a tilted square dropped on the ground: the two corners of its bottom
@@ -283,10 +289,11 @@ void test_tilted_square_settles() {
   const auto& q = storage::attr<"q">(p, s);
   std::print(stderr, "tilted square: q = ({:.6f}, {:.6f}, {:.3e}), at rest from t = {}\n",
              q(0), q(1), q(2), t_rest);
-  check(t_rest >= 0 && t_rest < 1., "the tilted square stops rotating and does not rock");
-  check(std::abs(q(2)) < 2e-2,
-        "the residual tilt is of the order of the velocity-level drift");
-  check(std::abs(q(1) - 0.5) < 2e-2, "the tilted square rests on the ground");
+  CPPUNIT_ASSERT_MESSAGE("the tilted square stops rotating and does not rock",
+                         t_rest >= 0 && t_rest < 1.);
+  CPPUNIT_ASSERT_MESSAGE("the residual tilt is of the order of the velocity-level drift",
+                         std::abs(q(2)) < 2e-2);
+  CPPUNIT_ASSERT_MESSAGE("the tilted square rests on the ground", std::abs(q(1) - 0.5) < 2e-2);
 }
 
 /* the same on a polytope pair: a tilted square dropped on a square resting
@@ -323,11 +330,14 @@ void test_tilted_square_on_square_settles() {
   std::print(stderr,
              "tilted square on square: q = ({:.6f}, {:.6f}, {:.3e}), at rest from t = {}\n",
              q(0), q(1), q(2), t_rest);
-  check(npp == 2, "the polytope pair has two interactions (manifold points 0 and 1)");
-  check(t_rest >= 0 && t_rest < 1.5, "the stack stops rotating and does not rock");
-  check(std::abs(q(2)) < 3e-2,
-        "the residual tilt is of the order of the velocity-level drift");
-  check(std::abs(q(1) - 1.5) < 3e-2, "the upper square rests on the lower one");
+  CPPUNIT_ASSERT_MESSAGE("the polytope pair has two interactions (manifold points 0 and 1)",
+                         npp == 2);
+  CPPUNIT_ASSERT_MESSAGE("the stack stops rotating and does not rock",
+                         t_rest >= 0 && t_rest < 1.5);
+  CPPUNIT_ASSERT_MESSAGE("the residual tilt is of the order of the velocity-level drift",
+                         std::abs(q(2)) < 3e-2);
+  CPPUNIT_ASSERT_MESSAGE("the upper square rests on the lower one",
+                         std::abs(q(1) - 1.5) < 3e-2);
 }
 
 /* a disk and a square inside the neighborhood radius: the pair is bound to
@@ -345,19 +355,33 @@ void test_disk_polytope_neighbors() {
        storage::handles<config::interaction>(w.data, w.simulation.current_step())) {
     if (!std::holds_alternative<pd_t>(inter.relation())) continue;
     ++n;
-    check(storage::prop<"ds1", config::topo>(inter).value() == d.index().value() &&
-              storage::prop<"ds2", config::topo>(inter).value() == p.index().value(),
-          "the mixed pair is linked disk first");
+    CPPUNIT_ASSERT_MESSAGE(
+        "the mixed pair is linked disk first",
+        (storage::prop<"ds1", config::topo>(inter).value() == d.index().value() &&
+         storage::prop<"ds2", config::topo>(inter).value() == p.index().value()));
   }
-  check(n == 1, "a disk and a polytope as neighbors get one polytopedisk_r interaction");
+  CPPUNIT_ASSERT_MESSAGE(
+      "a disk and a polytope as neighbors get one polytopedisk_r interaction", n == 1);
 }
 }  // namespace
 
-int main() {
-  test_two_columns();
-  test_tilted_square_settles();
-  test_tilted_square_on_square_settles();
-  test_disk_polytope_neighbors();
-  std::print("mixed_bodies: all checks pass\n");
-  return 0;
-}
+namespace {
+
+class MixedBodiesTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(MixedBodiesTest);
+  CPPUNIT_TEST(testMixedBodies);
+  CPPUNIT_TEST_SUITE_END();
+
+ public:
+  void testMixedBodies() {
+    test_two_columns();
+    test_tilted_square_settles();
+    test_tilted_square_on_square_settles();
+    test_disk_polytope_neighbors();
+    std::print("mixed_bodies: all checks pass\n");
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(MixedBodiesTest);
+
+}  // namespace

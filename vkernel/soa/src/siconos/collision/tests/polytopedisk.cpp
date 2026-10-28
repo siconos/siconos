@@ -11,6 +11,9 @@
    4. the mixed interaction is removed when the disk leaves and created
       again, on the same relation item, when it comes back. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <array>
 #include <cmath>
 #include <print>
@@ -93,9 +96,6 @@ struct data_t
 }  // namespace siconos::config
 
 namespace {
-void check(bool ok, const std::string& what) {
-  if (!ok) throw std::runtime_error("CHECK FAILED: " + what);
-}
 bool near(double a, double b, double tol = 1e-9) { return std::abs(a - b) <= tol; }
 bool near2(const auto& a, double x, double y, double tol = 1e-9) {
   return near(a[0], x, tol) && near(a[1], y, tol);
@@ -137,15 +137,18 @@ void test_contact() {
 
   auto d_out = add_disk(data, 0.5, 3, 0);
   auto out = rel.contact(0, d_out, sq);
-  check(out.status == 0 && near(out.h, 1.5), "outside: h = 2 - 0.5");
-  check(near2(out.normal, -1, 0) && near2(out.cp1, 2.5, 0) && near2(out.cp2, 1, 0),
-        "outside: normal disk -> polytope (-1,0), cp1 (2.5,0), cp2 (1,0)");
+  CPPUNIT_ASSERT_MESSAGE("outside: h = 2 - 0.5", out.status == 0 && near(out.h, 1.5));
+  CPPUNIT_ASSERT_MESSAGE(
+      "outside: normal disk -> polytope (-1,0), cp1 (2.5,0), cp2 (1,0)",
+      near2(out.normal, -1, 0) && near2(out.cp1, 2.5, 0) && near2(out.cp2, 1, 0));
 
   auto d_in = add_disk(data, 0.5, 0.5, 0.2);
   auto in = rel.contact(0, d_in, sq);
-  check(in.status == 1 && near(in.h, -1.0), "centre inside: h = -(0.5 + 0.5)");
-  check(near2(in.normal, -1, 0) && near2(in.cp1, 0, 0.2) && near2(in.cp2, 1, 0.2),
-        "centre inside: normal (-1,0), cp1 = c + r n, cp2 on the nearest edge");
+  CPPUNIT_ASSERT_MESSAGE("centre inside: h = -(0.5 + 0.5)",
+                         in.status == 1 && near(in.h, -1.0));
+  CPPUNIT_ASSERT_MESSAGE(
+      "centre inside: normal (-1,0), cp1 = c + r n, cp2 on the nearest edge",
+      near2(in.normal, -1, 0) && near2(in.cp1, 0, 0.2) && near2(in.cp2, 1, 0.2));
 }
 
 void test_jacobian_finite_differences() {
@@ -168,9 +171,10 @@ void test_jacobian_finite_differences() {
         const double hm = rel.compute_h(0, d, sq);
         q(k) = q0;
         const double gk = body == 0 ? g1(0, k) : g2(0, k);
-        check(near((hp - hm) / (2 * eps), gk, 1e-6),
-              "normal row of G == dh/dq (centre x " + std::to_string(dx) + ", body " +
-                  std::to_string(body + 1) + ", dof " + std::to_string(k) + ")");
+        CPPUNIT_ASSERT_MESSAGE("normal row of G == dh/dq (centre x " + std::to_string(dx) +
+                                   ", body " + std::to_string(body + 1) + ", dof " +
+                                   std::to_string(k) + ")",
+                               near((hp - hm) / (2 * eps), gk, 1e-6));
       }
     }
   }
@@ -248,9 +252,9 @@ std::vector<std::size_t> mixed_relations(world& w, std::size_t s) {
     if (!std::holds_alternative<pd_index>(inter.relation())) continue;
     auto ds1 = storage::make_handle(w.data, storage::prop<"ds1", config::topo>(inter));
     auto ds2 = storage::make_handle(w.data, storage::prop<"ds2", config::topo>(inter));
-    check(collision::has_shape<collision::shape::disk>(ds1) &&
-              collision::has_shape<collision::shape::polytope>(ds2),
-          "a mixed pair is linked disk first");
+    CPPUNIT_ASSERT_MESSAGE("a mixed pair is linked disk first",
+                           collision::has_shape<collision::shape::disk>(ds1) &&
+                               collision::has_shape<collision::shape::polytope>(ds2));
     rels.push_back(std::get<pd_index>(inter.relation()).value());
   }
   return rels;
@@ -287,15 +291,17 @@ void test_disk_on_square(bool square_first) {
   std::print(stderr,
              "disk on square ({}): disk ({:.6f}, {:.6f}), square ({:.6f}, {:.6f}, {:.2e})\n",
              square_first ? "square first" : "disk first", qd(0), qd(1), qs(0), qs(1), qs(2));
-  check(mixed, "a polytopedisk_r interaction was created");
+  CPPUNIT_ASSERT_MESSAGE("a polytopedisk_r interaction was created", mixed);
   // with friction the split of the tangential reaction between the square's
   // two ground points is not unique (the LCP picks one): the symmetric stack
   // drifts by ~1e-4, it does not slide or roll off
-  check(near(qd(0), 0, 1e-3) && near(qs(0), 0, 1e-3) && near(qs(2), 0, 1e-3),
-        "symmetric stack: no sliding, no rotation beyond the friction indeterminacy");
+  CPPUNIT_ASSERT_MESSAGE(
+      "symmetric stack: no sliding, no rotation beyond the friction indeterminacy",
+      near(qd(0), 0, 1e-3) && near(qs(0), 0, 1e-3) && near(qs(2), 0, 1e-3));
   // velocity-level drift of the impacts, as for the disk and square columns
-  check(near(qd(1), 1.5, 2e-2) && near(qs(1), 0.5, 2e-2), "the disk rests on the square");
-  check(storage::attr<"velocity">(d, s).norm() < 1e-2, "the disk is at rest");
+  CPPUNIT_ASSERT_MESSAGE("the disk rests on the square",
+                         near(qd(1), 1.5, 2e-2) && near(qs(1), 0.5, 2e-2));
+  CPPUNIT_ASSERT_MESSAGE("the disk is at rest", storage::attr<"velocity">(d, s).norm() < 1e-2);
 }
 
 void test_mixed_churn() {
@@ -312,22 +318,35 @@ void test_mixed_churn() {
     storage::attr<"q">(d, s)(1) = y_by_step[k];
     w.filter(s);
     const auto rels = mixed_relations(w, s);
-    check(rels.size() == n_by_step[k],
-          "mixed interaction count at scripted step " + std::to_string(k));
+    CPPUNIT_ASSERT_MESSAGE("mixed interaction count at scripted step " + std::to_string(k),
+                           rels.size() == n_by_step[k]);
     if (k == 0) rel0 = rels.front();
-    if (k == 2) check(rels.front() == rel0, "the stateless relation item is reused");
+    if (k == 2)
+      CPPUNIT_ASSERT_MESSAGE("the stateless relation item is reused", rels.front() == rel0);
     w.simulation.compute_one_step();
   }
   (void)sq;
 }
 }  // namespace
 
-int main() {
-  test_contact();
-  test_jacobian_finite_differences();
-  test_disk_on_square(true);
-  test_disk_on_square(false);
-  test_mixed_churn();
-  std::print("polytopedisk: all checks pass\n");
-  return 0;
-}
+namespace {
+
+class PolytopeDiskTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(PolytopeDiskTest);
+  CPPUNIT_TEST(testPolytopeDisk);
+  CPPUNIT_TEST_SUITE_END();
+
+ public:
+  void testPolytopeDisk() {
+    test_contact();
+    test_jacobian_finite_differences();
+    test_disk_on_square(true);
+    test_disk_on_square(false);
+    test_mixed_churn();
+    std::print("polytopedisk: all checks pass\n");
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(PolytopeDiskTest);
+
+}  // namespace

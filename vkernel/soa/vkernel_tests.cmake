@@ -86,6 +86,8 @@ if(WITH_TESTING)
     bouncing_disk_line.ref
     DEPS
     "${COMPACTNSEARCH}")
+  new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
+           ${SIMPLE_TEST_MAIN})
 
   begin_tests(
     src/siconos/collision/tests DEPS
@@ -106,9 +108,52 @@ if(WITH_TESTING)
     ${SIMPLE_TEST_MAIN}
     DATA
     fixed_disks.ref)
+  new_test(NAME vkernel_cxd_batch_smoke SOURCES cxd_batch_smoke.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_polytope_cxd SOURCES polytope_cxd.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_bouncing_polytopes SOURCES bouncing_polytopes.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_churn_polytopes SOURCES churn_polytopes.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_polytope_fsegment SOURCES polytope_fsegment.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_polytopemesh SOURCES polytopemesh.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_polytopefdisk SOURCES polytopefdisk.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_polytopedisk SOURCES polytopedisk.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_rigid_shapes SOURCES rigid_shapes.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_mixed_bodies SOURCES mixed_bodies.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_polytope_on_fem SOURCES polytope_on_fem.cpp
+           ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_io_contact_points SOURCES io_contact_points.cpp
+           ${SIMPLE_TEST_MAIN})
 
-  # the legacy targets were built with the vkernel/soa flags, which include the
-  # C++23 standard the tests need for std::print
+  # topology::sort_interactions (storage::permute) on both storage backends: the
+  # registry, and the compile time database (_static_db). The neighbor search
+  # order, hence the interactions, must be reproducible, and the assertions of
+  # the library headers must stay enabled in a Release build.
+  new_test(NAME vkernel_sort_interactions_registry SOURCES
+           sort_interactions.cpp ${SIMPLE_TEST_MAIN})
+  new_test(
+    NAME
+    vkernel_sort_interactions_static_db
+    SOURCES
+    sort_interactions.cpp
+    ${SIMPLE_TEST_MAIN}
+    COMPILE_DEFINITIONS
+    SORT_STATIC_DB)
+  set_property(
+    TEST vkernel_sort_interactions_registry vkernel_sort_interactions_static_db
+    APPEND
+    PROPERTY ENVIRONMENT OMP_NUM_THREADS=1)
+
+  # the tests were written against the vkernel/soa flags, which include the
+  # C++23 standard they need for std::print
   set(vkernel_ref_tests
       vkernel_bouncing_ball
       vkernel_bouncing_ball_registry
@@ -118,10 +163,28 @@ if(WITH_TESTING)
       vkernel_bouncing_disk
       vkernel_bouncing_disk_line
       vkernel_bouncing_disks
-      vkernel_fixed_disks)
+      vkernel_fixed_disks
+      vkernel_registry_remove
+      vkernel_cxd_batch_smoke
+      vkernel_polytope_cxd
+      vkernel_bouncing_polytopes
+      vkernel_churn_polytopes
+      vkernel_polytope_fsegment
+      vkernel_polytopemesh
+      vkernel_polytopefdisk
+      vkernel_polytopedisk
+      vkernel_rigid_shapes
+      vkernel_mixed_bodies
+      vkernel_polytope_on_fem
+      vkernel_io_contact_points
+      vkernel_sort_interactions_registry
+      vkernel_sort_interactions_static_db)
   foreach(t IN LISTS vkernel_ref_tests)
     set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
   endforeach()
+  set_target_properties(
+    vkernel_sort_interactions_registry vkernel_sort_interactions_static_db
+    PROPERTIES COMPILE_FLAGS "${flags} -UNDEBUG")
 
   set_target_properties(RtOsiTest PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")

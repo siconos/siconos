@@ -1,3 +1,6 @@
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <cmath>
 #include <cstdio>
 #include <print>
@@ -62,115 +65,123 @@ struct data_t : storage::make_runtime_database<
                             typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int, char**) {
-  using namespace siconos;
-  using namespace storage;
+namespace {
 
-  config::data_t data;
+class IoContactPointsTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(IoContactPointsTest);
+  CPPUNIT_TEST(testIoContactPoints);
+  CPPUNIT_TEST_SUITE_END();
 
-  double t0 = 0.;
-  double tmax = 0.7;
-  double h = 0.005;
-  double position_init = 1.;
-  double theta = 0.5;
-  double radius = 0.1;
-  double m = 1.;
-  double g = 9.81;
-  double e = 0.9;
+ public:
+  void testIoContactPoints() {
+    using namespace siconos;
+    using namespace storage;
 
-  std::size_t ndisks = 2;
+    config::data_t data;
 
-  auto disk_shape = storage::add<config::disk_shape>(data);
-  disk_shape.radius() = radius;
+    double t0 = 0.;
+    double tmax = 0.7;
+    double h = 0.005;
+    double position_init = 1.;
+    double theta = 0.5;
+    double radius = 0.1;
+    double m = 1.;
+    double g = 9.81;
+    double e = 0.9;
 
-  using disk_handle_t = decltype(storage::add<config::disk>(data));
-  std::vector<disk_handle_t> disks;
-  disks.reserve(ndisks);
-  for (std::size_t i = 0; i < ndisks; ++i) disks.push_back(storage::add<config::disk>(data));
+    std::size_t ndisks = 2;
 
-  for (std::size_t i = 0; i < disks.size(); ++i) {
-    auto& disk = disks[i];
-    prop<"id", config::topo>(disk) = static_cast<uint>(i + 1);
-    disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
-    disk.velocity() = {0, 0., 0.};
-    disk.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
-    prop<"shape">(disk) = disk_shape;
-    disk.fext() = {0., -m * g, 0.};
-  }
+    auto disk_shape = storage::add<config::disk_shape>(data);
+    disk_shape.radius() = radius;
 
-  auto nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = e;
+    using disk_handle_t = decltype(storage::add<config::disk>(data));
+    std::vector<disk_handle_t> disks;
+    disks.reserve(ndisks);
+    for (std::size_t i = 0; i < ndisks; ++i) disks.push_back(storage::add<config::disk>(data));
 
-  auto fc2d = storage::add<config::fc2d>(data);
-  fc2d.create();
-  fc2d.instance()->dimension = 2;
-  fc2d.instance()->mu = 0;
+    for (std::size_t i = 0; i < disks.size(); ++i) {
+      auto& disk = disks[i];
+      prop<"id", config::topo>(disk) = static_cast<uint>(i + 1);
+      disk.q() = {0, position_init * static_cast<uint>(i + 1), 0};
+      disk.velocity() = {0, 0., 0.};
+      disk.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+      prop<"shape">(disk) = disk_shape;
+      disk.fext() = {0., -m * g, 0.};
+    }
 
-  auto simulation = storage::add<config::simulation>(data);
-  simulation.one_step_integrator().theta() = theta;
-  simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-  simulation.time_discretization().t0() = t0;
-  simulation.time_discretization().h() = h;
-  simulation.time_discretization().tmax() = tmax;
-  auto osnspb = simulation.one_step_nonsmooth_problem();
-  osnspb.problem() = fc2d;
-  auto so = storage::add<simul::solver_options>(data);
-  so.create(SICONOS_FRICTION_2D_LEMKE);
-  osnspb.options() = so;
+    auto nslaw = storage::add<config::nslaw>(data);
+    nslaw.e() = e;
 
-  auto ngbh = storage::add<config::neighborhood>(data);
-  ngbh.create(0.6);
+    auto fc2d = storage::add<config::fc2d>(data);
+    fc2d.create();
+    fc2d.instance()->dimension = 2;
+    fc2d.instance()->mu = 0;
 
-  auto segment = storage::add<config::segment_shape>(data);
-  auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-  auto ground_r = storage::add<config::diskfsegment_r>(data);
-  ground_r.segment() = segment;
-  segment.x1() = -10.;
-  segment.y1() = 0.;
-  segment.x2() = 10.;
-  segment.y2() = 0.;
-  segment.initialize();
-  segment.maxpoints() = 10;
+    auto simulation = storage::add<config::simulation>(data);
+    simulation.one_step_integrator().theta() = theta;
+    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+    simulation.time_discretization().t0() = t0;
+    simulation.time_discretization().h() = h;
+    simulation.time_discretization().tmax() = tmax;
+    auto osnspb = simulation.one_step_nonsmooth_problem();
+    osnspb.problem() = fc2d;
+    auto so = storage::add<simul::solver_options>(data);
+    so.create(SICONOS_FRICTION_2D_LEMKE);
+    osnspb.options() = so;
 
-  auto spacef = storage::add<config::space_filter>(data);
-  spacef.neighborhood() = ngbh;
-  spacef.diskdisk_r() = diskdisk_r;
-  spacef.nslaw() = nslaw;
-  spacef.insert_diskfsegment_r(ground_r);
-  spacef.make_points();
-  ngbh.add_point_sets(0);
+    auto ngbh = storage::add<config::neighborhood>(data);
+    ngbh.create(0.6);
 
-  simulation.initialize();
+    auto segment = storage::add<config::segment_shape>(data);
+    auto diskdisk_r = storage::add<config::diskdisk_r>(data);
+    auto ground_r = storage::add<config::diskfsegment_r>(data);
+    ground_r.segment() = segment;
+    segment.x1() = -10.;
+    segment.y1() = 0.;
+    segment.x2() = 10.;
+    segment.y2() = 0.;
+    segment.initialize();
+    segment.maxpoints() = 10;
 
-  std::size_t failures = 0;
-  std::size_t checks = 0;
+    auto spacef = storage::add<config::space_filter>(data);
+    spacef.neighborhood() = ngbh;
+    spacef.diskdisk_r() = diskdisk_r;
+    spacef.nslaw() = nslaw;
+    spacef.insert_diskfsegment_r(ground_r);
+    spacef.make_points();
+    ngbh.add_point_sets(0);
 
-  while (simulation.has_next_event()) {
-    ngbh.update(0);
-    ngbh.search();
-    spacef.update_index_set0(simulation.current_step());
+    simulation.initialize();
 
-    simulation.compute_one_step();
+    std::size_t checks = 0;
 
-    // compute_output (called inside compute_one_step) zeroes y before the
-    // nonlinear relation branches, so y[1] must be defined (==0, finite) for
-    // every active interaction this step.
-    auto& ys = storage::attr_values<config::interaction, "y">(data, simulation.current_step());
-    for (auto [y] : view::zip(ys)) {
-      ++checks;
-      if (!std::isfinite(y[0]) || !std::isfinite(y[1]) || y[1] != 0.) {
-        ++failures;
+    while (simulation.has_next_event()) {
+      ngbh.update(0);
+      ngbh.search();
+      spacef.update_index_set0(simulation.current_step());
+
+      simulation.compute_one_step();
+
+      // compute_output (called inside compute_one_step) zeroes y before the
+      // nonlinear relation branches, so y[1] must be defined (==0, finite) for
+      // every active interaction this step.
+      auto& ys =
+          storage::attr_values<config::interaction, "y">(data, simulation.current_step());
+      for (auto [y] : view::zip(ys)) {
+        ++checks;
+        CPPUNIT_ASSERT_MESSAGE("y[1] (tangential gap row) is zero and finite",
+                               std::isfinite(y[0]) && std::isfinite(y[1]) && y[1] == 0.);
       }
     }
-  }
 
-  // Require at least one contact to have been produced, so the check is not
-  // vacuous: disks fall onto the ground segment within the window.
-  if (checks == 0) {
-    std::print("io_contact_points: no interactions observed (test is vacuous)\n");
-    return 2;
-  }
+    // Require at least one contact to have been produced, so the check is not
+    // vacuous: disks fall onto the ground segment within the window.
+    CPPUNIT_ASSERT_MESSAGE("at least one interaction was observed", checks > 0);
 
-  std::print("io_contact_points: {} y-rows checked, {} unexpected\n", checks, failures);
-  return failures ? 1 : 0;
-}
+    std::print("io_contact_points: {} y-rows checked\n", checks);
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(IoContactPointsTest);
+
+}  // namespace

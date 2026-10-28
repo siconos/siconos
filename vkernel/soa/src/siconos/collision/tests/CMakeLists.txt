@@ -7,65 +7,8 @@ if(WITH_vkernel_TESTING)
 
   # The ctest tests of this directory are registered in
   # vkernel/soa/vkernel_tests.cmake (begin_tests/new_test). This file only
-  # keeps the targets that are not ctest tests: the sort_interactions build per
-  # storage backend and the relation/index sets oracles.
-
-  add_executable(cxd_batch_smoke cxd_batch_smoke.cpp)
-  add_executable(polytope_cxd polytope_cxd.cpp)
-  add_executable(bouncing_polytopes bouncing_polytopes.cpp)
-  add_executable(churn_polytopes churn_polytopes.cpp)
-  add_executable(polytope_fsegment polytope_fsegment.cpp)
-  add_executable(polytopemesh polytopemesh.cpp)
-  add_executable(polytopefdisk polytopefdisk.cpp)
-  add_executable(polytopedisk polytopedisk.cpp)
-  add_executable(rigid_shapes rigid_shapes.cpp)
-  add_executable(mixed_bodies mixed_bodies.cpp)
-  add_executable(polytope_on_fem polytope_on_fem.cpp)
-  add_executable(io_contact_points io_contact_points.cpp)
-
-  foreach(t cxd_batch_smoke polytope_cxd bouncing_polytopes churn_polytopes
-            polytope_fsegment polytopemesh polytopefdisk polytopedisk
-            rigid_shapes mixed_bodies polytope_on_fem io_contact_points)
-    set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
-  endforeach()
-
-  target_link_libraries(cxd_batch_smoke Eigen3::Eigen numerics pthread)
-  target_link_libraries(polytope_cxd Eigen3::Eigen numerics pthread)
-  target_link_libraries(bouncing_polytopes Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(churn_polytopes Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(polytope_fsegment Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(polytopemesh Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(polytopefdisk Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(polytopedisk Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(rigid_shapes Eigen3::Eigen numerics pthread CPPUNIT::CPPUNIT)
-  target_link_libraries(mixed_bodies Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(polytope_on_fem Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(io_contact_points Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-
-  enable_testing()
-  foreach(test cxd_batch_smoke polytope_cxd bouncing_polytopes churn_polytopes
-             polytope_fsegment polytopemesh polytopefdisk polytopedisk
-             rigid_shapes mixed_bodies polytope_on_fem io_contact_points)
-    add_test(NAME vkernel_${test} COMMAND ${test}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  endforeach()
-
-  # topology::sort_interactions (storage::permute) on both storage backends:
-  # the registry, and the compile time database (_static_db)
-  foreach(backend registry static_db)
-    set(t sort_interactions_${backend})
-    add_executable(${t} sort_interactions.cpp)
-    set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
-    target_compile_options(${t} PRIVATE -UNDEBUG)
-    if(backend STREQUAL static_db)
-      target_compile_definitions(${t} PRIVATE SORT_STATIC_DB)
-    endif()
-    target_link_libraries(${t} Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-    add_test(NAME vkernel_${t} COMMAND ${t}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    # the neighbor search order, hence the interactions, must be reproducible
-    set_tests_properties(vkernel_${t} PROPERTIES ENVIRONMENT OMP_NUM_THREADS=1)
-  endforeach()
+  # keeps the targets that are not ctest tests: the relation/index sets
+  # oracles, which build the same test twice and compare their output.
 
   # oracle of the relation and index sets (simul/relation_sets.hpp,
   # simul/index_sets.hpp): the same test without the sets (_sets0) and with

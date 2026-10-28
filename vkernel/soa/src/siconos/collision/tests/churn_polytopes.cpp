@@ -32,6 +32,9 @@
       shape.radius() -- the circumradius for a polytope -- and returned
       a plausible but wrong gap. It must throw instead. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <array>
 #include <cmath>
 #include <print>
@@ -106,11 +109,6 @@ struct data_t
 }  // namespace siconos::config
 
 namespace {
-// assert() is compiled out under Release: an explicit throwing check keeps
-// the RED/GREEN honest
-void check(bool ok, const std::string& what) {
-  if (!ok) throw std::runtime_error("CHECK FAILED: " + what);
-}
 
 auto add_square_shape(siconos::config::data_t& data) {
   auto shape = siconos::storage::add<siconos::config::polytope_shape>(data);
@@ -237,7 +235,7 @@ void test_space_filter_churn(siconos::config::data_t& data) {
 
   for (size_t step = 0; step < y2_by_step.size(); ++step) {
     const auto s = simulation.current_step();
-    check(s == step, "current step advances in lockstep");
+    CPPUNIT_ASSERT_MESSAGE("current step advances in lockstep", s == step);
 
     storage::attr<"q">(ds2, s)(1) = y2_by_step[step];
 
@@ -247,23 +245,24 @@ void test_space_filter_churn(siconos::config::data_t& data) {
     np.ensure(s);
 
     auto inters = storage::handles<config::interaction>(data, s);
-    check(inters.size() == ninter_by_step[step],
-          "the filter keeps the right interaction count");
+    CPPUNIT_ASSERT_MESSAGE("the filter keeps the right interaction count",
+                           inters.size() == ninter_by_step[step]);
 
     for (auto inter : inters) {
-      check(std::holds_alternative<poly_r_index>(inter.relation()),
-            "the ds-ds interaction is rebound to polytopepolytope_r");
+      CPPUNIT_ASSERT_MESSAGE("the ds-ds interaction is rebound to polytopepolytope_r",
+                             std::holds_alternative<poly_r_index>(inter.relation()));
       auto rel = storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
       const std::size_t pi = rel.point_index();
-      check(pi < 2, "a polytope relation stands for manifold point 0 or 1");
+      CPPUNIT_ASSERT_MESSAGE("a polytope relation stands for manifold point 0 or 1", pi < 2);
       if (rel_idx0[pi] == static_cast<std::size_t>(-1)) {
         rel_idx0[pi] = rel.index().value();
       } else {
-        check(rel.index().value() == rel_idx0[pi],
-              "the relation item is recycled (same storage index) after removal");
+        CPPUNIT_ASSERT_MESSAGE(
+            "the relation item is recycled (same storage index) after removal",
+            rel.index().value() == rel_idx0[pi]);
       }
-      check(std::abs(rel.h() - h_by_step[step]) <= 1e-6,
-            "cached h is the exact gap (keep-previous when separated)");
+      CPPUNIT_ASSERT_MESSAGE("cached h is the exact gap (keep-previous when separated)",
+                             std::abs(rel.h() - h_by_step[step]) <= 1e-6);
     }
 
     simulation.compute_one_step();
@@ -303,7 +302,7 @@ void test_duplicate_pair_removal_throws(siconos::config::data_t& data) {
     threw = true;
     std::print("duplicate pair: {}\n", e.what());
   }
-  check(threw, "duplicate ds pair removal must throw, not dereference end()");
+  CPPUNIT_ASSERT_MESSAGE("duplicate ds pair removal must throw, not dereference end()", threw);
   std::print("remove_interactions: stale/duplicate pair fails loudly\n");
 }
 
@@ -336,7 +335,7 @@ void test_unknown_relation_throws(siconos::config::data_t& data) {
     threw = true;
     std::print("unknown relation: {}\n", e.what());
   }
-  check(threw, "unhandled relation in the ds1 == ds2 paths must throw");
+  CPPUNIT_ASSERT_MESSAGE("unhandled relation in the ds1 == ds2 paths must throw", threw);
   std::print("remove_interactions: unhandled relation fails loudly\n");
 }
 /* ---- 4: a polytope near a fixed segment must fail loudly ---- */
@@ -362,29 +361,43 @@ void test_polytope_against_fixed_segment_throws(siconos::config::data_t& data) {
     threw = true;
     std::print("polytope vs fixed segment: {}\n", e.what());
   }
-  check(!threw,
-        "a polytope near a fixed segment must now bind polytopefsegment_r, "
-        "not throw");
+  CPPUNIT_ASSERT_MESSAGE(
+      "a polytope near a fixed segment must now bind polytopefsegment_r, "
+      "not throw",
+      !threw);
   std::print("space_filter: polytope vs fixed segment binds polytopefsegment_r\n");
 }
 }  // namespace
 
-int main() {
-  {
-    siconos::config::data_t data;
-    test_space_filter_churn(data);
+namespace {
+
+class ChurnPolytopesTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(ChurnPolytopesTest);
+  CPPUNIT_TEST(testChurnPolytopes);
+  CPPUNIT_TEST_SUITE_END();
+
+ public:
+  void testChurnPolytopes() {
+    {
+      siconos::config::data_t data;
+      test_space_filter_churn(data);
+    }
+    {
+      siconos::config::data_t data;
+      test_duplicate_pair_removal_throws(data);
+    }
+    {
+      siconos::config::data_t data;
+      test_unknown_relation_throws(data);
+    }
+    {
+      siconos::config::data_t data;
+      test_polytope_against_fixed_segment_throws(data);
+    }
+    std::print("churn_polytopes: all groups pass\n");
   }
-  {
-    siconos::config::data_t data;
-    test_duplicate_pair_removal_throws(data);
-  }
-  {
-    siconos::config::data_t data;
-    test_unknown_relation_throws(data);
-  }
-  {
-    siconos::config::data_t data;
-    test_polytope_against_fixed_segment_throws(data);
-  }
-  std::print("churn_polytopes: all groups pass\n");
-}
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(ChurnPolytopesTest);
+
+}  // namespace

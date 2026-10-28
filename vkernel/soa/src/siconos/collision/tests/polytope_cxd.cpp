@@ -1,6 +1,9 @@
 /* Unit tests for the cxd-backed polytope narrowphase (Tasks 2..6).
    Task 2: shape::polytope item — vertices, nvertices, rmax, convexity check. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <cassert>
 #include <cmath>
 #include <print>
@@ -56,9 +59,6 @@ int test_polytope_item(siconos::config::data_t& data);
 
 namespace {
 
-auto check = [](bool ok, auto&& what) {
-  if (!ok) throw std::runtime_error(std::string("CHECK FAILED: ") + what);
-};
 // relation vector attrs come back as Eigen 2-vectors; the near() helpers
 // below take std::array, so funnel them through this
 auto to_arr = [](const auto& v) {
@@ -101,16 +101,13 @@ siconos::collision::narrowphase_input<double> make_input(
 
 int test_polytope_item(siconos::config::data_t& data) {
   using siconos::storage::add;
-  // side-2 axis-aligned square, CCW; assert() is compiled out under Release,
-  // an explicit throwing check keeps RED/GREEN honest
-  auto check = [](bool ok, auto&& what) {
-    if (!ok) throw std::runtime_error(std::string("CHECK FAILED: ") + what);
-  };
+  // side-2 axis-aligned square, CCW; CppUnit assertions are not compiled out
+  // in a Release build
   auto sh = add<siconos::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   for (int i = 0; i < 4; ++i) sh.vertices()[i] = {sq[i][0], sq[i][1]};
   sh.nvertices() = 4;
-  check(std::abs(sh.rmax() - std::sqrt(2.0)) < 1e-12, "rmax == sqrt(2)");
+  CPPUNIT_ASSERT_MESSAGE("rmax == sqrt(2)", std::abs(sh.rmax() - std::sqrt(2.0)) < 1e-12);
 
   // non-convex polygon rejected by check_convex
   auto sh2 = add<siconos::config::polytope_shape>(data);
@@ -124,7 +121,7 @@ int test_polytope_item(siconos::config::data_t& data) {
     } catch (const std::runtime_error&) {
       threw = true;
     }
-    check(threw, "non-convex polygon rejected by check_convex");
+    CPPUNIT_ASSERT_MESSAGE("non-convex polygon rejected by check_convex", threw);
   }
 
   // the vertex column is a fixed 16-slot array; check_convex must reject a
@@ -138,7 +135,8 @@ int test_polytope_item(siconos::config::data_t& data) {
     } catch (const std::runtime_error&) {
       threw = true;
     }
-    check(threw, "nvertices above the 16-vertex capacity rejected by check_convex");
+    CPPUNIT_ASSERT_MESSAGE("nvertices above the 16-vertex capacity rejected by check_convex",
+                           threw);
   }
   std::print("polytope item ok, rmax={}\n", sh.rmax());
   return 0;
@@ -158,29 +156,31 @@ void test_set_vertices(siconos::config::data_t& data) {
   Eigen::MatrixXd cw(4, 2);
   cw << -1, -1, -1, 1, 1, 1, 1, -1;  // clockwise square
   sh.set_vertices(cw);
-  check(sh.nvertices() == 4, "set_vertices: 4 vertices");
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: 4 vertices", sh.nvertices() == 4);
   double area2 = 0;
   for (std::size_t i = 0; i < 4; ++i) {
     const auto& a = sh.vertices()[i];
     const auto& b = sh.vertices()[(i + 1) % 4];
     area2 += a[0] * b[1] - b[0] * a[1];
   }
-  check(area2 > 0, "set_vertices: a clockwise list is stored counter-clockwise");
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: a clockwise list is stored counter-clockwise",
+                         area2 > 0);
   Eigen::MatrixXd with_z(3, 3);
   with_z << 0, 0, 7, 1, 0, 7, 0, 1, 7;
   sh.set_vertices(with_z);
-  check(sh.nvertices() == 3 && sh.vertices()[1][0] == 1,
-        "set_vertices: a third column is ignored");
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: a third column is ignored",
+                         sh.nvertices() == 3 && sh.vertices()[1][0] == 1);
   Eigen::MatrixXd concave(4, 2);
   concave << 0, 0, 2, 0, 0.5, 0.5, 0, 2;
-  check(throws(concave), "set_vertices: a non-convex polygon throws");
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: a non-convex polygon throws", throws(concave));
   Eigen::MatrixXd flat(3, 2);
   flat << 0, 0, 1, 0, 2, 0;
-  check(throws(flat), "set_vertices: a polygon of zero area throws");
-  check(throws(Eigen::MatrixXd::Zero(2, 2)), "set_vertices: fewer than 3 vertices throw");
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: a polygon of zero area throws", throws(flat));
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: fewer than 3 vertices throw",
+                         throws(Eigen::MatrixXd::Zero(2, 2)));
   Eigen::MatrixXd many(17, 2);
   for (int i = 0; i < 17; ++i) many.row(i) << std::cos(i * 0.3695), std::sin(i * 0.3695);
-  check(throws(many), "set_vertices: more than 16 vertices throw");
+  CPPUNIT_ASSERT_MESSAGE("set_vertices: more than 16 vertices throw", throws(many));
   std::print("polytope item: set_vertices validates and orders\n");
 }
 
@@ -189,41 +189,41 @@ void test_batch_engine() {
   {
     auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out.size() == 1, "one pair out");
-    check(out[0].status == 0 /* separated */, "s(0,0)-s(3,0) separated");
-    check(nears(out[0].h, 1.0), "h == 1");
-    check(near(out[0].cp1, {1, 0}), "cp1 == (1,0)");
-    check(near(out[0].cp2, {2, 0}), "cp2 == (2,0)");
-    check(near(out[0].normal, {1, 0}), "normal == (1,0)");
+    CPPUNIT_ASSERT_MESSAGE("one pair out", out.size() == 1);
+    CPPUNIT_ASSERT_MESSAGE("s(0,0)-s(3,0) separated", out[0].status == 0 /* separated */);
+    CPPUNIT_ASSERT_MESSAGE("h == 1", nears(out[0].h, 1.0));
+    CPPUNIT_ASSERT_MESSAGE("cp1 == (1,0)", near(out[0].cp1, {1, 0}));
+    CPPUNIT_ASSERT_MESSAGE("cp2 == (2,0)", near(out[0].cp2, {2, 0}));
+    CPPUNIT_ASSERT_MESSAGE("normal == (1,0)", near(out[0].normal, {1, 0}));
   }
   // {0,0} square x {3,3} square: separated on the diagonal
   {
     auto in = make_input({square_at(0, 0), square_at(3, 3)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(nears(out[0].h, std::sqrt(2.0)), "h == sqrt(2)");
-    check(near(out[0].cp1, {1, 1}), "cp1 == (1,1)");
-    check(near(out[0].cp2, {2, 2}), "cp2 == (2,2)");
+    CPPUNIT_ASSERT_MESSAGE("h == sqrt(2)", nears(out[0].h, std::sqrt(2.0)));
+    CPPUNIT_ASSERT_MESSAGE("cp1 == (1,1)", near(out[0].cp1, {1, 1}));
+    CPPUNIT_ASSERT_MESSAGE("cp2 == (2,2)", near(out[0].cp2, {2, 2}));
     const double c = 0.7071067811865476;
-    check(near(out[0].normal, {c, c}), "normal == diag");
+    CPPUNIT_ASSERT_MESSAGE("normal == diag", near(out[0].normal, {c, c}));
   }
   // diamond x square(3,0): separated, vertex-edge closest pair
   {
     auto in = make_input({diamond_at_origin(), square_at(3, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out[0].status == 0, "diamond-square separated");
-    check(nears(out[0].h, 2 - 1.4142135623730951, 1e-9), "h == 2-sqrt(2)");
-    check(near(out[0].cp1, {1.4142135623730951, 0}), "cp1 == diamond east");
-    check(near(out[0].cp2, {2, 0}), "cp2 == (2,0)");
-    check(near(out[0].normal, {1, 0}), "normal == (1,0)");
+    CPPUNIT_ASSERT_MESSAGE("diamond-square separated", out[0].status == 0);
+    CPPUNIT_ASSERT_MESSAGE("h == 2-sqrt(2)", nears(out[0].h, 2 - 1.4142135623730951, 1e-9));
+    CPPUNIT_ASSERT_MESSAGE("cp1 == diamond east", near(out[0].cp1, {1.4142135623730951, 0}));
+    CPPUNIT_ASSERT_MESSAGE("cp2 == (2,0)", near(out[0].cp2, {2, 0}));
+    CPPUNIT_ASSERT_MESSAGE("normal == (1,0)", near(out[0].normal, {1, 0}));
   }
   // {0,0} square x {1.9,0} square: enclosed, overlap depth 0.1
   {
     auto in = make_input({square_at(0, 0), square_at(1.9, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(std::abs(out[0].h + 0.1) <= 1e-6, "h == -0.1");
-    check(near(out[0].cp1, {1, 0}, 1e-6), "cp1 == (1,0)");
-    check(near(out[0].cp2, {0.9, 0}, 1e-6), "cp2 == (0.9,0)");
-    check(near(out[0].normal, {1, 0}, 1e-6), "normal == (1,0)");
+    CPPUNIT_ASSERT_MESSAGE("h == -0.1", std::abs(out[0].h + 0.1) <= 1e-6);
+    CPPUNIT_ASSERT_MESSAGE("cp1 == (1,0)", near(out[0].cp1, {1, 0}, 1e-6));
+    CPPUNIT_ASSERT_MESSAGE("cp2 == (0.9,0)", near(out[0].cp2, {0.9, 0}, 1e-6));
+    CPPUNIT_ASSERT_MESSAGE("normal == (1,0)", near(out[0].normal, {1, 0}, 1e-6));
   }
   // two identical squares: enclosed, and the depth is the minimum
   // translation that separates them (the half-width of the difference
@@ -231,20 +231,20 @@ void test_batch_engine() {
   {
     auto in = make_input({square_at(0, 0), square_at(0, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out[0].status == 1, "identical squares enclosed");
-    check(std::abs(out[0].h + 2.0) <= 1e-6, "h == -2");
+    CPPUNIT_ASSERT_MESSAGE("identical squares enclosed", out[0].status == 1);
+    CPPUNIT_ASSERT_MESSAGE("h == -2", std::abs(out[0].h + 2.0) <= 1e-6);
     for (double x : {out[0].h, out[0].normal[0], out[0].normal[1], out[0].cp1[0],
                      out[0].cp1[1], out[0].cp2[0], out[0].cp2[1]})
-      check(std::isfinite(x), "all outputs finite");
+      CPPUNIT_ASSERT_MESSAGE("all outputs finite", std::isfinite(x));
   }
   // one batch call over {separated, enclosed}: statuses preserved
   {
     auto in =
         make_input({square_at(0, 0), square_at(3, 0), square_at(1.9, 0)}, {{0, 1}, {0, 2}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out.size() == 2, "two pairs out");
-    check(out[0].status == 0 && out[1].status == 1, "statuses preserved");
-    check(nears(out[1].h, -0.1, 1e-6), "second pair h == -0.1");
+    CPPUNIT_ASSERT_MESSAGE("two pairs out", out.size() == 2);
+    CPPUNIT_ASSERT_MESSAGE("statuses preserved", out[0].status == 0 && out[1].status == 1);
+    CPPUNIT_ASSERT_MESSAGE("second pair h == -0.1", nears(out[1].h, -0.1, 1e-6));
   }
   std::print("narrowphase_batch engine: all exact cases pass\n");
 }
@@ -264,29 +264,35 @@ void test_witnesses_off_axis() {
   {
     auto in = make_input({diamond_at(0, 0.5), square_at(3, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out[0].status == 0, "vertex-face separated");
-    check(nears(out[0].h, 2 - r), "vertex-face h == 2-sqrt(2)");
-    check(near(out[0].cp1, {r, 0.5}), "vertex-face cp1 == diamond east vertex");
-    check(near(out[0].cp2, {2, 0.5}), "vertex-face cp2 == foot of the vertex");
+    CPPUNIT_ASSERT_MESSAGE("vertex-face separated", out[0].status == 0);
+    CPPUNIT_ASSERT_MESSAGE("vertex-face h == 2-sqrt(2)", nears(out[0].h, 2 - r));
+    CPPUNIT_ASSERT_MESSAGE("vertex-face cp1 == diamond east vertex",
+                           near(out[0].cp1, {r, 0.5}));
+    CPPUNIT_ASSERT_MESSAGE("vertex-face cp2 == foot of the vertex",
+                           near(out[0].cp2, {2, 0.5}));
   }
   // face of A, vertex of B, separated: square east face x = 1, diamond west
   // vertex (2, 0.5)
   {
     auto in = make_input({square_at(0, 0), diamond_at(2 + r, 0.5)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out[0].status == 0, "face-vertex separated");
-    check(nears(out[0].h, 1), "face-vertex h == 1");
-    check(near(out[0].cp1, {1, 0.5}), "face-vertex cp1 == foot of the vertex");
-    check(near(out[0].cp2, {2, 0.5}), "face-vertex cp2 == diamond west vertex");
+    CPPUNIT_ASSERT_MESSAGE("face-vertex separated", out[0].status == 0);
+    CPPUNIT_ASSERT_MESSAGE("face-vertex h == 1", nears(out[0].h, 1));
+    CPPUNIT_ASSERT_MESSAGE("face-vertex cp1 == foot of the vertex",
+                           near(out[0].cp1, {1, 0.5}));
+    CPPUNIT_ASSERT_MESSAGE("face-vertex cp2 == diamond west vertex",
+                           near(out[0].cp2, {2, 0.5}));
   }
   // vertex of A into the face of B, enclosed by 0.1
   {
     auto in = make_input({diamond_at(2.1 - r, 0.5), square_at(3, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out[0].status == 1, "vertex-face enclosed");
-    check(nears(out[0].h, -0.1, 1e-6), "vertex-face h == -0.1");
-    check(near(out[0].cp1, {2.1, 0.5}, 1e-6), "enclosed cp1 == diamond east vertex");
-    check(near(out[0].cp2, {2, 0.5}, 1e-6), "enclosed cp2 == foot of the vertex");
+    CPPUNIT_ASSERT_MESSAGE("vertex-face enclosed", out[0].status == 1);
+    CPPUNIT_ASSERT_MESSAGE("vertex-face h == -0.1", nears(out[0].h, -0.1, 1e-6));
+    CPPUNIT_ASSERT_MESSAGE("enclosed cp1 == diamond east vertex",
+                           near(out[0].cp1, {2.1, 0.5}, 1e-6));
+    CPPUNIT_ASSERT_MESSAGE("enclosed cp2 == foot of the vertex",
+                           near(out[0].cp2, {2, 0.5}, 1e-6));
   }
 }
 
@@ -298,15 +304,17 @@ void test_manifold() {
   {
     auto in = make_input({square_at(0, 0), square_at(0.5, 2.5)}, {{0, 1}});
     auto c = narrowphase_batch(std::move(in))[0];
-    check(c.npoints == 2, "parallel faces: two points");
+    CPPUNIT_ASSERT_MESSAGE("parallel faces: two points", c.npoints == 2);
     for (auto& p : c.points) {
-      check(nears(p.h, 0.5), "parallel faces: each gap 0.5");
-      check(nears(p.cp1[1], 1) && nears(p.cp2[1], 1.5), "parallel faces: points on the faces");
-      check(nears(p.cp1[0], p.cp2[0]), "parallel faces: witnesses face each other");
+      CPPUNIT_ASSERT_MESSAGE("parallel faces: each gap 0.5", nears(p.h, 0.5));
+      CPPUNIT_ASSERT_MESSAGE("parallel faces: points on the faces",
+                             nears(p.cp1[1], 1) && nears(p.cp2[1], 1.5));
+      CPPUNIT_ASSERT_MESSAGE("parallel faces: witnesses face each other",
+                             nears(p.cp1[0], p.cp2[0]));
     }
     const double x0 = c.points[0].cp1[0], x1 = c.points[1].cp1[0];
-    check(nears(std::min(x0, x1), -0.5) && nears(std::max(x0, x1), 1),
-          "parallel faces: the points bound the overlap window");
+    CPPUNIT_ASSERT_MESSAGE("parallel faces: the points bound the overlap window",
+                           nears(std::min(x0, x1), -0.5) && nears(std::max(x0, x1), 1));
   }
   // the upper square tilted by 0.1: its two bottom corners, two gaps
   {
@@ -319,40 +327,45 @@ void test_manifold() {
     const std::vector<std::array<double, 2>> wide = {{-2, -1}, {2, -1}, {2, 1}, {-2, 1}};
     auto in = make_input({wide, tilted}, {{0, 1}});
     auto ct = narrowphase_batch(std::move(in))[0];
-    check(ct.npoints == 2, "tilted face: two points");
-    check(near(ct.normal, {0, 1}), "tilted face: the reference normal is A's top face");
+    CPPUNIT_ASSERT_MESSAGE("tilted face: two points", ct.npoints == 2);
+    CPPUNIT_ASSERT_MESSAGE("tilted face: the reference normal is A's top face",
+                           near(ct.normal, {0, 1}));
     const std::array<double, 2> left{c * -1 - sn * -1, cy + sn * -1 + c * -1};
     const std::array<double, 2> right{c * 1 - sn * -1, cy + sn * 1 + c * -1};
     bool has_left = false, has_right = false;
     for (auto& p : ct.points) {
-      check(nears(p.cp1[1], 1) && nears(p.cp1[0], p.cp2[0]),
-            "tilted face: witness on A's top face, below the corner");
-      check(nears(p.h, p.cp2[1] - 1), "tilted face: the gap is the corner height");
+      CPPUNIT_ASSERT_MESSAGE("tilted face: witness on A's top face, below the corner",
+                             nears(p.cp1[1], 1) && nears(p.cp1[0], p.cp2[0]));
+      CPPUNIT_ASSERT_MESSAGE("tilted face: the gap is the corner height",
+                             nears(p.h, p.cp2[1] - 1));
       has_left = has_left || near(p.cp2, left);
       has_right = has_right || near(p.cp2, right);
     }
-    check(has_left && has_right, "tilted face: the points are the two bottom corners");
-    check(!nears(ct.points[0].h, ct.points[1].h, 1e-3), "tilted face: the gaps differ");
+    CPPUNIT_ASSERT_MESSAGE("tilted face: the points are the two bottom corners",
+                           has_left && has_right);
+    CPPUNIT_ASSERT_MESSAGE("tilted face: the gaps differ",
+                           !nears(ct.points[0].h, ct.points[1].h, 1e-3));
   }
   // corner against corner (diagonal squares): the normal is no face normal,
   // the single closest point
   {
     auto in = make_input({square_at(0, 0), square_at(3, 3)}, {{0, 1}});
     auto c = narrowphase_batch(std::move(in))[0];
-    check(c.npoints == 1, "vertex contact: one point");
-    check(nears(c.points[0].h, c.h) && near(c.points[0].cp1, c.cp1) &&
-              near(c.points[0].cp2, c.cp2),
-          "vertex contact: the single point is the closest pair");
+    CPPUNIT_ASSERT_MESSAGE("vertex contact: one point", c.npoints == 1);
+    CPPUNIT_ASSERT_MESSAGE("vertex contact: the single point is the closest pair",
+                           nears(c.points[0].h, c.h) && near(c.points[0].cp1, c.cp1) &&
+                               near(c.points[0].cp2, c.cp2));
   }
   // a square above a long segment: the two bottom corners of the square
   {
     auto in = make_input({square_at(0, 1.2), {{-5, 0}, {5, 0}}}, {{0, 1}});
     auto c = narrowphase_batch(std::move(in))[0];
-    check(c.npoints == 2, "square on segment: two points");
+    CPPUNIT_ASSERT_MESSAGE("square on segment: two points", c.npoints == 2);
     for (auto& p : c.points) {
-      check(nears(p.h, 0.2), "square on segment: gap 0.2");
-      check(nears(std::abs(p.cp1[0]), 1) && nears(p.cp1[1], 0.2) && nears(p.cp2[1], 0),
-            "square on segment: the bottom corners and their feet");
+      CPPUNIT_ASSERT_MESSAGE("square on segment: gap 0.2", nears(p.h, 0.2));
+      CPPUNIT_ASSERT_MESSAGE(
+          "square on segment: the bottom corners and their feet",
+          nears(std::abs(p.cp1[0]), 1) && nears(p.cp1[1], 0.2) && nears(p.cp2[1], 0));
     }
   }
   std::print("narrowphase_batch engine: contact manifolds pass\n");
@@ -374,10 +387,10 @@ void test_batch_engine_float() {
   in.init_dirs.push_back({1, 0});
 
   auto out = siconos::collision::narrowphase_batch(std::move(in));
-  check(out.size() == 1, "float: one pair out");
-  check(out[0].status == 0 /* separated */, "float: separated");
-  check(std::abs(out[0].h - 1.0f) <= 1e-4f, "float: h == 1");
-  check(std::abs(out[0].normal[0] - 1.0f) <= 1e-4f, "float: normal == (1,0)");
+  CPPUNIT_ASSERT_MESSAGE("float: one pair out", out.size() == 1);
+  CPPUNIT_ASSERT_MESSAGE("float: separated", out[0].status == 0 /* separated */);
+  CPPUNIT_ASSERT_MESSAGE("float: h == 1", std::abs(out[0].h - 1.0f) <= 1e-4f);
+  CPPUNIT_ASSERT_MESSAGE("float: normal == (1,0)", std::abs(out[0].normal[0] - 1.0f) <= 1e-4f);
   std::print("narrowphase_batch engine: float instantiation passes\n");
 }
 
@@ -393,19 +406,23 @@ void test_failed_subdistance_status() {
   {
     auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in), 0);
-    check(out[0].status == 0, "failed sub-distance: separated by the separating axis");
-    check(nears(out[0].h, 1.0), "failed sub-distance: h == 1");
-    check(near(out[0].normal, {1, 0}), "failed sub-distance: normal == (1,0)");
-    check(near(out[0].cp1, {1, 0}) && near(out[0].cp2, {2, 0}),
-          "failed sub-distance: witnesses on the facing faces");
+    CPPUNIT_ASSERT_MESSAGE("failed sub-distance: separated by the separating axis",
+                           out[0].status == 0);
+    CPPUNIT_ASSERT_MESSAGE("failed sub-distance: h == 1", nears(out[0].h, 1.0));
+    CPPUNIT_ASSERT_MESSAGE("failed sub-distance: normal == (1,0)",
+                           near(out[0].normal, {1, 0}));
+    CPPUNIT_ASSERT_MESSAGE("failed sub-distance: witnesses on the facing faces",
+                           near(out[0].cp1, {1, 0}) && near(out[0].cp2, {2, 0}));
   }
   // exactly touching squares: a usable normal and h == 0
   {
     auto in = make_input({square_at(0, 0), square_at(2, 0)}, {{0, 1}});
     auto out = siconos::collision::narrowphase_batch(std::move(in));
-    check(out[0].status == 0 || out[0].status == 1, "touching squares answered");
-    check(nears(out[0].h, 0.0, 1e-9), "touching squares: h == 0");
-    check(near(out[0].normal, {1, 0}, 1e-9), "touching squares: normal == (1,0)");
+    CPPUNIT_ASSERT_MESSAGE("touching squares answered",
+                           out[0].status == 0 || out[0].status == 1);
+    CPPUNIT_ASSERT_MESSAGE("touching squares: h == 0", nears(out[0].h, 0.0, 1e-9));
+    CPPUNIT_ASSERT_MESSAGE("touching squares: normal == (1,0)",
+                           near(out[0].normal, {1, 0}, 1e-9));
   }
   std::print("narrowphase_batch engine: unanswered pairs fall back to the separating axis\n");
 }
@@ -432,7 +449,8 @@ void test_polytopepolytope_relation(siconos::config::data_t& data) {
   rel.cp2() = {0, 0.9};
   rel.init_dir() = {0, -1};
 
-  check(std::abs(rel.compute_h(0, ds1, ds2) + 0.1) <= 1e-12, "compute_h == -0.1");
+  CPPUNIT_ASSERT_MESSAGE("compute_h == -0.1",
+                         std::abs(rel.compute_h(0, ds1, ds2) + 0.1) <= 1e-12);
 
   /* hand-derived (plan Task 4, with one corrected pin): n = (0,1),
      t = z^n = (-1,0); arm1 = cp1 - c1 = (0,1) -> z^arm1 = (-1,0);
@@ -446,8 +464,8 @@ void test_polytopepolytope_relation(siconos::config::data_t& data) {
   const double pin_g2[2][3] = {{0, 1, 0}, {-1, 0, -1.0}};
   for (int i = 0; i < 2; ++i) {
     for (int j = 0; j < 3; ++j) {
-      check(std::abs(g1(i, j) - pin_g1[i][j]) <= 1e-12, "G1 pin");
-      check(std::abs(g2(i, j) - pin_g2[i][j]) <= 1e-12, "G2 pin");
+      CPPUNIT_ASSERT_MESSAGE("G1 pin", std::abs(g1(i, j) - pin_g1[i][j]) <= 1e-12);
+      CPPUNIT_ASSERT_MESSAGE("G2 pin", std::abs(g2(i, j) - pin_g2[i][j]) <= 1e-12);
     }
   }
   std::print("polytopepolytope_r: G exact pins pass\n");
@@ -475,7 +493,7 @@ void test_jacobian_finite_differences(siconos::config::data_t& data) {
 
   const std::array<double, 3> q1 = {0., 0., 0.3}, q2 = {2.9, 0.7, -0.2};
   const auto c0 = batch(q1, q2);
-  check(c0.status == 0, "FD configuration is separated");
+  CPPUNIT_ASSERT_MESSAGE("FD configuration is separated", c0.status == 0);
 
   auto ds1 = add<siconos::config::polytope_ds>(data);
   auto ds2 = add<siconos::config::polytope_ds>(data);
@@ -498,9 +516,9 @@ void test_jacobian_finite_differences(siconos::config::data_t& data) {
       (body == 0 ? qm1 : qm2)[k] -= eps;
       const double fd = (batch(qp1, qp2).h - batch(qm1, qm2).h) / (2 * eps);
       const double gk = body == 0 ? g1(0, k) : g2(0, k);
-      check(std::abs(fd - gk) <= 1e-6, "normal row of G == dh/dq (body " +
-                                           std::to_string(body + 1) + ", dof " +
-                                           std::to_string(k) + ")");
+      CPPUNIT_ASSERT_MESSAGE("normal row of G == dh/dq (body " + std::to_string(body + 1) +
+                                 ", dof " + std::to_string(k) + ")",
+                             std::abs(fd - gk) <= 1e-6);
     }
   }
   std::print("polytopepolytope_r: G normal row matches finite differences\n");
@@ -546,19 +564,21 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
   using poly_r_index =
       siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
   auto check_rebound = [&]() {
-    check(std::holds_alternative<poly_r_index>(inter.relation()),
-          "relation rebound to polytopepolytope_r");
+    CPPUNIT_ASSERT_MESSAGE("relation rebound to polytopepolytope_r",
+                           std::holds_alternative<poly_r_index>(inter.relation()));
     return siconos::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
   };
   {
     auto rel = check_rebound();
-    check(rel.status() == 1 /* enclosed */, "rebound relation enclosed");
-    check(std::abs(rel.h() + 0.1) <= 1e-6, "rebound h == -0.1");
-    check(near(to_arr(rel.normal()), {0, 1}, 1e-6), "rebound normal == (0,1)");
-    check(near(to_arr(rel.cp1()), {0, 1}, 1e-6), "rebound cp1 == (0,1)");
-    check(near(to_arr(rel.cp2()), {0, 0.9}, 1e-6), "rebound cp2 == (0,0.9)");
+    CPPUNIT_ASSERT_MESSAGE("rebound relation enclosed", rel.status() == 1 /* enclosed */);
+    CPPUNIT_ASSERT_MESSAGE("rebound h == -0.1", std::abs(rel.h() + 0.1) <= 1e-6);
+    CPPUNIT_ASSERT_MESSAGE("rebound normal == (0,1)",
+                           near(to_arr(rel.normal()), {0, 1}, 1e-6));
+    CPPUNIT_ASSERT_MESSAGE("rebound cp1 == (0,1)", near(to_arr(rel.cp1()), {0, 1}, 1e-6));
+    CPPUNIT_ASSERT_MESSAGE("rebound cp2 == (0,0.9)", near(to_arr(rel.cp2()), {0, 0.9}, 1e-6));
     // the warm start written back for the next batch is the contact normal
-    check(near(to_arr(rel.init_dir()), {0, 1}, 1e-6), "init_dir == the contact normal");
+    CPPUNIT_ASSERT_MESSAGE("init_dir == the contact normal",
+                           near(to_arr(rel.init_dir()), {0, 1}, 1e-6));
   }
 
   // mutate q2 at the SAME step tag: the checksum must re-run the batch
@@ -566,22 +586,23 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
   np.ensure(0);
   {
     auto rel = check_rebound();
-    check(std::abs(rel.h() + 0.05) <= 1e-6, "checksum re-run: h == -0.05");
+    CPPUNIT_ASSERT_MESSAGE("checksum re-run: h == -0.05", std::abs(rel.h() + 0.05) <= 1e-6);
   }
 
   // rotation convention pin: local (1,0) under theta=pi/2 -> world (0,1) CCW
   ds2.q() = {0, 0, M_PI / 2};
   const auto wv = np.world_vertices(ds2, 0);
-  check(wv.size() == 4, "four world vertices");
-  check(near(wv[0], {0, 1}), "R(pi/2)*(1,0) == (0,1) (CCW convention)");
+  CPPUNIT_ASSERT_MESSAGE("four world vertices", wv.size() == 4);
+  CPPUNIT_ASSERT_MESSAGE("R(pi/2)*(1,0) == (0,1) (CCW convention)", near(wv[0], {0, 1}));
   // and the rotated diamond still reads the same overlap when centered on
   // body1's box gap... verify invariance with the square back at (0,1.9)
   ds2.q() = {0, 1.9, M_PI / 2};
   np.ensure(0);
   {
     auto rel = check_rebound();
-    check(std::abs(rel.h() + 0.1) <= 1e-6, "rotated pair h == -0.1");
-    check(near(to_arr(rel.normal()), {0, 1}, 1e-6), "rotated pair normal == (0,1)");
+    CPPUNIT_ASSERT_MESSAGE("rotated pair h == -0.1", std::abs(rel.h() + 0.1) <= 1e-6);
+    CPPUNIT_ASSERT_MESSAGE("rotated pair normal == (0,1)",
+                           near(to_arr(rel.normal()), {0, 1}, 1e-6));
   }
   ds2.q() = {0, 1.9, 0};
 
@@ -633,11 +654,12 @@ void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
   auto i13 = link(ds1, ds3);
   np.ensure(0);
 
-  check(std::holds_alternative<poly_r_index>(i13.relation()),
-        "third pair rebound to polytopepolytope_r");
+  CPPUNIT_ASSERT_MESSAGE("third pair rebound to polytopepolytope_r",
+                         std::holds_alternative<poly_r_index>(i13.relation()));
   auto rel13 = siconos::storage::make_handle(data, std::get<poly_r_index>(i13.relation()));
-  check(std::abs(rel13.h() - 1.0) <= 1e-6,
-        "new pair between cached bodies gets its gap (pair set in the cache key)");
+  CPPUNIT_ASSERT_MESSAGE(
+      "new pair between cached bodies gets its gap (pair set in the cache key)",
+      std::abs(rel13.h() - 1.0) <= 1e-6);
   std::print("cxd_narrowphase stage: pair-set change re-runs the batch\n");
 }
 
@@ -691,37 +713,51 @@ void test_narrowphase_scan_once(siconos::config::data_t& data) {
     auto d2 = siconos::storage::make_handle(
         data, siconos::storage::prop<"ds2", siconos::config::topo>(inter));
     rel.ensure(0, d1, d2);
-    check(std::abs(rel.h() - 1.0) <= 1e-6, "scan test: pair gap is 1");
+    CPPUNIT_ASSERT_MESSAGE("scan test: pair gap is 1", std::abs(rel.h() - 1.0) <= 1e-6);
   }
-  check(np.cache_scan_count() == scans, "per-relation reads do not rescan the whole world");
+  CPPUNIT_ASSERT_MESSAGE("per-relation reads do not rescan the whole world",
+                         np.cache_scan_count() == scans);
 
   // moving body 2 changes pairs (1,2) and (2,3). The first read pays ONE
   // scan; the run re-stamps both pairs, so the second read is O(1).
   ds2.q() = {2.5, 0, 0};
   auto rel12 = siconos::storage::make_handle(data, std::get<poly_r_index>(i12.relation()));
   rel12.ensure(0, ds1, ds2);
-  check(std::abs(rel12.h() - 0.5) <= 1e-6, "changed pair h == 0.5");
+  CPPUNIT_ASSERT_MESSAGE("changed pair h == 0.5", std::abs(rel12.h() - 0.5) <= 1e-6);
   const auto after_move = np.cache_scan_count();
-  check(after_move == scans + 1, "changed pair triggers exactly one scan");
+  CPPUNIT_ASSERT_MESSAGE("changed pair triggers exactly one scan", after_move == scans + 1);
   auto rel23 = siconos::storage::make_handle(data, std::get<poly_r_index>(i23.relation()));
   rel23.ensure(0, ds2, ds3);
-  check(std::abs(rel23.h() - 1.5) <= 1e-6, "stamped pair h == 1.5");
-  check(np.cache_scan_count() == after_move, "stamped pair does not rescan");
+  CPPUNIT_ASSERT_MESSAGE("stamped pair h == 1.5", std::abs(rel23.h() - 1.5) <= 1e-6);
+  CPPUNIT_ASSERT_MESSAGE("stamped pair does not rescan", np.cache_scan_count() == after_move);
   std::print("cxd_narrowphase stage: per-relation reads are O(1)\n");
 }
 
-int main() {
-  siconos::config::data_t data;
-  test_polytope_item(data);
-  test_set_vertices(data);
-  test_batch_engine();
-  test_witnesses_off_axis();
-  test_manifold();
-  test_batch_engine_float();
-  test_failed_subdistance_status();
-  test_polytopepolytope_relation(data);
-  test_jacobian_finite_differences(data);
-  test_narrowphase_stage(data);
-  test_narrowphase_pair_set_cache(data);
-  test_narrowphase_scan_once(data);
-}
+namespace {
+
+class PolytopeCxdTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(PolytopeCxdTest);
+  CPPUNIT_TEST(testPolytopeCxd);
+  CPPUNIT_TEST_SUITE_END();
+
+ public:
+  void testPolytopeCxd() {
+    siconos::config::data_t data;
+    test_polytope_item(data);
+    test_set_vertices(data);
+    test_batch_engine();
+    test_witnesses_off_axis();
+    test_manifold();
+    test_batch_engine_float();
+    test_failed_subdistance_status();
+    test_polytopepolytope_relation(data);
+    test_jacobian_finite_differences(data);
+    test_narrowphase_stage(data);
+    test_narrowphase_pair_set_cache(data);
+    test_narrowphase_scan_once(data);
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(PolytopeCxdTest);
+
+}  // namespace

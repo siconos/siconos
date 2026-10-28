@@ -13,6 +13,9 @@
    block must deflect. This fails when polytopemesh_r is not assembled on
    the mesh side (one_step_integrator, moreau_jean_element). */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -101,9 +104,6 @@ struct data_t
 }  // namespace siconos::config
 
 namespace {
-void check(bool ok, const std::string& what) {
-  if (!ok) throw std::runtime_error("CHECK FAILED: " + what);
-}
 
 constexpr double r = 0.1;  // disk radius, square half side
 
@@ -252,9 +252,9 @@ void test_mesh_churn(bool square) {
           ngbh.search();
           spacef.update_index_set0(s);
           auto inters = storage::handles<config::rt_interaction>(data, s);
-          check(std::size(inters) == n_by_step[k], std::string(square ? "square" : "disk") +
-                                                       ": mesh interaction count at step " +
-                                                       std::to_string(k));
+          CPPUNIT_ASSERT_MESSAGE(std::string(square ? "square" : "disk") +
+                                     ": mesh interaction count at step " + std::to_string(k),
+                                 std::size(inters) == n_by_step[k]);
           std::vector<std::size_t> rels;
           for (auto inter : inters)
             rels.push_back(siconos::variant::visit(data, inter.relation(), [](auto rrel) {
@@ -263,7 +263,8 @@ void test_mesh_churn(bool square) {
           std::ranges::sort(rels);
           if (k == 0) rels0 = rels;
           if (k == 2)
-            check(rels == rels0, "the relation items are reused when the body is back");
+            CPPUNIT_ASSERT_MESSAGE("the relation items are reused when the body is back",
+                                   rels == rels0);
           simulation.compute_one_step();
         }
         return 0;
@@ -271,34 +272,50 @@ void test_mesh_churn(bool square) {
 }
 }  // namespace
 
-int main() {
-  const auto disk = run(false);
-  const auto square = run(true);
-  double max_dy = 0., max_dtop = 0., max_top = 0.;
-  for (std::size_t k = 0; k < disk.body_y.size(); ++k) {
-    max_dy = std::max(max_dy, std::abs(square.body_y[k] - disk.body_y[k]));
-    max_dtop = std::max(max_dtop, std::abs(square.top_y[k] - disk.top_y[k]));
-    max_top = std::max(max_top, std::abs(disk.top_y[k]));
+namespace {
+
+class PolytopeOnFemTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(PolytopeOnFemTest);
+  CPPUNIT_TEST(testPolytopeOnFem);
+  CPPUNIT_TEST_SUITE_END();
+
+ public:
+  void testPolytopeOnFem() {
+    const auto disk = run(false);
+    const auto square = run(true);
+    double max_dy = 0., max_dtop = 0., max_top = 0.;
+    for (std::size_t k = 0; k < disk.body_y.size(); ++k) {
+      max_dy = std::max(max_dy, std::abs(square.body_y[k] - disk.body_y[k]));
+      max_dtop = std::max(max_dtop, std::abs(square.top_y[k] - disk.top_y[k]));
+      max_top = std::max(max_top, std::abs(disk.top_y[k]));
+    }
+    std::print(stderr,
+               "disk: final y = {:.9f}, max |top y| = {:.3e}; square: final y = {:.9f}; "
+               "max |dy| = {:.3e}, max |dtop| = {:.3e}\n",
+               disk.body_y.back(), max_top, square.body_y.back(), max_dy, max_dtop);
+    CPPUNIT_ASSERT_MESSAGE("the disk has one interaction with the edge",
+                           disk.n_mesh_contacts == 1);
+    CPPUNIT_ASSERT_MESSAGE(
+        "the square has two interactions with the edge (manifold points 0 and 1)",
+        square.n_mesh_contacts == 2);
+    CPPUNIT_ASSERT_MESSAGE("same number of steps", square.body_y.size() == disk.body_y.size());
+    // the block is undamped: the top oscillates around the static deflection
+    // (weight / 2 nodes / k ~ 4.9e-4), so test the amplitude, not the sign
+    CPPUNIT_ASSERT_MESSAGE("the disk moves the block", max_top > 1e-4);
+    CPPUNIT_ASSERT_MESSAGE("the disk rests on the block",
+                           std::abs(disk.body_y.back() - 1.1) < 1e-2);
+    CPPUNIT_ASSERT_MESSAGE("the square follows the disk's trajectory", max_dy < 1e-8);
+    CPPUNIT_ASSERT_MESSAGE("the square moves the block like the disk", max_dtop < 1e-8);
+    for (int i = 0; i < 8; ++i)
+      CPPUNIT_ASSERT_MESSAGE(
+          "final block displacement matches (dof " + std::to_string(i) + ")",
+          std::abs(square.fem_q[i] - disk.fem_q[i]) < 1e-8);
+    test_mesh_churn(false);
+    test_mesh_churn(true);
+    std::print("polytope_on_fem: all checks pass\n");
   }
-  std::print(stderr,
-             "disk: final y = {:.9f}, max |top y| = {:.3e}; square: final y = {:.9f}; "
-             "max |dy| = {:.3e}, max |dtop| = {:.3e}\n",
-             disk.body_y.back(), max_top, square.body_y.back(), max_dy, max_dtop);
-  check(disk.n_mesh_contacts == 1, "the disk has one interaction with the edge");
-  check(square.n_mesh_contacts == 2,
-        "the square has two interactions with the edge (manifold points 0 and 1)");
-  check(square.body_y.size() == disk.body_y.size(), "same number of steps");
-  // the block is undamped: the top oscillates around the static deflection
-  // (weight / 2 nodes / k ~ 4.9e-4), so test the amplitude, not the sign
-  check(max_top > 1e-4, "the disk moves the block");
-  check(std::abs(disk.body_y.back() - 1.1) < 1e-2, "the disk rests on the block");
-  check(max_dy < 1e-8, "the square follows the disk's trajectory");
-  check(max_dtop < 1e-8, "the square moves the block like the disk");
-  for (int i = 0; i < 8; ++i)
-    check(std::abs(square.fem_q[i] - disk.fem_q[i]) < 1e-8,
-          "final block displacement matches (dof " + std::to_string(i) + ")");
-  test_mesh_churn(false);
-  test_mesh_churn(true);
-  std::print("polytope_on_fem: all checks pass\n");
-  return 0;
-}
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(PolytopeOnFemTest);
+
+}  // namespace

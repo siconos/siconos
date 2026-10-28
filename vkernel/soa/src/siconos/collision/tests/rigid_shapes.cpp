@@ -13,7 +13,6 @@
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/ui/text/TestRunner.h>
 
 #include <cmath>
 #include <stdexcept>
@@ -172,9 +171,3 @@ class RigidShapesTest : public CppUnit::TestFixture {
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(RigidShapesTest);
-
-int main() {
-  CppUnit::TextUi::TestRunner runner;
-  runner.addTest(RigidShapesTest::suite());
-  return runner.run() ? 0 : 1;
-}

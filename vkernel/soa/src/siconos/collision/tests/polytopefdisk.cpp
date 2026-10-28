@@ -10,6 +10,9 @@
       Moreau-Jean: the relation is bound and the square comes to rest on top
       of the disk without rotating. */
 
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include <array>
 #include <cmath>
 #include <print>
@@ -79,9 +82,6 @@ struct data_t
 }  // namespace siconos::config
 
 namespace {
-void check(bool ok, const std::string& what) {
-  if (!ok) throw std::runtime_error("CHECK FAILED: " + what);
-}
 bool near(double a, double b, double tol = 1e-9) { return std::abs(a - b) <= tol; }
 bool near2(const auto& a, double x, double y, double tol = 1e-9) {
   return near(a[0], x, tol) && near(a[1], y, tol);
@@ -97,16 +97,18 @@ void test_distance() {
   for (const square_t* sq : {&square_ccw, static_cast<const square_t*>(&square_cw)}) {
     const std::string o = sq == &square_ccw ? "CCW" : "CW";
     auto out = point_polytope_distance(std::array<double, 2>{3, 0}, *sq, 4);
-    check(near(out.dist, 2) && near2(out.normal, 1, 0) && near2(out.closest, 1, 0),
-          o + " outside: dist 2, normal (1,0), closest (1,0)");
+    CPPUNIT_ASSERT_MESSAGE(
+        o + " outside: dist 2, normal (1,0), closest (1,0)",
+        near(out.dist, 2) && near2(out.normal, 1, 0) && near2(out.closest, 1, 0));
     auto corner = point_polytope_distance(std::array<double, 2>{2, 2}, *sq, 4);
     const double c = 1 / std::sqrt(2.);
-    check(near(corner.dist, std::sqrt(2.)) && near2(corner.normal, c, c) &&
-              near2(corner.closest, 1, 1),
-          o + " outside a corner: dist sqrt(2), normal diagonal");
+    CPPUNIT_ASSERT_MESSAGE(o + " outside a corner: dist sqrt(2), normal diagonal",
+                           near(corner.dist, std::sqrt(2.)) && near2(corner.normal, c, c) &&
+                               near2(corner.closest, 1, 1));
     auto in = point_polytope_distance(std::array<double, 2>{0.5, 0.2}, *sq, 4);
-    check(near(in.dist, -0.5) && near2(in.normal, 1, 0) && near2(in.closest, 1, 0.2),
-          o + " inside: dist -0.5, normal of the nearest edge, closest on it");
+    CPPUNIT_ASSERT_MESSAGE(
+        o + " inside: dist -0.5, normal of the nearest edge, closest on it",
+        near(in.dist, -0.5) && near2(in.normal, 1, 0) && near2(in.closest, 1, 0.2));
   }
 }
 
@@ -143,15 +145,18 @@ void test_relation() {
 
   rel.translated_disk_shape() = add_fixed_disk(data, 3, 0, 0.5);
   auto out = rel.contact(0, ds);
-  check(out.status == 0 && near(out.h, 1.5), "outside: h = 2 - 0.5");
-  check(near2(out.normal, 1, 0) && near2(out.cp1, 1, 0) && near2(out.cp2, 2.5, 0),
-        "outside: normal (1,0), cp1 (1,0), cp2 (2.5,0)");
+  CPPUNIT_ASSERT_MESSAGE("outside: h = 2 - 0.5", out.status == 0 && near(out.h, 1.5));
+  CPPUNIT_ASSERT_MESSAGE(
+      "outside: normal (1,0), cp1 (1,0), cp2 (2.5,0)",
+      near2(out.normal, 1, 0) && near2(out.cp1, 1, 0) && near2(out.cp2, 2.5, 0));
 
   rel.translated_disk_shape() = add_fixed_disk(data, 0.5, 0.2, 0.5);
   auto in = rel.contact(0, ds);
-  check(in.status == 1 && near(in.h, -1.0), "centre inside: h = -(0.5 + 0.5)");
-  check(near2(in.normal, 1, 0) && near2(in.cp1, 1, 0.2) && near2(in.cp2, 0, 0.2),
-        "centre inside: normal (1,0), cp1 (1,0.2), cp2 = c - r n");
+  CPPUNIT_ASSERT_MESSAGE("centre inside: h = -(0.5 + 0.5)",
+                         in.status == 1 && near(in.h, -1.0));
+  CPPUNIT_ASSERT_MESSAGE(
+      "centre inside: normal (1,0), cp1 (1,0.2), cp2 = c - r n",
+      near2(in.normal, 1, 0) && near2(in.cp1, 1, 0.2) && near2(in.cp2, 0, 0.2));
 }
 
 void test_jacobian_finite_differences() {
@@ -172,9 +177,9 @@ void test_jacobian_finite_differences() {
       q(k) = q0[k] - eps;
       const double hm = rel.compute_h(0, ds);
       q(k) = q0[k];
-      check(near((hp - hm) / (2 * eps), g1(0, k), 1e-6),
-            "normal row of G == dh/dq (centre x " + std::to_string(dx) + ", dof " +
-                std::to_string(k) + ")");
+      CPPUNIT_ASSERT_MESSAGE("normal row of G == dh/dq (centre x " + std::to_string(dx) +
+                                 ", dof " + std::to_string(k) + ")",
+                             near((hp - hm) / (2 * eps), g1(0, k), 1e-6));
     }
   }
 }
@@ -229,18 +234,32 @@ void test_fall_on_fixed_disk() {
   const auto s = simulation.current_step();
   const auto& q = storage::attr<"q">(ds, s);
   std::print(stderr, "square on fixed disk: q = ({:.6f}, {:.6f}, {:.3e})\n", q(0), q(1), q(2));
-  check(bound, "a polytopefdisk_r interaction was created");
-  check(near(q(0), 0, 1e-9) && near(q(2), 0, 1e-9), "the square neither slides nor rotates");
-  check(near(q(1), 2.0, 2e-2), "the square rests on top of the disk");
-  check(storage::attr<"velocity">(ds, s).norm() < 1e-2, "the square is at rest");
+  CPPUNIT_ASSERT_MESSAGE("a polytopefdisk_r interaction was created", bound);
+  CPPUNIT_ASSERT_MESSAGE("the square neither slides nor rotates",
+                         near(q(0), 0, 1e-9) && near(q(2), 0, 1e-9));
+  CPPUNIT_ASSERT_MESSAGE("the square rests on top of the disk", near(q(1), 2.0, 2e-2));
+  CPPUNIT_ASSERT_MESSAGE("the square is at rest",
+                         storage::attr<"velocity">(ds, s).norm() < 1e-2);
 }
 }  // namespace
 
-int main() {
-  test_distance();
-  test_relation();
-  test_jacobian_finite_differences();
-  test_fall_on_fixed_disk();
-  std::print("polytopefdisk: all checks pass\n");
-  return 0;
-}
+namespace {
+
+class PolytopeFDiskTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(PolytopeFDiskTest);
+  CPPUNIT_TEST(testPolytopeFDisk);
+  CPPUNIT_TEST_SUITE_END();
+
+ public:
+  void testPolytopeFDisk() {
+    test_distance();
+    test_relation();
+    test_jacobian_finite_differences();
+    test_fall_on_fixed_disk();
+    std::print("polytopefdisk: all checks pass\n");
+  }
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(PolytopeFDiskTest);
+
+}  // namespace
