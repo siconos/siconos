@@ -444,6 +444,19 @@ void NeighborhoodSearch::query() {
           }
         }
   }
+
+  // siconos: the loop above appends the neighbors of a point from several
+  // threads, in an order that depends on the scheduling. The contacts are
+  // created in the order of the neighbors and the solver depends on the order
+  // of the contacts: sorted lists make the simulations reproducible.
+  for (auto& d : m_point_sets) {
+    for (auto& n : d.m_neighbors) {
+#pragma omp parallel for
+      for (int k = 0; k < static_cast<int>(n.size()); k++) {
+        std::sort(n[k].begin(), n[k].end());
+      }
+    }
+  }
 }
 
 void NeighborhoodSearch::query(unsigned int point_set_id, unsigned int point_index,
