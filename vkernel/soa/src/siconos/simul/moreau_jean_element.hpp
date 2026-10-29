@@ -8,6 +8,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/simul/index_sets.hpp"
+#include "siconos/simul/moreau_jean_kernels.hpp"
 #include "siconos/simul/relation_sets.hpp"
 #include "siconos/storage/get.hpp"
 #include "siconos/utils/variant.hpp"
@@ -438,30 +439,49 @@ struct moreau_jean_element : item {
       }
     }
 
+    // the context of the kernels of this element (see simul/kernels.hpp)
+    struct kernel_context {
+      using system = System;
+      using element = moreau_jean_element;
+      using topology = Topology;
+    };
+
+    template <typename Kernel>
+    void run(auto step, const auto& p) {
+      kernels::run<Kernel, kernel_context>(self()->data(), step, p);
+    }
+
+    // the parameters of the kernel bricks (see moreau_jean_kernels.hpp)
+    template <typename H, typename S, typename F = std::nullptr_t>
+    struct step_parameters {
+      H h;
+      S theta;
+      F contact_velocity = nullptr;
+    };
+
+    auto parameters(auto h) {
+      using scalar = typename decltype(self()->env())::scalar;
+      return step_parameters<decltype(h), scalar>{h, self()->theta()};
+    }
+
     // free state: v(step + 1) and q(step + 1) without the contact impulses
     void compute_free_state(auto step, auto h) {
-      auto& data = self()->data();
-      using env_t = decltype(self()->env());
-      using scalar = typename env_t::scalar;
-
-      scalar theta = self()->theta();
-
-      auto& vs = storage::attr_values<system, "velocity">(data, step);
-      auto& vs_next = storage::attr_values<system, "velocity">(data, step + 1);
-
-      auto& qs = storage::attr_values<system, "q">(data, step);
-      auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
-
-      auto& bc_velocities_0s =
-          storage::prop_values<system, "bc_velocities_0", topology>(data, step);
+      auto p = parameters(h);
 
       if constexpr (system_with_k_matrix()) {
         // W = M + h^2*theta^2*K
         // RHS = M*v - h^2*theta*(1-theta)*K*v + h*(f_ext - K*q)
         // Note: for constant fext, F_k = f_ext
+        auto& data = self()->data();
+        using env_t = decltype(self()->env());
+        using scalar = typename env_t::scalar;
+        scalar theta = p.theta;
 
+        auto& vs = storage::attr_values<system, "velocity">(data, step);
+        auto& vs_next = storage::attr_values<system, "velocity">(data, step + 1);
+        auto& qs = storage::attr_values<system, "q">(data, step);
+        auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
         auto& fexts = storage::attr_values<system, "fext">(data, step);
-
         auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
 
         auto n = qs.size();
@@ -484,54 +504,13 @@ struct moreau_jean_element : item {
           // simulation
           vector dv = fem_w_factor(step, i, h).solve(rhs);
           vs_next[i] = v + dv;
-          update_position(qs_next[i], q, v, vs_next[i], h, theta);
+          moreau_jean::position::apply(p, q, v, vs_next[i], qs_next[i]);
         }
+      } else {
+        run<kernels::fused<moreau_jean::free_velocity, moreau_jean::position>>(step, p);
       }
 
-      else {
-        // K = 0
-        auto& minv_fs =
-            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step);
-        auto& minv_fs_next =
-            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
-
-        for (auto [q, q_next, v, v_next, minv_f, minv_f_next] :
-             view::zip(qs, qs_next, vs, vs_next, minv_fs, minv_fs_next)) {
-          v_next = v + h * theta * minv_f_next + h * (1 - theta) * minv_f;
-          update_position(q_next, q, v, v_next, h, theta);
-        }
-      }
-
-      apply_bc_velocities_0(bc_velocities_0s, qs, qs_next, vs, vs_next, h, theta);
-    }
-
-    // theta-method on the positions
-    static void update_position(auto& q_next, const auto& q, const auto& v, const auto& v_next,
-                                auto h, auto theta) {
-      q_next = q + h * (theta * v_next + (1.0 - theta) * v);
-    }
-
-    // zero the blocked velocity components: only the systems with boundary
-    // conditions are visited when bc_velocities_0 is a sparse set
-    static void apply_bc_velocities_0(auto& bc_velocities_0s, auto& vs) {
-      storage::for_each_entry(bc_velocities_0s, [&vs](auto i, auto& bcs) {
-        for (auto bc_idx : bcs) {
-          vs[i](bc_idx) = 0.0;
-        }
-      });
-    }
-
-    // the same, then the positions of these systems again, after a loop that
-    // updated q(step + 1) with the velocities before the boundary conditions
-    static void apply_bc_velocities_0(auto& bc_velocities_0s, auto& qs, auto& qs_next,
-                                      auto& vs, auto& vs_next, auto h, auto theta) {
-      storage::for_each_entry(bc_velocities_0s, [&](auto i, auto& bcs) {
-        if (bcs.size() == 0) return;
-        for (auto bc_idx : bcs) {
-          vs_next[i](bc_idx) = 0.0;
-        }
-        update_position(qs_next[i], qs[i], vs[i], vs_next[i], h, theta);
-      });
+      run<moreau_jean::boundary_conditions>(step, p);
     }
 
     void compute_output(auto step) {
@@ -645,45 +624,26 @@ struct moreau_jean_element : item {
     // add the contact impulses to v(step + 1) and update q(step + 1), for the
     // involved systems only: the others keep their free state
     void update_velocities_and_positions(auto step, auto h) {
-      auto& data = self()->data();
       auto&& velo = velocity_vector_assembled();
-      using scalar = typename decltype(self()->env())::scalar;
-      scalar theta = self()->theta();
 
-      auto& vs = storage::attr_values<velocity>(data, step);
-      auto& vs_next = storage::attr_values<velocity>(data, step + 1);
-      auto& qs = storage::attr_values<system, "q">(data, step);
-      auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
+      auto base = parameters(h);
+      auto p = step_parameters{base.h, base.theta, [&velo](auto index, const auto& v) {
+                                 if constexpr (match::fixed_size_vector<velocity>) {
+                                   return get_vector(velo, index);
+                                 } else {
+                                   return get_vector(velo, index, v.size());
+                                 }
+                               }};
 
-      auto& bc_velocities_0s =
-          storage::prop_values<system, "bc_velocities_0", topology>(data, step);
-
-      // involved ds velocities -> ds velocities
-      for_each_involved(step, [&](auto i, auto index) {
-        auto& v_next = vs_next[i];
-        if constexpr (match::fixed_size_vector<velocity>) {
-          v_next += get_vector(velo, index);
-        } else {
-          v_next += get_vector(velo, index, v_next.size());
-        }
-        update_position(qs_next[i], qs[i], vs[i], v_next, h, theta);
-      });
+      run<kernels::fused<moreau_jean::contact_velocity, moreau_jean::involved_position>>(step,
+                                                                                         p);
 
       // the involved systems may have broken them
-      apply_bc_velocities_0(bc_velocities_0s, qs, qs_next, vs, vs_next, h, theta);
+      run<moreau_jean::boundary_conditions>(step, p);
     }
 
     void update_positions(auto step, auto h) {
-      auto& data = self()->data();
-
-      auto& xs = storage::attr_values<system, "q">(data, step);
-      auto& xs_next = storage::attr_values<system, "q">(data, step + 1);
-      auto& vs = storage::attr_values<velocity>(data, step);
-      auto& vs_next = storage::attr_values<velocity>(data, step + 1);
-
-      for (auto [x, x_next, v, v_next] : view::zip(xs, xs_next, vs, vs_next)) {
-        update_position(x_next, x, v, v_next, h, theta());
-      }
+      run<moreau_jean::position>(step, parameters(h));
     }
 
     auto assemble_vectors(auto step) {
