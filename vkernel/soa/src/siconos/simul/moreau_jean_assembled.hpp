@@ -20,7 +20,6 @@ struct moreau_jean_assembled : item {
     some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>> h_matrix_assembled;
     some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>> w_matrix_assembled;
     some::assembled_vector<some::vector<some::scalar, size_1_t>> lambda_vector_assembled;
-    some::assembled_vector<some::vector<some::scalar, size_1_t>> y_vector_assembled;
     some::assembled_vector<some::vector<some::scalar, size_1_t>> ydot_vector_assembled;
     some::assembled_vector<some::vector<some::scalar, size_1_t>> velocity_vector_assembled;
     some::assembled_vector<some::vector<some::scalar, size_1_t>> p0_vector_assembled;
@@ -52,9 +51,6 @@ struct moreau_jean_assembled : item {
       return storage::attr<"w_matrix_assembled">(*self());
     }
 
-    decltype(auto) minv_fext_vector_assembled() {
-      return storage::attr<"minv_fext_vector_assembled">(*self());
-    }
     decltype(auto) lambda_vector_assembled() {
       return storage::attr<"lambda_vector_assembled">(*self());
     }
@@ -68,7 +64,6 @@ struct moreau_jean_assembled : item {
     }
     decltype(auto) q_nsp_vector_assembled() { return attr<"q_nsp_vector_assembled">(*self()); }
 
-    decltype(auto) y_vector_assembled() { return attr<"y_vector_assembled">(*self()); }
     decltype(auto) ydot_vector_assembled() { return attr<"ydot_vector_assembled">(*self()); }
 
     decltype(auto) mu_vector_assembled() { return attr<"mu_vector_assembled">(*self()); }

@@ -187,13 +187,6 @@ struct moreau_jean_element : item {
         return algebra::vec_view<vec_t>(assembled_osi().p0_vector_assembled(), ds_offset());
       }
     }
-    decltype(auto) y_vector_assembled() {
-      auto y_storage = get_storage_type(self()->data(), y{});
-
-      return algebra::vec_view(y_storage, assembled_osi().y_vector_assembled(),
-                               inter_offset());
-    }
-
     decltype(auto) ydot_vector_assembled() {
       auto ydot_storage = get_storage_type(self()->data(), ydot{});
 

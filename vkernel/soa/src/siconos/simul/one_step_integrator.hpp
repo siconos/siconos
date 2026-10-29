@@ -43,21 +43,13 @@ struct one_step_integrator {
     using all_elements_t = mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_ct_osi_t>,
                                      some::item_ref<rt_rt_osi_t>>;
 
-    using elements_t = decltype(mp::unpack(
-        mp::filter(all_elements_t{},
-                   [](const auto& h) constexpr {
-                     using t = typename std::decay_t<decltype(h)>::type;
-                     return mp::bool_c<!std::derived_from<t, empty_item>>;
-                   }),
-        []<typename... Elems>(Elems...) { return some::tuple<Elems...>{}; }));
-
     using assembled_osi_t = moreau_jean_assembled;
 
     // the stages of a time step (see moreau_jean_schedule.hpp)
     using time_step_schedule = simul::moreau_jean::time_step_schedule;
 
-    // Only include non-empty element types in items
-    using filtered_element_types_t = decltype(mp::unpack(
+    // the non-empty elements
+    using element_types_t = decltype(mp::unpack(
         mp::filter(all_elements_t{},
                    [](const auto& h) constexpr {
                      using t = typename std::decay_t<decltype(h)>::type;
@@ -65,8 +57,12 @@ struct one_step_integrator {
                    }),
         []<typename... Elems>(Elems...) { return mp::tuple<typename Elems::type...>{}; }));
 
+    using elements_t = decltype(mp::unpack(element_types_t{}, []<typename... Elems>(Elems...) {
+      return some::tuple<some::item_ref<Elems>...>{};
+    }));
+
     using items = decltype(mp::concat(mp::tuple<topology, ct_osi_t, assembled_osi_t>{},
-                                      filtered_element_types_t{}));
+                                      element_types_t{}));
 
     struct attributes {
       elements_t elements;
@@ -150,8 +146,6 @@ struct one_step_integrator {
       decltype(auto) q_nsp_vector_assembled() {
         return assembled_osi().q_nsp_vector_assembled();
       };
-
-      decltype(auto) y_vector_assembled() { return assembled_osi().y_vector_assembled(); };
 
       decltype(auto) ydot_vector_assembled() {
         return assembled_osi().ydot_vector_assembled();
@@ -239,7 +233,6 @@ struct one_step_integrator {
         algebra::resize(w_matrix_assembled(), raw_inter_size, raw_inter_size);
         algebra::resize(lambda_vector_assembled(), raw_inter_size);
         algebra::resize(velocity_vector_assembled(), raw_ds_size);
-        algebra::resize(y_vector_assembled(), raw_inter_size);
         algebra::resize(ydot_vector_assembled(), raw_inter_size);
         algebra::resize(q_nsp_vector_assembled(), raw_inter_size);
         algebra::resize(p0_vector_assembled(), raw_ds_size);
@@ -328,30 +321,10 @@ struct one_step_integrator {
 
         const indice ct_inter_counter = mark(ct_elem);
 
-        std::print(
-            "  [compute_active_interactions] total number of ct ds: "
-            "{}, "
-            "total "
-            "number of "
-            "ct interactions: {}\n",
-            std::size(storage::prop_values<ct_system, "involved", Topology>(data, step)),
-            std::size(
-                storage::prop_values<ct_interaction, "activation", Topology>(data, step)));
-
         indice rt_ct_inter_counter = 0;
         if constexpr (with_rt_ct_interaction()) {
           // /!\ a rt system can only be in interaction with a ct system (ds1)
           rt_ct_inter_counter = mark(std::get<1>(elements()));
-
-          std::print(
-              "  [compute_active_interactions] total number of rt ds: "
-              "{}, "
-              "total "
-              "number of "
-              "rt ct interactions: {}\n",
-              std::size(storage::prop_values<rt_system, "involved", Topology>(data, step)),
-              std::size(storage::prop_values<rt_ct_interaction, "activation", Topology>(
-                  data, step)));
         }
 
         indice rt_rt_inter_counter = 0;
@@ -359,11 +332,6 @@ struct one_step_integrator {
           // fem "self" contact (e.g. against a fixed ground): ds1 == ds2, in
           // the same rt_system as rt_ct above
           rt_rt_inter_counter = mark(rt_rt_element());
-
-          std::print(
-              "  [compute_active_interactions] number of activated rt rt "
-              "interactions: {}\n",
-              rt_rt_inter_counter);
         }
 
         // after all the marks: a ct system may be involved by a rt ct
@@ -385,18 +353,6 @@ struct one_step_integrator {
           rt_rt_elem.number_of_interactions() = rt_rt_inter_counter;
           rt_rt_elem.number_of_involved_ds() = rt_ds_counter;
         }
-
-        std::print(
-            "  [compute_active_interactions] number of involved ct ds:{}, "
-            "number of "
-            "activated ct interactions: {}\n",
-            ct_ds_counter, ct_inter_counter);
-
-        std::print(
-            "  [compute_active_interactions] number of involved rt ds:{}, "
-            "number of "
-            "activated ct rt interactions: {}\n",
-            rt_ds_counter, rt_ct_inter_counter);
 
         ct_elem.number_of_interactions() = ct_inter_counter;
         ct_elem.number_of_involved_ds() = ct_ds_counter;
