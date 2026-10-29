@@ -11,7 +11,7 @@
    symmetric about the centre) carry together the disk's gap, G and nodal
    split. So the two runs must agree, rigid body and block alike, and the
    block must deflect. This fails when polytopemesh_r is not assembled on
-   the mesh side (one_step_integrator, moreau_jean_kinds). */
+   the mesh side (one_step_integrator, kinds). */
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>

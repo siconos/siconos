@@ -11,7 +11,8 @@ if(WITH_TESTING)
   begin_tests(src/siconos/storage/tests DEPS "vkernel;CPPUNIT::CPPUNIT")
   new_test(SOURCES StorageTest.cpp ${SIMPLE_TEST_MAIN})
   # the schedules (storage/schedule.hpp) and the Moreau-Jean time step as text
-  new_test(NAME vkernel_schedule SOURCES ScheduleTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_schedule SOURCES ScheduleTest.cpp ${SIMPLE_TEST_MAIN} DEPS
+           "numerics;kernel;mechanics")
   new_test(SOURCES t1.cpp ${SIMPLE_TEST_MAIN} DEPS "numerics;kernel;mechanics")
   # end_tests()
 

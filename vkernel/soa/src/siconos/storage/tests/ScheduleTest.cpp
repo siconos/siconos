@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "siconos/simul/moreau_jean_schedule.hpp"
+#include "siconos/simul/moreau_jean.hpp"
 #include "siconos/storage/schedule.hpp"
 
 namespace {

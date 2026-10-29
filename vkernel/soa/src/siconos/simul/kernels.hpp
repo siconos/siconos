@@ -8,7 +8,7 @@
 namespace siconos::simul::kernels {
 
 /* The kernels of the simulation (see storage/kernels.hpp): the placeholders
-   resolved by the kind that runs a kernel (see moreau_jean_kinds.hpp), and the iteration
+   resolved by the kind that runs a kernel (see kinds.hpp), and the iteration
    spaces of the simulation. */
 
 using namespace storage::kernels;

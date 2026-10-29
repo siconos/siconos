@@ -2,7 +2,7 @@
 
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/model/nslaws.hpp"
-#include "siconos/simul/moreau_jean_schedule.hpp"
+#include "siconos/simul/kinds.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/data_holder.hpp"
 #include "siconos/storage/schedule.hpp"

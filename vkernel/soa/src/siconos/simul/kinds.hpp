@@ -4,20 +4,23 @@
 #include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/lagrangian_r.hpp"
+#include "siconos/model/nslaws.hpp"
+#include "siconos/simul/contacts.hpp"
 #include "siconos/simul/index_sets.hpp"
-#include "siconos/simul/moreau_jean_kernels.hpp"
 #include "siconos/simul/relation_sets.hpp"
 #include "siconos/storage/get.hpp"
+#include "siconos/storage/mp/mp.hpp"
+#include "siconos/storage/schedule.hpp"
 #include "siconos/utils/variant.hpp"
 
 namespace siconos::simul {
 
-/* The kinds of the Moreau-Jean integrator: a kind of systems (rigid with a
-   fixed number of dofs, FEM with a dynamic one) or a kind of interactions
-   (between rigid systems, rigid-FEM, FEM-FEM). A kind runs the kernels on its
-   items (see moreau_jean_kernels.hpp) and keeps where they are in the
-   assembled problem; the assembled matrices and vectors are those of the
-   integrator, given to the kind.
+/* The kinds of an integrator: a kind of systems (rigid with a fixed number
+   of dofs, FEM with a dynamic one) or a kind of interactions (between rigid
+   systems, rigid-FEM, FEM-FEM). A kind runs kernels on its items and keeps
+   where they are in the assembled problem; the assembled matrices and
+   vectors are those of the integrator, given to the kind. The stages of a
+   time step run for each kind (for_systems, for_interactions, at the end).
 
    Topology is the item that declares the attached storages of the systems
    and interactions (involved, index, ds1, ...): their lookups name it as
@@ -25,7 +28,7 @@ namespace siconos::simul {
 
 // a kind of systems
 template <typename System, typename Topology>
-struct moreau_jean_systems : item {
+struct system_kind : item {
   using system = System;
   using topology = Topology;
   using items = gather<System>;
@@ -58,6 +61,12 @@ struct moreau_jean_systems : item {
 
     static constexpr auto with_k_matrix() { return model::has_k_matrix(system{}); }
 
+    // f constant over the simulation
+    static constexpr bool time_invariant_fext() {
+      using data_t = const std::decay_t<typename Handle::data_t>;
+      return storage::has_property_t<fext, property::time_invariant, data_t>();
+    }
+
     decltype(auto) sum_dofs() { return storage::attr<"sum_dofs">(*self()); }
     decltype(auto) ds_offset() { return storage::attr<"ds_offset">(*self()); }
     decltype(auto) number_of_involved_ds() {
@@ -67,19 +76,13 @@ struct moreau_jean_systems : item {
     // the context of the kernels of this kind (see simul/kernels.hpp)
     struct kernel_context {
       using system = System;
-      using kind = moreau_jean_systems;
+      using kind = system_kind;
       using topology = Topology;
     };
 
     template <typename Kernel>
     void run(auto step, auto&& p) {
       kernels::run<Kernel, kernel_context>(self()->data(), step, p);
-    }
-
-    // the parameters of the kernels (see moreau_jean_kernels.hpp)
-    auto parameters(auto h, auto theta) {
-      using scalar = typename decltype(self()->env())::scalar;
-      return moreau_jean::time_step<decltype(h), scalar>{h, theta};
     }
 
     // where the involved system of a rank is in the assembled vectors and
@@ -133,11 +136,6 @@ struct moreau_jean_systems : item {
       }
     }
 
-    void initialize(auto step) {
-      run<moreau_jean::zero_velocity>(step, nullptr);
-      compute_iteration_matrix(step);
-    }
-
     // the dofs of the involved systems
     void compute_total_dofs(auto step) {
       if constexpr (runtime_dof()) {
@@ -147,7 +145,7 @@ struct moreau_jean_systems : item {
         using involved_systems = kernels::involved<kernels::systems>;
         auto n = kernels::count<involved_systems, kernel_context>(self()->data(), step);
         sum_dofs().assign(n + 1, 0);
-        run<moreau_jean::dofs>(step, moreau_jean::dof_offsets{sum_dofs()});
+        run<contacts::dofs>(step, contacts::dof_offsets{sum_dofs()});
         kernels::inclusive_scan(sum_dofs());
       } else {
         // compile time systems => sum dofs useless
@@ -170,7 +168,7 @@ struct moreau_jean_systems : item {
     // the active set: no system is involved before the marks of the
     // interactions
     void clear_involved(auto step) {
-      run<moreau_jean::not_involved>(step, nullptr);
+      run<contacts::not_involved>(step, nullptr);
       if constexpr (with_index_sets<Topology>) {
         index_set<system, involved_set_tag, Topology>(self()->data()).clear();
       }
@@ -184,12 +182,12 @@ struct moreau_jean_systems : item {
       using indice = typename decltype(self()->env())::indice;
       auto offsets = kernels::offsets<indice>(
           storage::prop_values<system, "involved", Topology>(data, step));
-      run<moreau_jean::involved_index>(step, moreau_jean::ranks{offsets});
+      run<contacts::involved_index>(step, contacts::ranks{offsets});
       if constexpr (with_index_sets<Topology>) {
         auto emplace = [&data](auto i, auto index) {
           index_set<system, involved_set_tag, Topology>(data).emplace(i, index);
         };
-        run<moreau_jean::involved_entry>(step, moreau_jean::ranks{offsets, emplace});
+        run<contacts::involved_entry>(step, contacts::ranks{offsets, emplace});
       }
       number_of_involved_ds() = offsets.back();
       return offsets.back();
@@ -201,70 +199,17 @@ struct moreau_jean_systems : item {
       simul::for_each_involved<system, topology>(self()->data(), step, f);
     }
 
-    void compute_iteration_matrix(auto step) {
-      if constexpr (with_k_matrix()) {
-        // M^-1 (f - K q) with the factorization of M kept on the system
-        using scalar = typename decltype(self()->env())::scalar;
-        auto factor = [&](auto i) -> auto& { return fem_m_factor(step, i); };
-        run<moreau_jean::fem_minv_f<algebra::unbounded_vector<scalar>>>(
-            step, moreau_jean::fem_factors{factor});
-      } else {
-        run<moreau_jean::minv_f>(step, nullptr);
-      }
-    }
-
-    void update_iteration_matrix(auto step) {
-      using data_t = const std::decay_t<decltype(self()->data())>;
-      if constexpr (!storage::has_property_t<fext, property::time_invariant, data_t>() ||
-                    with_k_matrix()) {
-        // constant fext => constant iteration matrix
-        compute_iteration_matrix(step);
-      }
-    }
-
-    // free state: v(step + 1) and q(step + 1) without the contact impulses
-    void compute_free_state(auto step, auto h, auto theta) {
-      auto p = parameters(h, theta);
-
-      if constexpr (with_k_matrix()) {
-        // W dv = h theta F(step + 1) + h (1 - theta) F(step), F = f - K q,
-        // W = M + h^2 theta^2 K factorized once for the simulation
-        using env_t = decltype(self()->env());
-        using vector = typename env_t::template unbounded_vector<typename env_t::scalar>;
-        auto factor = [&](auto i) -> auto& { return fem_w_factor(step, i, h, theta); };
-        run<kernels::fused<moreau_jean::fem_free_velocity<vector>, moreau_jean::position>>(
-            step, moreau_jean::fem_time_step{p.h, p.theta, factor});
-      } else {
-        run<kernels::fused<moreau_jean::free_velocity, moreau_jean::position>>(step, p);
-      }
-
-      run<moreau_jean::boundary_conditions>(step, p);
-    }
-
-    // add the contact impulses to v(step + 1) and update q(step + 1), for the
-    // involved systems only: the others keep their free state
-    void update_velocities_and_positions(auto step, auto h, auto theta, auto& velocities) {
-      auto base = parameters(h, theta);
-      auto p = moreau_jean::time_step{base.h, base.theta, part(), velocity_view(velocities)};
-
-      run<kernels::fused<moreau_jean::contact_velocity, moreau_jean::involved_position>>(step,
-                                                                                         p);
-
-      // the involved systems may have broken them
-      run<moreau_jean::boundary_conditions>(step, p);
-    }
-
     void assemble_mass_matrix(auto step, auto& assembled) {
       // size may be 0
-      run<moreau_jean::diagonal_block<"mass_matrix">>(
-          step, moreau_jean::diagonal_blocks{mass_matrix_view(assembled), at()});
+      run<contacts::diagonal_block<"mass_matrix">>(
+          step, contacts::diagonal_blocks{mass_matrix_view(assembled), at()});
     }
 
     void assemble_k_matrix(auto step, auto& assembled) {
       if constexpr (with_k_matrix()) {
         // size may be 0
-        run<moreau_jean::diagonal_block<"k_matrix">>(
-            step, moreau_jean::diagonal_blocks{k_matrix_view(assembled), at()});
+        run<contacts::diagonal_block<"k_matrix">>(
+            step, contacts::diagonal_blocks{k_matrix_view(assembled), at()});
       }
       // else the systems are rigid and the sparse k_matrix is not filled.
     }
@@ -333,14 +278,14 @@ struct moreau_jean_systems : item {
 };
 
 template <typename Topology>
-struct moreau_jean_systems<empty_item, Topology> : empty_item {
+struct system_kind<empty_item, Topology> : empty_item {
   using attributes = gather<>;
 };
 
 // a kind of interactions, between the systems of the kinds Systems1 (ds1) and
 // Systems2 (ds2)
 template <typename Interaction, typename Systems1, typename Systems2, typename Topology>
-struct moreau_jean_interactions : item {
+struct interaction_kind : item {
   using interaction = Interaction;
   using systems1 = Systems1;
   using systems2 = Systems2;
@@ -380,7 +325,7 @@ struct moreau_jean_interactions : item {
     // the context of the kernels of this kind (see simul/kernels.hpp)
     struct kernel_context {
       using interaction = Interaction;
-      using kind = moreau_jean_interactions;
+      using kind = interaction_kind;
       using topology = Topology;
     };
 
@@ -411,6 +356,14 @@ struct moreau_jean_interactions : item {
       return algebra::mat_view(storage, assembled, inter_offset(), inter_offset());
     }
 
+    // an assembled matrix for the transposed jacobians, xxx properties on
+    // h_matrix1, if any, are lost here
+    auto transposed_h_matrix() {
+      using env = decltype(self()->env());
+      return typename traits::config<env>::template convert<
+          some::assembled_matrix<some::transposed_matrix<h_matrix1>>>::type{};
+    }
+
     decltype(auto) lambda_view(auto& assembled) {
       auto storage = get_storage_type(self()->data(), lambda{});
       return algebra::vec_view(storage, assembled, inter_offset());
@@ -428,13 +381,6 @@ struct moreau_jean_interactions : item {
       return algebra::vec_view<vec_mu_t>(assembled, inter_offset() / 2);
     }
 
-    void initialize(auto step) {
-      // useless at initialisation ?
-      run<moreau_jean::zero_multipliers>(step, nullptr);
-
-      compute_h_matrices(step);
-    }
-
     static constexpr bool relation_sets() {
       return requires { requires topology::relation_sets; };
     }
@@ -448,7 +394,7 @@ struct moreau_jean_interactions : item {
     }
 
     void compute_h_matrices(auto step) {
-      run<moreau_jean::jacobians>(step, moreau_jean::at_step{step});
+      run<contacts::jacobians>(step, contacts::at_step{step});
     }
 
     static constexpr bool time_invariant_h_matrices() {
@@ -456,23 +402,7 @@ struct moreau_jean_interactions : item {
       return storage::has_property_t<interaction, property::time_invariant, data_t>();
     }
 
-    void update_h_matrices(auto step) {
-      if constexpr (!time_invariant_h_matrices()) {
-        compute_h_matrices(step);
-      }
-    };
-
-    // jacobians for the assembly: already up to date at this step if
-    // update_h_matrices computed them (q(step) has not changed since)
-    void ensure_h_matrices(auto step) {
-      if constexpr (time_invariant_h_matrices()) {
-        compute_h_matrices(step);
-      }
-    }
-
-    void compute_output(auto step) {
-      run<moreau_jean::output>(step, moreau_jean::at_step{step});
-    }
+    void compute_output(auto step) { run<contacts::output>(step, contacts::at_step{step}); }
 
     // the active set: the active interactions, their rank among the active
     // interactions of this kind, the systems they involve; the number of
@@ -483,16 +413,16 @@ struct moreau_jean_interactions : item {
       if constexpr (with_index_sets<Topology>) {
         index_set<interaction, active_set_tag, Topology>(data).clear();
       }
-      run<kernels::fused<moreau_jean::activation, moreau_jean::mark_involved>>(
-          step, moreau_jean::active_set{h, static_cast<decltype(h)>(gamma),
-                                        static_cast<decltype(h)>(threshold)});
+      run<kernels::fused<contacts::activation, contacts::mark_involved>>(
+          step, contacts::active_set{h, static_cast<decltype(h)>(gamma),
+                                     static_cast<decltype(h)>(threshold)});
       auto rows = kernels::offsets<indice>(
           storage::prop_values<interaction, "activation", Topology>(data, step));
       if constexpr (with_index_sets<Topology>) {
         auto emplace = [&data](auto i, auto row) {
           index_set<interaction, active_set_tag, Topology>(data).emplace(i, row);
         };
-        run<moreau_jean::active_entry>(step, moreau_jean::ranks{rows, emplace});
+        run<contacts::active_entry>(step, contacts::ranks{rows, emplace});
       }
       number_of_interactions() = rows.back();
       return rows.back();
@@ -507,14 +437,14 @@ struct moreau_jean_interactions : item {
       if constexpr (std::same_as<typename systems2::system,
                                  typename topology::fixed_dof_system>) {
         // between rigid systems (i.e disk/disk)
-        run<moreau_jean::h_blocks>(step, moreau_jean::block_matrix{h_matrix_view(
-                                             assembled, ds2_systems.ds_offset())});
+        run<contacts::h_blocks>(
+            step, contacts::block_matrix{h_matrix_view(assembled, ds2_systems.ds_offset())});
       } else if constexpr (std::same_as<systems1, systems2>) {
         // self contact of a FEM system
         auto fem_matrix = algebra::mat_view<matrix_1x1_t>(assembled, inter_offset(),
                                                           ds2_systems.ds_offset());
-        run<moreau_jean::fem_self_h_block>(
-            step, moreau_jean::fem_block_matrix{fem_matrix, ds2_systems.sum_dofs()});
+        run<contacts::fem_self_h_block>(
+            step, contacts::fem_block_matrix{fem_matrix, ds2_systems.sum_dofs()});
       } else {
         // a rigid system (ds1) and a FEM one (ds2) (i.e disk/fem)
         auto fem_matrix = algebra::mat_view<matrix_1x1_t>(assembled, inter_offset(),
@@ -522,42 +452,82 @@ struct moreau_jean_interactions : item {
         auto rigid_storage = get_storage_type(self()->data(), h_matrix1{});
         auto rigid_matrix = algebra::mat_view(rigid_storage, assembled, inter_offset(),
                                               ds1_systems.ds_offset());
-        run<moreau_jean::fem_h_blocks>(
-            step, moreau_jean::fem_h_matrix{self()->data(), fem_matrix, rigid_matrix,
-                                            ds2_systems.sum_dofs(),
-                                            static_cast<std::size_t>(nslaw_size())});
+        run<contacts::fem_h_blocks>(
+            step, contacts::fem_h_matrix{self()->data(), fem_matrix, rigid_matrix,
+                                         ds2_systems.sum_dofs(),
+                                         static_cast<std::size_t>(nslaw_size())});
       }
     }
 
     void assemble_vectors(auto step, auto& lambdas, auto& ydots, auto& mus) {
       if constexpr (nslaw_with_friction()) {
-        run<kernels::fused<moreau_jean::assemble_multipliers, moreau_jean::assemble_friction>>(
-            step, moreau_jean::multipliers{part(), lambda_view(lambdas), ydot_view(ydots),
-                                           mu_view(mus)});
+        run<kernels::fused<contacts::assemble_multipliers, contacts::assemble_friction>>(
+            step, contacts::multipliers{part(), lambda_view(lambdas), ydot_view(ydots),
+                                        mu_view(mus)});
       } else {
-        run<moreau_jean::assemble_multipliers>(
-            step, moreau_jean::multipliers{part(), lambda_view(lambdas), ydot_view(ydots)});
+        run<contacts::assemble_multipliers>(
+            step, contacts::multipliers{part(), lambda_view(lambdas), ydot_view(ydots)});
       }
     }
 
-    // nonsmooth law effect
-    void nsl_effect_on_free_output(auto step) { run<moreau_jean::impact_law>(step, nullptr); }
-
-    // H v_free: the free output derivatives in q of the problem
-    void free_output(auto step, auto& assembled) {
-      run<moreau_jean::free_output>(step, moreau_jean::block_vector{lambda_view(assembled)});
-    }
-
     void keep_lambdas(auto step, auto& lambdas) {
-      run<moreau_jean::keep_multipliers>(
-          step, moreau_jean::multipliers{part(), lambda_view(lambdas)});
+      run<contacts::keep_multipliers>(step,
+                                      contacts::multipliers{part(), lambda_view(lambdas)});
     }
   };
 };
 
 template <typename Systems1, typename Systems2, typename Topology>
-struct moreau_jean_interactions<empty_item, Systems1, Systems2, Topology> : empty_item {
+struct interaction_kind<empty_item, Systems1, Systems2, Topology> : empty_item {
   using attributes = gather<>;
+};
+
+/* The time step of a simulation as a schedule (see storage/schedule.hpp).
+
+   The context of a step: the time stepping, its integrator, the step, the
+   time step h, and the number of involved systems once the active set is
+   known. for_systems (for_interactions) runs its stages for each kind of
+   systems (of interactions) of the integrator, with ctx.kind the kind. */
+
+template <typename TimeStepping, typename Integrator, typename Step, typename H>
+struct step_context {
+  TimeStepping time_stepping;
+  Integrator integrator;
+  Step step;
+  H h;
+  Step involved = 0;
+};
+
+template <typename Ctx, typename Kind>
+struct kind_context : Ctx {
+  Kind kind;
+};
+
+// stages run for each kind, each kind after the other
+void for_each_kind(auto& ctx, auto&& kinds, auto&& run_stages) {
+  storage::mp::for_each(kinds, [&](auto kind) {
+    kind_context<std::decay_t<decltype(ctx)>, decltype(kind)> c{ctx, kind};
+    run_stages(c);
+    ctx.involved = c.involved;
+  });
+}
+
+template <typename... Stages>
+struct for_systems {
+  static constexpr std::string_view name{"for each kind of systems"};
+  using stages = std::tuple<Stages...>;
+  static void run(auto& ctx, auto&& run_stages) {
+    for_each_kind(ctx, ctx.integrator.systems(), run_stages);
+  }
+};
+
+template <typename... Stages>
+struct for_interactions {
+  static constexpr std::string_view name{"for each kind of interactions"};
+  using stages = std::tuple<Stages...>;
+  static void run(auto& ctx, auto&& run_stages) {
+    for_each_kind(ctx, ctx.integrator.interactions(), run_stages);
+  }
 };
 
 }  // namespace siconos::simul

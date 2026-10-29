@@ -3,8 +3,8 @@
 #include "interaction.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_r.hpp"
-#include "siconos/simul/moreau_jean_kinds.hpp"
-#include "siconos/simul/moreau_jean_schedule.hpp"
+#include "siconos/simul/kinds.hpp"
+#include "siconos/simul/moreau_jean.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/range.hpp"
@@ -42,16 +42,16 @@ struct one_step_integrator {
   struct moreau_jean : item {
     using topology = Topology;
 
-    // the kinds of systems and of interactions (see moreau_jean_kinds.hpp)
-    using ct_systems_t = moreau_jean_systems<ct_system, Topology>;
-    using rt_systems_t = moreau_jean_systems<rt_system, Topology>;
+    // the kinds of systems and of interactions (see kinds.hpp)
+    using ct_systems_t = system_kind<ct_system, Topology>;
+    using rt_systems_t = system_kind<rt_system, Topology>;
 
     using ct_interactions_t =
-        moreau_jean_interactions<ct_interaction, ct_systems_t, ct_systems_t, Topology>;
+        interaction_kind<ct_interaction, ct_systems_t, ct_systems_t, Topology>;
     using rt_ct_interactions_t =
-        moreau_jean_interactions<rt_ct_interaction, ct_systems_t, rt_systems_t, Topology>;
+        interaction_kind<rt_ct_interaction, ct_systems_t, rt_systems_t, Topology>;
     using rt_rt_interactions_t =
-        moreau_jean_interactions<rt_rt_interaction, rt_systems_t, rt_systems_t, Topology>;
+        interaction_kind<rt_rt_interaction, rt_systems_t, rt_systems_t, Topology>;
 
     // the non-empty kinds, in the order of the assembled problem
     using system_kinds_t = decltype(non_empty(
@@ -60,8 +60,10 @@ struct one_step_integrator {
         mp::tuple<some::item_ref<ct_interactions_t>, some::item_ref<rt_ct_interactions_t>,
                   some::item_ref<rt_rt_interactions_t>>{}));
 
-    // the stages of a time step (see moreau_jean_schedule.hpp)
+    // the scheme (see moreau_jean.hpp): the stages of a time step, of the
+    // initial state
     using time_step_schedule = simul::moreau_jean::time_step_schedule;
+    using initial_schedule = simul::moreau_jean::initial_schedule;
 
     using items = decltype(mp::concat(mp::concat(mp::tuple<topology>{}, system_kinds_t{}),
                                       interaction_kinds_t{}));
@@ -177,9 +179,10 @@ struct one_step_integrator {
         return std::get<n>(systems());
       }
 
+      // the state before the first step
       void initialize(auto step) {
-        mp::for_each(systems(), [&](auto kind) { kind.initialize(step); });
-        mp::for_each(interactions(), [&](auto kind) { kind.initialize(step); });
+        auto ctx = step_context{nullptr, *self(), step, 0.};
+        storage::schedule::run<initial_schedule>(ctx);
       }
 
       static constexpr auto with_k_matrix() {
@@ -283,94 +286,9 @@ struct one_step_integrator {
         mp::for_each(systems(), [](auto kind) { kind.invalidate_fem_operators(); });
       }
 
-      void compute_w_matrix(auto step, auto time_step) {
-        if constexpr (with_k_matrix()) {
-          // stiffness matrix is present
-          if (algebra::nnz(k_matrix_assembled()) == 0) {
-            // fem systems are not involved in contact
-            compute_w_matrix_with_diagonal_mass_matrix();
-          } else {
-            // fem systems are involved in contact
-            algebra::add(1., mass_matrix_assembled(),
-                         time_step * time_step * theta() * theta(), k_matrix_assembled(),
-                         iteration_matrix_assembled());
-
-            // H (M+ h^2 \theta^2 K)^-1 H^t, with the factorizations kept
-            // on the FEM systems
-            auto blocks = factored_blocks(step, time_step);
-            compute_kkt_matrix(h_matrix_assembled(), iteration_matrix_assembled(),
-                               w_matrix_assembled(), blocks);
-          }
-        } else {
-          // fem systems are not present in data
-          compute_w_matrix_with_diagonal_mass_matrix();
-        }
-      }
-
-      void compute_w_matrix_with_diagonal_mass_matrix() {
-        // mass matrix is assumed to be diagonal
-        using env = decltype(self()->env());
-
-        // the blocks of the rigid systems and of the interactions between
-        // them, the first kinds
-        auto ct_systems = std::get<0>(systems());
-        auto ct_interactions = std::get<0>(interactions());
-
-        // xxx properties on h_matrix1, if any, are lost here
-        auto tmp_matrix =
-            typename traits::config<env>::template convert<some::assembled_matrix<
-                some::transposed_matrix<typename ct_interactions_t::h_matrix1>>>::type{};
-
-        auto h_mat =
-            ct_interactions.h_matrix_view(h_matrix_assembled(), ct_systems.ds_offset());
-        auto m_mat = ct_systems.mass_matrix_view(mass_matrix_assembled());
-        auto w_mat = ct_interactions.w_matrix_view(w_matrix_assembled());
-
-        resize(tmp_matrix, size1(h_mat), size0(h_mat));
-        if constexpr (with_k_matrix()) {
-          solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat, tmp_matrix);
-        } else {
-          solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
-        }
-        prod(h_mat, tmp_matrix, w_mat);
-      }
-
-      void compute_input(auto step, auto time_step) {
-        auto& h_matrix = h_matrix_assembled();
-        auto& lambda = lambda_vector_assembled();
-        auto& p0 = p0_vector_assembled();
-        auto& velo = velocity_vector_assembled();
-        auto& mass_matrix = mass_matrix_assembled();
-
-        resize(p0, size1(h_matrix));
-        resize(velo, size1(h_matrix));
-
-        transpose(h_matrix);
-        prodt1(h_matrix, lambda, p0);
-
-        if constexpr (with_k_matrix()) {
-          if (algebra::nnz(k_matrix_assembled()) > 0) {
-            // block diagonal: rigid systems are divided, FEM blocks use the
-            // factorizations kept on the systems
-            auto blocks = factored_blocks(step, time_step);
-            solve_block_diagonal_system(iteration_matrix_assembled(), p0, velo, blocks);
-          } else {
-            solve_linear_system(mass_matrix, p0, velo);
-          }
-        } else {
-          solve_linear_system(mass_matrix, p0, velo);
-        }
-      }
-
       auto methods() {
-        using env_t = decltype(self()->env());
-        using indice = typename env_t::indice;
-        using scalar = typename env_t::scalar;
-
         return collect(
-            method("compute_input", &interface<Handle>::compute_input<indice, scalar>),
-            method("invalidate_fem_operators", &interface<Handle>::invalidate_fem_operators),
-            method("compute_w_matrix", &interface<Handle>::compute_w_matrix<indice, scalar>));
+            method("invalidate_fem_operators", &interface<Handle>::invalidate_fem_operators));
       }
     };
   };

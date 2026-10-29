@@ -6,46 +6,25 @@
 
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/numerics.hpp"
-#include "siconos/collision/diskmesh_r.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/lagrangian_r.hpp"
+// after the models
+#include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/simul/kernels.hpp"
+#include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::moreau_jean {
+namespace siconos::simul::contacts {
 
-/* The Moreau-Jean time integration as kernels (see storage/kernels.hpp and
-   simul/kernels.hpp). The parameters p of a kernel are one of the structs
-   below, given by the kinds (moreau_jean_kinds.hpp) when they run the kernel. */
+/* The contacts of a time step, whatever the scheme: the relations (the
+   jacobians H, the outputs y and ydot), the active set (the interactions
+   whose gap may close, the systems they involve) and the assembly of the
+   problem of the step (H, M, K, lambda, ydot, mu of the active
+   interactions). The kernels, then the stages on the kinds (see kinds.hpp)
+   and on the integrator. */
 
 using namespace kernels;
 
 // the parameters of the kernels
-
-// the time step, the theta of the theta-method, and for the contact impulse:
-// the assembled velocity correction and the part of it that belongs to a
-// system, part(assembled, rank, like)
-template <typename H, typename S, typename Part = std::nullptr_t,
-          typename Velocities = std::nullptr_t>
-struct time_step {
-  H h;
-  S theta;
-  Part part = nullptr;
-  Velocities velocities = nullptr;
-};
-
-// the time step, the theta of the theta-method and the factorizations of
-// the FEM systems kept on them: factor(i) of the system i
-template <typename H, typename S, typename Factor>
-struct fem_time_step {
-  H h;
-  S theta;
-  Factor factor;
-};
-
-// the factorizations of the FEM systems: factor(i) of the system i
-template <typename Factor>
-struct fem_factors {
-  Factor factor;
-};
 
 // an assembled matrix of FEM systems and the dof offsets of the involved ones
 template <typename Matrix, typename Offsets>
@@ -70,12 +49,6 @@ template <typename Offsets, typename Emplace = std::nullptr_t>
 struct ranks {
   Offsets& offsets;
   Emplace emplace = nullptr;
-};
-
-// an assembled vector
-template <typename Vector>
-struct block_vector {
-  Vector vector;
 };
 
 // the H matrix of the FEM systems in contact with rigid ones: its columns of
@@ -128,94 +101,7 @@ struct dof_offsets {
   Offsets& sum_dofs;
 };
 
-// the systems
-
-// theta-method on the positions: q(step + 1) from the velocities at step and
-// step + 1, on the systems of Space
-template <typename Space>
-struct position_on
-    : kernel<Space, in<"q">, in<"velocity">, in<"velocity", next>, out<"q", next>> {
-  static void apply(const auto& p, const auto& q, const auto& v, const auto& v_next,
-                    auto& q_next) {
-    q_next = q + p.h * (p.theta * v_next + (1.0 - p.theta) * v);
-  }
-};
-
-using position = position_on<all<systems>>;
-using involved_position = position_on<involved<systems>>;
-
-// M^-1 f of a rigid system, f being constant over the step
-struct minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">, out<"minv_f", by_kind>,
-                       out<"minv_f", by_kind, next>> {
-  static void apply(const auto&, auto& mass_matrix, const auto& f, auto& minv_f,
-                    auto& minv_f_next) {
-    minv_f = f;
-    algebra::solve_in_place(mass_matrix, minv_f);
-    minv_f_next = minv_f;
-  }
-};
-
-// free flight of a rigid system (K = 0)
-struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_kind>,
-                              in<"minv_f", by_kind, next>, out<"velocity", next>> {
-  static void apply(const auto& p, const auto& v, const auto& minv_f, const auto& minv_f_next,
-                    auto& v_next) {
-    v_next = v + p.h * p.theta * minv_f_next + p.h * (1 - p.theta) * minv_f;
-  }
-};
-
-// M^-1 (f - K q) of a FEM system, with the factorization of M kept on the
-// system, f being constant over the step
-template <typename Vector>
-struct fem_minv_f : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">, in<"fext">,
-                           out<"minv_f", by_kind>, out<"minv_f", by_kind, next>>,
-                    host_only {
-  static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& f, auto& minv_f,
-                    auto& minv_f_next) {
-    Vector fmkq = f - k * q;
-    minv_f = p.factor(i).solve(fmkq);
-    minv_f_next = minv_f;
-  }
-};
-
-// free flight of a FEM system: W dv = h theta F(step + 1) + h (1 - theta)
-// F(step), F = f - K q, W = M + h^2 theta^2 K factorized once on the system
-template <typename Vector>
-struct fem_free_velocity : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">,
-                                  in<"velocity">, in<"fext">, out<"velocity", next>>,
-                           host_only {
-  static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& v,
-                    const auto& f, auto& v_next) {
-    Vector tf = f - k * q;
-    Vector tf_next = f - k * (q + p.h * v);
-    Vector rhs = p.h * p.theta * tf_next + p.h * (1 - p.theta) * tf;
-    Vector dv = p.factor(i).solve(rhs);
-    v_next = v + dv;
-  }
-};
-
-// the contact impulse of an involved system
-struct contact_velocity : kernel<involved<systems>, rank, inout<"velocity", next>> {
-  static void apply(auto& p, auto index, auto& v_next) {
-    v_next += p.part(p.velocities, index, v_next);
-  }
-};
-
-// the boundary conditions of a system: its blocked velocity components are
-// zero, and its position follows. Only the systems with boundary conditions
-// are visited when bc_velocities_0 is a sparse set.
-struct boundary_conditions
-    : kernel<entries<systems, "bc_velocities_0", by_topology>, entry, in<"q">, in<"velocity">,
-             inout<"velocity", next>, out<"q", next>> {
-  static void apply(const auto& p, const auto& blocked, const auto& q, const auto& v,
-                    auto& v_next, auto& q_next) {
-    if (blocked.size() == 0) return;
-    for (auto k : blocked) {
-      v_next(k) = 0.0;
-    }
-    position::apply(p, q, v, v_next, q_next);
-  }
-};
+// the kernels
 
 // a block of the assembled matrix: the attribute Name of an involved system
 template <storage::pattern::string_literal Name>
@@ -226,34 +112,20 @@ struct diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
 };
 
 // the number of dofs of an involved system, before the scan that gives the
-// offsets (see moreau_jean_systems::compute_total_dofs)
+// offsets (see system_kind::compute_total_dofs)
 struct dofs : kernel<involved<systems>, rank, in<"mass_matrix">>, assembles {
   static void apply(auto& p, auto index, const auto& mass_matrix) {
     p.sum_dofs[index + 1] = algebra::ncols(mass_matrix);
   }
 };
 
-// the interactions
-
-// the velocities of the next step and the multipliers start from zero
-struct zero_velocity : kernel<all<systems>, out<"velocity", next>> {
-  static void apply(const auto&, auto& v_next) { algebra::set_zero(v_next); }
-};
-
+// the multipliers start from zero
 struct zero_multipliers
     : kernel<all<interactions>, out<"lambda">, out<"ydot">, out<"ydot", next>> {
   static void apply(const auto&, auto& lambda, auto& ydot, auto& ydot_next) {
     algebra::set_zero(lambda);
     algebra::set_zero(ydot);
     algebra::set_zero(ydot_next);
-  }
-};
-
-// the Newton impact law on the free output derivative
-struct impact_law
-    : kernel<all<interactions>, in<"ydot">, through<"nslaw", "e">, inout<"ydot", next>> {
-  static void apply(const auto&, const auto& ydot, const auto& e, auto& ydot_next) {
-    ydot_next += e * ydot;
   }
 };
 
@@ -419,15 +291,6 @@ struct involved_entry
   }
 };
 
-// the assembled nonsmooth problem
-
-// the free output derivative of an active interaction in q of the problem
-struct free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
-  static void apply(auto& p, auto row, const auto& ydot_next) {
-    set_value(p.vector, row, ydot_next);
-  }
-};
-
 // the blocks of H of an active interaction between rigid systems: its
 // jacobians without the columns of the blocked velocity components, at the
 // rows of the interaction and the columns of its systems
@@ -518,4 +381,103 @@ struct fem_self_h_block : kernel<active<interactions>, rank, in<"h_matrix1">,
   }
 };
 
-}  // namespace siconos::simul::moreau_jean
+// the stages (see storage/schedule.hpp)
+
+namespace stages {
+
+using storage::schedule::condition;
+using storage::schedule::host_code;
+using storage::schedule::stage;
+
+// on a kind of interactions
+
+struct initial_state : stage<"lambda, ydot are zero, the jacobians H"> {
+  static void run(auto& c) {
+    c.kind.template run<zero_multipliers>(c.step, nullptr);
+    c.kind.compute_h_matrices(c.step);
+  }
+};
+
+struct relation_sets : stage<"the relation sets hold every interaction">, host_code {
+  static void run(auto& c) { c.kind.sync_relation_sets(c.step); }
+};
+
+struct jacobians : stage<"the jacobians H, if the relations change"> {
+  static void run(auto& c) {
+    if constexpr (!std::decay_t<decltype(c.kind)>::time_invariant_h_matrices()) {
+      c.kind.compute_h_matrices(c.step);
+    }
+  }
+};
+
+struct outputs : stage<"the outputs y, ydot at step"> {
+  static void run(auto& c) { c.kind.compute_output(c.step); }
+};
+
+struct free_outputs : stage<"the free outputs y, ydot at step + 1"> {
+  static void run(auto& c) { c.kind.compute_output(c.step + 1); }
+};
+
+// jacobians for the assembly: already up to date at this step if the
+// jacobians stage computed them (q(step) has not changed since)
+struct time_invariant_jacobians : stage<"the jacobians H, if the relations do not change"> {
+  static void run(auto& c) {
+    if constexpr (std::decay_t<decltype(c.kind)>::time_invariant_h_matrices()) {
+      c.kind.compute_h_matrices(c.step);
+    }
+  }
+};
+
+struct h_matrix : stage<"H of the active interactions"> {
+  static void run(auto& c) { c.integrator.assemble_h_matrix(c.step, c.kind); }
+};
+
+struct multipliers : stage<"lambda, ydot, mu of the active interactions"> {
+  static void run(auto& c) {
+    c.kind.assemble_vectors(c.step, c.integrator.lambda_vector_assembled(),
+                            c.integrator.ydot_vector_assembled(),
+                            c.integrator.mu_vector_assembled());
+  }
+};
+
+struct keep_multipliers : stage<"lambda of the active interactions from the solution"> {
+  static void run(auto& c) {
+    c.kind.keep_lambdas(c.step, c.integrator.lambda_vector_assembled());
+  }
+};
+
+// on a kind of systems
+
+struct mass_matrix : stage<"M of the involved systems"> {
+  static void run(auto& c) {
+    c.kind.assemble_mass_matrix(c.step, c.integrator.mass_matrix_assembled());
+  }
+};
+
+struct stiffness_matrix : stage<"K of the involved FEM systems"> {
+  static void run(auto& c) {
+    c.kind.assemble_k_matrix(c.step, c.integrator.k_matrix_assembled());
+  }
+};
+
+// on the integrator
+
+struct active_set
+    : stage<"the active set: the interactions whose gap may close, the systems they involve">,
+      host_code {
+  static void run(auto& c) {
+    c.involved = c.integrator.compute_active_interactions(c.step, c.h);
+  }
+};
+
+struct with_contacts : condition<"there are contacts"> {
+  static bool holds(const auto& c) { return c.involved > 0; }
+};
+
+struct assembly_setup : stage<"the sizes and offsets of the assembled problem">, host_code {
+  static void run(auto& c) { c.integrator.assemble_setup(c.step); }
+};
+
+}  // namespace stages
+
+}  // namespace siconos::simul::contacts
