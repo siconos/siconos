@@ -102,6 +102,9 @@ struct one_step_integrator {
         };
         mp::for_each(systems(), add);
         mp::for_each(interactions(), add);
+
+        // the gap at the middle of the step for the active set
+        gamma() = 0.5;
       }
 
       void __del__() {
@@ -247,7 +250,7 @@ struct one_step_integrator {
         // a system may be involved by interactions of several kinds (a rigid
         // one by a rigid-FEM interaction)
         mp::for_each(interactions(), [&](auto kind) {
-          kind.mark_active(step, h, 0.5, self()->constraint_activation_threshold());
+          kind.mark_active(step, h, gamma(), constraint_activation_threshold());
         });
 
         typename decltype(self()->env())::indice involved = 0;
