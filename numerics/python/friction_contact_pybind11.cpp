@@ -925,6 +925,12 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT",
              FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT,
              "Parallel version of FC2D_NSGS (OpenMP, with permutation)")
+       .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY",
+             FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY,
+             "Parallel version of FC2D_NSGS (OpenMP, without copy for each thread)")
+       .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH",
+             FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH,
+             "Parallel version of FC2D_NSGS (OpenMP, copy only what's needed)")
 #endif
 #if defined(WITH_CUDA) && defined(SICONOS_PETSC)
       .value("SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA",

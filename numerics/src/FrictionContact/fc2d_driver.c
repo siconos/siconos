@@ -61,6 +61,8 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_PERMUT &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY &&
+      options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_CUDA_BLOCKLEGACY) {
     numerics_printf_verbose(1, "fc2d_driver: converting sparse matrix to dense for solver %d",

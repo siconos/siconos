@@ -478,7 +478,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
         }
 
         for (size_t color = 0; color < n_colors; color++) {
-#pragma omp for reduction(+ : light_error_sum)
+#pragma omp for reduction(+ : light_error_sum) schedule(static)
           for (unsigned int permuted_contact = (unsigned int)sum_sizes[color];
                permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
             if (freeze_contacts[permuted_contact] > 0) {
@@ -615,7 +615,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       while ((iter < itermax) && has_not_converged) {
         for (size_t color = 0; color < n_colors; color++) {
-#pragma omp for
+#pragma omp for schedule(static)
           for (unsigned int permuted_contact = (unsigned int)sum_sizes[color];
                permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
             pos = 2 * permuted_contact;

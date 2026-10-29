@@ -89,6 +89,9 @@ extern "C" {
 int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
                              size_t** set_sizes, size_t* inv_permutation);
 
+int color_graph_block_permut_equitable(size_t nc, NumericsMatrix* M, size_t* n_colors, 
+                                       size_t** sum_sizes, size_t* inv_permutation);
+
 #ifdef __cplusplus
 }
 #endif

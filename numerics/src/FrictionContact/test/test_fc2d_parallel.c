@@ -31,6 +31,8 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
       SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI,
       SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT,
       SICONOS_FRICTION_2D_NSGS_PERMUT,
+      SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY,
+      SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH,
   };
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));

@@ -106,6 +106,31 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem* problem, double* z, double* w,
 */
 void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* w, int* info,
                             SolverOptions* options);
+
+/**
+     Same as fc2d_nsgs_graph_permut, but without copying any data.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, double* w, int* info,
+                                   SolverOptions* options);
+
+/**
+     Same as fc2d_nsgs_graph_permut, but each thread copies the data it needs.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* z, double* w, int* info,
+                                      SolverOptions* options);
+
 /**
 Test solver, same as fc2d_nsgs but loops over contacts in the order given by the
 permutation used by parallel solvers.
