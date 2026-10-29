@@ -1,9 +1,13 @@
 #pragma once
 
+#include <chrono>
+#include <cstddef>
+#include <format>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <vector>
 
 #include "siconos/storage/pattern/base.hpp"
 
@@ -64,6 +68,55 @@ struct when {
 // an observer that only runs the stages
 struct run_only {
   void operator()(std::string_view, auto&& action) const { action(); }
+};
+
+// an observer that times the stages: per stage, the number of runs and the
+// total time, in the order of their first run. The stages run for each
+// element (per_element) are counted together.
+struct timings {
+  struct entry {
+    std::string name;
+    std::size_t runs = 0;
+    double seconds = 0;
+  };
+  std::vector<entry> entries;
+
+  void operator()(std::string_view name, auto&& action) {
+    const auto start = std::chrono::steady_clock::now();
+    action();
+    const std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - start;
+    auto& e = stage(name);
+    ++e.runs;
+    e.seconds += elapsed.count();
+  }
+
+  entry& stage(std::string_view name) {
+    for (auto& e : entries) {
+      if (e.name == name) return e;
+    }
+    return entries.emplace_back(entry{std::string(name)});
+  }
+
+  double total() const {
+    double t = 0;
+    for (const auto& e : entries) t += e.seconds;
+    return t;
+  }
+
+  void clear() { entries.clear(); }
+
+  /// one line per stage: total time, share of the total, runs, name
+  std::string report() const {
+    const double t = total();
+    std::string text =
+        std::format("{:>12} {:>7} {:>8}  {}\n", "seconds", "%", "runs", "stage");
+    for (const auto& e : entries) {
+      text += std::format("{:>12.6f} {:>7.2f} {:>8}  {}\n", e.seconds,
+                          t > 0 ? 100. * e.seconds / t : 0., e.runs, e.name);
+    }
+    text += std::format("{:>12.6f} {:>7.2f} {:>8}  {}\n", t, 100., "", "total");
+    return text;
+  }
 };
 
 template <typename S>

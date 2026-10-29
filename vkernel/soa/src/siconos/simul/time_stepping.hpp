@@ -4,9 +4,14 @@
 #include "siconos/model/nslaws.hpp"
 #include "siconos/simul/moreau_jean_schedule.hpp"
 #include "siconos/simul/simul_head.hpp"
+#include "siconos/storage/data_holder.hpp"
 #include "siconos/storage/schedule.hpp"
 
 namespace siconos::simul {
+
+// the timings of the stages of the time steps (see storage::schedule::timings)
+struct schedule_timings : storage::data_holder<storage::schedule::timings> {};
+
 template <match::item... Items>
 struct time_stepping : item {
   using items = gather<Items...>;
@@ -22,6 +27,7 @@ struct time_stepping : item {
     some::item_ref<one_step_integrator_t> one_step_integrator;
     some::item_ref<one_step_nonsmooth_problem_t> one_step_nonsmooth_problem;
     some::item_ref<topology_t> topology;
+    some::item_ref<schedule_timings> timings;
   };
 
   template <typename Handle>
@@ -34,6 +40,7 @@ struct time_stepping : item {
       one_step_integrator() = storage::add<one_step_integrator_t>(data);
       one_step_nonsmooth_problem() = storage::add<one_step_nonsmooth_problem_t>(data);
       topology() = storage::add<topology_t>(data);
+      timings() = storage::add<schedule_timings>(data);
     }
 
     void __del__() {
@@ -59,6 +66,9 @@ struct time_stepping : item {
     decltype(auto) topology() {
       return make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
     }
+    decltype(auto) timings() {
+      return make_ref_handle(self()->data(), storage::attr<"timings">(*self()));
+    }
 
     decltype(auto) current_step() { return (*self()).time_discretization().step(); }
 
@@ -67,7 +77,8 @@ struct time_stepping : item {
     // the schedule of a time step, given by the integrator
     using time_step_schedule = typename one_step_integrator_t::time_step_schedule;
 
-    auto compute_one_step() {
+    // one time step, the observer seeing each stage (see storage/schedule.hpp)
+    auto run_one_step(auto&& observer) {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
 
@@ -75,12 +86,35 @@ struct time_stepping : item {
 
       // v, q at step + 1: the free state if there is no contact
       auto ctx = step_context{*self(), one_step_integrator(), step, time_step()};
-      storage::schedule::run<time_step_schedule>(ctx);
+      storage::schedule::run<time_step_schedule>(ctx, observer);
 
       current_step() += 1;
 
       std::print("step {}\n", current_step());
       return ctx.involved;
+    }
+
+    auto compute_one_step() {
+      if (auto& timings = self()->timings().instance()) {
+        return run_one_step(*timings);
+      } else {
+        return run_one_step(storage::schedule::run_only{});
+      }
+    }
+
+    // the timings of the stages of the next time steps, from zero
+    void enable_timings(bool on) {
+      if (on) {
+        timings().instance() = std::make_shared<storage::schedule::timings>();
+      } else {
+        timings().instance().reset();
+      }
+    }
+
+    // the timings of the stages, one line per stage (empty if not enabled)
+    std::string timings_report() {
+      auto& timings = self()->timings().instance();
+      return timings ? timings->report() : std::string{};
     }
 
     // the time step as text, stage by stage
@@ -121,6 +155,8 @@ struct time_stepping : item {
                      method("time_step", &interface<Handle>::time_step),
                      method("compute_one_step", &interface<Handle>::compute_one_step),
                      method("describe_time_step", &interface<Handle>::describe_time_step),
+                     method("enable_timings", &interface<Handle>::enable_timings),
+                     method("timings_report", &interface<Handle>::timings_report),
                      method("has_next_event", &interface<Handle>::has_next_event));
     }
   };

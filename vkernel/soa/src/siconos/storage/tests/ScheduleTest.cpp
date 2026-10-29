@@ -47,6 +47,7 @@ class ScheduleTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ScheduleTest);
   CPPUNIT_TEST(testRunInOrder);
   CPPUNIT_TEST(testObserver);
+  CPPUNIT_TEST(testTimings);
   CPPUNIT_TEST(testDescribe);
   CPPUNIT_TEST(testMoreauJean);
   CPPUNIT_TEST_SUITE_END();
@@ -67,6 +68,30 @@ class ScheduleTest : public CppUnit::TestFixture {
     });
     CPPUNIT_ASSERT((seen == std::vector<std::string>{"first", "second"}));
     CPPUNIT_ASSERT((c.log == seen));
+  }
+
+  void testTimings() {
+    timings t;
+    for (int k = 0; k < 2; ++k) {
+      toy_context c;
+      run<toy>(c, t);
+    }
+    // the stages that ran, in the order of their first run
+    CPPUNIT_ASSERT_EQUAL(std::size_t(2), t.entries.size());
+    CPPUNIT_ASSERT_EQUAL(std::string("first"), t.entries[0].name);
+    CPPUNIT_ASSERT_EQUAL(std::string("second"), t.entries[1].name);
+    CPPUNIT_ASSERT_EQUAL(std::size_t(2), t.entries[0].runs);
+    CPPUNIT_ASSERT_EQUAL(std::size_t(2), t.entries[1].runs);
+    CPPUNIT_ASSERT(t.total() >= 0);
+
+    const auto report = t.report();
+    std::fputs(report.c_str(), stdout);
+    CPPUNIT_ASSERT(report.find("  first\n") < report.find("  second\n"));
+    CPPUNIT_ASSERT(report.find("  second\n") != std::string::npos);
+    CPPUNIT_ASSERT(report.find("total") != std::string::npos);
+
+    t.clear();
+    CPPUNIT_ASSERT(t.entries.empty());
   }
 
   void testDescribe() {
