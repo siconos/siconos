@@ -11,7 +11,7 @@
    symmetric about the centre) carry together the disk's gap, G and nodal
    split. So the two runs must agree, rigid body and block alike, and the
    block must deflect. This fails when polytopemesh_r is not assembled on
-   the mesh side (one_step_integrator, moreau_jean_element). */
+   the mesh side (one_step_integrator, moreau_jean_kinds). */
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -99,8 +99,8 @@ struct data_t
               storage::unbounded<storage::pattern::attr_t<fem, "fext">>,
               storage::time_invariant<storage::pattern::attr_t<body, "fext">>,
               storage::diagonal<storage::pattern::attr_t<body, "mass_matrix">>,
-              storage::assembled_diagonal<storage::pattern::attr_t<
-                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+              storage::assembled_diagonal<
+                  storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {

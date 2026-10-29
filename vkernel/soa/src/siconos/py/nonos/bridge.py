@@ -198,16 +198,16 @@ class NewtonImpactFrictionNSL(Stored):
 class Osi(Stored):
     def __init__(self, theta):
         self._handle = vkernel.disks.add_osi(self.data())
-        self._handle.assembled_osi().set_theta(theta)
+        self._handle.set_theta(theta)
 
     def setTheta(self, theta):
-        self.handle().assembled_osi().set_theta(theta)
+        self.handle().set_theta(theta)
 
     def setConstraintActivationThreshold(self, cat):
-        self.handle().assembled_osi().set_constraint_activation_threshold(cat)
+        self.handle().set_constraint_activation_threshold(cat)
 
     def setGamma(self, gamma):
-        self.handle().assembled_osi().set_gamma(gamma)
+        self.handle().set_gamma(gamma)
 
 
 class Topology(Stored):
@@ -261,7 +261,7 @@ class Simulation(Stored):
         self._timedisc.handle().set_t0(t0)
 
         self.handle().initialize()
-        self.handle().one_step_integrator().assembled_osi().set_theta(0.50001)
+        self.handle().one_step_integrator().set_theta(0.50001)
 
     def insertIntegrator(self, osi):
         pass  # unimplemented

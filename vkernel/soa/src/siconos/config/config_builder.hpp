@@ -74,8 +74,7 @@ class config_builder {
 
   template <typename OsiType, string_literal str>
   auto with_assembled_diagonal() const {
-    using Prop =
-        storage::assembled_diagonal<storage::attr_t<typename OsiType::assembled_osi_t, str>>;
+    using Prop = storage::assembled_diagonal<storage::attr_t<OsiType, str>>;
     using NewProps = decltype(mp::prepend(PropertiesList{}, Prop{}));
     return config_builder<ParamsMap, ItemsList, NewProps>{};
   }

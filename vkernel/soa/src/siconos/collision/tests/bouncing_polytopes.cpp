@@ -75,8 +75,8 @@ struct data_t : storage::make_runtime_database<
                                           storage::some::item_ref<polytope_shape>>,
                         storage::time_invariant<storage::pattern::attr_t<polytope, "fext">>,
                         storage::diagonal<storage::pattern::attr_t<polytope, "mass_matrix">>,
-                        storage::assembled_diagonal<storage::pattern::attr_t<
-                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+                        storage::assembled_diagonal<
+                            storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {

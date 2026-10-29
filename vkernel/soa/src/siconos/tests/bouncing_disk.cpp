@@ -37,9 +37,7 @@ struct data_t
                                 storage::some::item_ref<disk_shape>>,
               storage::time_invariant<storage::attr_t<disk, "fext">>,
               storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
-};
+              storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {
@@ -163,9 +161,8 @@ class BouncingDiskTest : public CppUnit::TestFixture {
 
       double p0, lambda;
       if (ninvds > 0) {
-        p0 = get_vector(simulation.one_step_integrator().visit_element<0>(
-                            [](auto elem) { return elem.p0_vector_assembled(); }),
-                        0)(1);
+        // the second component of the impulse on the disk
+        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 1)(0);
 
         lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
       } else {

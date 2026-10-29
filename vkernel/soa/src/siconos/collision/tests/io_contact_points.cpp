@@ -13,7 +13,7 @@
 // Regression for the uninitialized-output column 15 of io::contact_points
 // (interaction.y[1], the tangential gap row).
 //
-// compute_output in moreau_jean_element.hpp writes y[0] only on the nonlinear
+// compute_output in moreau_jean_kinds.hpp writes y[0] only on the nonlinear
 // relation branches; y[1] used to be read uninitialized (NaN or 0 depending on
 // the allocator) and contact_points exposed that in HDF5 column 15. The fix
 // zeros y before the branch, so every row must now read y[1] == 0 and finite,
@@ -61,8 +61,8 @@ struct data_t : storage::make_runtime_database<
                                           storage::some::item_ref<disk_shape>>,
                         storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
                         storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
-                        storage::assembled_diagonal<storage::pattern::attr_t<
-                            typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
+                        storage::assembled_diagonal<
+                            storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {

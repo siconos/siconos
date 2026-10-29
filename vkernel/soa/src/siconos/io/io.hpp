@@ -31,12 +31,12 @@ struct io : item {
   // declares the attached storages of systems and interactions (id, ds1, ...)
   using topology = typename osi::topology;
   /* /!\ only system sizes defined at compile time and 2D for the moment */
-  using system = nth_t<0, typename osi::systems_t>;   // fixed dof system
-  using dsystem = nth_t<1, typename osi::systems_t>;  // runtime dof system
-                                                      // maybe empty_item
-  using interaction = nth_t<0, typename osi::interactions_t>;
+  using system = typename topology::fixed_dof_system;     // fixed dof system
+  using dsystem = typename topology::dynamic_dof_system;  // runtime dof system
+                                                          // maybe empty_item
+  using interaction = typename topology::fixed_dof_interaction;
   // disk / fem interaction (maybe empty_item)
-  using dinteraction = nth_t<1, typename osi::interactions_t>;
+  using dinteraction = typename topology::dynamic_dof_fixed_dof_interaction;
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
@@ -77,9 +77,9 @@ struct io : item {
       auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
       auto& indices = storage::prop_values<system, "index", topology>(data, step);
 
-      /* /!\ first osi */
-      const auto& p0_v = self()->make_handle(osi()).template visit_element<0>(
-          [](auto elem) { return elem.p0_vector_assembled(); });
+      /* /!\ the rigid systems, the first kind */
+      auto hosi = self()->make_handle(osi());
+      const auto& p0_v = std::get<0>(hosi.systems()).p0_view(hosi.p0_vector_assembled());
 
       attr<"p0_info">(*self()).clear();
 

@@ -65,7 +65,7 @@ static auto param =
  *   carries its item closure;
  * - an item type: search only that item's own properties list, without the
  *   world.  This is what lets item code look up the attached storages it
- *   declares (topology, moreau_jean_element, io, ...) without the world.
+ *   declares (topology, moreau_jean_systems, io, ...) without the world.
  *
  * Compile with VKERNEL_CHECK_DECLARER to check, at every call site, that the
  * declarer's list gives the same storage as the world search.

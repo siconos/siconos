@@ -37,9 +37,7 @@ struct data_t
                                 storage::some::item_ref<disk_shape>>,
               storage::time_invariant<storage::attr_t<disk, "fext">>,
               storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
-};
+              storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {

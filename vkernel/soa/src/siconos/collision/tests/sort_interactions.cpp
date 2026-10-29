@@ -71,8 +71,7 @@ using properties = storage::with_properties<
                       storage::some::item_ref<disk_shape>>,
     storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
     storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
-    storage::assembled_diagonal<
-        storage::pattern::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>;
+    storage::assembled_diagonal<storage::pattern::attr_t<osi, "mass_matrix_assembled">>>;
 
 #ifdef SORT_STATIC_DB
 struct data_t : storage::make_compile_time_database<env, simulation, interaction_manager,

@@ -153,8 +153,8 @@ struct maker
               storage::unbounded<storage::pattern::attr_t<config::fem, "fext">>,
               storage::time_invariant<storage::pattern::attr_t<config::body, "fext">>,
               storage::diagonal<storage::pattern::attr_t<config::body, "mass_matrix">>,
-              storage::assembled_diagonal<storage::pattern::attr_t<
-                  typename config::osi::assembled_osi_t, "mass_matrix_assembled">>,
+              storage::assembled_diagonal<
+                  storage::pattern::attr_t<config::osi, "mass_matrix_assembled">>,
               storage::bind<config::body, "body">, storage::bind<config::fem, "fem">,
               storage::bind<config::polytope_shape, "polytope_shape">,
               storage::bind<config::polytopefsegment_r, "polytopefsegment_r">,
@@ -178,9 +178,8 @@ struct maker
               storage::bind<config::td, "time_discretization">,
               storage::bind<config::topo, "topology">,
               storage::bind<config::simulation, "simulation">,
-              storage::bind<config::osnspb, "osnspb">,
-              storage::bind<typename config::osi::assembled_osi_t, "assembled_osi">,
-              storage::bind<config::fc2d, "fc2d">, storage::bind<config::io, "io">>> {};
+              storage::bind<config::osnspb, "osnspb">, storage::bind<config::fc2d, "fc2d">,
+              storage::bind<config::io, "io">>> {};
 
 // no static instance: it was only there to name the type, and every TU
 // including this header constructed (and, with the registry, registered) one

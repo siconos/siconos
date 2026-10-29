@@ -8,12 +8,12 @@
 namespace siconos::simul::kernels {
 
 /* The kernels of the simulation (see storage/kernels.hpp): the placeholders
-   resolved by the element that runs a kernel, and the iteration spaces of the
-   simulation. */
+   resolved by the kind that runs a kernel (see moreau_jean_kinds.hpp), and the iteration
+   spaces of the simulation. */
 
 using namespace storage::kernels;
 
-// placeholders: Ctx is the context of the element that runs the kernel
+// placeholders: Ctx is the context of the kind that runs the kernel
 struct systems {  // its system type
   static constexpr std::string_view label = "systems";
   template <typename Ctx>
@@ -24,9 +24,9 @@ struct interactions {  // its interaction type
   template <typename Ctx>
   using resolved_in = typename Ctx::interaction;
 };
-struct by_element {  // the element, declarer of its own properties
+struct by_kind {  // the kind, declarer of its own properties
   template <typename Ctx>
-  using resolved_in = typename Ctx::element;
+  using resolved_in = typename Ctx::kind;
 };
 struct by_topology {  // the topology, declarer of the shared properties
   template <typename Ctx>

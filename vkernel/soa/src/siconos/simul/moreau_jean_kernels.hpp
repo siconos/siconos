@@ -14,7 +14,7 @@ namespace siconos::simul::moreau_jean {
 
 /* The Moreau-Jean time integration as kernels (see storage/kernels.hpp and
    simul/kernels.hpp). The parameters p of a kernel are one of the structs
-   below, given by moreau_jean_element when it runs the kernel. */
+   below, given by the kinds (moreau_jean_kinds.hpp) when they run the kernel. */
 
 using namespace kernels;
 
@@ -72,16 +72,15 @@ struct ranks {
   Emplace emplace = nullptr;
 };
 
-// an assembled vector or matrix, the first row of the items
-template <typename Assembled, typename Offset>
-struct assembled_at {
-  Assembled assembled;
-  Offset offset;
+// an assembled vector
+template <typename Vector>
+struct block_vector {
+  Vector vector;
 };
 
-// the H matrix of the FEM systems in contact with rigid ones: its rows of
-// the FEM systems (matrix), the rows of the rigid systems (rigid_matrix)
-// after rigid_rows, the dof offsets of the involved FEM systems
+// the H matrix of the FEM systems in contact with rigid ones: its columns of
+// the FEM systems (matrix), of the rigid systems (rigid_matrix), the dof
+// offsets of the involved FEM systems
 template <typename Data, typename Matrix, typename RigidMatrix, typename Offsets,
           typename Indice>
 struct fem_h_matrix {
@@ -89,7 +88,6 @@ struct fem_h_matrix {
   Matrix matrix;
   RigidMatrix rigid_matrix;
   Offsets& sum_dofs;
-  Indice rigid_rows;
   Indice nslaw_size;
 };
 
@@ -139,8 +137,8 @@ using position = position_on<all<systems>>;
 using involved_position = position_on<involved<systems>>;
 
 // M^-1 f of a rigid system, f being constant over the step
-struct minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">, out<"minv_f", by_element>,
-                       out<"minv_f", by_element, next>> {
+struct minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">, out<"minv_f", by_kind>,
+                       out<"minv_f", by_kind, next>> {
   static void apply(const auto&, auto& mass_matrix, const auto& f, auto& minv_f,
                     auto& minv_f_next) {
     minv_f = f;
@@ -150,8 +148,8 @@ struct minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">, out<"minv_f"
 };
 
 // free flight of a rigid system (K = 0)
-struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_element>,
-                              in<"minv_f", by_element, next>, out<"velocity", next>> {
+struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_kind>,
+                              in<"minv_f", by_kind, next>, out<"velocity", next>> {
   static void apply(const auto& p, const auto& v, const auto& minv_f, const auto& minv_f_next,
                     auto& v_next) {
     v_next = v + p.h * p.theta * minv_f_next + p.h * (1 - p.theta) * minv_f;
@@ -162,7 +160,7 @@ struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_elem
 // system, f being constant over the step
 template <typename Vector>
 struct fem_minv_f : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">, in<"fext">,
-                           out<"minv_f", by_element>, out<"minv_f", by_element, next>>,
+                           out<"minv_f", by_kind>, out<"minv_f", by_kind, next>>,
                     host_only {
   static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& f, auto& minv_f,
                     auto& minv_f_next) {
@@ -220,7 +218,7 @@ struct diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
 };
 
 // the number of dofs of an involved system, before the scan that gives the
-// offsets (see moreau_jean_element::compute_total_dofs)
+// offsets (see moreau_jean_systems::compute_total_dofs)
 struct dofs : kernel<involved<systems>, rank, in<"mass_matrix">>, assembles {
   static void apply(auto& p, auto index, const auto& mass_matrix) {
     p.sum_dofs[index + 1] = algebra::ncols(mass_matrix);
@@ -418,7 +416,7 @@ struct involved_entry
 // the free output derivative of an active interaction in q of the problem
 struct free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
   static void apply(auto& p, auto row, const auto& ydot_next) {
-    set_value(p.assembled, p.offset + row, ydot_next);
+    set_value(p.vector, row, ydot_next);
   }
 };
 
@@ -470,8 +468,7 @@ struct fem_h_blocks
     for (auto k : blocked1) {
       h1_mod.col(k).setZero();
     }
-    // the rows of the rigid-FEM interactions follow those of the rigid ones
-    set_value(p.rigid_matrix, p.rigid_rows + row, j1, h1_mod);
+    set_value(p.rigid_matrix, row, j1, h1_mod);
 
     variant::visit(p.data, rel,
                    mp::overload(
