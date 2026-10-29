@@ -15,10 +15,12 @@ using namespace storage::kernels;
 
 // placeholders: Ctx is the context of the element that runs the kernel
 struct systems {  // its system type
+  static constexpr std::string_view label = "systems";
   template <typename Ctx>
   using resolved_in = typename Ctx::system;
 };
 struct interactions {  // its interaction type
+  static constexpr std::string_view label = "interactions";
   template <typename Ctx>
   using resolved_in = typename Ctx::interaction;
 };
@@ -43,6 +45,7 @@ struct relation : space_value {};
 template <typename Item>
 struct involved {
   using item = Item;
+  static std::string text() { return "involved " + storage::kernels::detail::label<Item>(); }
   template <typename Ctx>
   static void for_each(auto& data, auto step, std::size_t, auto&& f) {
     simul::for_each_involved<resolve_t<Ctx, Item>, resolve_t<Ctx, by_topology>>(
@@ -54,6 +57,7 @@ struct involved {
 template <typename Item>
 struct active {
   using item = Item;
+  static std::string text() { return "active " + storage::kernels::detail::label<Item>(); }
   template <typename Ctx>
   static void for_each(auto& data, auto step, std::size_t, auto&& f) {
     simul::for_each_active<resolve_t<Ctx, Item>, resolve_t<Ctx, by_topology>>(
@@ -68,6 +72,9 @@ struct active {
 template <typename Item>
 struct relations {
   using item = Item;
+  static std::string text() {
+    return "relations of " + storage::kernels::detail::label<Item>();
+  }
   template <typename Ctx>
   static void for_each(auto& data, auto step, std::size_t, auto&& f) {
     using inter_t = resolve_t<Ctx, Item>;

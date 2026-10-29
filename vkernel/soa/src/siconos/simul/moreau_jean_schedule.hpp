@@ -44,11 +44,12 @@ struct per_element {
 namespace moreau_jean::stages {
 
 using storage::schedule::condition;
+using storage::schedule::host_code;
 using storage::schedule::stage;
 
 // the stages of an element
 
-struct relation_sets : stage<"the relation sets hold every interaction"> {
+struct relation_sets : stage<"the relation sets hold every interaction">, host_code {
   static void run(auto& c) { c.elem.sync_relation_sets(c.step); }
 };
 
@@ -103,7 +104,8 @@ struct contact_update : stage<"v, q at step + 1 of the involved systems"> {
 // the stages of the integrator
 
 struct active_set
-    : stage<"the active set: the interactions whose gap may close, the systems they involve"> {
+    : stage<"the active set: the interactions whose gap may close, the systems they involve">,
+      host_code {
   static void run(auto& c) {
     c.involved = c.integrator.compute_active_interactions(c.step, c.h);
   }
@@ -113,7 +115,7 @@ struct contacts : condition<"there are contacts"> {
   static bool holds(const auto& c) { return c.involved > 0; }
 };
 
-struct assembly_setup : stage<"the sizes and offsets of the assembled problem"> {
+struct assembly_setup : stage<"the sizes and offsets of the assembled problem">, host_code {
   static void run(auto& c) { c.integrator.assemble_setup(c.step); }
 };
 
@@ -125,11 +127,11 @@ struct free_velocity_output : stage<"q = H v_free, the free output derivatives">
   static void run(auto& c) { c.integrator.compute_q_nsp_vector_assembled(c.step); }
 };
 
-struct delassus : stage<"W = H M^-1 H^T, or H (M + h^2 theta^2 K)^-1 H^T"> {
+struct delassus : stage<"W = H M^-1 H^T, or H (M + h^2 theta^2 K)^-1 H^T">, host_code {
   static void run(auto& c) { c.integrator.compute_w_matrix(c.step, c.h); }
 };
 
-struct solve : stage<"the frictional contact problem (W, q, mu): lambda"> {
+struct solve : stage<"the frictional contact problem (W, q, mu): lambda">, host_code {
   static void run(auto& c) {
     using time_stepping_t = typename std::decay_t<decltype(c.time_stepping)>::type;
     c.time_stepping.template solve_nonsmooth_problem<typename time_stepping_t::formulation_t>(
@@ -137,7 +139,7 @@ struct solve : stage<"the frictional contact problem (W, q, mu): lambda"> {
   }
 };
 
-struct impulse : stage<"the velocity correction M^-1 H^T lambda"> {
+struct impulse : stage<"the velocity correction M^-1 H^T lambda">, host_code {
   static void run(auto& c) { c.integrator.compute_input(c.step, c.h); }
 };
 

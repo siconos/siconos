@@ -208,7 +208,7 @@ struct boundary_conditions
 
 // a block of the assembled matrix: the attribute Name of an involved system
 template <storage::pattern::string_literal Name>
-struct diagonal_block : kernel<involved<systems>, rank, in<Name>> {
+struct diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
   static void apply(auto& p, auto index, const auto& block) {
     set_value(p.matrix, index, index, block);
   }
@@ -216,7 +216,7 @@ struct diagonal_block : kernel<involved<systems>, rank, in<Name>> {
 
 // the number of dofs of an involved system, before the scan that gives the
 // offsets (see moreau_jean_element::compute_total_dofs)
-struct dofs : kernel<involved<systems>, rank, in<"mass_matrix">> {
+struct dofs : kernel<involved<systems>, rank, in<"mass_matrix">>, assembles {
   static void apply(auto& p, auto index, const auto& mass_matrix) {
     p.sum_dofs[index + 1] = algebra::ncols(mass_matrix);
   }
@@ -247,14 +247,16 @@ struct impact_law
 };
 
 // an active interaction in the assembled vectors
-struct assemble_multipliers : kernel<active<interactions>, rank, in<"lambda">, in<"ydot">> {
+struct assemble_multipliers : kernel<active<interactions>, rank, in<"lambda">, in<"ydot">>,
+                              assembles {
   static void apply(auto& p, auto index, const auto& lambda, const auto& ydot) {
     set_value(p.lambdas, index, lambda);
     set_value(p.ydots, index, ydot);
   }
 };
 
-struct assemble_friction : kernel<active<interactions>, rank, through<"nslaw", "mu">> {
+struct assemble_friction : kernel<active<interactions>, rank, through<"nslaw", "mu">>,
+                           assembles {
   static void apply(auto& p, auto index, const auto& mu) { set_value(p.mus, index, mu); }
 };
 
@@ -273,7 +275,8 @@ struct keep_multipliers : kernel<active<interactions>, rank, out<"lambda">> {
 struct jacobians
     : kernel<relations<interactions>, relation, referenced<"ds1", by_topology>,
              referenced<"ds2", by_topology>, inout<"h_matrix1">, inout<"h_matrix2">>,
-      reads_world {
+      reads_world,
+      host_only {
   static void apply(const auto& p, auto& rel, auto ds1, auto ds2, auto& h1, auto& h2) {
     using rel_t = std::decay_t<decltype(rel)>;
     // the first of relation1, relation2 wins: a linear relation that is a
@@ -292,7 +295,8 @@ struct jacobians
 struct output : kernel<relations<interactions>, relation, in<"nds", by_topology>,
                        referenced<"ds1", by_topology>, referenced<"ds2", by_topology>,
                        in<"h_matrix1">, in<"h_matrix2">, out<"y">, out<"ydot">>,
-                reads_world {
+                reads_world,
+                host_only {
   static void apply(const auto& p, auto& rel, auto nds, auto ds1, auto ds2, const auto& h1,
                     const auto& h2, auto& y, auto& ydot) {
     using rel_t = std::decay_t<decltype(rel)>;
@@ -375,7 +379,7 @@ struct activate : kernel<all<interactions>, item_index, in<"activation", by_topo
 // the assembled nonsmooth problem
 
 // the free output derivative of an active interaction in q of the problem
-struct free_output : kernel<active<interactions>, rank, in<"ydot", next>> {
+struct free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
   static void apply(auto& p, auto row, const auto& ydot_next) {
     set_value(p.assembled, p.offset + row, ydot_next);
   }
@@ -388,7 +392,8 @@ struct h_blocks
     : kernel<active<interactions>, rank, in<"h_matrix1">, in<"h_matrix2">,
              through<"ds1", "index", by_topology>, through<"ds2", "index", by_topology>,
              through<"ds1", "bc_velocities_0", by_topology>,
-             through<"ds2", "bc_velocities_0", by_topology>> {
+             through<"ds2", "bc_velocities_0", by_topology>>,
+      assembles {
   static void apply(auto& p, auto row, const auto& h1, const auto& h2, auto j1, auto j2,
                     const auto& blocked1, const auto& blocked2) {
     auto h1_mod = h1;
@@ -417,7 +422,8 @@ struct fem_h_blocks
              through<"ds1", "index", by_topology>, through<"ds2", "index", by_topology>,
              through<"ds1", "bc_velocities_0", by_topology>,
              through<"ds2", "bc_velocities_0", by_topology>>,
-      host_only {
+      host_only,
+      assembles {
   static void apply(auto& p, auto row, const auto& h1, const auto& h2, const auto& rel,
                     auto j1, auto i2, const auto& blocked1, const auto& blocked2) {
     const auto j2 = p.sum_dofs[i2];
@@ -455,7 +461,8 @@ struct fem_h_blocks
 // the block of H of an active self contact of a FEM system (ds1 == ds2)
 struct fem_self_h_block : kernel<active<interactions>, rank, in<"h_matrix1">,
                                  in<"nds", by_topology>, through<"ds2", "index", by_topology>,
-                                 through<"ds2", "bc_velocities_0", by_topology>> {
+                                 through<"ds2", "bc_velocities_0", by_topology>>,
+                          assembles {
   static void apply(auto& p, auto row, const auto& h1, [[maybe_unused]] auto nds, auto i2,
                     const auto& blocked2) {
     // only ds1 == ds2 (nds == 1) is supported (rt_lagrangian_r is a relation1)

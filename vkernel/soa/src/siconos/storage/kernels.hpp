@@ -1,12 +1,17 @@
 #pragma once
 
+#include <cctype>
 #include <cstddef>
 #include <numeric>
+#include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include "siconos/storage/get.hpp"
+#include "siconos/storage/handle.hpp"
 #include "siconos/storage/sparse_set.hpp"
 
 namespace siconos::storage::kernels {
@@ -44,6 +49,57 @@ namespace siconos::storage::kernels {
 
 // a field at the next step (the step + 1 slot of a keep<attr, 2> memory)
 struct next {};
+
+namespace detail {
+
+// the name of a type, without the namespaces, the string literals of its
+// template arguments as strings
+template <typename T>
+std::string type_name() {
+  std::string_view f = __PRETTY_FUNCTION__;
+  const auto b = f.find("T = ") + 4;
+  const std::string full(f.substr(b, f.find_first_of(";]", b) - b));
+
+  // without the namespaces: an identifier followed by :: is dropped
+  std::string name;
+  std::string word;
+  for (std::size_t k = 0; k < full.size(); ++k) {
+    const char c = full[k];
+    if (std::isalnum(static_cast<unsigned char>(c)) || c == '_') {
+      word += c;
+    } else if (c == ':' && k + 1 < full.size() && full[k + 1] == ':') {
+      word.clear();
+      ++k;
+    } else {
+      name += word;
+      word.clear();
+      name += c;
+    }
+  }
+  name += word;
+
+  // string_literal<N>{"x"} -> "x"
+  for (auto p = name.find("string_literal<"); p != std::string::npos;
+       p = name.find("string_literal<", p)) {
+    const auto open = name.find('{', p);
+    const auto close = name.find('}', open);
+    name =
+        name.substr(0, p) + name.substr(open + 1, close - open - 1) + name.substr(close + 1);
+  }
+  return name;
+}
+
+// a placeholder or an item: its label if it has one
+template <typename T>
+std::string label() {
+  if constexpr (requires { T::label; }) {
+    return std::string(T::label);
+  } else {
+    return type_name<T>();
+  }
+}
+
+}  // namespace detail
 
 template <typename Ctx, typename T>
 struct resolve {
@@ -162,6 +218,10 @@ struct host_only {};
 // parameters, counters...): it never runs in parallel
 struct ordered {};
 
+// a kernel that writes into an assembled matrix or vector given in its
+// parameters, each item in its own rows
+struct assembles {};
+
 // the value an iteration space gives with each item: the value of the item
 // in a sparse set (set), its entry in a property (entries)
 struct space_value {
@@ -200,6 +260,7 @@ decltype(auto) at(Column& column, auto i, auto&& v) {
 template <typename Item>
 struct all {
   using item = Item;
+  static std::string text() { return "all " + detail::label<Item>(); }
   template <typename Ctx>
   static void for_each(auto&, auto, std::size_t n, auto&& f) {
     for (std::size_t i = 0; i < n; ++i) {
@@ -213,6 +274,9 @@ struct all {
 template <typename Item, typename Tag, typename Declarer>
 struct set {
   using item = Item;
+  static std::string text() {
+    return detail::label<Item>() + " in " + detail::type_name<Tag>();
+  }
   template <typename Ctx>
   static void for_each(auto& data, auto, std::size_t, auto&& f) {
     auto& values = storage::prop_dynamic_memory_tagged<resolve_t<Ctx, Item>, Tag,
@@ -226,6 +290,9 @@ struct set {
 template <typename Item, pattern::string_literal Name, typename Declarer>
 struct entries {
   using item = Item;
+  static std::string text() {
+    return detail::label<Item>() + " with " + std::string(Name.value);
+  }
   template <typename Ctx>
   static void for_each(auto& data, auto step, std::size_t, auto&& f) {
     auto& values =
@@ -263,6 +330,110 @@ std::size_t count(auto& data, auto step) {
   Space::template for_each<Ctx>(data, step, 0, [&n](auto, auto&&) { ++n; });
   return n;
 }
+
+// what a kernel does, as text: its iteration space, the fields it reads and
+// writes, its markers (see info<K>() and the dataflow observer of
+// storage/schedule.hpp)
+struct kernel_info {
+  std::string name;
+  std::string space;
+  std::string item;  // the type of the items it ran on
+  std::vector<std::string> reads;
+  std::vector<std::string> writes;
+  bool host_only = false;
+  bool ordered = false;
+  bool reads_world = false;
+  bool assembles = false;
+};
+
+namespace detail {
+
+template <typename S>
+std::string space_text() {
+  if constexpr (requires { S::text(); }) {
+    return S::text();
+  } else {
+    return type_name<S>();
+  }
+}
+
+template <typename Field>
+struct access {
+  static void add(kernel_info&) {}  // space values, item index
+};
+
+template <pattern::string_literal Name, typename... Options>
+std::string field_label() {
+  return std::string(Name.value) + (field<Name, Options...>::offset ? "_next" : "");
+}
+
+template <pattern::string_literal Name, typename... Options>
+struct access<in<Name, Options...>> {
+  static void add(kernel_info& i) { i.reads.push_back(field_label<Name, Options...>()); }
+};
+template <pattern::string_literal Name, typename... Options>
+struct access<out<Name, Options...>> {
+  static void add(kernel_info& i) { i.writes.push_back(field_label<Name, Options...>()); }
+};
+template <pattern::string_literal Name, typename... Options>
+struct access<inout<Name, Options...>> {
+  static void add(kernel_info& i) {
+    i.reads.push_back(field_label<Name, Options...>());
+    i.writes.push_back(field_label<Name, Options...>());
+  }
+};
+template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
+struct access<through<Ref, Name, Options...>> {
+  static void add(kernel_info& i) {
+    i.reads.push_back(std::string(Ref.value) + "." + field_label<Name, Options...>());
+  }
+};
+template <pattern::string_literal Ref, typename... Options>
+struct access<referenced<Ref, Options...>> {
+  static void add(kernel_info& i) { i.reads.push_back(std::string(Ref.value) + " (handle)"); }
+};
+
+template <typename K, typename... Fields>
+void add_accesses(kernel_info& i, std::tuple<Fields...>*) {
+  (access<Fields>::add(i), ...);
+}
+
+}  // namespace detail
+
+/// what the kernel K (or fused<...>) does
+template <typename K>
+kernel_info info() {
+  kernel_info i;
+  if constexpr (requires { typename K::fields; }) {
+    i.name = detail::type_name<K>();
+    i.space = detail::space_text<typename K::space>();
+    detail::add_accesses<K>(i, static_cast<typename K::fields*>(nullptr));
+    i.host_only = std::is_base_of_v<host_only, K>;
+    i.ordered = std::is_base_of_v<ordered, K>;
+    i.reads_world = std::is_base_of_v<reads_world, K>;
+    i.assembles = std::is_base_of_v<assembles, K>;
+  } else {
+    [&]<typename... Kernels>(fused<Kernels...>*) {
+      (
+          [&](kernel_info k) {
+            i.name += (i.name.empty() ? "" : " + ") + k.name;
+            i.space = k.space;
+            i.reads.insert(i.reads.end(), k.reads.begin(), k.reads.end());
+            i.writes.insert(i.writes.end(), k.writes.begin(), k.writes.end());
+            i.host_only = i.host_only || k.host_only;
+            i.ordered = i.ordered || k.ordered;
+            i.reads_world = i.reads_world || k.reads_world;
+            i.assembles = i.assembles || k.assembles;
+          }(info<Kernels>()),
+          ...);
+    }(static_cast<K*>(nullptr));
+  }
+  return i;
+}
+
+/// while not null, run appends the kernels it runs (see the dataflow
+/// observer of storage/schedule.hpp)
+inline thread_local std::vector<kernel_info>* recording = nullptr;
 
 namespace detail {
 
@@ -306,6 +477,11 @@ void run(auto& data, auto step, auto&& p) {
   if constexpr (requires { typename K::fields; }) {
     run<fused<K>, Ctx>(data, step, p);
   } else {
+    if (recording) {
+      auto i = info<K>();
+      i.item = detail::type_name<resolve_t<Ctx, typename K::space::item>>();
+      recording->push_back(std::move(i));
+    }
     [&]<typename... Kernels>(fused<Kernels...>*) {
       using item = resolve_t<Ctx, typename K::space::item>;
       auto cols = std::make_tuple(detail::columns<Ctx, item>(

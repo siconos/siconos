@@ -1,4 +1,4 @@
-# Usage: timed.py <script.py> [script arguments...]
+# Usage: timed.py [--dataflow] <script.py> [script arguments...]
 #
 # Runs a vnative script (bench-disks.py, bench-polytopes.py,
 # tests/bench_fem_disks.py...) with the timings of the stages of its time
@@ -8,6 +8,10 @@
 #
 #   python3 timed.py bench-disks.py vnative 50
 #
+# With --dataflow, it also prints what the stages do: the kernels each stage
+# ran, their reads and writes, a placement (device, host, no kernel) and the
+# candidates for a fusion (see storage::schedule::dataflow).
+#
 # The script is not modified: the simulations it creates time their steps.
 
 import atexit
@@ -16,6 +20,10 @@ import sys
 
 import nonos.bridge as bridge
 
+dataflow = len(sys.argv) > 1 and sys.argv[1] == "--dataflow"
+if dataflow:
+    del sys.argv[1]
+
 simulation_init = bridge.Simulation.__init__
 
 
@@ -23,7 +31,14 @@ def timed_init(self, *args, **kwargs):
     simulation_init(self, *args, **kwargs)
     handle = self.handle()
     handle.enable_timings(True)
-    atexit.register(lambda: print("\n" + handle.timings_report(), file=sys.stderr))
+    handle.enable_dataflow(dataflow)
+
+    def report():
+        if dataflow:
+            print("\n" + handle.dataflow_report(), file=sys.stderr)
+        print("\n" + handle.timings_report(), file=sys.stderr)
+
+    atexit.register(report)
 
 
 bridge.Simulation.__init__ = timed_init

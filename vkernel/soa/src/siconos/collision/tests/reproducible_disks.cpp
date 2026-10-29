@@ -6,6 +6,7 @@
 #include <cmath>
 #include <format>
 #include <print>
+#include <string>
 #include <vector>
 
 #include "siconos/collision/space_filter.hpp"
@@ -79,9 +80,10 @@ namespace {
 struct run_result {
   std::vector<double> states;
   std::size_t max_interactions = 0;
+  std::string dataflow;  // what the stages of the time steps did
 };
 
-run_result run_deposit() {
+run_result run_deposit(bool with_dataflow = false) {
   using namespace siconos;
   using namespace storage;
 
@@ -176,6 +178,7 @@ run_result run_deposit() {
   ngbh.add_point_sets(0);
 
   simulation.initialize();
+  simulation.enable_dataflow(with_dataflow);
 
   run_result result;
   while (simulation.has_next_event()) {
@@ -186,6 +189,8 @@ run_result run_deposit() {
     result.max_interactions = std::max(
         result.max_interactions, std::size(storage::handles<config::interaction>(data, 0)));
   }
+
+  result.dataflow = simulation.dataflow_report();
 
   for (auto& disk : disks) {
     auto& q = storage::attr<"q">(disk, simulation.current_step());
@@ -200,6 +205,7 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ReproducibleDisksTest);
   CPPUNIT_TEST(testSortedNeighbors);
   CPPUNIT_TEST(testSameRunSameStates);
+  CPPUNIT_TEST(testDataflow);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -262,6 +268,29 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
       if (first.states[k] != second.states[k]) {
         CPPUNIT_FAIL(std::format("runs differ: state {} of disk {}: {:.17g} / {:.17g}", k % 6,
                                  k / 6, first.states[k], second.states[k]));
+      }
+    }
+  }
+
+  // what the stages of the time steps do, and recording it changes nothing
+  void testDataflow() {
+    auto recorded = run_deposit(true);
+    auto plain = run_deposit();
+    std::print("{}", recorded.dataflow);
+
+    CPPUNIT_ASSERT(recorded.states == plain.states);
+    CPPUNIT_ASSERT(plain.dataflow.empty());
+
+    const auto& text = recorded.dataflow;
+    for (const auto* line :
+         {"[device] the free state: v, q at step + 1 without the contact impulses\n",
+          "[host] the active set: the interactions whose gap may close, the systems they "
+          "involve\n",
+          "[host] the frictional contact problem (W, q, mu): lambda\n",
+          "    free_velocity + position_on<all<systems>>: all systems (disk)\n",
+          "fusion candidates:\n"}) {
+      if (text.find(line) == std::string::npos) {
+        CPPUNIT_FAIL(std::string("missing in the dataflow: ") + line);
       }
     }
   }

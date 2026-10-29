@@ -12,6 +12,9 @@ namespace siconos::simul {
 // the timings of the stages of the time steps (see storage::schedule::timings)
 struct schedule_timings : storage::data_holder<storage::schedule::timings> {};
 
+// what the stages of the time steps do (see storage::schedule::dataflow)
+struct schedule_dataflow : storage::data_holder<storage::schedule::dataflow> {};
+
 template <match::item... Items>
 struct time_stepping : item {
   using items = gather<Items...>;
@@ -28,6 +31,7 @@ struct time_stepping : item {
     some::item_ref<one_step_nonsmooth_problem_t> one_step_nonsmooth_problem;
     some::item_ref<topology_t> topology;
     some::item_ref<schedule_timings> timings;
+    some::item_ref<schedule_dataflow> dataflow;
   };
 
   template <typename Handle>
@@ -41,6 +45,7 @@ struct time_stepping : item {
       one_step_nonsmooth_problem() = storage::add<one_step_nonsmooth_problem_t>(data);
       topology() = storage::add<topology_t>(data);
       timings() = storage::add<schedule_timings>(data);
+      dataflow() = storage::add<schedule_dataflow>(data);
     }
 
     void __del__() {
@@ -69,6 +74,9 @@ struct time_stepping : item {
     decltype(auto) timings() {
       return make_ref_handle(self()->data(), storage::attr<"timings">(*self()));
     }
+    decltype(auto) dataflow() {
+      return make_ref_handle(self()->data(), storage::attr<"dataflow">(*self()));
+    }
 
     decltype(auto) current_step() { return (*self()).time_discretization().step(); }
 
@@ -95,11 +103,8 @@ struct time_stepping : item {
     }
 
     auto compute_one_step() {
-      if (auto& timings = self()->timings().instance()) {
-        return run_one_step(*timings);
-      } else {
-        return run_one_step(storage::schedule::run_only{});
-      }
+      return run_one_step(storage::schedule::optional_observers{
+          self()->timings().instance().get(), self()->dataflow().instance().get()});
     }
 
     // the timings of the stages of the next time steps, from zero
@@ -109,6 +114,22 @@ struct time_stepping : item {
       } else {
         timings().instance().reset();
       }
+    }
+
+    // record what the stages of the next time steps do
+    void enable_dataflow(bool on) {
+      if (on) {
+        dataflow().instance() = std::make_shared<storage::schedule::dataflow>();
+      } else {
+        dataflow().instance().reset();
+      }
+    }
+
+    // what the stages do: their kernels, a placement, the candidates for a
+    // fusion (empty if not enabled)
+    std::string dataflow_report() {
+      auto& dataflow = self()->dataflow().instance();
+      return dataflow ? dataflow->report() : std::string{};
     }
 
     // the timings of the stages, one line per stage (empty if not enabled)
@@ -157,6 +178,8 @@ struct time_stepping : item {
                      method("describe_time_step", &interface<Handle>::describe_time_step),
                      method("enable_timings", &interface<Handle>::enable_timings),
                      method("timings_report", &interface<Handle>::timings_report),
+                     method("enable_dataflow", &interface<Handle>::enable_dataflow),
+                     method("dataflow_report", &interface<Handle>::dataflow_report),
                      method("has_next_event", &interface<Handle>::has_next_event));
     }
   };
