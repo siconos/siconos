@@ -187,6 +187,10 @@ struct dataflow {
     for (const auto& e : entries) {
       text += std::format("[{}] {}\n", placement(e), e.name);
       for (const auto& k : e.kernels) {
+        if (k.space == "-") {
+          text += std::format("    {}\n", k.name);  // host code
+          continue;
+        }
         text += std::format("    {}: {} ({})\n", k.name, k.space, k.item);
         text += std::format("      reads {}\n", k.reads.empty() ? "-" : join(k.reads));
         auto writes = k.writes;

@@ -251,6 +251,11 @@ struct one_step_integrator {
         }
       }
 
+      // the active set: mark the active interactions and their systems,
+      // then the ranks by scans (kernels::offsets): the row of an active
+      // interaction among the active interactions of its type, the index of
+      // an involved system among the involved systems of its type, both in
+      // the order of the items
       auto compute_active_interactions(auto step, auto h) {
         auto& data = self()->data();
         using env = decltype(self()->env());
@@ -260,7 +265,12 @@ struct one_step_integrator {
 
         // all ds -> not involved
         ct_elem.template run<simul::moreau_jean::not_involved>(step, nullptr);
-        auto& ct_involveds = storage::prop_values<ct_system, "involved", Topology>(data, step);
+        if constexpr (with_k_matrix()) {
+          // once per step for the rt systems, whatever the rt interactions
+          // (rt_ct and/or rt_rt)
+          std::get<1>(elements())
+              .template run<simul::moreau_jean::not_involved>(step, nullptr);
+        }
 
         // the index sets are rebuilt with the properties
         if constexpr (with_index_sets<Topology>) {
@@ -277,48 +287,46 @@ struct one_step_integrator {
           }
         }
 
-        indice ct_ds_counter = 0;
-        indice ct_inter_counter = 0;
-
-        indice rt_ds_counter = 0;
-        indice rt_ct_inter_counter = 0;
-        indice rt_rt_inter_counter = 0;
-
-        // the system ds is involved: the next index of its kind if it is not
-        // already (a rigid system touched by a rigid-FEM interaction gets a
-        // rigid index)
-        auto involve = [&data, &ct_ds_counter, &rt_ds_counter](auto ds) {
-          using ds_t = typename decltype(ds)::type;
-          indice& counter = std::is_same_v<ds_t, ct_system> ? ct_ds_counter : rt_ds_counter;
-          if (!prop<"involved", Topology>(ds)) {
-            prop<"involved", Topology>(ds) = true;
-            prop<"index", Topology>(ds) = counter;
-            if constexpr (with_index_sets<Topology>) {
-              index_set<ds_t, involved_set_tag, Topology>(data).emplace(ds.index().value(),
-                                                                        counter);
-            }
-            counter++;
-          }
-        };
-
-        // the active set of the interactions of an element, rows counted by
-        // counter: the activation of each interaction, then in order the rows
-        // of the active ones and the indices of their systems
-        auto build_active_set = [&](auto elem, indice& counter) {
+        // the interactions of an element: the active ones, their rows, their
+        // systems involved; the number of active interactions
+        auto mark = [&](auto elem) -> indice {
           using inter_t = typename decltype(elem)::type::interaction;
-          auto activate = [&data, &counter](auto i) {
-            const indice row = counter++;
-            if constexpr (with_index_sets<Topology>) {
-              index_set<inter_t, active_set_tag, Topology>(data).emplace(i, row);
-            }
-          };
-          elem.template run<
-              kernels::fused<simul::moreau_jean::activation, simul::moreau_jean::activate>>(
+          elem.template run<kernels::fused<simul::moreau_jean::activation,
+                                           simul::moreau_jean::mark_involved>>(
               step, simul::moreau_jean::active_set{
-                        h, 0.5, self()->constraint_activation_threshold(), activate, involve});
+                        h, decltype(h){0.5},
+                        static_cast<decltype(h)>(self()->constraint_activation_threshold())});
+          auto rows = kernels::offsets<indice>(
+              storage::prop_values<inter_t, "activation", Topology>(data, step));
+          if constexpr (with_index_sets<Topology>) {
+            auto emplace = [&data](auto i, auto row) {
+              index_set<inter_t, active_set_tag, Topology>(data).emplace(i, row);
+            };
+            elem.template run<simul::moreau_jean::active_entry>(
+                step, simul::moreau_jean::ranks{rows, emplace});
+          }
+          return rows.back();
         };
 
-        build_active_set(ct_elem, ct_inter_counter);
+        // the systems of an element: the index of the involved ones; the
+        // number of involved systems
+        auto index = [&](auto elem) -> indice {
+          using system_t = typename decltype(elem)::type::system;
+          auto offsets = kernels::offsets<indice>(
+              storage::prop_values<system_t, "involved", Topology>(data, step));
+          elem.template run<simul::moreau_jean::involved_index>(
+              step, simul::moreau_jean::ranks{offsets});
+          if constexpr (with_index_sets<Topology>) {
+            auto emplace = [&data](auto i, auto index) {
+              index_set<system_t, involved_set_tag, Topology>(data).emplace(i, index);
+            };
+            elem.template run<simul::moreau_jean::involved_entry>(
+                step, simul::moreau_jean::ranks{offsets, emplace});
+          }
+          return offsets.back();
+        };
+
+        const indice ct_inter_counter = mark(ct_elem);
 
         std::print(
             "  [compute_active_interactions] total number of ct ds: "
@@ -326,22 +334,14 @@ struct one_step_integrator {
             "total "
             "number of "
             "ct interactions: {}\n",
-            std::size(ct_involveds),
+            std::size(storage::prop_values<ct_system, "involved", Topology>(data, step)),
             std::size(
                 storage::prop_values<ct_interaction, "activation", Topology>(data, step)));
 
-        if constexpr (with_k_matrix()) {
-          // reset rt_system involvement once per step, regardless of which
-          // rt-family interaction type(s) (rt_ct and/or rt_rt) are actually
-          // present - both key off this same shared per-rt_system property.
-          std::get<1>(elements())
-              .template run<simul::moreau_jean::not_involved>(step, nullptr);
-        }
-
+        indice rt_ct_inter_counter = 0;
         if constexpr (with_rt_ct_interaction()) {
-          auto rt_elem = std::get<1>(elements());
           // /!\ a rt system can only be in interaction with a ct system (ds1)
-          build_active_set(rt_elem, rt_ct_inter_counter);
+          rt_ct_inter_counter = mark(std::get<1>(elements()));
 
           std::print(
               "  [compute_active_interactions] total number of rt ds: "
@@ -352,24 +352,36 @@ struct one_step_integrator {
               std::size(storage::prop_values<rt_system, "involved", Topology>(data, step)),
               std::size(storage::prop_values<rt_ct_interaction, "activation", Topology>(
                   data, step)));
-
-          rt_elem.number_of_interactions() = rt_ct_inter_counter;
-          rt_elem.number_of_involved_ds() = rt_ds_counter;
         }
 
+        indice rt_rt_inter_counter = 0;
         if constexpr (with_rt_rt_interaction()) {
-          // fem "self" contact (e.g. against a fixed ground): ds1 == ds2,
-          // both indexed into the same rt_system as rt_ct above - continue
-          // (not reset) rt_ds_counter so a rt_system ds already marked
-          // involved via rt_ct keeps its index.
-          auto rt_rt_elem = rt_rt_element();
-          build_active_set(rt_rt_elem, rt_rt_inter_counter);
+          // fem "self" contact (e.g. against a fixed ground): ds1 == ds2, in
+          // the same rt_system as rt_ct above
+          rt_rt_inter_counter = mark(rt_rt_element());
 
           std::print(
               "  [compute_active_interactions] number of activated rt rt "
               "interactions: {}\n",
               rt_rt_inter_counter);
+        }
 
+        // after all the marks: a ct system may be involved by a rt ct
+        // interaction
+        const indice ct_ds_counter = index(ct_elem);
+        indice rt_ds_counter = 0;
+        if constexpr (with_k_matrix()) {
+          rt_ds_counter = index(std::get<1>(elements()));
+        }
+
+        if constexpr (with_rt_ct_interaction()) {
+          auto rt_elem = std::get<1>(elements());
+          rt_elem.number_of_interactions() = rt_ct_inter_counter;
+          rt_elem.number_of_involved_ds() = rt_ds_counter;
+        }
+
+        if constexpr (with_rt_rt_interaction()) {
+          auto rt_rt_elem = rt_rt_element();
           rt_rt_elem.number_of_interactions() = rt_rt_inter_counter;
           rt_rt_elem.number_of_involved_ds() = rt_ds_counter;
         }

@@ -55,16 +55,21 @@ struct fem_block_matrix {
 };
 
 // the active set: gamma for the gap at the middle of the step, the
-// activation threshold, activate(i) gives the next row to the interaction i,
-// involve(ds) gives the next index of its type to the system ds if it has
-// none yet
-template <typename H, typename S, typename Activate, typename Involve>
+// activation threshold
+template <typename H, typename S>
 struct active_set {
   H h;
   S gamma;
   S threshold;
-  Activate activate;
-  Involve involve;
+};
+
+// the ranks of the flagged items of a column, offsets[i] (the scan of the
+// flags, see kernels::offsets), and the index set of the flagged items,
+// emplace(i, rank)
+template <typename Offsets, typename Emplace = std::nullptr_t>
+struct ranks {
+  Offsets& offsets;
+  Emplace emplace = nullptr;
 };
 
 // an assembled vector or matrix, the first row of the items
@@ -358,20 +363,52 @@ struct activation
   }
 };
 
-// in the order of the interactions: a row for each active interaction, an
-// index for each system it involves the first time (the index of ds2 first)
-struct activate : kernel<all<interactions>, item_index, in<"activation", by_topology>,
-                         in<"nds", by_topology>, referenced<"ds1", by_topology>,
-                         referenced<"ds2", by_topology>>,
-                  ordered,
-                  host_only {
-  static void apply(auto& p, auto i, bool activation, auto nds, auto ds1, auto ds2) {
+// the systems of an active interaction are involved: several interactions
+// may write the same system, they all write true
+struct mark_involved
+    : kernel<all<interactions>, in<"activation", by_topology>, in<"nds", by_topology>,
+             out_through<"ds1", "involved", by_topology>,
+             out_through<"ds2", "involved", by_topology>> {
+  static void apply(const auto&, bool activation, auto nds, auto& involved1, auto& involved2) {
     if (activation) {
-      p.activate(i);
-      p.involve(ds2);
+      involved2 = true;
       if (nds == 2) {
-        p.involve(ds1);
+        involved1 = true;
       }
+    }
+  }
+};
+
+// the index of an involved system: its rank among the involved systems of
+// its type, in the order of the systems
+struct involved_index : kernel<all<systems>, item_index, in<"involved", by_topology>,
+                               out<"index", by_topology>> {
+  static void apply(const auto& p, auto i, bool involved, auto& index) {
+    if (involved) {
+      index = p.offsets[i];
+    }
+  }
+};
+
+// the active interactions and the involved systems in their index sets (host
+// containers, filled in the order of the items)
+struct active_entry : kernel<all<interactions>, item_index, in<"activation", by_topology>>,
+                      host_only,
+                      ordered {
+  static void apply(auto& p, auto i, bool activation) {
+    if (activation) {
+      p.emplace(i, p.offsets[i]);
+    }
+  }
+};
+
+struct involved_entry
+    : kernel<all<systems>, item_index, in<"involved", by_topology>, in<"index", by_topology>>,
+      host_only,
+      ordered {
+  static void apply(auto& p, auto i, bool involved, auto index) {
+    if (involved) {
+      p.emplace(i, index);
     }
   }
 };

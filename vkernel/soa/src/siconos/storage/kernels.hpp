@@ -186,6 +186,11 @@ struct through {
   }
 };
 
+// the same, written: a scatter (several items may write the same target, the
+// kernel must write the same value or be run in order)
+template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
+struct out_through : through<Ref, Name, Options...> {};
+
 // a handle on the item referenced by Ref, for the code that works on handles
 // (the relations): host only
 template <pattern::string_literal Ref, typename... Options>
@@ -317,6 +322,19 @@ struct fused {
                 "a kernel that reads the world cannot be fused");
 };
 
+/// the exclusive prefix sums of a column of counts or flags: offsets[k] is
+/// the sum of the k first values, offsets[n] the total. For flags, the rank
+/// of each flagged item among the flagged ones (a scan, the compaction of a
+/// mark).
+template <typename Index = std::size_t>
+std::vector<Index> offsets(const auto& column) {
+  std::vector<Index> o(std::size(column) + 1, 0);
+  for (std::size_t k = 0; k < std::size(column); ++k) {
+    o[k + 1] = o[k] + static_cast<Index>(column[k]);
+  }
+  return o;
+}
+
 /// v[k] = v[0] + ... + v[k], in place: with v[0] = 0 and v[k + 1] the size
 /// of the output of item k, the offsets of the outputs of variable size
 void inclusive_scan(auto& v) {
@@ -386,6 +404,12 @@ template <pattern::string_literal Ref, pattern::string_literal Name, typename...
 struct access<through<Ref, Name, Options...>> {
   static void add(kernel_info& i) {
     i.reads.push_back(std::string(Ref.value) + "." + field_label<Name, Options...>());
+  }
+};
+template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
+struct access<out_through<Ref, Name, Options...>> {
+  static void add(kernel_info& i) {
+    i.writes.push_back(std::string(Ref.value) + "." + field_label<Name, Options...>());
   }
 };
 template <pattern::string_literal Ref, typename... Options>
