@@ -32,6 +32,62 @@ struct time_step {
   Velocities velocities = nullptr;
 };
 
+// the time step, the theta of the theta-method and the factorizations of
+// the FEM systems kept on them: factor(i) of the system i
+template <typename H, typename S, typename Factor>
+struct fem_time_step {
+  H h;
+  S theta;
+  Factor factor;
+};
+
+// the factorizations of the FEM systems: factor(i) of the system i
+template <typename Factor>
+struct fem_factors {
+  Factor factor;
+};
+
+// an assembled matrix of FEM systems and the dof offsets of the involved ones
+template <typename Matrix, typename Offsets>
+struct fem_block_matrix {
+  Matrix matrix;
+  Offsets& sum_dofs;
+};
+
+// the active set: gamma for the gap at the middle of the step, the
+// activation threshold, activate(i) gives the next row to the interaction i,
+// involve(ds) gives the next index of its type to the system ds if it has
+// none yet
+template <typename H, typename S, typename Activate, typename Involve>
+struct active_set {
+  H h;
+  S gamma;
+  S threshold;
+  Activate activate;
+  Involve involve;
+};
+
+// an assembled vector or matrix, the first row of the items
+template <typename Assembled, typename Offset>
+struct assembled_at {
+  Assembled assembled;
+  Offset offset;
+};
+
+// the H matrix of the FEM systems in contact with rigid ones: its rows of
+// the FEM systems (matrix), the rows of the rigid systems (rigid_matrix)
+// after rigid_rows, the dof offsets of the involved FEM systems
+template <typename Data, typename Matrix, typename RigidMatrix, typename Offsets,
+          typename Indice>
+struct fem_h_matrix {
+  Data& data;
+  Matrix matrix;
+  RigidMatrix rigid_matrix;
+  Offsets& sum_dofs;
+  Indice rigid_rows;
+  Indice nslaw_size;
+};
+
 // the step of the relations
 template <typename Step>
 struct at_step {
@@ -94,6 +150,36 @@ struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_elem
   static void apply(const auto& p, const auto& v, const auto& minv_f, const auto& minv_f_next,
                     auto& v_next) {
     v_next = v + p.h * p.theta * minv_f_next + p.h * (1 - p.theta) * minv_f;
+  }
+};
+
+// M^-1 (f - K q) of a FEM system, with the factorization of M kept on the
+// system, f being constant over the step
+template <typename Vector>
+struct fem_minv_f : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">, in<"fext">,
+                           out<"minv_f", by_element>, out<"minv_f", by_element, next>>,
+                    host_only {
+  static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& f, auto& minv_f,
+                    auto& minv_f_next) {
+    Vector fmkq = f - k * q;
+    minv_f = p.factor(i).solve(fmkq);
+    minv_f_next = minv_f;
+  }
+};
+
+// free flight of a FEM system: W dv = h theta F(step + 1) + h (1 - theta)
+// F(step), F = f - K q, W = M + h^2 theta^2 K factorized once on the system
+template <typename Vector>
+struct fem_free_velocity : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">,
+                                  in<"velocity">, in<"fext">, out<"velocity", next>>,
+                           host_only {
+  static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& v,
+                    const auto& f, auto& v_next) {
+    Vector tf = f - k * q;
+    Vector tf_next = f - k * (q + p.h * v);
+    Vector rhs = p.h * p.theta * tf_next + p.h * (1 - p.theta) * tf;
+    Vector dv = p.factor(i).solve(rhs);
+    v_next = v + dv;
   }
 };
 
@@ -249,6 +335,137 @@ struct output : kernel<relations<interactions>, relation, in<"nds", by_topology>
       ydot = h1 * storage::attr<"velocity">(ds1, step);
       ydot += h2 * storage::attr<"velocity">(ds2, step);
     }
+  }
+};
+
+// the active set
+
+// before the active set: no system is involved
+struct not_involved : kernel<all<systems>, out<"involved", by_topology>> {
+  static void apply(const auto&, auto& involved) { involved = false; }
+};
+
+// an interaction is active when its gap at the middle of the step may be
+// below the threshold
+struct activation
+    : kernel<all<interactions>, in<"y">, in<"ydot">, out<"activation", by_topology>> {
+  static void apply(const auto& p, const auto& y, const auto& ydot, auto& activation) {
+    activation = ((y + p.gamma * p.h * ydot)(0) <= p.threshold);
+  }
+};
+
+// in the order of the interactions: a row for each active interaction, an
+// index for each system it involves the first time (the index of ds2 first)
+struct activate : kernel<all<interactions>, item_index, in<"activation", by_topology>,
+                         in<"nds", by_topology>, referenced<"ds1", by_topology>,
+                         referenced<"ds2", by_topology>>,
+                  ordered,
+                  host_only {
+  static void apply(auto& p, auto i, bool activation, auto nds, auto ds1, auto ds2) {
+    if (activation) {
+      p.activate(i);
+      p.involve(ds2);
+      if (nds == 2) {
+        p.involve(ds1);
+      }
+    }
+  }
+};
+
+// the assembled nonsmooth problem
+
+// the free output derivative of an active interaction in q of the problem
+struct free_output : kernel<active<interactions>, rank, in<"ydot", next>> {
+  static void apply(auto& p, auto row, const auto& ydot_next) {
+    set_value(p.assembled, p.offset + row, ydot_next);
+  }
+};
+
+// the blocks of H of an active interaction between rigid systems: its
+// jacobians without the columns of the blocked velocity components, at the
+// rows of the interaction and the columns of its systems
+struct h_blocks
+    : kernel<active<interactions>, rank, in<"h_matrix1">, in<"h_matrix2">,
+             through<"ds1", "index", by_topology>, through<"ds2", "index", by_topology>,
+             through<"ds1", "bc_velocities_0", by_topology>,
+             through<"ds2", "bc_velocities_0", by_topology>> {
+  static void apply(auto& p, auto row, const auto& h1, const auto& h2, auto j1, auto j2,
+                    const auto& blocked1, const auto& blocked2) {
+    auto h1_mod = h1;
+    auto h2_mod = h2;
+    for (auto k : blocked1) {
+      h1_mod.col(k).setZero();
+    }
+    if (j1 != j2) {
+      for (auto k : blocked2) {
+        h2_mod.col(k).setZero();
+      }
+      set_value(p.matrix, row, j1, h1_mod);
+      set_value(p.matrix, row, j2, h2_mod);
+    } else {
+      // self interaction
+      set_value(p.matrix, row, j2, h1_mod);
+    }
+  }
+};
+
+// the blocks of H of an active interaction between a rigid system (ds1) and
+// a FEM one (ds2): the rigid block, then the FEM columns of the nodes of the
+// contact segment of its mesh relation
+struct fem_h_blocks
+    : kernel<active<interactions>, rank, in<"h_matrix1">, in<"h_matrix2">, in<"relation">,
+             through<"ds1", "index", by_topology>, through<"ds2", "index", by_topology>,
+             through<"ds1", "bc_velocities_0", by_topology>,
+             through<"ds2", "bc_velocities_0", by_topology>>,
+      host_only {
+  static void apply(auto& p, auto row, const auto& h1, const auto& h2, const auto& rel,
+                    auto j1, auto i2, const auto& blocked1, const auto& blocked2) {
+    const auto j2 = p.sum_dofs[i2];
+    const auto rows = row * p.nslaw_size;
+
+    auto h1_mod = h1;
+    for (auto k : blocked1) {
+      h1_mod.col(k).setZero();
+    }
+    // the rows of the rigid-FEM interactions follow those of the rigid ones
+    set_value(p.rigid_matrix, p.rigid_rows + row, j1, h1_mod);
+
+    variant::visit(p.data, rel,
+                   mp::overload(
+                       [&](match::handle<collision::mesh_relation> auto rrel) {
+                         const auto& nodes = rrel.mesh().global_indices();
+                         const auto base = 4 * rrel.contact_index();
+                         for (auto i = 0; i < algebra::nrows(h2); ++i) {
+                           for (auto c = 0; c < 4; ++c) {
+                             set_value(p.matrix, i + rows, nodes[base + c] + j2, h2(i, c));
+                           }
+                         }
+                       },
+                       [](auto) {}));
+
+    // the blocked velocity components of ds2
+    for (auto i = 0; i < algebra::nrows(h2); ++i) {
+      for (auto k : blocked2) {
+        set_value(p.matrix, i + rows, j2 + k, 0.);
+      }
+    }
+  }
+};
+
+// the block of H of an active self contact of a FEM system (ds1 == ds2)
+struct fem_self_h_block : kernel<active<interactions>, rank, in<"h_matrix1">,
+                                 in<"nds", by_topology>, through<"ds2", "index", by_topology>,
+                                 through<"ds2", "bc_velocities_0", by_topology>> {
+  static void apply(auto& p, auto row, const auto& h1, [[maybe_unused]] auto nds, auto i2,
+                    const auto& blocked2) {
+    // only ds1 == ds2 (nds == 1) is supported (rt_lagrangian_r is a relation1)
+    assert(nds == 1);
+    const auto j2 = p.sum_dofs[i2];
+    auto h1_mod = h1;
+    for (auto k : blocked2) {
+      h1_mod.col(k).setZero();
+    }
+    set_value(p.matrix, row, j2, h1_mod);
   }
 };
 

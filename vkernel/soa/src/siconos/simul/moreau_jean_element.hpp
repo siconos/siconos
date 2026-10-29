@@ -227,30 +227,11 @@ struct moreau_jean_element : item {
 
     void compute_iteration_matrix(auto step) {
       if constexpr (system_with_k_matrix()) {
-        // M^-1 (f - K q) with the factorization of M kept on the system:
-        // host only
-        auto& data = self()->data();
-        using env = decltype(self()->env());
-        using scalar = typename env::scalar;
-
-        auto& fs = storage::attr_values<system, "fext">(data, step);
-        auto& fs_next = storage::attr_values<system, "fext">(data, step + 1);
-        auto& minv_fs =
-            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step);
-        auto& minv_fs_next =
-            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
-        auto& ks = storage::attr_values<system, "k_matrix">(data, step);
-        auto& qs = storage::attr_values<system, "q">(data, step);
-        std::size_t i = 0;
-        for (auto [k, q, f, f_next, minv_f, minv_f_next] :
-             view::zip(ks, qs, fs, fs_next, minv_fs, minv_fs_next)) {
-          algebra::unbounded_vector<scalar> fmkq = f - k * q;
-          // M factorized once for the simulation
-          minv_f = fem_m_factor(step, i++).solve(fmkq);
-
-          // constant fext
-          minv_f_next = minv_f;
-        }
+        // M^-1 (f - K q) with the factorization of M kept on the system
+        using scalar = typename decltype(self()->env())::scalar;
+        auto factor = [&](auto i) -> auto& { return fem_m_factor(step, i); };
+        run<moreau_jean::fem_minv_f<algebra::unbounded_vector<scalar>>>(
+            step, moreau_jean::fem_factors{factor});
       } else {
         run<moreau_jean::minv_f>(step, nullptr);
       }
@@ -395,43 +376,13 @@ struct moreau_jean_element : item {
       auto p = parameters(h);
 
       if constexpr (system_with_k_matrix()) {
-        // W = M + h^2*theta^2*K
-        // RHS = M*v - h^2*theta*(1-theta)*K*v + h*(f_ext - K*q)
-        // Note: for constant fext, F_k = f_ext
-        auto& data = self()->data();
+        // W dv = h theta F(step + 1) + h (1 - theta) F(step), F = f - K q,
+        // W = M + h^2 theta^2 K factorized once for the simulation
         using env_t = decltype(self()->env());
-        using scalar = typename env_t::scalar;
-        scalar theta = p.theta;
-
-        auto& vs = storage::attr_values<system, "velocity">(data, step);
-        auto& vs_next = storage::attr_values<system, "velocity">(data, step + 1);
-        auto& qs = storage::attr_values<system, "q">(data, step);
-        auto& qs_next = storage::attr_values<system, "q">(data, step + 1);
-        auto& fexts = storage::attr_values<system, "fext">(data, step);
-        auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
-
-        auto n = qs.size();
-        for (std::size_t i = 0; i < n; ++i) {
-          auto& k_mat = k_matrices[i];
-          auto& q = qs[i];
-          auto& v = vs[i];
-          auto& f = fexts[i];
-
-          using vector = typename env_t::template unbounded_vector<scalar>;
-
-          // Force at step k: F_k = f_ext - K*q_k
-          vector tf = f - k_mat * q;
-          vector tf_next = f - k_mat * (q + h * v);
-
-          // rhs
-          vector rhs = h * theta * tf_next + h * (1 - theta) * tf;
-
-          // W * dv = RHS, W = M + h^2*theta^2*K factorized once for the
-          // simulation
-          vector dv = fem_w_factor(step, i, h).solve(rhs);
-          vs_next[i] = v + dv;
-          moreau_jean::position::apply(p, q, v, vs_next[i], qs_next[i]);
-        }
+        using vector = typename env_t::template unbounded_vector<typename env_t::scalar>;
+        auto factor = [&](auto i) -> auto& { return fem_w_factor(step, i, h); };
+        run<kernels::fused<moreau_jean::fem_free_velocity<vector>, moreau_jean::position>>(
+            step, moreau_jean::fem_time_step{p.h, p.theta, factor});
       } else {
         run<kernels::fused<moreau_jean::free_velocity, moreau_jean::position>>(step, p);
       }

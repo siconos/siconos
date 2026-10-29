@@ -95,9 +95,10 @@ struct out : field<Name, Options...> {};
 template <pattern::string_literal Name, typename... Options>
 struct inout : field<Name, Options...> {};
 
-// the attribute Name of the item referenced by Ref, a reference of the
-// iterated item (an attribute, or a property when a declarer is given in the
-// options): a gather
+// the field Name of the item referenced by Ref, a reference of the iterated
+// item: a gather. The reference is an attribute, or a property when a
+// declarer is given in the options; Name is an attribute of the referenced
+// item, or else its property with the same declarer.
 template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
 struct through {
   template <typename Refs, typename Values>
@@ -108,12 +109,22 @@ struct through {
     std::size_t size() const { return std::size(refs); }
   };
 
+  template <typename Ctx, typename Target>
+  static decltype(auto) target_column(auto& data, auto step) {
+    if constexpr (requires { storage::attr_values<Target, Name>(data, step); }) {
+      return storage::attr_values<Target, Name>(data, step);
+    } else {
+      using declarer = typename declarer_of<Options...>::type;
+      return storage::prop_values<Target, Name, resolve_t<Ctx, declarer>>(data, step);
+    }
+  }
+
   template <typename Ctx, typename Item>
   static auto column(auto& data, auto step) {
     using ref = field<Ref, Options...>;
     auto& refs = ref::template column<Ctx, Item>(data, step);
     using target = typename std::decay_t<decltype(refs[0])>::type;
-    auto& values = storage::attr_values<target, Name>(data, step + ref::offset);
+    auto& values = target_column<Ctx, target>(data, step + ref::offset);
     return gathered<std::remove_reference_t<decltype(refs)>,
                     std::remove_reference_t<decltype(values)>>{refs, values};
   }
@@ -143,6 +154,14 @@ struct referenced {
 // a whole column...): it is not fused with other kernels
 struct reads_world {};
 
+// a kernel that needs host objects (factorizations, handles, variants...):
+// it never runs on a device
+struct host_only {};
+
+// a kernel whose items must be visited in order (side effects through its
+// parameters, counters...): it never runs in parallel
+struct ordered {};
+
 // the value an iteration space gives with each item: the value of the item
 // in a sparse set (set), its entry in a property (entries)
 struct space_value {
@@ -153,11 +172,21 @@ struct space_value {
 };
 struct entry : space_value {};
 
+// the index of the item
+struct item_index {
+  template <typename Ctx, typename Item>
+  static item_index column(auto&, auto) {
+    return {};
+  }
+};
+
 // the field of item i, v being the value given by the iteration space
 template <typename Column>
 decltype(auto) at(Column& column, auto i, auto&& v) {
   if constexpr (std::is_same_v<std::decay_t<Column>, space_value>) {
     return v;
+  } else if constexpr (std::is_same_v<std::decay_t<Column>, item_index>) {
+    return i;
   } else {
     return (column[i]);
   }
@@ -253,7 +282,9 @@ std::size_t count(Columns& columns) {
       [&](auto&... column) {
         (
             [&](auto& c) {
-              if constexpr (!std::is_same_v<std::decay_t<decltype(c)>, space_value>) {
+              using c_t = std::decay_t<decltype(c)>;
+              if constexpr (!std::is_same_v<c_t, space_value> &&
+                            !std::is_same_v<c_t, item_index>) {
                 if (!found) {
                   n = std::size(c);
                   found = true;

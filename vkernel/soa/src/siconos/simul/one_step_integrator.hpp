@@ -252,25 +252,11 @@ struct one_step_integrator {
         using env = decltype(self()->env());
         using indice = typename env::indice;
 
-        auto& ct_ys = storage::attr_values<ct_interaction, "y">(data, step);
-        auto& ct_ydots = storage::attr_values<ct_interaction, "ydot">(data, step);
-
-        auto& ct_ids1s = storage::prop_values<ct_interaction, "ds1", Topology>(data, step);
-        auto& ct_ids2s = storage::prop_values<ct_interaction, "ds2", Topology>(data, step);
-        auto& ct_ndss = storage::prop_values<ct_interaction, "nds", Topology>(data, step);
-
-        auto& ct_activations =
-            storage::prop_values<ct_interaction, "activation", Topology>(data, step);
-
-        auto& ct_involveds = storage::prop_values<ct_system, "involved", Topology>(data, step);
-
-        const auto& ct_interactions = storage::handles<ct_interaction>(data, step);
+        auto ct_elem = std::get<0>(elements());
 
         // all ds -> not involved
-        // view::concat: c++26
-        for (auto [involved] : view::zip(ct_involveds)) {
-          involved = false;
-        };
+        ct_elem.template run<simul::moreau_jean::not_involved>(step, nullptr);
+        auto& ct_involveds = storage::prop_values<ct_system, "involved", Topology>(data, step);
 
         // the index sets are rebuilt with the properties
         if constexpr (with_index_sets<Topology>) {
@@ -287,24 +273,23 @@ struct one_step_integrator {
           }
         }
 
-        // the interaction inter is active, at row among the active
-        // interactions of its type
-        auto activate = [&data](auto& inter, indice row) {
-          if constexpr (with_index_sets<Topology>) {
-            using inter_t = typename std::decay_t<decltype(inter)>::type;
-            index_set<inter_t, active_set_tag, Topology>(data).emplace(inter.index().value(),
-                                                                       row);
-          }
-        };
+        indice ct_ds_counter = 0;
+        indice ct_inter_counter = 0;
+
+        indice rt_ds_counter = 0;
+        indice rt_ct_inter_counter = 0;
+        indice rt_rt_inter_counter = 0;
 
         // the system ds is involved: the next index of its kind if it is not
-        // already
-        auto involve = [&data](auto ds, indice& counter) {
+        // already (a rigid system touched by a rigid-FEM interaction gets a
+        // rigid index)
+        auto involve = [&data, &ct_ds_counter, &rt_ds_counter](auto ds) {
+          using ds_t = typename decltype(ds)::type;
+          indice& counter = std::is_same_v<ds_t, ct_system> ? ct_ds_counter : rt_ds_counter;
           if (!prop<"involved", Topology>(ds)) {
             prop<"involved", Topology>(ds) = true;
             prop<"index", Topology>(ds) = counter;
             if constexpr (with_index_sets<Topology>) {
-              using ds_t = typename std::decay_t<decltype(ds)>::type;
               index_set<ds_t, involved_set_tag, Topology>(data).emplace(ds.index().value(),
                                                                         counter);
             }
@@ -312,30 +297,24 @@ struct one_step_integrator {
           }
         };
 
-        auto gamma_v = 0.5;
-
-        indice ct_ds_counter = 0;
-        indice ct_inter_counter = 0;
-
-        indice rt_ds_counter = 0;
-        indice rt_ct_inter_counter = 0;
-
-        for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
-             view::zip(ct_ys, ct_ydots, ct_activations, ct_ndss, ct_ids1s, ct_ids2s,
-                       ct_interactions)) {
-          activation =
-              ((y + gamma_v * h * ydot)(0) <= self()->constraint_activation_threshold());
-
-          if (activation) {
-            activate(inter, ct_inter_counter++);
-
-            involve(storage::make_handle(data, ids2), ct_ds_counter);
-
-            if (nds == 2) {
-              involve(storage::make_handle(data, ids1), ct_ds_counter);
+        // the active set of the interactions of an element, rows counted by
+        // counter: the activation of each interaction, then in order the rows
+        // of the active ones and the indices of their systems
+        auto build_active_set = [&](auto elem, indice& counter) {
+          using inter_t = typename decltype(elem)::type::interaction;
+          auto activate = [&data, &counter](auto i) {
+            const indice row = counter++;
+            if constexpr (with_index_sets<Topology>) {
+              index_set<inter_t, active_set_tag, Topology>(data).emplace(i, row);
             }
-          }
-        }
+          };
+          elem.template run<
+              kernels::fused<simul::moreau_jean::activation, simul::moreau_jean::activate>>(
+              step, simul::moreau_jean::active_set{
+                        h, 0.5, self()->constraint_activation_threshold(), activate, involve});
+        };
+
+        build_active_set(ct_elem, ct_inter_counter);
 
         std::print(
             "  [compute_active_interactions] total number of ct ds: "
@@ -343,115 +322,49 @@ struct one_step_integrator {
             "total "
             "number of "
             "ct interactions: {}\n",
-            std::size(ct_involveds), std::size(ct_activations));
+            std::size(ct_involveds),
+            std::size(
+                storage::prop_values<ct_interaction, "activation", Topology>(data, step)));
 
         if constexpr (with_k_matrix()) {
           // reset rt_system involvement once per step, regardless of which
           // rt-family interaction type(s) (rt_ct and/or rt_rt) are actually
           // present - both key off this same shared per-rt_system property.
-          auto& rt_involveds =
-              storage::prop_values<rt_system, "involved", Topology>(data, step);
-
-          for (auto [involved] : view::zip(rt_involveds)) {
-            involved = false;
-          };
+          std::get<1>(elements())
+              .template run<simul::moreau_jean::not_involved>(step, nullptr);
         }
 
         if constexpr (with_rt_ct_interaction()) {
-          auto& rt_ct_ys = storage::attr_values<rt_ct_interaction, "y">(data, step);
-          auto& rt_ct_ydots = storage::attr_values<rt_ct_interaction, "ydot">(data, step);
-          auto& rt_ct_ids1s =
-              storage::prop_values<rt_ct_interaction, "ds1", Topology>(data, step);
-          auto& rt_ct_ids2s =
-              storage::prop_values<rt_ct_interaction, "ds2", Topology>(data, step);
-          auto& rt_ct_ndss =
-              storage::prop_values<rt_ct_interaction, "nds", Topology>(data, step);
+          auto rt_elem = std::get<1>(elements());
+          // /!\ a rt system can only be in interaction with a ct system (ds1)
+          build_active_set(rt_elem, rt_ct_inter_counter);
 
-          auto& rt_ct_activations =
-              storage::prop_values<rt_ct_interaction, "activation", Topology>(data, step);
-
-          // already reset once above, unconditionally, for the whole
-          // rt_system regardless of which rt-family interaction is present
-          auto& rt_involveds =
-              storage::prop_values<rt_system, "involved", Topology>(data, step);
-
-          const auto& rt_ct_interactions = storage::handles<rt_ct_interaction>(data, step);
-
-          for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
-               view::zip(rt_ct_ys, rt_ct_ydots, rt_ct_activations, rt_ct_ndss, rt_ct_ids1s,
-                         rt_ct_ids2s, rt_ct_interactions)) {
-            activation =
-                ((y + gamma_v * h * ydot)(0) <= self()->constraint_activation_threshold());
-
-            if (activation) {
-              activate(inter, rt_ct_inter_counter++);
-
-              involve(storage::make_handle(data, ids2), rt_ds_counter);
-
-              // /!\ a rt system can only be in interaction with a ct system
-              // i.e no rt rt interaction yet
-              assert(nds == 2);
-              involve(storage::make_handle(data, ids1), ct_ds_counter);
-            }
-          }
           std::print(
               "  [compute_active_interactions] total number of rt ds: "
               "{}, "
               "total "
               "number of "
               "rt ct interactions: {}\n",
-              std::size(rt_involveds), std::size(rt_ct_activations));
-
-          auto rt_elem = std::get<1>(elements());
+              std::size(storage::prop_values<rt_system, "involved", Topology>(data, step)),
+              std::size(storage::prop_values<rt_ct_interaction, "activation", Topology>(
+                  data, step)));
 
           rt_elem.number_of_interactions() = rt_ct_inter_counter;
           rt_elem.number_of_involved_ds() = rt_ds_counter;
         }
 
-        indice rt_rt_inter_counter = 0;
-
         if constexpr (with_rt_rt_interaction()) {
           // fem "self" contact (e.g. against a fixed ground): ds1 == ds2,
           // both indexed into the same rt_system as rt_ct above - continue
-          // (not reset) rt_involveds/rt_ds_counter so a rt_system ds already
-          // marked involved via rt_ct keeps its index.
-          auto& rt_rt_ys = storage::attr_values<rt_rt_interaction, "y">(data, step);
-          auto& rt_rt_ydots = storage::attr_values<rt_rt_interaction, "ydot">(data, step);
-          auto& rt_rt_ids1s =
-              storage::prop_values<rt_rt_interaction, "ds1", Topology>(data, step);
-          auto& rt_rt_ids2s =
-              storage::prop_values<rt_rt_interaction, "ds2", Topology>(data, step);
-          auto& rt_rt_ndss =
-              storage::prop_values<rt_rt_interaction, "nds", Topology>(data, step);
-
-          auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation", Topology>(data, step);
-
-          const auto& rt_rt_interactions = storage::handles<rt_rt_interaction>(data, step);
-
-          for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
-               view::zip(rt_rt_ys, rt_rt_ydots, rt_rt_activations, rt_rt_ndss, rt_rt_ids1s,
-                         rt_rt_ids2s, rt_rt_interactions)) {
-            activation =
-                ((y + gamma_v * h * ydot)(0) <= self()->constraint_activation_threshold());
-
-            if (activation) {
-              activate(inter, rt_rt_inter_counter++);
-
-              involve(storage::make_handle(data, ids2), rt_ds_counter);
-
-              if (nds == 2) {
-                involve(storage::make_handle(data, ids1), rt_ds_counter);
-              }
-            }
-          }
+          // (not reset) rt_ds_counter so a rt_system ds already marked
+          // involved via rt_ct keeps its index.
+          auto rt_rt_elem = rt_rt_element();
+          build_active_set(rt_rt_elem, rt_rt_inter_counter);
 
           std::print(
               "  [compute_active_interactions] number of activated rt rt "
               "interactions: {}\n",
               rt_rt_inter_counter);
-
-          auto rt_rt_elem = rt_rt_element();
 
           rt_rt_elem.number_of_interactions() = rt_rt_inter_counter;
           rt_rt_elem.number_of_involved_ds() = rt_ds_counter;
@@ -469,8 +382,6 @@ struct one_step_integrator {
             "activated ct rt interactions: {}\n",
             rt_ds_counter, rt_ct_inter_counter);
 
-        auto ct_elem = std::get<0>(elements());
-
         ct_elem.number_of_interactions() = ct_inter_counter;
         ct_elem.number_of_involved_ds() = ct_ds_counter;
 
@@ -486,154 +397,25 @@ struct one_step_integrator {
 
         // assumption: compile time element is the first one.
         auto ct_elem = std::get<0>(elements());
-
         auto&& ct_h_matrix = ct_elem.h_matrix_assembled();
 
-        // auto& rt_rt_activations =
-        //     storage::prop_values<rt_rt_interaction, "activation", Topology>(data,
-        //     step);
-
-        auto& ct_h_mat1s = storage::attr_values<ct_interaction, "h_matrix1">(data, step);
-        auto& ct_h_mat2s = storage::attr_values<ct_interaction, "h_matrix2">(data, step);
-
-        // auto& rt_rt_h_mat1s =
-        //     storage::attr_values<rt_rt_interaction, "h_matrix1">(data,
-        //     step);
-        // auto& rt_rt_h_mat2s =
-        //     storage::attr_values<rt_rt_interaction, "h_matrix2">(data,
-        //     step);
-
-        auto& ct_ids1s = storage::prop_values<ct_interaction, "ds1", Topology>(data, step);
-        auto& ct_ids2s = storage::prop_values<ct_interaction, "ds2", Topology>(data, step);
-
-        // auto& rt_rt_ids1s =
-        //     storage::prop_values<rt_rt_interaction, "ds1", Topology>(data, step);
-        // auto& rt_rt_ids2s =
-        //     storage::prop_values<rt_rt_interaction, "ds2", Topology>(data, step);
-
-        auto& ct_indices = storage::prop_values<ct_system, "index", Topology>(data, step);
-
-        auto& ct_bc_velocities_0s =
-            storage::prop_values<ct_system, "bc_velocities_0", Topology>(data, step);
-
         // ct / ct activation (i.e disk/disk)
-        for_each_active<ct_interaction, Topology>(data, step, [&](auto i, auto i_ct) {
-          {
-            auto& h_mat1 = ct_h_mat1s[i];
-            auto& h_mat2 = ct_h_mat2s[i];
-            auto& ids1 = ct_ids1s[i];
-            auto& ids2 = ct_ids2s[i];
-
-            auto j1 = ct_indices[ids1.value()];
-            auto j2 = ct_indices[ids2.value()];
-
-            // modification on a copy
-            auto h_mat1_mod = h_mat1;
-            auto h_mat2_mod = h_mat2;
-
-            // BC velocities for ds1
-            //  zero columns in h_mat1_mod / BC DOFs in ds1
-            for (auto bc_local_idx : ct_bc_velocities_0s[ids1.value()]) {
-              h_mat1_mod.col(bc_local_idx).setZero();
-            }
-
-            if (j1 != j2) {
-              // BC velocities for ds2
-              // zero columns in h_mat2_mod / BC DOFs in ds2
-              for (auto bc_local_idx : ct_bc_velocities_0s[ids2.value()]) {
-                h_mat2_mod.col(bc_local_idx).setZero();
-              }
-
-              // insertion
-              set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
-              set_value(ct_h_matrix, i_ct, j2, h_mat2_mod);
-            } else {
-              // self interaction
-              set_value(ct_h_matrix, i_ct, j2, h_mat1_mod);
-            }
-          }
-        });
+        ct_elem.template run<simul::moreau_jean::h_blocks>(
+            step, simul::moreau_jean::block_matrix{ct_h_matrix});
 
         // the rt ct rows follow the ct rows
         [[maybe_unused]] const std::size_t n_ct = ct_elem.number_of_interactions();
 
         if constexpr (with_rt_ct_interaction()) {
+          // ct / rt activation (i.e disk/fem)
           auto rt_elem = std::get<1>(elements());
           auto&& rt_h_matrix =
               algebra::mat_view<matrix_1x1_t>(assembled_osi().h_matrix_assembled(),
                                               rt_elem.inter_offset(), rt_elem.ds_offset());
-
-          auto& rt_ct_h_mat1s =
-              storage::attr_values<rt_ct_interaction, "h_matrix1">(data, step);
-          auto& rt_ct_h_mat2s =
-              storage::attr_values<rt_ct_interaction, "h_matrix2">(data, step);
-          auto& rt_ct_ids1s =
-              storage::prop_values<rt_ct_interaction, "ds1", Topology>(data, step);
-          auto& rt_ct_ids2s =
-              storage::prop_values<rt_ct_interaction, "ds2", Topology>(data, step);
-          auto& rt_ct_rels = storage::attr_values<rt_ct_interaction, "relation">(data, step);
-          auto& rt_indices = storage::prop_values<rt_system, "index", Topology>(data, step);
-
-          auto& rt_bc_velocities_0s =
-              storage::prop_values<rt_system, "bc_velocities_0", Topology>(data, step);
-
-          for_each_active<rt_ct_interaction, Topology>(data, step, [&](auto k, auto i_rt) {
-            const auto i_ct = n_ct + i_rt;
-            auto& h_mat1 = rt_ct_h_mat1s[k];
-            auto& h_mat2 = rt_ct_h_mat2s[k];
-            auto& ids1 = rt_ct_ids1s[k];
-            auto& ids2 = rt_ct_ids2s[k];
-            auto& rel = rt_ct_rels[k];
-            {
-              // ct / rt activation (i.e disk/fem)
-              auto j1 = ct_indices[ids1.value()];
-              auto j2 = rt_elem.sum_dofs()[rt_indices[ids2.value()]];
-
-              // modification on a copy
-              auto h_mat1_mod = h_mat1;
-
-              // BC velocities for ds1
-              // zero columns in h_mat1_mod / BC DOFs in ds1
-              for (auto bc_local_idx : ct_bc_velocities_0s[ids1.value()]) {
-                h_mat1_mod.col(bc_local_idx).setZero();
-              }
-
-              // insertion
-              set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
-
-              // contact index in original mesh
-              variant::visit(data, rel,
-                             mp::overload(
-                                 [&](match::handle<collision::mesh_relation> auto rrel) {
-                                   auto base_idx = 4 * rrel.contact_index();
-                                   auto dof0 = rrel.mesh().global_indices()[base_idx];
-                                   auto dof1 = rrel.mesh().global_indices()[base_idx + 1];
-                                   auto dof2 = rrel.mesh().global_indices()[base_idx + 2];
-                                   auto dof3 = rrel.mesh().global_indices()[base_idx + 3];
-
-                                   for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                                     set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                                               dof0 + j2, h_mat2(i, 0));
-                                     set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                                               dof1 + j2, h_mat2(i, 1));
-                                     set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                                               dof2 + j2, h_mat2(i, 2));
-                                     set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                                               dof3 + j2, h_mat2(i, 3));
-                                   }
-                                 },
-                                 [](auto) {})  // in the case of no rt ct relation
-              );
-
-              // BC velocities for ds2
-              for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                for (auto bc_local_idx : rt_bc_velocities_0s[ids2.value()]) {
-                  set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(), j2 + bc_local_idx,
-                            0.);
-                }
-              }
-            }
-          });
+          rt_elem.template run<simul::moreau_jean::fem_h_blocks>(
+              step, simul::moreau_jean::fem_h_matrix{
+                        data, rt_h_matrix, ct_h_matrix, rt_elem.sum_dofs(), n_ct,
+                        static_cast<std::size_t>(rt_elem.nslaw_size())});
         }
 
         if constexpr (with_rt_rt_interaction()) {
@@ -641,41 +423,9 @@ struct one_step_integrator {
           auto&& rt_rt_h_matrix = algebra::mat_view<matrix_1x1_t>(
               assembled_osi().h_matrix_assembled(), rt_rt_elem.inter_offset(),
               rt_rt_elem.ds_offset());
-
-          auto& rt_rt_h_mat1s =
-              storage::attr_values<rt_rt_interaction, "h_matrix1">(data, step);
-          auto& rt_rt_ndss =
-              storage::prop_values<rt_rt_interaction, "nds", Topology>(data, step);
-          auto& rt_rt_ids2s =
-              storage::prop_values<rt_rt_interaction, "ds2", Topology>(data, step);
-
-          auto& rt_rt_indices = storage::prop_values<rt_system, "index", Topology>(data, step);
-          auto& rt_rt_bc_velocities_0s =
-              storage::prop_values<rt_system, "bc_velocities_0", Topology>(data, step);
-
-          for_each_active<rt_rt_interaction, Topology>(data, step, [&](auto k, auto i_rt_rt) {
-            auto& h_mat1 = rt_rt_h_mat1s[k];
-            [[maybe_unused]] auto nds = rt_rt_ndss[k];
-            auto& ids2 = rt_rt_ids2s[k];
-            {
-              // fem "self" contact (e.g. against a fixed ground): only
-              // ds1 == ds2 (nds == 1) is supported today, matching
-              // rt_lagrangian_r's relation1-only compute_jachq and
-              // topology::link's only rt_rt-producing overload.
-              assert(nds == 1);
-
-              auto j2 = rt_rt_elem.sum_dofs()[rt_rt_indices[ids2.value()]];
-
-              auto h_mat1_mod = h_mat1;
-
-              // BC velocities for ds2 (== ds1 here)
-              for (auto bc_local_idx : rt_rt_bc_velocities_0s[ids2.value()]) {
-                h_mat1_mod.col(bc_local_idx).setZero();
-              }
-
-              set_value(rt_rt_h_matrix, i_rt_rt, j2, h_mat1_mod);
-            }
-          });
+          rt_rt_elem.template run<simul::moreau_jean::fem_self_h_block>(
+              step,
+              simul::moreau_jean::fem_block_matrix{rt_rt_h_matrix, rt_rt_elem.sum_dofs()});
         }
       }
 
@@ -749,43 +499,31 @@ struct one_step_integrator {
         prod(h_mat, tmp_matrix, w_mat);
       }
 
-      // compute H vfree
+      // compute H vfree: the free output derivatives of the active
+      // interactions, the rows of each interaction type following the rows of
+      // the previous ones
       void compute_q_nsp_vector_assembled(auto step) {
-        auto& data = self()->data();
         auto ct_elem = std::get<0>(elements());
 
-        auto& ct_ydots_next = storage::attr_values<ct_interaction, "ydot">(data, step + 1);
-
-        // the rows of each interaction type follow the rows of the previous
-        // ones
+        // /!\ with ct_elem offsets (0), should be directly in global
+        // q_nsp_vector_assembled()
+        auto q = ct_elem.q_nsp_vector_assembled();
         std::size_t k0 = 0;
 
-        for_each_active<ct_interaction, Topology>(data, step, [&](auto i, auto row) {
-          set_value(ct_elem.q_nsp_vector_assembled(), k0 + row, ct_ydots_next[i]);
-        });
+        ct_elem.template run<simul::moreau_jean::free_output>(
+            step, simul::moreau_jean::assembled_at{q, k0});
         k0 += ct_elem.number_of_interactions();
 
         if constexpr (with_rt_ct_interaction()) {
-          auto& rt_ct_ydots_next =
-              storage::attr_values<rt_ct_interaction, "ydot">(data, step + 1);
-
-          // /!\ with ct_elem offsets (0), should be directly in
-          // global q_nsp_vector_assembled()
-          for_each_active<rt_ct_interaction, Topology>(data, step, [&](auto i, auto row) {
-            set_value(ct_elem.q_nsp_vector_assembled(), k0 + row, rt_ct_ydots_next[i]);
-          });
-          k0 += std::get<1>(elements()).number_of_interactions();
+          auto rt_elem = std::get<1>(elements());
+          rt_elem.template run<simul::moreau_jean::free_output>(
+              step, simul::moreau_jean::assembled_at{q, k0});
+          k0 += rt_elem.number_of_interactions();
         }
 
         if constexpr (with_rt_rt_interaction()) {
-          auto& rt_rt_ydots_next =
-              storage::attr_values<rt_rt_interaction, "ydot">(data, step + 1);
-
-          // /!\ with ct_elem offsets (0), should be directly in
-          // global q_nsp_vector_assembled()
-          for_each_active<rt_rt_interaction, Topology>(data, step, [&](auto i, auto row) {
-            set_value(ct_elem.q_nsp_vector_assembled(), k0 + row, rt_rt_ydots_next[i]);
-          });
+          rt_rt_element().template run<simul::moreau_jean::free_output>(
+              step, simul::moreau_jean::assembled_at{q, k0});
         }
       }
 
