@@ -11,7 +11,11 @@
    symmetric about the centre) carry together the disk's gap, G and nodal
    split. So the two runs must agree, rigid body and block alike, and the
    block must deflect. This fails when polytopemesh_r is not assembled on
-   the mesh side (one_step_integrator, kinds). */
+   the mesh side (one_step_integrator, kinds).
+
+   With VKERNEL_GOSI the integrator is moreau_jean_gosi (the global problem,
+   gfc2d) instead of moreau_jean (the local problem, fc2d): the same checks
+   must pass. */
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -50,12 +54,20 @@ struct topo;
 using polytopepolytope_r = collision::polytopepolytope_r<topo>;
 using polytopemesh_r = collision::polytopemesh_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
+#ifdef VKERNEL_GOSI
+struct fc2d : simul::nonsmooth_problem<GlobalFrictionContactProblem> {};
+#else
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
+#endif
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 struct ct_interaction : simul::interaction<nslaw, diskdisk_r, polytopepolytope_r> {};
 struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r, polytopemesh_r> {};
 struct topo : simul::topology<body, ct_interaction, fem, rt_interaction> {};
+#ifdef VKERNEL_GOSI
+struct osi : simul::one_step_integrator<topo>::moreau_jean_gosi {};
+#else
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+#endif
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<body, collision::empty_shape>;
 using pointf = collision::point<fem, mesh_shape>;
@@ -191,7 +203,11 @@ auto with_fem_world(bool square, F&& body) {
   auto osnspb = simulation.one_step_nonsmooth_problem();
   osnspb.problem() = fc2d;
   auto so = storage::add<simul::solver_options>(data);
+#ifdef VKERNEL_GOSI
+  so.create(SICONOS_GLOBAL_FRICTION_2D_NSN_AC);
+#else
   so.create(SICONOS_FRICTION_2D_LEMKE);
+#endif
   osnspb.options() = so;
 
   auto ngbh = storage::add<config::neighborhood>(data);

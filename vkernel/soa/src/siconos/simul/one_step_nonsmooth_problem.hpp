@@ -2,6 +2,7 @@
 
 #include <FrictionContactProblem.h>
 #include <FrictionContact_options.h>
+#include <GlobalFrictionContactProblem.h>
 #include <LinearComplementarityProblem.h>
 #include <NonSmoothDrivers.h>
 #include <NumericsVerbose.h>
@@ -208,6 +209,40 @@ struct one_step_nonsmooth_problem : item {
         }
       }
     }
+    // the global frictional contact problem (numerics convention, H being
+    // n x m there): M v = q + H r, u = H^T v + b, (u, r) in the Coulomb
+    // complementarity. h_mat is our H (m x n, the rows of the interactions).
+    // r, u, v: in as a starting point, out as the solution.
+    void solve_global(auto& m_mat, auto& h_mat, auto& q_vec, auto& b_vec, auto& mu_vec,
+                      auto& r_vec, auto& u_vec, auto& v_vec) {
+      using scalar = typename decltype(self()->env())::scalar;
+
+      numerics_set_verbose(storage::attr<"verbose">(*self()));
+      algebra::transpose(h_mat);
+
+      auto& problem = *self()->problem().instance();
+      problem.dimension = 2;
+      problem.numberOfContacts = size0(h_mat) / problem.dimension;
+      problem.M = m_mat._m;
+      problem.H = h_mat._mt;
+      problem.q = q_vec._v->dense;
+      problem.b = b_vec._v->dense;
+      problem.mu = mu_vec._v->dense;
+      problem.M_inverse = nullptr;
+      problem.name = nullptr;
+      problem.env = nullptr;
+
+      attr<"number_of_contacts">(*self()) = problem.numberOfContacts;
+
+      const auto start_time{std::chrono::steady_clock::now()};
+      gfc2d_driver(&problem, r_vec._v->dense, u_vec._v->dense, v_vec._v->dense,
+                   &*options().instance());
+      const std::chrono::duration<scalar> elapsed_seconds{std::chrono::steady_clock::now() -
+                                                          start_time};
+      attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
+      attr<"number_of_iterations">(*self()) = options().iparam(SICONOS_IPARAM_ITER_DONE);
+    }
+
     auto methods() {
       return collect(method("options", &interface<Handle>::options),
                      method("problem", &interface<Handle>::problem));

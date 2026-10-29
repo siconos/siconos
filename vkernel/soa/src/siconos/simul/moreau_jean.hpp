@@ -214,4 +214,9 @@ using initial_schedule =
 
 // clang-format on
 
+struct scheme {
+  using time_step_schedule = moreau_jean::time_step_schedule;
+  using initial_schedule = moreau_jean::initial_schedule;
+};
+
 }  // namespace siconos::simul::moreau_jean

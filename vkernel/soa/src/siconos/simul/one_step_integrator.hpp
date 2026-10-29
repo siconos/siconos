@@ -5,6 +5,7 @@
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/simul/kinds.hpp"
 #include "siconos/simul/moreau_jean.hpp"
+#include "siconos/simul/moreau_jean_gosi.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/range.hpp"
@@ -39,7 +40,10 @@ struct one_step_integrator {
   using ct_system = typename Topology::fixed_dof_system;
   using rt_system = typename Topology::dynamic_dof_system;
 
-  struct moreau_jean : item {
+  // an integrator of the systems and interactions of the topology, Scheme
+  // giving the stages of a time step and of the initial state
+  template <typename Scheme>
+  struct integrator : item {
     using topology = Topology;
 
     // the kinds of systems and of interactions (see kinds.hpp)
@@ -60,10 +64,9 @@ struct one_step_integrator {
         mp::tuple<some::item_ref<ct_interactions_t>, some::item_ref<rt_ct_interactions_t>,
                   some::item_ref<rt_rt_interactions_t>>{}));
 
-    // the scheme (see moreau_jean.hpp): the stages of a time step, of the
-    // initial state
-    using time_step_schedule = simul::moreau_jean::time_step_schedule;
-    using initial_schedule = simul::moreau_jean::initial_schedule;
+    // the stages of a time step, of the initial state
+    using time_step_schedule = typename Scheme::time_step_schedule;
+    using initial_schedule = typename Scheme::initial_schedule;
 
     using items = decltype(mp::concat(mp::concat(mp::tuple<topology>{}, system_kinds_t{}),
                                       interaction_kinds_t{}));
@@ -89,6 +92,7 @@ struct one_step_integrator {
       assembled_vector p0_vector_assembled;
       assembled_vector q_nsp_vector_assembled;
       assembled_vector mu_vector_assembled;
+      assembled_vector b_vector_assembled;
       // the kinds
       decltype(refs(system_kinds_t{})) systems;
       decltype(refs(interaction_kinds_t{})) interactions;
@@ -152,6 +156,9 @@ struct one_step_integrator {
       }
       decltype(auto) mu_vector_assembled() {
         return storage::attr<"mu_vector_assembled">(*self());
+      }
+      decltype(auto) b_vector_assembled() {
+        return storage::attr<"b_vector_assembled">(*self());
       }
 
       // the kinds of systems, of interactions, as handles
@@ -233,6 +240,7 @@ struct one_step_integrator {
         algebra::resize(velocity_vector_assembled(), raw_ds_size);
         algebra::resize(ydot_vector_assembled(), raw_inter_size);
         algebra::resize(q_nsp_vector_assembled(), raw_inter_size);
+        algebra::resize(b_vector_assembled(), raw_inter_size);
         algebra::resize(p0_vector_assembled(), raw_ds_size);
 
         if constexpr (with_friction()) {
@@ -292,5 +300,11 @@ struct one_step_integrator {
       }
     };
   };
+
+  // the Moreau-Jean scheme on the local problem (see moreau_jean.hpp)
+  struct moreau_jean : integrator<simul::moreau_jean::scheme> {};
+
+  // the Moreau-Jean scheme on the global problem (see moreau_jean_gosi.hpp)
+  struct moreau_jean_gosi : integrator<simul::moreau_jean_gosi::scheme> {};
 };
 }  // namespace siconos::simul

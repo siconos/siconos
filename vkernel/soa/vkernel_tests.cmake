@@ -137,6 +137,9 @@ if(WITH_TESTING)
            ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_polytope_on_fem SOURCES polytope_on_fem.cpp
            ${SIMPLE_TEST_MAIN})
+  # the same with the Moreau-Jean scheme on the global problem
+  new_test(NAME vkernel_polytope_on_fem_gosi SOURCES polytope_on_fem.cpp
+           ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS VKERNEL_GOSI)
   new_test(NAME vkernel_io_contact_points SOURCES io_contact_points.cpp
            ${SIMPLE_TEST_MAIN})
 
@@ -190,6 +193,7 @@ if(WITH_TESTING)
       vkernel_mixed_bodies
       vkernel_reproducible_disks
       vkernel_polytope_on_fem
+      vkernel_polytope_on_fem_gosi
       vkernel_io_contact_points
       vkernel_sort_interactions_registry
       vkernel_sort_interactions_static_db)
