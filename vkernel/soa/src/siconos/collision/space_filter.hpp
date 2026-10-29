@@ -299,6 +299,9 @@ struct space_filter : item {
                      shape_handle.segments().points_coords(index) | view::enumerate) {
                   auto new_point = storage::add<Point>(data);
                   new_point.item() = ds;
+                  // the mesh of this system: a contact on this point is on
+                  // one of its edges
+                  new_point.shape() = shape_handle;
                   new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
                   new_point.seg_index() = index;
                   new_point.point_index() = i;
