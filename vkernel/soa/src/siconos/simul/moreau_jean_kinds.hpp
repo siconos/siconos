@@ -82,13 +82,24 @@ struct moreau_jean_systems : item {
       return moreau_jean::time_step<decltype(h), scalar>{h, theta};
     }
 
+    // where the involved system of a rank is in the assembled vectors and
+    // matrices of this kind, in their blocks: its rank when the systems have
+    // the same dofs, its first dof otherwise (the blocks are scalars)
+    auto at() {
+      if constexpr (runtime_dof()) {
+        return [&sum_dofs = sum_dofs()](auto index) { return sum_dofs[index]; };
+      } else {
+        return [](auto index) { return index; };
+      }
+    }
+
     // the part of an assembled vector that belongs to the system of a rank
-    static auto part() {
-      return [](auto& assembled, auto index, const auto& like) {
+    auto part() {
+      return [at = at()](auto& assembled, auto index, const auto& like) {
         if constexpr (match::fixed_size_vector<velocity>) {
-          return get_vector(assembled, index);
+          return get_vector(assembled, at(index));
         } else {
-          return get_vector(assembled, index, like.size());
+          return get_vector(assembled, at(index), like.size());
         }
       };
     }
@@ -246,14 +257,14 @@ struct moreau_jean_systems : item {
     void assemble_mass_matrix(auto step, auto& assembled) {
       // size may be 0
       run<moreau_jean::diagonal_block<"mass_matrix">>(
-          step, moreau_jean::block_matrix{mass_matrix_view(assembled)});
+          step, moreau_jean::diagonal_blocks{mass_matrix_view(assembled), at()});
     }
 
     void assemble_k_matrix(auto step, auto& assembled) {
       if constexpr (with_k_matrix()) {
         // size may be 0
         run<moreau_jean::diagonal_block<"k_matrix">>(
-            step, moreau_jean::block_matrix{k_matrix_view(assembled)});
+            step, moreau_jean::diagonal_blocks{k_matrix_view(assembled), at()});
       }
       // else the systems are rigid and the sparse k_matrix is not filled.
     }

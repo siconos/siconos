@@ -108,10 +108,18 @@ struct multipliers {
   Mus mus = nullptr;
 };
 
-// an assembled block diagonal matrix
+// an assembled block matrix
 template <typename Matrix>
 struct block_matrix {
   Matrix matrix;
+};
+
+// an assembled block diagonal matrix, the block of the system of a rank at
+// at(rank)
+template <typename Matrix, typename At>
+struct diagonal_blocks {
+  Matrix matrix;
+  At at;
 };
 
 // sum_dofs[k] is the first dof of the involved system of rank k
@@ -213,7 +221,7 @@ struct boundary_conditions
 template <storage::pattern::string_literal Name>
 struct diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
   static void apply(auto& p, auto index, const auto& block) {
-    set_value(p.matrix, index, index, block);
+    set_value(p.matrix, p.at(index), p.at(index), block);
   }
 };
 
