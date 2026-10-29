@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <numeric>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -94,6 +95,54 @@ struct out : field<Name, Options...> {};
 template <pattern::string_literal Name, typename... Options>
 struct inout : field<Name, Options...> {};
 
+// the attribute Name of the item referenced by Ref, a reference of the
+// iterated item (an attribute, or a property when a declarer is given in the
+// options): a gather
+template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
+struct through {
+  template <typename Refs, typename Values>
+  struct gathered {
+    Refs& refs;
+    Values& values;
+    decltype(auto) operator[](std::size_t i) { return (values[refs[i].value()]); }
+    std::size_t size() const { return std::size(refs); }
+  };
+
+  template <typename Ctx, typename Item>
+  static auto column(auto& data, auto step) {
+    using ref = field<Ref, Options...>;
+    auto& refs = ref::template column<Ctx, Item>(data, step);
+    using target = typename std::decay_t<decltype(refs[0])>::type;
+    auto& values = storage::attr_values<target, Name>(data, step + ref::offset);
+    return gathered<std::remove_reference_t<decltype(refs)>,
+                    std::remove_reference_t<decltype(values)>>{refs, values};
+  }
+};
+
+// a handle on the item referenced by Ref, for the code that works on handles
+// (the relations): host only
+template <pattern::string_literal Ref, typename... Options>
+struct referenced {
+  template <typename Data, typename Refs>
+  struct handles {
+    Data& data;
+    Refs& refs;
+    auto operator[](std::size_t i) { return storage::make_handle(data, refs[i]); }
+    std::size_t size() const { return std::size(refs); }
+  };
+
+  template <typename Ctx, typename Item>
+  static auto column(auto& data, auto step) {
+    auto& refs = field<Ref, Options...>::template column<Ctx, Item>(data, step);
+    return handles<std::remove_reference_t<decltype(data)>,
+                   std::remove_reference_t<decltype(refs)>>{data, refs};
+  }
+};
+
+// a kernel that reads more than its fields (a cache shared by all the items,
+// a whole column...): it is not fused with other kernels
+struct reads_world {};
+
 // the value an iteration space gives with each item: the value of the item
 // in a sparse set (set), its entry in a property (entries)
 struct space_value {
@@ -168,7 +217,23 @@ struct fused {
   using space = std::tuple_element_t<0, std::tuple<typename Kernels::space...>>;
   static_assert((std::is_same_v<typename Kernels::space, space> && ...),
                 "fused kernels must have the same iteration space");
+  static_assert(sizeof...(Kernels) == 1 || (!std::is_base_of_v<reads_world, Kernels> && ...),
+                "a kernel that reads the world cannot be fused");
 };
+
+/// v[k] = v[0] + ... + v[k], in place: with v[0] = 0 and v[k + 1] the size
+/// of the output of item k, the offsets of the outputs of variable size
+void inclusive_scan(auto& v) {
+  std::inclusive_scan(std::begin(v), std::end(v), std::begin(v));
+}
+
+/// the number of items of an iteration space with a value (set, entries...)
+template <typename Space, typename Ctx>
+std::size_t count(auto& data, auto step) {
+  std::size_t n = 0;
+  Space::template for_each<Ctx>(data, step, 0, [&n](auto, auto&&) { ++n; });
+  return n;
+}
 
 namespace detail {
 
@@ -206,7 +271,7 @@ std::size_t count(Columns& columns) {
 /// run the kernel K (or fused<...>) on the data of step, with the
 /// parameters p. Ctx resolves the placeholders.
 template <typename K, typename Ctx>
-void run(auto& data, auto step, const auto& p) {
+void run(auto& data, auto step, auto&& p) {
   if constexpr (requires { typename K::fields; }) {
     run<fused<K>, Ctx>(data, step, p);
   } else {

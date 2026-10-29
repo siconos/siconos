@@ -71,25 +71,15 @@ struct moreau_jean_element : item {
 
     void compute_total_dofs(auto step) {
       if constexpr (runtime_dof()) {
-        // runtime degrees of freedom: we must compute the sum
-        using env_t = decltype(self()->env());
-        using indice = typename env_t::indice;
-
-        auto& data = self()->data();
-        auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-
-        // sum_dofs()[index] is the first dof of the involved system of this
-        // index: summed in the order of the indices, which is the order in
-        // which the systems got involved, not the order of the systems
-        indice n = 0;
-        for_each_involved(step, [&n](auto, auto) { ++n; });
+        // runtime degrees of freedom: sum_dofs()[k] is the first dof of the
+        // involved system of rank k (the rank is the order in which the
+        // systems got involved, not the order of the systems): the dofs of
+        // each system at k + 1, then a scan
+        using involved_systems = kernels::involved<kernels::systems>;
+        auto n = kernels::count<involved_systems, kernel_context>(self()->data(), step);
         sum_dofs().assign(n + 1, 0);
-        for_each_involved(step, [&](auto i, auto index) {
-          sum_dofs()[index + 1] = algebra::ncols(mass_matrices[i]);
-        });
-        for (indice k = 0; k < n; ++k) {
-          sum_dofs()[k + 1] += sum_dofs()[k];
-        }
+        run<moreau_jean::dofs>(step, moreau_jean::dof_offsets{sum_dofs()});
+        kernels::inclusive_scan(sum_dofs());
       } else {
         // compile time systems => sum dofs useless
       }
@@ -226,43 +216,29 @@ struct moreau_jean_element : item {
     }
 
     void initialize(auto step) {
-      auto& data = self()->data();
-
-      auto& vs_next = storage::attr_values<system, "velocity">(data, step + 1);
-
-      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
-
-      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto& ydots_next = storage::attr_values<interaction, "ydot">(data, step + 1);
-
-      for (auto [v_next] : view::zip(vs_next)) {
-        algebra::set_zero(v_next);
-      }
+      run<moreau_jean::zero_velocity>(step, nullptr);
 
       // useless at initialisation ?
-      for (auto [lambda, ydot, ydot_next] : view::zip(lambdas, ydots, ydots_next)) {
-        algebra::set_zero(lambda);
-        algebra::set_zero(ydot);
-        algebra::set_zero(ydot_next);
-      };
+      run<moreau_jean::zero_multipliers>(step, nullptr);
 
       compute_iteration_matrix(step);
       compute_h_matrices(step);
     }
 
     void compute_iteration_matrix(auto step) {
-      auto& data = self()->data();
-      using env = decltype(self()->env());
-      using scalar = typename env::scalar;
-
-      auto& mats = storage::attr_values<system, "mass_matrix">(data, step);
-      auto& fs = storage::attr_values<system, "fext">(data, step);
-      auto& fs_next = storage::attr_values<system, "fext">(data, step + 1);
-      auto& minv_fs = storage::prop_values<system, "minv_f", moreau_jean_element>(data, step);
-      auto& minv_fs_next =
-          storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
-
       if constexpr (system_with_k_matrix()) {
+        // M^-1 (f - K q) with the factorization of M kept on the system:
+        // host only
+        auto& data = self()->data();
+        using env = decltype(self()->env());
+        using scalar = typename env::scalar;
+
+        auto& fs = storage::attr_values<system, "fext">(data, step);
+        auto& fs_next = storage::attr_values<system, "fext">(data, step + 1);
+        auto& minv_fs =
+            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step);
+        auto& minv_fs_next =
+            storage::prop_values<system, "minv_f", moreau_jean_element>(data, step + 1);
         auto& ks = storage::attr_values<system, "k_matrix">(data, step);
         auto& qs = storage::attr_values<system, "q">(data, step);
         std::size_t i = 0;
@@ -276,11 +252,7 @@ struct moreau_jean_element : item {
           minv_f_next = minv_f;
         }
       } else {
-        for (auto [mat, f, minv_f, minv_f_next] : view::zip(mats, fs, minv_fs, minv_fs_next)) {
-          minv_f = f;
-          algebra::solve_in_place(mat, minv_f);
-          minv_f_next = minv_f;
-        }
+        run<moreau_jean::minv_f>(step, nullptr);
       }
     }
 
@@ -338,37 +310,7 @@ struct moreau_jean_element : item {
     }
 
     void compute_h_matrices(auto step) {
-      auto& data = self()->data();
-
-      auto& h_matrices1 = storage::attr_values<h_matrix1>(data, step);
-      auto& h_matrices2 = storage::attr_values<h_matrix2>(data, step);
-
-      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
-
-      // the jacobians of interaction i, of relation rrel
-      auto jachq = [&](auto i, auto& rrel) {
-        auto& hm1 = h_matrices1[i];
-        auto& hm2 = h_matrices2[i];
-        auto hds1 = storage::make_handle(data, ds1s[i]);
-        auto hds2 = storage::make_handle(data, ds2s[i]);
-        using rel_t = std::decay_t<decltype(rrel)>;
-
-        // the first of relation1, relation2 wins, as the overload_linearly
-        // of the variant visit did: a linear relation that is a relation1
-        // (lagrangian_r) gets the one ds jacobian whatever its nds (the
-        // linear_relation auto&& alternative there never matched an lvalue
-        // handle)
-        if constexpr (match::relation1<rel_t>) {
-          rrel.compute_jachq(step, hds1, hm1);
-        } else if constexpr (match::relation2<rel_t>) {
-          rrel.compute_jachq(step, hds1, hds2, hm1, hm2);
-        } else {
-          assert(false);
-        }
-      };
-
-      for_each_relation(step, jachq);
+      run<moreau_jean::jacobians>(step, moreau_jean::at_step{step});
     }
 
     static constexpr bool relation_sets() {
@@ -376,38 +318,17 @@ struct moreau_jean_element : item {
     }
 
     // the relation sets hold every interaction (see relation_sets.hpp): once
-    // per step, before the loops that go through for_each_relation
+    // per step, before the kernels on the relations
     void sync_relation_sets(auto step) {
       if constexpr (relation_sets()) {
         simul::sync_relation_sets<interaction, topology>(self()->data(), step);
       }
     }
 
-    // f(i, row) for every active interaction i, row being its rank among the
-    // active interactions of this element (see index_sets.hpp)
-    void for_each_active(auto step, auto&& f) {
-      simul::for_each_active<interaction, topology>(self()->data(), step, f);
-    }
-
     // f(i, index) for every involved system i, index being its index among
     // the involved systems
     void for_each_involved(auto step, auto&& f) {
       simul::for_each_involved<system, topology>(self()->data(), step, f);
-    }
-
-    // f(i, rrel) for every interaction i, rrel being a handle on its relation:
-    // relation type by relation type with the relation sets, through a visit
-    // of the relation variant of each interaction otherwise
-    void for_each_relation(auto step, auto&& f) {
-      auto& data = self()->data();
-      if constexpr (relation_sets()) {
-        simul::for_each_relation<interaction, topology>(data, f);
-      } else {
-        auto& relations = storage::attr_values<relation>(data, step);
-        for (std::size_t i = 0; i < std::size(relations); ++i) {
-          siconos::variant::visit(data, relations[i], [&f, i](auto& rrel) { f(i, rrel); });
-        }
-      }
     }
 
     void update_iteration_matrix(auto step) {
@@ -442,26 +363,31 @@ struct moreau_jean_element : item {
     // the context of the kernels of this element (see simul/kernels.hpp)
     struct kernel_context {
       using system = System;
+      using interaction = Inter;
       using element = moreau_jean_element;
       using topology = Topology;
     };
 
     template <typename Kernel>
-    void run(auto step, const auto& p) {
+    void run(auto step, auto&& p) {
       kernels::run<Kernel, kernel_context>(self()->data(), step, p);
     }
 
-    // the parameters of the kernel bricks (see moreau_jean_kernels.hpp)
-    template <typename H, typename S, typename F = std::nullptr_t>
-    struct step_parameters {
-      H h;
-      S theta;
-      F contact_velocity = nullptr;
-    };
-
+    // the parameters of the kernels (see moreau_jean_kernels.hpp)
     auto parameters(auto h) {
       using scalar = typename decltype(self()->env())::scalar;
-      return step_parameters<decltype(h), scalar>{h, self()->theta()};
+      return moreau_jean::time_step<decltype(h), scalar>{h, self()->theta()};
+    }
+
+    // the part of an assembled vector that belongs to the item of a rank
+    static auto part() {
+      return [](auto& assembled, auto index, const auto& like) {
+        if constexpr (match::fixed_size_vector<velocity>) {
+          return get_vector(assembled, index);
+        } else {
+          return get_vector(assembled, index, like.size());
+        }
+      };
     }
 
     // free state: v(step + 1) and q(step + 1) without the contact impulses
@@ -514,126 +440,19 @@ struct moreau_jean_element : item {
     }
 
     void compute_output(auto step) {
-      auto& data = self()->data();
-      using env = decltype(self()->env());
-      using scalar = typename env::scalar;
-      using indice = typename env::indice;
-
-      auto& ys = storage::attr_values<y>(data, step);
-      auto& ydots = storage::attr_values<ydot>(data, step);
-      auto& h_matrices1 = storage::attr_values<h_matrix1>(data, step);
-      auto& h_matrices2 = storage::attr_values<h_matrix2>(data, step);
-
-      auto& qs = storage::attr_values<system, "q">(data, step);
-      auto& velocities = storage::attr_values<attr_t<system, "velocity">>(data, step);
-
-      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
-
-      auto& ndss = storage::prop_values<interaction, "nds", topology>(data, step);
-
-      // global h_matrix is not assembled at this stage
-      auto output = [&](auto inter_index, auto& rel) {
-        auto& y = ys[inter_index];
-        auto& ydot = ydots[inter_index];
-        auto& hm1 = h_matrices1[inter_index];
-        auto& hm2 = h_matrices2[inter_index];
-        auto& ds1 = ds1s[inter_index];
-        auto& ds2 = ds2s[inter_index];
-        auto nds = ndss[inter_index];
-
-        // y[1] (the tangential gap row) is only written by the linear branch
-        // below; the nonlinear relation branches set y[0] from compute_h() and
-        // leave y[1] untouched. Zero the whole vector so io::contact_points
-        // never reads uninitialized y[1] (HDF5 column 15) on nonlinear
-        // relations (diskdisk_r, polytopepolytope_r, polytopefsegment_r,
-        // polytopefdisk_r, polytopedisk_r).
-        algebra::set_zero(y);
-
-        mp::overload(
-            [&](match::linear_relation auto& rrel) {
-              y = hm1 * qs[ds1.value()] + rrel.b();
-              ydot = hm1 * velocities[ds1.value()];
-
-              if (nds == 2) {
-                y += hm2 * qs[ds2.value()];
-                ydot += hm2 * velocities[ds2.value()];
-              }
-            },
-            [&](match::handle<collision::mesh_relation> auto rrel) {
-              using vector_4d = typename env::template vector<scalar, 4>;
-              auto hds1 = storage::make_handle(data, ds1);
-              auto hds2 = storage::make_handle(data, ds2);
-              using ds1_t = typename decltype(hds1)::type;
-
-              auto& ds1_velocities =
-                  storage::attr_values<ds1_t, "velocity">(self()->data(), step);
-
-              y[0] = rrel.compute_h(step, hds1, hds2);
-
-              indice k = 4 * rrel.contact_index();
-              indice idx1 = rrel.mesh().global_indices()[k];
-              indice idy1 = rrel.mesh().global_indices()[k + 1];
-              indice idx2 = rrel.mesh().global_indices()[k + 2];
-              indice idy2 = rrel.mesh().global_indices()[k + 3];
-
-              ydot = hm1 * ds1_velocities[ds1.value()];
-
-              /* segment nodes */
-              vector_4d local_velocity = {
-                  velocities[ds2.value()][idx1], velocities[ds2.value()][idy1],
-                  velocities[ds2.value()][idx2], velocities[ds2.value()][idy2]};
-
-              ydot += hm2 * local_velocity;
-            },
-            [&](match::relation1 auto rrel) {
-              auto hds1 = storage::make_handle(data, ds1);
-              y[0] = rrel.compute_h(step, hds1);
-              ydot = hm1 * velocities[ds1.value()];
-            },
-            [&](match::relation2 auto rrel) {
-              auto hds1 = storage::make_handle(data, ds1);
-              auto hds2 = storage::make_handle(data, ds2);
-              y[0] = rrel.compute_h(step, hds1, hds2);
-              ydot = hm1 * velocities[ds1.value()];
-              ydot += hm2 * velocities[ds2.value()];
-            })(rel);
-      };
-
-      for_each_relation(step, output);
+      run<moreau_jean::output>(step, moreau_jean::at_step{step});
     }
 
     void keep_lambdas(auto step) {
-      auto& data = self()->data();
-
-      auto&& lambda_assembled = lambda_vector_assembled();
-      auto&& ydot_assembled = ydot_vector_assembled();
-
-      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
-
-      for_each_active(step, [&](auto i, auto k) {
-        auto& lambda = lambdas[i];
-        if constexpr (match::fixed_size_vector<velocity>) {
-          lambda = get_vector(lambda_assembled, k);
-        } else {
-          lambda = get_vector(lambda_assembled, k, lambda.size());
-        }
-      });
+      run<moreau_jean::keep_multipliers>(
+          step, moreau_jean::multipliers{part(), lambda_vector_assembled()});
     }
 
     // add the contact impulses to v(step + 1) and update q(step + 1), for the
     // involved systems only: the others keep their free state
     void update_velocities_and_positions(auto step, auto h) {
-      auto&& velo = velocity_vector_assembled();
-
       auto base = parameters(h);
-      auto p = step_parameters{base.h, base.theta, [&velo](auto index, const auto& v) {
-                                 if constexpr (match::fixed_size_vector<velocity>) {
-                                   return get_vector(velo, index);
-                                 } else {
-                                   return get_vector(velo, index, v.size());
-                                 }
-                               }};
+      auto p = moreau_jean::time_step{base.h, base.theta, part(), velocity_vector_assembled()};
 
       run<kernels::fused<moreau_jean::contact_velocity, moreau_jean::involved_position>>(step,
                                                                                          p);
@@ -647,64 +466,34 @@ struct moreau_jean_element : item {
     }
 
     auto assemble_vectors(auto step) {
-      auto& data = self()->data();
-
-      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
-      auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
-
-      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-
-      for_each_active(step, [&](auto i, auto k) {
-        set_value(lambda_vector_assembled(), k, lambdas[i]);
-
-        if constexpr (nslaw_with_friction()) {
-          auto hnslaw = storage::make_handle(data, nslaws[i]);
-          set_value(mu_vector_assembled(), k, hnslaw.mu());
-        }
-
-        set_value(ydot_vector_assembled(), k, ydots[i]);
-      });
+      if constexpr (nslaw_with_friction()) {
+        run<kernels::fused<moreau_jean::assemble_multipliers, moreau_jean::assemble_friction>>(
+            step, moreau_jean::multipliers{part(), lambda_vector_assembled(),
+                                           ydot_vector_assembled(), mu_vector_assembled()});
+      } else {
+        run<moreau_jean::assemble_multipliers>(
+            step, moreau_jean::multipliers{part(), lambda_vector_assembled(),
+                                           ydot_vector_assembled()});
+      }
     }
 
     void assemble_mass_matrix_for_involved_ds(auto step) {
-      auto& data = self()->data();
-
-      auto& mass_matrices = storage::attr_values<system, "mass_matrix">(data, step);
-
       // size may be 0
-      for_each_involved(step, [&](auto i, auto index) {
-        set_value(mass_matrix_assembled(), index, index, mass_matrices[i]);
-      });
+      run<moreau_jean::diagonal_block<"mass_matrix">>(
+          step, moreau_jean::block_matrix{mass_matrix_assembled()});
     }
 
     void assemble_k_matrix_for_involved_ds(auto step) {
       if constexpr (system_with_k_matrix()) {
-        auto& data = self()->data();
-
-        auto& k_matrices = storage::attr_values<system, "k_matrix">(data, step);
-
         // size may be 0
-        for_each_involved(step, [&](auto i, auto index) {
-          set_value(k_matrix_assembled(), index, index, k_matrices[i]);
-        });
+        run<moreau_jean::diagonal_block<"k_matrix">>(
+            step, moreau_jean::block_matrix{k_matrix_assembled()});
       }
       // else the system is rigid and the sparse k_matrix is not filled.
     }
 
     // nonsmooth law effect
-    void nsl_effect_on_free_output(auto step) {
-      auto& data = self()->data();
-      auto& ydots = storage::attr_values<ydot>(data, step);
-      auto& ydots_next = storage::attr_values<ydot>(data, step + 1);
-
-      auto& es = storage::attr_values<nslaw, "e">(data, step);
-
-      auto& inslaws = storage::attr_values<attr_t<interaction, "nslaw">>(data, step);
-
-      for (auto [ydot, ydot_next, inslaw] : view::zip(ydots, ydots_next, inslaws)) {
-        ydot_next += es[inslaw.value()] * ydot;
-      }
-    }
+    void nsl_effect_on_free_output(auto step) { run<moreau_jean::impact_law>(step, nullptr); }
   };
 };
 
