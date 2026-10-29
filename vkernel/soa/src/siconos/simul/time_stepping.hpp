@@ -2,7 +2,9 @@
 
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/model/nslaws.hpp"
+#include "siconos/simul/moreau_jean_schedule.hpp"
 #include "siconos/simul/simul_head.hpp"
+#include "siconos/storage/schedule.hpp"
 
 namespace siconos::simul {
 template <match::item... Items>
@@ -62,83 +64,28 @@ struct time_stepping : item {
 
     decltype(auto) time_step() { return self()->time_discretization().h(); }
 
+    // the schedule of a time step, given by the integrator
+    using time_step_schedule = typename one_step_integrator_t::time_step_schedule;
+
     auto compute_one_step() {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
 
-      auto osi = one_step_integrator();
-
       indice_t step = current_step();
 
-      // loop over different kind of dynamic systems
-      mp::for_each(osi.elements(), [&](auto elem) {
-        // the interactions do not change during the step
-        elem.sync_relation_sets(step);
-
-        // udpate M^-1 * fext
-        // do nothing if fext is time_invariant
-        elem.update_iteration_matrix(step);
-
-        // update jacobians
-        // do nothing if lagrangian_r is time_invariant
-        elem.update_h_matrices(step);
-
-        // vfree, qfree stored in v(step+1) & q(step+1)
-        elem.compute_free_state(step, time_step());
-
-        // -> y & ydot (step & step+1)
-        elem.compute_output(step);
-        elem.compute_output(step + 1);
-      });
-
-      // compute active interactions
-      indice_t total_number_of_involved_ds =
-          osi.compute_active_interactions(step, time_step());
-
-      if (total_number_of_involved_ds > 0) {
-        // resize assembled matrices and vectors
-        osi.assemble_setup(step);
-
-        mp::for_each(osi.elements(), [&](auto elem) {
-          // a least one activated interaction
-          elem.ensure_h_matrices(step);
-        });
-
-        osi.assemble_h_matrix_for_involved_ds(step);
-
-        mp::for_each(osi.elements(), [&](auto elem) {
-          elem.assemble_mass_matrix_for_involved_ds(step);
-          elem.assemble_k_matrix_for_involved_ds(step);
-          elem.assemble_vectors(step);
-
-          elem.nsl_effect_on_free_output(step);
-        });
-
-        osi.compute_q_nsp_vector_assembled(step);
-
-        // H M^-1 H^t or H (M^-1 + h^2 * theta^2 * K) H^t
-        osi.compute_w_matrix(step, time_step());
-        self()->template solve_nonsmooth_problem<formulation_t>(step);
-
-        // velocity_vector_assembled <- mass_matrix^-1 * (h_matrix^t * lambda)
-        osi.compute_input(step, time_step());
-
-        mp::for_each(osi.elements(), [&](auto elem) {
-          // lambda_vector_assembled -> lambdas
-          elem.keep_lambdas(step);
-
-          // velocity_vector_assembled -> velocities and positions of the
-          // involved systems
-          elem.update_velocities_and_positions(step, time_step());
-        });
-      }
-
-      // without contact the free state is the state at step + 1
+      // v, q at step + 1: the free state if there is no contact
+      auto ctx = step_context{*self(), one_step_integrator(), step, time_step()};
+      storage::schedule::run<time_step_schedule>(ctx);
 
       current_step() += 1;
 
       std::print("step {}\n", current_step());
-      return total_number_of_involved_ds;
+      return ctx.involved;
+    }
+
+    // the time step as text, stage by stage
+    std::string describe_time_step() {
+      return storage::schedule::describe<time_step_schedule>();
     }
 
     template <typename Formulation>
@@ -173,6 +120,7 @@ struct time_stepping : item {
                      method("current_step", &interface<Handle>::current_step),
                      method("time_step", &interface<Handle>::time_step),
                      method("compute_one_step", &interface<Handle>::compute_one_step),
+                     method("describe_time_step", &interface<Handle>::describe_time_step),
                      method("has_next_event", &interface<Handle>::has_next_event));
     }
   };

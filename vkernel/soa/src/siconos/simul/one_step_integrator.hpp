@@ -6,6 +6,7 @@
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/simul/moreau_jean_assembled.hpp"
 #include "siconos/simul/moreau_jean_element.hpp"
+#include "siconos/simul/moreau_jean_schedule.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/range.hpp"
@@ -51,6 +52,9 @@ struct one_step_integrator {
         []<typename... Elems>(Elems...) { return some::tuple<Elems...>{}; }));
 
     using assembled_osi_t = moreau_jean_assembled;
+
+    // the stages of a time step (see moreau_jean_schedule.hpp)
+    using time_step_schedule = simul::moreau_jean::time_step_schedule;
 
     // Only include non-empty element types in items
     using filtered_element_types_t = decltype(mp::unpack(
