@@ -740,7 +740,7 @@ def scene_shear(ax):
     scene_axes(ax, "The scene")
     ground(ax, -0.6, 5.6)
     for i in range(6):
-        disk(ax, i * 1.0, 0.55)
+        disk(ax, i * 1.0, 0.5)
         ax.add_patch(
             matplotlib.patches.Circle(
                 (i * 1.0, 0.55),
@@ -752,11 +752,11 @@ def scene_shear(ax):
             )
         )
     x0 = 1.5
-    disk(ax, x0, 0.55 + math.sqrt(0.75))
-    arrow(ax, x0 + 0.55, 0.55 + math.sqrt(0.75), 0.8, 0, "v imposed")
+    disk(ax, x0, 0.5 + math.sqrt(0.75))
+    arrow(ax, x0 + 0.55, 0.5 + math.sqrt(0.75), 0.8, 0, "v imposed")
     # the geometric path of its centre
     xs = [x0 + 0.02 * k for k in range(151)]
-    ys = [0.55 + max(math.sqrt(max(1 - (x - i) ** 2, 0)) for i in range(6)) for x in xs]
+    ys = [0.5 + max(math.sqrt(max(1 - (x - i) ** 2, 0)) for i in range(6)) for x in xs]
     ax.plot(xs, ys, color=MUTED, linestyle="--", linewidth=1)
     ax.text(
         3.0, 2.35, "geometric path of the centre", fontsize=8, color=INK, ha="center"
@@ -766,7 +766,7 @@ def scene_shear(ax):
         ax,
         -0.7,
         -0.5,
-        "a disk sheared over a fixed layer (hatched),\nrotation locked: its contacts slide;\n"
+        "a disk sheared over a layer of fixed disks\n(hatched), rotation locked: its contacts slide;\n"
         "from a hollow (\u221a3 r) to a crest (2 r): the\ngeometric dilatancy. AT, \u03bc > 0: u_N = \u03bc |u_T|\n"
         "launches it at each sliding step, it falls\nback at the next: above the path",
     )

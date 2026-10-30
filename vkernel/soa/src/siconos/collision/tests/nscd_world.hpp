@@ -5,7 +5,8 @@
    tests/nscd_comparisons.cpp): rigid disks and unit squares on a ground
    segment y = 0, the space filter, the cxd narrowphase stage, the
    selectable integrator (the dem integrator with NSCD_DEM_ONLY), NSGS at a
-   tolerance of 1e-12 by default. An incline of angle alpha is the ground with the
+   tolerance of 1e-12 by default. Fixed disks are obstacles without dofs
+   (diskfdisk_r). An incline of angle alpha is the ground with the
    gravity tilted by alpha. */
 
 #include <array>
@@ -24,6 +25,7 @@
 #include "siconos/collision/polytopepolytope_r.hpp"
 #include "siconos/collision/polytopefsegment_r.hpp"
 #include "siconos/collision/polytopedisk_r.hpp"
+#include "siconos/collision/polytopefdisk_r.hpp"
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
@@ -38,15 +40,19 @@ using polytope_shape = collision::shape::polytope;
 using segment_shape = collision::shape::segment;
 using diskdisk_r = collision::diskdisk_r;
 using diskfsegment_r = collision::diskfsegment_r;
+using diskfdisk_r = collision::diskfdisk_r;
+using translated_disk_shape = collision::translated<disk_shape>;
 struct topo;
 using polytopepolytope_r = collision::polytopepolytope_r<topo>;
 using polytopefsegment_r = collision::polytopefsegment_r<topo>;
 using polytopedisk_r = collision::polytopedisk_r<topo>;
+using polytopefdisk_r = collision::polytopefdisk_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
-struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, polytopepolytope_r,
-                                        polytopefsegment_r, polytopedisk_r> {};
+struct interaction
+    : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r, polytopepolytope_r,
+                         polytopefsegment_r, polytopedisk_r, polytopefdisk_r> {};
 struct topo : simul::topology<body, interaction> {};
 #ifdef NSCD_DEM_ONLY
 // the DEM cases on the dem integrator: its own storage (y at one time level)
@@ -57,7 +63,8 @@ struct osi : simul::one_step_integrator<topo>::selectable {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<body, collision::empty_shape>;
 using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
-struct neighborhood : collision::neighborhood<pointd, pointl> {};
+using pointtds = collision::point<storage::pattern::empty_item, translated_disk_shape>;
+struct neighborhood : collision::neighborhood<pointd, pointl, pointtds> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
@@ -70,9 +77,9 @@ struct env : standard_environment<T> {
 struct data_t
     : storage::make_runtime_database<
           env, simulation, interaction_manager, body, disk_shape, polytope_shape,
-          segment_shape, diskdisk_r, diskfsegment_r, nslaw, interaction, topo,
-          polytopepolytope_r, polytopefsegment_r, cxd_narrowphase, osi, td, osnspb,
-          neighborhood, space_filter,
+          segment_shape, translated_disk_shape, diskdisk_r, diskfsegment_r, diskfdisk_r, nslaw,
+          interaction, topo, polytopepolytope_r, polytopefsegment_r, cxd_narrowphase, osi, td,
+          osnspb, neighborhood, space_filter,
           storage::with_properties<
               storage::wrapped<body, some::unbounded_collection>,
               storage::wrapped<disk_shape, some::unbounded_collection>,
@@ -80,11 +87,15 @@ struct data_t
               storage::wrapped<segment_shape, some::unbounded_collection>,
               storage::wrapped<diskdisk_r, some::unbounded_collection>,
               storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+              storage::wrapped<diskfdisk_r, some::unbounded_collection>,
+              storage::wrapped<translated_disk_shape, some::unbounded_collection>,
               storage::wrapped<polytopepolytope_r, some::unbounded_collection>,
               storage::wrapped<polytopefsegment_r, some::unbounded_collection>,
               storage::wrapped<polytopedisk_r, some::unbounded_collection>,
+              storage::wrapped<polytopefdisk_r, some::unbounded_collection>,
               storage::wrapped<pointd, some::unbounded_collection>,
               storage::wrapped<pointl, some::unbounded_collection>,
+              storage::wrapped<pointtds, some::unbounded_collection>,
               storage::wrapped<interaction, some::unbounded_collection>,
               storage::dynamic_storage<
                   storage::attached<body, symbol<"disk_shape">, some::item_ref<disk_shape>>>,
@@ -206,6 +217,21 @@ struct world {
     return b;
   }
   auto add_disk(double x, double y) { return add_body(dsh, x, y, 0., 0.5 * m * r * r); }
+  // a fixed disk of radius r at (x, y): an obstacle without dofs, its points
+  // for the neighborhood sampled on its circle
+  void add_fixed_disk(double x, double y) {
+    using namespace siconos;
+    auto shape = storage::add<config::disk_shape>(data);
+    shape.radius() = r;
+    shape.maxpoints() = 8;
+    auto tds = storage::add<config::translated_disk_shape>(data);
+    tds.translated() = shape;
+    tds.translation() = {x, y, 0.};
+    auto rel = storage::add<config::diskfdisk_r>(data);
+    rel.translated_disk_shape() = tds;
+    spacef.insert_diskfdisk_r(rel);
+  }
+
   auto add_square(double x, double y, double vx = 0.) {
     return add_body(psh, x, y, vx, m * (4 * r * r + 4 * r * r) / 12.);
   }

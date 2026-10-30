@@ -22,11 +22,11 @@
                     beyond the exact motion vs k_t, the rotation free or
                     locked, against the excess of the loading of the
                     tangential springs (an estimate, see dem_incline)
-     shear          the dilatancy: a disk sheared over a fixed layer of
+     shear          the dilatancy: a disk sheared over a layer of fixed
                     disks (its horizontal velocity imposed by a large
                     horizontal mass, its rotation locked: the contacts
-                    slide), its height against the geometric one y_layer +
-                    max_i sqrt(4 r^2 - (x - x_i)^2), for mu = 0 and 0.3
+                    slide), its height against the geometric one r + max_i
+                    sqrt(4 r^2 - (x - x_i)^2), for mu = 0 and 0.3
 
    The cost of each run: its wall time and the iterations of its solver
    (summed over the steps; none for DEM). Moreau-Jean and Anitescu-Tasora
@@ -338,17 +338,17 @@ void dem_incline(const std::filesystem::path& dir) {
   }
 }
 
-/* the dilatancy: a disk sheared over a fixed layer of disks. The layer is
-   made immobile by large masses (1e4) and no force; its disks are 0.01 apart
-   and 0.01 above the ground: no contact between two immobile bodies, whose
-   blocks of W would be ~1e-18 (NSGS refuses them as singular). */
+/* the dilatancy: a disk sheared over a layer of touching fixed disks
+   (diskfdisk_r: obstacles without dofs). Its horizontal velocity is imposed
+   by a large horizontal mass (1e4), its rotation locked by a large moment of
+   inertia. */
 void shear(const std::filesystem::path& dir) {
   using namespace siconos;
   auto f = open_csv(dir, "shear", "scheme,mu,h,t,x,y,y_geometric");
   auto summary = open_csv(dir, "shear_summary",
                           "scheme,mu,h,steps,wall_s,iterations,max_above,max_below");
   const double v = 0.5;  // the imposed velocity: v^2 / (2 r) < g, it stays on the crests
-  const double spacing = 2 * r + 0.01, y_layer = r + 0.01, heavy = 1e4;
+  const double spacing = 2 * r, y_layer = r, heavy = 1e4;
   const double x0 = 5.5 * spacing;  // in the hollow between the layer disks 5 and 6
   const double travel = 3.;
   auto geometric = [=](double x) {  // the height of a disk resting on the layer
@@ -363,12 +363,8 @@ void shear(const std::filesystem::path& dir) {
     for (const auto& s : all_schemes) {
       const double h = is_dem(s) ? 1e-4 : 5e-3;
       world w(scene_for(s, mu, h, travel / v));
-      // the fixed layer: disks made immobile (large masses, no force)
-      for (int i = 0; i < 20; ++i) {
-        auto d = w.add_disk(i * spacing, y_layer);
-        d.mass_matrix().diagonal() << heavy, heavy, heavy;
-        d.fext() = {0., 0., 0.};
-      }
+      // the layer of fixed disks
+      for (int i = 0; i < 20; ++i) w.add_fixed_disk(i * spacing, y_layer);
       // the sheared disk: its horizontal velocity imposed, its rotation locked
       auto top = w.add_disk(x0, geometric(x0));
       top.mass_matrix().diagonal() << heavy, m, heavy;
