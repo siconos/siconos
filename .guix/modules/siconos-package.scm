@@ -201,6 +201,7 @@ problems.")
                                 gmp
                                 hdf5
                                 lapack
+                                lpsolve
                                 nlohmann-json
                                 openblas
                                 opencascade-occt
