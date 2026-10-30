@@ -841,7 +841,6 @@ struct cxd_narrowphase : item {
     void for_each_world_vertex(auto& ds, auto step, F&& f) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
-      auto& data = self()->data();
       auto sh = collision::shape_of<shape::polytope>(ds);
       auto& q = storage::attr<"q">(ds, step);
       const scalar c = std::cos(q(2)), s = std::sin(q(2));

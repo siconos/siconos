@@ -26,8 +26,6 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
     }
 
     void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
-      auto& data = self()->data();
-
       auto& q = storage::attr<"q">(ds, step);
       auto r = collision::disk_radius(ds);
 

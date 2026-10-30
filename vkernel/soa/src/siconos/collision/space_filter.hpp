@@ -1057,7 +1057,6 @@ struct space_filter : item {
                                      storage::index<finteraction, indice>>;
 
       auto& data = self()->data();
-      auto& diskfsegments = self()->diskfsegments();
 
       auto ngbh = self()->neighborhood();
       using ngbh_t = typename std::decay_t<decltype(ngbh)>::type;

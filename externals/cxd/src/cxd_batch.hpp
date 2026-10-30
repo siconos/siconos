@@ -284,7 +284,6 @@ template <std::size_t Dim, typename Pool>
 void compute_pool_bounds(const Pool& pool,
                          pool_bounds<typename Pool::scalar, Dim>& out)
 {
-  using point = typename Pool::vector;
   using scalar = typename Pool::scalar;
 
   const auto* entries = pool.entries.data();

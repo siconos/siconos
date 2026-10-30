@@ -26,14 +26,12 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
     decltype(auto) shape() { return self()->translated_disk_shape(); }
 
     [[gnu::always_inline]] decltype(auto) compute_h(auto step, auto& ds) {
-      auto& data = self()->data();
       auto& q = storage::attr<"q">(ds, step);
       return collision::distance(q, translated_disk_shape().translation()) -
              collision::disk_radius(ds) - translated_disk_shape().translated().radius();
     }
 
     [[gnu::always_inline]] void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
-      auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;
 
       const auto& q1 = storage::attr<"q">(ds, step);

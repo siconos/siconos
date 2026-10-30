@@ -49,8 +49,6 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
               match::handle<model::lagrangian_ds> DS2, typename M>
     [[gnu::always_inline]] void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1,
                                               M& h_matrix2) {
-      auto& data = self()->data();
-
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 

@@ -32,7 +32,6 @@ struct diskfsegment_r : item, model::relation1, model::any_lagrangian_relation {
     }
 
     [[gnu::always_inline]] void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
-      auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;
 
       const auto& q = storage::attr<"q">(ds, step);
