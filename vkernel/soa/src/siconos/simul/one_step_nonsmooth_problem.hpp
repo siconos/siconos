@@ -12,6 +12,7 @@
 
 #include <chrono>
 #include <format>
+#include <print>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"
@@ -106,8 +107,10 @@ struct one_step_nonsmooth_problem : item {
   using attributes =
       gather<attribute<"solver_duration_seconds", some::scalar>,
              attribute<"number_of_contacts", some::indice>,
-             attribute<"number_of_iterations", some::indice>, attribute<"level", some::indice>,
-             attribute<"trace", some::boolean>,
+             attribute<"number_of_iterations", some::indice>,
+             // the last solve: did it converge, its error
+             attribute<"converged", some::boolean>, attribute<"solver_error", some::scalar>,
+             attribute<"level", some::indice>, attribute<"trace", some::boolean>,
              attribute<"trace_params", some::item_ref<trace_params>>,
              attribute<"verbose", some::boolean>,
              attribute<"options", some::item_ref<solver_options>>,
@@ -130,6 +133,23 @@ struct one_step_nonsmooth_problem : item {
     }
     decltype(auto) level() { return attr<"level">(*self()); };
 
+    // the result of a solver (info, 0 if it converged), kept with its
+    // iterations and its error, and a warning if it did not converge
+    void check(int info) {
+      const auto& so = *options().instance();
+      attr<"converged">(*self()) = (info == 0);
+      attr<"number_of_iterations">(*self()) = so.iparam[SICONOS_IPARAM_ITER_DONE];
+      attr<"solver_error">(*self()) = so.dparam[SICONOS_DPARAM_RESIDU];
+      if (info != 0) {
+        std::print(stderr,
+                   "warning: the nonsmooth solver {} did not converge (info {}): {} contacts, "
+                   "{} iterations, error {:.3e}, tolerance {:.1e}\n",
+                   so.solverId, info, attr<"number_of_contacts">(*self()),
+                   so.iparam[SICONOS_IPARAM_ITER_DONE], so.dparam[SICONOS_DPARAM_RESIDU],
+                   so.dparam[SICONOS_DPARAM_TOL]);
+      }
+    }
+
     template <typename Formulation, match::matrix W, match::vector V>
     void solve(algebra::mat<W>& w_mat, algebra::vec<V>& q_vec, algebra::vec<V>& z_vec,
                algebra::vec<V>& w_vec,
@@ -148,8 +168,8 @@ struct one_step_nonsmooth_problem : item {
         self()->problem().instance()->M = w_mat_dense;
         self()->problem().instance()->q = q_vec._v->dense;
 
-        linearComplementarity_driver(&*self()->problem().instance(), z_vec._v->dense,
-                                     w_vec._v->dense, &*options().instance());
+        check(linearComplementarity_driver(&*self()->problem().instance(), z_vec._v->dense,
+                                           w_vec._v->dense, &*options().instance()));
 
         NM_free(w_mat_dense);
       } else if constexpr (std::derived_from<Formulation, FrictionContactProblem>) {
@@ -164,8 +184,8 @@ struct one_step_nonsmooth_problem : item {
 
         if (!trace()) {
           const auto start_time{std::chrono::steady_clock::now()};
-          fc2d_driver(&*self()->problem().instance(), z_vec._v->dense, w_vec._v->dense,
-                      &*options().instance());
+          check(fc2d_driver(&*self()->problem().instance(), z_vec._v->dense, w_vec._v->dense,
+                            &*options().instance()));
           const auto end_time{std::chrono::steady_clock::now()};
 
           const std::chrono::duration<scalar> elapsed_seconds{end_time - start_time};
@@ -176,14 +196,12 @@ struct one_step_nonsmooth_problem : item {
           auto w_bck = algebra::copy(w_vec);
 
           const auto start_time{std::chrono::steady_clock::now()};
-          fc2d_driver(&*self()->problem().instance(), z_vec._v->dense, w_vec._v->dense,
-                      &*options().instance());
+          check(fc2d_driver(&*self()->problem().instance(), z_vec._v->dense, w_vec._v->dense,
+                            &*options().instance()));
           const auto end_time{std::chrono::steady_clock::now()};
 
           const std::chrono::duration<scalar> elapsed_seconds{end_time - start_time};
           attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
-
-          attr<"number_of_iterations">(*self()) = options().iparam(SICONOS_IPARAM_ITER_DONE);
 
           // trace_params must be set!
           if (options().iparam(SICONOS_IPARAM_ITER_DONE) > trace_params().maxiter()) {
@@ -237,12 +255,11 @@ struct one_step_nonsmooth_problem : item {
       attr<"number_of_contacts">(*self()) = problem.numberOfContacts;
 
       const auto start_time{std::chrono::steady_clock::now()};
-      gfc2d_driver(&problem, r_vec._v->dense, u_vec._v->dense, v_vec._v->dense,
-                   &*options().instance());
+      check(gfc2d_driver(&problem, r_vec._v->dense, u_vec._v->dense, v_vec._v->dense,
+                         &*options().instance()));
       const std::chrono::duration<scalar> elapsed_seconds{std::chrono::steady_clock::now() -
                                                           start_time};
       attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
-      attr<"number_of_iterations">(*self()) = options().iparam(SICONOS_IPARAM_ITER_DONE);
     }
 
     auto methods() {
