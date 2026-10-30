@@ -4,7 +4,8 @@
 # A unit square launched at v0 on a ground segment with friction mu: with
 # Moreau-Jean it stays on the ground (y = 0.5) and stops at v0^2 / (2 mu g);
 # with Anitescu-Tasora (nonos.bridge.AnitescuTasoraOSI, the cone
-# complementarity) it slides with u_N = mu |u_T| and lifts off. The C++
+# complementarity by projected Gauss-Seidel, or AnitescuTasoraAPGDOSI, by
+# APGD) it slides with u_N = mu |u_T| and lifts off, the same with both. The C++
 # ctest vkernel_nscd_cases checks the numbers; this script checks the python
 # path (the scheme chosen by run_options["osi"]).
 #
@@ -85,13 +86,17 @@ def run(osi, filename):
 
 if len(sys.argv) == 3:
     # one scheme: the heights of the square, in a file
-    osi = {"mj": integrators.MoreauJeanOSI, "at": nonos.bridge.AnitescuTasoraOSI}
+    osi = {
+        "mj": integrators.MoreauJeanOSI,
+        "at": nonos.bridge.AnitescuTasoraOSI,
+        "apgd": nonos.bridge.AnitescuTasoraAPGDOSI,
+    }
     np.save(sys.argv[2], run(osi[sys.argv[1]], sys.argv[2] + ".hdf5"))
     sys.exit(0)
 
 tmpdir = tempfile.mkdtemp()
 heights = {}
-for scheme in ("mj", "at"):
+for scheme in ("mj", "at", "apgd"):
     out = os.path.join(tmpdir, scheme + ".npy")
     subprocess.run(
         [sys.executable, __file__, scheme, out], check=True, stdout=subprocess.DEVNULL
@@ -100,8 +105,10 @@ for scheme in ("mj", "at"):
 
 mj_lift = np.abs(heights["mj"] - 0.5).max()
 at_lift = (heights["at"] - 0.5).max()
+apgd_lift = (heights["apgd"] - 0.5).max()
 print(f"Moreau-Jean: max |y - 0.5| = {mj_lift:.3e}")
 print(f"Anitescu-Tasora: max lift-off = {at_lift:.3e} (h mu v0 = {h * mu * v0:.3e})")
+print(f"Anitescu-Tasora, APGD: max lift-off = {apgd_lift:.3e}")
 
 # Moreau-Jean: no lift-off, but the vnative backend keeps a constraint
 # activation threshold of 0 (run_options["constraint_activation_threshold"]
@@ -113,5 +120,8 @@ if mj_lift > 2 * g * h * h:
     sys.exit(1)
 if at_lift < 0.1 * h * mu * v0:
     print("FAILED: the Anitescu-Tasora square did not lift off")
+    sys.exit(1)
+if abs(apgd_lift - at_lift) > 1e-8:
+    print("FAILED: the two Anitescu-Tasora solvers differ")
     sys.exit(1)
 print("OK")
