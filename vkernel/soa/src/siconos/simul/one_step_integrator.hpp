@@ -87,6 +87,10 @@ struct one_step_integrator {
       some::scalar theta;
       some::scalar gamma;
       some::scalar constraint_activation_threshold;
+      // the penalty contact law of the explicit DEM scheme (see dem.hpp)
+      some::scalar normal_stiffness;
+      some::scalar normal_damping;
+      some::scalar tangential_stiffness;
       // the assembled problem
       assembled_matrix mass_matrix_assembled;
       assembled_matrix iteration_matrix_assembled;
@@ -139,6 +143,11 @@ struct one_step_integrator {
       decltype(auto) gamma() { return storage::attr<"gamma">(*self()); }
       decltype(auto) constraint_activation_threshold() {
         return storage::attr<"constraint_activation_threshold">(*self());
+      }
+      decltype(auto) normal_stiffness() { return storage::attr<"normal_stiffness">(*self()); }
+      decltype(auto) normal_damping() { return storage::attr<"normal_damping">(*self()); }
+      decltype(auto) tangential_stiffness() {
+        return storage::attr<"tangential_stiffness">(*self());
       }
 
       decltype(auto) mass_matrix_assembled() {
@@ -273,13 +282,18 @@ struct one_step_integrator {
       // an involved system among the involved systems of its kind, both in
       // the order of the items. The number of involved systems.
       auto compute_active_interactions(auto step, auto h) {
+        return compute_active_interactions(step, h, gamma(),
+                                           constraint_activation_threshold());
+      }
+
+      // the same with a given gamma and threshold (gamma = 0: the gap at step)
+      auto compute_active_interactions(auto step, auto h, auto gamma, auto threshold) {
         mp::for_each(systems(), [&](auto kind) { kind.clear_involved(step); });
 
         // a system may be involved by interactions of several kinds (a rigid
         // one by a rigid-FEM interaction)
-        mp::for_each(interactions(), [&](auto kind) {
-          kind.mark_active(step, h, gamma(), constraint_activation_threshold());
-        });
+        mp::for_each(interactions(),
+                     [&](auto kind) { kind.mark_active(step, h, gamma, threshold); });
 
         typename decltype(self()->env())::indice involved = 0;
         mp::for_each(systems(), [&](auto kind) { involved += kind.index_involved(step); });
@@ -328,6 +342,9 @@ struct one_step_integrator {
   // anitescu_tasora.hpp)
   struct anitescu_tasora : integrator<simul::anitescu_tasora::scheme> {};
   struct anitescu_tasora_apgd : integrator<simul::anitescu_tasora::apgd_scheme> {};
+
+  // the explicit DEM scheme, the other reference (see dem.hpp)
+  struct dem : integrator<simul::dem::scheme> {};
 
   // one of them, chosen at run time by the scheme attribute (see
   // selectable_scheme.hpp)

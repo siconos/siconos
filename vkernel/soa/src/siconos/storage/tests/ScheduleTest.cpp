@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "siconos/simul/anitescu_tasora.hpp"
+#include "siconos/simul/dem.hpp"
 #include "siconos/simul/moreau_jean.hpp"
 #include "siconos/storage/schedule.hpp"
 
@@ -72,6 +73,7 @@ class ScheduleTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testMoreauJean);
   CPPUNIT_TEST(testAnitescuTasora);
   CPPUNIT_TEST(testAnitescuTasoraApgd);
+  CPPUNIT_TEST(testDem);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -253,6 +255,41 @@ class ScheduleTest : public CppUnit::TestFixture {
                     "      lambda of the active interactions from the solution\n"
                     "    for each kind of systems:\n"
                     "      v, q at step + 1 of the involved systems\n"),
+        text);
+  }
+
+  // the explicit DEM: the assembly and the impulse of Moreau-Jean, no solve
+  void testDem() {
+    const auto text = describe<siconos::simul::dem::time_step_schedule>();
+    std::fputs(text.c_str(), stdout);
+    CPPUNIT_ASSERT_EQUAL(
+        std::string(
+            "explicit DEM time step:\n"
+            "  for each kind of systems:\n"
+            "    M^-1 f, if f or K change\n"
+            "    the free state: v, q at step + 1 without the contact impulses\n"
+            "  for each kind of interactions:\n"
+            "    the relation sets hold every interaction\n"
+            "    the jacobians H, if the relations change\n"
+            "    the outputs y, ydot at step\n"
+            "  the active set: the interactions that overlap at step, the systems they "
+            "involve\n"
+            "  for each kind of interactions:\n"
+            "    no force and no tangential spring without overlap\n"
+            "  if there are contacts:\n"
+            "    the sizes and offsets of the assembled problem\n"
+            "    for each kind of interactions:\n"
+            "      the jacobians H, if the relations do not change\n"
+            "      the penalty forces at step, the tangential springs: lambda = h F\n"
+            "      H of the active interactions\n"
+            "      lambda, ydot, mu of the active interactions\n"
+            "    for each kind of systems:\n"
+            "      M of the involved systems\n"
+            "      K of the involved FEM systems\n"
+            "    A = M + h^2 theta^2 K, if FEM systems are in contact\n"
+            "    the velocity correction M^-1 H^T lambda\n"
+            "    for each kind of systems:\n"
+            "      v, q at step + 1 of the involved systems\n"),
         text);
   }
 };

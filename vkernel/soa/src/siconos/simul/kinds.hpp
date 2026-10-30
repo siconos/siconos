@@ -305,7 +305,12 @@ struct interaction_kind : item {
     some::indice number_of_interactions;
   };
 
-  using properties = gather<storage::keep<y, 2>, storage::keep<ydot, 2>>;
+  // the elongation of the tangential spring of a contact, its history in the
+  // explicit DEM scheme (see dem.hpp)
+  using spring_attachment =
+      storage::attached<interaction, symbol<"tangential_spring">, some::scalar>;
+
+  using properties = gather<spring_attachment, storage::keep<y, 2>, storage::keep<ydot, 2>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
