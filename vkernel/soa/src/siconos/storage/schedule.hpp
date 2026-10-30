@@ -27,8 +27,9 @@ namespace siconos::storage::schedule {
    A composite has a name, its stages, and a static run(ctx, run_stages)
    that runs them (run_stages(ctx) runs them in order on a context):
    sequence<"name", Stages...> runs them, when<Condition, Stages...> runs
-   them if Condition::holds(ctx); an application defines its own (see
-   simul::per_element).
+   them if Condition::holds(ctx), repeat<Condition, Stages...> runs them
+   until Condition::holds(ctx); an application defines its own (see
+   simul::for_systems).
 
    run<S>(ctx, observer) runs a schedule, the observer seeing each stage:
    observer(name, action) must call action() (timers, traces...).
@@ -67,6 +68,21 @@ struct when {
     if (Condition::holds(ctx)) {
       run_stages(ctx);
     }
+  }
+};
+
+// stages run again and again until the condition holds (checked after each
+// run: they run at least once), the iterations of a solver. The condition
+// carries its own limit (a maximum number of iterations in the context).
+template <typename Condition, typename... Stages>
+struct repeat {
+  static constexpr std::string_view name = Condition::name;
+  static constexpr std::string_view prefix = "repeat until ";
+  using stages = std::tuple<Stages...>;
+  static void run(auto& ctx, auto&& run_stages) {
+    do {
+      run_stages(ctx);
+    } while (!Condition::holds(ctx));
   }
 };
 
@@ -196,9 +212,10 @@ struct dataflow {
         auto writes = k.writes;
         if (k.assembles) writes.push_back("the assembled problem (by rank)");
         text += std::format("      writes {}\n", writes.empty() ? "-" : join(writes));
-        if (k.host_only || k.ordered || k.reads_world) {
-          text += std::format("      {}{}{}\n", k.host_only ? "host only " : "",
-                              k.ordered ? "ordered " : "", k.reads_world ? "reads world" : "");
+        if (k.host_only || k.ordered || k.reads_world || k.accumulates) {
+          text += std::format("      {}{}{}{}\n", k.host_only ? "host only " : "",
+                              k.ordered ? "ordered " : "", k.reads_world ? "reads world " : "",
+                              k.accumulates ? "accumulates through references" : "");
         }
       }
     }

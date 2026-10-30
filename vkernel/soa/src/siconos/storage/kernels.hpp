@@ -191,6 +191,14 @@ struct through {
 template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
 struct out_through : through<Ref, Name, Options...> {};
 
+// the same, accumulated: the kernel adds to the field of the referenced item
+// (several items may add to the same target, the sum does not depend on
+// their order up to the rounding errors). It may read it first: a Gauss-
+// Seidel sweep, which is then ordered. Run in parallel, it needs items that
+// share no target (colour classes) or atomic additions.
+template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
+struct add_through : through<Ref, Name, Options...> {};
+
 // a handle on the item referenced by Ref, for the code that works on handles
 // (the relations): host only
 template <pattern::string_literal Ref, typename... Options>
@@ -312,7 +320,9 @@ struct kernel {
   using fields = std::tuple<Fields...>;
 };
 
-// kernels run in one loop
+// kernels run in one loop. B reading what A wrote through a reference would
+// read the targets before the other items of A wrote them: what A writes
+// through references (out_through, add_through) is not checked here.
 template <typename... Kernels>
 struct fused {
   using space = std::tuple_element_t<0, std::tuple<typename Kernels::space...>>;
@@ -362,6 +372,7 @@ struct kernel_info {
   bool ordered = false;
   bool reads_world = false;
   bool assembles = false;
+  bool accumulates = false;  // adds to the fields of referenced items
 };
 
 namespace detail {
@@ -412,6 +423,14 @@ struct access<out_through<Ref, Name, Options...>> {
     i.writes.push_back(std::string(Ref.value) + "." + field_label<Name, Options...>());
   }
 };
+template <pattern::string_literal Ref, pattern::string_literal Name, typename... Options>
+struct access<add_through<Ref, Name, Options...>> {
+  static void add(kernel_info& i) {
+    i.writes.push_back(std::string(Ref.value) + "." + field_label<Name, Options...>() +
+                       " (+=)");
+    i.accumulates = true;
+  }
+};
 template <pattern::string_literal Ref, typename... Options>
 struct access<referenced<Ref, Options...>> {
   static void add(kernel_info& i) { i.reads.push_back(std::string(Ref.value) + " (handle)"); }
@@ -448,6 +467,7 @@ kernel_info info() {
             i.ordered = i.ordered || k.ordered;
             i.reads_world = i.reads_world || k.reads_world;
             i.assembles = i.assembles || k.assembles;
+            i.accumulates = i.accumulates || k.accumulates;
           }(info<Kernels>()),
           ...);
     }(static_cast<K*>(nullptr));
