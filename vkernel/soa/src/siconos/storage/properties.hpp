@@ -20,7 +20,7 @@ namespace property {
 
 struct without_binding : some::property {};
 
-struct keep : some::property {};
+struct time_levels : some::property {};
 
 struct wrapped : some::property {};
 
@@ -92,10 +92,14 @@ struct without_binding : Attr {
   using without_binding_t = void;
 };
 
+// the attribute Attr at N time levels: a circular buffer of N values, the
+// step k at k % N (step and step + 1 for N = 2; with N = 1 they are the same
+// value). Declared by the code that needs the levels (an integrator scheme,
+// see simul/theta_method.hpp), in the properties of an item.
 template <match::attribute Attr, std::size_t N>
-struct keep : property::keep {
+struct time_levels : property::time_levels {
   using type = Attr;
-  using keep_t = void;
+  using time_levels_t = void;
   //    using attribute = Attr;
   static constexpr std::size_t size = N;
 };

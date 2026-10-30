@@ -10,7 +10,7 @@
    part of the collision pipeline that scales today.
 
    Everything runs at step column 0. With no one_step_integrator in the
-   world there is no keep<> on q/velocity/y/ydot, so every step index maps
+   world there is no time_levels<> on q/velocity/y/ydot, so every step index maps
    to column 0 and ds.q() is the current geometry.
 
    What is measured, per step:

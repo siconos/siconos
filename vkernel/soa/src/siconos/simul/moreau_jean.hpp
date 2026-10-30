@@ -214,9 +214,14 @@ using initial_schedule =
 
 // clang-format on
 
+// the schedules and the storage they need on the kinds (see kinds.hpp)
 struct scheme {
   using time_step_schedule = moreau_jean::time_step_schedule;
   using initial_schedule = moreau_jean::initial_schedule;
+  template <typename System>
+  using system_storage = theta_method::system_storage<System>;
+  template <typename Interaction>
+  using interaction_storage = contacts::interaction_storage<Interaction>;
 };
 
 }  // namespace siconos::simul::moreau_jean

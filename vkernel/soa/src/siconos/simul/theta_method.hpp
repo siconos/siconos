@@ -21,6 +21,16 @@ namespace siconos::simul::theta_method {
 
 using namespace kernels;
 
+// the storage of the theta-method on the systems of a kind (the properties of
+// the kind, see kinds.hpp): M^-1 f, declared by the kind, at one time level
+// (f is constant over the step: minv_f at step and at step + 1 are the same
+// value), q and the velocity at two levels, step and step + 1
+template <typename System>
+using system_storage =
+    gather<storage::attached<System, symbol<"minv_f">, attr_t<System, "fext">>,
+           storage::time_levels<attr_t<System, "q">, 2>,
+           storage::time_levels<attr_t<System, "velocity">, 2>>;
+
 // the time step, the theta of the theta-method, and for the contact impulse:
 // the assembled velocity correction and the part of it that belongs to a
 // system, part(assembled, rank, like)

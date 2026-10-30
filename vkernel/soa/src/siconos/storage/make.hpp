@@ -155,7 +155,7 @@ namespace build_detail {
  * @brief Storage of one attribute column of Item, before its memory depth.
  *
  * The three stages shared by both databases: attribute refinement, item
- * wrapper or default storage, and the keep<> depth. column_type stores the
+ * wrapper or default storage, and the time_levels<> depth. column_type stores the
  * depth in the type (memory_t), registry::column_of at run time.
  */
 template <typename Info, match::attribute A, typename Item>
@@ -195,9 +195,10 @@ struct column_storage {
     }
   }());
 
-  // memory level: keep<> depth
-  using keeps_t = decltype(mp::filter(all_properties_t{}, mp::derive_from<property::keep>));
-  static constexpr std::size_t depth = memory_size<A, keeps_t>();
+  // memory level: time_levels<> depth
+  using time_levels_list =
+      decltype(mp::filter(all_properties_t{}, mp::derive_from<property::time_levels>));
+  static constexpr std::size_t depth = memory_size<A, time_levels_list>();
 };
 
 /**
@@ -248,7 +249,7 @@ struct pack_columns<Info, boost::hana::tuple<Ps...>> {
  * @brief Factory struct for building a complete compile-time typed database
  *
  * The whole database type (every column of every item, refined, wrapped and
- * sized for its keep<> depth) is computed here, at compile time, and every
+ * sized for its time_levels<> depth) is computed here, at compile time, and every
  * handle carries it: slowest compile, fastest runtime access.
  * For the counterpart where columns are compile-time typed per key too, but
  * only created (registered) at run time - much faster to compile, at the

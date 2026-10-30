@@ -33,7 +33,7 @@ static auto remove = [](auto& data, auto&& h) {
     data.store()._registry.template remove_item<item_t>(h.index().value());
   } else {
     using info_t = get_info_t<decltype(data)>;
-    using all_keeps_t = decltype(all_properties_as<property::keep>(data));
+    using all_time_levels_t = decltype(all_properties_as<property::time_levels>(data));
 
     using indice = typename info_t::template env<item_t>::indice;
 
@@ -82,7 +82,7 @@ static auto remove = [](auto& data, auto&& h) {
     if constexpr (mp::size(attrs) > mp::size_c<0>) {
       mp::for_each(attrs, [&data, &h]<match::attribute A>(A) {
         return mp::for_each(
-            mp::range<memory_size<A, all_keeps_t>()>, [&data, &h](indice step) {
+            mp::range<memory_size<A, all_time_levels_t>()>, [&data, &h](indice step) {
               move_back(h.index().value(), memory(step, mp::get<A>(data.store())));
             });
       });

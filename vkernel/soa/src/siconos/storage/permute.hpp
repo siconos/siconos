@@ -59,7 +59,7 @@ void permute(auto& data, const std::vector<std::size_t>& perm) {
     data.store()._registry.template permute_item<Item>(perm, inverse);
   } else {
     using info_t = get_info_t<decltype(data)>;
-    using all_keeps_t = decltype(all_properties_as<property::keep>(data));
+    using all_time_levels_t = decltype(all_properties_as<property::time_levels>(data));
     using indice = typename info_t::template env<Item>::indice;
     using env_t = typename info_t::template env<Item>;
 
@@ -80,7 +80,7 @@ void permute(auto& data, const std::vector<std::size_t>& perm) {
 
     mp::for_each(attrs, [&data, &perm]<match::attribute A>(A) {
       return mp::for_each(
-          mp::range<memory_size<A, all_keeps_t>()>, [&data, &perm](indice step) {
+          mp::range<memory_size<A, all_time_levels_t>()>, [&data, &perm](indice step) {
             permute_detail::gather(perm, memory(step, mp::get<A>(data.store())));
           });
     });

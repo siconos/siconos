@@ -75,6 +75,15 @@ struct scheme {
 
   // the same for all
   using initial_schedule = simul::moreau_jean::initial_schedule;
+
+  // the storage of all the schemes: the theta-method on the systems, the
+  // contacts and the tangential springs of dem on the interactions
+  template <typename System>
+  using system_storage = theta_method::system_storage<System>;
+  template <typename Interaction>
+  using interaction_storage =
+      decltype(storage::mp::concat(contacts::interaction_storage<Interaction>{},
+                                   gather<simul::dem::tangential_spring<Interaction>>{}));
 };
 
 }  // namespace siconos::simul::selectable_scheme

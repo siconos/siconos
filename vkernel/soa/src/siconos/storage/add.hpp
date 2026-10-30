@@ -20,7 +20,7 @@ decltype(auto) add_static(auto&& data) {
   // types
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
-  using all_keeps_t = decltype(all_properties_as<property::keep>(data));
+  using all_time_levels_t = decltype(all_properties_as<property::time_levels>(data));
   using indice = typename info_t::template env<Item>::indice;
 
   // get attached storages from all properties
@@ -36,8 +36,8 @@ decltype(auto) add_static(auto&& data) {
     // there is some attributes or attached_storages
     indice index = 0;
     mp::for_each(attrs, [&data, &index]<match::attribute A>(A) {
-      mp::for_each(mp::range<memory_size<A, all_keeps_t>()>,
-                   // memory keep is taken into account
+      mp::for_each(mp::range<memory_size<A, all_time_levels_t>()>,
+                   // one value per time level
                    [&data, &index](auto step) {
                      auto&& storage =
                          memory(step, mp::get<A>(static_cast<data_t&&>(data).store()));

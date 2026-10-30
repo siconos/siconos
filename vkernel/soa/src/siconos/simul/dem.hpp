@@ -38,6 +38,19 @@ namespace siconos::simul::dem {
 
 using namespace kernels;
 
+// the history of a contact: the elongation of its tangential spring
+template <typename Interaction>
+using tangential_spring =
+    storage::attached<Interaction, symbol<"tangential_spring">, some::scalar>;
+
+// the storage of the scheme on the interactions of a kind (the properties of
+// the kind, see kinds.hpp): the tangential springs; y and ydot at step only,
+// but ydot at two time levels for the contact work of the outputs (io reads
+// ydot at step - 1)
+template <typename Interaction>
+using interaction_storage = gather<tangential_spring<Interaction>,
+                                   storage::time_levels<attr_t<Interaction, "ydot">, 2>>;
+
 // the parameters of the contact forces
 template <typename H, typename S>
 struct penalty {
@@ -169,6 +182,10 @@ using initial_schedule = moreau_jean::initial_schedule;
 struct scheme {
   using time_step_schedule = dem::time_step_schedule;
   using initial_schedule = dem::initial_schedule;
+  template <typename System>
+  using system_storage = theta_method::system_storage<System>;
+  template <typename Interaction>
+  using interaction_storage = dem::interaction_storage<Interaction>;
 };
 
 }  // namespace siconos::simul::dem

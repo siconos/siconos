@@ -45,12 +45,11 @@ int main() {
 
   struct zz {};
 
-  auto data =
-      siconos::make_storage<env, simulation, wrap<some::unbounded_collection, relation>,
-                            wrap<some::unbounded_collection, ball>,
-                            wrap<some::unbounded_collection, interaction>,
-                            with_properties<keep<ball::q, 10>, diagonal<ball::mass_matrix>,
-                                            unbounded_diagonal<osi::mass_matrix_assembled>>>();
+  auto data = siconos::make_storage<
+      env, simulation, wrap<some::unbounded_collection, relation>,
+      wrap<some::unbounded_collection, ball>, wrap<some::unbounded_collection, interaction>,
+      with_properties<time_levels<ball::q, 10>, diagonal<ball::mass_matrix>,
+                      unbounded_diagonal<osi::mass_matrix_assembled>>>();
 
   auto the_ball = add<ball>(data);
 
@@ -172,7 +171,7 @@ int main() {
   osnspb_1.options() = so;
 
   print("memory_size={}\n",
-        (memory_size<ball::q, decltype(all_properties_as<property::keep>(data))>));
+        (memory_size<ball::q, decltype(all_properties_as<property::time_levels>(data))>));
 
   hosi.compute_q_vector_assembled(0);
   dsimul.solve_nonsmooth_problem<LinearComplementarityProblem>();

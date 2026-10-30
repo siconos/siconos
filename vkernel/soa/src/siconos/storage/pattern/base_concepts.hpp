@@ -43,7 +43,7 @@ concept array_like = requires(T a) {
 }(std::make_index_sequence<std::tuple_size_v<T>>());
 
 template <typename T>
-concept keep = requires(T t) {
+concept time_levels = requires(T t) {
   typename T::tag;
   { t.size };
 };

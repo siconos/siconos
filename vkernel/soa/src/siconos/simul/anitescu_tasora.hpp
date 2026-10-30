@@ -525,11 +525,14 @@ using initial_schedule = moreau_jean::initial_schedule;
 struct scheme {
   using time_step_schedule = anitescu_tasora::time_step_schedule;
   using initial_schedule = anitescu_tasora::initial_schedule;
+  template <typename System>
+  using system_storage = theta_method::system_storage<System>;
+  template <typename Interaction>
+  using interaction_storage = contacts::interaction_storage<Interaction>;
 };
 
-struct apgd_scheme {
+struct apgd_scheme : scheme {
   using time_step_schedule = anitescu_tasora::apgd_time_step_schedule;
-  using initial_schedule = anitescu_tasora::initial_schedule;
 };
 
 }  // namespace siconos::simul::anitescu_tasora

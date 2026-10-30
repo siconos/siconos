@@ -79,7 +79,12 @@ struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, polytopepolytope_r,
                                         polytopefsegment_r, polytopedisk_r> {};
 struct topo : simul::topology<body, interaction> {};
+#ifdef NSCD_DEM_ONLY
+// the DEM cases on the dem integrator: its own storage (y at one time level)
+struct osi : simul::one_step_integrator<topo>::dem {};
+#else
 struct osi : simul::one_step_integrator<topo>::selectable {};
+#endif
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<body, collision::empty_shape>;
 using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
@@ -629,6 +634,7 @@ void dem_incline_sticks() {
 
 class NscdCasesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(NscdCasesTest);
+#ifndef NSCD_DEM_ONLY
   CPPUNIT_TEST(testSlidingSquare);
   CPPUNIT_TEST(testInclineSticks);
   CPPUNIT_TEST(testInclineSlides);
@@ -636,6 +642,7 @@ class NscdCasesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testAnitescuTasoraFrictionless);
   CPPUNIT_TEST(testAnitescuTasoraSeparation);
   CPPUNIT_TEST(testAnitescuTasoraWarmStart);
+#endif
   CPPUNIT_TEST(testDemColumn);
   CPPUNIT_TEST(testDemStability);
   CPPUNIT_TEST(testDemFriction);

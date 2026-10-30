@@ -24,7 +24,7 @@ namespace siconos::storage::kernels {
      - its iteration space: all the items of a type, the dense side of a
        sparse set, the items with an entry in a property...
      - the fields it reads (in), writes (out) or both (inout), at the current
-       step or at the next one (the memory of keep<attr, 2>),
+       step or at the next one (the memory of time_levels<attr, 2>),
    and a static apply(p, fields...) that works on the fields of one item, p
    being the parameters of the run. apply knows nothing about the storage:
    run<K> finds the columns and loops.
@@ -47,7 +47,7 @@ namespace siconos::storage::kernels {
    run: a placeholder P defines P::resolved_in<Ctx>. An application defines
    its own placeholders and its own iteration spaces (see simul/kernels.hpp). */
 
-// a field at the next step (the step + 1 slot of a keep<attr, 2> memory)
+// a field at the next step (the step + 1 slot of a time_levels<attr, 2> memory)
 struct next {};
 
 namespace detail {

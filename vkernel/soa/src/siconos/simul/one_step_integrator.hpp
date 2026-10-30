@@ -32,6 +32,25 @@ constexpr auto refs(mp::tuple<Items...>) {
   return some::tuple<some::item_ref<Items>...>{};
 }
 
+// the storage a scheme needs on the systems (interactions) of a kind, none
+// on an empty kind
+template <typename Scheme, typename System>
+struct system_storage_of {
+  using type = typename Scheme::template system_storage<System>;
+};
+template <typename Scheme>
+struct system_storage_of<Scheme, empty_item> {
+  using type = gather<>;
+};
+template <typename Scheme, typename Interaction>
+struct interaction_storage_of {
+  using type = typename Scheme::template interaction_storage<Interaction>;
+};
+template <typename Scheme>
+struct interaction_storage_of<Scheme, empty_item> {
+  using type = gather<>;
+};
+
 template <typename Topology>
 struct one_step_integrator {
   using ct_interaction = typename Topology::fixed_dof_interaction;
@@ -47,16 +66,24 @@ struct one_step_integrator {
   struct integrator : item {
     using topology = Topology;
 
-    // the kinds of systems and of interactions (see kinds.hpp)
-    using ct_systems_t = system_kind<ct_system, Topology>;
-    using rt_systems_t = system_kind<rt_system, Topology>;
+    // the kinds of systems and of interactions (see kinds.hpp), with the
+    // storage the scheme needs on them
+    template <typename System>
+    using system_kind_t =
+        system_kind<System, Topology, typename system_storage_of<Scheme, System>::type>;
+    template <typename Interaction, typename Systems1, typename Systems2>
+    using interaction_kind_t =
+        interaction_kind<Interaction, Systems1, Systems2, Topology,
+                         typename interaction_storage_of<Scheme, Interaction>::type>;
 
-    using ct_interactions_t =
-        interaction_kind<ct_interaction, ct_systems_t, ct_systems_t, Topology>;
+    using ct_systems_t = system_kind_t<ct_system>;
+    using rt_systems_t = system_kind_t<rt_system>;
+
+    using ct_interactions_t = interaction_kind_t<ct_interaction, ct_systems_t, ct_systems_t>;
     using rt_ct_interactions_t =
-        interaction_kind<rt_ct_interaction, ct_systems_t, rt_systems_t, Topology>;
+        interaction_kind_t<rt_ct_interaction, ct_systems_t, rt_systems_t>;
     using rt_rt_interactions_t =
-        interaction_kind<rt_rt_interaction, rt_systems_t, rt_systems_t, Topology>;
+        interaction_kind_t<rt_rt_interaction, rt_systems_t, rt_systems_t>;
 
     // the non-empty kinds, in the order of the assembled problem
     using system_kinds_t = decltype(non_empty(

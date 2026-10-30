@@ -24,10 +24,13 @@ namespace siconos::simul {
 
    Topology is the item that declares the attached storages of the systems
    and interactions (involved, index, ds1, ...): their lookups name it as
-   declarer. */
+   declarer. Storage is what the scheme of the integrator needs on the items
+   of the kind (time levels, attached storages: system_storage and
+   interaction_storage of a scheme, see moreau_jean.hpp): the properties of
+   the kind, which declares them. */
 
 // a kind of systems
-template <typename System, typename Topology>
+template <typename System, typename Topology, typename Storage>
 struct system_kind : item {
   using system = System;
   using topology = Topology;
@@ -43,11 +46,7 @@ struct system_kind : item {
     some::indice number_of_involved_ds;
   };
 
-  using minv_storage_attachment = storage::attached<system, symbol<"minv_f">, fext>;
-
-  using properties =
-      gather<minv_storage_attachment, storage::keep<minv_storage_attachment, 1>,
-             storage::keep<fext, 1>, storage::keep<q, 2>, storage::keep<velocity, 2>>;
+  using properties = Storage;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -277,14 +276,15 @@ struct system_kind : item {
   };
 };
 
-template <typename Topology>
-struct system_kind<empty_item, Topology> : empty_item {
+template <typename Topology, typename Storage>
+struct system_kind<empty_item, Topology, Storage> : empty_item {
   using attributes = gather<>;
 };
 
 // a kind of interactions, between the systems of the kinds Systems1 (ds1) and
 // Systems2 (ds2)
-template <typename Interaction, typename Systems1, typename Systems2, typename Topology>
+template <typename Interaction, typename Systems1, typename Systems2, typename Topology,
+          typename Storage>
 struct interaction_kind : item {
   using interaction = Interaction;
   using systems1 = Systems1;
@@ -305,12 +305,7 @@ struct interaction_kind : item {
     some::indice number_of_interactions;
   };
 
-  // the elongation of the tangential spring of a contact, its history in the
-  // explicit DEM scheme (see dem.hpp)
-  using spring_attachment =
-      storage::attached<interaction, symbol<"tangential_spring">, some::scalar>;
-
-  using properties = gather<spring_attachment, storage::keep<y, 2>, storage::keep<ydot, 2>>;
+  using properties = Storage;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -486,8 +481,8 @@ struct interaction_kind : item {
   };
 };
 
-template <typename Systems1, typename Systems2, typename Topology>
-struct interaction_kind<empty_item, Systems1, Systems2, Topology> : empty_item {
+template <typename Systems1, typename Systems2, typename Topology, typename Storage>
+struct interaction_kind<empty_item, Systems1, Systems2, Topology, Storage> : empty_item {
   using attributes = gather<>;
 };
 

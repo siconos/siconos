@@ -72,7 +72,7 @@ struct column final : column_base {
   Memory value{};
 
   column() = default;
-  // runtime memory depth (keep<>): one storage per kept time step
+  // runtime memory depth (time_levels<>): one storage per kept time step
   explicit column(std::size_t depth) {
     if constexpr (!registry_detail::is_sparse_set<Memory>) value.resize(depth);
   }
@@ -262,7 +262,7 @@ struct registry {
 #endif
   }
 
-  /// Create the column of Key with its memory depth (keep<>), and list it
+  /// Create the column of Key with its memory depth (time_levels<>), and list it
   /// among the columns of Item; done once per column and item, when the world
   /// registers its columns.
   template <typename Item, typename Key, typename Memory>
@@ -381,7 +381,7 @@ concept configuration_item = match::item<T> && requires { typename T::properties
  * all_properties_t holds ONLY the configuration's properties (the
  * with_properties<...> given to make_runtime_database): the user refinements, wrappers
  * and configuration-declared attached storages.  Properties declared by items
- * (topology's attached storages, keep<> depths) are not there on purpose: a
+ * (topology's attached storages, time_levels<> depths) are not there on purpose: a
  * lookup of those must name its declarer, and a world-wide one fails to
  * compile ("attached storage not found") instead of silently differing.
  */
@@ -430,11 +430,11 @@ template <typename Info, match::attribute A>
 struct column_of
     : build_detail::column_storage<Info, A,
                                    typename registry_detail::column_item<Info, A>::type> {
-  // the keep<> depth is a runtime size, not part of the type (unlike
+  // the time_levels<> depth is a runtime size, not part of the type (unlike
   // memory_t's std::array), so that the type of a column does not depend on
-  // which item declares a keep<> on it.  memory(step, m) indexes
+  // which item declares a time_levels<> on it.  memory(step, m) indexes
   // m[step % size] either way.  depth is only meaningful with a world_info
-  // (registration): keep<> is declared by items.
+  // (registration): time_levels<> is declared by items.
   using type = std::vector<typename column_of::storage_t>;
 };
 
@@ -490,7 +490,7 @@ struct world {
   /// takes the fast path of registry::column.
   ///
   /// WorldInfo is the full world_info (item closure, all properties): only
-  /// here, where the world is built, are the keep<> depths and the item lists
+  /// here, where the world is built, are the time_levels<> depths and the item lists
   /// needed.  The column types are those the access sites compute from Info
   /// alone, checked against the full computation.
   template <typename WorldInfo>
@@ -522,7 +522,7 @@ struct world {
 
 /// make_compile_time_database counterpart that builds a runtime
 /// (registry-backed) database: its columns are compile-time typed per key
-/// (same refine -> wrapper -> keep<> pipeline as its counterpart, see
+/// (same refine -> wrapper -> time_levels<> pipeline as its counterpart, see
 /// column_of), but materialised (registered) at run time, at construction.
 /// Much faster to compile than make_compile_time_database (no database type:
 /// no per-TU instantiation, see SiconosVkernelRegistryWorld), at the cost of

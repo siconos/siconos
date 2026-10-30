@@ -24,6 +24,14 @@ namespace siconos::simul::contacts {
 
 using namespace kernels;
 
+// the storage of the contacts on the interactions of a kind (the properties
+// of the kind, see kinds.hpp): y and ydot at two time levels, the outputs at
+// step and the free outputs at step + 1 (the active set reads y, ydot at
+// step after the free outputs, the impact law ydot at step and step + 1)
+template <typename Interaction>
+using interaction_storage = gather<storage::time_levels<attr_t<Interaction, "y">, 2>,
+                                   storage::time_levels<attr_t<Interaction, "ydot">, 2>>;
+
 // the parameters of the kernels
 
 // an assembled matrix of FEM systems and the dof offsets of the involved ones
