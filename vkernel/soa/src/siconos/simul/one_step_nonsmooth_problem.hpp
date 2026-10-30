@@ -52,7 +52,8 @@ struct solver_options : storage::data_holder<SolverOptions> {
                      method("iparam", &interface<Handle>::iparam<indice>),
                      method("dparam", &interface<Handle>::dparam<indice>),
                      method("solver_id", &interface<Handle>::solver_id),
-                     method("set_iparam", &interface<Handle>::set_iparam<indice, indice>),
+                     // iparam is an int array: some solvers have -1 defaults
+                     method("set_iparam", &interface<Handle>::set_iparam<indice, int>),
                      method("set_dparam", &interface<Handle>::set_dparam<indice, scalar>),
                      method("set_solver_id", &interface<Handle>::set_solver_id<indice>));
     }
@@ -211,16 +212,17 @@ struct one_step_nonsmooth_problem : item {
     }
     // the global frictional contact problem (numerics convention, H being
     // n x m there): M v = q + H r, u = H^T v + b, (u, r) in the Coulomb
-    // complementarity. h_mat is our H (m x n, the rows of the interactions).
-    // r, u, v: in as a starting point, out as the solution.
-    void solve_global(auto& m_mat, auto& h_mat, auto& q_vec, auto& b_vec, auto& mu_vec,
-                      auto& r_vec, auto& u_vec, auto& v_vec) {
+    // complementarity, with the options of this problem. h_mat is our H (m x
+    // n, the rows of the interactions). r, u, v: in as a starting point, out
+    // as the solution.
+    void solve_global(GlobalFrictionContactProblem& problem, auto& m_mat, auto& h_mat,
+                      auto& q_vec, auto& b_vec, auto& mu_vec, auto& r_vec, auto& u_vec,
+                      auto& v_vec) {
       using scalar = typename decltype(self()->env())::scalar;
 
       numerics_set_verbose(storage::attr<"verbose">(*self()));
       algebra::transpose(h_mat);
 
-      auto& problem = *self()->problem().instance();
       problem.dimension = 2;
       problem.numberOfContacts = size0(h_mat) / problem.dimension;
       problem.M = m_mat._m;

@@ -3,15 +3,19 @@
 # Timings: the io.mechanics timer lines (computeOneStep, updateInteractions...).
 #
 # usage: python3 bench_fem_disks.py <mesh.msh> <ndisks> [hdf5_output]
-#          [neighborhood_factor] [spacing_factor] [T]
+#          [neighborhood_factor] [spacing_factor] [T] [mj|gosi] [tolerance]
 #
-# neighborhood_factor: neighborhood radius of the space filter, in disk radii.
+# neighborhood_factor: neighborhood radius of the space filter, in disk radii
+# ("none": the defaults).
 # Without it the SpaceFilterOptions defaults (radius 2.1, meant for unit
 # disks) apply: with disks of radius 0.01 every pair of disks is then a
 # neighbor, i.e. N(N-1)/2 interactions.
 # spacing_factor: grid spacing in disk radii (default 2.05). 2.0 starts with
 # every disk touching its neighbors, i.e. the whole pile in contact.
 # T: final time (default 0.5, i.e. 100 steps).
+# mj|gosi: Moreau-Jean on the local problem (default, FC2D NSGS) or on the
+# global one (MoreauJeanGOSI, GFC2D_NSN_AC).
+# tolerance: of the solver (default 1e-2).
 
 import math
 import sys
@@ -29,13 +33,18 @@ from siconos.io.mechanics_run import (
 )
 import nonos  # noqa: F401 registers the vnative backend
 import nonos.bridge
+from siconos import integrators
 
 shape_filename = sys.argv[1]
 ndisks = int(sys.argv[2]) if len(sys.argv) > 2 else 100
 hdf5_output = sys.argv[3] if len(sys.argv) > 3 else "bench_fem_disks.hdf5"
-neighborhood_factor = float(sys.argv[4]) if len(sys.argv) > 4 else None
+neighborhood_factor = (
+    float(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] != "none" else None
+)
 spacing_factor = float(sys.argv[5]) if len(sys.argv) > 5 else 2.05
 final_time = float(sys.argv[6]) if len(sys.argv) > 6 else 0.5
+gosi = len(sys.argv) > 7 and sys.argv[7] == "gosi"
+tolerance = float(sys.argv[8]) if len(sys.argv) > 8 else 1e-2
 
 disk_radius = 0.01
 
@@ -85,14 +94,19 @@ with MechanicsHdf5Runner(config=runner_config, io_filename=hdf5_output) as io:
 
     io.add_Newton_impact_friction_nsl("contact", mu=0.5, e=0)
 
-options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
-options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
-options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-2
-# legacy FC2D error measure: the default became Euclidean scaling upstream
-options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
-    sn.params.SICONOS_FRICTION_2D_SCALING_NO
-)
-options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
+if gosi:
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_GLOBAL_FRICTION_2D_NSN_AC)
+    options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
+    options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
+else:
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+    options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
+    options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
+    # legacy FC2D error measure: the default became Euclidean scaling upstream
+    options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
+        sn.params.SICONOS_FRICTION_2D_SCALING_NO
+    )
+    options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 run_options = MechanicsHdf5Runner_run_options()
 run_options["with_timer"] = True
@@ -100,6 +114,8 @@ run_options["t0"] = 0
 run_options["T"] = final_time
 run_options["h"] = 0.005
 run_options["theta"] = 0.50001
+if gosi:
+    run_options["osi"] = integrators.MoreauJeanGOSI
 run_options["Newton_max_iter"] = 1
 run_options["set_external_forces"] = None
 run_options["solver_options"] = options

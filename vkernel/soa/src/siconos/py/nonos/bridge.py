@@ -244,6 +244,11 @@ class TimeDiscretisation(Stored):
         self.handle().set_h(h)
 
 
+# the schemes of the integrator (simul/selectable_scheme.hpp)
+SCHEME_LOCAL_PROBLEM = 0
+SCHEME_GLOBAL_PROBLEM = 1
+
+
 class Simulation(Stored):
     def __init__(self, nsds, timedisc):
         self._need_init = True
@@ -264,7 +269,14 @@ class Simulation(Stored):
         self.handle().one_step_integrator().set_theta(0.50001)
 
     def insertIntegrator(self, osi):
-        pass  # unimplemented
+        # the scheme of the vnative integrator: Moreau-Jean on the local
+        # problem, or on the global one for a MoreauJeanGOSI (the solver
+        # options must then be those of a global solver, GFC2D_*)
+        if type(osi).__name__ == "MoreauJeanGOSI":
+            scheme = SCHEME_GLOBAL_PROBLEM
+        else:
+            scheme = SCHEME_LOCAL_PROBLEM
+        self.handle().one_step_integrator().set_scheme(scheme)
 
     def insertNonSmoothProblem(self, osnspb):
         self._osnspb = osnspb
@@ -647,6 +659,8 @@ MoreauJeanGOSI = Unimplemented
 TimeSteppingDirectProjection = Unimplemented
 
 FrictionContact = OSNSPB
+# the same: the problem itself is chosen by the scheme of the integrator
+GlobalFrictionContact = OSNSPB
 
 
 class MechanicsIO(Stored):

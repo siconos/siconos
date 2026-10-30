@@ -54,11 +54,7 @@ struct topo;
 using polytopepolytope_r = collision::polytopepolytope_r<topo>;
 using polytopemesh_r = collision::polytopemesh_r<topo>;
 using cxd_narrowphase = collision::cxd_narrowphase<topo>;
-#ifdef VKERNEL_GOSI
-struct fc2d : simul::nonsmooth_problem<GlobalFrictionContactProblem> {};
-#else
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
-#endif
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 struct ct_interaction : simul::interaction<nslaw, diskdisk_r, polytopepolytope_r> {};
 struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r, polytopemesh_r> {};

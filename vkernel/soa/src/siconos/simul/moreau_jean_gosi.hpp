@@ -4,6 +4,7 @@
 #include "siconos/simul/contacts.hpp"
 #include "siconos/simul/kinds.hpp"
 #include "siconos/simul/moreau_jean.hpp"
+#include "siconos/simul/one_step_nonsmooth_problem.hpp"
 #include "siconos/simul/theta_method.hpp"
 #include "siconos/storage/schedule.hpp"
 
@@ -29,6 +30,9 @@ namespace siconos::simul::moreau_jean_gosi {
 
 using namespace kernels;
 using moreau_jean::block_vector;
+
+// the global problem of the step, kept by the integrator (numerics)
+struct global_problem : nonsmooth_problem<GlobalFrictionContactProblem> {};
 using theta_method::involved_position;
 using theta_method::time_step;
 
@@ -111,12 +115,13 @@ void solve(auto osi, auto osnsp, auto& a) {
   resize(q, size0(v));
   NM_gemv(1., a._m, v._v->dense, 0., q._v->dense);
 
-  osnsp.solve_global(a, osi.h_matrix_assembled(), q, osi.b_vector_assembled(),
-                     osi.mu_vector_assembled(), osi.lambda_vector_assembled(),
-                     osi.ydot_vector_assembled(), v);
+  // the problem of the integrator, the solver options of the time stepping
+  osnsp.solve_global(*osi.global_problem().instance(), a, osi.h_matrix_assembled(), q,
+                     osi.b_vector_assembled(), osi.mu_vector_assembled(),
+                     osi.lambda_vector_assembled(), osi.ydot_vector_assembled(), v);
 }
 
-struct global_problem
+struct global_solve
     : stage<"the global frictional contact problem (A, H^T, A v_free, b, mu): v, lambda">,
       host_code {
   static void run(auto& c) {
@@ -161,7 +166,7 @@ using time_step_schedule = sequence<
          for_interactions<co::time_invariant_jacobians, co::h_matrix, co::multipliers,
                           gosi::impact_term>,
          for_systems<co::mass_matrix, co::stiffness_matrix, gosi::free_velocities>,
-         gosi::global_problem,
+         gosi::global_solve,
          for_interactions<co::keep_multipliers>,
          for_systems<gosi::velocity_update>>>;
 

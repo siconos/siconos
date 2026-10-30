@@ -72,7 +72,8 @@ struct ct_interaction
                          polytopefsegment_r, polytopefdisk_r, polytopedisk_r> {};
 struct rt_interaction : simul::rt_ct_interaction<nslaw, diskmesh_r, polytopemesh_r> {};
 struct topo : simul::topology<body, ct_interaction, fem, rt_interaction> {};
-struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+// the scheme is chosen at run time (see simul/selectable_scheme.hpp)
+struct osi : simul::one_step_integrator<topo>::selectable {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<body, collision::empty_shape>;
 using pointf = collision::point<fem, mesh_shape>;

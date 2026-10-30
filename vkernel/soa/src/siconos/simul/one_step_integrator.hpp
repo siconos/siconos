@@ -6,6 +6,7 @@
 #include "siconos/simul/kinds.hpp"
 #include "siconos/simul/moreau_jean.hpp"
 #include "siconos/simul/moreau_jean_gosi.hpp"
+#include "siconos/simul/selectable_scheme.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/range.hpp"
@@ -68,8 +69,12 @@ struct one_step_integrator {
     using time_step_schedule = typename Scheme::time_step_schedule;
     using initial_schedule = typename Scheme::initial_schedule;
 
-    using items = decltype(mp::concat(mp::concat(mp::tuple<topology>{}, system_kinds_t{}),
-                                      interaction_kinds_t{}));
+    // the global problem (see moreau_jean_gosi.hpp)
+    using global_problem_t = simul::moreau_jean_gosi::global_problem;
+
+    using items = decltype(mp::concat(
+        mp::concat(mp::tuple<topology, global_problem_t>{}, system_kinds_t{}),
+        interaction_kinds_t{}));
 
     using size_1_t = some::indice_value<1>;
     using assembled_matrix =
@@ -77,6 +82,8 @@ struct one_step_integrator {
     using assembled_vector = some::assembled_vector<some::vector<some::scalar, size_1_t>>;
 
     struct attributes {
+      // the scheme of a selectable integrator (see selectable_scheme.hpp)
+      some::indice scheme;
       some::scalar theta;
       some::scalar gamma;
       some::scalar constraint_activation_threshold;
@@ -96,6 +103,7 @@ struct one_step_integrator {
       // the kinds
       decltype(refs(system_kinds_t{})) systems;
       decltype(refs(interaction_kinds_t{})) interactions;
+      some::item_ref<global_problem_t> global_problem;
     };
 
     template <typename Handle>
@@ -111,6 +119,10 @@ struct one_step_integrator {
 
         // the gap at the middle of the step for the active set
         gamma() = 0.5;
+
+        auto problem = storage::add<global_problem_t>(self()->data());
+        problem.create();
+        global_problem() = problem;
       }
 
       void __del__() {
@@ -118,7 +130,12 @@ struct one_step_integrator {
         throw std::runtime_error("Stable pointers need to be implemented");
       }
 
+      decltype(auto) scheme() { return storage::attr<"scheme">(*self()); }
       decltype(auto) theta() { return storage::attr<"theta">(*self()); }
+      decltype(auto) global_problem() {
+        return storage::make_ref_handle(self()->data(),
+                                        storage::attr<"global_problem">(*self()));
+      }
       decltype(auto) gamma() { return storage::attr<"gamma">(*self()); }
       decltype(auto) constraint_activation_threshold() {
         return storage::attr<"constraint_activation_threshold">(*self());
@@ -306,5 +323,9 @@ struct one_step_integrator {
 
   // the Moreau-Jean scheme on the global problem (see moreau_jean_gosi.hpp)
   struct moreau_jean_gosi : integrator<simul::moreau_jean_gosi::scheme> {};
+
+  // one of them, chosen at run time by the scheme attribute (see
+  // selectable_scheme.hpp)
+  struct selectable : integrator<simul::selectable_scheme::scheme> {};
 };
 }  // namespace siconos::simul

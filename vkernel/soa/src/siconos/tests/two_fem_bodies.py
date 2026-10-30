@@ -6,7 +6,8 @@
 # systems are involved at the same steps: the second one gets its velocity
 # correction at its own dofs in the assembled vector.
 #
-# usage: python3 two_fem_bodies.py <mesh_N5.msh> [hdf5_output]
+# usage: python3 two_fem_bodies.py [--gosi] <mesh_N5.msh> [hdf5_output]
+# --gosi: Moreau-Jean on the global problem (MoreauJeanGOSI, GFC2D_NSN_AC)
 # exit status 0 if the two disks follow the same trajectory
 
 import os
@@ -26,9 +27,12 @@ from siconos.io.mechanics_run import (
     RunnerConfig,
 )
 import nonos  # noqa: F401 registers the vnative backend
+from siconos import integrators
 
-mesh_filename = sys.argv[1]
-hdf5_output = sys.argv[2] if len(sys.argv) > 2 else "two_fem_bodies.hdf5"
+gosi = "--gosi" in sys.argv[1:]
+args = [a for a in sys.argv[1:] if a != "--gosi"]
+mesh_filename = args[0]
+hdf5_output = args[1] if len(args) > 1 else "two_fem_bodies.hdf5"
 
 shift = 2.0
 disk_radius = 0.05
@@ -81,7 +85,10 @@ with MechanicsHdf5Runner(config=runner_config, io_filename=hdf5_output) as io:
 
     io.add_Newton_impact_friction_nsl("contact", mu=0.5, e=0)
 
-options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+if gosi:
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_GLOBAL_FRICTION_2D_NSN_AC)
+else:
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 1000
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-12
 
@@ -90,6 +97,8 @@ run_options["t0"] = 0
 run_options["T"] = 0.1
 run_options["h"] = 0.005
 run_options["theta"] = 0.50001
+if gosi:
+    run_options["osi"] = integrators.MoreauJeanGOSI
 run_options["Newton_max_iter"] = 1
 run_options["set_external_forces"] = None
 run_options["solver_options"] = options
