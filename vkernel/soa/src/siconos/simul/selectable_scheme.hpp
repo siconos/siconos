@@ -16,7 +16,12 @@ namespace siconos::simul::selectable_scheme {
    all compiled, one runs. */
 
 // the values of the scheme attribute of the integrator
-enum : std::size_t { local_problem = 0, global_problem = 1, cone_complementarity = 2 };
+enum : std::size_t {
+  local_problem = 0,
+  global_problem = 1,
+  cone_complementarity = 2,       // Anitescu-Tasora, projected Gauss-Seidel
+  cone_complementarity_apgd = 3,  // Anitescu-Tasora, APGD
+};
 
 using storage::schedule::condition;
 
@@ -41,6 +46,13 @@ struct anitescu_tasora : condition<"the scheme is Anitescu-Tasora"> {
   }
 };
 
+struct anitescu_tasora_apgd : condition<"the scheme is Anitescu-Tasora with APGD"> {
+  static bool holds(const auto& c) {
+    auto osi = c.integrator;
+    return osi.scheme() == cone_complementarity_apgd;
+  }
+};
+
 using storage::schedule::sequence;
 using storage::schedule::when;
 
@@ -48,7 +60,8 @@ struct scheme {
   using time_step_schedule =
       sequence<"time step", when<local, simul::moreau_jean::time_step_schedule>,
                when<global, simul::moreau_jean_gosi::time_step_schedule>,
-               when<anitescu_tasora, simul::anitescu_tasora::time_step_schedule>>;
+               when<anitescu_tasora, simul::anitescu_tasora::time_step_schedule>,
+               when<anitescu_tasora_apgd, simul::anitescu_tasora::apgd_time_step_schedule>>;
 
   // the same for all
   using initial_schedule = simul::moreau_jean::initial_schedule;

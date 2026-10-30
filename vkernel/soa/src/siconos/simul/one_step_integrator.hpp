@@ -327,6 +327,7 @@ struct one_step_integrator {
   // the Anitescu-Tasora scheme, the reference for the comparisons (see
   // anitescu_tasora.hpp)
   struct anitescu_tasora : integrator<simul::anitescu_tasora::scheme> {};
+  struct anitescu_tasora_apgd : integrator<simul::anitescu_tasora::apgd_scheme> {};
 
   // one of them, chosen at run time by the scheme attribute (see
   // selectable_scheme.hpp)

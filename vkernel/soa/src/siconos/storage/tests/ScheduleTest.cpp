@@ -71,6 +71,7 @@ class ScheduleTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testRepeat);
   CPPUNIT_TEST(testMoreauJean);
   CPPUNIT_TEST(testAnitescuTasora);
+  CPPUNIT_TEST(testAnitescuTasoraApgd);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -207,12 +208,51 @@ class ScheduleTest : public CppUnit::TestFixture {
                     "      for each kind of interactions:\n"
                     "        lambda <- P_K(lambda - eta (H v + e ydot)), v <- v + M^-1 H^T "
                     "dlambda, interaction by interaction\n"
-                    "    the number of sweeps, a warning if lambda did not converge\n"
+                    "    the number of iterations, a warning if lambda did not converge\n"
                     "    for each kind of systems:\n"
                     "      q at step + 1 of the involved systems\n"
                     "    the offsets of the involved systems, p0 is zero\n"
                     "    for each kind of interactions:\n"
                     "      p0 = H^T lambda, the contact impulses (outputs)\n"),
+        text);
+  }
+
+  // the same CCP by APGD: the assembly and the impulse of Moreau-Jean
+  void testAnitescuTasoraApgd() {
+    const auto text = describe<siconos::simul::anitescu_tasora::apgd_time_step_schedule>();
+    std::fputs(text.c_str(), stdout);
+    CPPUNIT_ASSERT_EQUAL(
+        std::string("Anitescu-Tasora time step, APGD:\n"
+                    "  for each kind of systems:\n"
+                    "    M^-1 f, if f or K change\n"
+                    "    the free state: v, q at step + 1 without the contact impulses\n"
+                    "  for each kind of interactions:\n"
+                    "    the relation sets hold every interaction\n"
+                    "    the jacobians H, if the relations change\n"
+                    "    the outputs y, ydot at step\n"
+                    "    the free outputs y, ydot at step + 1\n"
+                    "  the active set: the interactions whose gap may close, the systems they "
+                    "involve\n"
+                    "  if there are contacts:\n"
+                    "    the sizes and offsets of the assembled problem\n"
+                    "    for each kind of interactions:\n"
+                    "      the jacobians H, if the relations do not change\n"
+                    "      lambda of the interactions that are not active is zero\n"
+                    "      H of the active interactions\n"
+                    "      lambda, ydot, mu of the active interactions\n"
+                    "      the Newton impact law on the free ydot at step + 1\n"
+                    "      q = H v_free, the free output derivatives\n"
+                    "    for each kind of systems:\n"
+                    "      M of the involved systems\n"
+                    "      K of the involved FEM systems\n"
+                    "    W = H M^-1 H^T, or H (M + h^2 theta^2 K)^-1 H^T\n"
+                    "    the cone complementarity problem (W, q, mu) by APGD: lambda\n"
+                    "    the number of iterations, a warning if lambda did not converge\n"
+                    "    the velocity correction M^-1 H^T lambda\n"
+                    "    for each kind of interactions:\n"
+                    "      lambda of the active interactions from the solution\n"
+                    "    for each kind of systems:\n"
+                    "      v, q at step + 1 of the involved systems\n"),
         text);
   }
 };
