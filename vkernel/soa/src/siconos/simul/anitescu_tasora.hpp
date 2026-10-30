@@ -38,8 +38,9 @@ namespace siconos::simul::anitescu_tasora {
 
    until the largest change of lambda in a sweep is below the tolerance of
    the solver options (dparam TOL, relative to the largest lambda), at most
-   iparam MAX_ITER sweeps. lambda starts from zero (no warm start), v from
-   v_free. Nothing is assembled but the contact impulses H^T lambda of the
+   iparam MAX_ITER sweeps. Warm start: lambda starts from its value at the
+   previous step (zero for an interaction that was not active), v from
+   v_free + M^-1 H^T lambda. Nothing is assembled but the contact impulses H^T lambda of the
    involved systems, for the outputs.
 
    Everything else is the Moreau-Jean step (moreau_jean.hpp): the theta
@@ -75,9 +76,44 @@ struct sweep_state {
   S largest = 0;
 };
 
-// the multipliers of the active interactions start from zero
-struct zero_multiplier : kernel<active<interactions>, out<"lambda">> {
-  static void apply(const auto&, auto& lambda) { algebra::set_zero(lambda); }
+// the multiplier of an interaction that is not active is zero: it starts
+// from zero when it is active again
+struct inactive_multiplier
+    : kernel<all<interactions>, in<"activation", by_topology>, inout<"lambda">> {
+  static void apply(const auto&, bool activation, auto& lambda) {
+    if (!activation) {
+      algebra::set_zero(lambda);
+    }
+  }
+};
+
+// M^-1 H^T without the blocked velocity components: the velocity change of a
+// system for the multiplier of one of its interactions
+auto velocity_change(auto& m, auto h, const auto& blocked, const auto& lambda, const auto& v) {
+  for (auto k : blocked) h.col(k).setZero();
+  std::decay_t<decltype(v)> dv = h.transpose() * lambda;
+  algebra::solve_in_place(m, dv);
+  return dv;
+}
+
+// the warm start: the systems of an active interaction get the impulse of
+// its multiplier at the previous step
+struct warm_start
+    : kernel<active<interactions>, in<"nds", by_topology>, in<"h_matrix1">, in<"h_matrix2">,
+             in<"lambda">, through<"ds1", "mass_matrix", by_topology>,
+             through<"ds2", "mass_matrix", by_topology>,
+             through<"ds1", "bc_velocities_0", by_topology>,
+             through<"ds2", "bc_velocities_0", by_topology>,
+             add_through<"ds1", "velocity", by_topology, next>,
+             add_through<"ds2", "velocity", by_topology, next>> {
+  static void apply(const auto&, auto nds, const auto& h1, const auto& h2, const auto& lambda,
+                    auto& m1, auto& m2, const auto& blocked1, const auto& blocked2, auto& v1,
+                    auto& v2) {
+    v1 += velocity_change(m1, h1, blocked1, lambda, v1);
+    if (nds == 2) {
+      v2 += velocity_change(m2, h2, blocked2, lambda, v2);
+    }
+  }
 };
 
 // one projected Gauss-Seidel step on an active interaction between rigid
@@ -180,8 +216,15 @@ using storage::schedule::stage;
 
 // on a kind of interactions
 
-struct zero_multipliers : stage<"lambda of the active interactions is zero"> {
-  static void run(auto& c) { c.kind.template run<zero_multiplier>(c.step, nullptr); }
+struct warm_start : stage<
+                        "lambda at the previous step, zero if not active; "
+                        "v <- v + M^-1 H^T lambda, the warm start"> {
+  static void run(auto& c) {
+    c.kind.template run<inactive_multiplier>(c.step, nullptr);
+    if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
+      c.kind.template run<anitescu_tasora::warm_start>(c.step, nullptr);
+    }
+  }
 };
 
 struct sweep : stage<
@@ -305,7 +348,7 @@ using time_step_schedule = sequence<
     for_interactions<co::relation_sets, co::jacobians, co::outputs, co::free_outputs>,
     co::active_set,
     when<co::with_contacts,
-         for_interactions<co::time_invariant_jacobians, at::zero_multipliers>,
+         for_interactions<co::time_invariant_jacobians, at::warm_start>,
          at::start,
          repeat<at::converged,
                 at::next_sweep,

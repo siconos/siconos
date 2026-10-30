@@ -426,6 +426,43 @@ void separation_when_sliding() {
   CPPUNIT_ASSERT_MESSAGE("the block lifts off", max_lift > 0.1 * h * mu * v0);
 }
 
+/* Anitescu-Tasora, the warm start: a column of n disks at rest. The first
+   step starts from lambda = 0 (cold), the next ones from the lambda of the
+   previous step, close to the solution. Not at it: the sweeps stop when
+   lambda changes less than the tolerance, and Gauss-Seidel converges slowly
+   on a chain, so a small change still leaves an error that the next step
+   corrects. 20 disks: 10332 sweeps cold, at most 337 warm */
+void warm_started_column(std::size_t n) {
+  using namespace siconos;
+  world w({.mu = 0.3, .h = 5e-3, .tmax = 0.5, .scheme = schemes::cone_complementarity});
+  std::vector<decltype(w.add_disk(0., 0.))> disks;
+  for (std::size_t i = 0; i < n; ++i) disks.push_back(w.add_disk(0., r + 2 * r * i));
+  w.finalize();
+  auto osnspb = w.simulation.one_step_nonsmooth_problem();
+  std::size_t first = 0, later = 0;
+  double max_pen = 0., max_v = 0.;
+  while (w.simulation.has_next_event()) {
+    w.step();
+    const auto s = w.simulation.current_step();
+    const std::size_t sweeps = storage::attr<"number_of_iterations">(osnspb);
+    (s == 1 ? first : later) = std::max(s == 1 ? first : later, sweeps);
+    double below = 0.;
+    for (auto& d : disks) {
+      const double y = storage::attr<"q">(d, s)(1);
+      max_pen = std::max(max_pen, (below + r) - y);
+      max_v = std::max(max_v, storage::attr<"velocity">(d, s).norm());
+      below = y + r;
+    }
+  }
+  std::print(stderr,
+             "AT: column of {} disks at rest: {} sweeps at the first step (cold), at most {} "
+             "after (warm), max interpenetration {:.2e}, max |v| {:.2e}\n",
+             n, first, later, max_pen, max_v);
+  CPPUNIT_ASSERT_MESSAGE("the warm start needs far fewer sweeps", 10 * later <= first);
+  CPPUNIT_ASSERT_MESSAGE("no interpenetration in the column", max_pen <= 1e-10);
+  CPPUNIT_ASSERT_MESSAGE("the column stays at rest", max_v <= 1e-10);
+}
+
 class NscdCasesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(NscdCasesTest);
   CPPUNIT_TEST(testSlidingSquare);
@@ -434,6 +471,7 @@ class NscdCasesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testColumn);
   CPPUNIT_TEST(testAnitescuTasoraFrictionless);
   CPPUNIT_TEST(testAnitescuTasoraSeparation);
+  CPPUNIT_TEST(testAnitescuTasoraWarmStart);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -454,6 +492,7 @@ class NscdCasesTest : public CppUnit::TestFixture {
     for (double h : {1e-2, 5e-3}) incline(30 * deg, 0., h, schemes::cone_complementarity);
   }
   void testAnitescuTasoraSeparation() { separation_when_sliding(); }
+  void testAnitescuTasoraWarmStart() { warm_started_column(20); }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(NscdCasesTest);
