@@ -2,6 +2,7 @@ import nonos as vkernel
 import numpy as np
 from math import sqrt
 import siconos.numerics as sn
+from siconos import integrators as siconos_integrators
 
 from math import pi
 import hashlib
@@ -247,6 +248,7 @@ class TimeDiscretisation(Stored):
 # the schemes of the integrator (simul/selectable_scheme.hpp)
 SCHEME_LOCAL_PROBLEM = 0
 SCHEME_GLOBAL_PROBLEM = 1
+SCHEME_CONE_COMPLEMENTARITY = 2
 
 
 class Simulation(Stored):
@@ -271,9 +273,13 @@ class Simulation(Stored):
     def insertIntegrator(self, osi):
         # the scheme of the vnative integrator: Moreau-Jean on the local
         # problem, or on the global one for a MoreauJeanGOSI (the solver
-        # options must then be those of a global solver, GFC2D_*)
+        # options must then be those of a global solver, GFC2D_*), or the
+        # Anitescu-Tasora scheme for an AnitescuTasoraOSI (the tolerance and
+        # the maximum number of sweeps from the solver options)
         if type(osi).__name__ == "MoreauJeanGOSI":
             scheme = SCHEME_GLOBAL_PROBLEM
+        elif type(osi).__name__ == "AnitescuTasoraOSI":
+            scheme = SCHEME_CONE_COMPLEMENTARITY
         else:
             scheme = SCHEME_LOCAL_PROBLEM
         self.handle().one_step_integrator().set_scheme(scheme)
@@ -656,6 +662,14 @@ class Unimplemented:
 
 
 MoreauJeanGOSI = Unimplemented
+
+
+class AnitescuTasoraOSI(siconos_integrators.MoreauJeanOSI):
+    """run_options["osi"] for the Anitescu-Tasora scheme of the vnative
+    backend (simul/anitescu_tasora.hpp), a reference for the comparisons with
+    Moreau-Jean: only its type is read by Simulation.insertIntegrator"""
+
+
 TimeSteppingDirectProjection = Unimplemented
 
 FrictionContact = OSNSPB
