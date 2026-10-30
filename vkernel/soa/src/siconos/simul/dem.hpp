@@ -11,11 +11,10 @@
 
 namespace siconos::simul::dem {
 
-/* The explicit DEM scheme (Cundall & Strack 1979), a reference for the
-   comparisons with Moreau-Jean, not a scheme for production: the contacts
-   are penalty springs, their forces explicit (at the state of the step),
-   the gap allowed to close (an overlap). For a contact that overlaps, gap
-   g <= 0, relative velocity (u_N, u_T):
+/* The explicit DEM scheme (Cundall & Strack 1979), here for the
+   comparisons with Moreau-Jean: the contacts are penalty springs, their forces explicit (at
+   the state of the step), the gap allowed to close (an overlap). For a contact that overlaps,
+   gap g <= 0, relative velocity (u_N, u_T):
 
      F_N = max(0, -k_n g - c_n u_N)                 spring and dashpot
      xi  <- xi + h u_T                              the tangential spring

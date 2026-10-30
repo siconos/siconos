@@ -680,8 +680,8 @@ MoreauJeanGOSI = Unimplemented
 
 class AnitescuTasoraOSI(siconos_integrators.MoreauJeanOSI):
     """run_options["osi"] for the Anitescu-Tasora scheme of the vnative
-    backend (simul/anitescu_tasora.hpp), a reference for the comparisons with
-    Moreau-Jean: only its type is read by Simulation.insertIntegrator"""
+    backend (simul/anitescu_tasora.hpp): only its type is read by
+    Simulation.insertIntegrator"""
 
 
 class AnitescuTasoraAPGDOSI(siconos_integrators.MoreauJeanOSI):
@@ -690,8 +690,7 @@ class AnitescuTasoraAPGDOSI(siconos_integrators.MoreauJeanOSI):
 
 class ExplicitDEMOSI(siconos_integrators.MoreauJeanOSI):
     """run_options["osi"] for the explicit DEM scheme of the vnative backend
-    (simul/dem.hpp, penalty springs), the other reference for the
-    comparisons: its penalty law and its theta (1: the symplectic Euler
+    (simul/dem.hpp, penalty springs): its penalty law and its theta (1: the symplectic Euler
     scheme, stable for h < 2 sqrt(m / k_n)) are read by
     Simulation.insertIntegrator. The runner calls osi(theta): give the law
     with functools.partial(ExplicitDEMOSI, normal_stiffness=...)"""

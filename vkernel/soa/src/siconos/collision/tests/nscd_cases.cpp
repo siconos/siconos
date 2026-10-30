@@ -1,7 +1,7 @@
 /* Analytic test cases of the NSCD scheme (Moreau-Jean, velocity level,
-   Coulomb friction), the reference numbers for the comparisons with the
-   Anitescu-Tasora and explicit DEM schemes (design note "Plan: where NSCD
-   wins, reference schemes for comparison").
+   Coulomb friction), the numbers for the comparisons with the
+   Anitescu-Tasora and explicit DEM schemes (design note, "Plan: where NSCD
+   wins").
 
    Rigid bodies on a ground segment y = 0, the space filter, the cxd
    narrowphase stage, Moreau-Jean theta = 0.5, the 2D friction problem

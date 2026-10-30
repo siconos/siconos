@@ -338,12 +338,12 @@ struct one_step_integrator {
   // the Moreau-Jean scheme on the global problem (see moreau_jean_gosi.hpp)
   struct moreau_jean_gosi : integrator<simul::moreau_jean_gosi::scheme> {};
 
-  // the Anitescu-Tasora scheme, the reference for the comparisons (see
+  // the Anitescu-Tasora scheme, projected Gauss-Seidel or APGD (see
   // anitescu_tasora.hpp)
   struct anitescu_tasora : integrator<simul::anitescu_tasora::scheme> {};
   struct anitescu_tasora_apgd : integrator<simul::anitescu_tasora::apgd_scheme> {};
 
-  // the explicit DEM scheme, the other reference (see dem.hpp)
+  // the explicit DEM scheme (see dem.hpp)
   struct dem : integrator<simul::dem::scheme> {};
 
   // one of them, chosen at run time by the scheme attribute (see

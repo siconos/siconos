@@ -18,9 +18,8 @@
 namespace siconos::simul::anitescu_tasora {
 
 /* The Anitescu-Tasora scheme (Anitescu & Tasora 2010, Tasora & Anitescu
-   2011), a reference for the comparisons with Moreau-Jean, not a scheme for
-   production: the Coulomb law is replaced by its convexification, the cone
-   complementarity problem (CCP)
+   2011), here for the comparisons with Moreau-Jean: the Coulomb law is
+   replaced by its convexification, the cone complementarity problem (CCP)
 
      lambda in K,  u in K*,  u . lambda = 0
      K = {|lambda_T| <= mu lambda_N},  K* = {u_N >= mu |u_T|}

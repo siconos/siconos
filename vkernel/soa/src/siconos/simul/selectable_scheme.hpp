@@ -12,9 +12,9 @@ namespace siconos::simul::selectable_scheme {
 
 /* The scheme chosen when the simulation is set up, not when it is compiled:
    the scheme attribute of the integrator (see one_step_integrator.hpp),
-   moreau_jean (local problem), moreau_jean_gosi (global problem), or the
-   references for the comparisons: anitescu_tasora and dem. The schedules
-   are all compiled, one runs. */
+   moreau_jean (local problem), moreau_jean_gosi (global problem),
+   anitescu_tasora (two solvers) or dem. The schedules are all compiled,
+   one runs. */
 
 // the values of the scheme attribute of the integrator
 enum : std::size_t {
