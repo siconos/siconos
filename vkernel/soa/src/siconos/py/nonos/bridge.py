@@ -250,6 +250,7 @@ SCHEME_LOCAL_PROBLEM = 0
 SCHEME_GLOBAL_PROBLEM = 1
 SCHEME_CONE_COMPLEMENTARITY = 2
 SCHEME_CONE_COMPLEMENTARITY_APGD = 3
+SCHEME_EXPLICIT_PENALTY = 4
 
 
 class Simulation(Stored):
@@ -277,13 +278,22 @@ class Simulation(Stored):
         # options must then be those of a global solver, GFC2D_*), or the
         # Anitescu-Tasora scheme for an AnitescuTasoraOSI (projected
         # Gauss-Seidel) or an AnitescuTasoraAPGDOSI (APGD), the tolerance
-        # and the maximum number of iterations from the solver options)
+        # and the maximum number of iterations from the solver options), or
+        # the explicit DEM scheme for an ExplicitDEMOSI (its penalty law and
+        # its theta)
         if type(osi).__name__ == "MoreauJeanGOSI":
             scheme = SCHEME_GLOBAL_PROBLEM
         elif type(osi).__name__ == "AnitescuTasoraOSI":
             scheme = SCHEME_CONE_COMPLEMENTARITY
         elif type(osi).__name__ == "AnitescuTasoraAPGDOSI":
             scheme = SCHEME_CONE_COMPLEMENTARITY_APGD
+        elif type(osi).__name__ == "ExplicitDEMOSI":
+            scheme = SCHEME_EXPLICIT_PENALTY
+            vosi = self.handle().one_step_integrator()
+            vosi.set_theta(osi.theta_dem)
+            vosi.set_normal_stiffness(osi.normal_stiffness)
+            vosi.set_normal_damping(osi.normal_damping)
+            vosi.set_tangential_stiffness(osi.tangential_stiffness)
         else:
             scheme = SCHEME_LOCAL_PROBLEM
         self.handle().one_step_integrator().set_scheme(scheme)
@@ -676,6 +686,33 @@ class AnitescuTasoraOSI(siconos_integrators.MoreauJeanOSI):
 
 class AnitescuTasoraAPGDOSI(siconos_integrators.MoreauJeanOSI):
     """the same, the cone complementarity problem solved by APGD"""
+
+
+class ExplicitDEMOSI(siconos_integrators.MoreauJeanOSI):
+    """run_options["osi"] for the explicit DEM scheme of the vnative backend
+    (simul/dem.hpp, penalty springs), the other reference for the
+    comparisons: its penalty law and its theta (1: the symplectic Euler
+    scheme, stable for h < 2 sqrt(m / k_n)) are read by
+    Simulation.insertIntegrator. The runner calls osi(theta): give the law
+    with functools.partial(ExplicitDEMOSI, normal_stiffness=...)"""
+
+    def __init__(
+        self,
+        theta=None,
+        normal_stiffness=1e5,
+        normal_damping=0.0,
+        tangential_stiffness=None,
+        theta_dem=1.0,
+    ):
+        super().__init__(theta_dem)
+        self.theta_dem = theta_dem
+        self.normal_stiffness = normal_stiffness
+        self.normal_damping = normal_damping
+        self.tangential_stiffness = (
+            2.0 / 7.0 * normal_stiffness
+            if tangential_stiffness is None
+            else tangential_stiffness
+        )
 
 
 TimeSteppingDirectProjection = Unimplemented

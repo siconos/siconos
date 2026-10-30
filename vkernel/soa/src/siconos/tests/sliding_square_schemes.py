@@ -5,7 +5,9 @@
 # Moreau-Jean it stays on the ground (y = 0.5) and stops at v0^2 / (2 mu g);
 # with Anitescu-Tasora (nonos.bridge.AnitescuTasoraOSI, the cone
 # complementarity by projected Gauss-Seidel, or AnitescuTasoraAPGDOSI, by
-# APGD) it slides with u_N = mu |u_T| and lifts off, the same with both. The C++
+# APGD) it slides with u_N = mu |u_T| and lifts off, the same with both;
+# with the explicit DEM (ExplicitDEMOSI) it rests on its penalty springs,
+# overlapping the ground by ~ m g / (2 k_n). The C++
 # ctest vkernel_nscd_cases checks the numbers; this script checks the python
 # path (the scheme chosen by run_options["osi"]).
 #
@@ -16,6 +18,7 @@
 # usage: python3 sliding_square_schemes.py
 # exit status 0 if Moreau-Jean stays on the ground and Anitescu-Tasora lifts off
 
+import functools
 import subprocess
 import sys
 import tempfile
@@ -41,6 +44,11 @@ v0 = 2.0
 mu = 0.3
 g = 9.81
 h = 0.005
+# the DEM normal stiffness. The stiffest mode of the square on its two corner
+# springs is the rocking one, omega = sqrt(3 kn / m): the symplectic Euler
+# scheme needs h < 2 / sqrt(3 kn) = 1.15e-2 (kn = 1e5 would need 3.7e-3 and
+# blows up at h = 0.005)
+kn = 1e4
 
 
 def run(osi, filename):
@@ -90,13 +98,18 @@ if len(sys.argv) == 3:
         "mj": integrators.MoreauJeanOSI,
         "at": nonos.bridge.AnitescuTasoraOSI,
         "apgd": nonos.bridge.AnitescuTasoraAPGDOSI,
+        "dem": functools.partial(
+            nonos.bridge.ExplicitDEMOSI,
+            normal_stiffness=kn,
+            normal_damping=2 * 0.5 * (kn**0.5),
+        ),
     }
     np.save(sys.argv[2], run(osi[sys.argv[1]], sys.argv[2] + ".hdf5"))
     sys.exit(0)
 
 tmpdir = tempfile.mkdtemp()
 heights = {}
-for scheme in ("mj", "at", "apgd"):
+for scheme in ("mj", "at", "apgd", "dem"):
     out = os.path.join(tmpdir, scheme + ".npy")
     subprocess.run(
         [sys.executable, __file__, scheme, out], check=True, stdout=subprocess.DEVNULL
@@ -109,6 +122,12 @@ apgd_lift = (heights["apgd"] - 0.5).max()
 print(f"Moreau-Jean: max |y - 0.5| = {mj_lift:.3e}")
 print(f"Anitescu-Tasora: max lift-off = {at_lift:.3e} (h mu v0 = {h * mu * v0:.3e})")
 print(f"Anitescu-Tasora, APGD: max lift-off = {apgd_lift:.3e}")
+dem_overlap = (0.5 - heights["dem"]).max()
+dem_lift = (heights["dem"] - 0.5).max()
+print(
+    f"explicit DEM: max overlap = {dem_overlap:.3e}, max lift-off = {dem_lift:.3e}"
+    f" (m g / (2 kn) = {g / (2 * kn):.3e})"
+)
 
 # Moreau-Jean: no lift-off, but the vnative backend keeps a constraint
 # activation threshold of 0 (run_options["constraint_activation_threshold"]
@@ -123,5 +142,9 @@ if at_lift < 0.1 * h * mu * v0:
     sys.exit(1)
 if abs(apgd_lift - at_lift) > 1e-8:
     print("FAILED: the two Anitescu-Tasora solvers differ")
+    sys.exit(1)
+# DEM: the penalty springs let the corners overlap, by ~ m g / (2 kn) at rest
+if not (0 < dem_overlap < 10 * g / (2 * kn)) or dem_lift > 10 * g / (2 * kn):
+    print("FAILED: the DEM square does not rest on its springs")
     sys.exit(1)
 print("OK")

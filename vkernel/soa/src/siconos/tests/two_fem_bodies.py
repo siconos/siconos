@@ -6,10 +6,13 @@
 # systems are involved at the same steps: the second one gets its velocity
 # correction at its own dofs in the assembled vector.
 #
-# usage: python3 two_fem_bodies.py [--gosi] <mesh_N5.msh> [hdf5_output]
+# usage: python3 two_fem_bodies.py [--gosi | --dem] <mesh_N5.msh> [hdf5_output]
 # --gosi: Moreau-Jean on the global problem (MoreauJeanGOSI, GFC2D_NSN_AC)
+# --dem: the explicit DEM scheme (ExplicitDEMOSI, penalty springs; the FEM
+#        systems keep the implicit theta method, the contact forces explicit)
 # exit status 0 if the two disks follow the same trajectory
 
+import functools
 import os
 import sys
 import tempfile
@@ -27,10 +30,12 @@ from siconos.io.mechanics_run import (
     RunnerConfig,
 )
 import nonos  # noqa: F401 registers the vnative backend
+import nonos.bridge
 from siconos import integrators
 
 gosi = "--gosi" in sys.argv[1:]
-args = [a for a in sys.argv[1:] if a != "--gosi"]
+dem = "--dem" in sys.argv[1:]
+args = [a for a in sys.argv[1:] if a not in ("--gosi", "--dem")]
 mesh_filename = args[0]
 hdf5_output = args[1] if len(args) > 1 else "two_fem_bodies.hdf5"
 
@@ -99,6 +104,13 @@ run_options["h"] = 0.005
 run_options["theta"] = 0.50001
 if gosi:
     run_options["osi"] = integrators.MoreauJeanGOSI
+if dem:
+    # h = 0.005 < 2 sqrt(m / kn) = 0.01 for the disks (m = 1), damping
+    # ratio 0.5
+    kn = 4e4
+    run_options["osi"] = functools.partial(
+        nonos.bridge.ExplicitDEMOSI, normal_stiffness=kn, normal_damping=kn**0.5
+    )
 run_options["Newton_max_iter"] = 1
 run_options["set_external_forces"] = None
 run_options["solver_options"] = options
