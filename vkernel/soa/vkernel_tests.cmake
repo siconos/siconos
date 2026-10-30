@@ -142,6 +142,8 @@ if(WITH_TESTING)
            ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS VKERNEL_GOSI)
   new_test(NAME vkernel_io_contact_points SOURCES io_contact_points.cpp
            ${SIMPLE_TEST_MAIN})
+  # the analytic cases of the NSCD scheme: sliding block, incline, column
+  new_test(NAME vkernel_nscd_cases SOURCES nscd_cases.cpp ${SIMPLE_TEST_MAIN})
 
   # the same deposit run twice with a multithreaded neighbor search must give
   # bitwise identical states
@@ -195,6 +197,7 @@ if(WITH_TESTING)
       vkernel_polytope_on_fem
       vkernel_polytope_on_fem_gosi
       vkernel_io_contact_points
+      vkernel_nscd_cases
       vkernel_sort_interactions_registry
       vkernel_sort_interactions_static_db)
   foreach(t IN LISTS vkernel_ref_tests)
