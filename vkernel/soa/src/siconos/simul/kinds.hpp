@@ -318,6 +318,11 @@ struct interaction_kind : item {
 
     static constexpr auto nslaw_size() { return nslaw_size_t{}.value; }
 
+    // between rigid systems (i.e disk/disk), not FEM ones
+    static constexpr bool between_rigid_systems() {
+      return std::same_as<typename systems2::system, typename topology::fixed_dof_system>;
+    }
+
     static constexpr auto nslaw_with_friction() {
       return std::derived_from<nslaw, model::newton_impact_friction>;
     }
@@ -434,8 +439,7 @@ struct interaction_kind : item {
       using env_t = decltype(self()->env());
       using matrix_1x1_t = typename env_t::template matrix<typename env_t::scalar, 1, 1>;
 
-      if constexpr (std::same_as<typename systems2::system,
-                                 typename topology::fixed_dof_system>) {
+      if constexpr (between_rigid_systems()) {
         // between rigid systems (i.e disk/disk)
         run<contacts::h_blocks>(
             step, contacts::block_matrix{h_matrix_view(assembled, ds2_systems.ds_offset())});
@@ -485,9 +489,10 @@ struct interaction_kind<empty_item, Systems1, Systems2, Topology> : empty_item {
 /* The time step of a simulation as a schedule (see storage/schedule.hpp).
 
    The context of a step: the time stepping, its integrator, the step, the
-   time step h, and the number of involved systems once the active set is
-   known. for_systems (for_interactions) runs its stages for each kind of
-   systems (of interactions) of the integrator, with ctx.kind the kind. */
+   time step h, the number of involved systems once the active set is
+   known, and for a solver written as a schedule (repeat) the number of its
+   iterations and the change of the last one. for_systems (for_interactions) runs its stages
+   for each kind of systems (of interactions) of the integrator, with ctx.kind the kind. */
 
 template <typename TimeStepping, typename Integrator, typename Step, typename H>
 struct step_context {
@@ -496,6 +501,8 @@ struct step_context {
   Step step;
   H h;
   Step involved = 0;
+  Step iterations = 0;
+  H change = 0;
 };
 
 template <typename Ctx, typename Kind>
@@ -509,6 +516,8 @@ void for_each_kind(auto& ctx, auto&& kinds, auto&& run_stages) {
     kind_context<std::decay_t<decltype(ctx)>, decltype(kind)> c{ctx, kind};
     run_stages(c);
     ctx.involved = c.involved;
+    ctx.iterations = c.iterations;
+    ctx.change = c.change;
   });
 }
 

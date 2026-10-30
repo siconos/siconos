@@ -23,6 +23,12 @@
       contact, whatever N (a penalty scheme has a bottom overlap ~ N m g /
       k_n).
 
+   The integrator is the selectable one: the same cases checks the
+   Anitescu-Tasora scheme (simul/anitescu_tasora.hpp, its sweeps at the same
+   tolerance) where it must agree with Moreau-Jean, mu = 0 (a column of
+   disks dropped with gaps, step by step; the frictionless incline), and
+   where it must not: the sliding square lifts off, u_N = mu |u_T|.
+
    Each case prints its measured numbers. */
 
 #include <cppunit/TestAssert.h>
@@ -68,7 +74,7 @@ struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, polytopepolytope_r,
                                         polytopefsegment_r, polytopedisk_r> {};
 struct topo : simul::topology<body, interaction> {};
-struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct osi : simul::one_step_integrator<topo>::selectable {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<body, collision::empty_shape>;
 using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
@@ -118,6 +124,8 @@ constexpr double g = 9.81;
 constexpr double r = 0.5;  // disk radius, square half side
 constexpr double deg = std::numbers::pi / 180.;
 
+namespace schemes = siconos::simul::selectable_scheme;
+
 struct scene {
   double mu = 0.;
   double h = 0.005;
@@ -127,6 +135,7 @@ struct scene {
   // errors: with a threshold of 0 its activation is decided by their sign,
   // and a dropped row lets the body fall by g h^2 on the other contact
   double threshold = 1e-10;
+  std::size_t scheme = schemes::local_problem;
 };
 
 struct world {
@@ -162,6 +171,7 @@ struct world {
     fc2d.instance()->dimension = 2;
     fc2d.instance()->mu = 0;
 
+    simulation.one_step_integrator().scheme() = sc.scheme;
     simulation.one_step_integrator().theta() = 0.5;
     simulation.one_step_integrator().constraint_activation_threshold() = sc.threshold;
     simulation.time_discretization().t0() = 0.;
@@ -278,12 +288,12 @@ void sliding_square(double h) {
    friction angle it sticks, above it slides with the acceleration
    a = g (sin alpha - mu cos alpha), exactly at every step (the same
    argument as for the sliding square) */
-void incline(double alpha, double mu, double h) {
+void incline(double alpha, double mu, double h, std::size_t scheme = schemes::local_problem) {
   using namespace siconos;
   const double tmax = 1.;
   const bool sticks = std::tan(alpha) < mu;
   const double a = sticks ? 0. : g * (std::sin(alpha) - mu * std::cos(alpha));
-  world w({.mu = mu, .h = h, .tmax = tmax, .alpha = alpha});
+  world w({.mu = mu, .h = h, .tmax = tmax, .alpha = alpha, .scheme = scheme});
   auto p = w.add_square(0., r);
   w.finalize();
 
@@ -302,10 +312,11 @@ void incline(double alpha, double mu, double h) {
   }
   const auto s = w.simulation.current_step();
   std::print(stderr,
-             "incline {:.0f} deg, mu {} ({}), h = {:.0e}: x(T) = {:.12f} (exact {:.12f}), "
+             "{}incline {:.0f} deg, mu {} ({}), h = {:.0e}: x(T) = {:.12f} (exact {:.12f}), "
              "max |x - x_exact| {:.2e}, max |vx - vx_exact| {:.2e}, max |y - r| {:.2e}, "
              "max |vy| {:.2e}, max |theta| {:.2e}\n",
-             alpha / deg, mu, sticks ? "sticks" : "slides", h, storage::attr<"q">(p, s)(0),
+             scheme == schemes::local_problem ? "" : "AT: ", alpha / deg, mu,
+             sticks ? "sticks" : "slides", h, storage::attr<"q">(p, s)(0),
              0.5 * a * tmax * tmax, max_x_err, max_vx_err, max_dy, max_vy, max_theta);
   // on the trapezoidal rule x is exact for a linear v: rounding only
   CPPUNIT_ASSERT_MESSAGE("the velocity is a t", max_vx_err <= 1e-10);
@@ -345,12 +356,84 @@ void column(std::size_t n, double h) {
   CPPUNIT_ASSERT_MESSAGE("the column stays at rest", max_v <= 1e-10);
 }
 
+/* Anitescu-Tasora, mu = 0: the same law as Moreau-Jean. A column of disks
+   dropped with gaps of 0.1 (impacts at different times, then at rest), the
+   two schemes step by step: their difference is the solvers' tolerance */
+void frictionless_column(std::size_t n) {
+  using namespace siconos;
+  auto run = [n](std::size_t scheme) {
+    world w({.mu = 0., .h = 5e-3, .tmax = 1., .scheme = scheme});
+    std::vector<decltype(w.add_disk(0., 0.))> disks;
+    for (std::size_t i = 0; i < n; ++i)
+      disks.push_back(w.add_disk(0., r + 0.1 + (2 * r + 0.1) * i));
+    w.finalize();
+    std::vector<double> trajectory;
+    while (w.simulation.has_next_event()) {
+      w.step();
+      const auto s = w.simulation.current_step();
+      for (auto& d : disks) {
+        trajectory.push_back(storage::attr<"q">(d, s)(1));
+        trajectory.push_back(storage::attr<"velocity">(d, s)(1));
+      }
+    }
+    return trajectory;
+  };
+  const auto mj = run(schemes::local_problem);
+  const auto at = run(schemes::cone_complementarity);
+  double diff = 0., lowest = 1.;
+  for (std::size_t k = 0; k < mj.size(); ++k) diff = std::max(diff, std::abs(mj[k] - at[k]));
+  for (std::size_t k = 0; k < mj.size(); k += 2 * n) lowest = std::min(lowest, mj[k]);
+  std::print(stderr,
+             "AT: frictionless column of {} disks dropped with gaps: max |AT - MJ| on y, vy "
+             "{:.2e} over {} steps (lowest disk down to y = {:.6f})\n",
+             n, diff, mj.size() / (2 * n), lowest);
+  CPPUNIT_ASSERT_MESSAGE("the steps ran", mj.size() == at.size() && !mj.empty());
+  CPPUNIT_ASSERT_MESSAGE("the disks landed", lowest < r + 1e-3);
+  CPPUNIT_ASSERT_MESSAGE("mu = 0: Anitescu-Tasora is Moreau-Jean", diff <= 1e-9);
+}
+
+/* Anitescu-Tasora, mu > 0: the square launched on the ground. In the first
+   step it slides, and the cone complementarity gives u_N = mu |u_T| instead
+   of 0: vy = mu vx with the normal impulse P = (g h + mu v0) / (1 + mu^2),
+   the block lifts off (Moreau-Jean: vy = 0, see sliding_square) */
+void separation_when_sliding() {
+  using namespace siconos;
+  const double v0 = 2.;
+  const double mu = 0.3;
+  const double h = 5e-3;
+  world w({.mu = mu, .h = h, .tmax = 0.5, .scheme = schemes::cone_complementarity});
+  auto p = w.add_square(0., r, v0);
+  w.finalize();
+  w.step();
+  const auto& v1 = storage::attr<"velocity">(p, w.simulation.current_step());
+  const double vx1 = v1(0), vy1 = v1(1), om1 = v1(2);
+  double max_lift = 0.;
+  while (w.simulation.has_next_event()) {
+    w.step();
+    max_lift = std::max(max_lift, storage::attr<"q">(p, w.simulation.current_step())(1) - r);
+  }
+  std::print(
+      stderr,
+      "AT: sliding square, first step vx {:.9f} vy {:.9f} (mu vx {:.9f}), omega {:.2e}, "
+      "max lift-off {:.3e} (h mu v0 = {:.3e})\n",
+      vx1, vy1, mu * vx1, om1, max_lift, h * mu * v0);
+  // the normal impulse P solves -g h + P = mu (v0 - mu P)
+  const double impulse = (g * h + mu * v0) / (1 + mu * mu);
+  CPPUNIT_ASSERT_MESSAGE("the cone complementarity: vy = mu vx",
+                         std::abs(vy1 - mu * vx1) <= 1e-9);
+  CPPUNIT_ASSERT_MESSAGE("vx = v0 - mu P", std::abs(vx1 - (v0 - mu * impulse)) <= 1e-9);
+  CPPUNIT_ASSERT_MESSAGE("no rotation", std::abs(om1) <= 1e-9);
+  CPPUNIT_ASSERT_MESSAGE("the block lifts off", max_lift > 0.1 * h * mu * v0);
+}
+
 class NscdCasesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(NscdCasesTest);
   CPPUNIT_TEST(testSlidingSquare);
   CPPUNIT_TEST(testInclineSticks);
   CPPUNIT_TEST(testInclineSlides);
   CPPUNIT_TEST(testColumn);
+  CPPUNIT_TEST(testAnitescuTasoraFrictionless);
+  CPPUNIT_TEST(testAnitescuTasoraSeparation);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -366,6 +449,11 @@ class NscdCasesTest : public CppUnit::TestFixture {
   void testColumn() {
     for (std::size_t n : {1, 5, 20, 50}) column(n, 5e-3);
   }
+  void testAnitescuTasoraFrictionless() {
+    frictionless_column(5);
+    for (double h : {1e-2, 5e-3}) incline(30 * deg, 0., h, schemes::cone_complementarity);
+  }
+  void testAnitescuTasoraSeparation() { separation_when_sliding(); }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(NscdCasesTest);

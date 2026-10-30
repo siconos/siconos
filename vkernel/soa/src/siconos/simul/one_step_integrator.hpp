@@ -324,6 +324,10 @@ struct one_step_integrator {
   // the Moreau-Jean scheme on the global problem (see moreau_jean_gosi.hpp)
   struct moreau_jean_gosi : integrator<simul::moreau_jean_gosi::scheme> {};
 
+  // the Anitescu-Tasora scheme, the reference for the comparisons (see
+  // anitescu_tasora.hpp)
+  struct anitescu_tasora : integrator<simul::anitescu_tasora::scheme> {};
+
   // one of them, chosen at run time by the scheme attribute (see
   // selectable_scheme.hpp)
   struct selectable : integrator<simul::selectable_scheme::scheme> {};

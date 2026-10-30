@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "siconos/simul/anitescu_tasora.hpp"
 #include "siconos/simul/moreau_jean.hpp"
 #include "siconos/storage/schedule.hpp"
 
@@ -16,6 +17,7 @@ using namespace siconos::storage::schedule;
 struct toy_context {
   std::vector<std::string> log;
   bool more = false;
+  int count = 0;
 };
 
 struct first : stage<"first"> {
@@ -43,13 +45,32 @@ struct less : condition<"less"> {
 
 using toy = sequence<"toy", first, when<more, second>, when<less, never>>;
 
+struct count : stage<"count"> {
+  static void run(toy_context& c) {
+    ++c.count;
+    c.log.emplace_back("count");
+  }
+};
+
+struct three : condition<"three"> {
+  static bool holds(const toy_context& c) { return c.count >= 3; }
+};
+
+struct done : condition<"done"> {
+  static bool holds(const toy_context&) { return true; }
+};
+
+using loop = sequence<"loop", repeat<three, count, second>, repeat<done, first>>;
+
 class ScheduleTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ScheduleTest);
   CPPUNIT_TEST(testRunInOrder);
   CPPUNIT_TEST(testObserver);
   CPPUNIT_TEST(testTimings);
   CPPUNIT_TEST(testDescribe);
+  CPPUNIT_TEST(testRepeat);
   CPPUNIT_TEST(testMoreauJean);
+  CPPUNIT_TEST(testAnitescuTasora);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -104,6 +125,23 @@ class ScheduleTest : public CppUnit::TestFixture {
                          describe<toy>());
   }
 
+  // repeat runs its stages until the condition holds, at least once
+  void testRepeat() {
+    toy_context c;
+    timings t;
+    run<loop>(c, t);
+    CPPUNIT_ASSERT((c.log == std::vector<std::string>{"count", "second", "count", "second",
+                                                      "count", "second", "first"}));
+    CPPUNIT_ASSERT_EQUAL(std::size_t(3), t.stage("count").runs);
+    CPPUNIT_ASSERT_EQUAL(std::string("loop:\n"
+                                     "  repeat until three:\n"
+                                     "    count\n"
+                                     "    second\n"
+                                     "  repeat until done:\n"
+                                     "    first\n"),
+                         describe<loop>());
+  }
+
   // the Moreau-Jean time step, as the simulations run it: a change of the
   // algorithm changes this text
   void testMoreauJean() {
@@ -139,6 +177,41 @@ class ScheduleTest : public CppUnit::TestFixture {
                     "      lambda of the active interactions from the solution\n"
                     "    for each kind of systems:\n"
                     "      v, q at step + 1 of the involved systems\n"),
+        text);
+  }
+
+  void testAnitescuTasora() {
+    const auto text = describe<siconos::simul::anitescu_tasora::time_step_schedule>();
+    std::fputs(text.c_str(), stdout);
+    CPPUNIT_ASSERT_EQUAL(
+        std::string("Anitescu-Tasora time step:\n"
+                    "  for each kind of systems:\n"
+                    "    M^-1 f, if f or K change\n"
+                    "    the free state: v, q at step + 1 without the contact impulses\n"
+                    "  for each kind of interactions:\n"
+                    "    the relation sets hold every interaction\n"
+                    "    the jacobians H, if the relations change\n"
+                    "    the outputs y, ydot at step\n"
+                    "    the free outputs y, ydot at step + 1\n"
+                    "  the active set: the interactions whose gap may close, the systems they "
+                    "involve\n"
+                    "  if there are contacts:\n"
+                    "    for each kind of interactions:\n"
+                    "      the jacobians H, if the relations do not change\n"
+                    "      lambda of the active interactions is zero\n"
+                    "    no sweep yet\n"
+                    "    repeat until lambda changes less than the tolerance, or too many "
+                    "sweeps:\n"
+                    "      a new sweep\n"
+                    "      for each kind of interactions:\n"
+                    "        lambda <- P_K(lambda - eta (H v + e ydot)), v <- v + M^-1 H^T "
+                    "dlambda, interaction by interaction\n"
+                    "    the number of sweeps, a warning if lambda did not converge\n"
+                    "    for each kind of systems:\n"
+                    "      q at step + 1 of the involved systems\n"
+                    "    the offsets of the involved systems, p0 is zero\n"
+                    "    for each kind of interactions:\n"
+                    "      p0 = H^T lambda, the contact impulses (outputs)\n"),
         text);
   }
 };
