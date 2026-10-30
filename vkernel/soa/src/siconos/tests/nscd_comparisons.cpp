@@ -18,6 +18,15 @@
      sliding_path, incline_slide_path
                     the trajectories of the square in these two cases, at
                     h = 5e-3 (DEM 1e-4)
+     dem_incline    DEM on the incline above the friction angle: x(T)
+                    beyond the exact motion vs k_t, the rotation free or
+                    locked, against the excess of the loading of the
+                    tangential springs (an estimate, see dem_incline)
+     shear          the dilatancy: a disk sheared over a fixed layer of
+                    disks (its horizontal velocity imposed by a large
+                    horizontal mass, its rotation locked: the contacts
+                    slide), its height against the geometric one y_layer +
+                    max_i sqrt(4 r^2 - (x - x_i)^2), for mu = 0 and 0.3
 
    The cost of each run: its wall time and the iterations of its solver
    (summed over the steps; none for DEM). Moreau-Jean and Anitescu-Tasora
@@ -291,6 +300,102 @@ void incline_slide(const std::filesystem::path& dir) {
   square_paths(dir, "incline_slide_path", mu, tmax, alpha, 0.);
 }
 
+/* DEM on the incline above the friction angle: the tangential springs start
+   unloaded, the friction is 2 k_t x below its cap: the square moves as a mass
+   on a spring, x = x_eq (1 - cos w t), x_eq = m g sin(alpha) / (2 k_t), w =
+   sqrt(2 k_t / m), until 2 k_t x = mu m g cos(alpha) at t_c. Its velocity is
+   then ahead of the Coulomb motion (a t) by dv = x_eq w sin(w t_c) - a t_c,
+   and stays so: at T, x is ahead by dv (T - t_c) + x_c - a t_c^2 / 2. */
+void dem_incline(const std::filesystem::path& dir) {
+  using namespace siconos;
+  auto f = open_csv(dir, "dem_incline", "rotation,kt,x_end,x_exact,excess,loading_estimate");
+  const double alpha = 30 * deg, mu = 0.3, tmax = 1., h = 1e-4;
+  const double a = g * (std::sin(alpha) - mu * std::cos(alpha));
+  const double x_exact = 0.5 * a * tmax * tmax;
+  const scheme_t dem_scheme = all_schemes[3];
+  for (const char* rotation : {"free", "locked"}) {
+    for (double k : {kt / 4, kt, 4 * kt, 16 * kt}) {
+      scene sc = scene_for(dem_scheme, mu, h, tmax, alpha);
+      sc.kt = k;
+      world w(sc);
+      auto [p, y0] = square_at_rest(w, dem_scheme, alpha);
+      if (std::string(rotation) == "locked") p.mass_matrix().diagonal()(2) = 1e9;
+      w.finalize();
+      while (w.simulation.has_next_event()) w.step();
+      const double x_end = storage::attr<"q">(p, w.simulation.current_step())(0);
+      const double x_eq = m * g * std::sin(alpha) / (2 * k);
+      const double x_c = mu * m * g * std::cos(alpha) / (2 * k);
+      const double omega = std::sqrt(2 * k / m);
+      const double t_c = std::acos(1 - x_c / x_eq) / omega;
+      const double dv = x_eq * omega * std::sin(omega * t_c) - a * t_c;
+      const double estimate = dv * (tmax - t_c) + x_c - 0.5 * a * t_c * t_c;
+      std::println(f, "{},{},{},{},{},{}", rotation, k, x_end, x_exact, x_end - x_exact,
+                   estimate);
+      std::println(
+          stderr, "dem_incline rotation {} k_t {:.3e}: excess {:.3e}, loading estimate {:.3e}",
+          rotation, k, x_end - x_exact, estimate);
+    }
+  }
+}
+
+/* the dilatancy: a disk sheared over a fixed layer of disks. The layer is
+   made immobile by large masses (1e4) and no force; its disks are 0.01 apart
+   and 0.01 above the ground: no contact between two immobile bodies, whose
+   blocks of W would be ~1e-18 (NSGS refuses them as singular). */
+void shear(const std::filesystem::path& dir) {
+  using namespace siconos;
+  auto f = open_csv(dir, "shear", "scheme,mu,h,t,x,y,y_geometric");
+  auto summary = open_csv(dir, "shear_summary",
+                          "scheme,mu,h,steps,wall_s,iterations,max_above,max_below");
+  const double v = 0.5;  // the imposed velocity: v^2 / (2 r) < g, it stays on the crests
+  const double spacing = 2 * r + 0.01, y_layer = r + 0.01, heavy = 1e4;
+  const double x0 = 5.5 * spacing;  // in the hollow between the layer disks 5 and 6
+  const double travel = 3.;
+  auto geometric = [=](double x) {  // the height of a disk resting on the layer
+    double y = 0;
+    for (int i = 0; i < 20; ++i) {
+      const double d = x - i * spacing;
+      if (std::abs(d) < 2 * r) y = std::max(y, y_layer + std::sqrt(4 * r * r - d * d));
+    }
+    return y;
+  };
+  for (const double mu : {0., 0.3}) {
+    for (const auto& s : all_schemes) {
+      const double h = is_dem(s) ? 1e-4 : 5e-3;
+      world w(scene_for(s, mu, h, travel / v));
+      // the fixed layer: disks made immobile (large masses, no force)
+      for (int i = 0; i < 20; ++i) {
+        auto d = w.add_disk(i * spacing, y_layer);
+        d.mass_matrix().diagonal() << heavy, heavy, heavy;
+        d.fext() = {0., 0., 0.};
+      }
+      // the sheared disk: its horizontal velocity imposed, its rotation locked
+      auto top = w.add_disk(x0, geometric(x0));
+      top.mass_matrix().diagonal() << heavy, m, heavy;
+      top.velocity() = {v, 0., 0.};
+      w.finalize();
+      cost c;
+      double above = 0., below = 0.;
+      const std::size_t every = std::max<std::size_t>(1, std::lround(5e-3 / h));
+      while (w.simulation.has_next_event()) {
+        step(w, c);
+        const auto st = w.simulation.current_step();
+        const auto& q = storage::attr<"q">(top, st);
+        const double yg = geometric(q(0));
+        above = std::max(above, q(1) - yg);
+        below = std::max(below, yg - q(1));
+        if (st % every == 0)
+          std::println(f, "{},{},{},{},{},{},{}", s.name, mu, h, st * h, q(0), q(1), yg);
+      }
+      std::println(summary, "{},{},{},{},{},{},{},{}", s.name, mu, h, c.steps, c.wall(),
+                   c.iterations, above, below);
+      std::println(stderr,
+                   "shear {} mu {}: max above the geometric height {:.3e}, below {:.3e}",
+                   s.name, mu, above, below);
+    }
+  }
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -305,7 +410,9 @@ int main(int argc, char** argv) {
                {"column", columns},
                {"incline_stick", incline_stick},
                {"sliding", sliding},
-               {"incline_slide", incline_slide}};
+               {"incline_slide", incline_slide},
+               {"dem_incline", dem_incline},
+               {"shear", shear}};
   std::vector<std::string> wanted(argv + 2, argv + argc);
   for (const auto& [name, run] : cases) {
     if (wanted.empty() || std::find(wanted.begin(), wanted.end(), name) != wanted.end()) {

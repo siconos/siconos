@@ -210,6 +210,60 @@ error_table(
     "x_exact",
 )
 
+shear_summary = read("shear_summary")
+if shear_summary:
+    rows = []
+    for mu in ("0", "0.3"):
+        for s in SCHEMES:
+            r = next(
+                (r for r in shear_summary if r["scheme"] == s and r["mu"] == mu), None
+            )
+            if r:
+                rows.append(
+                    [
+                        mu,
+                        s,
+                        r["h"],
+                        fmt(r["max_above"]),
+                        fmt(r["max_below"]),
+                        r["iterations"],
+                        f"{num(r['wall_s']):.2f}",
+                    ]
+                )
+    md.append(
+        table(
+            "Dilatancy: a disk sheared over a fixed layer - height above / below the geometric one",
+            [
+                "mu",
+                "scheme",
+                "h",
+                "max above",
+                "max below",
+                "solver iterations",
+                "wall time (s)",
+            ],
+            rows,
+        )
+    )
+
+dem_incline = read("dem_incline")
+if dem_incline:
+    md.append(
+        table(
+            "DEM on the incline 30 deg, mu 0.3: x(T = 1) ahead of the exact motion, vs k_t",
+            ["rotation", "k_t", "excess", "loading estimate"],
+            [
+                [
+                    r["rotation"],
+                    fmt(r["kt"]),
+                    fmt(r["excess"]),
+                    fmt(r["loading_estimate"]),
+                ]
+                for r in dem_incline
+            ],
+        )
+    )
+
 with open(os.path.join(directory, "tables.md"), "w") as f:
     f.write("\n".join(md))
 print(f"wrote {os.path.join(directory, 'tables.md')}")
@@ -680,3 +734,94 @@ for name, title, value, exact, draw in (
         ax.set_title(f"{title}: {what}", loc="left")
     axes[0].legend()
     save(fig, name + "_h")
+
+
+def scene_shear(ax):
+    scene_axes(ax, "The scene")
+    ground(ax, -0.6, 5.6)
+    for i in range(6):
+        disk(ax, i * 1.0, 0.55)
+        ax.add_patch(
+            matplotlib.patches.Circle(
+                (i * 1.0, 0.55),
+                0.5,
+                facecolor="none",
+                edgecolor=MUTED,
+                hatch="////",
+                linewidth=0,
+            )
+        )
+    x0 = 1.5
+    disk(ax, x0, 0.55 + math.sqrt(0.75))
+    arrow(ax, x0 + 0.55, 0.55 + math.sqrt(0.75), 0.8, 0, "v imposed")
+    # the geometric path of its centre
+    xs = [x0 + 0.02 * k for k in range(151)]
+    ys = [0.55 + max(math.sqrt(max(1 - (x - i) ** 2, 0)) for i in range(6)) for x in xs]
+    ax.plot(xs, ys, color=MUTED, linestyle="--", linewidth=1)
+    ax.text(
+        3.0, 2.35, "geometric path of the centre", fontsize=8, color=INK, ha="center"
+    )
+    gravity(ax, -0.4, 3.4)
+    note(
+        ax,
+        -0.7,
+        -0.5,
+        "a disk sheared over a fixed layer (hatched),\nrotation locked: its contacts slide;\n"
+        "from a hollow (\u221a3 r) to a crest (2 r): the\ngeometric dilatancy. AT, \u03bc > 0: u_N = \u03bc |u_T|\n"
+        "launches it at each sliding step, it falls\nback at the next: above the path",
+    )
+    ax.set_xlim(-0.8, 5.8)
+    ax.set_ylim(-2.4, 3.6)
+
+
+shear_rows = read("shear")
+if shear_rows:
+    fig, axes = plt.subplots(
+        1, 3, figsize=(15, 4), gridspec_kw={"width_ratios": [1.1, 1.3, 1.3]}
+    )
+    scene_shear(axes[0])
+    for ax, mu in zip(axes[1:], ("0", "0.3")):
+        data = {}
+        for s in SCHEMES:
+            rows = [r for r in shear_rows if r["scheme"] == s and r["mu"] == mu]
+            data[s] = (
+                [num(r["x"]) for r in rows],
+                [num(r["y"]) - num(r["y_geometric"]) for r in rows],
+            )
+        schemes_chart(ax, data, every=40)
+        ax.axhline(0, color=MUTED, linewidth=0.8, linestyle="--")
+        ax.set_xlabel("position of the sheared disk x (m)")
+        ax.set_ylabel("height above the geometric one (m)")
+        ax.set_title(f"\u03bc = {mu}", loc="left")
+    axes[1].legend()
+    save(fig, "shear")
+
+if dem_incline:
+    fig, ax = plt.subplots(figsize=(6.4, 4))
+    for rotation, marker, ls in (("free", "D", "-"), ("locked", "o", ":")):
+        rows = [r for r in dem_incline if r["rotation"] == rotation]
+        ax.plot(
+            [num(r["kt"]) for r in rows],
+            [num(r["excess"]) for r in rows],
+            color=COLORS["DEM"],
+            marker=marker,
+            linestyle=ls,
+            markeredgecolor=SURFACE,
+            label=f"DEM, rotation {rotation}",
+        )
+    rows = [r for r in dem_incline if r["rotation"] == "free"]
+    ax.plot(
+        [num(r["kt"]) for r in rows],
+        [num(r["loading_estimate"]) for r in rows],
+        color=MUTED,
+        linestyle="--",
+        linewidth=1,
+        label="loading of the tangential springs (estimate)",
+    )
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("tangential stiffness k_t (N/m)")
+    ax.set_ylabel("x(T = 1) ahead of the exact motion (m)")
+    ax.set_title("DEM on the incline: the start of the springs", loc="left")
+    ax.legend()
+    save(fig, "dem_incline")
