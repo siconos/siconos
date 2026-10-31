@@ -245,6 +245,16 @@ if shear_summary:
             rows,
         )
     )
+    md.append(
+        "Below the geometric path, Moreau-Jean and AT at mu = 0 (shear_detail.png):\n"
+        "they keep u_N = 0, never the gap. In a hollow the path has a corner, the\n"
+        "vertical velocity flips from -v tan 30 to +v tan 30 in one step; with\n"
+        "theta = 1/2 the position moves with the mean of the two, about 0: the\n"
+        "centre stays flat over that step while the path goes up, about 1e-3 below\n"
+        "it (at most h v tan 30). Small teeth: the tangent motion over a convex arc\n"
+        "opens the gap by ~(h v_T)^2 / (2 R) per step; when it is open, one step of\n"
+        "free fall (g h^2), caught at the velocity level, the overlap kept.\n"
+    )
 
 dem_incline = read("dem_incline")
 if dem_incline:
@@ -795,6 +805,90 @@ if shear_rows:
         ax.set_title(f"\u03bc = {mu}", loc="left")
     axes[1].legend()
     save(fig, "shear")
+
+
+def shear_geometric(x):
+    """the height of the centre of a disk resting on the layer (r = 0.5,
+    fixed disks at the integers, at the height r), as in nscd_comparisons"""
+    return 0.5 + max(math.sqrt(1 - (x - i) ** 2) for i in range(20) if abs(x - i) < 1)
+
+
+# the details of Moreau-Jean, mu = 0: the trajectory itself, a hollow and a
+# small tooth, one point per step
+mj0 = [r for r in shear_rows if r["scheme"] == "Moreau-Jean" and r["mu"] == "0"]
+if mj0:
+    xs = [num(r["x"]) for r in mj0]
+    ys = [num(r["y"]) for r in mj0]
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    color = COLORS["Moreau-Jean"]
+
+    def geometric_line(ax, x0, x1):
+        gx = [x0 + (x1 - x0) * k / 400 for k in range(401)]
+        # the corners of the hollows, exactly
+        gx = sorted(set(gx) | {i + 0.5 for i in range(20) if x0 < i + 0.5 < x1})
+        ax.plot(
+            gx,
+            [shear_geometric(x) for x in gx],
+            color=MUTED,
+            linestyle="--",
+            linewidth=1,
+            label="geometric path",
+        )
+
+    ax = axes[0]
+    geometric_line(ax, xs[0], xs[-1])
+    ax.plot(xs, ys, color=color)
+    ax.set_ylabel("height of the centre y (m)")
+    ax.set_title("\u03bc = 0: Moreau-Jean, the centre (dashed: geometric)", loc="left")
+
+    ax = axes[1]
+    sel = [i for i, x in enumerate(xs) if 6.48 < x < 6.53]
+    geometric_line(ax, 6.48, 6.53)
+    ax.plot(
+        [xs[i] for i in sel],
+        [ys[i] for i in sel],
+        color=color,
+        marker="o",
+        markersize=4,
+        markeredgecolor=SURFACE,
+        label="centre, one point per step",
+    )
+    ax.set_ylabel("height of the centre y (m)")
+    ax.set_title("the hollow x = 6.5: the step over the corner", loc="left")
+    ax.legend(loc="upper left")
+    note(
+        ax,
+        6.5085,
+        1.3692,
+        "v_y: -v tan 30 \u2192 +v tan 30\nin one step; \u03b8 = 1/2: moves with\n"
+        "the mean, \u2248 0: flat, then ~1e-3\nbelow the path, kept:\n"
+        "u_N = 0, not the gap",
+    )
+
+    ax = axes[2]
+    sel = [i for i, x in enumerate(xs) if 5.68 < x < 5.83]
+    ax.plot(
+        [xs[i] for i in sel],
+        [ys[i] - shear_geometric(xs[i]) for i in sel],
+        color=color,
+        marker="o",
+        markersize=2,
+        markeredgewidth=0,
+    )
+    ax.axhline(0, color=MUTED, linewidth=0.8, linestyle="--")
+    ax.set_ylabel("height above the geometric one (m)")
+    ax.set_title("small teeth: the gap opens, one step of free fall", loc="left")
+    note(
+        ax,
+        5.685,
+        -2.4e-4,
+        "tangent motion on a convex arc: the gap\nopens, ~(h v_T)\u00b2/(2R) per step; open:\n"
+        "one step of free fall (g h\u00b2), caught\nat the velocity level",
+    )
+    ax.set_ylim(-3.4e-4, 3e-5)
+    for ax in axes:
+        ax.set_xlabel("position of the sheared disk x (m)")
+    save(fig, "shear_detail")
 
 if dem_incline:
     fig, ax = plt.subplots(figsize=(6.4, 4))
