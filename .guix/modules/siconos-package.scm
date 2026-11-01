@@ -191,6 +191,8 @@ problems.")
                          git-minimal/pinned
                          pybind11
                          python-lxml
+                         ;; the figures of vkernel/docs/studies (vkernel_study_*)
+                         python-matplotlib
                          python-pytest
                          swig))
       (inputs (list python))
