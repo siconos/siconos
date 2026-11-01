@@ -23,7 +23,7 @@ local `check()` calls into CppUnit assertions.
 - Exactly two commits for the delivery, each building and tested on its own.
 - Build inside `guix shell -f guix.scm -- <cmd>`; never outside it.
 - Run test binaries with `LD_LIBRARY_PATH=/tmp/opencode/extra-libs`.
-- Never touch `/home/maurice/wkt/siconos/main-devel-cxd-relation-sets/siconos`.
+- Never touch the `main-devel-cxd-relation-sets` worktree.
 - ctest names stay `vkernel_<test>`; `ctest -N -R '^vkernel_'` must list the same names.
 - Reference tolerance is relative Frobenius `1e-8`; loosen only with a comment recording the
   observed spread, never tighten.
@@ -102,7 +102,7 @@ Expected: 29/29 pass.
 - [ ] **Step 4: Verify the perturbations the spec requires (not committed)**
 
 Run the tutorial reference against the current `bouncing_ball` output
-(`/home/maurice/src/siconos-tutorials/examples/mechanics/BouncingBall/BouncingBallTS.ref`):
+(`examples/mechanics/BouncingBall/BouncingBallTS.ref` of siconos-tutorials):
 expected Frobenius error ≈ `3.6e-13`.
 
 ---
@@ -287,7 +287,7 @@ Configure and build, then for each of the nine generated references run the fres
 binary in a scratch directory (`/tmp/opencode/gen/<name>`), copy its `.dat` to
 `vkernel/soa/src/siconos/<dir>/<name>.ref`, and re-run configure so `begin_tests`/`DATA` copies
 it into the build tree. `bouncing_ball.ref` is instead the verbatim copy of
-`/home/maurice/src/siconos-tutorials/examples/mechanics/BouncingBall/BouncingBallTS.ref`
+`examples/mechanics/BouncingBall/BouncingBallTS.ref` of siconos-tutorials
 (header line included).
 
 - [ ] **Step 4: Record the spec deltas** in §3.4/§3.6 of the design document (fem_t3 not
