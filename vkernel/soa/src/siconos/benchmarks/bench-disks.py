@@ -104,7 +104,8 @@ run_options["gravity_scale"] = 1 / N
 run_options["bullet_options"] = bullet_options
 run_options["solver_options"] = options
 
-run_options["constraint_activation_threshold"] = 1e-05
+# ignored by vnative until a007b2693: the reference outputs are without it
+# run_options["constraint_activation_threshold"] = 1e-05
 print(dir(sim))
 run_options["Newton_options"] = sim.LINEAR
 

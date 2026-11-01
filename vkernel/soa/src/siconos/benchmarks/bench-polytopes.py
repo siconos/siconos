@@ -234,7 +234,8 @@ else:
     run_options["gravity_scale"] = 1.0
 
 run_options["solver_options"] = options
-run_options["constraint_activation_threshold"] = 1e-05
+# ignored by vnative until a007b2693: the reference outputs are without it
+# run_options["constraint_activation_threshold"] = 1e-05
 
 # Bullet backend: configure collision options for convex polytopes (without
 # this the default gives missed contacts and blocks fall through the ramp).
