@@ -261,7 +261,8 @@ int main(int argc, char* argv[]) {
   fc2d.instance()->mu = 0;
 
   auto simulation = storage::add<config::simulation>(data);
-  simulation.one_step_integrator().theta() = 0.5;
+  // above 1/2: the stiffness of the FEM body is stable, not marginally
+  simulation.one_step_integrator().theta() = 0.50001;
   simulation.one_step_integrator().constraint_activation_threshold() = 0.;
   simulation.time_discretization().t0() = 0.;
   simulation.time_discretization().h() = 0.005;
