@@ -7,6 +7,9 @@ The figures come from vnative simulations (Moreau–Jean, θ = 1/2, γ = 1/2,
 h = 1e-3, NSGS 2D friction) of main-devel after 7ed68269a. The
 comparison of the time integrators is in
 [time-integrators-mj-at-dem.md](time-integrators-mj-at-dem.md).
+All the bodies here are rigid, so θ = 1/2 is safe. With a FEM body
+(a polytope on mesh edges) use θ slightly above 1/2, since θ = 1/2 is the
+stability limit of the stiffness: see *θ and stability* in that document.
 
 Code: `collision/cxd_narrowphase.hpp` (`narrowphase_pair`,
 `clip_manifold`, `manifold_point`), `collision/polytopefsegment_r.hpp`,

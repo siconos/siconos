@@ -24,9 +24,33 @@ In python (vnative): `run_options["osi"]` = `nonos.bridge.AnitescuTasoraOSI`,
 
 Settings of the comparisons:
 - Moreau–Jean (NSGS) and AT: solver tolerance 1e-12, activation threshold
-  1e-10, θ = 0.5.
+  1e-10, θ = 0.5 (rigid bodies only, see below).
 - DEM: k_n = 1e5, damping ratio 0.5 (on a contact with the ground),
   k_t = 2/7 k_n, θ = 1.
+
+**θ and stability.** The θ-method of the smooth dynamics
+(`simul/theta_method.hpp`) is
+
+```
+v_free(k+1) = v(k) + A⁻¹ h (θ F(k+1) + (1−θ) F(k)),   A = M + h²θ² K,   F = f − K q
+q(k+1)      = q(k) + h (θ v(k+1) + (1−θ) v(k))
+```
+
+- **With a stiffness K (FEM bodies).** On an undamped linear oscillator
+  the amplification factor has modulus < 1 for θ > ½ (the high
+  frequencies are damped), exactly 1 for θ = ½ for every h ω (marginal
+  stability, no numerical damping: stiff modes ring forever), and > 1 for
+  θ < ½ once h ω is large (unstable). θ = ½ is the stability limit. For
+  FEM bodies, use θ slightly above ½: the python runner's default is
+  0.50001. The price is energy: θ = ½ conserves it between impacts (Acary
+  & Collins-Craft on Moreau–Jean), θ > ½ dissipates it.
+- **Rigid bodies (every scene of this study).** There is no K, and gravity
+  is constant. θ only weights the two velocities in the position update,
+  there is no stiff mode, and the contact is implicit at the velocity
+  level whatever θ: θ = 0.5 is safe. Its visible effect is the mid-step
+  position over a velocity jump (the dips of §3.7).
+- **DEM.** θ = 1 (symplectic Euler) for rigid bodies. Its stability limit,
+  h < 2 √(m / k_n), comes from the explicit penalty force, not from θ.
 
 The scenes are shared with the ctest `vkernel_nscd_cases`
 (`collision/tests/nscd_world.hpp`, `collision/tests/nscd_cases.cpp`). That
