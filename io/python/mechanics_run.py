@@ -172,6 +172,7 @@ class RunnerConfig:
             self.default_simulation_class = sio.Simulation
             self.default_body_class = sio.Body
             self.default_bodies_class = sio.Bodies
+            self.default_polytope_bodies_class = sio.PolytopeBodies
 
         else:
             raise RuntimeError(f"Unavailable chosen backend {self.backend}")
@@ -1194,19 +1195,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 elif self._shape.attributes(ctor.shape_name)["type"] == "convex":
                     # a 2D convex polygon (at most 16 vertices): a rigid
-                    # body with a polytope shape. q is the centre of mass, so
-                    # the vertices must be centred on their area centroid
-                    # (siconos.mechanics.collision.convexhull.ConvexHull2d
-                    # gives it).
-                    points = self._shape._io.shapes()[ctor.shape_name][:]
-                    hull = convex_hull_2d(points)
-                    area, centroid, polar = polygon_mass_properties(hull)
-                    extent = np.ptp(hull, axis=0).max()
-                    if np.linalg.norm(centroid) > 1e-6 * extent:
-                        raise ValueError(
-                            f"vnative: the vertices of the convex shape {ctor.shape_name} must be "
-                            f"centred on their centroid, found {centroid}"
-                        )
+                    # body with a polytope shape
+                    hull, area, polar = self.convex_shape_2d(ctor.shape_name)
                     if given_inertia is None:
                         inertia = mass * polar / area
                     else:
@@ -1218,7 +1208,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self._v0.append(velocity)
 
                     body = body_class()
-                    body.init_polytope(hull, mass, inertia, self._q0[-1], self._v0[-1])
+                    body.init_polytope(
+                        hull,
+                        mass,
+                        inertia,
+                        self._q0[-1],
+                        self._v0[-1],
+                        ctor.collision_group,
+                    )
                     self._set_external_forces(body)
 
                 elif self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
@@ -2131,6 +2128,22 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 self._deaths[time_of_death] = [(name, obj, body, flag)]
 
+    def convex_shape_2d(self, shape_name):
+        """The convex hull of a 2D convex shape, its area and its polar
+        second moment of area about the centroid. q is the centre of mass,
+        so the vertices must be centred on their area centroid
+        (siconos.mechanics.collision.convexhull.ConvexHull2d gives it)."""
+        points = self._shape._io.shapes()[shape_name][:]
+        hull = convex_hull_2d(points)
+        area, centroid, polar = polygon_mass_properties(hull)
+        extent = np.ptp(hull, axis=0).max()
+        if np.linalg.norm(centroid) > 1e-6 * extent:
+            raise ValueError(
+                f"vnative: the vertices of the convex shape {shape_name} must be "
+                f"centred on their centroid, found {centroid}"
+            )
+        return hull, area, polar
+
     def import_objects(
         self,
         name,
@@ -2158,39 +2171,80 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # base_id = obj.attrs["id"]
         count = obj.attrs["count"]
 
-        # Create contactor (same for all grains)
-        import siconos.mechanics.collision.tools as smct_tools
+        collision_group = obj.attrs.get("group", 0)
 
-        contactor = smct_tools.Contactor(
-            shape_name=obj.attrs["shape_name"],
-            collision_group=obj.attrs.get("group", 0),
-        )
+        # the shape of each grain: one shared, or indexed in a list
+        if "shape_names" in obj:
+            shape_names = [
+                n.decode("utf-8") if isinstance(n, bytes) else str(n)
+                for n in obj["shape_names"][:]
+            ]
+            shape_indices = np.asarray(obj["shape_indices"][:], dtype=np.int64)
+        else:
+            shape_names = [obj.attrs["shape_name"]]
+            shape_indices = np.zeros(count, dtype=np.int64)
 
         self.print_verbose(f"Importing aggregate {name} with {count} grains...")
 
-        # For vnative backend, create bodies efficiently
-        ctor = contactor
+        convex = [self._shape.attributes(n)["type"] == "convex" for n in shape_names]
+        if any(convex) and not all(convex):
+            raise ValueError(
+                f"aggregate {name}: the shapes are all disks or all convex polygons"
+            )
 
-        # radius: per grain, shared, or the radius of the shape
-        if "radii" in obj:
-            radii = np.asarray(obj["radii"][:], dtype=np.float64)
-        elif "radius" in obj.attrs:
-            radii = float(obj.attrs["radius"])
+        if all(convex):
+            if "radii" in obj or "radius" in obj.attrs:
+                raise ValueError(f"aggregate {name}: radii are for disks only")
+            hulls, areas, polars = zip(*map(self.convex_shape_2d, shape_names))
+            area = np.asarray(areas)[shape_indices]
+            polar = np.asarray(polars)[shape_indices]
+
+            # mass: per grain, shared, or from the density
+            if "masses" in obj:
+                mass = np.asarray(obj["masses"][:], dtype=np.float64)
+            elif "density" in obj.attrs:
+                mass = obj.attrs["density"] * area
+            # Only dynamic objects
+            assert mass is not None
+            mass = np.broadcast_to(np.asarray(mass, dtype=np.float64), count)
+
+            bodies = self.config.default_polytope_bodies_class(
+                hulls,
+                shape_indices,
+                mass,
+                mass * polar / area,
+                positions,
+                velocities,
+                collision_group,
+            )
         else:
-            radii = self._shape._io.shapes()[ctor.shape_name][:][0][0]
+            # radius: per grain, shared, or the radius of the shape
+            if "radii" in obj:
+                radii = np.asarray(obj["radii"][:], dtype=np.float64)
+            elif "radius" in obj.attrs:
+                radii = float(obj.attrs["radius"])
+            else:
+                shape_radii = np.array(
+                    [self._shape._io.shapes()[n][:][0][0] for n in shape_names]
+                )
+                radii = (
+                    float(shape_radii[0])
+                    if len(shape_names) == 1
+                    else shape_radii[shape_indices]
+                )
 
-        # mass: per grain, shared, or from the density (2D disks)
-        if "masses" in obj:
-            mass = np.asarray(obj["masses"][:], dtype=np.float64)
-        elif "density" in obj.attrs:
-            mass = obj.attrs["density"] * np.pi * np.square(radii)
+            # mass: per grain, shared, or from the density (2D disks)
+            if "masses" in obj:
+                mass = np.asarray(obj["masses"][:], dtype=np.float64)
+            elif "density" in obj.attrs:
+                mass = obj.attrs["density"] * np.pi * np.square(radii)
 
-        # Only dynamic objects
-        assert mass is not None
+            # Only dynamic objects
+            assert mass is not None
 
-        bodies = self.config.default_bodies_class(
-            radii, mass, positions, velocities, contactor.collision_group
-        )
+            bodies = self.config.default_bodies_class(
+                radii, mass, positions, velocities, collision_group
+            )
         np.vectorize(self._nsds.insertDynamicalSystem)(bodies.get())
         np.vectorize(self._set_external_forces)(bodies.get())
 

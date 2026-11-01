@@ -18,6 +18,10 @@ class Stored:
     @classmethod
     def setStorage(cls, data):
         cls._data = data
+        # the bodies and the shapes of a previous storage are gone: ids from
+        # 1 again, and no shape handle into it
+        BodyBase.set_count(0)
+        BodyBase.shapes().clear()
 
     @classmethod
     def data(cls):
@@ -401,6 +405,17 @@ class BodyBase(Stored):
             cls.shapes()[radius] = disk_shape
         return cls.shapes()[radius]
 
+    # one polytope shape per vertex set, shared by all the bodies
+    @classmethod
+    def polytope_shape(cls, vertices):
+        vertices = np.asarray(vertices, dtype=float)[:, :2]
+        key = ("polytope", tuple(map(tuple, vertices)))
+        if key not in cls.shapes():
+            polytope_shape = vkernel.disks.add_polytope_shape(cls.data())
+            polytope_shape.set_vertices(vertices)
+            cls.shapes()[key] = polytope_shape
+        return cls.shapes()[key]
+
 
 class Body(BodyBase):
     def __init__(self):
@@ -452,7 +467,9 @@ class Body(BodyBase):
         body.set_disk_shape(self.disk_shape(radius))
         body.set_fext(array([0, 0, 0]))  # default
 
-    def init_polytope(self, vertices, mass, inertia, position, velocity):
+    def init_polytope(
+        self, vertices, mass, inertia, position, velocity, collision_group=0
+    ):
         """A convex polygon: vertices (n x 2, 3 <= n <= 16) relative to the
         centre of mass, any orientation; inertia about the centre of mass."""
 
@@ -462,19 +479,11 @@ class Body(BodyBase):
         body = vkernel.disks.add_body(self.data())
         self._handle = body
         body.set_id(self._ident)
+        body.set_collision_group(collision_group)
         body.set_q(array(position))
         body.set_velocity(array(velocity))
         body.set_mass_matrix(array([mass, mass, inertia]))
-
-        key = ("polytope", tuple(map(tuple, np.asarray(vertices, dtype=float)[:, :2])))
-        if key in self.shapes():
-            polytope_shape = self.shapes()[key]
-        else:
-            polytope_shape = vkernel.disks.add_polytope_shape(self.data())
-            polytope_shape.set_vertices(np.asarray(vertices, dtype=float))
-            self.shapes()[key] = polytope_shape
-
-        body.set_polytope_shape(polytope_shape)
+        body.set_polytope_shape(self.polytope_shape(vertices))
         body.set_fext(array([0, 0, 0]))  # default
 
     def getMassValue(self):
@@ -547,16 +556,7 @@ class BodyWrap:
 # many bodies
 class Bodies(BodyBase):
     def __init__(self, radius, mass, positions, velocities, collision_group=0):
-        # ids from 1, as Body and the hdf5 file
-        start = self.count() + 1
-        self.set_count(self.count() + len(positions))
-        self._ident = np.arange(start, self.count() + 1)
-
-        bodies = vkernel.disks.multiple_add_body(self.data(), len(positions))
-        self._handle = bodies
-        bodies.multiple_set_id(self._ident)
-        bodies.multiple_set_q(array(positions))
-        bodies.multiple_set_velocity(array(velocities))
+        bodies = self._add_bodies(positions, velocities)
 
         # radius and mass: a scalar shared by all the grains, or one
         # value per grain (polydisperse packing)
@@ -580,6 +580,19 @@ class Bodies(BodyBase):
 
         bodies.set_fext(array([0, 0, 0]))  # default
         bodies.set_collision_group(collision_group)
+
+    def _add_bodies(self, positions, velocities):
+        # ids from 1, as Body and the hdf5 file
+        start = self.count() + 1
+        self.set_count(self.count() + len(positions))
+        self._ident = np.arange(start, self.count() + 1)
+
+        bodies = vkernel.disks.multiple_add_body(self.data(), len(positions))
+        self._handle = bodies
+        bodies.multiple_set_id(self._ident)
+        bodies.multiple_set_q(array(positions))
+        bodies.multiple_set_velocity(array(velocities))
+        return bodies
 
     def get(self):
         return [BodyWrap(bdy) for bdy in self.handle().get()]
@@ -614,6 +627,32 @@ class Bodies(BodyBase):
 
     def swapInMemory(self):
         pass  # compatibility
+
+
+# many convex polygons
+class PolytopeBodies(Bodies):
+    def __init__(
+        self,
+        vertices,
+        shape_indices,
+        masses,
+        inertias,
+        positions,
+        velocities,
+        collision_group=0,
+    ):
+        """vertices: one vertex set (n x 2, 3 <= n <= 16, relative to the
+        centre of mass) per shape; shape_indices: the shape of each body;
+        masses and inertias (about the centre of mass): one per body."""
+        bodies = self._add_bodies(positions, velocities)
+
+        shapes = [self.polytope_shape(v) for v in vertices]
+        for body, k in zip(bodies.get(), shape_indices):
+            body.set_polytope_shape(shapes[k])
+
+        bodies.multiple_set_mass_matrix(np.column_stack([masses, masses, inertias]))
+        bodies.set_fext(array([0, 0, 0]))  # default
+        bodies.set_collision_group(collision_group)
 
 
 class TraceParams(Stored):

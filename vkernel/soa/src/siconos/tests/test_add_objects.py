@@ -109,3 +109,97 @@ def test_add_objects_polydisperse(tmp_path):
         check(range(5, 9), [0.3] * 4, [1.5] * 4)
         check(range(9, 13), radii, masses)
         check(range(13, 17), [SHAPE_RADIUS] * 4, [1.0] * 4)
+
+
+def test_add_objects_polytopes(tmp_path):
+    filename = str(tmp_path / "add_objects_polytopes.hdf5")
+    config = RunnerConfig("vnative")
+
+    # two shapes centred on their centroid: a square and a triangle
+    square = 0.1 * np.array([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+    triangle = 0.1 * np.array([[-1.0, -1.0], [2.0, -1.0], [-1.0, 2.0]])
+    area = np.array([0.04, 0.045])
+    # polar second moment about the centroid: a^4 * 2/3 for the square of
+    # half side a, A * (a^2 + b^2) / 18 for the right triangle of legs a, b
+    polar = np.array([0.1**4 * 8 / 3, 0.045 * (0.3**2 + 0.3**2) / 18])
+    circumradius = np.array([0.1 * np.sqrt(2), 0.1 * np.sqrt(5)])
+    shape_indices = np.array([0, 1, 1, 0])
+    density = 10.0
+
+    with MechanicsHdf5Runner(config=config, io_filename=filename) as io:
+        io.add_convex_shape("Square", square)
+        io.add_convex_shape("Triangle", triangle)
+        io.add_primitive_shape("Disk", "Disk", [SHAPE_RADIUS])
+        io.add_Newton_impact_friction_nsl("contact", mu=0.3, e=0)
+
+        # ids 1-4: per-grain shapes, mass from the density
+        io.add_objects(
+            "rocks",
+            [Contactor("Square"), Contactor("Triangle")],
+            grid(4, 0.0),
+            shape_indices=shape_indices,
+            density=density,
+        )
+        # ids 5-8: one shape, shared mass
+        io.add_objects("squares", [Contactor("Square")], grid(4, 10.0), mass=2.0)
+
+        with pytest.raises(ValueError):
+            io.add_objects(
+                "no_indices",
+                [Contactor("Square"), Contactor("Triangle")],
+                grid(4, 20.0),
+                mass=1.0,
+            )
+        with pytest.raises(ValueError):
+            io.add_objects(
+                "bad_indices",
+                [Contactor("Square"), Contactor("Triangle")],
+                grid(4, 20.0),
+                shape_indices=[0, 1, 2, 0],
+                mass=1.0,
+            )
+        # disks and polygons together: refused at import
+        io.add_objects(
+            "mixed",
+            [Contactor("Square"), Contactor("Disk")],
+            grid(4, 30.0),
+            shape_indices=shape_indices,
+            mass=1.0,
+        )
+
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+    vnative_options = nonos.bridge.SpaceFilterOptions()
+    vnative_options.neighborhood_radius = 2.1 * circumradius.max()
+    vnative_options.min_radius = 0.5 * SHAPE_RADIUS
+
+    run_options = MechanicsHdf5Runner_run_options()
+    run_options["t0"] = 0
+    run_options["T"] = 0.05
+    run_options["h"] = 0.005
+    run_options["solver_options"] = options
+    run_options["vnative_options"] = vnative_options
+    run_options["verbose"] = False
+
+    with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
+        with pytest.raises(ValueError):
+            io.run(run_options)
+
+    # the same without the mixed aggregate, in a new storage
+    with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
+        del io._input["mixed"]
+    config = RunnerConfig("vnative")
+    with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
+        io.run(run_options)
+
+        # body id -> radius of its shape, the circumradius for a polytope
+        radius_of = {int(i): r for i, r in np.asarray(io._io.radii(io._nsds))}
+
+        def check(ids, indices, masses):
+            for i, k, m in zip(ids, indices, masses):
+                body = io._nsds.dynamicalSystem(i)._bdy
+                assert radius_of[i] == pytest.approx(circumradius[k])
+                inertia = m * polar[k] / area[k]
+                assert list(body.mass_matrix()) == pytest.approx([m, m, inertia])
+
+        check(range(1, 5), shape_indices, density * area[shape_indices])
+        check(range(5, 9), [0] * 4, [2.0] * 4)

@@ -1232,22 +1232,27 @@ class MechanicsHdf5:
         density=None,
         time_of_birth=-1,
         time_of_death=-1,
+        shape_indices=None,
     ):
         """
         Add an aggregate of objects (e.g., granular material) with shared properties.
 
-        All objects share the same shape. Translations, orientations and
-        velocities are given per grain. Radius and mass are shared by default;
-        ``radii`` and ``mass`` (or ``density``) may be given per grain to create
-        a polydisperse packing. The inertia of each grain is computed from its
-        own mass and radius.
+        The grains share one shape, or each one takes its shape in a list
+        (``shape_indices``). Translations, orientations and velocities are
+        given per grain. Radius and mass are shared by default; ``radii`` and
+        ``mass`` (or ``density``) may be given per grain to create a
+        polydisperse packing. The inertia of each grain is computed from its
+        own mass and shape.
 
         Parameters
         ----------
         name: string
             The name of the aggregate.
         shapes: Contactor or list of Contactors
-            The shape(s) for all grains (only first contactor used for now).
+            The shape of all the grains, or the shapes indexed by
+            ``shape_indices``. The shapes are all disks or all convex
+            polygons (vnative), and the collision group is the one of the
+            first contactor.
         translations: array_like (N, 2) or (N, 3)
             Initial translations for all N grains.
         orientations: array_like (N,) for 2D or (N, 4) for 3D, optional
@@ -1262,11 +1267,14 @@ class MechanicsHdf5:
             mass and the radius of each grain.
         radii: float or array_like (N,), optional
             Radius of the grains, shared or one per grain. Default: the
-            radius of the disk shape.
+            radius of the disk shape. Disks only.
         density: float, optional
-            Instead of mass: the mass of each grain is density * pi * r**2
-            (2D, unit thickness), so that grains of different radii have the
-            same density. Exclusive with mass.
+            Instead of mass: the mass of each grain is density times its
+            area (2D, unit thickness), so that grains of different sizes have
+            the same density. Exclusive with mass.
+        shape_indices: array_like (N,) of int, optional
+            The index in ``shapes`` of the shape of each grain. Required
+            with more than one shape.
         """
         if name in self._input:
             return
@@ -1283,6 +1291,21 @@ class MechanicsHdf5:
             radii = np.asarray(radii, dtype=np.float64)
             if radii.ndim > 0 and radii.shape != (n,):
                 raise ValueError("radii must be a scalar or of length N")
+        if not isinstance(shapes, (list, tuple)):
+            shapes = [shapes]
+        if shape_indices is None:
+            if len(shapes) > 1:
+                raise ValueError("several shapes need shape_indices")
+        else:
+            shape_indices = np.asarray(shape_indices)
+            if shape_indices.shape != (n,):
+                raise ValueError("shape_indices must be of length N")
+            if (
+                not np.issubdtype(shape_indices.dtype, np.integer)
+                or shape_indices.min() < 0
+                or shape_indices.max() >= len(shapes)
+            ):
+                raise ValueError("shape_indices must index shapes")
 
         obj = group(self._input, name)
 
@@ -1296,13 +1319,21 @@ class MechanicsHdf5:
             obj.attrs["id"] = -(self._number_of_static_objects + 1)
             self._number_of_static_objects += len(translations)
 
-        # Store shape info (same for all grains)
-        if isinstance(shapes, (list, tuple)):
-            shape_info = shapes[0]
-        else:
-            shape_info = shapes
+        # the first shape is also the one of the format with a single shape
+        shape_info = shapes[0]
 
         obj.attrs["shape_name"] = shape_info.shape_name
+        if shape_indices is not None:
+            obj.create_dataset(
+                "shape_names",
+                data=[s.shape_name for s in shapes],
+                dtype=h5py.string_dtype(),
+            )
+            obj.create_dataset(
+                "shape_indices",
+                data=shape_indices.astype(np.int64),
+                compression="gzip" if self._use_compression else None,
+            )
         if hasattr(shape_info, "group"):
             obj.attrs["group"] = shape_info.group
         if hasattr(shape_info, "collision_group"):
