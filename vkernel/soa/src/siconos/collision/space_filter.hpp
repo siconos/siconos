@@ -207,6 +207,26 @@ struct space_filter : item {
       //   points_t{},
       //   mp::equal.to(collision::point<item_t>));
 
+      // storage::remove moves the last item to the index of the removed one:
+      // what refers to the last item by its index must follow
+      const auto removed = item_handle.index().value();
+      const auto last = storage::handles<item_t>(data).size() - 1;
+
+      // the relations of the removed segment go out of the maps, so that no
+      // new interaction binds them; the interactions that use them are not
+      // activated anymore (no point left) and go at the next update
+      if constexpr (std::derived_from<item_t, collision::shape::segment>) {
+        const auto x1 = item_handle.x1();
+        const auto x2 = item_handle.x2();
+        const auto y1 = item_handle.y1();
+        const auto y2 = item_handle.y2();
+        self()->diskfsegments().erase({x1, x2, y1, y2});
+        std::erase_if(self()->polytopefsegments(), [&](const auto& kv) {
+          const auto& k = kv.first;
+          return k[0] == x1 && k[1] == x2 && k[2] == y1 && k[3] == y2;
+        });
+      }
+
       // first remove item
       storage::remove(data, item_handle);
 
@@ -216,9 +236,26 @@ struct space_filter : item {
       }
 
       for (auto [flag, pitem] : view::zip(points_flags, points_items)) {
-        if (item_handle.index().value() == pitem.value()) {
+        if (removed == pitem.value()) {
           flag = true;
+        } else if (pitem.value() == last) {
+          // a point of the moved item
+          pitem = item_handle;
+        }
+      }
+
+      // the relations of the moved segment
+      if constexpr (std::derived_from<item_t, collision::shape::segment>) {
+        auto follow = [&](auto& relmap) {
+          for (auto& [key, rel_ref] : relmap) {
+            auto rel = storage::make_handle(data, rel_ref);
+            if (rel.segment().index().value() == last) {
+              rel.segment() = item_handle;
+            }
+          }
         };
+        follow(self()->diskfsegments());
+        follow(self()->polytopefsegments());
       }
       // XX check with one loop : flag = (item_handle.get() == pitem.get())
       // remove points
@@ -237,6 +274,12 @@ struct space_filter : item {
 
       neighborhood().instance()->resize_point_set(ps_indx, points_coords.front().data(),
                                                   points_coords.size());
+
+      // The points moved into the slots of the removed ones keep the cell
+      // keys of these slots: a fixed point set is not dynamic, CompactNSearch
+      // never recomputes its keys, and these points are not found where they
+      // are. The next search rebuilds the hash table from the coordinates.
+      neighborhood().instance()->reset();
     }
 
     void insert_diskfsegment_r(auto hdl) {
