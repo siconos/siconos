@@ -37,7 +37,6 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
     template <typename I, match::handle<model::lagrangian_ds> DS1,
               match::handle<model::elastic_lagrangian_ds> DS2, typename M1, typename M2>
     void compute_jachq(I step, DS1& hds1, DS2& hds2, M1& h_matrix1, M2& h_matrix2) {
-      auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;
 
       auto& q1 = hds1.q(step);
