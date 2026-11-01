@@ -118,6 +118,26 @@ def add_line(dataset, line):
     dataset[dataset.shape[0] - 1, :] = line
 
 
+# The tables that get rows at each output step. data/step_index/<table>
+# has one row per output step, empty steps included: time, first row,
+# number of rows. The radii and p0s tables, which have no time column,
+# have no row at the initial output.
+STEP_TABLES = (
+    "static",
+    "dynamic",
+    "velocities",
+    "radii",
+    "p0s",
+    "cf",
+    "cf_info",
+    "cf_work",
+    "cf_internal_variables",
+    "energy_work",
+    "domain",
+    "solv",
+)
+
+
 #
 # misc fixes
 #
@@ -221,6 +241,8 @@ class MechanicsHdf5:
         self._verbose = verbose
         self._fem_dof_mappings = {}
         # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
+        self._write_step_index = False
+        self._step_rows_before = None
 
     def __enter__(self):
         """Reminder: this function will be called when a 'with'
@@ -583,10 +605,95 @@ class MechanicsHdf5:
         """
         return self._boundary_conditions
 
+    def init_step_index(self):
+        """Record the rows of each output step in data/step_index.
+
+        A file whose tables were written without an index is left
+        without one: the index would only cover the last steps.
+        """
+        if "step_index" in self._data:
+            self._write_step_index = True
+            return
+        if any(self._table_rows(name) > 0 for name in STEP_TABLES):
+            self.print_verbose(
+                "[warning] outputs without step index in the file, "
+                "the step index is not written"
+            )
+            return
+        index = self._data.create_group("step_index")
+        index.attrs["info"] = "[0] : time,\n [1] : first row,\n [2] : number of rows"
+        for name in STEP_TABLES:
+            index.create_dataset(
+                name, (0, 3), maxshape=(None, 3), chunks=(256, 3), dtype="f8"
+            )
+        self._write_step_index = True
+
+    def _table_rows(self, name):
+        table = self._data.get(name)
+        return 0 if table is None else table.shape[0]
+
+    def begin_output_step(self):
+        if self._write_step_index:
+            self._step_rows_before = {
+                name: self._table_rows(name) for name in STEP_TABLES
+            }
+
+    def end_output_step(self, time):
+        if not self._write_step_index:
+            return
+        index = self._data["step_index"]
+        for name, first in self._step_rows_before.items():
+            add_line(index[name], [time, first, self._table_rows(name) - first])
+        self._step_rows_before = None
+
+    def step_rows(self, name, nonempty=False):
+        """Rows of each output step of a table: (times, starts, ends).
+
+        From data/step_index when the file has one, otherwise from the
+        time column of the table, which then gives the nonempty steps
+        only, and None for the tables without a time column.
+
+        nonempty: keep only the steps with rows.
+        """
+        table = self._data.get(name)
+        index = self._data.get("step_index")
+        if index is not None and name in index:
+            rows = index[name][:]
+            times = rows[:, 0]
+            starts = rows[:, 1].astype(np.int64)
+            ends = starts + rows[:, 2].astype(np.int64)
+            if nonempty:
+                keep = ends > starts
+                times, starts, ends = times[keep], starts[keep], ends[keep]
+            return times, starts, ends
+        if name in ("radii", "p0s"):
+            return None
+        if table is None or table.shape[0] == 0:
+            empty = np.empty(0, dtype=np.int64)
+            return np.empty(0), empty, empty
+        times, starts = np.unique(table[:, 0], return_index=True)
+        ends = np.append(starts[1:], table.shape[0])
+        return times, starts.astype(np.int64), ends.astype(np.int64)
+
+    def _indexed_step(self, name, step):
+        """Rows of a radii-like table at output step, from the index.
+
+        The initial output has no rows in these tables: an empty step
+        takes the rows of the next nonempty one.
+        """
+        _, starts, ends = self.step_rows(name)
+        nonempty = np.flatnonzero(ends[step:] > starts[step:])
+        if nonempty.size == 0:
+            return None
+        k = step + nonempty[0]
+        return self._data[name][starts[k] : ends[k]]
+
     def p0s(self, step):
         """Get p0 data for a specific time step (fixed-dof systems only)."""
         if self._p0s_data is None:
             return None
+        if self.step_rows("p0s") is not None:
+            return self._indexed_step("p0s", step)
         # Get dynamic objects at this step to know count
         dyn_data = self.dynamic_data()
         if dyn_data is None or len(dyn_data) == 0:
@@ -620,6 +727,8 @@ class MechanicsHdf5:
         """Get radii for a specific time step (fixed-dof systems only)."""
         if self._radii_data is None:
             return None
+        if self.step_rows("radii") is not None:
+            return self._indexed_step("radii", step)
         radii_all = self._radii_data[:]
         if len(radii_all) == 0:
             return None

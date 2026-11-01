@@ -73,6 +73,10 @@ p.add_argument("--T", type=float, default=None)
 p.add_argument("--seed", type=int, default=0)
 p.add_argument("--margin", type=float, default=None)
 p.add_argument("--sort-frequency", type=int, default=None)
+# siconos: the hdf5 tables, vtkhdf: a ParaView file instead, or both
+p.add_argument(
+    "--output-format", choices=("siconos", "vtkhdf", "both"), default="siconos"
+)
 args, _ = p.parse_known_args(sys.argv[2:])
 
 rng = np.random.default_rng(args.seed)
@@ -335,6 +339,7 @@ run_options["with_timer"] = True
 run_options["time_stepping"] = None
 run_options["output_contact_info"] = True
 run_options["output_contact_work"] = False
+run_options["output_format"] = args.output_format
 
 vnative_options = sio.SpaceFilterOptions()
 # The broadphase searches body centres with one radius: two bodies can touch

@@ -20,6 +20,7 @@
 import bisect
 import json
 import numbers
+import os
 import shutil
 import sys
 from math import atan, atan2, cos, pi, sin, sqrt
@@ -31,6 +32,7 @@ import siconos.io as sio
 # Siconos imports
 import siconos.io.mechanics_hdf5
 import siconos.io.shape_collection
+import siconos.io.vtkhdf
 
 # Siconos Mechanics imports
 # import siconos.mechanics.collision.tools as smc_tools
@@ -558,6 +560,17 @@ class MechanicsHdf5Runner_run_options(dict):
             True,
             """if True, the contact internal variables are written in the hdf5 file  """,
         )
+        create_option(
+            d,
+            "output_format",
+            "string, optional",
+            "siconos",
+            """output format of the bodies (positions, orientations, velocities)
+                      'siconos': the dynamic and velocities tables of the hdf5 file
+                      'vtkhdf': a transient VTKHDF file <io_filename>.vtkhdf,
+                       readable by ParaView, instead of these tables
+                      'both': both of them""",
+        )
 
         # default verbose and debug  options
         create_option(
@@ -782,6 +795,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._deaths = {}
         self._initializing = True
         self._output_contact_index_set = 1
+        self._output_format = "siconos"
+        self._vtkhdf_writer = None
+        self._vtkhdf_append = False
+        self._vtkhdf_shapes = None
+        self._vtkhdf_static_writer = None
+        self._vtkhdf_contacts_writer = None
+        self._vtkhdf_fem_writer = None
+        self._static_rows = slice(0, 0)
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
         self._before_next_step_iteration_hook = None
@@ -2144,6 +2165,33 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             )
         return hull, area, polar
 
+    def restart_grains(self, name, ids, positions, velocities, dpos, vel):
+        """The positions and velocities of the grains ids at the rows dpos,
+        vel of the dynamic and velocities tables, in place."""
+        # rows of the grains in the tables
+        order = np.argsort(dpos[:, 1])
+        known = dpos[order, 1]
+        where = np.clip(np.searchsorted(known, ids), 0, max(len(known) - 1, 0))
+        found = (known[where] == ids) if len(known) else np.zeros(len(ids), bool)
+        if not found.all():
+            self.print_verbose(
+                f"[warning] aggregate {name}: {np.count_nonzero(~found)} grains "
+                "not in the last output, they restart from their initial state"
+            )
+        rows = dpos[order][where[found]]
+        vorder = np.argsort(vel[:, 1])
+        vwhere = np.searchsorted(vel[vorder, 1], ids[found])
+        vrows = vel[vorder][vwhere]
+        if self._dimension == 2:
+            # (x, y, theta), (vx, vy, w): rotation about z from (qw, 0, 0, qz)
+            positions[found, 0:2] = rows[:, 2:4]
+            positions[found, 2] = 2.0 * np.arctan2(rows[:, 8], rows[:, 5])
+            velocities[found, 0:2] = vrows[:, 2:4]
+            velocities[found, 2] = vrows[:, 7]
+        else:
+            positions[found] = rows[:, 2:9]
+            velocities[found] = vrows[:, 2:8]
+
     def import_objects(
         self,
         name,
@@ -2152,9 +2200,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         face_class=None,
         edge_class=None,
         birth=False,
+        last_rows=None,
     ):
         """
         Import several objects at once.
+
+        last_rows: on a cold restart, the rows (dynamic, velocities) of
+        the last output step; the grain k, of id <aggregate id> + k,
+        starts from them.
         """
 
         # This is implemented only for the vnative backend
@@ -2170,6 +2223,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # inertia = obj.attrs.get("inertia", None)
         # base_id = obj.attrs["id"]
         count = obj.attrs["count"]
+
+        if last_rows is not None:
+            ids = int(obj.attrs["id"]) + np.arange(count)
+            self.restart_grains(name, ids, positions, velocities, *last_rows)
 
         collision_group = obj.attrs.get("group", 0)
 
@@ -2290,31 +2347,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # else:
                 #     self._ds_boundary_conditions[ds1_name].append(name)
 
-            # get pointers
-            dpos_data = self.dynamic_data()
-            velocities = self.velocities_data()
-
             # some dict to prefetch values in order to
             # speedup cold start in the case of many objects
             xdpos_data = {}
             xvelocities = {}
 
-            if dpos_data is not None and len(dpos_data) > 0:
-                max_time = max(dpos_data[:, 0])
-                id_last = np.where(abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
-                id_vlast = np.where(abs(velocities[:, 0] - max_time) < 1e-9)[0]
+            # the rows of the last output step
+            last_dpos_data, last_velocities = self.last_bodies_rows()
 
-                # prefetch positions and velocities in dictionaries
-                # this avoids calls to np.where for each object
-                for ldpos_data in dpos_data[id_last, :]:
-                    xdpos_data[ldpos_data[1]] = ldpos_data
-                for lvelocities in velocities[id_vlast, :]:
-                    xvelocities[lvelocities[1]] = lvelocities
+            # prefetch positions and velocities in dictionaries
+            # this avoids calls to np.where for each object
+            for ldpos_data in last_dpos_data:
+                xdpos_data[ldpos_data[1]] = ldpos_data
+            for lvelocities in last_velocities:
+                xvelocities[lvelocities[1]] = lvelocities
+            # cold restart if output previously done
+            restart = len(xdpos_data) > 0
 
-            else:
-                # should not be used
-                max_time = None
-                id_last = None
             self.print_verbose("import dynamical systems ...")
             for name, obj in sorted(
                 self._input.items(), key=lambda x: x[1].attrs["id"]
@@ -2325,7 +2374,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if obj_type in ("dynamic_aggregate", "static_aggregate"):
                     # Import aggregate as individual bodies
                     self.import_objects(
-                        name, body_class, shape_class, face_class, edge_class
+                        name,
+                        body_class,
+                        shape_class,
+                        face_class,
+                        edge_class,
+                        last_rows=(last_dpos_data, last_velocities)
+                        if restart
+                        else None,
                     )
                     continue
 
@@ -2349,8 +2405,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     # pass
                 elif (
                     mass is not None
-                    and dpos_data is not None
-                    and len(dpos_data) > 0
+                    and restart
                     and xdpos_data.get(obj.attrs["id"], None) is None
                 ):
                     # object already dead do not import
@@ -2369,11 +2424,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     #
                     # cold restart if output previously done
 
-                    if (
-                        mass is not None
-                        and dpos_data is not None
-                        and len(dpos_data) > 0
-                    ):
+                    if mass is not None and restart:
                         xpos = xdpos_data[obj.attrs["id"]]
                         translation = (xpos[2], xpos[3], xpos[4])
                         orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
@@ -2498,6 +2549,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # append new static position
         current_line = self._static_data.shape[0]
         self._static_data.resize(current_line + len(self._static), 0)
+        self._static_rows = slice(current_line, current_line + len(self._static))
 
         p = current_line
         for static in self._static.values():
@@ -2743,11 +2795,102 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     (times, new_velocities), axis=1
                 )
 
+    def last_bodies_rows(self):
+        """
+        Rows of the dynamic and velocities tables at the last output step,
+        read from the VTKHDF file when the tables are not written.
+        """
+        _, starts, ends = self.step_rows("dynamic", nonempty=True)
+        if len(starts) > 0:
+            _, vstarts, vends = self.step_rows("velocities", nonempty=True)
+            return (
+                self.dynamic_data()[starts[-1] : ends[-1], :],
+                self.velocities_data()[vstarts[-1] : vends[-1], :],
+            )
+        if self._vtkhdf_writer is not None:
+            last = self._vtkhdf_writer.last_step()
+            if last is not None:
+                return siconos.io.vtkhdf.siconos_rows(*last)
+        return np.empty((0, 9)), np.empty((0, 8))
+
+    def output_bodies_vtkhdf(self):
+        """
+        Outputs positions, orientations, velocities (and radii with the
+        vnative backend) of the dynamic objects in the VTKHDF file.
+        """
+        positions = self.get_io_array(self._io.positions(self._nsds))
+        if positions.shape[0] == 0:
+            return
+        velocities = self.get_io_array(self._io.velocities(self._nsds))
+        radii = None
+        if self.config.backend == "vnative":
+            radii = self.get_io_array(self._io.radii(self._nsds))
+        points, point_data = siconos.io.vtkhdf.bodies_point_data(
+            positions, velocities, radii
+        )
+        point_data.update(self._vtkhdf_shapes.point_data(point_data["id"]))
+        self._vtkhdf_writer.write_step(self.current_time(), points, point_data)
+
+    def output_fem_vtkhdf(self):
+        """
+        Outputs the deformed FEM meshes, as written in the FEM tables at
+        this step, in the VTKHDF file of the meshes.
+        """
+        time = self.current_time()
+        rows = siconos.io.vtkhdf.fem_rows(self._data, time)
+        self._vtkhdf_fem_writer.write_step(
+            time, *self._vtkhdf_shapes.fem.step_data(*rows)
+        )
+
+    def output_static_vtkhdf(self):
+        """
+        Outputs the static objects alive, as written in the static table
+        at this step, in the VTKHDF file of the static objects.
+        """
+        time = self.current_time()
+        points, point_data = siconos.io.vtkhdf.static_point_data(
+            self._static_data[self._static_rows, 1:], self._vtkhdf_shapes, time
+        )
+        self._vtkhdf_static_writer.write_step(time, points, point_data)
+
+    def output_bodies(self, with_timer=False, initial=False):
+        """
+        Outputs the dynamic objects in the format(s) given by output_format.
+        """
+        if self._output_format != "vtkhdf":
+            self.log(self.output_dynamic_objects, with_timer)()
+            self.log(self.output_velocities, with_timer)()
+            # the radii table has no initial entry
+            if self.config.backend == "vnative" and not initial:
+                self.log(self.output_radii, with_timer)()
+
+        # a restart continues the VTKHDF steps: its initial output would
+        # repeat the time of the last one
+        if self._vtkhdf_writer is not None and not (initial and self._vtkhdf_append):
+            self.log(self.output_bodies_vtkhdf, with_timer)()
+            if self._vtkhdf_static_writer is not None:
+                self.log(self.output_static_vtkhdf, with_timer)()
+            # the FEM tables have no row at the initial output: the meshes
+            # undeformed
+            if initial and self._vtkhdf_fem_writer is not None:
+                self._vtkhdf_fem_writer.write_step(
+                    self.current_time(),
+                    *siconos.io.vtkhdf.initial_fem_step(self._vtkhdf_shapes.fem),
+                )
+            # no contact at the initial output, the time steps of the files
+            # are the same
+            if initial and self._vtkhdf_contacts_writer is not None:
+                self._vtkhdf_contacts_writer.write_step(
+                    self.current_time(),
+                    *siconos.io.vtkhdf.contacts_point_data(np.zeros((0, 25))),
+                )
+
     def output_contact_forces(self):
         """
         Outputs contact forces
         _output_contact_index_set default value is 1.
         """
+        rows = np.zeros((0, 26))
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
 
@@ -2756,17 +2899,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             )
 
             if contact_points.shape[0] > 0:
-                current_line = self._cf_data.shape[0]
-                # Increase the number of lines in cf_data
-                # (h5 dataset with chunks)
-                self._cf_data.resize(current_line + contact_points.shape[0], 0)
                 times = np.empty((contact_points.shape[0], 1))
                 times.fill(time)
 
                 if self._dimension == 3 or self.config.backend == "vnative":
-                    self._cf_data[current_line:, :] = np.concatenate(
-                        (times, contact_points), axis=1
-                    )
+                    rows = np.concatenate((times, contact_points), axis=1)
 
                 elif self._dimension == 2:
                     # VA. change the contact info such that
@@ -2801,14 +2938,25 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     new_contact_points[:, 22] = contact_points[:, 15]
                     new_contact_points[:, 23] = contact_points[:, 16]  # ds 1
                     new_contact_points[:, 24] = contact_points[:, 17]  # ds 2
-                    self._cf_data[current_line:, :] = np.concatenate(
-                        (times, new_contact_points), axis=1
-                    )
+                    rows = np.concatenate((times, new_contact_points), axis=1)
 
-                # return the number of contacts
-                return len(contact_points)
-            return 0
-        return 0
+            if rows.shape[0] > 0 and self._output_format != "vtkhdf":
+                current_line = self._cf_data.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
+                self._cf_data.resize(current_line + rows.shape[0], 0)
+                self._cf_data[current_line:, :] = rows
+
+        # a step for each output, empty or not: ParaView would keep showing
+        # the contacts of the last step written
+        if self._vtkhdf_contacts_writer is not None:
+            self._vtkhdf_contacts_writer.write_step(
+                self.current_time(),
+                *siconos.io.vtkhdf.contacts_point_data(rows[:, 1:]),
+            )
+
+        # return the number of contacts
+        return rows.shape[0]
 
     def output_contact_info(self):
         """
@@ -3047,17 +3195,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         ]
 
     def output_results(self, with_timer=False):
+        self.begin_output_step()
         self.log(self.output_static_objects, with_timer)()
 
-        self.log(self.output_dynamic_objects, with_timer)()
-
-        self.log(self.output_velocities, with_timer)()
+        self.output_bodies(with_timer)
 
         if self.config.backend == "vnative":
             self.log(self.output_displacements, with_timer)()
             self.log(self.output_fem_epsilon, with_timer)()
             self.log(self.output_fem_sigma, with_timer)()
             self.log(self.output_p0s, with_timer)()
+            if self._vtkhdf_fem_writer is not None:
+                self.log(self.output_fem_vtkhdf, with_timer)()
 
         if self._output_contact_forces:
             self.log(self.output_contact_forces, with_timer)()
@@ -3108,10 +3257,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self.config.backend != "vnative":
             self.log(self.output_solver_infos, with_timer)()
 
-        if self.config.backend == "vnative":
-            self.log(self.output_radii, with_timer)()
-
+        self.end_output_step(self.current_time())
         self.log(self._out.flush)()
+        if self._vtkhdf_writer is not None:
+            self.log(self._vtkhdf_writer.flush)()
+        for writer in (
+            self._vtkhdf_static_writer,
+            self._vtkhdf_contacts_writer,
+            self._vtkhdf_fem_writer,
+        ):
+            if writer is not None:
+                self.log(writer.flush)()
 
     def output_run_options(self):
         """
@@ -3553,6 +3709,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 "output_contact_internal_variables"
             ]
 
+        if run_options.get("output_format") is not None:
+            self._output_format = run_options["output_format"]
+        if self._output_format not in ("siconos", "vtkhdf", "both"):
+            raise ValueError(
+                f"output_format must be 'siconos', 'vtkhdf' or 'both', "
+                f"not {self._output_format!r}"
+            )
+
         if run_options["gravity_scale"] is not None:
             self._gravity_scale = run_options["gravity_scale"]
 
@@ -3560,11 +3724,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         T = run_options["T"]
         h = run_options["h"]
 
-        # cold restart
-        times = set()
-        if self.dynamic_data() is not None and len(self.dynamic_data()) > 0:
-            dpos_data = self.dynamic_data()
-            times = set(dpos_data[:, 0])
+        # cold restart: the output steps are in the step index, or else in
+        # the time column of the dynamic table
+        times = set(self.step_rows("dynamic")[0])
+        if len(times) > 0:
             t0 = float(max(times))
 
         # Time-related parameters for this simulation run
@@ -3586,6 +3749,43 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             msg = f"Simulation time {t0} >= T={T}, exiting."
             self.print_verbose(msg)
             sys.exit(0)
+
+        if self._output_format != "siconos":
+            vtkhdf_filename = f"{os.path.splitext(self._io_filename)[0]}.vtkhdf"
+            self._vtkhdf_shapes = siconos.io.vtkhdf.write_shapes_and_state(
+                self._data,
+                self._dimension,
+                vtkhdf_filename,
+                contacts=self._output_contact_forces,
+            )
+            files = siconos.io.vtkhdf.companion_filenames(vtkhdf_filename)
+            state, static_filename = files.state, files.static
+            self.print_verbose(
+                f"bodies written in {vtkhdf_filename}, view: paraview --state={state}"
+            )
+            # a restart continues the steps of the file
+            self._vtkhdf_append = len(times) > 0
+            self._vtkhdf_writer = siconos.io.vtkhdf.BodiesWriter(
+                vtkhdf_filename,
+                compression=self._use_compression,
+                append=self._vtkhdf_append,
+            )
+            if self._output_contact_forces:
+                self._vtkhdf_contacts_writer = siconos.io.vtkhdf.BodiesWriter(
+                    files.contacts,
+                    compression=self._use_compression,
+                    append=self._vtkhdf_append,
+                )
+            if self._vtkhdf_shapes.fem:
+                self._vtkhdf_fem_writer = siconos.io.vtkhdf.FemWriter(
+                    files.fem, self._vtkhdf_shapes.fem, append=self._vtkhdf_append
+                )
+            if self._vtkhdf_shapes.has_static:
+                self._vtkhdf_static_writer = siconos.io.vtkhdf.BodiesWriter(
+                    static_filename,
+                    compression=self._use_compression,
+                    append=self._vtkhdf_append,
+                )
 
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
@@ -3992,12 +4192,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self._data.create_dataset(coord_name, data=coords)
 
         self.print_verbose("first output static and dynamic objects ...")
+        self.init_step_index()
+        self.begin_output_step()
         self.output_static_objects()
-        self.output_dynamic_objects()
-        self.output_velocities()
+        self.output_bodies(initial=True)
 
         if self._should_output_domains:
             self.log(self.output_domains, run_options["with_timer"])()
+        self.end_output_step(self.current_time())
 
         # self.output_run_options()
 
@@ -4303,8 +4505,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         with_timer = self._run_options.get("with_timer")
 
-        info = self.log(self.run_initialize, with_timer)()
-        info = self.log(self.run_loop, with_timer)()
+        try:
+            info = self.log(self.run_initialize, with_timer)()
+            info = self.log(self.run_loop, with_timer)()
+        finally:
+            for writer in (
+                self._vtkhdf_writer,
+                self._vtkhdf_static_writer,
+                self._vtkhdf_contacts_writer,
+                self._vtkhdf_fem_writer,
+            ):
+                if writer is not None:
+                    writer.close()
+            self._vtkhdf_writer = self._vtkhdf_fem_writer = None
+            self._vtkhdf_static_writer = self._vtkhdf_contacts_writer = None
 
         if with_timer and self._run_options["with_timer_output_at_the_end"]:
             self.output_timer_at_the_end()

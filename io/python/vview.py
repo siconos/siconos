@@ -1159,10 +1159,7 @@ class IOReader(VTKPythonAlgorithmBase):
         t = info.Get(vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP())
 
         id_t = max(0, numpy.searchsorted(self._times, t, side="right") - 1)
-        if id_t < len(self._indices) - 1:
-            self._id_t_m = list(range(self._indices[id_t], self._indices[id_t + 1]))
-        else:
-            self._id_t_m = [self._indices[id_t]]
+        self._id_t_m = slice(self._starts[id_t], self._ends[id_t])
 
         self._time = self._times[id_t]
         self._index = id_t
@@ -1173,16 +1170,10 @@ class IOReader(VTKPythonAlgorithmBase):
             0, numpy.searchsorted(self._static_times, t, side="right") - 1
         )
 
-        if len(self._static_indices) > 0:
-            if static_id_t < len(self._static_indices) - 1:
-                self._static_id_t_m = list(
-                    range(
-                        self._static_indices[static_id_t],
-                        self._static_indices[static_id_t + 1],
-                    )
-                )
-            else:
-                self._static_id_t_m = [self._static_indices[static_id_t]]
+        if len(self._static_starts) > 0:
+            self._static_id_t_m = slice(
+                self._static_starts[static_id_t], self._static_ends[static_id_t]
+            )
         else:
             self._static_id_t_m = None
         if self._static_id_t_m:
@@ -1202,7 +1193,7 @@ class IOReader(VTKPythonAlgorithmBase):
             )  # shape: (n_disks, 2) -> [ds_id, radius]
             if radii_current is not None and len(radii_current) > 0:
                 radii_dict = {int(row[0]): row[1] for row in radii_current}
-                ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
+                ds_ids = self.pos_data[:, 1].astype(int)
                 # the radius of a non disk body is its circumradius: no glyph
                 self.vtk_radii_data = dsa.numpyTovtkDataArray(
                     numpy.array(
@@ -1232,13 +1223,13 @@ class IOReader(VTKPythonAlgorithmBase):
                     for row in p0s_current
                 }
                 # Get ds_ids for current dynamic objects
-                ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
+                ds_ids = self.pos_data[:, 1].astype(int)
                 # Map to p0_norm, default 0 for FEM objects
                 self.current_p0_norm = numpy.array(
                     [p0_dict.get(ds_id, 0.0) for ds_id in ds_ids]
                 )
             else:
-                self.current_p0_norm = numpy.zeros(len(self._id_t_m))
+                self.current_p0_norm = numpy.zeros(len(self.pos_data))
 
             self.vtk_p0_norm_data = dsa.numpyTovtkDataArray(self.current_p0_norm)
             self.vtk_p0_norm_data.SetName("p0_norm")
@@ -1295,7 +1286,7 @@ class IOReader(VTKPythonAlgorithmBase):
         try:
             if self._with_contact_forces:
                 # get the number of time step with nonempty cf_data
-                ncfindices = len(self._cf_indices)
+                ncfindices = len(self._cf_starts)
 
                 # get the indices of entries that corresponds to a given time
                 id_t_cf = numpy.searchsorted(self._cf_times, t, side="right")
@@ -1312,16 +1303,14 @@ class IOReader(VTKPythonAlgorithmBase):
 
                 if id_t_cf > 0 and abs(t - self._cf_times[id_t_cf - 1]) <= ctimestep:
                     if not after_last_time_cf:
-                        self._id_t_m_cf = list(
-                            range(
-                                self._cf_indices[id_t_cf - 1], self._cf_indices[id_t_cf]
-                            )
+                        self._id_t_m_cf = slice(
+                            self._cf_starts[id_t_cf - 1], self._cf_ends[id_t_cf - 1]
                         )
                         self.cf_data = self._icf_data[self._id_t_m_cf, :]
                         # self._cf_time = self._cf_times[id_t_cf]
                     else:
                         self.cf_data = self._icf_data[
-                            self._cf_indices[id_t_cf - 1] :, :
+                            self._cf_starts[id_t_cf - 1] : self._cf_ends[id_t_cf - 1], :
                         ]
                         # self._cf_time = self._cf_times[id_t_cf-1]
 
@@ -1477,17 +1466,13 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self._spos_data = self._ispos_data[:, :]
 
-        # all times as hdf5 slice
-        self._raw_times = self._idpos_data[:, 0]
-
-        # build times steps
-        self._times, self._indices = numpy.unique(self._raw_times, return_index=True)
-        # all times as hdf5 slice for static objects
-        self._static_raw_times = self._ispos_data[:, 0]
-
-        # build times steps for static objects
-        self._static_times, self._static_indices = numpy.unique(
-            self._static_raw_times, return_index=True
+        # the rows of each time step, from the step index of the file
+        # when it has one
+        self._times, self._starts, self._ends = self._io.step_rows(
+            "dynamic", nonempty=True
+        )
+        self._static_times, self._static_starts, self._static_ends = self._io.step_rows(
+            "static", nonempty=True
         )
         dcf = self._times[1:] - self._times[:-1]
         self._avg_timestep = numpy.mean(dcf)
@@ -1562,9 +1547,10 @@ class IOReader(VTKPythonAlgorithmBase):
     # contact forces provider
     def ContactForcesOn(self):
 
-        self._cf_raw_times = self._icf_data[:, 0]
-        self._cf_times, self._cf_indices = numpy.unique(
-            self._cf_raw_times, return_index=True
+        # cf or cf_internal_variables
+        cf_table = self._icf_data.name.split("/")[-1]
+        self._cf_times, self._cf_starts, self._cf_ends = self._io.step_rows(
+            cf_table, nonempty=True
         )
         self._mu_coefs = numpy.unique(self._icf_data[:, 1], return_index=False)
 
