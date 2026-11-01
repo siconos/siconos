@@ -3609,7 +3609,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         osi = run_options.get("osi")
         self._osi = osi(run_options.get("theta"))
         if run_options.get("gamma"):
-            self._osi.setGamma(run_options.get("gamma"))
+            # a property in the pybind11 integrators (its setter: setGamma)
+            if hasattr(self._osi, "setGamma"):
+                self._osi.setGamma(run_options.get("gamma"))
+            else:
+                self._osi.gamma = run_options.get("gamma")
         if run_options.get("constraint_activation_threshold"):
             self._osi.setConstraintActivationThreshold(
                 run_options["constraint_activation_threshold"]
