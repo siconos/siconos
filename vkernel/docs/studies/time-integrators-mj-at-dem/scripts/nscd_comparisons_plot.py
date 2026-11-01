@@ -1,6 +1,8 @@
 # The tables and the plots of the comparisons of Moreau-Jean with the
 # Anitescu-Tasora and explicit DEM schemes, from the CSV files written by
-# nscd_comparisons (tests/nscd_comparisons.cpp).
+# nscd_comparisons (vkernel/soa/src/siconos/tests/nscd_comparisons.cpp).
+# The study: vkernel/docs/studies/time-integrators-mj-at-dem.md; the cmake
+# target vkernel_study_time_integrators runs both.
 #
 # usage: python3 nscd_comparisons_plot.py <directory of the CSV files>
 # writes tables.md and, if matplotlib is there, one PNG per case, in the

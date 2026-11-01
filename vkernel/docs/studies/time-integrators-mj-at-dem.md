@@ -239,17 +239,28 @@ Two notes on this case:
 
 ## 5. Reproduce
 
-`nscd_comparisons` is built with the vkernel tests (`WITH_vkernel_TESTING`).
-Running all the cases takes about 1.5 min and writes one CSV per case:
+`nscd_comparisons` (`vkernel/soa/src/siconos/tests/nscd_comparisons.cpp`)
+is built with the vkernel tests (`WITH_vkernel_TESTING`). It writes one
+CSV per case, and all the cases take about 1.5 min. The plot script,
+`time-integrators-mj-at-dem/scripts/nscd_comparisons_plot.py`, makes
+`tables.md` (the full tables, of which §3 gives excerpts) and one PNG per
+case. Each PNG has a scene panel (bodies, ground, gravity, the imposed
+motion, what each scheme does) next to the data. The target runs both:
 
 ```
-<build>/vkernel/soa/src/siconos/tests/nscd_comparisons <output directory> [case...]
-guix shell python python-matplotlib -- \
-  python3 vkernel/soa/src/siconos/tests/nscd_comparisons_plot.py <output directory>
+cmake --build <build> --target vkernel_study_time_integrators
 ```
 
-The plot script writes `tables.md` (the full tables, of which §3 gives
-excerpts) and one PNG per case. Each PNG has a scene panel (bodies, ground,
-gravity, the imposed motion, what each scheme does) next to the data. The
-figures here come from the run of 2026-10-30 (commits 95ae14f98 to
+The outputs go to `<build>/vkernel/soa/studies/time-integrators-mj-at-dem/`.
+The PNGs need matplotlib, which the build environment does not have:
+without it, the target writes `tables.md` only. To get the plots, run the
+script on the same directory with matplotlib:
+
+```
+guix shell python python-matplotlib -- python3 \
+  vkernel/docs/studies/time-integrators-mj-at-dem/scripts/nscd_comparisons_plot.py \
+  <build>/vkernel/soa/studies/time-integrators-mj-at-dem
+```
+
+The figures here come from the run of 2026-10-30 (commits 95ae14f98 to
 909ff40a3).

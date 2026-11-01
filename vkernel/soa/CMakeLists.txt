@@ -193,3 +193,6 @@ siconos_component_install_setup(${COMPONENT})
 target_compile_features(vkernel PUBLIC cxx_std_20)
 
 include(vkernel_tests.cmake)
+
+# the studies of vkernel/docs/studies (targets vkernel_study_*)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../docs/studies ${CMAKE_CURRENT_BINARY_DIR}/studies)

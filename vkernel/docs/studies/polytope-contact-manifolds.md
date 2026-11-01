@@ -3,8 +3,8 @@
 How a 2D polytope touching a segment (a fixed segment, a mesh edge) or
 another polytope is turned into Moreau–Jean interactions: how many are
 created, where their contact points are, and when each becomes active.
-The figures come from vnative simulations (Moreau–Jean, θ = 0.50001, γ = 1/2,
-h = 1e-3, NSGS 2D friction) of main-devel as of bbca50666. The
+The figures come from vnative simulations (Moreau–Jean, θ = 1/2, γ = 1/2,
+h = 1e-3, NSGS 2D friction) of main-devel after 7ed68269a. The
 comparison of the time integrators is in
 [time-integrators-mj-at-dem.md](time-integrators-mj-at-dem.md).
 
@@ -193,25 +193,34 @@ square has toppled flat. Afterwards both stay active.
 
 ## 5. Reproduce
 
+From a siconos build with the python bindings (`-DWITH_PYB11_WRAPPER=1`,
+component `vkernel`), after the default target:
+
+```
+cmake --build <build> --target vkernel_study_polytope_contact_manifolds
+```
+
+This runs the scenes, the check and the figures into
+`<build>/vkernel/soa/studies/polytope-contact-manifolds/`. The figures
+need matplotlib, which the build environment of siconos does not have:
+without it they are skipped. To get them, use the guix wrapper, which runs
+the same driver with matplotlib:
+
+```
+SICONOS_BUILD_DIR=<build> vkernel/docs/studies/polytope-contact-manifolds/scripts/run.sh
+```
+
+`nonos/bridge.py` comes from the source tree, so the build must match
+the sources. The figures of this document are copies of the outputs.
+
 `polytope-contact-manifolds/scripts/`:
 
 | file | what |
 |---|---|
+| `run.py` | the driver: the nonos package of the build, the environment, one process per scene, the check, the figures |
+| `run.sh` | `run.py` in the guix container of `guix.scm`, with matplotlib (outputs in `$WORKDIR`, default `./work`) |
 | `scenes.py` | the seven scenes, vnative backend, one hdf5 file per scene |
 | `manifold.py` | the Python port of the manifold (normal, `clip_manifold`, ordering, 1e30) |
 | `sim.py` | reads a scene, rebuilds the manifolds, predicts the active set, matches the `cf` rows |
 | `check.py` | the step-by-step comparison of the active sets |
 | `figs.py` | the figures |
-| `run.sh` | runs everything against a siconos build, in the `guix.scm` container |
-
-```
-SICONOS_BUILD_DIR=<siconos build directory> \
-  vkernel/docs/studies/polytope-contact-manifolds/scripts/run.sh
-```
-
-The build needs the vkernel python module (`-DWITH_PYB11_WRAPPER=1`,
-component `vkernel`), built from the same sources: `nonos/bridge.py` is
-taken from the source tree and must match the `_nonos` module. The
-outputs go to `$WORKDIR` (default `./work`).
-`run.sh <command>` runs a single command in the same environment, for
-example `run.sh python3 '$SCRIPTS/scenes.py' tilted`.
