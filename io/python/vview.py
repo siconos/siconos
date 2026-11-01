@@ -1045,6 +1045,8 @@ class IOReader(VTKPythonAlgorithmBase):
         self.ctf = vtk.vtkColorTransferFunction()
         self.fem_actors = {}
         self.fem_disp_arrays = {}
+        # dynamic objects not drawn by the glyphs (not disks, e.g. polytopes)
+        self.non_glyph_ids = set()
         self.options = opts
 
     def InitGlyphs(self):
@@ -1201,8 +1203,16 @@ class IOReader(VTKPythonAlgorithmBase):
             if radii_current is not None and len(radii_current) > 0:
                 radii_dict = {int(row[0]): row[1] for row in radii_current}
                 ds_ids = self._idpos_data[self._id_t_m, 1].astype(int)
+                # the radius of a non disk body is its circumradius: no glyph
                 self.vtk_radii_data = dsa.numpyTovtkDataArray(
-                    numpy.array([radii_dict.get(ds_id, 0.0) for ds_id in ds_ids])
+                    numpy.array(
+                        [
+                            0.0
+                            if ds_id in self.non_glyph_ids
+                            else radii_dict.get(ds_id, 0.0)
+                            for ds_id in ds_ids
+                        ]
+                    )
                 )
                 self.vtk_radii_data.SetName("radii")
             else:
@@ -2415,8 +2425,16 @@ class VView:
         is_fem = len(instance.attrs.get("material", [])) > 0
         is_dynamic = instance.attrs.get("mass", 0) > 0 or is_fem
 
-        if is_dynamic and self.opts.view_as_glyphs and not is_fem:
-            # drawn by the glyphs (all dynamic objects of the dynamic data);
+        is_disk = (
+            isinstance(contact_shape_indx, str)
+            and self.io.shapes()[contact_shape_indx].attrs.get("primitive") == "Disk"
+        )
+        if is_dynamic and self.opts.view_as_glyphs and not is_fem and not is_disk:
+            # drawn with its shape, the glyphs are disks
+            self.io_reader.non_glyph_ids.add(int(instid))
+
+        if is_dynamic and self.opts.view_as_glyphs and not is_fem and is_disk:
+            # drawn by the glyphs (the disks of the dynamic data);
             # a FEM object is drawn with its mesh in any case
             pass
 
@@ -2473,111 +2491,169 @@ class VView:
             )
 
         if actor is not None:
-            if self.opts.with_random_color:
-                actor.GetProperty().SetColor(random_color())
-                if self.opts.with_edges:
-                    actor_edge.GetProperty().SetColor(random_color())
-
-            actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
-            if self.opts.with_edges:
-                actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
-
-            self.renderer.AddActor(actor)
-            if self.opts.with_edges:
-                self.renderer.AddActor(actor_edge)
-
-            transform = vtk.vtkTransform()
-            transformer = vtk.vtkTransformFilter()
-
-            if contact_shape_indx in self.readers:
-                transformer.SetInputConnection(
-                    self.readers[contact_shape_indx].GetOutputPort()
-                )
-            else:
-                # FORCE: ensure dataset is not empty
-                ds = self.datasets[contact_shape_indx]
-                print(f"[init] dataset pts={ds.GetNumberOfPoints() if ds else 'None'}")
-                transformer.SetInputData(ds)
-
-                transformer.SetInputData(self.datasets[contact_shape_indx])
-
-            if isinstance(contact_shape_indx, tuple):
-                contact_shape_name = contact_shape_indx[1]
-            else:
-                contact_shape_name = contact_shape_indx
-
-            if "scale" in self.io.shapes()[contact_shape_name].attrs:
-                scale = self.io.shapes()[contact_shape_name].attrs["scale"]
-                scale_transform = vtk.vtkTransform()
-                scale_transform.Scale(scale, scale, scale)
-                scale_transform.SetInput(transform)
-                transformer.SetTransform(scale_transform)
-
-                actor.SetUserTransform(scale_transform)
-                if self.opts.with_edges:
-                    actor_edge.SetUserTransform(scale_transform)
-            else:
-                transformer.SetTransform(transform)
-                actor.SetUserTransform(transform)
-                if self.opts.with_edges:
-                    actor_edge.SetUserTransform(transform)
-
-            self.transformers[contact_shape_indx] = transformer
-
-            self.transforms[instid].append(transform)
-
             if "center_of_mass" in instance.attrs:
                 center_of_mass = instance.attrs["center_of_mass"].astype(float)
             else:
                 center_of_mass = [0.0, 0.0, 0.0]
-
-            offset_orientation = contactor.attrs["orientation"].astype(float)
-
-            # for disk, we change the offset since cylinder source are directed
-            #  along the y axis by default
-            # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
-            # we propose to erase it.
-            try:
-                if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
-                    offset_orientation = [
-                        math.cos(pi / 4.0),
-                        math.sin(pi / 4.0),
-                        0.0,
-                        0.0,
-                    ]
-            except KeyError:
-                pass
-            self.offsets[instid].append(
-                (
-                    numpy.subtract(
-                        contactor.attrs["translation"].astype(float), center_of_mass
-                    ),
-                    offset_orientation,
-                )
-            )
-
-            cc = CellConnector(
+            self.attach_actor(
+                actor,
+                actor_edge,
+                contact_shape_indx,
                 instid,
-                data_names=[
-                    "instance",
-                    "translation",
-                    "velocity(linear)",
-                    "velocity(angular)",
-                    "kinetic_energy",
-                    "displacement",
-                ],
-                data_sizes=[1, 3, 3, 3, 1, 3],
+                numpy.subtract(
+                    contactor.attrs["translation"].astype(float), center_of_mass
+                ),
+                contactor.attrs["orientation"].astype(float),
             )
 
-            if self.cell_connectors.get(instid, None) is None:
-                self.cell_connectors[instid] = [cc]
-            else:
-                self.cell_connectors[instid].append(cc)
+    def attach_actor(
+        self,
+        actor,
+        actor_edge,
+        contact_shape_indx,
+        instid,
+        offset_translation,
+        offset_orientation,
+    ):
+        """Map the shape on the actor, and place it with the instance
+        transform and the contactor offset in the body frame."""
+        if self.opts.with_random_color:
+            actor.GetProperty().SetColor(random_color())
+            if self.opts.with_edges:
+                actor_edge.GetProperty().SetColor(random_color())
 
-            cc.SetInputConnection(transformer.GetOutputPort())
+        actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
+        if self.opts.with_edges:
+            actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
-            self.objects_collector.AddInputConnection(cc.GetOutputPort())
-            cc.Update()
+        self.renderer.AddActor(actor)
+        if self.opts.with_edges:
+            self.renderer.AddActor(actor_edge)
+
+        transform = vtk.vtkTransform()
+        transformer = vtk.vtkTransformFilter()
+
+        if contact_shape_indx in self.readers:
+            transformer.SetInputConnection(
+                self.readers[contact_shape_indx].GetOutputPort()
+            )
+        else:
+            # FORCE: ensure dataset is not empty
+            ds = self.datasets[contact_shape_indx]
+            print(f"[init] dataset pts={ds.GetNumberOfPoints() if ds else 'None'}")
+            transformer.SetInputData(ds)
+
+            transformer.SetInputData(self.datasets[contact_shape_indx])
+
+        if isinstance(contact_shape_indx, tuple):
+            contact_shape_name = contact_shape_indx[1]
+        else:
+            contact_shape_name = contact_shape_indx
+
+        if "scale" in self.io.shapes()[contact_shape_name].attrs:
+            scale = self.io.shapes()[contact_shape_name].attrs["scale"]
+            scale_transform = vtk.vtkTransform()
+            scale_transform.Scale(scale, scale, scale)
+            scale_transform.SetInput(transform)
+            transformer.SetTransform(scale_transform)
+
+            actor.SetUserTransform(scale_transform)
+            if self.opts.with_edges:
+                actor_edge.SetUserTransform(scale_transform)
+        else:
+            transformer.SetTransform(transform)
+            actor.SetUserTransform(transform)
+            if self.opts.with_edges:
+                actor_edge.SetUserTransform(transform)
+
+        self.transformers[contact_shape_indx] = transformer
+
+        self.transforms[instid].append(transform)
+
+        # for disk, we change the offset since cylinder source are directed
+        #  along the y axis by default
+        # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
+        # we propose to erase it.
+        try:
+            if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
+                offset_orientation = [
+                    math.cos(pi / 4.0),
+                    math.sin(pi / 4.0),
+                    0.0,
+                    0.0,
+                ]
+        except KeyError:
+            pass
+        self.offsets[instid].append((offset_translation, offset_orientation))
+
+        cc = CellConnector(
+            instid,
+            data_names=[
+                "instance",
+                "translation",
+                "velocity(linear)",
+                "velocity(angular)",
+                "kinetic_energy",
+                "displacement",
+            ],
+            data_sizes=[1, 3, 3, 3, 1, 3],
+        )
+
+        if self.cell_connectors.get(instid, None) is None:
+            self.cell_connectors[instid] = [cc]
+        else:
+            self.cell_connectors[instid].append(cc)
+
+        cc.SetInputConnection(transformer.GetOutputPort())
+
+        self.objects_collector.AddInputConnection(cc.GetOutputPort())
+        cc.Update()
+
+    def init_aggregate_grains(self, instance):
+        """The grains of an add_objects aggregate with convex shapes, drawn
+        with their shape: the glyphs draw disks only."""
+        names = [
+            n.decode("utf-8") if isinstance(n, bytes) else str(n)
+            for n in instance["shape_names"][:]
+        ]
+        if not all(self.io.shapes()[n].attrs.get("type") == "convex" for n in names):
+            return
+        base = int(instance.attrs["id"])
+        group = instance.attrs.get("group", -1)
+        if "masses" in instance:
+            masses = instance["masses"][:]
+        else:
+            # from a density: not known here, no kinetic energy
+            masses = numpy.full(
+                instance.attrs["count"], instance.attrs.get("mass", 0.0)
+            )
+        for k, i in enumerate(instance["shape_indices"][:]):
+            instid = base + k
+            shape_name = names[i]
+            self.transforms[instid] = []
+            self.offsets[instid] = []
+            self.mass[instid] = masses[k]
+            self.inertia[instid] = 0.0
+            self.dynamic_actors[instid] = []
+            self.io_reader.non_glyph_ids.add(instid)
+
+            actor = vtk.vtkActor()
+            actor.GetProperty().SetOpacity(self.config.get("dynamic_opacity", 0.7))
+            actor.GetProperty().SetColor(
+                self.config.get("dynamic_bodies_color", [0.3, 0.3, 0.3])
+            )
+            self.dynamic_actors[instid].append((actor, shape_name, group))
+            actor_edge = None
+            if self.opts.with_edges:
+                actor_edge = vtk.vtkActor()
+                actor_edge.GetProperty().SetOpacity(
+                    self.config.get("dynamic_opacity", 1.0)
+                )
+                actor_edge.GetProperty().SetRepresentationToWireframe()
+                self.dynamic_actors[instid].append((actor_edge, shape_name, group))
+            self.attach_actor(
+                actor, actor_edge, shape_name, instid, numpy.zeros(3), [1, 0, 0, 0]
+            )
 
     def init_instance(self, instance_name):
         self.print_verbose_level(2, "init_instance", instance_name)
@@ -2623,6 +2699,10 @@ class VView:
 
         for contactor_instance_name in instance:
             self.init_contactor(contactor_instance_name, instance, instid)
+
+        # after the instance itself: the first grain has the instance id
+        if "shape_names" in instance:
+            self.init_aggregate_grains(instance)
 
     def init_instances(self):
         self.print_verbose_level(1, "init_instances")
