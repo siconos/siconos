@@ -58,7 +58,13 @@ p.add_argument("--rock-fraction", type=float, default=0.4)
 # distinct random shapes per class, the rocks of a class are drawn from them
 p.add_argument("--rock-shapes", type=int, default=32)
 p.add_argument("--mu-rock", type=float, default=0.6)
-p.add_argument("--density", type=float, default=1.0)
+# the densities relative to water (specific gravities): the liquid disks are
+# water, the rocks granite or quartz, the usual 2.65 of rock and sediment
+# grains. Only their ratio matters: the masses are density * area in disk
+# radii. --density sets both, as before they were separate.
+p.add_argument("--density-liquid", type=float, default=1.0)
+p.add_argument("--density-rock", type=float, default=2.65)
+p.add_argument("--density", type=float, default=None)
 # the terrain, lengths as multiples of the reservoir width
 p.add_argument("--slope", type=float, default=31.0, help="degrees")
 p.add_argument("--slope-length", type=float, default=8.0)
@@ -78,6 +84,8 @@ p.add_argument(
     "--output-format", choices=("siconos", "vtkhdf", "both"), default="siconos"
 )
 args, _ = p.parse_known_args(sys.argv[2:])
+if args.density is not None:
+    args.density_liquid = args.density_rock = args.density
 
 rng = np.random.default_rng(args.seed)
 g = 9.81 / args.unit  # in disk radii per second squared
@@ -235,7 +243,8 @@ y_wall_top = y_max + 2 * d_d
 
 print(
     "bench-dambreak: size={} disks={} rocks={} classes={} reservoir={:.0f}r "
-    "slope={:.0f}r valley={:.0f}r terrain segments={}".format(
+    "slope={:.0f}r valley={:.0f}r terrain segments={} "
+    "densities liquid={:g} rock={:g}".format(
         size,
         len(disks),
         len(placed_rocks),
@@ -244,6 +253,8 @@ print(
         L_s,
         L_v,
         len(nodes) - 1,
+        args.density_liquid,
+        args.density_rock,
     ),
     flush=True,
 )
@@ -287,7 +298,7 @@ with MechanicsHdf5Runner(io_filename=io_filename, config=runner_config) as io:
         "liquid",
         Contactor("Liquid", collision_group=LIQUID),
         disks,
-        density=args.density,
+        density=args.density_liquid,
     )
 
     for k, (verts, _, _, _) in enumerate(shapes):
@@ -302,7 +313,7 @@ with MechanicsHdf5Runner(io_filename=io_filename, config=runner_config) as io:
         placed[:, 1:],
         orientations=rng.uniform(0, 2 * math.pi, len(placed)),
         shape_indices=placed[:, 0].astype(int),
-        density=args.density,
+        density=args.density_rock,
     )
 
     # the liquid lubricates every contact it is in
