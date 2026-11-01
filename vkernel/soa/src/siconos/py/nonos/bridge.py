@@ -280,16 +280,21 @@ class Simulation(Stored):
         # Gauss-Seidel) or an AnitescuTasoraAPGDOSI (APGD), the tolerance
         # and the maximum number of iterations from the solver options), or
         # the explicit DEM scheme for an ExplicitDEMOSI (its penalty law and
-        # its theta). The theta and the gamma of the osi are those of the
-        # integrator (the gamma of a MoreauJeanOSI is 1/2 if not set, as the
+        # its theta). The theta, the gamma and the constraint activation
+        # threshold of the osi are those of the integrator (the gamma of a
+        # MoreauJeanOSI is 1/2 if not set, its threshold 0, as the
         # integrator's)
         vosi = self.handle().one_step_integrator()
         if isinstance(osi, Osi):
             vosi.set_theta(osi.handle().theta())
             vosi.set_gamma(osi.handle().gamma())
+            vosi.set_constraint_activation_threshold(
+                osi.handle().constraint_activation_threshold()
+            )
         else:
             vosi.set_theta(osi.theta)
             vosi.set_gamma(osi.gamma)
+            vosi.set_constraint_activation_threshold(osi.constraintActivationThreshold)
         if type(osi).__name__ == "MoreauJeanGOSI":
             scheme = SCHEME_GLOBAL_PROBLEM
         elif type(osi).__name__ == "AnitescuTasoraOSI":

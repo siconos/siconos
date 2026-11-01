@@ -48,6 +48,9 @@ PYBIND11_MODULE(integrators, m) {
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
       .def("setConstraintActivationThreshold",
            &siconos::integrators::MoreauJeanOSI::setConstraintActivationThreshold)
+      .def_property("constraintActivationThreshold",
+                    &siconos::integrators::MoreauJeanOSI::constraintActivationThreshold,
+                    &siconos::integrators::MoreauJeanOSI::setConstraintActivationThreshold)
       .def("computeWorkForces", &siconos::integrators::MoreauJeanOSI::computeWorkForces,
            py::return_value_policy::move)
       .def_property("theta",
