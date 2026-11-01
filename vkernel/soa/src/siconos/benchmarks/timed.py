@@ -1,4 +1,4 @@
-# Usage: timed.py [--dataflow] [time stepping options] <script.py> [script arguments...]
+# Usage: timed.py [--dataflow] [time stepping options] [--output-format F] <script.py> [script arguments...]
 #
 # Runs a vnative script (bench-disks.py, bench-polytopes.py,
 # tests/bench_fem_disks.py...) with the timings of the stages of its time
@@ -33,6 +33,16 @@
 #   --kn, --cn, --kt  the penalty law of dem: k_n 1e5, c_n 0, k_t 2/7 k_n
 #       by default, unless the script gave an ExplicitDEMOSI
 #
+# The output option replaces the run option of the script (a script run by
+# siconos.io.mechanics_run.MechanicsHdf5Runner):
+#
+#   --output-format siconos|vtkhdf|both  the tables of the hdf5 file, the
+#       ParaView files (<io_filename>.vtkhdf, its shapes, static objects,
+#       contacts, FEM meshes, and the state <io_filename>_paraview.py), or
+#       both; see vkernel/docs/notes/paraview-vtkhdf-export.md, e.g.:
+#
+#   python3 timed.py --output-format vtkhdf bench-dambreak.py 100
+#
 # The time stepping that ran is printed before the timings.
 #
 # The script is not modified: the simulations it creates time their steps,
@@ -59,7 +69,8 @@ SOLVER_NAMES = {
 }
 
 parser = argparse.ArgumentParser(
-    usage="timed.py [--dataflow] [time stepping options] <script.py> [args...]",
+    usage="timed.py [--dataflow] [time stepping options] [--output-format F] "
+    "<script.py> [args...]",
     allow_abbrev=False,
 )
 parser.add_argument("--dataflow", action="store_true")
@@ -74,6 +85,7 @@ parser.add_argument("--max-iter", type=int)
 parser.add_argument("--kn", type=float)
 parser.add_argument("--cn", type=float)
 parser.add_argument("--kt", type=float)
+parser.add_argument("--output-format", choices=("siconos", "vtkhdf", "both"))
 parser.add_argument("script")
 parser.add_argument("args", nargs=argparse.REMAINDER)
 options = parser.parse_args()
@@ -210,6 +222,19 @@ def timed_init(self, *args, **kwargs):
 
 
 bridge.Simulation.__init__ = timed_init
+
+# the output format: in the run options, before the runner reads them
+
+if options.output_format is not None:
+    from siconos.io.mechanics_run import MechanicsHdf5Runner
+
+    run_initialize = MechanicsHdf5Runner.run_initialize
+
+    def output_format_run_initialize(self):
+        self._run_options["output_format"] = options.output_format
+        return run_initialize(self)
+
+    MechanicsHdf5Runner.run_initialize = output_format_run_initialize
 
 sys.argv = [options.script] + options.args
 runpy.run_path(options.script, run_name="__main__")

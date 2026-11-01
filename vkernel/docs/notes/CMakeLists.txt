@@ -1,6 +1,6 @@
-# The studies of vkernel/docs/studies: one target each, not part of all,
-# writing their outputs (data, tables, figures) under
-# <build>/vkernel/soa/studies/<study>. The figures of the documents are
+# The studies of the notes of vkernel/docs/notes: one target each, not
+# part of all, writing their outputs (data, tables, figures) under
+# <build>/vkernel/soa/notes/<study>. The figures of the documents are
 # copies of these outputs.
 #
 #   cmake --build <build> --target vkernel_study_polytope_contact_manifolds
@@ -10,8 +10,8 @@
 # guix.scm: without it the studies still run, with the data and the tables
 # only.
 
-set(_studies_src ${CMAKE_CURRENT_SOURCE_DIR})
-set(_studies_bin ${CMAKE_CURRENT_BINARY_DIR})
+set(_notes_src ${CMAKE_CURRENT_SOURCE_DIR})
+set(_notes_bin ${CMAKE_CURRENT_BINARY_DIR})
 
 # polytope-contact-manifolds.md: vnative scenes through the python runner
 if(TARGET _nonos AND WITH_PYB11_WRAPPER)
@@ -29,9 +29,9 @@ if(TARGET _nonos AND WITH_PYB11_WRAPPER)
   string(JOIN ":" _libs ${_libs})
   add_custom_target(vkernel_study_polytope_contact_manifolds
     COMMAND ${Python_EXECUTABLE}
-            ${_studies_src}/polytope-contact-manifolds/scripts/run.py
+            ${_notes_src}/polytope-contact-manifolds/scripts/run.py
             --build-dir ${CMAKE_BINARY_DIR}
-            --out ${_studies_bin}/polytope-contact-manifolds
+            --out ${_notes_bin}/polytope-contact-manifolds
             --nonos-module $<TARGET_FILE:_nonos>
             --library-path "${_libs}"
     DEPENDS _nonos
@@ -42,12 +42,12 @@ endif()
 
 # time-integrators-mj-at-dem.md: nscd_comparisons, then the tables and plots
 if(TARGET nscd_comparisons)
-  set(_out ${_studies_bin}/time-integrators-mj-at-dem)
+  set(_out ${_notes_bin}/time-integrators-mj-at-dem)
   add_custom_target(vkernel_study_time_integrators
     COMMAND ${CMAKE_COMMAND} -E make_directory ${_out}
     COMMAND $<TARGET_FILE:nscd_comparisons> ${_out}
     COMMAND ${Python_EXECUTABLE}
-            ${_studies_src}/time-integrators-mj-at-dem/scripts/nscd_comparisons_plot.py
+            ${_notes_src}/time-integrators-mj-at-dem/scripts/nscd_comparisons_plot.py
             ${_out}
     DEPENDS nscd_comparisons
     COMMENT "study: Moreau-Jean, Anitescu-Tasora, DEM"

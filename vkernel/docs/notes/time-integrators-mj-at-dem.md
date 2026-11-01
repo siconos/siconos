@@ -275,7 +275,7 @@ motion, what each scheme does) next to the data. The target runs both:
 cmake --build <build> --target vkernel_study_time_integrators
 ```
 
-The outputs go to `<build>/vkernel/soa/studies/time-integrators-mj-at-dem/`.
+The outputs go to `<build>/vkernel/soa/notes/time-integrators-mj-at-dem/`.
 The PNGs need matplotlib, which is in the development environment of
 `guix.scm` (`guix shell -D -f guix.scm`). Without matplotlib the target
 writes `tables.md` only.

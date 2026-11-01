@@ -204,7 +204,7 @@ cmake --build <build> --target vkernel_study_polytope_contact_manifolds
 ```
 
 This runs the scenes, the check and the figures into
-`<build>/vkernel/soa/studies/polytope-contact-manifolds/`. The figures
+`<build>/vkernel/soa/notes/polytope-contact-manifolds/`. The figures
 need matplotlib, which is in the development environment of `guix.scm`
 (`guix shell -D -f guix.scm`). Without matplotlib they are skipped.
 

@@ -29,7 +29,7 @@ LIBRARY_DIRS = [
 ]
 
 here = os.path.dirname(os.path.abspath(__file__))
-# the source tree: <src>/vkernel/docs/studies/<study>/scripts
+# the source tree: <src>/vkernel/docs/notes/<study>/scripts
 src = os.path.abspath(os.path.join(here, *[".."] * 5))
 
 parser = argparse.ArgumentParser(

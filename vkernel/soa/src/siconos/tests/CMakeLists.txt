@@ -15,7 +15,7 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread ${COMPACTNSEARCH})
 
   # the comparisons of Moreau-Jean with Anitescu-Tasora and DEM: CSV tables,
-  # the target vkernel_study_time_integrators (vkernel/docs/studies) runs
+  # the target vkernel_study_time_integrators (vkernel/docs/notes) runs
   # it and makes the tables and the plots
   add_executable(nscd_comparisons nscd_comparisons.cpp)
   set_target_properties(nscd_comparisons PROPERTIES COMPILE_FLAGS "${flags}")

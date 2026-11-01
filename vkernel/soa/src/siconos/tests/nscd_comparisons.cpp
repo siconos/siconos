@@ -3,7 +3,7 @@
    of the design note ("Plan: where NSCD wins"), with the scenes of
    collision/tests/nscd_world.hpp. One CSV file per case in the output
    directory; the plot script of the study makes the tables and the plots
-   (vkernel/docs/studies/time-integrators-mj-at-dem/scripts/
+   (vkernel/docs/notes/time-integrators-mj-at-dem/scripts/
    nscd_comparisons_plot.py, cmake target vkernel_study_time_integrators).
 
      stability      a column of 5 disks at rest, h from 1e-4 to 1e-2: the
