@@ -6,9 +6,9 @@
 #   cmake --build <build> --target vkernel_study_polytope_contact_manifolds
 #   cmake --build <build> --target vkernel_study_time_integrators
 #
-# The figures need matplotlib in the python of the build, which is not in
-# the build environment of siconos: without it the studies still run, with
-# the data and the tables only.
+# The figures need matplotlib, which is in the development environment of
+# guix.scm: without it the studies still run, with the data and the tables
+# only.
 
 set(_studies_src ${CMAKE_CURRENT_SOURCE_DIR})
 set(_studies_bin ${CMAKE_CURRENT_BINARY_DIR})

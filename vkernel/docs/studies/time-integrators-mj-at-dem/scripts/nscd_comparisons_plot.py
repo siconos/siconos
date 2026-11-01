@@ -6,8 +6,8 @@
 #
 # usage: python3 nscd_comparisons_plot.py <directory of the CSV files>
 # writes tables.md and, if matplotlib is there, one PNG per case, in the
-# same directory. matplotlib is not in the build environment of siconos:
-#   guix shell python python-matplotlib -- python3 nscd_comparisons_plot.py <dir>
+# same directory (matplotlib is in the development environment of
+# guix.scm).
 
 import csv
 import math

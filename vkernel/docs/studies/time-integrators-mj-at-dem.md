@@ -276,15 +276,9 @@ cmake --build <build> --target vkernel_study_time_integrators
 ```
 
 The outputs go to `<build>/vkernel/soa/studies/time-integrators-mj-at-dem/`.
-The PNGs need matplotlib, which the build environment does not have:
-without it, the target writes `tables.md` only. To get the plots, run the
-script on the same directory with matplotlib:
-
-```
-guix shell python python-matplotlib -- python3 \
-  vkernel/docs/studies/time-integrators-mj-at-dem/scripts/nscd_comparisons_plot.py \
-  <build>/vkernel/soa/studies/time-integrators-mj-at-dem
-```
+The PNGs need matplotlib, which is in the development environment of
+`guix.scm` (`guix shell -D -f guix.scm`). Without matplotlib the target
+writes `tables.md` only.
 
 The figures here come from the run of 2026-10-30 (commits 95ae14f98 to
 909ff40a3).

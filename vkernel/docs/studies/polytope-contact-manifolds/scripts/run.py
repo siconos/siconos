@@ -5,8 +5,8 @@ output directory.
   python3 run.py --build-dir <siconos build> [--out <dir>] [scene...]
 
 The cmake target vkernel_study_polytope_contact_manifolds runs it with the
-paths of the build; run.sh runs it in the guix container of guix.scm. The
-figures need matplotlib: without it, they are skipped."""
+paths of the build. The figures need matplotlib (in the development
+environment of guix.scm): without it, they are skipped."""
 
 import argparse
 import glob
