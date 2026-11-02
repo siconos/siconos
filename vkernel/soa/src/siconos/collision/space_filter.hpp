@@ -6,6 +6,7 @@
 #include <numbers>
 #include <print>
 #include <stdexcept>
+#include <vector>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/array_hash.hpp"
@@ -170,15 +171,13 @@ struct space_filter : item {
       return std::numeric_limits<double>::infinity();
     }
 
-    // the neighborhood search is run with one radius, sized for the largest
-    // pair of bodies: two points it finds may be much farther apart than
-    // their bodies can touch. Too far apart: no interaction.
+    // the neighborhood search is run with one radius: two points it finds
+    // may be much farther apart than their bodies can touch, when the radius
+    // is sized for the largest bodies. Too far apart: no interaction.
     static bool beyond_margin(auto& hp1, auto& hp2, double margin) {
       if (margin <= 0) return false;
-      const double dx =
-          (hp2.coord()[0] - hp2.offset()[0]) - (hp1.coord()[0] - hp1.offset()[0]);
-      const double dy =
-          (hp2.coord()[1] - hp2.offset()[1]) - (hp1.coord()[1] - hp1.offset()[1]);
+      const double dx = hp2.center()[0] - hp1.center()[0];
+      const double dy = hp2.center()[1] - hp1.center()[1];
       const double reach = hp1.bound() + hp2.bound() + margin;
       return dx * dx + dy * dy > reach * reach;
     }
@@ -388,38 +387,61 @@ struct space_filter : item {
                 }
               }
             } else {
-              // With one point at its center, a disk pair is seen by
-              // the neighborhood search iff r1 + r2 <= search radius,
-              // so a single point is only enough for 2 r <= search
-              // radius. A bigger disk gets points on its circle, spaced
-              // by half the search radius: any contact point is then
-              // within a quarter of the search radius of one of them.
-              // Polytopes keep one point at their center.
-              auto npoints = std::size_t{1};
-              auto radius = 0.;
-              if constexpr (collision::may_have_shape<collision::shape::disk,
-                                                      decltype(ds)>()) {
-                if (collision::has_shape<collision::shape::disk>(ds)) {
-                  auto search_radius = neighborhood().instance()->radius();
-                  radius = collision::shape_of<collision::shape::disk>(ds).radius();
-                  if (2 * radius > search_radius) {
-                    npoints = static_cast<std::size_t>(
-                        std::ceil(2 * std::numbers::pi * radius / (search_radius / 2)));
+              // With one point at its center, a pair of bodies is seen by
+              // the neighborhood search iff r1 + r2 <= search radius, so a
+              // single point is only enough for 2 r <= search radius. A
+              // bigger body gets points on its boundary, spaced by at most
+              // half the search radius: any contact point is then within a
+              // quarter of the search radius of one of them. The points of
+              // a disk are on its circle, those of a polytope on its edges,
+              // in the body frame.
+              const auto search_radius = neighborhood().instance()->radius();
+              const auto bound = bounding_radius(ds);
+              const auto spacing = search_radius / 2;
+              std::vector<std::array<float, 2>> offsets{{0.f, 0.f}};
+              bool body_frame = false;
+              if (2 * bound > search_radius) {
+                if constexpr (collision::may_have_shape<collision::shape::disk,
+                                                        decltype(ds)>()) {
+                  if (collision::has_shape<collision::shape::disk>(ds)) {
+                    const auto n = static_cast<std::size_t>(
+                        std::ceil(2 * std::numbers::pi * bound / spacing));
+                    offsets.clear();
+                    for (std::size_t i = 0; i < n; ++i) {
+                      const auto t = 2 * std::numbers::pi * i / n;
+                      offsets.push_back({static_cast<float>(bound * std::cos(t)),
+                                         static_cast<float>(bound * std::sin(t))});
+                    }
+                  }
+                }
+                if constexpr (collision::may_have_shape<collision::shape::polytope,
+                                                        decltype(ds)>()) {
+                  if (collision::has_shape<collision::shape::polytope>(ds)) {
+                    auto poly = collision::shape_of<collision::shape::polytope>(ds);
+                    const std::size_t nv = poly.nvertices();
+                    offsets.clear();
+                    body_frame = true;
+                    for (std::size_t k = 0; k < nv; ++k) {
+                      const auto& a = poly.vertices()[k];
+                      const auto& b = poly.vertices()[(k + 1) % nv];
+                      const auto n = std::max<std::size_t>(
+                          1, static_cast<std::size_t>(
+                                 std::ceil(std::hypot(b[0] - a[0], b[1] - a[1]) / spacing)));
+                      for (std::size_t i = 0; i < n; ++i) {
+                        const double t = static_cast<double>(i) / n;
+                        offsets.push_back({static_cast<float>(a[0] + t * (b[0] - a[0])),
+                                           static_cast<float>(a[1] + t * (b[1] - a[1]))});
+                      }
+                    }
                   }
                 }
               }
-              const auto bound = bounding_radius(ds);
-              for (std::size_t i = 0; i < npoints; ++i) {
+              for (const auto& offset : offsets) {
                 auto new_point = storage::add<Point>(data);
                 new_point.item() = ds;
                 new_point.bound() = bound;
-                if (npoints == 1) {
-                  new_point.offset() = {0.f, 0.f};
-                } else {
-                  auto t = 2 * std::numbers::pi * i / npoints;
-                  new_point.offset() = {static_cast<float>(radius * std::cos(t)),
-                                        static_cast<float>(radius * std::sin(t))};
-                }
+                new_point.body_frame() = body_frame;
+                new_point.offset() = {offset[0], offset[1]};
                 new_point.update(0);
               }
             }

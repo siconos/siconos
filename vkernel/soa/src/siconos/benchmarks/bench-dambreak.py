@@ -79,6 +79,7 @@ p.add_argument("--T", type=float, default=None)
 p.add_argument("--seed", type=int, default=0)
 p.add_argument("--margin", type=float, default=None)
 p.add_argument("--contact-margin", type=float, default=None)
+p.add_argument("--large-search", action="store_true")
 p.add_argument("--sort-frequency", type=int, default=None)
 # siconos: the hdf5 tables, vtkhdf: a ParaView file instead, or both
 p.add_argument(
@@ -354,13 +355,17 @@ run_options["output_contact_work"] = False
 run_options["output_format"] = args.output_format
 
 vnative_options = sio.SpaceFilterOptions()
-# The broadphase searches body centres with one radius: two bodies can touch
-# when their centres are closer than the sum of their circumradii, so the
-# largest rock sets it for every body.
+# The broadphase searches points with one radius, sized for two disks: a
+# rock wider than it gets points along its edges (space_filter::make_points).
+# With --large-search the radius is sized for the largest rock instead and
+# every body has one point, at its centre.
 margin = args.margin if args.margin is not None else r_d
-vnative_options.neighborhood_radius = 2 * shapes[rocks[0]][3] + margin
-# A disk then finds hundreds of others: only the pairs whose bounding circles
-# are closer than the contact margin get an interaction (<= 0: all of them).
+if args.large_search:
+    vnative_options.neighborhood_radius = 2 * shapes[rocks[0]][3] + margin
+else:
+    vnative_options.neighborhood_radius = 2 * r_d + margin
+# Only the pairs whose bounding circles are closer than the contact margin
+# get an interaction (<= 0: every pair the search finds).
 contact_margin = args.contact_margin if args.contact_margin is not None else margin
 if contact_margin > 0:
     vnative_options.contact_margin = contact_margin

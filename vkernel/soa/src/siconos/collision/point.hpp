@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <concepts>
 #include <type_traits>  // dependent_false
 
@@ -24,10 +25,11 @@ struct point : item {
 };
 
 // Direct association to a lagrangian_ds: a point at the coordinates of
-// the system, shifted by a fixed offset. A small disk has one point with
-// a null offset; a disk too big for the neighborhood radius gets several
-// points on its circle (see space_filter::make_points). The offset is in
-// the global frame: a circle is invariant by rotation.
+// the system, shifted by an offset. A small body has one point with a
+// null offset; a body too big for the neighborhood radius gets several
+// points on its boundary (see space_filter::make_points). The offset of a
+// disk is in the global frame (a circle is invariant by rotation), the
+// offset of a polytope in the body frame (body_frame): it turns with it.
 template <match::item Item>
   requires(requires { typename Item::lagrangian_dynamical_system_t; })
 struct point<Item, empty_shape> : item {
@@ -40,8 +42,10 @@ struct point<Item, empty_shape> : item {
     some::boolean flag;
     some::vector<float, some::indice_value<3>> coord;
     some::vector<float, some::indice_value<2>> offset;
-    // bounding radius of the body around its centre (coord - offset): disk
-    // radius or polytope circumradius, infinity for a body of unknown shape
+    some::boolean body_frame;
+    // position of the body, and its bounding radius around it: disk radius
+    // or polytope circumradius, infinity for a body of unknown shape
+    some::vector<float, some::indice_value<2>> center;
     some::scalar bound;
     some::item_ref<item_t> item;
   };
@@ -53,14 +57,26 @@ struct point<Item, empty_shape> : item {
     decltype(auto) flags() { return storage::attr<"flag">(*self()); };
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
     decltype(auto) offset() { return storage::attr<"offset">(*self()); };
+    decltype(auto) body_frame() { return storage::attr<"body_frame">(*self()); };
+    decltype(auto) center() { return storage::attr<"center">(*self()); };
     decltype(auto) bound() { return storage::attr<"bound">(*self()); };
     decltype(auto) item() {
       return storage::make_ref_handle(self()->data(), storage::attr<"item">(*self()));
     };
 
     void update(auto step) {
-      coord()[0] = item().q(step)(0) + offset()[0];
-      coord()[1] = item().q(step)(1) + offset()[1];
+      const auto& q = item().q(step);
+      center()[0] = q(0);
+      center()[1] = q(1);
+      if (body_frame()) {
+        const auto c = std::cos(q(2));
+        const auto s = std::sin(q(2));
+        coord()[0] = q(0) + c * offset()[0] - s * offset()[1];
+        coord()[1] = q(1) + s * offset()[0] + c * offset()[1];
+      } else {
+        coord()[0] = q(0) + offset()[0];
+        coord()[1] = q(1) + offset()[1];
+      }
       coord()[2] = 0; /* 2D */
     }
   };
