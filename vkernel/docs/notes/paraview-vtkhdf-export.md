@@ -40,12 +40,12 @@ Without editing the script:
 
 ```
 python3 bench-dambreak.py 40 --output-format vtkhdf
-python3 timed.py --output-format vtkhdf bench-disks.py vnative 50
+siconos --output-format vtkhdf bench-disks.py vnative 50
 ```
 
-`bench-dambreak.py` has the option; `timed.py`
-(`vkernel/soa/src/siconos/benchmarks`) sets it for any script run by the
-runner, over what the script chose.
+`bench-dambreak.py` has the option; the `siconos` command
+(`--t0 --T --h --output-format`, and the vnative time stepping options)
+sets them for any python driver it runs, over what the driver chose.
 
 ### After the simulation
 

@@ -161,6 +161,7 @@ install(TARGETS _nonos COMPONENT python DESTINATION ${SICONOS_PYTHON_INSTALL_DIR
 install(FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/__init__.py
   ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/bridge.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/simoptions.py
   COMPONENT python
   DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos/)
 
