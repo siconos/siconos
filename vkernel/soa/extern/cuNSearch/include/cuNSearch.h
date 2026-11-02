@@ -147,6 +147,12 @@ class NeighborhoodSearch {
    */
   void set_radius(Real r);
 
+  /**
+   * Resets the internal state of the neighborhood search. This will force a complete
+   * reinitialization.
+   */
+  void reset() { isInitialized = false; }
+
   /** Activate/deactivate that neighbors in point set j are found when searching for neighbors
    * of point set i.
    *   @param i Index of searching point set.
