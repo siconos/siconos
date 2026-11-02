@@ -1,7 +1,13 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <CompactNSearch>
+#ifdef WITH_GPU
+#include "cuNSearch.h"
+namespace CompactNSearch = cuNSearch;
+#else
+#include "CompactNSearch/CompactNSearch.h"
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <format>
