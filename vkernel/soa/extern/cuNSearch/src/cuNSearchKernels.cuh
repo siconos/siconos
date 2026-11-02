@@ -52,7 +52,8 @@ __global__ void kComputeCounts(
 	const uint *cellOffsets,
 	const uint *cellParticleCounts,
 	uint *neighborCounts,
-	const uint *reversedSortIndices
+	const uint *reversedSortIndices,
+	const bool selfQuery
 );
 
 __global__ void kNeighborhoodQueryWithCounts(
@@ -65,4 +66,5 @@ __global__ void kNeighborhoodQueryWithCounts(
 	const uint *cellParticleCounts,
 	const uint *neighborWriteOffsets,
 	uint *neighbors,
-	const uint *reversedSortIndices);
+	const uint *reversedSortIndices,
+	const bool selfQuery);

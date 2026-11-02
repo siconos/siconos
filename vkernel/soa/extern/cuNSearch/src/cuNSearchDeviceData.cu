@@ -184,6 +184,8 @@ namespace cuNSearch
 		auto pointSetImpl = pointSet.impl.get();
 
 		uint particleCount = static_cast<uint>(queryPointSet.n_points());
+		// siconos: a point is excluded from its own neighbors by its index
+		const bool selfQuery = &queryPointSet == &pointSet;
 
 		// An empty target point set has no grid data at all: computeMinMax and
 		// computeCellInformation return early for it, hence its gridInfo is
@@ -243,7 +245,8 @@ namespace cuNSearch
 			CudaHelper::GetPointer(pointSetImpl->d_CellParticleCounts),
 
 			CudaHelper::GetPointer(d_NeighborCounts),
-			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices)
+			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices),
+			selfQuery
 			);
 
 		CudaHelper::CheckLastError();
@@ -286,7 +289,8 @@ namespace cuNSearch
 
 			CudaHelper::GetPointer(d_NeighborWriteOffsets),
 			CudaHelper::GetPointer(d_Neighbors),
-			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices)
+			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices),
+			selfQuery
 			);
 
 		CudaHelper::CheckLastError();
