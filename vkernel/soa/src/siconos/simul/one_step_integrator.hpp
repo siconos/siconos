@@ -231,11 +231,7 @@ struct one_step_integrator {
       // temporary tuple
       template <typename Kind>
       auto systems_of() {
-        constexpr auto n = mp::unpack(system_kinds_t{}, []<typename... Kinds>(Kinds...) {
-          std::size_t i = 0;
-          ((std::is_same_v<Kinds, Kind> ? false : (++i, true)) && ...);
-          return i;
-        });
+        constexpr auto n = mp::index_of<Kind>(mp::std_tuple(system_kinds_t{}));
         return std::get<n>(systems());
       }
 

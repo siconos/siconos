@@ -503,7 +503,7 @@ static constexpr auto is_inside_type_parent =
     is_a_model<[]<typename T>() consteval { return std::derived_from<B, typename T::type>; }>;
 
 template <typename... Ts>
-auto std_tuple(const hana::tuple<Ts...>& htpl) {
+constexpr auto std_tuple(const hana::tuple<Ts...>& htpl) {
   return hana::unpack(htpl,
                       []<typename... Elems>(Elems...) { return std::make_tuple(Elems{}...); });
 }
