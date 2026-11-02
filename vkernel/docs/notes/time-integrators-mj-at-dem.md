@@ -11,12 +11,12 @@ per pair) is described in
 
 ## 1. The schemes
 
-| scheme | file | contact law | solver | scheme value |
-|---|---|---|---|---|
-| Moreau–Jean | `simul/moreau_jean.hpp` | Signorini + Coulomb at the velocity level, Newton impact law | NSGS (fc2d) on the assembled problem | 0 (1: global, MoreauJeanGOSI) |
-| AT (PGS) | `simul/anitescu_tasora.hpp` | cone complementarity, u ∈ K* = {u_N ≥ μ\|u_T\|} (convexified Coulomb), no gap/h stabilization | matrix-free projected Gauss–Seidel, warm started | 2 |
-| AT (APGD) | same | same | APGD (Mazhar et al. 2015) on the assembled problem of Moreau–Jean (works with FEM) | 3 |
-| DEM | `simul/dem.hpp` | penalty spring–dashpot normal, tangential spring capped by Coulomb (Cundall–Strack, history per interaction) | explicit: forces h F through the Moreau–Jean velocity correction, θ = 1 for rigid bodies (symplectic Euler), implicit θ method kept for FEM | 4 |
+| scheme      | file                        | contact law                                                                                                  | solver                                                                                                                                      | scheme value                  |
+|-------------|-----------------------------|--------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
+| Moreau–Jean | `simul/moreau_jean.hpp`     | Signorini + Coulomb at the velocity level, Newton impact law                                                 | NSGS (fc2d) on the assembled problem                                                                                                        | 0 (1: global, MoreauJeanGOSI) |
+| AT (PGS)    | `simul/anitescu_tasora.hpp` | cone complementarity, u ∈ K* = {u_N ≥ μ\|u_T\|} (convexified Coulomb), no gap/h stabilization                | matrix-free projected Gauss–Seidel, warm started                                                                                            | 2                             |
+| AT (APGD)   | same                        | same                                                                                                         | APGD (Mazhar et al. 2015) on the assembled problem of Moreau–Jean (works with FEM)                                                          | 3                             |
+| DEM         | `simul/dem.hpp`             | penalty spring–dashpot normal, tangential spring capped by Coulomb (Cundall–Strack, history per interaction) | explicit: forces h F through the Moreau–Jean velocity correction, θ = 1 for rigid bodies (symplectic Euler), implicit θ method kept for FEM | 4                             |
 
 In python (vnative): `run_options["osi"]` = `nonos.bridge.AnitescuTasoraOSI`,
 `AnitescuTasoraAPGDOSI` or `ExplicitDEMOSI`. See
@@ -63,18 +63,18 @@ ctest checks the analytic NSCD cases to rounding error:
 
 ## 2. Summary
 
-| case | Moreau–Jean | AT (PGS = APGD) | DEM |
-|---|---|---|---|
-| column of 5 at rest, h 1e-4 … 1e-2: stability | KE ~1e-24 at every h | KE ~1e-23 at every h | KE 2e-2 (does not settle in 1 s); blows up from h = 5e-3 |
-| column at rest, N 1 … 50: overlap | 0 (< 1e-13) | < 3e-13 | bottom N m g / k_n (exact to N = 5; N = 20, 50 not settled) |
-| column landing from gaps 0.01 | 1.04e-3 for every N (~ v h / 2: the O(h) drift, independent of N) | same as MJ (to 1e-6) | ~ N m g / k_n at the end |
-| incline 20°, μ 0.5 (sticks) | \|x\| < 3e-13 | < 4e-10 (CCP = Coulomb when sticking) | slips 1.9e-4, then holds 1.67e-4 |
-| sliding square v0 = 2, μ 0.3: stopping distance error | 6e-6 (h 1e-2) to 2e-9 (h 1e-4) | 7e-5 to 2e-8, converges | −2e-1 at 5e-3 (rocking unstable) to −1.7e-4 at 1e-4 |
-| sliding square: lift-off | 0 | **1.6e-2 at every h** | ~1e-11 for h ≤ 1e-3 |
-| incline 30°, μ 0.3 (slides): x(T = 1) error | < 3e-13 at every h | 3e-3 … 6e-3, does not converge with h; lift-off 2e-2 | ~8e-3 at h ≤ 1e-3 (start-up transient of the tangential springs, §3.6) |
-| dilatancy, disk sheared over a layer, μ = 0 | 3.5e-6 above / 1.2e-3 below the geometric path | = MJ (to 1e-6) | 1.2e-3 / 1.3e-3 |
-| dilatancy, μ = 0.3 | 3e-6 / 7e-4 (follows the path) | **3.7e-3** / 1.5e-3 (launched by u_N = μ\|u_T\|) | 1.1e-3 / 1.4e-3 |
-| cost at the same h | about equal for all (per-step overhead) | 10–15× the solver iterations of NSGS | the small h it needs |
+| case                                                  | Moreau–Jean                                                       | AT (PGS = APGD)                                      | DEM                                                                    |
+|-------------------------------------------------------|-------------------------------------------------------------------|------------------------------------------------------|------------------------------------------------------------------------|
+| column of 5 at rest, h 1e-4 … 1e-2: stability         | KE ~1e-24 at every h                                              | KE ~1e-23 at every h                                 | KE 2e-2 (does not settle in 1 s); blows up from h = 5e-3               |
+| column at rest, N 1 … 50: overlap                     | 0 (< 1e-13)                                                       | < 3e-13                                              | bottom N m g / k_n (exact to N = 5; N = 20, 50 not settled)            |
+| column landing from gaps 0.01                         | 1.04e-3 for every N (~ v h / 2: the O(h) drift, independent of N) | same as MJ (to 1e-6)                                 | ~ N m g / k_n at the end                                               |
+| incline 20°, μ 0.5 (sticks)                           | \|x\| < 3e-13                                                     | < 4e-10 (CCP = Coulomb when sticking)                | slips 1.9e-4, then holds 1.67e-4                                       |
+| sliding square v0 = 2, μ 0.3: stopping distance error | 6e-6 (h 1e-2) to 2e-9 (h 1e-4)                                    | 7e-5 to 2e-8, converges                              | −2e-1 at 5e-3 (rocking unstable) to −1.7e-4 at 1e-4                    |
+| sliding square: lift-off                              | 0                                                                 | **1.6e-2 at every h**                                | ~1e-11 for h ≤ 1e-3                                                    |
+| incline 30°, μ 0.3 (slides): x(T = 1) error           | < 3e-13 at every h                                                | 3e-3 … 6e-3, does not converge with h; lift-off 2e-2 | ~8e-3 at h ≤ 1e-3 (start-up transient of the tangential springs, §3.6) |
+| dilatancy, disk sheared over a layer, μ = 0           | 3.5e-6 above / 1.2e-3 below the geometric path                    | = MJ (to 1e-6)                                       | 1.2e-3 / 1.3e-3                                                        |
+| dilatancy, μ = 0.3                                    | 3e-6 / 7e-4 (follows the path)                                    | **3.7e-3** / 1.5e-3 (launched by u_N = μ\|u_T\|)     | 1.1e-3 / 1.4e-3                                                        |
+| cost at the same h                                    | about equal for all (per-step overhead)                           | 10–15× the solver iterations of NSGS                 | the small h it needs                                                   |
 
 To be fair to the other schemes:
 - At μ = 0, AT is the same scheme as NSCD: a column dropped with gaps
@@ -93,12 +93,12 @@ error at every h.
 
 ![stability](time-integrators-mj-at-dem/stability.png)
 
-| h | Moreau-Jean KE | AT (PGS) | AT (APGD) | DEM |
-|---|---|---|---|---|
-| 1e-04 | 1.90e-28 | 2.62e-27 | 5.83e-24 | 1.73e-02 |
-| 1e-03 | 1.90e-26 | 2.62e-25 | 5.67e-24 | 1.75e-02 |
-| 5e-03 | 4.74e-25 | 6.54e-24 | 6.75e-24 | 4.77e+05 |
-| 1e-02 | 1.90e-24 | 2.62e-23 | 7.10e-24 | unstable |
+| h     | Moreau-Jean KE | AT (PGS) | AT (APGD) | DEM      |
+|-------|----------------|----------|-----------|----------|
+| 1e-04 | 1.90e-28       | 2.62e-27 | 5.83e-24  | 1.73e-02 |
+| 1e-03 | 1.90e-26       | 2.62e-25 | 5.67e-24  | 1.75e-02 |
+| 5e-03 | 4.74e-25       | 6.54e-24 | 6.75e-24  | 4.77e+05 |
+| 1e-02 | 1.90e-24       | 2.62e-23 | 7.10e-24  | unstable |
 
 ### 3.2 Column of N disks: at rest and landing
 
@@ -112,11 +112,11 @@ N.
 
 ![column](time-integrators-mj-at-dem/column.png)
 
-| N | MJ at rest | DEM at rest | N m g / k_n | MJ landing (end) | DEM landing (end) |
-|---|---|---|---|---|---|
-| 1 | 0 | 9.81e-05 | 9.81e-05 | 1.04e-03 | 9.81e-05 |
-| 10 | 0 | 1.01e-03 | 9.81e-04 | 1.04e-03 | 1.05e-03 |
-| 50 | 0 | 8.13e-03 | 4.90e-03 | 1.04e-03 | 3.77e-03 |
+| N  | MJ at rest | DEM at rest | N m g / k_n | MJ landing (end) | DEM landing (end) |
+|----|------------|-------------|-------------|------------------|-------------------|
+| 1  | 0          | 9.81e-05    | 9.81e-05    | 1.04e-03         | 9.81e-05          |
+| 10 | 0          | 1.01e-03    | 9.81e-04    | 1.04e-03         | 1.05e-03          |
+| 50 | 0          | 8.13e-03    | 4.90e-03    | 1.04e-03         | 3.77e-03          |
 
 Wall time for 1 s: about 0.05 s for MJ and AT, 2.2–2.7 s for DEM (its h).
 For a column of 50 landing: MJ 0.32 s, AT PGS 1.94 s, APGD 0.08 s.
@@ -143,11 +143,11 @@ The stopping distance is still nearly right.
 
 ![sliding vs h](time-integrators-mj-at-dem/sliding_h.png)
 
-| h | MJ error | AT error | DEM error | MJ lift-off | AT lift-off | DEM lift-off |
-|---|---|---|---|---|---|---|
-| 1e-02 | 5.94e-06 | 6.91e-05 | unstable | 0 | 1.76e-02 | unstable |
-| 1e-03 | 3.59e-07 | 1.30e-06 | -1.07e-03 | 0 | 1.57e-02 | 1.81e-11 |
-| 1e-04 | 2.47e-09 | 1.87e-08 | -1.66e-04 | 0 | 1.55e-02 | 2.74e-11 |
+| h     | MJ error | AT error | DEM error | MJ lift-off | AT lift-off | DEM lift-off |
+|-------|----------|----------|-----------|-------------|-------------|--------------|
+| 1e-02 | 5.94e-06 | 6.91e-05 | unstable  | 0           | 1.76e-02    | unstable     |
+| 1e-03 | 3.59e-07 | 1.30e-06 | -1.07e-03 | 0           | 1.57e-02    | 1.81e-11     |
+| 1e-04 | 2.47e-09 | 1.87e-08 | -1.66e-04 | 0           | 1.55e-02    | 2.74e-11     |
 
 Cost at h = 1e-3: wall time 0.21 s for MJ (1006 NSGS iterations), 0.24 s
 for AT PGS (18441), 0.21 s for APGD (14848), 0.20 s for DEM. A DEM square
@@ -173,14 +173,14 @@ gets ahead of the Coulomb motion by dv = x_eq ω sin(ω t_c) − a t_c, and it
 keeps that lead. Once the springs are loaded, the friction is exactly
 μ F_N. The excess goes like k_t^(−1/2):
 
-| rotation | k_t | excess x(T) − x_exact | estimate |
-|---|---|---|---|
-| free | 7.14e+03 | 1.56e-02 | 1.49e-02 |
-| free | 2.86e+04 | 7.93e-03 | 7.44e-03 |
-| free | 1.14e+05 | 4.03e-03 | 3.72e-03 |
-| free | 4.57e+05 | 2.08e-03 | 1.86e-03 |
-| locked | 7.14e+03 | 1.50e-02 | 1.49e-02 |
-| locked | 4.57e+05 | 1.99e-03 | 1.86e-03 |
+| rotation | k_t      | excess x(T) − x_exact | estimate |
+|----------|----------|-----------------------|----------|
+| free     | 7.14e+03 | 1.56e-02              | 1.49e-02 |
+| free     | 2.86e+04 | 7.93e-03              | 7.44e-03 |
+| free     | 1.14e+05 | 4.03e-03              | 3.72e-03 |
+| free     | 4.57e+05 | 2.08e-03              | 1.86e-03 |
+| locked   | 7.14e+03 | 1.50e-02              | 1.49e-02 |
+| locked   | 4.57e+05 | 1.99e-03              | 1.86e-03 |
 
 The estimate agrees to 2–7% with the rotation locked. With the rotation
 free the excess is ~5% larger (rocking).
@@ -200,16 +200,16 @@ The scene:
 
 ![shear](time-integrators-mj-at-dem/shear.png)
 
-| μ | scheme | h | max above | max below | solver iterations | wall time (s) |
-|---|---|---|---|---|---|---|
-| 0 | Moreau-Jean | 0.005 | 3.49e-06 | 1.19e-03 | 2402 | 0.52 |
-| 0 | AT (PGS) | 0.005 | 3.49e-06 | 1.19e-03 | 2988067 | 0.91 |
-| 0 | AT (APGD) | 0.005 | 3.49e-06 | 1.19e-03 | 13160 | 0.45 |
-| 0 | DEM | 1e-04 | 1.19e-03 | 1.28e-03 | 0 | 24.84 |
-| 0.3 | Moreau-Jean | 0.005 | 3.08e-06 | 7.17e-04 | 2402 | 0.47 |
-| 0.3 | AT (PGS) | 0.005 | 3.68e-03 | 1.51e-03 | 5789159 | 0.68 |
-| 0.3 | AT (APGD) | 0.005 | 3.68e-03 | 1.51e-03 | 18866 | 0.56 |
-| 0.3 | DEM | 1e-04 | 1.12e-03 | 1.35e-03 | 0 | 23.59 |
+| μ   | scheme      | h     | max above | max below | solver iterations | wall time (s) |
+|-----|-------------|-------|-----------|-----------|-------------------|---------------|
+| 0   | Moreau-Jean | 0.005 | 3.49e-06  | 1.19e-03  | 2402              | 0.52          |
+| 0   | AT (PGS)    | 0.005 | 3.49e-06  | 1.19e-03  | 2988067           | 0.91          |
+| 0   | AT (APGD)   | 0.005 | 3.49e-06  | 1.19e-03  | 13160             | 0.45          |
+| 0   | DEM         | 1e-04 | 1.19e-03  | 1.28e-03  | 0                 | 24.84         |
+| 0.3 | Moreau-Jean | 0.005 | 3.08e-06  | 7.17e-04  | 2402              | 0.47          |
+| 0.3 | AT (PGS)    | 0.005 | 3.68e-03  | 1.51e-03  | 5789159           | 0.68          |
+| 0.3 | AT (APGD)   | 0.005 | 3.68e-03  | 1.51e-03  | 18866             | 0.56          |
+| 0.3 | DEM         | 1e-04 | 1.12e-03  | 1.35e-03  | 0                 | 23.59         |
 
 **μ = 0: Moreau–Jean = AT.** Both enforce u_N = 0, never the gap, and have
 no position projection.

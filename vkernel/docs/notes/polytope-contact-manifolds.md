@@ -92,14 +92,14 @@ Code: `collision/cxd_narrowphase.hpp` (`narrowphase_pair`,
 
 ![manifold cases](polytope-contact-manifolds/fig1_manifold_cases.png)
 
-| case | reference / incident | points | consequence |
-|---|---|---|---|
-| (a) flat face on face | tie → body 1 (polytope); segment clipped to it | the two corners, equal h | both active on the same step |
-| (b) corner first, tilt θ | segment (align 1) / lower box face | p0 the corner (h≈0); p1 the **far corner**, h ≈ L sin θ | p1 exists from the start with a large gap; it activates only when the box has rotated down |
-| (c) overhang | box face / segment, clipped to the box | box corner and the **segment end** | the support is the segment end, not a box vertex |
-| (d) tipping over the end | box face (align 1) / segment | the segment end (h≈0), and the foot of the box face's far end on the segment (large h) | contact = segment end vertex on the box face |
-| (e) two collinear segments (two mesh edges) | one manifold **per segment** | 4 points, **two coincident at the junction** | redundant rows, statically indeterminate (§3) |
-| (f) vertex on vertex | no face within 1e-6 | **one** point (closest features); p1 has h = 1e30 | only one interaction can be active |
+| case                                        | reference / incident                           | points                                                                                 | consequence                                                                                |
+|---------------------------------------------|------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| (a) flat face on face                       | tie → body 1 (polytope); segment clipped to it | the two corners, equal h                                                               | both active on the same step                                                               |
+| (b) corner first, tilt θ                    | segment (align 1) / lower box face             | p0 the corner (h≈0); p1 the **far corner**, h ≈ L sin θ                                | p1 exists from the start with a large gap; it activates only when the box has rotated down |
+| (c) overhang                                | box face / segment, clipped to the box         | box corner and the **segment end**                                                     | the support is the segment end, not a box vertex                                           |
+| (d) tipping over the end                    | box face (align 1) / segment                   | the segment end (h≈0), and the foot of the box face's far end on the segment (large h) | contact = segment end vertex on the box face                                               |
+| (e) two collinear segments (two mesh edges) | one manifold **per segment**                   | 4 points, **two coincident at the junction**                                           | redundant rows, statically indeterminate (§3)                                              |
+| (f) vertex on vertex                        | no face within 1e-6                            | **one** point (closest features); p1 has h = 1e30                                      | only one interaction can be active                                                         |
 
 A polytope pair behaves the same way, with a polygon face in place of the
 segment: fig. 6 is case (b) between two polytopes, and the stack in fig. 5
@@ -213,11 +213,11 @@ the sources. The figures of this document are copies of the outputs.
 
 `polytope-contact-manifolds/scripts/`:
 
-| file | what |
-|---|---|
-| `run.py` | the driver of the target (`run.py --build-dir <build> --out <dir>` by hand): the nonos package of the build, the environment, one process per scene, the check, the figures |
-| `scenes.py` | the seven scenes, vnative backend, one hdf5 file per scene |
-| `manifold.py` | the Python port of the manifold (normal, `clip_manifold`, ordering, 1e30) |
-| `sim.py` | reads a scene, rebuilds the manifolds, predicts the active set, matches the `cf` rows |
-| `check.py` | the step-by-step comparison of the active sets |
-| `figs.py` | the figures |
+| file          | what                                                                                                                                                                        |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `run.py`      | the driver of the target (`run.py --build-dir <build> --out <dir>` by hand): the nonos package of the build, the environment, one process per scene, the check, the figures |
+| `scenes.py`   | the seven scenes, vnative backend, one hdf5 file per scene                                                                                                                  |
+| `manifold.py` | the Python port of the manifold (normal, `clip_manifold`, ordering, 1e30)                                                                                                   |
+| `sim.py`      | reads a scene, rebuilds the manifolds, predicts the active set, matches the `cf` rows                                                                                       |
+| `check.py`    | the step-by-step comparison of the active sets                                                                                                                              |
+| `figs.py`     | the figures                                                                                                                                                                 |
