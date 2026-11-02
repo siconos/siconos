@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <concepts>
+#include <limits>
 #include <numbers>
 #include <print>
 #include <stdexcept>
@@ -95,6 +96,10 @@ struct space_filter : item {
     // the disk x polytope relation is stateless: one item, under key 0,
     // serves every mixed pair
     some::map<some::indice, some::item_ref<polytopedisk_r<Topology>>> polytopedisks;
+    // a body pair found by the neighborhood search gets an interaction only
+    // when its bounding circles are closer than contact_margin; <= 0: every
+    // pair found gets one
+    some::scalar contact_margin;
   };
 
   template <typename Handle>
@@ -145,6 +150,38 @@ struct space_filter : item {
 
     decltype(auto) diskfdisks() { return storage::attr<"diskfdisks">(*self()); }
     decltype(auto) polytopedisks() { return storage::attr<"polytopedisks">(*self()); }
+    decltype(auto) contact_margin() { return storage::attr<"contact_margin">(*self()); }
+
+    // radius of a circle centred on the body that contains its shape: the
+    // disk radius, the polytope circumradius; infinity (never culled) for a
+    // body with neither
+    static double bounding_radius(auto& ds) {
+      using ds_t = std::decay_t<decltype(ds)>;
+      if constexpr (collision::may_have_shape<collision::shape::disk, ds_t>()) {
+        if (collision::has_shape<collision::shape::disk>(ds)) {
+          return collision::shape_of<collision::shape::disk>(ds).radius();
+        }
+      }
+      if constexpr (collision::may_have_shape<collision::shape::polytope, ds_t>()) {
+        if (collision::has_shape<collision::shape::polytope>(ds)) {
+          return collision::shape_of<collision::shape::polytope>(ds).rmax();
+        }
+      }
+      return std::numeric_limits<double>::infinity();
+    }
+
+    // the neighborhood search is run with one radius, sized for the largest
+    // pair of bodies: two points it finds may be much farther apart than
+    // their bodies can touch. Too far apart: no interaction.
+    static bool beyond_margin(auto& hp1, auto& hp2, double margin) {
+      if (margin <= 0) return false;
+      const double dx =
+          (hp2.coord()[0] - hp2.offset()[0]) - (hp1.coord()[0] - hp1.offset()[0]);
+      const double dy =
+          (hp2.coord()[1] - hp2.offset()[1]) - (hp1.coord()[1] - hp1.offset()[1]);
+      const double reach = hp1.bound() + hp2.bound() + margin;
+      return dx * dx + dy * dy > reach * reach;
+    }
 
     // void create_relations()
     // {
@@ -371,9 +408,11 @@ struct space_filter : item {
                   }
                 }
               }
+              const auto bound = bounding_radius(ds);
               for (std::size_t i = 0; i < npoints; ++i) {
                 auto new_point = storage::add<Point>(data);
                 new_point.item() = ds;
+                new_point.bound() = bound;
                 if (npoints == 1) {
                   new_point.offset() = {0.f, 0.f};
                 } else {
@@ -543,9 +582,10 @@ struct space_filter : item {
       if constexpr (std::is_same_v<std::decay_t<decltype(ds1)>, std::decay_t<decltype(ds2)>>) {
         if (ds1.index() == ds2.index()) return;
       }
+      // not activated: an interaction of this pair, if any, goes
+      if (beyond_margin(hp1, hp2, self()->contact_margin())) return;
       auto& data = self()->data();
       auto topo = self()->topology();
-      auto nslaw = nonsmooth_law(ds1, ds2);
       auto diskdisk_r = self()->diskdisk_r();
 
       const bool polytope1 = collision::has_shape<collision::shape::polytope>(ds1);
@@ -573,7 +613,7 @@ struct space_filter : item {
                               std::decay_t<decltype(std::declval<inter_t&>().relation())> v,
                               pd_index_t i) { v = i; }) {
               auto inter = polytope1 ? topo.link(ds2, ds1) : topo.link(ds1, ds2);
-              inter.nslaw() = nslaw;
+              inter.nslaw() = nonsmooth_law(ds1, ds2);
               storage::prop<"activation", Topology>(inter) = true;
               auto& rmap = self()->polytopedisks();
               if (auto search = rmap.find(0); search != rmap.end()) {
@@ -597,7 +637,7 @@ struct space_filter : item {
         // until the cxd stage rebinds it
         // create the edge
         auto inter = topo.link(ds1, ds2);
-        inter.nslaw() = nslaw;  // one nslaw for the moment
+        inter.nslaw() = nonsmooth_law(ds1, ds2);
 
         storage::prop<"activation", Topology>(inter) = true;
 
@@ -609,7 +649,6 @@ struct space_filter : item {
     void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1, auto hp2) {
       auto& data = self()->data();
       auto topo = self()->topology();
-      auto nslaw = nonsmooth_law(ds1, ds2);
       auto& diskmeshes = self()->diskmeshes();
       auto& polytopemeshes = self()->polytopemeshes();
 
@@ -643,7 +682,7 @@ struct space_filter : item {
 
         // create the edge
         auto inter = topo.link(ds1, ds2);
-        inter.nslaw() = nslaw;  // one nslaw for the moment
+        inter.nslaw() = nonsmooth_law(ds1, ds2);
         storage::prop<"activation", Topology>(inter) = true;
 
         if constexpr (collision::may_have_shape<collision::shape::polytope, ds1_t>()) {
@@ -686,7 +725,6 @@ struct space_filter : item {
 
     void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& relmap = self()->diskfsegments();
 
@@ -723,7 +761,7 @@ struct space_filter : item {
         //       b, c);
         // create the edge
         auto inter = topo.link(body1);
-        inter.nslaw() = nslaw;  // one nslaw for the moment
+        inter.nslaw() = nonsmooth_law(body1, body2);
 
         if (auto search = relmap.find({x1, x2, y1, y2}); search != relmap.end()) {
           simul::bind_relation<Topology>(data, inter, search->second);
@@ -745,7 +783,6 @@ struct space_filter : item {
 
     void polytopefsegment_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& relmap = self()->polytopefsegments();
 
@@ -776,7 +813,7 @@ struct space_filter : item {
           storage::prop<"activation", Topology>(inter) = true;
         } else {
           auto inter = topo.link(body1);
-          inter.nslaw() = nslaw;
+          inter.nslaw() = nonsmooth_law(body1, body2);
 
           if (auto search = relmap.find(key); search != relmap.end()) {
             simul::bind_relation<Topology>(data, inter, search->second);
@@ -795,7 +832,6 @@ struct space_filter : item {
 
     void polytopefdisk_activation(auto& body1, auto& body2, auto& intermap) {
       auto& data = self()->data();
-      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& relmap = self()->polytopefdisks();
 
@@ -818,7 +854,7 @@ struct space_filter : item {
         storage::prop<"activation", Topology>(inter) = true;
       } else {
         auto inter = topo.link(body1);
-        inter.nslaw() = nslaw;
+        inter.nslaw() = nonsmooth_law(body1, body2);
 
         using poly_fd_t = collision::polytopefdisk_r<Topology>;
         if (auto search = relmap.find(coefs); search != relmap.end()) {
@@ -836,7 +872,6 @@ struct space_filter : item {
 
     void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
       auto& data = self()->data();
-      auto nslaw = nonsmooth_law(body1, body2);
       auto topo = self()->topology();
       auto& diskfdisks = self()->diskfdisks();
 
@@ -861,7 +896,7 @@ struct space_filter : item {
         storage::prop<"activation", Topology>(inter) = true;
       } else {
         auto inter = topo.link(body1);
-        inter.nslaw() = nslaw;
+        inter.nslaw() = nonsmooth_law(body1, body2);
 
         if (auto search = diskfdisks.find(coefs); search != diskfdisks.end()) {
           simul::bind_relation<Topology>(data, inter, search->second);

@@ -78,6 +78,7 @@ p.add_argument("--t-settle", type=float, default=None)
 p.add_argument("--T", type=float, default=None)
 p.add_argument("--seed", type=int, default=0)
 p.add_argument("--margin", type=float, default=None)
+p.add_argument("--contact-margin", type=float, default=None)
 p.add_argument("--sort-frequency", type=int, default=None)
 # siconos: the hdf5 tables, vtkhdf: a ParaView file instead, or both
 p.add_argument(
@@ -358,6 +359,11 @@ vnative_options = sio.SpaceFilterOptions()
 # largest rock sets it for every body.
 margin = args.margin if args.margin is not None else r_d
 vnative_options.neighborhood_radius = 2 * shapes[rocks[0]][3] + margin
+# A disk then finds hundreds of others: only the pairs whose bounding circles
+# are closer than the contact margin get an interaction (<= 0: all of them).
+contact_margin = args.contact_margin if args.contact_margin is not None else margin
+if contact_margin > 0:
+    vnative_options.contact_margin = contact_margin
 vnative_options.min_radius = r_d
 if args.sort_frequency is not None:
     vnative_options.sort_frequency = args.sort_frequency

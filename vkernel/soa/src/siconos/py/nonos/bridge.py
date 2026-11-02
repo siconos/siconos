@@ -43,6 +43,9 @@ class SpaceFilter(Stored):
         self._handle = vkernel.disks.add_space_filter(self.data())
         self._handle.set_neighborhood(self._ngbh)
         self._handle.set_diskdisk_r(vkernel.disks.add_diskdisk_r(self.data()))
+        contact_margin = getattr(options, "contact_margin", None)
+        if contact_margin is not None:
+            self._handle.set_contact_margin(contact_margin)
         # the cxd narrowphase stage: gives the polytope pairs the filter binds
         # on the generic diskdisk_r their polytopepolytope_r relations
         self._narrowphase = vkernel.disks.add_cxd_narrowphase(self.data())
@@ -814,6 +817,11 @@ class SpaceFilterOptions:
     min_radius = 0.5
     # z-order sort of the point sets every sort_frequency steps (0: never)
     sort_frequency = 100
+    # the search finds pairs of body centres within neighborhood_radius, a
+    # radius sized for the largest bodies: a pair gets an interaction only
+    # when the gap between its bounding circles (disk radius, polytope
+    # circumradius) is below contact_margin. None: every pair found.
+    contact_margin = None
 
     def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__)

@@ -40,6 +40,9 @@ struct point<Item, empty_shape> : item {
     some::boolean flag;
     some::vector<float, some::indice_value<3>> coord;
     some::vector<float, some::indice_value<2>> offset;
+    // bounding radius of the body around its centre (coord - offset): disk
+    // radius or polytope circumradius, infinity for a body of unknown shape
+    some::scalar bound;
     some::item_ref<item_t> item;
   };
 
@@ -50,6 +53,7 @@ struct point<Item, empty_shape> : item {
     decltype(auto) flags() { return storage::attr<"flag">(*self()); };
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
     decltype(auto) offset() { return storage::attr<"offset">(*self()); };
+    decltype(auto) bound() { return storage::attr<"bound">(*self()); };
     decltype(auto) item() {
       return storage::make_ref_handle(self()->data(), storage::attr<"item">(*self()));
     };
