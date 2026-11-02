@@ -475,6 +475,8 @@ enum SICONOS_FRICTION_2D_NSN_WARM_START {
   SICONOS_FRICTION_2D_NSN_WARM_START_YES = 1,
   /** Run GFC2D_VI_FPP only if the first Newton linear solve fails */
   SICONOS_FRICTION_2D_NSN_WARM_START_AUTO = 2,
+  /** Compute rho from the diagonal approximation of the reduced problem */
+  SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL = 3,
 };
 
 /** Warm-start strategy values for GFC3D_NSN_AC */
@@ -485,6 +487,8 @@ enum SICONOS_FRICTION_3D_NSN_WARM_START {
   SICONOS_FRICTION_3D_NSN_WARM_START_YES = 1,
   /** Run GFC3D_VI_FPP only if the first Newton linear solve fails */
   SICONOS_FRICTION_3D_NSN_WARM_START_AUTO = 2,
+  /** Compute rho from the diagonal approximation of the reduced problem */
+  SICONOS_FRICTION_3D_NSN_WARM_START_RHO_FROM_DIAGONAL = 3,
 };
 
 /** Jacobian regularization values for GFC3D_NSN_AC */

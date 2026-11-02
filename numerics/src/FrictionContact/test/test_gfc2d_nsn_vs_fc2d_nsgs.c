@@ -58,10 +58,13 @@ int main(int argc, char** argv) {
   double* reaction_g = (double*)calloc((size_t)m, sizeof(double));
   double* velocity_g = (double*)calloc((size_t)m, sizeof(double));
   double* globalvelocity_g = (double*)calloc((size_t)n_global, sizeof(double));
-
+  verbose = 1;
   SolverOptions* options_nsn = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_NSN_AC);
   options_nsn->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options_nsn->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options_nsn->iparam[SICONOS_FRICTION_2D_NSN_REGUL] =
+      SICONOS_FRICTION_2D_NSN_REGULARIZATION_YES;
+  options_nsn->dparam[SICONOS_FRICTION_2D_NSN_REGUL] = 1e-6;
 
   int info_nsn = gfc2d_driver(gproblem, reaction_g, velocity_g, globalvelocity_g, options_nsn);
   printf("\nGFC2D_NSN_AC: info = %d, iterations = %d, residual = %e\n", info_nsn,

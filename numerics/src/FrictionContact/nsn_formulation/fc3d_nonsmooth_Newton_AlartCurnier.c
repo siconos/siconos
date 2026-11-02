@@ -19,6 +19,7 @@
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 
 #include <assert.h>  // for assert
+#include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for sqrt
 #include <stddef.h>  // for NULL
 
@@ -26,6 +27,8 @@
 #include "FrictionContactProblem.h"         // IWYU pragma: keep
 #include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_NSN_H...
 #include "NumericsFwd.h"                    // for SolverOptions, FrictionCo...
+#include "NumericsMatrix.h"                 // for NM_gemv
+#include "SiconosBlas.h"                    // for cblas_dnrm2, cblas_daxpy
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_cst.h"                         // for SICONOS_VI_ERROR_EVALUATI...
 #include "fc3d_AlartCurnier_functions.h"    // for computeAlartCurnierJeanMo...
@@ -90,6 +93,16 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem* problem, double*
   assert(problem->q);
   assert(problem->mu);
   assert(problem->M);
+
+  const int num_dofs = problem->dimension * problem->numberOfContacts;
+  if ((cblas_dnrm2(num_dofs, velocity, 1) < DBL_EPSILON) &&
+      (cblas_dnrm2(num_dofs, reaction, 1) < DBL_EPSILON)) {
+    /* A zero initial velocity and reaction  makes the Alart--Curnier Jacobian singular.
+     * Initialize the velocity consistently with the provided reaction.
+     * With a null reaction this gives velocity = q. */
+    NM_gemv(1.0, problem->M, reaction, 0.0, velocity);
+    cblas_daxpy(num_dofs, 1.0, problem->q, 1, velocity, 1);
+  }
 
   assert(!options->iparam[4]);  // only host
 

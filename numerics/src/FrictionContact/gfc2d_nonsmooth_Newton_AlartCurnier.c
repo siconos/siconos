@@ -696,9 +696,16 @@ restart:
   info[0] = 1; /* Default to non-convergence. */
   iteration = 0;
 
-  /* Initialize rho from the current NSN rho parameter. */
-  for (unsigned int i = 0; i < num_contact_dofs; ++i) {
-    rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+  /* Initialize rho from the diagonal approximation of the reduced problem when
+   * the corresponding warm-start strategy is selected.  Otherwise use the
+   * current NSN rho parameter. */
+  if (options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] ==
+      SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL) {
+    globalFrictionContact_compute_rho_from_diagonal_approximation(problem, rho);
+  } else {
+    for (unsigned int i = 0; i < num_contact_dofs; ++i) {
+      rho[i] = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+    }
   }
 
   /* Initialize the Newton direction to zero. */
@@ -710,9 +717,21 @@ restart:
   friction_error_toolkit_recompute_local_velocity(problem->H, problem->b, globalVelocity,
                                                   (int)num_contact_dofs, velocity);
 
-  const double norm_velocity = cblas_dnrm2(num_contact_dofs, velocity, 1);
-  if (fabs(norm_velocity) < DBL_EPSILON) {
-    for (unsigned int k = 0; k < num_contact_dofs; k++) velocity[k] = 0.0;
+  double norm_velocity = cblas_dnrm2(num_contact_dofs, velocity, 1);
+  double norm_reaction = cblas_dnrm2(num_contact_dofs, reaction, 1);
+
+  if ((fabs(norm_velocity) < DBL_EPSILON) && (fabs(norm_reaction) < DBL_EPSILON)) {
+    /* The provided initial guess gives a zero local velocity and reaction, which makes the
+     * Alart--Curnier Jacobian singular.  Fall back to the physical velocity
+     * obtained with a null reaction: solve M * globalVelocity = q and update
+     * the local velocity from it. */
+    memcpy(globalVelocity, problem->q, num_global_dofs * sizeof(double));
+    int info_lu = NM_LU_solve(NM_preserve(problem->M), globalVelocity, 1);
+    if (info_lu == 0) {
+      friction_error_toolkit_recompute_local_velocity(problem->H, problem->b, globalVelocity,
+                                                      (int)num_contact_dofs, velocity);
+      norm_velocity = cblas_dnrm2(num_contact_dofs, velocity, 1);
+    }
   }
 
   DEBUG_PRINTF("norm of velocity = %e\n", cblas_dnrm2(num_contact_dofs, velocity, 1));

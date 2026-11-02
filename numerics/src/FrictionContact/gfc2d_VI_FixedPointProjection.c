@@ -73,28 +73,27 @@ static void gfc2d_vi_fpp_status_callback(void* env, size_t size, double* x, doub
 
   unsigned int no_contact = 0, stick = 0, slip_right = 0, slip_left = 0;
   unsigned int stabilized = 0;
-
-  for (int i = 0; i < nc; ++i) {
-    const int status = FrictionContactProblem_compute_contact_status_2d(
-        &local_velocity[2 * i], &reaction[2 * i], problem->mu[i]);
-    status_env->current_status[i] = status;
-    if (status == 0)
-      no_contact++;
-    else if (status == 1)
-      stick++;
-    else if (status == 2)
-      slip_right++;
-    else
-      slip_left++;
-    if (status_env->previous_status[i] != -1 && status_env->previous_status[i] == status) {
-      stabilized++;
+  if (verbose > 1) {
+    for (int i = 0; i < nc; ++i) {
+      const int status = FrictionContactProblem_compute_contact_status_2d(
+          &local_velocity[2 * i], &reaction[2 * i], problem->mu[i]);
+      status_env->current_status[i] = status;
+      if (status == 0)
+        no_contact++;
+      else if (status == 1)
+        stick++;
+      else if (status == 2)
+        slip_right++;
+      else
+        slip_left++;
+      if (status_env->previous_status[i] != -1 && status_env->previous_status[i] == status) {
+        stabilized++;
+      }
+      status_env->previous_status[i] = status;
     }
-    status_env->previous_status[i] = status;
-  }
 
-  const double stabilized_pct = (nc > 0) ? (100.0 * stabilized) / nc : 0.0;
+    const double stabilized_pct = (nc > 0) ? (100.0 * stabilized) / nc : 0.0;
 
-  if (verbose > 0) {
     if (status_env->iteration == 1) {
       printf("Contact status: no-c | stick | slip+ | slip- | stab%%\n");
     }

@@ -174,6 +174,24 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
 int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* problem,
                                                 double* reaction, double* globalVelocity);
 
+/** Compute per-contact rho values from a diagonal approximation of the
+ *  reduced friction-contact problem.
+ *
+ *  The reduced matrix \f$W = H^T M^{-1} H\f$ is approximated by
+ *  \f$W_{\mathrm{diag}} = H^T D^{-1} H\f$ where \f$D\f$ is the diagonal of
+ *  the global mass matrix \f$M\f$.  For each contact the diagonal block of
+ *  this approximation is formed and the NSN rho parameter is derived from it
+ *  (reciprocal of the diagonal entries in 2D, split-spectral-norm estimate
+ *  in 3D).
+ *
+ *  \param[in] problem the global friction-contact problem
+ *  \param[out] rho vector of rho values, size \c problem->dimension *
+ *              problem->numberOfContacts
+ *  \return 0 on success, a numerics error code otherwise
+ */
+int globalFrictionContact_compute_rho_from_diagonal_approximation(
+    GlobalFrictionContactProblem* problem, double* rho);
+
 /** Reduce the global friction-contact problem to a local FrictionContactProblem.
  *
  *  This eliminates the global velocity by computing the reduced matrix and

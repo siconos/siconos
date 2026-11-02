@@ -24,10 +24,12 @@
 #include <string.h>  // for memcpy
 
 #include "FrictionContactProblem.h"
-#include "NumericsMatrix.h"        // for NumericsMatrix, NM_display, NM_clear
-#include "NumericsSparseMatrix.h"  // for NumericsMatrix, NM_display, NM_clear
-#include "SiconosBlas.h"           // for cblas_dscal, cblas_dcopy
-#include "SparseBlockMatrix.h"     // for SBM_gemv, SBM_free
+#include "NumericsMatrix.h"            // for NumericsMatrix, NM_display, NM_clear
+#include "NumericsSparseMatrix.h"      // for NumericsMatrix, NM_display, NM_clear
+#include "SiconosBlas.h"               // for cblas_dscal, cblas_dcopy
+#include "SparseBlockMatrix.h"         // for SBM_gemv, SBM_free
+#include "fc3d_compute_rho.h"          // for compute_rho_split_spectral_norm
+#include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_allocate
 #include "io_tools.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for check_io
@@ -306,6 +308,208 @@ int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* pr
   DEBUG_EXPR(NM_vector_display(globalVelocity, n));
 
   return info;
+}
+
+/* --------------------------------------------------------------------------
+ * Diagonal approximation helpers for NSN warm-start rho estimation
+ * -------------------------------------------------------------------------- */
+
+/** Extract the diagonal of M and store its element-wise inverse in Dinv.
+ *
+ *  Only the diagonal of M is used, so off-diagonal entries are ignored.  For
+ *  sparse-block storage a sparse copy is built first.  If a diagonal entry is
+ *  (numerically) zero a fallback value of 1.0 is stored.
+ */
+static int globalFrictionContact_extract_diagonal_inverse(NumericsMatrix* M, double* Dinv) {
+  const size_t n = to_size_t(M->size0);
+
+  switch (M->storageType) {
+    case NM_DENSE: {
+      const double* Md = M->dense;
+      for (size_t i = 0; i < n; ++i) {
+        const double d = Md[i * n + i];
+        Dinv[i] = (fabs(d) > DBL_EPSILON) ? 1.0 / d : 1.0;
+      }
+      return NUMERICS_OK;
+    }
+    case NM_SPARSE: {
+      CSparseMatrix* csc = NM_csc(M);
+      if (!csc) {
+        return numerics_error("globalFrictionContact_extract_diagonal_inverse",
+                              "unable to get CSC storage of M");
+      }
+      for (size_t i = 0; i < n; ++i) {
+        double d = 0.0;
+        for (CS_INT k = csc->p[i]; k < csc->p[i + 1]; ++k) {
+          if ((size_t)csc->i[k] == i) {
+            d = csc->x[k];
+            break;
+          }
+        }
+        Dinv[i] = (fabs(d) > DBL_EPSILON) ? 1.0 / d : 1.0;
+      }
+      return NUMERICS_OK;
+    }
+    case NM_SPARSE_BLOCK: {
+      NumericsMatrix* M_sparse = NM_copy_to_sparse(M, DBL_EPSILON);
+      if (!M_sparse) {
+        return numerics_error("globalFrictionContact_extract_diagonal_inverse",
+                              "unable to convert M to sparse storage");
+      }
+      const int info = globalFrictionContact_extract_diagonal_inverse(M_sparse, Dinv);
+      NM_clear(M_sparse);
+      free(M_sparse);
+      return info;
+    }
+    default:
+      return numerics_error("globalFrictionContact_extract_diagonal_inverse",
+                            "unsupported matrix storage %d", M->storageType);
+  }
+}
+
+/** Binary search for row in a sorted CSC column (rows[start..end-1]).
+ *  Returns the index if found, -1 otherwise.
+ */
+static CS_INT globalFrictionContact_csc_find_row(const CS_INT* rows, CS_INT start, CS_INT end,
+                                                 CS_INT row) {
+  CS_INT lo = start;
+  CS_INT hi = end - 1;
+  while (lo <= hi) {
+    const CS_INT mid = (lo + hi) / 2;
+    const CS_INT r = rows[mid];
+    if (r == row)
+      return mid;
+    else if (r < row)
+      lo = mid + 1;
+    else
+      hi = mid - 1;
+  }
+  return -1;
+}
+
+int globalFrictionContact_compute_rho_from_diagonal_approximation(
+    GlobalFrictionContactProblem* problem, double* rho) {
+  assert(problem);
+  assert(problem->M);
+  assert(problem->H);
+  assert(rho);
+
+  const int dim = problem->dimension;
+  if (dim != 2 && dim != 3) {
+    return numerics_error("globalFrictionContact_compute_rho_from_diagonal_approximation",
+                          "only 2D and 3D problems are supported");
+  }
+
+  const size_t n = to_size_t(problem->M->size0);
+  const size_t m = to_size_t(problem->H->size1);
+  const size_t nc = problem->numberOfContacts;
+
+  if (m != nc * (size_t)dim) {
+    return numerics_error("globalFrictionContact_compute_rho_from_diagonal_approximation",
+                          "inconsistent problem dimensions: H->size1=%zu, nc=%zu, dim=%d", m,
+                          nc, dim);
+  }
+
+  /* Diagonal inverse of the global mass matrix. */
+  double* Dinv = (double*)calloc(n, sizeof(double));
+  int info = globalFrictionContact_extract_diagonal_inverse(problem->M, Dinv);
+  if (info != NUMERICS_OK) {
+    free(Dinv);
+    return info;
+  }
+
+  /* Work on a CSC copy of H. */
+  NumericsMatrix* H_work = problem->H;
+  NumericsMatrix* H_copy = NULL;
+  if (H_work->storageType != NM_SPARSE) {
+    H_copy = NM_copy_to_sparse(H_work, DBL_EPSILON);
+    if (!H_copy) {
+      free(Dinv);
+      return numerics_error("globalFrictionContact_compute_rho_from_diagonal_approximation",
+                            "unable to convert H to sparse storage");
+    }
+    H_work = H_copy;
+  }
+
+  CSparseMatrix* csc = NM_csc(H_work);
+  if (!csc) {
+    free(Dinv);
+    if (H_copy) {
+      NM_clear(H_copy);
+      free(H_copy);
+    }
+    return numerics_error("globalFrictionContact_compute_rho_from_diagonal_approximation",
+                          "unable to get CSC storage of H");
+  }
+
+  FrictionContactProblem* local3d = NULL;
+  if (dim == 3) {
+    local3d = fc3d_local_problem_allocate(NM_DENSE);
+    if (!local3d) {
+      free(Dinv);
+      if (H_copy) {
+        NM_clear(H_copy);
+        free(H_copy);
+      }
+      return numerics_error("globalFrictionContact_compute_rho_from_diagonal_approximation",
+                            "unable to allocate 3D local problem");
+    }
+  }
+
+  for (size_t c = 0; c < nc; ++c) {
+    /* Build the dim x dim diagonal block W_{cc} = H_c^T D^{-1} H_c. */
+    double block[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
+
+    for (int l1 = 0; l1 < dim; ++l1) {
+      const size_t col1 = c * dim + l1;
+      const CS_INT s1 = csc->p[col1];
+      const CS_INT e1 = csc->p[col1 + 1];
+      for (int l2 = l1; l2 < dim; ++l2) {
+        const size_t col2 = c * dim + l2;
+        const CS_INT s2 = csc->p[col2];
+        const CS_INT e2 = csc->p[col2 + 1];
+        double sum = 0.0;
+        for (CS_INT k = s1; k < e1; ++k) {
+          const CS_INT row = csc->i[k];
+          const CS_INT idx = globalFrictionContact_csc_find_row(csc->i, s2, e2, row);
+          if (idx >= 0) {
+            sum += csc->x[k] * Dinv[row] * csc->x[idx];
+          }
+        }
+        block[l1][l2] = sum;
+        block[l2][l1] = sum;
+      }
+    }
+
+    if (dim == 2) {
+      rho[c * 2 + 0] = (block[0][0] > DBL_EPSILON) ? 1.0 / block[0][0] : 1.0;
+      rho[c * 2 + 1] = (block[1][1] > DBL_EPSILON) ? 1.0 / block[1][1] : 1.0;
+    } else {
+      /* Copy block into the 3x3 dense local matrix (column-major). */
+      double* MLocal = local3d->M->dense;
+      for (int j = 0; j < 3; ++j) {
+        for (int i = 0; i < 3; ++i) {
+          MLocal[i + j * 3] = block[i][j];
+        }
+      }
+      if (MLocal[0] > DBL_EPSILON && MLocal[4] > DBL_EPSILON && MLocal[8] > DBL_EPSILON) {
+        compute_rho_split_spectral_norm(local3d, &rho[c * 3]);
+      } else {
+        rho[c * 3 + 0] = 1.0;
+        rho[c * 3 + 1] = 1.0;
+        rho[c * 3 + 2] = 1.0;
+      }
+    }
+  }
+
+  if (local3d) frictionContactProblem_free(local3d);
+  free(Dinv);
+  if (H_copy) {
+    NM_clear(H_copy);
+    free(H_copy);
+  }
+
+  return NUMERICS_OK;
 }
 
 FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
