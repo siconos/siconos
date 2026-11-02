@@ -26,7 +26,10 @@
 #   python3 bench-dambreak.py 40 --t-settle 0.5 --T 3
 
 import argparse
+import functools
+import json
 import math
+import os
 import sys
 
 import nonos.bridge as sio
@@ -81,6 +84,12 @@ p.add_argument("--margin", type=float, default=None)
 p.add_argument("--contact-margin", type=float, default=None)
 p.add_argument("--large-search", action="store_true")
 p.add_argument("--sort-frequency", type=int, default=None)
+# the explicit DEM scheme (siconos --scheme dem): the largest overlap at
+# impact as a fraction of the body radius, the damping ratio of a contact
+# between two liquid disks, and the time steps per contact duration
+p.add_argument("--dem-overlap", type=float, default=0.5)
+p.add_argument("--dem-damping-ratio", type=float, default=0.7)
+p.add_argument("--dem-steps", type=float, default=10.0)
 # siconos: the hdf5 tables, vtkhdf: a ParaView file instead, or both
 p.add_argument(
     "--output-format", choices=("siconos", "vtkhdf", "both"), default="siconos"
@@ -274,6 +283,41 @@ t_settle = args.t_settle if args.t_settle is not None else 2 * t_fall
 t_flow = 2 * math.sqrt(2 * L_s / math.cos(theta) / (g * math.sin(theta)))
 T = args.T if args.T is not None else t_settle + t_flow
 
+# The explicit DEM scheme, chosen by the siconos command (--scheme dem, in
+# the options it passes to this script): its penalty springs must be sized
+# on the scene, the default law is too soft for it and the bodies sink
+# through the terrain. A body of mass m = rho pi R^2 hitting at speed v
+# overlaps by v sqrt(m / k_n): an overlap of at most a fraction f of its
+# radius R needs k_n = pi rho (v / f)^2, whatever R. The fastest impacts
+# are the drop on the reservoir floor and, in the flow, the normal speed
+# where the slope bends. The dashpot damps the contact of two liquid
+# disks (the lightest pair) at the given ratio, as the nonsmooth law has
+# e = 0, and h resolves its duration pi sqrt(m / k_n) in --dem-steps steps.
+# The --dem-kn, --dem-cn and --h options of the siconos command override
+# these.
+scheme = json.loads(os.environ.get("SICONOS_SIM_OPTIONS", "{}")).get("scheme")
+dem_osi = None
+if scheme == "dem":
+    v_impact = max(math.sqrt(2 * g * (y_max - terrain_y(W))), v_max * math.sin(theta))
+    rho = max(args.density_liquid, args.density_rock)
+    k_n = math.pi * rho * (v_impact / args.dem_overlap) ** 2
+    m_pair = 0.5 * min(
+        args.density_liquid * math.pi * r_d**2,
+        args.density_rock * min(shapes[k][1] for k in rocks),
+    )
+    c_n = 2 * args.dem_damping_ratio * math.sqrt(k_n * m_pair)
+    if args.h is None:
+        h = min(h, math.pi * math.sqrt(m_pair / k_n) / args.dem_steps)
+    dem_osi = functools.partial(
+        sio.ExplicitDEMOSI, normal_stiffness=k_n, normal_damping=c_n
+    )
+    print(
+        "bench-dambreak: dem k_n={:.3e} c_n={:.3e} impact speed={:.0f}".format(
+            k_n, c_n, v_impact
+        ),
+        flush=True,
+    )
+
 # --- scene ----------------------------------------------------------------
 with MechanicsHdf5Runner(io_filename=io_filename, config=runner_config) as io:
     statics = {
@@ -350,6 +394,8 @@ run_options["violation_verbose"] = True
 run_options["output_frequency"] = max(1, int(round(0.01 / h)))
 run_options["with_timer"] = True
 run_options["time_stepping"] = None
+if dem_osi is not None:
+    run_options["osi"] = dem_osi
 run_options["output_contact_info"] = True
 run_options["output_contact_work"] = False
 run_options["output_format"] = args.output_format
