@@ -92,7 +92,7 @@ struct sweep_state {
 
 // the multiplier of an interaction that is not active is zero: it starts
 // from zero when it is active again
-struct inactive_multiplier
+struct zero_inactive_multiplier
     : kernel<all<interactions>, in<"activation", by_topology>, inout<"lambda">> {
   static void apply(const auto&, bool activation, auto& lambda) {
     if (!activation) {
@@ -112,7 +112,7 @@ auto velocity_change(auto& m, auto h, const auto& blocked, const auto& lambda, c
 
 // the warm start: the systems of an active interaction get the impulse of
 // its multiplier at the previous step
-struct warm_start
+struct apply_warm_start
     : kernel<active<interactions>, in<"nds", by_topology>, in<"h_matrix1">, in<"h_matrix2">,
              in<"lambda">, through<"ds1", "mass_matrix", by_topology>,
              through<"ds2", "mass_matrix", by_topology>,
@@ -133,8 +133,8 @@ struct warm_start
 // one projected Gauss-Seidel step on an active interaction between rigid
 // systems: its multiplier, and the velocities of its systems by accumulation
 // (add_through). A one system interaction (nds == 1) has ds1 == ds2 and its
-// jacobian h_matrix1 (as contacts::h_blocks).
-struct projected_gauss_seidel
+// jacobian h_matrix1 (as contacts::assemble_h_blocks).
+struct apply_projected_gauss_seidel
     : kernel<active<interactions>, in<"nds", by_topology>, in<"h_matrix1">, in<"h_matrix2">,
              in<"ydot">, through<"nslaw", "e">, through<"nslaw", "mu">,
              through<"ds1", "mass_matrix", by_topology>,
@@ -194,7 +194,7 @@ struct projected_gauss_seidel
 // the contact impulse H^T lambda of an active interaction between rigid
 // systems, added to the assembled impulses of its systems (two interactions
 // may add to the same system: in order). A one system interaction: ds1.
-struct contact_impulse
+struct assemble_contact_impulse
     : kernel<active<interactions>, in<"nds", by_topology>, in<"h_matrix1">, in<"h_matrix2">,
              in<"lambda">, through<"ds1", "index", by_topology>,
              through<"ds2", "index", by_topology>,
@@ -328,29 +328,31 @@ using storage::schedule::stage;
 
 // on a kind of interactions
 
-struct warm_start : stage<
-                        "lambda at the previous step, zero if not active; "
-                        "v <- v + M^-1 H^T lambda, the warm start"> {
+struct apply_warm_start
+    : stage<
+          "Apply the warm start: lambda at the previous step, zero if not active; "
+          "v <- v + M^-1 H^T lambda"> {
   static void run(auto& c) {
-    c.kind.template run<inactive_multiplier>(c.step, nullptr);
+    c.kind.template run<zero_inactive_multiplier>(c.step, nullptr);
     if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
-      c.kind.template run<anitescu_tasora::warm_start>(c.step, nullptr);
+      c.kind.template run<anitescu_tasora::apply_warm_start>(c.step, nullptr);
     }
   }
 };
 
-struct inactive_multipliers : stage<"lambda of the interactions that are not active is zero"> {
-  static void run(auto& c) { c.kind.template run<inactive_multiplier>(c.step, nullptr); }
+struct zero_inactive_multipliers
+    : stage<"Zero lambda of the interactions that are not active"> {
+  static void run(auto& c) { c.kind.template run<zero_inactive_multiplier>(c.step, nullptr); }
 };
 
 struct sweep : stage<
-                   "lambda <- P_K(lambda - eta (H v + e ydot)), v <- v + M^-1 H^T dlambda, "
-                   "interaction by interaction"> {
+                   "Run one sweep: lambda <- P_K(lambda - eta (H v + e ydot)), "
+                   "v <- v + M^-1 H^T dlambda, interaction by interaction"> {
   static void run(auto& c) {
     if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
       using scalar = typename decltype(c.kind.env())::scalar;
       sweep_state<scalar> p;
-      c.kind.template run<projected_gauss_seidel>(c.step, p);
+      c.kind.template run<apply_projected_gauss_seidel>(c.step, p);
       // the largest over the kinds, relative to the largest lambda
       c.change = std::max(c.change, p.change / std::max(p.largest, scalar(1e-300)));
     } else if (c.kind.number_of_interactions() > 0) {
@@ -359,11 +361,12 @@ struct sweep : stage<
   }
 };
 
-struct contact_impulses : stage<"p0 = H^T lambda, the contact impulses (outputs)"> {
+struct assemble_contact_impulses
+    : stage<"Assemble p0 = H^T lambda, the contact impulses (outputs)"> {
   static void run(auto& c) {
     if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
       auto rigid_systems = std::get<0>(c.integrator.systems());
-      c.kind.template run<contact_impulse>(
+      c.kind.template run<assemble_contact_impulse>(
           c.step, moreau_jean::block_vector{
                       rigid_systems.p0_view(c.integrator.p0_vector_assembled())});
     }
@@ -372,19 +375,21 @@ struct contact_impulses : stage<"p0 = H^T lambda, the contact impulses (outputs)
 
 // on a kind of systems
 
-struct position_update : stage<"q at step + 1 of the involved systems"> {
+struct update_positions : stage<"Update q at step + 1 of the involved systems"> {
   static void run(auto& c) {
     auto p = theta_method::stages::parameters(c.kind, c.h, c.integrator.theta());
     // their velocities are already updated, by the sweeps
-    c.kind.template run<theta_method::involved_position>(c.step, p);
-    c.kind.template run<theta_method::boundary_conditions>(c.step, p);
+    c.kind.template run<theta_method::update_position_involved>(c.step, p);
+    c.kind.template run<theta_method::apply_boundary_conditions>(c.step, p);
   }
 };
 
 // on the integrator
 
 // the offsets of the involved systems in the assembled vectors (no matrix)
-struct impulses_setup : stage<"the offsets of the involved systems, p0 is zero">, host_code {
+struct setup_impulses
+    : stage<"Set up the impulses: the offsets of the involved systems, p0 is zero">,
+      host_code {
   static void run(auto& c) {
     auto osi = c.integrator;
     std::size_t offset = 0;
@@ -397,11 +402,11 @@ struct impulses_setup : stage<"the offsets of the involved systems, p0 is zero">
   }
 };
 
-struct start : stage<"no sweep yet">, host_code {
+struct start : stage<"Start: no sweep yet">, host_code {
   static void run(auto& c) { c.iterations = 0; }
 };
 
-struct next_sweep : stage<"a new sweep">, host_code {
+struct next_sweep : stage<"Start a new sweep">, host_code {
   static void run(auto& c) {
     ++c.iterations;
     c.change = 0;
@@ -426,7 +431,7 @@ struct converged : condition<"lambda changes less than the tolerance, or too man
 };
 
 // as one_step_nonsmooth_problem::check: the result of the solver
-struct check : stage<"the number of iterations, a warning if lambda did not converge">,
+struct check : stage<"Check the number of iterations, warn if lambda did not converge">,
                host_code {
   static void run(auto& c) {
     auto osnsp = c.time_stepping.one_step_nonsmooth_problem();
@@ -445,7 +450,7 @@ struct check : stage<"the number of iterations, a warning if lambda did not conv
 };
 
 // the CCP on the assembled problem, by APGD
-struct apgd_solve : stage<"the cone complementarity problem (W, q, mu) by APGD: lambda">,
+struct solve_apgd : stage<"Solve the cone complementarity problem (W, q, mu) by APGD: lambda">,
                     host_code {
   static void run(auto& c) {
     auto osi = c.integrator;
@@ -483,39 +488,39 @@ namespace at = stages;
 // the Anitescu-Tasora time step
 using time_step_schedule = sequence<
     "Anitescu-Tasora time step",
-    for_systems<th::iteration_matrix, th::free_state>,
-    for_interactions<co::relation_sets, co::jacobians, co::outputs, co::free_outputs>,
-    co::active_set,
+    for_systems<th::recompute_minv_f, th::compute_free_state>,
+    for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs, co::compute_free_outputs>,
+    co::compute_active_set,
     when<co::with_contacts,
-         for_interactions<co::time_invariant_jacobians, at::warm_start>,
+         for_interactions<co::compute_time_invariant_jacobians, at::apply_warm_start>,
          at::start,
          repeat<at::converged,
                 at::next_sweep,
                 for_interactions<at::sweep>>,
          at::check,
-         for_systems<at::position_update>,
-         at::impulses_setup,
-         for_interactions<at::contact_impulses>>>;
+         for_systems<at::update_positions>,
+         at::setup_impulses,
+         for_interactions<at::assemble_contact_impulses>>>;
 
 namespace mj = moreau_jean::stages;
 
 // the same CCP by APGD, on the assembled problem of Moreau-Jean
 using apgd_time_step_schedule = sequence<
     "Anitescu-Tasora time step, APGD",
-    for_systems<th::iteration_matrix, th::free_state>,
-    for_interactions<co::relation_sets, co::jacobians, co::outputs, co::free_outputs>,
-    co::active_set,
+    for_systems<th::recompute_minv_f, th::compute_free_state>,
+    for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs, co::compute_free_outputs>,
+    co::compute_active_set,
     when<co::with_contacts,
-         co::assembly_setup,
-         for_interactions<co::time_invariant_jacobians, at::inactive_multipliers, co::h_matrix,
-                          co::multipliers, mj::impact_law, mj::free_velocity_output>,
-         for_systems<co::mass_matrix, co::stiffness_matrix>,
-         mj::delassus_operator,
-         at::apgd_solve,
+         co::setup_assembly,
+         for_interactions<co::compute_time_invariant_jacobians, at::zero_inactive_multipliers, co::assemble_h_matrix,
+                          co::assemble_multipliers, mj::apply_newton_impact_law, mj::assemble_free_velocity_output>,
+         for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix>,
+         mj::assemble_delassus_operator,
+         at::solve_apgd,
          at::check,
-         mj::velocity_correction,
+         mj::apply_velocity_correction,
          for_interactions<co::keep_multipliers>,
-         for_systems<mj::contact_update>>>;
+         for_systems<mj::update_contact_state>>>;
 
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;

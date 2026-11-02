@@ -25,8 +25,8 @@ namespace siconos::simul::moreau_jean {
    the initial state). The rest of a step is in contacts.hpp. */
 
 using namespace kernels;
-using theta_method::involved_position;
 using theta_method::time_step;
+using theta_method::update_position_involved;
 
 // an assembled vector
 template <typename Vector>
@@ -35,14 +35,15 @@ struct block_vector {
 };
 
 // the contact impulse of an involved system
-struct contact_velocity : kernel<involved<systems>, rank, inout<"velocity", next>> {
+struct update_contact_next_velocity
+    : kernel<involved<systems>, rank, inout<"velocity", next>> {
   static void apply(auto& p, auto index, auto& v_next) {
     v_next += p.part(p.velocities, index, v_next);
   }
 };
 
 // the Newton impact law on the free output derivative
-struct impact_law
+struct apply_impact_law
     : kernel<all<interactions>, in<"ydot">, through<"nslaw", "e">, inout<"ydot", next>> {
   static void apply(const auto&, const auto& ydot, const auto& e, auto& ydot_next) {
     ydot_next += e * ydot;
@@ -50,7 +51,7 @@ struct impact_law
 };
 
 // the free output derivative of an active interaction in q of the problem
-struct free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
+struct assemble_free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
   static void apply(auto& p, auto row, const auto& ydot_next) {
     set_value(p.vector, row, ydot_next);
   }
@@ -65,30 +66,35 @@ using storage::schedule::stage;
 
 // on a kind of interactions
 
-struct impact_law : stage<"the Newton impact law on the free ydot at step + 1"> {
-  static void run(auto& c) { c.kind.template run<moreau_jean::impact_law>(c.step, nullptr); }
+struct apply_newton_impact_law
+    : stage<"Apply the Newton impact law on the free ydot at step + 1"> {
+  static void run(auto& c) {
+    c.kind.template run<moreau_jean::apply_impact_law>(c.step, nullptr);
+  }
 };
 
-struct free_velocity_output : stage<"q = H v_free, the free output derivatives"> {
+struct assemble_free_velocity_output
+    : stage<"Assemble q = H v_free, the free output derivatives"> {
   static void run(auto& c) {
-    c.kind.template run<free_output>(
+    c.kind.template run<assemble_free_output>(
         c.step, block_vector{c.kind.lambda_view(c.integrator.q_nsp_vector_assembled())});
   }
 };
 
 // on a kind of systems
 
-struct contact_update : stage<"v, q at step + 1 of the involved systems"> {
+struct update_contact_state : stage<"Update v, q at step + 1 of the involved systems"> {
   static void run(auto& c) {
     auto base = theta_method::stages::parameters(c.kind, c.h, c.integrator.theta());
     auto p = time_step{base.h, base.theta, c.kind.part(),
                        c.kind.velocity_view(c.integrator.velocity_vector_assembled())};
 
     // only the involved systems: the others keep their free state
-    c.kind.template run<fused<contact_velocity, involved_position>>(c.step, p);
+    c.kind.template run<fused<update_contact_next_velocity, update_position_involved>>(c.step,
+                                                                                       p);
 
     // the involved systems may have broken them
-    c.kind.template run<theta_method::boundary_conditions>(c.step, p);
+    c.kind.template run<theta_method::apply_boundary_conditions>(c.step, p);
   }
 };
 
@@ -159,12 +165,13 @@ void impulse(auto osi, auto step, auto h) {
   solve_linear_system(osi.mass_matrix_assembled(), p0, velocities);
 }
 
-struct delassus_operator : stage<"W = H M^-1 H^T, or H (M + h^2 theta^2 K)^-1 H^T">,
-                           host_code {
+struct assemble_delassus_operator
+    : stage<"Assemble W = H M^-1 H^T, or H (M + h^2 theta^2 K)^-1 H^T">,
+      host_code {
   static void run(auto& c) { delassus(c.integrator, c.step, c.h); }
 };
 
-struct solve : stage<"the frictional contact problem (W, q, mu): lambda">, host_code {
+struct solve : stage<"Solve the frictional contact problem (W, q, mu): lambda">, host_code {
   static void run(auto& c) {
     using time_stepping_t = typename std::decay_t<decltype(c.time_stepping)>::type;
     c.time_stepping.template solve_nonsmooth_problem<typename time_stepping_t::formulation_t>(
@@ -172,7 +179,8 @@ struct solve : stage<"the frictional contact problem (W, q, mu): lambda">, host_
   }
 };
 
-struct velocity_correction : stage<"the velocity correction M^-1 H^T lambda">, host_code {
+struct apply_velocity_correction : stage<"Apply the velocity correction M^-1 H^T lambda">,
+                                   host_code {
   static void run(auto& c) { impulse(c.integrator, c.step, c.h); }
 };
 
@@ -193,24 +201,24 @@ namespace mj = stages;
 // the Moreau-Jean time step
 using time_step_schedule = sequence<
     "Moreau-Jean time step",
-    for_systems<th::iteration_matrix, th::free_state>,
-    for_interactions<co::relation_sets, co::jacobians, co::outputs, co::free_outputs>,
-    co::active_set,
+    for_systems<th::recompute_minv_f, th::compute_free_state>,
+    for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs, co::compute_free_outputs>,
+    co::compute_active_set,
     when<co::with_contacts,
-         co::assembly_setup,
-         for_interactions<co::time_invariant_jacobians, co::h_matrix, co::multipliers,
-                          mj::impact_law, mj::free_velocity_output>,
-         for_systems<co::mass_matrix, co::stiffness_matrix>,
-         mj::delassus_operator,
+         co::setup_assembly,
+         for_interactions<co::compute_time_invariant_jacobians, co::assemble_h_matrix, co::assemble_multipliers,
+                          mj::apply_newton_impact_law, mj::assemble_free_velocity_output>,
+         for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix>,
+         mj::assemble_delassus_operator,
          mj::solve,
-         mj::velocity_correction,
+         mj::apply_velocity_correction,
          for_interactions<co::keep_multipliers>,
-         for_systems<mj::contact_update>>>;
+         for_systems<mj::update_contact_state>>>;
 
 // the state before the first step
 using initial_schedule =
-    sequence<"Moreau-Jean initial state", for_systems<th::initial_state>,
-             for_interactions<co::initial_state>>;
+    sequence<"Moreau-Jean initial state", for_systems<th::set_initial_state>,
+             for_interactions<co::set_initial_state>>;
 
 // clang-format on
 

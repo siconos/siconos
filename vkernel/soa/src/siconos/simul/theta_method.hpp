@@ -61,7 +61,7 @@ struct fem_factors {
 // theta-method on the positions: q(step + 1) from the velocities at step and
 // step + 1, on the systems of Space
 template <typename Space>
-struct position_on
+struct update_position
     : kernel<Space, in<"q">, in<"velocity">, in<"velocity", next>, out<"q", next>> {
   static void apply(const auto& p, const auto& q, const auto& v, const auto& v_next,
                     auto& q_next) {
@@ -69,12 +69,12 @@ struct position_on
   }
 };
 
-using position = position_on<all<systems>>;
-using involved_position = position_on<involved<systems>>;
+using update_position_all = update_position<all<systems>>;
+using update_position_involved = update_position<involved<systems>>;
 
 // M^-1 f of a rigid system, f being constant over the step
-struct minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">, out<"minv_f", by_kind>,
-                       out<"minv_f", by_kind, next>> {
+struct compute_minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">,
+                               out<"minv_f", by_kind>, out<"minv_f", by_kind, next>> {
   static void apply(const auto&, auto& mass_matrix, const auto& f, auto& minv_f,
                     auto& minv_f_next) {
     minv_f = f;
@@ -84,8 +84,8 @@ struct minv_f : kernel<all<systems>, in<"mass_matrix">, in<"fext">, out<"minv_f"
 };
 
 // free flight of a rigid system (K = 0)
-struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_kind>,
-                              in<"minv_f", by_kind, next>, out<"velocity", next>> {
+struct compute_free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_kind>,
+                                      in<"minv_f", by_kind, next>, out<"velocity", next>> {
   static void apply(const auto& p, const auto& v, const auto& minv_f, const auto& minv_f_next,
                     auto& v_next) {
     v_next = v + p.h * p.theta * minv_f_next + p.h * (1 - p.theta) * minv_f;
@@ -95,9 +95,10 @@ struct free_velocity : kernel<all<systems>, in<"velocity">, in<"minv_f", by_kind
 // M^-1 (f - K q) of a FEM system, with the factorization of M kept on the
 // system, f being constant over the step
 template <typename Vector>
-struct fem_minv_f : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">, in<"fext">,
-                           out<"minv_f", by_kind>, out<"minv_f", by_kind, next>>,
-                    host_only {
+struct compute_fem_minv_f
+    : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">, in<"fext">,
+             out<"minv_f", by_kind>, out<"minv_f", by_kind, next>>,
+      host_only {
   static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& f, auto& minv_f,
                     auto& minv_f_next) {
     Vector fmkq = f - k * q;
@@ -109,9 +110,9 @@ struct fem_minv_f : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">, in
 // free flight of a FEM system: W dv = h theta F(step + 1) + h (1 - theta)
 // F(step), F = f - K q, W = M + h^2 theta^2 K factorized once on the system
 template <typename Vector>
-struct fem_free_velocity : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">,
-                                  in<"velocity">, in<"fext">, out<"velocity", next>>,
-                           host_only {
+struct compute_fem_free_velocity : kernel<all<systems>, item_index, in<"k_matrix">, in<"q">,
+                                          in<"velocity">, in<"fext">, out<"velocity", next>>,
+                                   host_only {
   static void apply(auto& p, auto i, const auto& k, const auto& q, const auto& v,
                     const auto& f, auto& v_next) {
     Vector tf = f - k * q;
@@ -125,7 +126,7 @@ struct fem_free_velocity : kernel<all<systems>, item_index, in<"k_matrix">, in<"
 // the boundary conditions of a system: its blocked velocity components are
 // zero, and its position follows. Only the systems with boundary conditions
 // are visited when bc_velocities_0 is a sparse set.
-struct boundary_conditions
+struct apply_boundary_conditions
     : kernel<entries<systems, "bc_velocities_0", by_topology>, entry, in<"q">, in<"velocity">,
              inout<"velocity", next>, out<"q", next>> {
   static void apply(const auto& p, const auto& blocked, const auto& q, const auto& v,
@@ -134,7 +135,7 @@ struct boundary_conditions
     for (auto k : blocked) {
       v_next(k) = 0.0;
     }
-    position::apply(p, q, v, v_next, q_next);
+    update_position_all::apply(p, q, v, v_next, q_next);
   }
 };
 
@@ -161,21 +162,21 @@ void compute_minv_f(auto kind, auto step) {
   if constexpr (kind.with_k_matrix()) {
     using scalar = typename decltype(kind.env())::scalar;
     auto factor = [&](auto i) -> auto& { return kind.fem_m_factor(step, i); };
-    kind.template run<fem_minv_f<algebra::unbounded_vector<scalar>>>(step,
-                                                                     fem_factors{factor});
+    kind.template run<compute_fem_minv_f<algebra::unbounded_vector<scalar>>>(
+        step, fem_factors{factor});
   } else {
-    kind.template run<minv_f>(step, nullptr);
+    kind.template run<theta_method::compute_minv_f>(step, nullptr);
   }
 }
 
-struct initial_state : stage<"v at step + 1 is zero, M^-1 f"> {
+struct set_initial_state : stage<"Set the initial state: v at step + 1 is zero, M^-1 f"> {
   static void run(auto& c) {
     c.kind.template run<zero_velocity>(c.step, nullptr);
     compute_minv_f(c.kind, c.step);
   }
 };
 
-struct iteration_matrix : stage<"M^-1 f, if f or K change"> {
+struct recompute_minv_f : stage<"Recompute M^-1 f, if f or K change"> {
   static void run(auto& c) {
     using kind_t = std::decay_t<decltype(c.kind)>;
     if constexpr (kind_t::with_k_matrix() || !kind_t::time_invariant_fext()) {
@@ -184,7 +185,8 @@ struct iteration_matrix : stage<"M^-1 f, if f or K change"> {
   }
 };
 
-struct free_state : stage<"the free state: v, q at step + 1 without the contact impulses"> {
+struct compute_free_state
+    : stage<"Compute the free state: v, q at step + 1 without the contact impulses"> {
   static void run(auto& c) {
     auto p = parameters(c.kind, c.h, c.integrator.theta());
 
@@ -196,13 +198,13 @@ struct free_state : stage<"the free state: v, q at step + 1 without the contact 
       auto factor = [&](auto i) -> auto& {
         return c.kind.fem_w_factor(c.step, i, c.h, c.integrator.theta());
       };
-      c.kind.template run<fused<fem_free_velocity<vector>, position>>(
+      c.kind.template run<fused<compute_fem_free_velocity<vector>, update_position_all>>(
           c.step, fem_time_step{p.h, p.theta, factor});
     } else {
-      c.kind.template run<fused<free_velocity, position>>(c.step, p);
+      c.kind.template run<fused<compute_free_velocity, update_position_all>>(c.step, p);
     }
 
-    c.kind.template run<boundary_conditions>(c.step, p);
+    c.kind.template run<apply_boundary_conditions>(c.step, p);
   }
 };
 

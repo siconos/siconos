@@ -33,12 +33,13 @@ using moreau_jean::block_vector;
 
 // the global problem of the step, kept by the integrator (numerics)
 struct global_problem : nonsmooth_problem<GlobalFrictionContactProblem> {};
-using theta_method::involved_position;
 using theta_method::time_step;
+using theta_method::update_position_involved;
 
 // b of an active interaction: its impact term e ydot(step)
-struct impact_term : kernel<active<interactions>, rank, in<"ydot">, through<"nslaw", "e">>,
-                     assembles {
+struct assemble_impact_term
+    : kernel<active<interactions>, rank, in<"ydot">, through<"nslaw", "e">>,
+      assembles {
   static void apply(auto& p, auto row, const auto& ydot, const auto& e) {
     set_value(p.vector, row, e * ydot);
   }
@@ -52,14 +53,15 @@ struct system_vector {
 };
 
 // the free velocity of an involved system in the assembled velocities
-struct free_velocity : kernel<involved<systems>, rank, in<"velocity", next>>, assembles {
+struct assemble_free_velocity : kernel<involved<systems>, rank, in<"velocity", next>>,
+                                assembles {
   static void apply(auto& p, auto index, const auto& v_free) {
     set_value(p.vector, p.at(index), v_free);
   }
 };
 
 // the velocity of an involved system from the solution
-struct solution_velocity : kernel<involved<systems>, rank, out<"velocity", next>> {
+struct set_solution_velocity : kernel<involved<systems>, rank, out<"velocity", next>> {
   static void apply(auto& p, auto index, auto& v_next) {
     v_next = p.part(p.velocities, index, v_next);
   }
@@ -74,34 +76,34 @@ using storage::schedule::stage;
 
 // on a kind of interactions
 
-struct impact_term : stage<"b = e ydot at step, the impact terms"> {
+struct assemble_impact_terms : stage<"Assemble b = e ydot at step, the impact terms"> {
   static void run(auto& c) {
-    c.kind.template run<moreau_jean_gosi::impact_term>(
+    c.kind.template run<moreau_jean_gosi::assemble_impact_term>(
         c.step, block_vector{c.kind.lambda_view(c.integrator.b_vector_assembled())});
   }
 };
 
 // on a kind of systems
 
-struct free_velocities : stage<"v_free of the involved systems"> {
+struct assemble_free_velocities : stage<"Assemble v_free of the involved systems"> {
   static void run(auto& c) {
-    c.kind.template run<moreau_jean_gosi::free_velocity>(
+    c.kind.template run<moreau_jean_gosi::assemble_free_velocity>(
         c.step, system_vector{c.kind.velocity_view(c.integrator.velocity_vector_assembled()),
                               c.kind.at()});
   }
 };
 
-struct velocity_update : stage<"v, q at step + 1 of the involved systems"> {
+struct update_solved_state : stage<"Update v, q at step + 1 of the involved systems"> {
   static void run(auto& c) {
     auto base = theta_method::stages::parameters(c.kind, c.h, c.integrator.theta());
     auto p = time_step{base.h, base.theta, c.kind.part(),
                        c.kind.velocity_view(c.integrator.velocity_vector_assembled())};
 
     // only the involved systems: the others keep their free state
-    c.kind.template run<fused<solution_velocity, involved_position>>(c.step, p);
+    c.kind.template run<fused<set_solution_velocity, update_position_involved>>(c.step, p);
 
     // the involved systems may have broken them
-    c.kind.template run<theta_method::boundary_conditions>(c.step, p);
+    c.kind.template run<theta_method::apply_boundary_conditions>(c.step, p);
   }
 };
 
@@ -121,8 +123,9 @@ void solve(auto osi, auto osnsp, auto& a) {
                      osi.lambda_vector_assembled(), osi.ydot_vector_assembled(), v);
 }
 
-struct global_solve
-    : stage<"the global frictional contact problem (A, H^T, A v_free, b, mu): v, lambda">,
+struct solve_global_problem
+    : stage<
+          "Solve the global frictional contact problem (A, H^T, A v_free, b, mu): v, lambda">,
       host_code {
   static void run(auto& c) {
     auto osi = c.integrator;
@@ -158,17 +161,17 @@ namespace gosi = stages;
 // the Moreau-Jean global time step
 using time_step_schedule = sequence<
     "Moreau-Jean global time step",
-    for_systems<th::iteration_matrix, th::free_state>,
-    for_interactions<co::relation_sets, co::jacobians, co::outputs, co::free_outputs>,
-    co::active_set,
+    for_systems<th::recompute_minv_f, th::compute_free_state>,
+    for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs, co::compute_free_outputs>,
+    co::compute_active_set,
     when<co::with_contacts,
-         co::assembly_setup,
-         for_interactions<co::time_invariant_jacobians, co::h_matrix, co::multipliers,
-                          gosi::impact_term>,
-         for_systems<co::mass_matrix, co::stiffness_matrix, gosi::free_velocities>,
-         gosi::global_solve,
+         co::setup_assembly,
+         for_interactions<co::compute_time_invariant_jacobians, co::assemble_h_matrix, co::assemble_multipliers,
+                          gosi::assemble_impact_terms>,
+         for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix, gosi::assemble_free_velocities>,
+         gosi::solve_global_problem,
          for_interactions<co::keep_multipliers>,
-         for_systems<gosi::velocity_update>>>;
+         for_systems<gosi::update_solved_state>>>;
 
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;

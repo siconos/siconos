@@ -144,7 +144,7 @@ struct system_kind : item {
         using involved_systems = kernels::involved<kernels::systems>;
         auto n = kernels::count<involved_systems, kernel_context>(self()->data(), step);
         sum_dofs().assign(n + 1, 0);
-        run<contacts::dofs>(step, contacts::dof_offsets{sum_dofs()});
+        run<contacts::compute_dofs>(step, contacts::dof_offsets{sum_dofs()});
         kernels::inclusive_scan(sum_dofs());
       } else {
         // compile time systems => sum dofs useless
@@ -167,7 +167,7 @@ struct system_kind : item {
     // the active set: no system is involved before the marks of the
     // interactions
     void clear_involved(auto step) {
-      run<contacts::not_involved>(step, nullptr);
+      run<contacts::clear_involved>(step, nullptr);
       if constexpr (with_index_sets<Topology>) {
         index_set<system, involved_set_tag, Topology>(self()->data()).clear();
       }
@@ -181,12 +181,12 @@ struct system_kind : item {
       using indice = typename decltype(self()->env())::indice;
       auto offsets = kernels::offsets<indice>(
           storage::prop_values<system, "involved", Topology>(data, step));
-      run<contacts::involved_index>(step, contacts::ranks{offsets});
+      run<contacts::set_involved_index>(step, contacts::ranks{offsets});
       if constexpr (with_index_sets<Topology>) {
         auto emplace = [&data](auto i, auto index) {
           index_set<system, involved_set_tag, Topology>(data).emplace(i, index);
         };
-        run<contacts::involved_entry>(step, contacts::ranks{offsets, emplace});
+        run<contacts::collect_involved_systems>(step, contacts::ranks{offsets, emplace});
       }
       number_of_involved_ds() = offsets.back();
       return offsets.back();
@@ -200,14 +200,14 @@ struct system_kind : item {
 
     void assemble_mass_matrix(auto step, auto& assembled) {
       // size may be 0
-      run<contacts::diagonal_block<"mass_matrix">>(
+      run<contacts::assemble_diagonal_block<"mass_matrix">>(
           step, contacts::diagonal_blocks{mass_matrix_view(assembled), at()});
     }
 
     void assemble_k_matrix(auto step, auto& assembled) {
       if constexpr (with_k_matrix()) {
         // size may be 0
-        run<contacts::diagonal_block<"k_matrix">>(
+        run<contacts::assemble_diagonal_block<"k_matrix">>(
             step, contacts::diagonal_blocks{k_matrix_view(assembled), at()});
       }
       // else the systems are rigid and the sparse k_matrix is not filled.
@@ -399,7 +399,7 @@ struct interaction_kind : item {
     }
 
     void compute_h_matrices(auto step) {
-      run<contacts::jacobians>(step, contacts::at_step{step});
+      run<contacts::compute_jacobians>(step, contacts::at_step{step});
     }
 
     static constexpr bool time_invariant_h_matrices() {
@@ -407,7 +407,9 @@ struct interaction_kind : item {
       return storage::has_property_t<interaction, property::time_invariant, data_t>();
     }
 
-    void compute_output(auto step) { run<contacts::output>(step, contacts::at_step{step}); }
+    void compute_output(auto step) {
+      run<contacts::compute_output>(step, contacts::at_step{step});
+    }
 
     // the active set: the active interactions, their rank among the active
     // interactions of this kind, the systems they involve; the number of
@@ -418,7 +420,7 @@ struct interaction_kind : item {
       if constexpr (with_index_sets<Topology>) {
         index_set<interaction, active_set_tag, Topology>(data).clear();
       }
-      run<kernels::fused<contacts::activation, contacts::mark_involved>>(
+      run<kernels::fused<contacts::compute_activation, contacts::mark_involved>>(
           step, contacts::active_set{h, static_cast<decltype(h)>(gamma),
                                      static_cast<decltype(h)>(threshold)});
       auto rows = kernels::offsets<indice>(
@@ -427,7 +429,7 @@ struct interaction_kind : item {
         auto emplace = [&data](auto i, auto row) {
           index_set<interaction, active_set_tag, Topology>(data).emplace(i, row);
         };
-        run<contacts::active_entry>(step, contacts::ranks{rows, emplace});
+        run<contacts::collect_active_interactions>(step, contacts::ranks{rows, emplace});
       }
       number_of_interactions() = rows.back();
       return rows.back();
@@ -441,13 +443,13 @@ struct interaction_kind : item {
 
       if constexpr (between_rigid_systems()) {
         // between rigid systems (i.e disk/disk)
-        run<contacts::h_blocks>(
+        run<contacts::assemble_h_blocks>(
             step, contacts::block_matrix{h_matrix_view(assembled, ds2_systems.ds_offset())});
       } else if constexpr (std::same_as<systems1, systems2>) {
         // self contact of a FEM system
         auto fem_matrix = algebra::mat_view<matrix_1x1_t>(assembled, inter_offset(),
                                                           ds2_systems.ds_offset());
-        run<contacts::fem_self_h_block>(
+        run<contacts::assemble_fem_self_h_block>(
             step, contacts::fem_block_matrix{fem_matrix, ds2_systems.sum_dofs()});
       } else {
         // a rigid system (ds1) and a FEM one (ds2) (i.e disk/fem)
@@ -456,7 +458,7 @@ struct interaction_kind : item {
         auto rigid_storage = get_storage_type(self()->data(), h_matrix1{});
         auto rigid_matrix = algebra::mat_view(rigid_storage, assembled, inter_offset(),
                                               ds1_systems.ds_offset());
-        run<contacts::fem_h_blocks>(
+        run<contacts::assemble_fem_h_blocks>(
             step, contacts::fem_h_matrix{self()->data(), fem_matrix, rigid_matrix,
                                          ds2_systems.sum_dofs(),
                                          static_cast<std::size_t>(nslaw_size())});

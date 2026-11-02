@@ -283,11 +283,12 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
 
     const auto& text = recorded.dataflow;
     for (const auto* line :
-         {"[device] the free state: v, q at step + 1 without the contact impulses\n",
-          "[host] the active set: the interactions whose gap may close, the systems they "
+         {"[device] Compute the free state: v, q at step + 1 without the contact impulses\n",
+          "[host] Compute the active set: the interactions whose gap may close, the systems "
+          "they "
           "involve\n",
-          "[host] the frictional contact problem (W, q, mu): lambda\n",
-          "    free_velocity + position_on<all<systems>>: all systems (disk)\n",
+          "[host] Solve the frictional contact problem (W, q, mu): lambda\n",
+          "    compute_free_velocity + update_position<all<systems>>: all systems (disk)\n",
           "fusion candidates:\n"}) {
       if (text.find(line) == std::string::npos) {
         CPPUNIT_FAIL(std::string("missing in the dataflow: ") + line);

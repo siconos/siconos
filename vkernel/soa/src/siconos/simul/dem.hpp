@@ -61,8 +61,8 @@ struct penalty {
 };
 
 // an interaction that does not overlap: no force, no tangential spring
-struct released : kernel<all<interactions>, in<"activation", by_topology>, inout<"lambda">,
-                         inout<"tangential_spring", by_kind>> {
+struct zero_released : kernel<all<interactions>, in<"activation", by_topology>,
+                              inout<"lambda">, inout<"tangential_spring", by_kind>> {
   static void apply(const auto&, bool activation, auto& lambda, auto& spring) {
     if (!activation) {
       algebra::set_zero(lambda);
@@ -73,7 +73,7 @@ struct released : kernel<all<interactions>, in<"activation", by_topology>, inout
 
 // the contact force of an interaction that overlaps (y = gap <= 0, ydot =
 // (u_N, u_T) at step), as an impulse h F in lambda
-struct contact_force
+struct apply_contact_force
     : kernel<active<interactions>, in<"y">, in<"ydot">, through<"nslaw", "mu">,
              inout<"tangential_spring", by_kind>, out<"lambda">> {
   static void apply(const auto& p, const auto& y, const auto& ydot, const auto& mu,
@@ -100,10 +100,11 @@ using storage::schedule::stage;
 
 // on the integrator
 
-struct overlaps : stage<
-                      "the active set: the interactions that overlap at step, the systems "
-                      "they involve">,
-                  host_code {
+struct compute_overlaps
+    : stage<
+          "Compute the overlaps: the interactions that overlap at step, the systems "
+          "they involve">,
+      host_code {
   static void run(auto& c) {
     // gamma = 0: the gap at step, threshold 0: an overlap
     c.involved = c.integrator.compute_active_interactions(c.step, c.h, 0., 0.);
@@ -112,16 +113,16 @@ struct overlaps : stage<
 
 // on a kind of interactions
 
-struct released : stage<"no force and no tangential spring without overlap"> {
-  static void run(auto& c) { c.kind.template run<dem::released>(c.step, nullptr); }
+struct zero_released : stage<"Zero the force and the tangential spring without overlap"> {
+  static void run(auto& c) { c.kind.template run<dem::zero_released>(c.step, nullptr); }
 };
 
-struct contact_forces
-    : stage<"the penalty forces at step, the tangential springs: lambda = h F"> {
+struct apply_contact_forces
+    : stage<"Apply the penalty forces at step, the tangential springs: lambda = h F"> {
   static void run(auto& c) {
     using scalar = typename decltype(c.kind.env())::scalar;
     auto osi = c.integrator;
-    c.kind.template run<contact_force>(
+    c.kind.template run<apply_contact_force>(
         c.step,
         penalty<decltype(c.h), scalar>{c.h, osi.normal_stiffness(), osi.normal_damping(),
                                        osi.tangential_stiffness()});
@@ -130,8 +131,9 @@ struct contact_forces
 
 // the velocity correction of FEM systems needs the assembled iteration
 // matrix, formed by the delassus stage in Moreau-Jean
-struct iteration_matrix : stage<"A = M + h^2 theta^2 K, if FEM systems are in contact">,
-                          host_code {
+struct assemble_iteration_matrix
+    : stage<"Assemble A = M + h^2 theta^2 K, if FEM systems are in contact">,
+      host_code {
   static void run(auto& c) {
     auto osi = c.integrator;
     if constexpr (osi.with_k_matrix()) {
@@ -161,18 +163,18 @@ namespace de = stages;
 // the explicit DEM time step
 using time_step_schedule = sequence<
     "explicit DEM time step",
-    for_systems<th::iteration_matrix, th::free_state>,
-    for_interactions<co::relation_sets, co::jacobians, co::outputs>,
-    de::overlaps,
-    for_interactions<de::released>,
+    for_systems<th::recompute_minv_f, th::compute_free_state>,
+    for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs>,
+    de::compute_overlaps,
+    for_interactions<de::zero_released>,
     when<co::with_contacts,
-         co::assembly_setup,
-         for_interactions<co::time_invariant_jacobians, de::contact_forces, co::h_matrix,
-                          co::multipliers>,
-         for_systems<co::mass_matrix, co::stiffness_matrix>,
-         de::iteration_matrix,
-         mj::velocity_correction,
-         for_systems<mj::contact_update>>>;
+         co::setup_assembly,
+         for_interactions<co::compute_time_invariant_jacobians, de::apply_contact_forces, co::assemble_h_matrix,
+                          co::assemble_multipliers>,
+         for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix>,
+         de::assemble_iteration_matrix,
+         mj::apply_velocity_correction,
+         for_systems<mj::update_contact_state>>>;
 
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;

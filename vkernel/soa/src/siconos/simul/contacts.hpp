@@ -113,7 +113,7 @@ struct dof_offsets {
 
 // a block of the assembled matrix: the attribute Name of an involved system
 template <storage::pattern::string_literal Name>
-struct diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
+struct assemble_diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
   static void apply(auto& p, auto index, const auto& block) {
     set_value(p.matrix, p.at(index), p.at(index), block);
   }
@@ -121,7 +121,7 @@ struct diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
 
 // the number of dofs of an involved system, before the scan that gives the
 // offsets (see system_kind::compute_total_dofs)
-struct dofs : kernel<involved<systems>, rank, in<"mass_matrix">>, assembles {
+struct compute_dofs : kernel<involved<systems>, rank, in<"mass_matrix">>, assembles {
   static void apply(auto& p, auto index, const auto& mass_matrix) {
     p.sum_dofs[index + 1] = algebra::ncols(mass_matrix);
   }
@@ -163,7 +163,7 @@ struct keep_multipliers : kernel<active<interactions>, rank, out<"lambda">> {
 // the relations of a step (reads_world)
 
 // the jacobians of an interaction
-struct jacobians
+struct compute_jacobians
     : kernel<relations<interactions>, relation, referenced<"ds1", by_topology>,
              referenced<"ds2", by_topology>, inout<"h_matrix1">, inout<"h_matrix2">>,
       reads_world,
@@ -183,11 +183,11 @@ struct jacobians
 };
 
 // y and ydot of an interaction from the state of its systems
-struct output : kernel<relations<interactions>, relation, in<"nds", by_topology>,
-                       referenced<"ds1", by_topology>, referenced<"ds2", by_topology>,
-                       in<"h_matrix1">, in<"h_matrix2">, out<"y">, out<"ydot">>,
-                reads_world,
-                host_only {
+struct compute_output : kernel<relations<interactions>, relation, in<"nds", by_topology>,
+                               referenced<"ds1", by_topology>, referenced<"ds2", by_topology>,
+                               in<"h_matrix1">, in<"h_matrix2">, out<"y">, out<"ydot">>,
+                        reads_world,
+                        host_only {
   static void apply(const auto& p, auto& rel, auto nds, auto ds1, auto ds2, const auto& h1,
                     const auto& h2, auto& y, auto& ydot) {
     using rel_t = std::decay_t<decltype(rel)>;
@@ -236,13 +236,13 @@ struct output : kernel<relations<interactions>, relation, in<"nds", by_topology>
 // the active set
 
 // before the active set: no system is involved
-struct not_involved : kernel<all<systems>, out<"involved", by_topology>> {
+struct clear_involved : kernel<all<systems>, out<"involved", by_topology>> {
   static void apply(const auto&, auto& involved) { involved = false; }
 };
 
 // an interaction is active when its gap at the middle of the step may be
 // below the threshold
-struct activation
+struct compute_activation
     : kernel<all<interactions>, in<"y">, in<"ydot">, out<"activation", by_topology>> {
   static void apply(const auto& p, const auto& y, const auto& ydot, auto& activation) {
     activation = ((y + p.gamma * p.h * ydot)(0) <= p.threshold);
@@ -267,8 +267,8 @@ struct mark_involved
 
 // the index of an involved system: its rank among the involved systems of
 // its type, in the order of the systems
-struct involved_index : kernel<all<systems>, item_index, in<"involved", by_topology>,
-                               out<"index", by_topology>> {
+struct set_involved_index : kernel<all<systems>, item_index, in<"involved", by_topology>,
+                                   out<"index", by_topology>> {
   static void apply(const auto& p, auto i, bool involved, auto& index) {
     if (involved) {
       index = p.offsets[i];
@@ -278,9 +278,10 @@ struct involved_index : kernel<all<systems>, item_index, in<"involved", by_topol
 
 // the active interactions and the involved systems in their index sets (host
 // containers, filled in the order of the items)
-struct active_entry : kernel<all<interactions>, item_index, in<"activation", by_topology>>,
-                      host_only,
-                      ordered {
+struct collect_active_interactions
+    : kernel<all<interactions>, item_index, in<"activation", by_topology>>,
+      host_only,
+      ordered {
   static void apply(auto& p, auto i, bool activation) {
     if (activation) {
       p.emplace(i, p.offsets[i]);
@@ -288,7 +289,7 @@ struct active_entry : kernel<all<interactions>, item_index, in<"activation", by_
   }
 };
 
-struct involved_entry
+struct collect_involved_systems
     : kernel<all<systems>, item_index, in<"involved", by_topology>, in<"index", by_topology>>,
       host_only,
       ordered {
@@ -302,7 +303,7 @@ struct involved_entry
 // the blocks of H of an active interaction between rigid systems: its
 // jacobians without the columns of the blocked velocity components, at the
 // rows of the interaction and the columns of its systems
-struct h_blocks
+struct assemble_h_blocks
     : kernel<active<interactions>, rank, in<"h_matrix1">, in<"h_matrix2">,
              through<"ds1", "index", by_topology>, through<"ds2", "index", by_topology>,
              through<"ds1", "bc_velocities_0", by_topology>,
@@ -331,7 +332,7 @@ struct h_blocks
 // the blocks of H of an active interaction between a rigid system (ds1) and
 // a FEM one (ds2): the rigid block, then the FEM columns of the nodes of the
 // contact segment of its mesh relation
-struct fem_h_blocks
+struct assemble_fem_h_blocks
     : kernel<active<interactions>, rank, in<"h_matrix1">, in<"h_matrix2">, in<"relation">,
              through<"ds1", "index", by_topology>, through<"ds2", "index", by_topology>,
              through<"ds1", "bc_velocities_0", by_topology>,
@@ -372,10 +373,11 @@ struct fem_h_blocks
 };
 
 // the block of H of an active self contact of a FEM system (ds1 == ds2)
-struct fem_self_h_block : kernel<active<interactions>, rank, in<"h_matrix1">,
-                                 in<"nds", by_topology>, through<"ds2", "index", by_topology>,
-                                 through<"ds2", "bc_velocities_0", by_topology>>,
-                          assembles {
+struct assemble_fem_self_h_block
+    : kernel<active<interactions>, rank, in<"h_matrix1">, in<"nds", by_topology>,
+             through<"ds2", "index", by_topology>,
+             through<"ds2", "bc_velocities_0", by_topology>>,
+      assembles {
   static void apply(auto& p, auto row, const auto& h1, [[maybe_unused]] auto nds, auto i2,
                     const auto& blocked2) {
     // only ds1 == ds2 (nds == 1) is supported (rt_lagrangian_r is a relation1)
@@ -399,18 +401,20 @@ using storage::schedule::stage;
 
 // on a kind of interactions
 
-struct initial_state : stage<"lambda, ydot are zero, the jacobians H"> {
+struct set_initial_state : stage<"Set lambda, ydot to zero and compute the jacobians H"> {
   static void run(auto& c) {
     c.kind.template run<zero_multipliers>(c.step, nullptr);
     c.kind.compute_h_matrices(c.step);
   }
 };
 
-struct relation_sets : stage<"the relation sets hold every interaction">, host_code {
+struct sync_relation_sets
+    : stage<"Synchronize the relation sets: they hold every interaction">,
+      host_code {
   static void run(auto& c) { c.kind.sync_relation_sets(c.step); }
 };
 
-struct jacobians : stage<"the jacobians H, if the relations change"> {
+struct compute_jacobians : stage<"Compute the jacobians H, if the relations change"> {
   static void run(auto& c) {
     if constexpr (!std::decay_t<decltype(c.kind)>::time_invariant_h_matrices()) {
       c.kind.compute_h_matrices(c.step);
@@ -418,17 +422,18 @@ struct jacobians : stage<"the jacobians H, if the relations change"> {
   }
 };
 
-struct outputs : stage<"the outputs y, ydot at step"> {
+struct compute_outputs : stage<"Compute the outputs y, ydot at step"> {
   static void run(auto& c) { c.kind.compute_output(c.step); }
 };
 
-struct free_outputs : stage<"the free outputs y, ydot at step + 1"> {
+struct compute_free_outputs : stage<"Compute the free outputs y, ydot at step + 1"> {
   static void run(auto& c) { c.kind.compute_output(c.step + 1); }
 };
 
 // jacobians for the assembly: already up to date at this step if the
 // jacobians stage computed them (q(step) has not changed since)
-struct time_invariant_jacobians : stage<"the jacobians H, if the relations do not change"> {
+struct compute_time_invariant_jacobians
+    : stage<"Compute the jacobians H, if the relations do not change"> {
   static void run(auto& c) {
     if constexpr (std::decay_t<decltype(c.kind)>::time_invariant_h_matrices()) {
       c.kind.compute_h_matrices(c.step);
@@ -436,11 +441,11 @@ struct time_invariant_jacobians : stage<"the jacobians H, if the relations do no
   }
 };
 
-struct h_matrix : stage<"H of the active interactions"> {
+struct assemble_h_matrix : stage<"Assemble H of the active interactions"> {
   static void run(auto& c) { c.integrator.assemble_h_matrix(c.step, c.kind); }
 };
 
-struct multipliers : stage<"lambda, ydot, mu of the active interactions"> {
+struct assemble_multipliers : stage<"Assemble lambda, ydot, mu of the active interactions"> {
   static void run(auto& c) {
     c.kind.assemble_vectors(c.step, c.integrator.lambda_vector_assembled(),
                             c.integrator.ydot_vector_assembled(),
@@ -448,7 +453,7 @@ struct multipliers : stage<"lambda, ydot, mu of the active interactions"> {
   }
 };
 
-struct keep_multipliers : stage<"lambda of the active interactions from the solution"> {
+struct keep_multipliers : stage<"Keep lambda of the active interactions from the solution"> {
   static void run(auto& c) {
     c.kind.keep_lambdas(c.step, c.integrator.lambda_vector_assembled());
   }
@@ -456,13 +461,13 @@ struct keep_multipliers : stage<"lambda of the active interactions from the solu
 
 // on a kind of systems
 
-struct mass_matrix : stage<"M of the involved systems"> {
+struct assemble_mass_matrix : stage<"Assemble M of the involved systems"> {
   static void run(auto& c) {
     c.kind.assemble_mass_matrix(c.step, c.integrator.mass_matrix_assembled());
   }
 };
 
-struct stiffness_matrix : stage<"K of the involved FEM systems"> {
+struct assemble_stiffness_matrix : stage<"Assemble K of the involved FEM systems"> {
   static void run(auto& c) {
     c.kind.assemble_k_matrix(c.step, c.integrator.k_matrix_assembled());
   }
@@ -470,9 +475,10 @@ struct stiffness_matrix : stage<"K of the involved FEM systems"> {
 
 // on the integrator
 
-struct active_set
-    : stage<"the active set: the interactions whose gap may close, the systems they involve">,
-      host_code {
+struct compute_active_set : stage<
+                                "Compute the active set: the interactions whose gap may "
+                                "close, the systems they involve">,
+                            host_code {
   static void run(auto& c) {
     c.involved = c.integrator.compute_active_interactions(c.step, c.h);
   }
@@ -482,7 +488,9 @@ struct with_contacts : condition<"there are contacts"> {
   static bool holds(const auto& c) { return c.involved > 0; }
 };
 
-struct assembly_setup : stage<"the sizes and offsets of the assembled problem">, host_code {
+struct setup_assembly
+    : stage<"Set up the assembly: the sizes and offsets of the assembled problem">,
+      host_code {
   static void run(auto& c) { c.integrator.assemble_setup(c.step); }
 };
 
