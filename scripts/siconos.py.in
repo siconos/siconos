@@ -96,6 +96,20 @@ def main():
     # -- Parse command line --
     parser = parse_command_line()
     args = parser.parse_args()
+
+    # C++ drivers keep the old command line semantics: the tokens after
+    # the driver name are siconos options, not arguments of the driver
+    # (the "<driver> <args>" shape is for python drivers only). Re-parse
+    # strictly: it either succeeds (the tokens were siconos options) or
+    # fails with the usual argparse error.
+    if (
+        args.driver is not None
+        and not args.driver.endswith(".py")
+        and args.script_args
+    ):
+        args = parse_command_line(with_remainder=False).parse_args()
+        args.script_args = []
+
     sim_options = collect_sim_options(args)
 
     # -- Clean current dir (.siconos) --
@@ -413,7 +427,7 @@ def siconos_clean(build_dir=None, quiet=True):
             raise
 
 
-def parse_command_line():
+def parse_command_line(with_remainder=True):
     """Use argparse (python3) to read command line options."""
     # Build parser
     parser = argparse.ArgumentParser(
@@ -425,14 +439,22 @@ def parse_command_line():
 
     # Main source file.
     msg = "driver file name (.cpp or .py) to build and run a simulation. "
-    msg += "The siconos options go before the driver; the arguments after "
-    msg += "the driver name are the arguments of the driver itself: "
-    msg += "siconos [siconos options] driver.py [driver arguments]"
+    msg += "The siconos options go before the driver. For python drivers, "
+    msg += "the arguments after the driver name are the arguments of the "
+    msg += "driver itself: siconos [siconos options] driver.py [driver "
+    msg += "arguments]. For C++ drivers, the command line is the same as "
+    msg += "before (siconos options only, in any order)."
     parser.add_argument("driver", help=msg, nargs="?")
 
-    # the arguments of the driver, after its name
-    parser.add_argument("script_args", nargs=argparse.REMAINDER, default=[],
-                        help="arguments of the python driver (everything after the driver name)")
+    # the arguments of the driver, after its name (python drivers only;
+    # for C++ drivers the command line is re-parsed strictly, as before)
+    if with_remainder:
+        parser.add_argument(
+            "script_args",
+            nargs=argparse.REMAINDER,
+            default=[],
+            help="arguments of the python driver (everything after the driver name)",
+        )
 
     # verbosity
     verbose_mode = parser.add_mutually_exclusive_group()
