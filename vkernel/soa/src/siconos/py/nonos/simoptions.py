@@ -11,7 +11,8 @@ Two groups of options:
     by all the backends: t0, T, h, output_format. They are forced in
     run_options before run_initialize reads them.
   - the objects of nonos.bridge, the vnative backend only: the scheme of the
-    integrator (mj, gosi, at, at-apgd, dem) and its theta, gamma and
+    integrator (MoreauJean, MoreauJeanGOSI, AnitescuTasora,
+    AnitescuTasoraAPGD, DEM) and its theta, gamma and
     constraint activation threshold, the solver and its tolerance and maximum
     number of iterations, the penalty law of the explicit DEM scheme (dem_kn,
     dem_cn, dem_kt), and the observers: the timings of the stages of the time
@@ -39,11 +40,19 @@ SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
 
 SCHEMES = {
-    "mj": SCHEME_LOCAL_PROBLEM,
-    "gosi": SCHEME_GLOBAL_PROBLEM,
-    "at": SCHEME_CONE_COMPLEMENTARITY,
-    "at-apgd": SCHEME_CONE_COMPLEMENTARITY_APGD,
-    "dem": SCHEME_EXPLICIT_PENALTY,
+    "MoreauJean": SCHEME_LOCAL_PROBLEM,
+    "MoreauJeanGOSI": SCHEME_GLOBAL_PROBLEM,
+    "AnitescuTasora": SCHEME_CONE_COMPLEMENTARITY,
+    "AnitescuTasoraAPGD": SCHEME_CONE_COMPLEMENTARITY_APGD,
+    "DEM": SCHEME_EXPLICIT_PENALTY,
+}
+# the short names of the first version, still accepted
+SCHEME_ALIASES = {
+    "mj": "MoreauJean",
+    "gosi": "MoreauJeanGOSI",
+    "at": "AnitescuTasora",
+    "at-apgd": "AnitescuTasoraAPGD",
+    "dem": "DEM",
 }
 SCHEME_NAMES = {v: k for k, v in SCHEMES.items()}
 
@@ -72,6 +81,7 @@ def _error(message):
 
 
 _solver_names_cache = None
+_solver_ids_cache = None
 
 
 def _solver_names():
@@ -86,6 +96,19 @@ def _solver_names():
             if n.startswith("SICONOS_")
         }
     return _solver_names_cache
+
+
+def _solver_id(name):
+    """the id of a solver of siconos.numerics, SICONOS_ optional in name;
+    exits with a clean error on an unknown name"""
+    global _solver_ids_cache
+    if _solver_ids_cache is None:
+        _solver_ids_cache = {v: k for k, v in _solver_names().items()}
+    if not name.startswith("SICONOS_"):
+        name = "SICONOS_" + name
+    if name not in _solver_ids_cache:
+        _error(f"unknown solver {name}")
+    return _solver_ids_cache[name]
 
 
 def apply(options):
@@ -105,6 +128,11 @@ def apply(options):
         _patch_run_options(cross)
 
     vnative = {key: options.get(key) for key in VNATIVE_OPTIONS}
+    if vnative["scheme"] is not None:
+        # the short names of the first version are still accepted
+        vnative["scheme"] = SCHEME_ALIASES.get(vnative["scheme"], vnative["scheme"])
+        if vnative["scheme"] not in SCHEMES:
+            _error(f"unknown scheme {vnative['scheme']}, one of " + ", ".join(SCHEMES))
     if any(set(value) for value in vnative.values()):
         _patch_vnative(vnative)
 
@@ -133,17 +161,14 @@ def _patch_vnative(v):
 
     solver = None
     if v["solver"] is not None:
-        name = v["solver"]
-        name = name if name.startswith("SICONOS_") else "SICONOS_" + name
-        if name not in _solver_names():
-            _error(f"unknown solver {name}")
-        solver = getattr(sn.solver_ids, name)
-    if v["scheme"] == "gosi":
+        solver = _solver_id(v["solver"])
+    if v["scheme"] == "MoreauJeanGOSI":
         if solver is None:
             solver = sn.solver_ids.SICONOS_GLOBAL_FRICTION_2D_NSN_AC
         elif "GLOBAL" not in _solver_names()[solver]:
             _error(
-                f"--scheme gosi needs a global solver, not {_solver_names()[solver]}"
+                f"--scheme MoreauJeanGOSI needs a global solver, "
+                f"not {_solver_names()[solver]}"
             )
 
     # the solver: its options, before the problem is created from them
@@ -165,7 +190,7 @@ def _patch_vnative(v):
         vosi = simulation.handle().one_step_integrator()
         if v["scheme"] is not None:
             vosi.set_scheme(SCHEMES[v["scheme"]])
-        if v["scheme"] == "dem" and type(osi).__name__ != "ExplicitDEMOSI":
+        if v["scheme"] == "DEM" and type(osi).__name__ != "ExplicitDEMOSI":
             # the defaults of bridge.ExplicitDEMOSI
             kn = 1e5 if v["dem_kn"] is None else v["dem_kn"]
             vosi.set_theta(1.0)
@@ -231,19 +256,20 @@ def _time_stepping(simulation):
         f"theta {vosi.theta()}, gamma {vosi.gamma()}, "
         f"constraint activation threshold {vosi.constraint_activation_threshold()}"
     ]
-    if scheme == "dem":
+    if scheme == "DEM":
         lines.append(
             f"k_n {vosi.normal_stiffness()}, c_n {vosi.normal_damping()}, "
             f"k_t {vosi.tangential_stiffness()}"
         )
     osnspb = getattr(simulation, "_osnspb", None)
-    if osnspb is not None and scheme != "dem":
+    if osnspb is not None and scheme != "DEM":
         so = osnspb._so
         # Anitescu-Tasora: its own solver, the tolerance and the maximum
         # number of iterations from the options
-        name = {"at": "projected Gauss-Seidel", "at-apgd": "APGD"}.get(
-            scheme, _solver_names().get(so.solver_id(), so.solver_id())
-        )
+        name = {
+            "AnitescuTasora": "projected Gauss-Seidel",
+            "AnitescuTasoraAPGD": "APGD",
+        }.get(scheme, _solver_names().get(so.solver_id(), so.solver_id()))
         lines.append(
             f"solver {name}, "
             f"tolerance {so.dparam(sn.params.SICONOS_DPARAM_TOL)}, "

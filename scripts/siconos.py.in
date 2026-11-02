@@ -58,6 +58,29 @@ SIM_OPTION_DESTS = (
     "dataflow",
 )
 
+# the schemes of the vnative integrator, mirrored from
+# nonos/simoptions.py; the short names of the first version are still
+# accepted (the alias is resolved before the choices are checked)
+SIM_SCHEMES = (
+    "MoreauJean",
+    "MoreauJeanGOSI",
+    "AnitescuTasora",
+    "AnitescuTasoraAPGD",
+    "DEM",
+)
+SIM_SCHEME_ALIASES = {
+    "mj": "MoreauJean",
+    "gosi": "MoreauJeanGOSI",
+    "at": "AnitescuTasora",
+    "at-apgd": "AnitescuTasoraAPGD",
+    "dem": "DEM",
+}
+
+
+def sim_scheme(value):
+    """a scheme of the vnative integrator, old short names included"""
+    return SIM_SCHEME_ALIASES.get(value, value)
+
 
 def collect_sim_options(args):
     """the given simulation options, as a dict (none given: empty)"""
@@ -550,11 +573,14 @@ def parse_command_line(with_remainder=True):
     )
     sim_group.add_argument(
         "--scheme",
-        choices=("mj", "gosi", "at", "at-apgd", "dem"),
-        help="the scheme of the vnative integrator: Moreau-Jean on the local "
-        "problem (mj) or the global one (gosi), Anitescu-Tasora solved by "
-        "projected Gauss-Seidel (at) or APGD (at-apgd), explicit DEM "
-        "(penalty springs, dem)",
+        type=sim_scheme,
+        choices=SIM_SCHEMES,
+        help="the scheme of the vnative integrator: MoreauJean (Moreau-Jean "
+        "on the local problem), MoreauJeanGOSI (Moreau-Jean on the global "
+        "problem), AnitescuTasora or AnitescuTasoraAPGD (cone "
+        "complementarity, solved by projected Gauss-Seidel or APGD), DEM "
+        "(explicit penalty springs). The short names mj, gosi, at, at-apgd "
+        "and dem are accepted too",
     )
     sim_group.add_argument("--theta", type=float, help="theta of the vnative integrator")
     sim_group.add_argument("--gamma", type=float, help="gamma of the vnative integrator")
@@ -566,7 +592,7 @@ def parse_command_line(with_remainder=True):
     sim_group.add_argument(
         "--solver",
         help="the solver id, a name of siconos.numerics.solver_ids, SICONOS_ "
-        "optional; --scheme gosi needs a global solver "
+        "optional; --scheme MoreauJeanGOSI needs a global solver "
         "(GLOBAL_FRICTION_2D_NSN_AC if none is given)",
     )
     sim_group.add_argument(

@@ -84,7 +84,7 @@ p.add_argument("--margin", type=float, default=None)
 p.add_argument("--contact-margin", type=float, default=None)
 p.add_argument("--large-search", action="store_true")
 p.add_argument("--sort-frequency", type=int, default=None)
-# the explicit DEM scheme (siconos --scheme dem): the largest overlap at
+# the explicit DEM scheme (siconos --scheme DEM): the largest overlap at
 # impact as a fraction of the body radius, the damping ratio of a contact
 # between two liquid disks, and the time steps per contact duration
 p.add_argument("--dem-overlap", type=float, default=0.5)
@@ -283,7 +283,7 @@ t_settle = args.t_settle if args.t_settle is not None else 2 * t_fall
 t_flow = 2 * math.sqrt(2 * L_s / math.cos(theta) / (g * math.sin(theta)))
 T = args.T if args.T is not None else t_settle + t_flow
 
-# The explicit DEM scheme, chosen by the siconos command (--scheme dem, in
+# The explicit DEM scheme, chosen by the siconos command (--scheme DEM, in
 # the options it passes to this script): its penalty springs must be sized
 # on the scene, the default law is too soft for it and the bodies sink
 # through the terrain. A body of mass m = rho pi R^2 hitting at speed v
