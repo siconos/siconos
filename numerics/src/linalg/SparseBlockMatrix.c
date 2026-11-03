@@ -3270,7 +3270,7 @@ int SBM_to_sparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix* out
         DEBUG_PRINTF("isparsecolumnstart = %zu\t", isparsecolumnstart);
         DEBUG_PRINTF("isparsecolumnend = %zu\n", isparsecolumnend);
 
-        size_t rowintheblock = isparserow;
+        size_t rowintheblock = isparserow - isparserowstart;
         for (size_t isparsecolumn = isparsecolumnstart; isparsecolumn < isparsecolumnend;
              isparsecolumn++) {
           DEBUG_PRINTF("nnz = %zu \t", nnz);
@@ -3278,10 +3278,6 @@ int SBM_to_sparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix* out
           DEBUG_PRINTF("isparsecolumn = %zu \t", isparsecolumn);
 
           outSparseMat->i[nnz] = to_csint(isparsecolumn);
-
-          if (currentRowNumber != 0) {
-            rowintheblock -= A->blocksize0[currentRowNumber - 1];
-          }
 
           size_t colintheblock = isparsecolumn;
           if (colNumber != 0) {
