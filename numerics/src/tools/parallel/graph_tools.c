@@ -5,10 +5,22 @@
 
 #include "safe_casts.h"
 
+/* The coloring needs PETSc, which only the test drivers initialize: a solver
+ * called from the kernel or from Python would get an error from the first
+ * PETSc call instead of a coloring. Nothing is done if PETSc is already
+ * initialized (by petsc4py for instance). */
+static PetscErrorCode ensure_petsc_initialized(void) {
+  PetscBool initialized = PETSC_FALSE;
+  PetscCall(PetscInitialized(&initialized));
+  if (!initialized) PetscCall(PetscInitializeNoArguments());
+  return PETSC_SUCCESS;
+}
+
 int color_graph(int n, NumericsMatrix* M, size_t* n_colors, size_t** set_sizes,
                 size_t*** set_indices) {
   Mat A;
 
+  PetscCall(ensure_petsc_initialized());
   PetscFunctionBeginUser;
 
   /* First, create PETSC matrix from NumericsMatrix.
@@ -130,6 +142,7 @@ int color_graph_permut(int n, NumericsMatrix* M, size_t* n_colors, size_t** sum_
   /* Build PETSC matrix */
   Mat A;
 
+  PetscCall(ensure_petsc_initialized());
   PetscFunctionBeginUser;
   switch (M->storageType) {
     case NM_DENSE: {
@@ -595,6 +608,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
   size_t n = (size_t)M->size0;
   size_t d = n / nc;  // dimension of contact space
   PetscInt nc_petsc = 0;
+  PetscCall(ensure_petsc_initialized());
   PetscCall(PetscIntCast(nc, &nc_petsc));
 
   Mat A;
@@ -950,6 +964,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
   size_t n = (size_t)M->size0;
   size_t d = n / nc;  // dimension of contact space
   PetscInt nc_petsc = 0;
+  PetscCall(ensure_petsc_initialized());
   PetscCall(PetscIntCast(nc, &nc_petsc));
 
   Mat A;
