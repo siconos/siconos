@@ -1318,28 +1318,31 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
   return 0;
 }
 
-/* Rebalance a coloring in place, keeping the same number of colors. Tries to move contacts 
+/* Rebalance a coloring in place, keeping the same number of colors. Tries to move contacts
    from big groups (size > ceil(slack * n_contacts / n_colors)) to small groups.
  */
-static long rebalance_coloring_seq(size_t n, const PetscInt *Mp, const PetscInt *Mi,
-                                   size_t n_colors, size_t *sum_size,
-                                   size_t *inv_permutation, double slack) {
+static long rebalance_coloring_seq(size_t n, const PetscInt* Mp, const PetscInt* Mi,
+                                   size_t n_colors, size_t* sum_size, size_t* inv_permutation,
+                                   double slack) {
   long moved = 0;
- 
+
   const size_t cap = (size_t)ceil(slack * (double)n / (double)n_colors);
- 
-  int *color_contact = (int *)malloc(n * sizeof(int));
-  size_t *size = (size_t *)malloc(n_colors * sizeof(size_t));
-  size_t *order = (size_t *)malloc(n_colors * sizeof(size_t)); /* later reused as write positions */
-  size_t *mark = (size_t *)calloc(n_colors, sizeof(size_t));   /* stamp = vertex + 1, never reset */
- 
+
+  int* color_contact = (int*)malloc(n * sizeof(int));
+  size_t* size = (size_t*)malloc(n_colors * sizeof(size_t));
+  size_t* order =
+      (size_t*)malloc(n_colors * sizeof(size_t)); /* later reused as write positions */
+  size_t* mark =
+      (size_t*)calloc(n_colors, sizeof(size_t)); /* stamp = vertex + 1, never reset */
+
   /* Compute the size of each color group
      and the color of each contact */
   for (size_t color = 0; color < n_colors; color++) {
     size[color] = sum_size[color + 1] - sum_size[color];
-    for (size_t j = sum_size[color]; j < sum_size[color + 1]; j++) color_contact[inv_permutation[j]] = (int)color;
+    for (size_t j = sum_size[color]; j < sum_size[color + 1]; j++)
+      color_contact[inv_permutation[j]] = (int)color;
   }
- 
+
   /* Find color groups with more contacts than cap */
   size_t n_big_groups = 0;
   for (size_t color = 0; color < n_colors; color++)
@@ -1348,36 +1351,39 @@ static long rebalance_coloring_seq(size_t n, const PetscInt *Mp, const PetscInt 
   for (size_t i = 1; i < n_big_groups; i++) {
     size_t x = order[i], j = i;
     while (j > 0 && size[order[j - 1]] < size[x]) {
-      order[j] = order[j - 1]; 
-      j--; 
+      order[j] = order[j - 1];
+      j--;
     }
     order[j] = x;
   }
- 
+
   /* Go through each big color group */
   for (size_t s = 0; s < n_big_groups; s++) {
     const size_t color = order[s];
     size_t excess = size[color] - cap; /* number of contacts to move */
- 
+
     /* inv_permutation is not modified during this loop, so the segment of
        class c is still the original one */
     /* Go through contacts of the big color group */
     for (size_t j = sum_size[color]; j < sum_size[color + 1] && excess > 0; j++) {
-      const size_t v = inv_permutation[j]; // contact index
+      const size_t v = inv_permutation[j];  // contact index
       const size_t stamp = v + 1;
- 
+
       /* Mark the colors present among the neighbours of v */
       for (PetscInt e = Mp[v]; e < Mp[v + 1]; e++) mark[color_contact[Mi[e]]] = stamp;
- 
+
       /* Go through all colors, find the smallest available color group */
       size_t best = n_colors, best_size = cap;
       for (size_t d = 0; d < n_colors; d++) {
         if (d == color || mark[d] == stamp) continue;
-        if (size[d] < best_size) { best_size = size[d]; best = d; }
+        if (size[d] < best_size) {
+          best_size = size[d];
+          best = d;
+        }
       }
       /* If we did not find a better color, we skip to next contact*/
       if (best == n_colors) continue;
- 
+
       color_contact[v] = (int)best;
       size[best]++;
       size[color]--;
@@ -1385,7 +1391,7 @@ static long rebalance_coloring_seq(size_t n, const PetscInt *Mp, const PetscInt 
       moved++;
     }
   }
- 
+
   /* Rebuild sum_size and inv_permutation */
   if (moved > 0) {
     sum_size[0] = 0;
@@ -1395,7 +1401,7 @@ static long rebalance_coloring_seq(size_t n, const PetscInt *Mp, const PetscInt 
     }
     for (size_t v = 0; v < n; v++) inv_permutation[order[color_contact[v]]++] = v;
   }
- 
+
   free(color_contact);
   free(size);
   free(order);
