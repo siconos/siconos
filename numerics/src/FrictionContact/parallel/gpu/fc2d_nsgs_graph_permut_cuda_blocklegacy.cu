@@ -322,7 +322,14 @@ void fc2d_nsgs_graph_permut_cuda_blocklegacy(FrictionContactProblem* problem, do
   size_t* sum_sizes = NULL;
   size_t* inv_permutation = (size_t*)malloc(nc * sizeof(size_t));
 
-  color_graph_block_permut(nc, problem->M, &n_colors, &sum_sizes, inv_permutation);
+  if (color_graph_block_permut(nc, problem->M, &n_colors, &sum_sizes, inv_permutation) != 0) {
+    numerics_printf("fc2d_nsgs_graph_permut_cuda: the coloring of the contacts failed");
+    free(sum_sizes);
+    free(inv_permutation);
+    cusparseDestroy(handle);
+    *info = 1;
+    return;
+  }
 
   SparseBlockStructuredMatrix* SBM_problem = NULL;
 
