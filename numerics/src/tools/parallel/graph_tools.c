@@ -1,5 +1,6 @@
 #include "graph_tools.h"
 
+#include <math.h>  // for fabs
 #include <petscmat.h>
 #include <petscsys.h>
 
@@ -348,7 +349,7 @@ void create_adjacency_lists(int n, NumericsMatrix* M, node_t** adjacency_lists) 
 
       for (size_t row = 0; row < (size_t)n; row++) {
         for (size_t col = 0; col < (size_t)n; col++) {
-          if (dense[row + col * (size_t)M->size0] > DBL_EPSILON)
+          if (fabs(dense[row + col * (size_t)M->size0]) > DBL_EPSILON)
             push_new_node(&adjacency_lists[row], col);
         }
       }
@@ -688,7 +689,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
         for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
           size_t col = Mi_[k] / d;
           if (block_is_zero[col] == true) {
-            if (Mx_[k] > DBL_EPSILON) {
+            if (fabs(Mx_[k]) > DBL_EPSILON) {
               block_is_zero[col] = false;
               nnz += 1;
             }
@@ -739,7 +740,7 @@ int color_graph_block(size_t nc, NumericsMatrix* M, size_t* n_colors, size_t** s
         for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
           size_t col = Mi_[k] / d;
           if (block_is_zero[col] == true) {
-            if (Mx_[k] > DBL_EPSILON) {
+            if (fabs(Mx_[k]) > DBL_EPSILON) {
               block_is_zero[col] = false;
               Mp[contact + 1]++;
               // Mi[current_index] = (int64_t)col;
@@ -1044,7 +1045,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
         for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
           size_t col = Mi_[k] / d;
           if (block_is_zero[col] == true) {
-            if (Mx_[k] > DBL_EPSILON) {
+            if (fabs(Mx_[k]) > DBL_EPSILON) {
               block_is_zero[col] = false;
               nnz += 1;
             }
@@ -1095,7 +1096,7 @@ int color_graph_block_permut(size_t nc, NumericsMatrix* M, size_t* n_colors,
         for (CS_INT k = Mp_[d * contact]; k < Mp_[d * contact + d]; k++) {
           size_t col = Mi_[k] / d;
           if (block_is_zero[col] == true) {
-            if (Mx_[k] > DBL_EPSILON) {
+            if (fabs(Mx_[k]) > DBL_EPSILON) {
               block_is_zero[col] = false;
               Mp[contact + 1]++;
               // Mi[current_index] = (PetscInt)col;
