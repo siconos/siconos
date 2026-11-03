@@ -56,6 +56,7 @@ SIM_OPTION_DESTS = (
     "dem_kt",
     "timings",
     "dataflow",
+    "resume",
 )
 
 # the schemes of the vnative integrator, mirrored from
@@ -185,7 +186,7 @@ def main():
     if sim_options and not args.is_python:
         print(
             "siconos: the simulation options (--t0 --T --h --output-format "
-            "--scheme ...) need a python driver",
+            "--scheme ... --resume) need a python driver",
             file=sys.stderr,
         )
         sys.exit(2)
@@ -621,6 +622,13 @@ def parse_command_line(with_remainder=True):
         action="store_true",
         help="print what the stages do: the kernels, their reads and writes, "
         "a placement, and the candidates for a fusion (vnative)",
+    )
+    sim_group.add_argument(
+        "--resume",
+        action="store_true",
+        help="resume the vkernel simulation from where it stopped: the "
+        "hdf5 output file is opened in append mode and the simulation resumes "
+        "from the last saved time (the driver must already have been run once)",
     )
 
     # -- Build options (compile, link ...) for main) --

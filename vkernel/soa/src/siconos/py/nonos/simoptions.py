@@ -72,6 +72,7 @@ VNATIVE_OPTIONS = (
     "dem_kt",
     "timings",
     "dataflow",
+    "resume",
 )
 
 
@@ -128,13 +129,19 @@ def apply(options):
         _patch_run_options(cross)
 
     vnative = {key: options.get(key) for key in VNATIVE_OPTIONS}
-    if vnative["scheme"] is not None:
+    if vnative.get("resume"):
+        _patch_resume()
+
+    # the other vnative options (scheme, theta, gamma, ...): "resume" is
+    # handled above and does not need nonos.bridge
+    others = {k: v for k, v in vnative.items() if k != "resume"}
+    if others["scheme"] is not None:
         # the short names of the first version are still accepted
-        vnative["scheme"] = SCHEME_ALIASES.get(vnative["scheme"], vnative["scheme"])
-        if vnative["scheme"] not in SCHEMES:
-            _error(f"unknown scheme {vnative['scheme']}, one of " + ", ".join(SCHEMES))
-    if any(set(value) for value in vnative.values()):
-        _patch_vnative(vnative)
+        others["scheme"] = SCHEME_ALIASES.get(others["scheme"], others["scheme"])
+        if others["scheme"] not in SCHEMES:
+            _error(f"unknown scheme {others['scheme']}, one of " + ", ".join(SCHEMES))
+    if any(set(value) for value in others.values()):
+        _patch_vnative(others)
 
 
 def _patch_run_options(cross):
@@ -150,6 +157,34 @@ def _patch_run_options(cross):
         return run_initialize(self)
 
     MechanicsHdf5Runner.run_initialize = run_options_run_initialize
+
+
+def _patch_resume():
+    """Resume a vkernel simulation from where it stopped.
+
+    Force MechanicsHdf5Runner to open the hdf5 file in append mode ("r+")
+    instead of write mode ("w"), so that an existing simulation file is not
+    truncated when the driver re-creates its scene.  Scene creation
+    (add_primitive_shape, add_object, ...) is idempotent: objects already
+    registered are left untouched.
+
+    The cold restart already implemented in MechanicsHdf5Runner.run_initialize
+    then resumes the simulation from the last saved time: t0 is set to the
+    last time present in the dynamic table, and the bodies' positions and
+    velocities are restored from the last output step (import_scene).
+    """
+    from siconos.io.mechanics_run import MechanicsHdf5Runner
+
+    orig_init = MechanicsHdf5Runner.__init__
+
+    def resumed_init(self, *args, **kwargs):
+        # never truncate an existing simulation file: open it in append mode
+        # so the cold restart can resume from the last saved time
+        if kwargs.get("mode") == "w" or "mode" not in kwargs:
+            kwargs["mode"] = "r+"
+        orig_init(self, *args, **kwargs)
+
+    MechanicsHdf5Runner.__init__ = resumed_init
 
 
 def _patch_vnative(v):
