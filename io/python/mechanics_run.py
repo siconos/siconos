@@ -571,6 +571,15 @@ class MechanicsHdf5Runner_run_options(dict):
                        readable by ParaView, instead of these tables
                       'both': both of them""",
         )
+        create_option(
+            d,
+            "output_vtkhdf_disks",
+            "boolean, optional",
+            False,
+            """if True, the ParaView state of the VTKHDF output draws the
+                      bodies as disks (BODIES_AS_DISKS), much lighter than
+                      their shapes for the large cases""",
+        )
 
         # default verbose and debug  options
         create_option(
@@ -2845,13 +2854,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def output_static_vtkhdf(self):
         """
         Outputs the static objects alive, as written in the static table
-        at this step, in the VTKHDF file of the static objects.
+        at this step, in the VTKHDF file of the static objects, if they
+        changed.
         """
         time = self.current_time()
-        points, point_data = siconos.io.vtkhdf.static_point_data(
-            self._static_data[self._static_rows, 1:], self._vtkhdf_shapes, time
+        self._vtkhdf_static_writer.write_step(
+            time,
+            *self._vtkhdf_shapes.static_geometry(
+                self._static_data[self._static_rows, 1:], time
+            ),
         )
-        self._vtkhdf_static_writer.write_step(time, points, point_data)
 
     def output_bodies(self, with_timer=False, initial=False):
         """
@@ -3757,6 +3769,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._dimension,
                 vtkhdf_filename,
                 contacts=self._output_contact_forces,
+                disks=run_options.get("output_vtkhdf_disks", False),
             )
             files = siconos.io.vtkhdf.companion_filenames(vtkhdf_filename)
             state, static_filename = files.state, files.static
@@ -3781,7 +3794,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     files.fem, self._vtkhdf_shapes.fem, append=self._vtkhdf_append
                 )
             if self._vtkhdf_shapes.has_static:
-                self._vtkhdf_static_writer = siconos.io.vtkhdf.BodiesWriter(
+                self._vtkhdf_static_writer = siconos.io.vtkhdf.StaticWriter(
                     static_filename,
                     compression=self._use_compression,
                     append=self._vtkhdf_append,

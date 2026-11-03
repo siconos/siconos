@@ -43,7 +43,8 @@ python3 bench-dambreak.py 40 --output-format vtkhdf
 siconos --output-format vtkhdf bench-disks.py vnative 50
 ```
 
-`bench-dambreak.py` has the option; the `siconos` command
+`bench-dambreak.py` has the option, and `--vtkhdf-disks` (run option
+`output_vtkhdf_disks`) for the large cases, see §3; the `siconos` command
 (`--t0 --T --h --output-format`, and the vnative time stepping options)
 sets them for any python driver it runs, over what the driver chose.
 
@@ -55,6 +56,7 @@ Any siconos HDF5 file, old ones included:
 siconos_vtkhdf my_run.hdf5                 # my_run.vtkhdf and the others
 siconos_vtkhdf my_run.hdf5 -o out.vtkhdf   # out.vtkhdf, out_shapes.vtkhdf...
 siconos_vtkhdf my_run.hdf5 --compression   # gzip the datasets
+siconos_vtkhdf my_run.hdf5 --disks         # the state draws the bodies as disks
 ```
 
 In the guix container (`guix shell --container`) the installed scripts
@@ -67,22 +69,24 @@ Next to `my_run.hdf5` (or the `-o` name):
 | file                     | content                                       | written                                              |
 |--------------------------|-----------------------------------------------|------------------------------------------------------|
 | `my_run.vtkhdf`          | the dynamic bodies, one point per body        | always                                               |
-| `my_run_shapes.vtkhdf`   | the glyph table: one block per distinct shape | always                                               |
-| `my_run_static.vtkhdf`   | the static objects alive at each step         | if there are static objects                          |
+| `my_run_shapes.vtkhdf`   | the glyph table: one block per distinct shape of the bodies | always                                 |
+| `my_run_static.vtkhdf`   | the static objects alive, their geometry merged, a step when it changes | if there are static objects |
 | `my_run_contacts.vtkhdf` | the contacts, one point per contact           | if the contacts are output (`output_contact_forces`) |
 | `my_run_fem.vtkhdf`      | the finite element meshes, deformed           | if there are FEM bodies                              |
 | `my_run_paraview.py`     | a ParaView state drawing all of them          | always                                               |
 
-All the files have the same time steps: a step without contact is an
-empty step of the contacts file, so ParaView never shows the contacts of
-another time.
+The files have the same time steps but the static one: a step without
+contact is an empty step of the contacts file, so ParaView never shows
+the contacts of another time. The static objects change at a birth or a
+death only, and ParaView shows the last step of a file at or before the
+time asked.
 
 The point and cell arrays:
 
 | file     | arrays                                                                                                                                                           |
 |----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| bodies   | `id`, `orientation` (quaternion w, x, y, z), `velocity`, `angular_velocity`, `radius` (vnative: disk radius, polygon circumradius), `shape_index`, `glyph_scale` |
-| static   | `id`, `orientation`, `shape_index`, `glyph_scale`                                                                                                                |
+| bodies   | `id`, `orientation` (quaternion w, x, y, z), `velocity`, `angular_velocity`, `radius` (vnative: disk radius, polygon circumradius), `shape_index`, `glyph_scale`, `disk_radius` |
+| static   | cells: `id` (of the static object)                                                                                                                               |
 | contacts | `normal`, `reaction` (impulse, global frame), `reaction_normal`, `reaction_tangent` (norm), `gap`, `relative_velocity`, `mu`, `interaction`, `ds1`, `ds2`        |
 | FEM      | points: `displacement`; cells: `strain`, `stress` (xx, yy, xy), `von_mises` (plane stress), `body` (ds id)                                                       |
 
@@ -103,7 +107,12 @@ The state:
   `orientation` and scaled by `glyph_scale` (the radius for the disks and
   spheres, which share a unit block; 1 for the others), colored by the
   velocity;
-- draws the static objects the same way, in gray;
+- or, with `BODIES_AS_DISKS = True` at the top of the state (`--disks`),
+  draws every body as a disk (a sphere in 3D) of radius `disk_radius`
+  with the *Point Gaussian* representation: in 2D the disk of the same
+  area as the shape (the radius for a disk), in 3D the largest distance
+  of the shape to the body origin. For the large cases, see below;
+- draws the static objects as lines and polygons, in gray;
 - draws the FEM meshes with their edges, colored by the von Mises stress;
 - loads the contacts **hidden**: the eye of `contacts` in the Pipeline
   Browser shows them, as small spheres colored by the reaction;
@@ -119,9 +128,6 @@ reaction impulse](paraview-vtkhdf-export/dambreak_contacts.png)
 
 Other ways to look at the same files, in ParaView:
 
-- disks or spheres only: the *Point Gaussian* representation of the
-  bodies, *Scale By Array* `radius`, *Use Scale Function* off, is lighter
-  than the glyphs;
 - the force chains: color the contacts by `reaction_normal`, or a
   *Threshold* on it;
 - the bodies of a contact: `ds1`, `ds2`; a body: *Find Data* on `id`.
@@ -147,9 +153,30 @@ other shape is drawn as a small cross, with a warning. The convex
 vertices are taken as given: vnative requires them centred on their
 centroid, so they are in the body frame.
 
-**Static objects.** One point per static object at each step, from the
-`static` table, kept only from its `time_of_birth` to its
-`time_of_death` (the table keeps the dead ones).
+**Static objects.** Their contactors merged and moved to their pose
+(the `static` table), kept only from their `time_of_birth` to their
+`time_of_death` (the table keeps the dead ones), in one PolyData of
+lines and polygons. A step is written when this geometry changes only.
+They are not glyphs: one block per static object (the 1050 terrain
+segments of `bench-dambreak.py 256`) would make the ParaView memory leak
+below 10 times worse. vtkHDFReader reads the offsets of a step at
+`CellOffsets` + the number of previous steps whose cells start before
+it, which is not the true row after a step without cell of the
+topology: `StaticWriter` pads `Offsets` so that each step is written at
+a row the reader finds.
+
+**ParaView memory, 3D Glyphs.** `vtkOpenGLGlyph3DMapper` (VTK 9.5, ParaView
+6.0) caches its glyph geometry per input dataset, keyed by its pointer,
+one entry per block of the glyph table, and frees nothing until the
+representation goes: ParaView gives a new dataset at each step, so
+playing an animation leaks about 27 kB per block per step shown.
+`bench-dambreak.py 256` with the static objects in the glyph table (1180
+blocks) took 64 MB per step, out of memory after 470 of its 854 steps;
+with the bodies only (110 blocks) about 3 MB per step is expected
+(`bench-dambreak.py 40`, 66 blocks: 2 MB per step measured). Fixed in VTK
+by e9652f91 ("vtkOpenGLGlyph3DMapper: prevent excessive memory usage",
+2026-02-25, not in VTK 9.6.0). Until a ParaView has it, `BODIES_AS_DISKS`
+(*Point Gaussian*, measured flat) is the way to play a large case.
 
 **FEM.** The objects with a `material` are FEM bodies (stored with
 type `static`). Their mesh is the gmsh 2.2 text of their shape; its
@@ -194,6 +221,8 @@ The shape table of 1.1M bodies (102 shapes) builds in 0.06 s and adds
   are drawn as crosses.
 - The FEM tables are written in every mode.
 - `siconos_vexport` (`vexport.py`) is still there, outdated and slow.
+- 3D Glyphs leak memory in ParaView 6.0 (§4): `BODIES_AS_DISKS` for the
+  long animations of the large cases.
 
 ## 6. Reproduce the figures
 

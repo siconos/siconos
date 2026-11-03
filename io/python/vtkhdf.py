@@ -21,11 +21,12 @@ The bodies are written as one transient PolyData, one point per body,
 read natively by ParaView (>= 5.12) and VTK (>= 9.3). It is meant for
 large granular simulations. Alongside <name>.vtkhdf:
 
-- <name>_shapes.vtkhdf, the glyph table: one block per distinct shape in
-  the body frame, picked for each body by its shape_index point array,
-  scaled by glyph_scale (the radius of the disks and spheres);
-- <name>_static.vtkhdf, the static objects alive at each step, one point
-  per object, drawn from the same glyph table;
+- <name>_shapes.vtkhdf, the glyph table: one block per distinct shape of
+  the bodies in the body frame, picked for each body by its shape_index
+  point array, scaled by glyph_scale (the radius of the disks and
+  spheres);
+- <name>_static.vtkhdf, the static objects alive, their geometry merged
+  in one PolyData, a step written only when it changes;
 - <name>_contacts.vtkhdf, the contacts of each step, one point per
   contact (the middle of its points A and B) with its normal and reaction;
 - <name>_fem.vtkhdf, the finite element meshes deformed at each step,
@@ -35,8 +36,10 @@ large granular simulations. Alongside <name>.vtkhdf:
   object with its shape (3D Glyphs oriented by the "orientation"
   quaternion w, x, y, z): paraview --state=<name>_paraview.py
 
-Disks or spheres alone are lighter with the "Point Gaussian"
-representation scaled by the "radius" array.
+For the large cases, BODIES_AS_DISKS = True at the top of the state (the
+disks option of the writers) draws every body as a disk scaled by the
+"disk_radius" array, with the "Point Gaussian" representation: the
+3D Glyphs of ParaView keep a copy of the glyph table at every step shown.
 
 Layout: every step appends its rows to the same datasets, and the
 Steps group records where each step starts. The vertex topology (one
@@ -374,6 +377,12 @@ def _rotate(q, points):
     return points + 2 * np.cross(v, np.cross(v, points) + w * points)
 
 
+def _polygon_area(points):
+    """Area of a planar polygon of the xy plane (shoelace)."""
+    x, y = points[:, 0], points[:, 1]
+    return 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+
+
 def _polygon(points):
     return _Geometry(points, [np.arange(len(points))])
 
@@ -494,16 +503,50 @@ def _decode(names):
     return [n.decode("utf-8") if isinstance(n, bytes) else str(n) for n in names]
 
 
+def _cross():
+    """A small cross, for the bodies of unknown or unsupported shapes."""
+    r = 0.5
+    arms = [(-r, 0, 0), (r, 0, 0), (0, -r, 0), (0, r, 0), (0, 0, -r), (0, 0, r)]
+    return _Geometry(np.array(arms), [(0, 1), (2, 3), (4, 5)])
+
+
+def _contactor_offset(c):
+    t = np.asarray(c.attrs.get("translation", (0, 0, 0)), dtype=np.float64)
+    q = np.asarray(c.attrs.get("orientation", (1, 0, 0, 0)), dtype=np.float64)
+    return np.pad(t, (0, 3 - len(t))), q
+
+
+def _contactors_geometry(contactors, ref, dimension, unsupported):
+    """The contactors of an object merged in its frame, at their size; the
+    names of the shapes not drawn are added to unsupported."""
+    g = _Geometry()
+    for c in contactors:
+        shape_name = c.attrs["shape_name"]
+        part = _shape_geometry(ref[shape_name], dimension)
+        if part is None:
+            unsupported.add(shape_name)
+            continue
+        part, unit = part
+        if unit is not None:
+            r = unit[1]
+            part = _polygon(r * _unit_circle()) if unit[0] == "disk" else _sphere(r)
+        g.merge(part, *_contactor_offset(c))
+    return g
+
+
 class ShapeTable:
-    """The shapes of the dynamic bodies of a siconos mechanics HDF5 file.
+    """The shapes of the bodies of a siconos mechanics HDF5 file.
 
     Built from the data/input and data/ref groups. The grain k of an
     add_objects aggregate has the id of the aggregate + k.
 
-    blocks: list of (name, _Geometry), the glyph table.
-    point_data(ids): the shape_index and glyph_scale arrays of bodies.
-    The static objects (negative ids) are drawn from the same table, alive
-    from their time of birth to their time of death.
+    blocks: list of (name, _Geometry), the glyph table of the dynamic
+    bodies only.
+    point_data(ids): the shape_index, glyph_scale and disk_radius
+    arrays of bodies.
+    static_geometry(rows, time): the static objects (negative ids) alive
+    at time, from their time of birth to their time of death, merged in
+    one geometry: they are not glyphs (see _PARAVIEW_STATE).
     """
 
     def __init__(self, data, dimension):
@@ -512,7 +555,8 @@ class ShapeTable:
         self._block_of_key = {}
         self.unsupported = set()
         self._fallback = None
-        # static id -> (block, scale, time of birth, time of death)
+        # static id -> (geometry in the object frame, time of birth, time
+        # of death)
         self._static = {}
         # of the static objects and of the bodies at their initial positions
         self._bounds = None
@@ -581,12 +625,13 @@ class ShapeTable:
                 )
             elif kind == "static":
                 contactors = [obj[c] for c in obj if "shape_name" in obj[c].attrs]
-                block, scale = self._contactors_block(
-                    name, contactors, shape_block, ref
+                geometry = _contactors_geometry(
+                    contactors, ref, dimension, self.unsupported
                 )
+                if len(geometry.points) == 0:
+                    geometry = _cross()
                 self._static[base] = (
-                    block,
-                    scale,
+                    geometry,
                     obj.attrs.get("time_of_birth", -np.inf),
                     obj.attrs.get("time_of_death", np.inf),
                 )
@@ -600,8 +645,9 @@ class ShapeTable:
                 given = np.asarray(obj.attrs.get("translation", ()), dtype=np.float64)
                 translation = np.zeros(3)
                 translation[: min(3, given.size)] = given.ravel()[:3]
-                points = scale * self.blocks[block][1].points
-                self._extend_bounds(_rotate(orientation, points) + translation, 0.0)
+                self._extend_bounds(
+                    _rotate(orientation, geometry.points) + translation, 0.0
+                )
 
         ids = np.concatenate(ids).astype(np.int64) if ids else np.zeros(0, np.int64)
         size = int(ids.max()) + 1 if len(ids) else 0
@@ -611,16 +657,28 @@ class ShapeTable:
         if len(ids):
             self._shape_index[ids] = np.concatenate(blocks)
             self._glyph_scale[ids] = np.concatenate(scales)
+        # the largest distance of a block to the body origin
+        self._extent = np.array(
+            [
+                np.linalg.norm(g.points, axis=1).max() if len(g.points) else 0.0
+                for _, g in self.blocks
+            ]
+        )
+        # the radius of a block drawn as a disk: in 2D, the disk of the
+        # same area as its polygons, else the largest distance
+        self._disk_radius = self._extent.copy()
+        if dimension == 2:
+            for k, (_, g) in enumerate(self.blocks):
+                area = sum(_polygon_area(g.points[c]) for c in g.cells if len(c) > 2)
+                if area > 0:
+                    self._disk_radius[k] = np.sqrt(area / np.pi)
+        unit = self._block_of_key.get(("unit",))
+        if unit is not None:
+            self._disk_radius[unit] = 1.0
         # the median size of the bodies, for the contacts drawing
         self.typical_size = 1.0
         if len(ids):
-            extent = np.array(
-                [
-                    np.linalg.norm(g.points, axis=1).max() if len(g.points) else 0.0
-                    for _, g in self.blocks
-                ]
-            )
-            sizes = extent[self._shape_index[ids]] * self._glyph_scale[ids]
+            sizes = self._extent[self._shape_index[ids]] * self._glyph_scale[ids]
             if np.any(sizes > 0):
                 self.typical_size = float(np.median(sizes[sizes > 0]))
 
@@ -664,22 +722,14 @@ class ShapeTable:
     def _fallback_block(self):
         """A small cross, for the bodies of unknown or unsupported shapes."""
         if self._fallback is None:
-            r = 0.5
-            arms = [(-r, 0, 0), (r, 0, 0), (0, -r, 0), (0, r, 0), (0, 0, -r), (0, 0, r)]
-            geometry = _Geometry(np.array(arms), [(0, 1), (2, 3), (4, 5)])
-            self._fallback = self._block(("fallback",), "unknown", lambda: geometry)
+            self._fallback = self._block(("fallback",), "unknown", _cross)
         return self._fallback
 
     def _contactors_block(self, name, contactors, shape_block, ref):
         """(block, scale) of a body made of its contactors."""
 
-        def offset(c):
-            t = np.asarray(c.attrs.get("translation", (0, 0, 0)), dtype=np.float64)
-            q = np.asarray(c.attrs.get("orientation", (1, 0, 0, 0)), dtype=np.float64)
-            return np.pad(t, (0, 3 - len(t))), q
-
         def identity(c):
-            t, q = offset(c)
+            t, q = _contactor_offset(c)
             return np.allclose(t, 0) and len(q) == 4 and np.allclose(q, (1, 0, 0, 0))
 
         if not contactors:
@@ -688,52 +738,61 @@ class ShapeTable:
             return shape_block(contactors[0].attrs["shape_name"])
         # a composite body: the contactors merged, at their size
         key = tuple(
-            (c.attrs["shape_name"], *offset(c)[0], *offset(c)[1]) for c in contactors
+            (c.attrs["shape_name"], *_contactor_offset(c)[0], *_contactor_offset(c)[1])
+            for c in contactors
         )
 
         def geometry():
-            g = _Geometry()
-            for c in contactors:
-                shape_name = c.attrs["shape_name"]
-                part = _shape_geometry(ref[shape_name], self.dimension)
-                if part is None:
-                    self.unsupported.add(shape_name)
-                    continue
-                part, unit = part
-                if unit is not None:
-                    r = unit[1]
-                    part = (
-                        _polygon(r * _unit_circle())
-                        if unit[0] == "disk"
-                        else _sphere(r)
-                    )
-                t, q = offset(c)
-                g.merge(part, t, q)
-            return g
+            return _contactors_geometry(
+                contactors, ref, self.dimension, self.unsupported
+            )
 
         return self._block(("composite", key), name, geometry), 1.0
 
     def point_data(self, ids):
-        """shape_index and glyph_scale of the bodies ids."""
+        """shape_index, glyph_scale and disk_radius (for the bodies drawn
+        as disks: in 2D the radius of the disk of the same area as the
+        shape, else the largest distance of the shape to the body origin)
+        of the bodies ids."""
         ids = np.asarray(ids).astype(np.int64)
         known = (ids >= 0) & (ids < len(self._shape_index))
         index = np.full(len(ids), self._fallback_block(), dtype=np.int64)
         scale = np.ones(len(ids))
         index[known] = self._shape_index[ids[known]]
         scale[known] = self._glyph_scale[ids[known]]
-        for k in np.flatnonzero(ids < 0):
-            if ids[k] in self._static:
-                index[k], scale[k] = self._static[ids[k]][:2]
-        return {"shape_index": index, "glyph_scale": scale}
+        radius = self._disk_radius[index] * scale
+        return {"shape_index": index, "glyph_scale": scale, "disk_radius": radius}
 
     @property
     def has_static(self):
         return len(self._static) > 0
 
     def static_alive(self, ids, time):
-        """Mask of the static objects ids alive at time."""
-        lives = [self._static.get(int(i), (0, 0, -np.inf, np.inf))[2:] for i in ids]
+        """Mask of the static objects ids alive at time, False for an
+        unknown id."""
+        lives = [self._static.get(int(i), (0, 0, np.inf))[1:] for i in ids]
         return np.array([birth <= time < death for birth, death in lives], dtype=bool)
+
+    def static_geometry(self, rows, time):
+        """The static objects alive at time merged in one geometry, and the
+        id of each of its cells.
+
+        rows : (N, 8) id, x, y, z, q0, q1, q2, q3, as the static table
+        without its time column.
+        """
+        rows = np.asarray(rows, dtype=np.float64).reshape(-1, 8)
+        rows = rows[self.static_alive(rows[:, 0], time)]
+        points, cells, ids = [], [], []
+        n = 0
+        for row in rows:
+            geometry = self._static[int(row[0])][0]
+            points.append(_rotate(row[4:8], geometry.points) + row[1:4])
+            cells += [c + n for c in geometry.cells]
+            ids.append(np.full(len(geometry.cells), int(row[0]), dtype=np.int64))
+            n += len(geometry.points)
+        points = np.vstack(points) if points else np.zeros((0, 3))
+        ids = np.concatenate(ids) if ids else np.zeros(0, np.int64)
+        return _Geometry(points, cells), ids
 
     def write(self, filename):
         """The glyph table, a MultiBlockDataSet with one PolyData per block."""
@@ -778,28 +837,44 @@ _PARAVIEW_STATE = """# ParaView state: paraview --state={state}
 # The bodies drawn with their shape: the 3D Glyphs representation picks in
 # the glyph table (the shapes file) the block shape_index of each body,
 # rotates it by the orientation quaternion and scales it by glyph_scale.
-# For disks or spheres only, the Point Gaussian representation scaled by
-# the radius array is lighter.
+#
+# Memory: the 3D Glyphs of ParaView up to 6.0 at least keep a copy of the
+# glyph table for every step shown, never freed (fixed in VTK by commit
+# e9652f91, "vtkOpenGLGlyph3DMapper: prevent excessive memory usage").
+# Playing a long animation with many distinct shapes takes gigabytes:
+# BODIES_AS_DISKS = True draws every body as a disk (a sphere in 3D) of
+# radius disk_radius instead (in 2D, of the area of the shape), with the
+# Point Gaussian representation, which keeps nothing.
+BODIES_AS_DISKS = {disks}
+
 from paraview.simple import *
 
 bodies = OpenDataFile({bodies!r})
 RenameSource("bodies", bodies)
-shapes = OpenDataFile({shapes!r})
-RenameSource("shapes", shapes)
 view = GetActiveViewOrCreate("RenderView")
 display = Show(bodies, view)
-display.SetRepresentationType("3D Glyphs")
-display.GlyphType = shapes
-display.UseGlyphTable = 1
-display.UseCompositeGlyphTable = 1
-display.GlyphTableIndexArray = "shape_index"
-display.Orient = 1
-display.OrientationMode = "Quaternion"
-display.SelectOrientationVectors = "orientation"
-display.Scaling = 1
-display.ScaleMode = "Magnitude"
-display.SelectScaleArray = "glyph_scale"
-display.ScaleFactor = 1.0
+if BODIES_AS_DISKS:
+    display.SetRepresentationType("Point Gaussian")
+    display.ShaderPreset = {preset!r}
+    display.ScaleByArray = 1
+    display.SetScaleArray = ["POINTS", "disk_radius"]
+    display.UseScaleFunction = 0
+    display.GaussianRadius = 1.0
+else:
+    shapes = OpenDataFile({shapes!r})
+    RenameSource("shapes", shapes)
+    display.SetRepresentationType("3D Glyphs")
+    display.GlyphType = shapes
+    display.UseGlyphTable = 1
+    display.UseCompositeGlyphTable = 1
+    display.GlyphTableIndexArray = "shape_index"
+    display.Orient = 1
+    display.OrientationMode = "Quaternion"
+    display.SelectOrientationVectors = "orientation"
+    display.Scaling = 1
+    display.ScaleMode = "Magnitude"
+    display.SelectScaleArray = "glyph_scale"
+    display.ScaleFactor = 1.0
 ColorBy(display, ("POINTS", "velocity", "Magnitude"))
 # the bodies start at rest: the range grows with the steps shown
 velocity = GetColorTransferFunction("velocity")
@@ -812,22 +887,13 @@ Render(view)
 """
 
 _PARAVIEW_STATIC = """
-# the static objects, from the same glyph table
+# the static objects, their geometry merged, the id cell array tells
+# which object a cell is of
 static = OpenDataFile({static!r})
 RenameSource("static", static)
 static_display = Show(static, view)
-static_display.SetRepresentationType("3D Glyphs")
-static_display.GlyphType = shapes
-static_display.UseGlyphTable = 1
-static_display.UseCompositeGlyphTable = 1
-static_display.GlyphTableIndexArray = "shape_index"
-static_display.Orient = 1
-static_display.OrientationMode = "Quaternion"
-static_display.SelectOrientationVectors = "orientation"
-static_display.Scaling = 1
-static_display.ScaleMode = "Magnitude"
-static_display.SelectScaleArray = "glyph_scale"
-static_display.ScaleFactor = 1.0
+static_display.SetRepresentationType("Surface")
+static_display.ColorArrayName = ["POINTS", ""]
 static_display.AmbientColor = static_display.DiffuseColor = [0.5, 0.5, 0.5]
 static_display.LineWidth = 2.0
 """
@@ -872,9 +938,11 @@ def write_paraview_state(
     contacts_filename=None,
     typical_size=1.0,
     fem_filename=None,
+    disks=False,
 ):
     """A ParaView python state drawing the bodies, and the static objects,
-    with their shapes, and the contacts."""
+    with their shapes, and the contacts. disks: the default of
+    BODIES_AS_DISKS in the state, the bodies drawn as disks."""
     # the glyph bounds are padded by the largest glyph: the camera is set on
     # the static objects and the bodies at their initial positions
     camera = "view.ResetCamera()\n"
@@ -897,6 +965,8 @@ def write_paraview_state(
                 bodies=os.path.abspath(bodies_filename),
                 shapes=os.path.abspath(shapes_filename),
                 static=static,
+                disks=bool(disks),
+                preset="Plain circle" if dimension == 2 else "Sphere",
                 camera=camera,
                 view_2d='view.InteractionMode = "2D"\n' if dimension == 2 else "",
             )
@@ -919,9 +989,12 @@ def companion_filenames(vtkhdf_filename):
     )
 
 
-def write_shapes_and_state(data, dimension, vtkhdf_filename, contacts=False):
+def write_shapes_and_state(
+    data, dimension, vtkhdf_filename, contacts=False, disks=False
+):
     """The shapes file and the ParaView state of the bodies of a siconos
-    file, returns the ShapeTable. contacts: draw the contacts file too."""
+    file, returns the ShapeTable. contacts: draw the contacts file too.
+    disks: the state draws the bodies as disks, for the large cases."""
     shapes = ShapeTable(data, dimension)
     if shapes.unsupported:
         print(
@@ -943,6 +1016,7 @@ def write_shapes_and_state(data, dimension, vtkhdf_filename, contacts=False):
         files.contacts if contacts else None,
         shapes.typical_size,
         files.fem if shapes.fem else None,
+        disks,
     )
     return shapes
 
@@ -1139,6 +1213,166 @@ class FemWriter:
         self.close()
 
 
+class StaticWriter:
+    """Append the static objects, merged in one geometry, to a VTKHDF file:
+    a transient PolyData of lines and polygons with the id of the object of
+    each cell. A step is written only when the geometry changes: the
+    reader shows the last step at or before the time asked.
+
+    Unlike the bodies, the static objects are not glyphs: a glyph table of
+    one block per static object costs ParaView memory at every step shown
+    (see _PARAVIEW_STATE).
+    """
+
+    def __init__(self, filename, dtype=np.float32, compression=False, append=False):
+        self._dtype = dtype
+        self._compression = "gzip" if compression else None
+        # the geometry of the last step written, unknown after a restart
+        self._last = None
+        if append and os.path.exists(filename):
+            self._file = h5py.File(filename, "a")
+            self._root = self._file["VTKHDF"]
+            self._steps = self._root["Steps"]
+            return
+        self._file = h5py.File(filename, "w")
+        root = self._root = self._file.create_group("VTKHDF")
+        root.attrs["Version"] = np.array(VTKHDF_VERSION, dtype=np.int64)
+        root.attrs["Type"] = np.bytes_("PolyData")
+        self._extendable(root, "Points", (3,), dtype)
+        self._per_step(root, "NumberOfPoints", (), np.int64)
+        for name in _TOPOLOGIES:
+            topology = root.create_group(name)
+            for count in ("NumberOfCells", "NumberOfConnectivityIds"):
+                self._per_step(topology, count, (), np.int64)
+            # a step without cell reads the first offset
+            _append(self._extendable(topology, "Offsets", (), np.int64), [0])
+            self._extendable(topology, "Connectivity", (), np.int64)
+        root.create_group("PointData")
+        self._extendable(root.create_group("CellData"), "id", (), np.int64)
+        root.create_group("FieldData")
+        steps = self._steps = root.create_group("Steps")
+        steps.attrs["NSteps"] = 0
+        self._per_step(steps, "Values", (), np.float64)
+        for name in ("PartOffsets", "NumberOfParts", "PointOffsets"):
+            self._per_step(steps, name, (), np.int64)
+        for name in ("CellOffsets", "ConnectivityIdOffsets"):
+            self._per_step(steps, name, (len(_TOPOLOGIES),), np.int64)
+        steps.create_group("PointDataOffsets")
+        self._per_step(steps.create_group("CellDataOffsets"), "id", (), np.int64)
+        steps.create_group("FieldDataOffsets")
+
+    def _extendable(self, group, name, shape, dtype):
+        return _extendable(group, name, shape, dtype, 8192, self._compression)
+
+    def _per_step(self, group, name, shape, dtype):
+        return _extendable(group, name, shape, dtype, _STEP_CHUNK_ROWS, None)
+
+    def _cell_offset(self, topology):
+        """The CellOffsets of a new step and the row of Offsets where its
+        offsets go, padding Offsets up to it.
+
+        vtkHDFReader reads the offsets of a step at CellOffsets + the
+        number of the previous steps whose cells start before
+        CellOffsets, not at the true row when a step without cell comes
+        just before: the step is written at the first row it can read.
+        """
+        offsets = topology["Offsets"]
+        counts = topology["NumberOfCells"][:]
+        # the first cell of each previous step
+        starts = np.concatenate(([0], np.cumsum(counts)[:-1])) if len(counts) else []
+        row = offsets.shape[0]
+
+        def read_row(cell_offset):
+            return cell_offset + int(np.searchsorted(starts, cell_offset, "left"))
+
+        low, high = 0, row
+        while low < high:
+            middle = (low + high) // 2
+            if read_row(middle) >= row:
+                high = middle
+            else:
+                low = middle + 1
+        padding = read_row(low) - row
+        if padding:
+            _append(offsets, np.zeros(padding, np.int64))
+        return low
+
+    def write_step(self, time, geometry, ids):
+        """Append one time step, unless the geometry is the one of the
+        last step written.
+
+        geometry : _Geometry, its cells of 2 points are lines, polygons
+            else.
+        ids : (number of cells,) the id of the object of each cell.
+        """
+        lines = [c for c in geometry.cells if len(c) == 2]
+        polygons = [c for c in geometry.cells if len(c) > 2]
+        is_line = np.array([len(c) == 2 for c in geometry.cells], dtype=bool)
+        ids = np.asarray(ids, dtype=np.int64)
+        # the cell data in the order of the topologies
+        ids = np.concatenate((ids[is_line], ids[~is_line]))
+        cells = {"Lines": lines, "Polygons": polygons}
+        connectivity = {
+            name: np.concatenate(c) if c else np.zeros(0, np.int64)
+            for name, c in cells.items()
+        }
+        current = (
+            geometry.points,
+            connectivity["Lines"],
+            connectivity["Polygons"],
+            ids,
+        )
+        if self._last is not None and all(
+            np.array_equal(a, b) for a, b in zip(current, self._last)
+        ):
+            return
+        self._last = current
+
+        root, steps = self._root, self._steps
+        k = int(steps.attrs["NSteps"])
+        _append(steps["Values"], [time])
+        _append(steps["PartOffsets"], [k])
+        _append(steps["NumberOfParts"], [1])
+        points = geometry.points.astype(self._dtype, copy=False)
+        _append(steps["PointOffsets"], [_append(root["Points"], points)])
+        _append(root["NumberOfPoints"], [len(points)])
+        cell_offsets, connectivity_offsets = [], []
+        for name in _TOPOLOGIES:
+            topology = root[name]
+            step_cells = cells.get(name, [])
+            step_connectivity = connectivity.get(name, np.zeros(0, np.int64))
+            if step_cells:
+                cell_offsets.append(self._cell_offset(topology))
+                counts = np.cumsum([len(c) for c in step_cells])
+                _append(topology["Offsets"], np.concatenate(([0], counts)))
+            else:
+                cell_offsets.append(0)
+            connectivity_offsets.append(
+                _append(topology["Connectivity"], step_connectivity)
+            )
+            _append(topology["NumberOfCells"], [len(step_cells)])
+            _append(topology["NumberOfConnectivityIds"], [len(step_connectivity)])
+        _append(steps["CellOffsets"], [cell_offsets])
+        _append(steps["ConnectivityIdOffsets"], [connectivity_offsets])
+        offset = _append(root["CellData"]["id"], ids)
+        _append(steps["CellDataOffsets"]["id"], [offset])
+        steps.attrs["NSteps"] = k + 1
+
+    def flush(self):
+        self._file.flush()
+
+    def close(self):
+        if self._file:
+            self._file.close()
+            self._file = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type_, value, traceback):
+        self.close()
+
+
 def fem_rows(data, time=None):
     """The rows of the FEM tables, dicts ds id -> row without the time and
     id columns: displacements, strains, stresses. At time, or the last
@@ -1239,19 +1473,6 @@ def contacts_point_data(rows):
     return points, point_data
 
 
-def static_point_data(rows, shapes, time):
-    """Points and point arrays of the static objects alive at time.
-
-    rows : (N, 8) id, x, y, z, q0, q1, q2, q3, as the static table
-    without its time column.
-    """
-    rows = np.asarray(rows, dtype=np.float64).reshape(-1, 8)
-    rows = rows[shapes.static_alive(rows[:, 0], time)]
-    point_data = {"id": rows[:, 0].astype(np.int64), "orientation": rows[:, 4:8]}
-    point_data.update(shapes.point_data(rows[:, 0]))
-    return rows[:, 1:4], point_data
-
-
 def siconos_rows(time, points, point_data):
     """The rows of the siconos dynamic and velocities tables of a step.
 
@@ -1342,13 +1563,16 @@ def _time_column_steps(data, block_rows):
         yield time, slice(start, end), slice(start, end), step_radii
 
 
-def convert(io_filename, vtkhdf_filename, compression=False, block_rows=1 << 22):
+def convert(
+    io_filename, vtkhdf_filename, compression=False, block_rows=1 << 22, disks=False
+):
     """Write the bodies of a siconos mechanics HDF5 file in a VTKHDF file.
 
     The dynamic and velocities tables are read one step at a time, with
     the step index of the file when it has one. The radii table (vnative
     backend) is used when it lines up with them. The shapes file and the
-    ParaView state are written alongside.
+    ParaView state are written alongside, the state draws the bodies as
+    disks if disks.
     Returns the number of steps written.
     """
     with h5py.File(io_filename, "r") as io:
@@ -1367,7 +1591,7 @@ def convert(io_filename, vtkhdf_filename, compression=False, block_rows=1 << 22)
         cf = data.get("cf")
         with_contacts = cf is not None and cf.shape[0] > 0
         shapes = write_shapes_and_state(
-            data, dimension, vtkhdf_filename, contacts=with_contacts
+            data, dimension, vtkhdf_filename, contacts=with_contacts, disks=disks
         )
         files = companion_filenames(vtkhdf_filename)
 
@@ -1400,10 +1624,10 @@ def convert(io_filename, vtkhdf_filename, compression=False, block_rows=1 << 22)
                 bounds = [(float(t), int(s), int(s + n)) for t, s, n in rows if n > 0]
             else:
                 bounds = _step_bounds(static, block_rows)
-            with BodiesWriter(static_filename, compression=compression) as writer:
+            with StaticWriter(static_filename, compression=compression) as writer:
                 for time, start, end in bounds:
                     writer.write_step(
-                        time, *static_point_data(static[start:end, 1:], shapes, time)
+                        time, *shapes.static_geometry(static[start:end, 1:], time)
                     )
     return number_of_steps
 

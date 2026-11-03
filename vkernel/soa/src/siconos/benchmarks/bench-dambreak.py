@@ -94,6 +94,8 @@ p.add_argument("--dem-steps", type=float, default=10.0)
 p.add_argument(
     "--output-format", choices=("siconos", "vtkhdf", "both"), default="siconos"
 )
+# the ParaView state draws the rocks as disks: lighter for the large cases
+p.add_argument("--vtkhdf-disks", action="store_true")
 args, _ = p.parse_known_args(sys.argv[2:])
 if args.density is not None:
     args.density_liquid = args.density_rock = args.density
@@ -399,6 +401,7 @@ if dem_osi is not None:
 run_options["output_contact_info"] = True
 run_options["output_contact_work"] = False
 run_options["output_format"] = args.output_format
+run_options["output_vtkhdf_disks"] = args.vtkhdf_disks
 
 vnative_options = sio.SpaceFilterOptions()
 # The broadphase searches points with one radius, sized for two disks: a

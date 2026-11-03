@@ -27,8 +27,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--compression", action="store_true", help="gzip the VTKHDF datasets"
     )
+    parser.add_argument(
+        "--disks",
+        action="store_true",
+        help="the ParaView state draws the bodies as disks (BODIES_AS_DISKS), "
+        "much lighter than their shapes for the large cases",
+    )
     args = parser.parse_args()
 
     output = args.output or f"{os.path.splitext(args.io_filename)[0]}.vtkhdf"
-    steps = convert(args.io_filename, output, compression=args.compression)
+    steps = convert(
+        args.io_filename, output, compression=args.compression, disks=args.disks
+    )
     print(f"{output}: {steps} steps")
