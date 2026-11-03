@@ -270,8 +270,8 @@ static unsigned int* f2d_nsgs_allocate_freezing_contacts(FrictionContactProblem*
   return fcontacts;
 }
 
-void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, double* w, int* info,
-                                   SolverOptions* options) {
+void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, double* w,
+                                   int* info, SolverOptions* options) {
   /* Notes:
      - we suppose that the trivial solution case has been checked before,
      and that all inputs differs from NULL since this function is
@@ -481,7 +481,8 @@ void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, d
             /* Local problem formalization */
             fc2d_nsgs_build_local_problem_parallel(
                 permuted_contact, problem, blocks_contiguous, diagonal_blocks,
-                problem->M->sparse_block->index1_data, problem->M->sparse_block->index2_data, local_problem, z);
+                problem->M->sparse_block->index1_data, problem->M->sparse_block->index2_data,
+                local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
@@ -595,7 +596,8 @@ void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, d
             /* Local problem formalization */
             fc2d_nsgs_build_local_problem_parallel(
                 permuted_contact, problem, blocks_contiguous, diagonal_blocks,
-                problem->M->sparse_block->index1_data, problem->M->sparse_block->index2_data, local_problem, z);
+                problem->M->sparse_block->index1_data, problem->M->sparse_block->index2_data,
+                local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
@@ -743,8 +745,8 @@ static int fc2d_nsgs_graph_permut_nocopy_init_wrap(void* problem, SolverOptions*
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_graph_permut_nocopy_solve_wrap(void* problem, double* reaction, double* velocity,
-                                             SolverOptions* options) {
+static int fc2d_nsgs_graph_permut_nocopy_solve_wrap(void* problem, double* reaction,
+                                                    double* velocity, SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_graph_permut((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
@@ -756,11 +758,13 @@ static void fc2d_nsgs_graph_permut_nocopy_free_wrap(void* problem, SolverOptions
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY, "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY",
+REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY,
+                "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_NOCOPY",
                 "Parallel version of FC2D_NSGS (OpenMP, with permutation)",
-                fc2d_nsgs_graph_permut_nocopy_init_wrap, fc2d_nsgs_graph_permut_nocopy_solve_wrap,
+                fc2d_nsgs_graph_permut_nocopy_init_wrap,
+                fc2d_nsgs_graph_permut_nocopy_solve_wrap,
                 fc2d_nsgs_graph_permut_nocopy_free_wrap, NULL, /* error function */
-                fc2d_nsgs_set_default,                  /* set_default */
-                1000,                                   /* default_max_iter */
-                1e-4,                                   /* default_tol */
-                0)                                      /* is_local_solver */
+                fc2d_nsgs_set_default,                         /* set_default */
+                1000,                                          /* default_max_iter */
+                1e-4,                                          /* default_tol */
+                0)                                             /* is_local_solver */

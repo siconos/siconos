@@ -116,8 +116,8 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
      \param[in,out] info termination value
      \param[in,out] options structure
 */
-void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, double* w, int* info,
-                                   SolverOptions* options);
+void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, double* w,
+                                   int* info, SolverOptions* options);
 
 /**
      Same as fc2d_nsgs_graph_permut, but each thread copies the data it needs.
@@ -128,8 +128,8 @@ void fc2d_nsgs_graph_permut_nocopy(FrictionContactProblem* problem, double* z, d
      \param[in,out] info termination value
      \param[in,out] options structure
 */
-void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* z, double* w, int* info,
-                                      SolverOptions* options);
+void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* z, double* w,
+                                       int* info, SolverOptions* options);
 
 /**
 Test solver, same as fc2d_nsgs but loops over contacts in the order given by the

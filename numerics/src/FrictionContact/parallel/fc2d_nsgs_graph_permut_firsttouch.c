@@ -69,9 +69,9 @@ static void* fc2d_free_diagonal_blocks(double* sbcm) {
 }
 
 static void fc2d_nsgs_build_local_problem_parallel(
-    unsigned int contact, size_t local_contact, FrictionContactProblem* problem, double* blocks_contiguous,
-    double* diagonal_blocks, size_t* index1_data, size_t* index2_data,
-    LinearComplementarityProblem* local_problem, double* reaction) {
+    unsigned int contact, size_t local_contact, FrictionContactProblem* problem,
+    double* blocks_contiguous, double* diagonal_blocks, size_t* index1_data,
+    size_t* index2_data, LinearComplementarityProblem* local_problem, double* reaction) {
   // NM_extract_diag_block2(problem->M, contact, &local_problem->M->dense);
   local_problem->M->dense = &diagonal_blocks[4 * local_contact];
 
@@ -270,8 +270,8 @@ static unsigned int* f2d_nsgs_allocate_freezing_contacts(FrictionContactProblem*
   return fcontacts;
 }
 
-void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* z, double* w, int* info,
-                                       SolverOptions* options) {
+void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* z, double* w,
+                                       int* info, SolverOptions* options) {
   /* Notes:
      - we suppose that the trivial solution case has been checked before,
      and that all inputs differs from NULL since this function is
@@ -425,12 +425,11 @@ void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* 
 
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
-#pragma omp parallel default(none)                                                      \
-    private(pos, local_problem, localreaction, light_error_2)                           \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)    \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,    \
-               has_not_converged, norm_q, w, itermax)                                   \
-    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,    \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2) \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)         \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,         \
+               has_not_converged, norm_q, w, itermax)                                        \
+    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,         \
                blocks_contiguous)
     {
       // Allocate local problem
@@ -480,8 +479,9 @@ void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* 
 
             /* Local problem formalization */
             fc2d_nsgs_build_local_problem_parallel(
-                permuted_contact, permuted_contact, problem, blocks_contiguous, diagonal_blocks,
-                problem->M->sparse_block->index1_data, problem->M->sparse_block->index2_data, local_problem, z);
+                permuted_contact, permuted_contact, problem, blocks_contiguous,
+                diagonal_blocks, problem->M->sparse_block->index1_data,
+                problem->M->sparse_block->index2_data, local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
@@ -565,44 +565,47 @@ void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* 
     double light_error_sum = 0.;
     double localreaction[2];
 
-#pragma omp parallel default(none)                                                   \
-    private(pos, local_problem, localreaction)                                       \
+#pragma omp parallel default(none) private(pos, local_problem, localreaction)        \
     shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter, \
                blocks_contiguous)                                                    \
     shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
                has_not_converged, norm_q, w, itermax)
-    { 
+    {
       size_t n_threads = (size_t)omp_get_num_threads();
       size_t thread = (size_t)omp_get_thread_num();
 
       // Each thread gets only the blocks it needse
-      size_t* low = (size_t *)malloc(n_colors * sizeof(size_t));
-      size_t* high = (size_t *)malloc(n_colors * sizeof(size_t));
+      size_t* low = (size_t*)malloc(n_colors * sizeof(size_t));
+      size_t* high = (size_t*)malloc(n_colors * sizeof(size_t));
 
       // For each color group, compute the low and high contact indices for each thread
       // The index are local to the color group !
       size_t n_contacts_thread = 0;
-      size_t n_blocks_thread = 0 ;
-      size_t *offset = (size_t *)malloc(n_colors * sizeof(size_t));
+      size_t n_blocks_thread = 0;
+      size_t* offset = (size_t*)malloc(n_colors * sizeof(size_t));
 
       for (size_t color = 0; color < n_colors; color++) {
-        size_t n_contacts_color = sum_sizes[color + 1] - sum_sizes[color]; // number of contacts in this color group
-        size_t q = n_contacts_color / n_threads, r = n_contacts_color % n_threads; 
+        size_t n_contacts_color =
+            sum_sizes[color + 1] - sum_sizes[color];  // number of contacts in this color group
+        size_t q = n_contacts_color / n_threads, r = n_contacts_color % n_threads;
         low[color] = thread * q + (thread < r ? thread : r);
         high[color] = low[color] + q + (thread < r ? 1 : 0);
         // Update offset
         offset[color] = n_contacts_thread;
-        //Update number of contacts of this thread
+        // Update number of contacts of this thread
         n_contacts_thread += q + (thread < r ? 1 : 0);
         // Update number of blocks for this thread
-        n_blocks_thread += problem->M->sparse_block->index1_data[high[color] + sum_sizes[color]] - problem->M->sparse_block->index1_data[low[color] + sum_sizes[color]];
+        n_blocks_thread +=
+            problem->M->sparse_block->index1_data[high[color] + sum_sizes[color]] -
+            problem->M->sparse_block->index1_data[low[color] + sum_sizes[color]];
       }
 
-      size_t* index1_data_thread = (size_t *)calloc(n_contacts_thread + 1, sizeof(size_t));
-      size_t* index2_data_thread = (size_t *)malloc(n_blocks_thread * sizeof(size_t));
-      double* blocks = (double *)malloc(n_blocks_thread * 4 * sizeof(double));
-      double* diagonal_blocks_thread = (double *)malloc(n_contacts_thread * 4 * sizeof(double));
-      double* diagonal_block_determinant_thread = (double *)malloc(n_contacts_thread * sizeof(double));
+      size_t* index1_data_thread = (size_t*)calloc(n_contacts_thread + 1, sizeof(size_t));
+      size_t* index2_data_thread = (size_t*)malloc(n_blocks_thread * sizeof(size_t));
+      double* blocks = (double*)malloc(n_blocks_thread * 4 * sizeof(double));
+      double* diagonal_blocks_thread = (double*)malloc(n_contacts_thread * 4 * sizeof(double));
+      double* diagonal_block_determinant_thread =
+          (double*)malloc(n_contacts_thread * sizeof(double));
 
       size_t k = 0;
       size_t j = 0;
@@ -610,14 +613,21 @@ void fc2d_nsgs_graph_permut_firsttouch(FrictionContactProblem* problem, double* 
         for (size_t local_contact = low[color]; local_contact < high[color]; local_contact++) {
           size_t global_contact = local_contact + sum_sizes[color];
           // Diagonal blocks
-          memcpy(&diagonal_blocks_thread[4 * k], &diagonal_blocks[4 * global_contact], 4 * sizeof(double));
+          memcpy(&diagonal_blocks_thread[4 * k], &diagonal_blocks[4 * global_contact],
+                 4 * sizeof(double));
           // Diagonal block determinants
           diagonal_block_determinant_thread[k] = diagonal_block_determinant[global_contact];
           // Cumulative number of blocks
-          index1_data_thread[k + 1] = index1_data_thread[k] + problem->M->sparse_block->index1_data[global_contact + 1] - problem->M->sparse_block->index1_data[global_contact];
+          index1_data_thread[k + 1] =
+              index1_data_thread[k] +
+              problem->M->sparse_block->index1_data[global_contact + 1] -
+              problem->M->sparse_block->index1_data[global_contact];
           // Copy all blocks for this contact
-          for (size_t blockNum = problem->M->sparse_block->index1_data[global_contact]; blockNum < problem->M->sparse_block->index1_data[global_contact + 1]; blockNum++) {
-            memcpy(&blocks[4 * j], problem->M->sparse_block->block[blockNum], 4 * sizeof(double));
+          for (size_t blockNum = problem->M->sparse_block->index1_data[global_contact];
+               blockNum < problem->M->sparse_block->index1_data[global_contact + 1];
+               blockNum++) {
+            memcpy(&blocks[4 * j], problem->M->sparse_block->block[blockNum],
+                   4 * sizeof(double));
             index2_data_thread[j] = problem->M->sparse_block->index2_data[blockNum];
             j += 1;
           }
@@ -804,24 +814,28 @@ static int fc2d_nsgs_graph_permut_firsttouch_init_wrap(void* problem, SolverOpti
   return NUMERICS_OK;
 }
 
-static int fc2d_nsgs_graph_permut_firsttouch_solve_wrap(void* problem, double* reaction, double* velocity,
-                                             SolverOptions* options) {
+static int fc2d_nsgs_graph_permut_firsttouch_solve_wrap(void* problem, double* reaction,
+                                                        double* velocity,
+                                                        SolverOptions* options) {
   int info = NUMERICS_OK;
   fc2d_nsgs_graph_permut((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_nsgs_graph_permut_firsttouch_free_wrap(void* problem, SolverOptions* options) {
+static void fc2d_nsgs_graph_permut_firsttouch_free_wrap(void* problem,
+                                                        SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH, "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH",
+REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH,
+                "SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_FIRSTTOUCH",
                 "Parallel version of FC2D_NSGS (OpenMP, with permutation)",
-                fc2d_nsgs_graph_permut_firsttouch_init_wrap, fc2d_nsgs_graph_permut_firsttouch_solve_wrap,
+                fc2d_nsgs_graph_permut_firsttouch_init_wrap,
+                fc2d_nsgs_graph_permut_firsttouch_solve_wrap,
                 fc2d_nsgs_graph_permut_firsttouch_free_wrap, NULL, /* error function */
-                fc2d_nsgs_set_default,                  /* set_default */
-                1000,                                   /* default_max_iter */
-                1e-4,                                   /* default_tol */
-                0)                                      /* is_local_solver */
+                fc2d_nsgs_set_default,                             /* set_default */
+                1000,                                              /* default_max_iter */
+                1e-4,                                              /* default_tol */
+                0)                                                 /* is_local_solver */
