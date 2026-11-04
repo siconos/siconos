@@ -7,7 +7,16 @@
 # ===============================================================================
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics kernel control mechanics io CACHE STRING "List of siconos components to build and install")
+# Each component can be enabled/disabled with a WITH_<component> option.
+# If the COMPONENTS variable is not set, it is derived from these options.
+option(WITH_externals "Build externals component" ON)
+option(WITH_numerics "Build numerics component" ON)
+option(WITH_kernel "Build kernel component" ON)
+option(WITH_control "Build control component" ON)
+option(WITH_mechanics "Build mechanics component" ON)
+option(WITH_mechanisms "Build mechanisms component" OFF)
+option(WITH_io "Build io component" ON)
+option(WITH_vkernel "Build vkernel component" OFF)
 option(WITH_PYB11_WRAPPER "Build and install python bindings" ON)
 
 # --- Build/compiling options ---
