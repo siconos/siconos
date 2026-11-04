@@ -73,10 +73,10 @@ struct space_filter : item {
   using nslaw = typename finteraction::nslaw;
   using neighborhood = Neighborhood;
   struct attributes {
-    some::item_ref<topology> topology;
-    some::item_ref<neighborhood> neighborhood;
+    some::item_ref<Topology> topology;
+    some::item_ref<Neighborhood> neighborhood;
     some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<nslaw>> nslaws;
-    some::item_ref<diskdisk_r> diskdisk_r;
+    some::item_ref<collision::diskdisk_r> diskdisk_r;
     some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<diskmesh_r>>
         diskmeshes;
     some::map<some::array<some::scalar, some::indice_value<4>>, some::item_ref<diskfsegment_r>>

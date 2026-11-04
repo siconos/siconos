@@ -86,6 +86,11 @@ std::string type_name() {
     name =
         name.substr(0, p) + name.substr(open + 1, close - open - 1) + name.substr(close + 1);
   }
+
+  // gcc spells nested closing brackets "> >", clang ">>"
+  for (auto p = name.find("> >"); p != std::string::npos; p = name.find("> >", p)) {
+    name.erase(p + 1, 1);
+  }
   return name;
 }
 

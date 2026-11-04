@@ -58,6 +58,7 @@ struct column_base {
 namespace registry_detail {
 template <typename T>
 constexpr bool is_sparse_set = storage::is_sparse_set_v<T>;
+
 }  // namespace registry_detail
 
 /**
@@ -371,6 +372,18 @@ namespace registry_detail {
 template <typename T>
 concept configuration_item = match::item<T> && requires { typename T::properties; } &&
                              std::derived_from<T, with_properties_base>;
+
+// the properties of a configuration item, an empty tuple for any other item
+// (a class template: gcc rejects a lambda in a pack expansion of an alias)
+template <typename T>
+struct configuration_properties_of {
+  using type = mp::tuple<>;
+};
+
+template <configuration_item T>
+struct configuration_properties_of<T> {
+  using type = typename T::properties;
+};
 }  // namespace registry_detail
 
 /**
@@ -395,13 +408,8 @@ struct world_config {
 
 /// the with_properties<...> lists among the items given to make_runtime_database
 template <match::item... Items>
-using configuration_properties_t = decltype(mp::concat_all([] {
-  if constexpr (registry_detail::configuration_item<Items>) {
-    return typename Items::properties{};
-  } else {
-    return mp::tuple<>{};
-  }
-}()...));
+using configuration_properties_t = decltype(mp::concat_all(
+    typename registry_detail::configuration_properties_of<Items>::type{}...));
 
 /**
  * @brief Concrete column type of one attribute key.

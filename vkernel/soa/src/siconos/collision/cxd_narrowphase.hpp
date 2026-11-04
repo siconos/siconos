@@ -772,7 +772,7 @@ struct cxd_narrowphase : item {
   using poly_r_t = polytopepolytope_r<Topo>;
 
   struct attributes {
-    some::item_ref<topology> topology;
+    some::item_ref<Topo> topology;
     some::item_ref<collision::diskdisk_r> dsds_r;  // generic binder to detect
     // the plan's poly_dsds_r ref (cxd_narrowphase -> polytopepolytope_r) is
     // DISABLED on purpose: the mutual item_refs with poly_r's narrowphase

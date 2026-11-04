@@ -15,7 +15,7 @@ struct interaction : item {
 
   struct attributes {
     some::polymorphic_attribute<some::item_ref<Relations>...> relation;
-    some::item_ref<nslaw> nslaw;
+    some::item_ref<Nslaw> nslaw;
     some::matrix<some::scalar, nslaw_size, dof> h_matrix1;
     some::matrix<some::scalar, nslaw_size, dof> h_matrix2;
     some::vector<some::scalar, nslaw_size> lambda;

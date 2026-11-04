@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <tuple>
 
 #include "siconos/storage/memory.hpp"
 #include "siconos/storage/mp/mp.hpp"
@@ -50,7 +51,8 @@ static constexpr auto apply_wrapper(Storage storage) {
   // If matching wrapper found, apply it; otherwise return storage as-is
   if constexpr (of::found) {
     return []<typename... Ws>(boost::hana::tuple<Ws...>) {
-      return typename __type_pack_element<of::index, Ws...>::template wrapper<Storage>{};
+      return typename std::tuple_element_t<of::index,
+                                           std::tuple<Ws...>>::template wrapper<Storage>{};
     }(std::decay_t<Wrappers>{});
   } else {
     // without wrapper
