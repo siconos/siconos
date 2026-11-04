@@ -6,6 +6,7 @@
 #include <LinearComplementarityProblem.h>
 #include <NonSmoothDrivers.h>
 #include <NumericsVerbose.h>
+#include <SiconosConfig.h>  // WITH_FCLIB
 #include <SolverOptions.h>
 #include <fclib_interface.h>
 #include <lcp_cst.h>
@@ -213,6 +214,7 @@ struct one_step_nonsmooth_problem : item {
                 "{}-i{:0{}d}-{}-{}.hdf5", trace_params().filename(), solver_maxiter,
                 n_format_string, size0(w_mat), trace_params().counter());
 
+#if defined(WITH_FCLIB)
             frictionContact_fclib_write(
                 &*self()->problem().instance(), trace_params().title().c_str(),
                 trace_params().description().c_str(), trace_params().math_info().c_str(),
@@ -222,6 +224,7 @@ struct one_step_nonsmooth_problem : item {
 
             frictionContact_fclib_write_guess(z_vec._v->dense, w_vec._v->dense,
                                               trace_params().filename().c_str());
+#endif
 
             trace_params().counter()++;
           }
