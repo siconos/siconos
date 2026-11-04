@@ -32,6 +32,11 @@ find_package(Eigen3 REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 3.0.2  CONFIG REQUIRED)
 
+# every vkernel target includes boost/hana (storage/mp/mp.hpp): outside a
+# guix profile (micromamba, brew) the boost headers are not on the default
+# include path of the compiler.
+link_libraries(Boost::boost)
+
 include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 
 if(WITH_GPU)
