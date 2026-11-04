@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 #include "siconos/storage/get.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
@@ -90,12 +92,20 @@ struct index {
   /// @brief Three-way comparison operator
   friend auto operator<=>(const index<T, R>&, const index<T, R>&) = default;
 
+  /// declared explicitly: the operator== template below suppresses the
+  /// implicit one of the defaulted <=> (gcc), so same-type indices compared
+  /// unequal
+  friend bool operator==(const index<T, R>&, const index<T, R>&) = default;
+
+  /// indices of different item types never compare equal
   template <match::item U>
+    requires(!std::same_as<U, T>)
   friend bool operator!=(const index<T, R>& lhs, const index<U, R>& rhs) {
     return true;
   }
 
   template <match::item U>
+    requires(!std::same_as<U, T>)
   friend bool operator==(const index<T, R>& lhs, const index<U, R>& rhs) {
     return false;
   }
@@ -145,7 +155,7 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
   /// Base type alias
   using base_t = B<T, R, D>;
   /// Index type for this handle
-  using index_t = index<T, R>;
+  using index_t = storage::index<T, R>;
   /// Item type
   using type = typename index_t::type;
   /// Tag for handle concept (deprecated)
