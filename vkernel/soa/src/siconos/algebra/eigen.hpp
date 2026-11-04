@@ -2,6 +2,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <cassert>
 
 #include "siconos/algebra/linear_algebra.hpp"
 

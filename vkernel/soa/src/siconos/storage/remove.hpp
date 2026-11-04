@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "siconos/storage/get.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"

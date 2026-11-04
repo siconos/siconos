@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include <cassert>
+
 #include "siconos/collision/collision_head.hpp"
 
 namespace siconos::collision::shape {
