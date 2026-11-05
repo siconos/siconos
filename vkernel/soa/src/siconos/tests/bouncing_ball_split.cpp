@@ -16,7 +16,8 @@ class BouncingBallSplitTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
  public:
-  void testBouncingBallSplit() {
+  void testBouncingBallSplit()
+  {
     namespace storage = siconos::storage;
     namespace config = siconos::config;
     using siconos::storage::handle;
@@ -107,24 +108,31 @@ class BouncingBallSplitTest : public CppUnit::TestFixture {
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(ball, simulation.current_step())(0),
-               storage::attr<"velocity">(ball, simulation.current_step())(0), 0., 0.);
+               storage::attr<"velocity">(ball, simulation.current_step())(0),
+               0., 0.);
 
     while (simulation_has_next_event(data, simulation.index().value())) {
-      uint ninvds = simulation_compute_one_step(data, simulation.index().value());
+      unsigned int ninvds =
+          simulation_compute_one_step(data, simulation.index().value());
 
       double p0, lambda;
       if (ninvds > 0) {
-        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
-        lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-      } else {
+        p0 = get_vector(
+            simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+        lambda = get_vector(
+            simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      }
+      else {
         p0 = 0;
         lambda = 0;
       }
 
-      std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-                 simulation.current_step() * simulation.time_step(),
-                 storage::attr<"q">(ball, simulation.current_step())(0),
-                 storage::attr<"velocity">(ball, simulation.current_step())(0), p0, lambda);
+      std::print(
+          result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+          simulation.current_step() * simulation.time_step(),
+          storage::attr<"q">(ball, simulation.current_step())(0),
+          storage::attr<"velocity">(ball, simulation.current_step())(0), p0,
+          lambda);
     }
     //  io::close(fd);
 
