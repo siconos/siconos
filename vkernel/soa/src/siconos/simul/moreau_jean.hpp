@@ -16,7 +16,7 @@ namespace siconos::simul::moreau_jean {
 
      v_free         the free state (theta_method.hpp)
      W  = H A^-1 H^T                   the Delassus operator
-     q  = H v_free + e ydot(k)         the free output derivatives
+     q  = H v_free + e ydot_N(k)       the free output derivatives
      lambda solution of the frictional contact problem (W, q, mu)
      v(k + 1) = v_free + A^-1 H^T lambda
      q(k + 1) = q(k) + h (theta v(k + 1) + (1 - theta) v(k))
@@ -42,11 +42,12 @@ struct update_contact_next_velocity
   }
 };
 
-// the Newton impact law on the free output derivative
+// the Newton impact law on the free output derivative: e on the normal
+// component only, no tangential restitution (et = 0 in the kernel)
 struct apply_impact_law
     : kernel<all<interactions>, in<"ydot">, through<"nslaw", "e">, inout<"ydot", next>> {
   static void apply(const auto&, const auto& ydot, const auto& e, auto& ydot_next) {
-    ydot_next += e * ydot;
+    ydot_next(0) += e * ydot(0);
   }
 };
 

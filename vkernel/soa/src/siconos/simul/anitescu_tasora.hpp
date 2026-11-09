@@ -32,7 +32,7 @@ namespace siconos::simul::anitescu_tasora {
    Gauss-Seidel, matrix free): for each active interaction, with v the
    velocities of its systems so far,
 
-     u      = H v + e ydot(k)
+     u      = H v + e ydot_N(k)
      lambda <- P_K(lambda - eta u),  eta = 2 / trace(H M^-1 H^T)
      v      <- v + M^-1 H^T (the change of lambda)
 
@@ -56,7 +56,7 @@ namespace siconos::simul::anitescu_tasora {
      min 1/2 lambda^T W lambda + q^T lambda,  lambda in K
 
    on the assembled problem of Moreau-Jean (W = H A^-1 H^T, q = H v_free +
-   e ydot(k)): the same assembly, the same velocity correction, only the
+   e ydot_N(k)): the same assembly, the same velocity correction, only the
    solve differs (rigid and FEM systems). Nesterov's extrapolation, the step
    1 / L by backtracking on the Lipschitz estimate L, the adaptive restart;
    warm started from lambda at the previous step; it stops when the natural
@@ -173,10 +173,10 @@ struct apply_projected_gauss_seidel
       return;  // every velocity component it acts on is blocked
     }
 
-    // u = H v + e ydot(k)
+    // u = H v + e ydot_N(k), no tangential restitution
     auto u = (g1 * v1).eval();
     if (two) u += g2 * v2;
-    u += e * ydot;
+    u(0) += e * ydot(0);
 
     auto previous = lambda;
     lambda -= (2 / trace) * u;

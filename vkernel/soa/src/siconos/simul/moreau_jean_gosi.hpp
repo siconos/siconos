@@ -19,11 +19,11 @@ namespace siconos::simul::moreau_jean_gosi {
 
      v_free         the free state (theta_method.hpp)
      A v(k + 1) = A v_free + H^T lambda
-     u = H v(k + 1) + e ydot(k)
+     u = H v(k + 1) + e ydot_N(k)
      (u, lambda) in the Coulomb complementarity, friction coefficients mu
      q(k + 1) = q(k) + h (theta v(k + 1) + (1 - theta) v(k))
 
-   numerics solves it as (A, H^T, q = A v_free, b = e ydot(k), mu), and
+   numerics solves it as (A, H^T, q = A v_free, b = e ydot_N(k), mu), and
    gives v(k + 1) and lambda: no A^-1 H^T, the FEM systems in contact stay
    sparse. With a linear A it is the same problem as the local one, the
    trajectories are those of moreau_jean.hpp up to the solver tolerance. */
@@ -36,12 +36,15 @@ struct global_problem : nonsmooth_problem<GlobalFrictionContactProblem> {};
 using theta_method::time_step;
 using theta_method::update_position_involved;
 
-// b of an active interaction: its impact term e ydot(step)
+// b of an active interaction: its impact term e ydot_N(step), no
+// tangential restitution
 struct assemble_impact_term
     : kernel<active<interactions>, rank, in<"ydot">, through<"nslaw", "e">>,
       assembles {
   static void apply(auto& p, auto row, const auto& ydot, const auto& e) {
-    set_value(p.vector, row, e * ydot);
+    std::decay_t<decltype(ydot)> b = std::decay_t<decltype(ydot)>::Zero();
+    b(0) = e * ydot(0);
+    set_value(p.vector, row, b);
   }
 };
 
