@@ -20,14 +20,13 @@ struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
-struct data_t
-    : decltype(storage()
-                   .with_param<"dof", 3>()
-                   .with_items<simulation>()
-                   .with_time_invariant<ball, "fext">()
-                   .with_diagonal<ball, "mass_matrix">()
-                   .with_assembled_diagonal<osi, "mass_matrix_assembled">()
-                   .build_compile_time_database()){};
+struct data_t : decltype(storage()
+                             .with_param<"dof", 3>()
+                             .with_items<simulation>()
+                             .with_time_invariant<ball, "fext">()
+                             .with_diagonal<ball, "mass_matrix">()
+                             .with_assembled_diagonal<osi, "mass_matrix_assembled">()
+                             .build_compile_time_database()){};
 }  // namespace siconos::config
 
 namespace {
@@ -38,8 +37,7 @@ class BouncingBallTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
  public:
-  void testBouncingBall()
-  {
+  void testBouncingBall() {
     namespace storage = siconos::storage;
     namespace config = siconos::config;
     using siconos::storage::handle;
@@ -130,36 +128,30 @@ class BouncingBallTest : public CppUnit::TestFixture {
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(ball, simulation.current_step())(0),
-               storage::attr<"velocity">(ball, simulation.current_step())(0),
-               0., 0.);
+               storage::attr<"velocity">(ball, simulation.current_step())(0), 0., 0.);
 
     while (simulation.has_next_event()) {
       unsigned int ninvds = simulation.compute_one_step();
 
       double p0, lambda;
       if (ninvds > 0) {
-        p0 = get_vector(
-            simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
-        lambda = get_vector(
-            simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-      }
-      else {
+        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+        lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      } else {
         p0 = 0;
         lambda = 0;
       }
 
-      std::print(
-          result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-          simulation.current_step() * simulation.time_step(),
-          storage::attr<"q">(ball, simulation.current_step())(0),
-          storage::attr<"velocity">(ball, simulation.current_step())(0), p0,
-          lambda);
+      std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                 simulation.current_step() * simulation.time_step(),
+                 storage::attr<"q">(ball, simulation.current_step())(0),
+                 storage::attr<"velocity">(ball, simulation.current_step())(0), p0, lambda);
     }
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_ball.dat"),
-                       "bouncing_ball.ref", 1e-8);
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_ball.dat"), "bouncing_ball.ref",
+                       1e-8);
   }
 };
 
