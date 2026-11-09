@@ -50,9 +50,9 @@ class Hashed : public std::enable_shared_from_this<Hashed> {
   int k{0};
 
   Hashed(std::shared_ptr<siconos::modeling::DynamicalSystem> body, int i, int j, int k = 0)
-      : body(body), i(i), j(j), k(k){};
+      : body(body), i(i), j(j), k(k) {};
 
-  Hashed(int i, int j, int k = 0) : i(i), j(j), k(k){};
+  Hashed(int i, int j, int k = 0) : i(i), j(j), k(k) {};
 
   ~Hashed() noexcept = default;
 };

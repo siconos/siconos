@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 #include "TimeDiscretisationEvent.hpp"
+
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 
-void siconos::simulation::TimeDiscretisationEvent::process(Simulation& simulation)
-{
+void siconos::simulation::TimeDiscretisationEvent::process(Simulation& simulation) {
   // Update y[i] values in Interactions with new DS states.
   // simulation->updateOutput(0, 1);
   // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
@@ -31,8 +31,7 @@ void siconos::simulation::TimeDiscretisationEvent::process(Simulation& simulatio
       ->pushInteractionsInMemory();  // To save pre-impact values
 }
 
-void siconos::simulation::TimeDiscretisationEvent::update(unsigned int k)
-{
+void siconos::simulation::TimeDiscretisationEvent::update(unsigned int k) {
   assert(k > _k &&
          "TimeDiscretisationEvent::update - next step has to be greater than the current one");
   if (_td)  // if no TimeDiscretisation, then do nothing

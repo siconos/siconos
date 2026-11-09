@@ -25,7 +25,7 @@
 */
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
-#include "fc3d_2NCP_Glocker.h"  // for Compute_NCP_error1, Compute_NC...
+#include "fc3d_2NCP_Glocker.h"
 
 #include <math.h>   // for sqrt, cos, sin
 #include <stdio.h>  // for printf, NULL
@@ -36,9 +36,9 @@
 #include "SiconosBlas.h"               // for cblas_dcopy, cblas_dgemv, Cbla...
 #include "SparseBlockMatrix.h"         // for SBM_diagonal_block_index, Spar...
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
-#include "numerics_verbose.h"
-#include "naming_conventions.h"  // Standardized naming conventions
+#include "naming_conventions.h"        // Standardized naming conventions
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 /*Static variables */
 
@@ -88,7 +88,7 @@ void computeE(unsigned int i, double* e) {
 
 /* Compute and save MGlocker */
 void computeMGlocker() {
-  double* MLocal = localFC3D->M->matrix0;
+  double* MLocal = localFC3D->M->dense;
 
   /* Local function used in update */
 
@@ -161,7 +161,7 @@ void computeGGlocker() {
 }
 
 int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
-                           FrictionContactProblem* localproblem, int contact) {
+                          FrictionContactProblem* localproblem, int contact) {
   NumericsMatrix* MGlobal = problem->M;
   int n = 3 * problem->numberOfContacts;
 
@@ -171,8 +171,8 @@ int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
     int inc = n * in;
     // === Fill MLocal(3,3) according to the current contact number ===
     /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-    double* MM = MGlobal->matrix0;
-    double* MLocal = localproblem->M->matrix0;
+    double* MM = MGlobal->dense;
+    double* MLocal = localproblem->M->dense;
     MLocal[0] = MM[inc + in];
     MLocal[1] = MM[inc + it];
     MLocal[2] = MM[inc + is];
@@ -185,13 +185,14 @@ int NCPGlocker_fillMLocal(FrictionContactProblem* problem,
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   } else if (storageType == NM_SPARSE_BLOCK) {
-    int diagPos = SBM_diagonal_block_index(MGlobal->matrix1, contact);
-    localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
-    /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
+    int diagPos = SBM_diagonal_block_index(MGlobal->sparse_block, contact);
+    localproblem->M->dense = MGlobal->sparse_block->block[diagPos];
+    /*     cblas_dcopy(9, MGlobal->sparse_block->block[diagPos], 1,localproblem->M->dense , 1);
+     */
   } else
     return numerics_error("fc3d2NCP_Glocker::NCPGlocker_fillMLocal() -",
                           "unknown storage type for matrix M");
-  return 0;  
+  return 0;
 }
 
 void NCPGlocker_initialize(FrictionContactProblem* problem) {
@@ -356,42 +357,7 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date) {
   *jacobianFOut = jacobianFGlocker; /* pointer link */
 }
 
-/* Compute error for the NCP formulation*/
-
-/*  error = sum_i [(zi*F(zi)_+ + (zi)_- + (F(zi))_-] */
-
-double Compute_NCP_error1(int i, double error) {
-  printf("--------------contact =  %i\n", i);
-
-  double Fz;
-  printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);
-  printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
-
-  Fz = FGlocker[i] * reactionGlocker[i];
-  if (Fz > 0) error += Fz;
-  if (reactionGlocker[i] < 0) error += reactionGlocker[i];
-  if (FGlocker[i] < 0) error += FGlocker[i];
-  return error;
-}
-
-/*  error = sum_i sqrt[((zi*F(zi)_+)^2 + (sqrt(zi^2 + (F(zi))^2) - zi - F(zi))^2 ] */
-
-double Compute_NCP_error2(int i, double error) {
-  double Fz;
-  //      printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);
-  //      printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
-
-  Fz = FGlocker[i] * reactionGlocker[i];
-  if (Fz > 0) error += Fz * Fz;
-  error += (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) -
-            FGlocker[i] - reactionGlocker[i]) *
-           (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) -
-            FGlocker[i] - reactionGlocker[i]);
-  error = sqrt(error);
-  return error;
-}
-
-void compute_Z_GlockerFixedP(int i, double* reactionstep) {
+void compute_Z_Glocker_fixed_point(int i, double* reactionstep) {
   double rho = 1.;
   if (reactionGlocker[i] - rho * FGlocker[i] > 0.) {
     reactionstep[i] = rho * FGlocker[i] - reactionGlocker[i];

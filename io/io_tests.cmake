@@ -1,12 +1,12 @@
 include(tools4tests)
 
 if(WITH_TESTING)
-  
-  add_custom_target(io-tests echo "Start io tests")  
+
+  add_custom_target(io-tests echo "Start io tests")
 
   if(HAVE_SICONOS_MECHANICS)
     begin_tests(src/mechanics/test DEPS "CPPUNIT::CPPUNIT")
-    new_test(SOURCES MechanicsIOTest.cpp ${SIMPLE_TEST_MAIN}) 
+    new_test(SOURCES MechanicsIOTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
 
   if(WITH_SERIALIZATION)
@@ -15,5 +15,5 @@ if(WITH_TESTING)
     new_test(SOURCES BasicTest.cpp ${SIMPLE_TEST_MAIN})
     new_test(SOURCES KernelTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
-  
+
 endif()

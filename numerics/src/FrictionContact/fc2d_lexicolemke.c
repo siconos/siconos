@@ -33,19 +33,19 @@
 #include "numerics_verbose.h"
 #include "solver_registry.h"
 
-void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double *velocity,
-                      int *info, SolverOptions *options) {
+void fc2d_lexicolemke(FrictionContactProblem* problem, double* reaction, double* velocity,
+                      int* info, SolverOptions* options) {
   int i;
   // conversion into LCP
-  LinearComplementarityProblem *lcp_problem =
-      (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
+  LinearComplementarityProblem* lcp_problem =
+      (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
 
   fc2d_tolcp(problem, lcp_problem);
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
   /* linearComplementarity_display(lcp_problem); */
 
-  double *zlcp = (double *)calloc(lcp_problem->size, sizeof(double));
-  double *wlcp = (double *)calloc(lcp_problem->size, sizeof(double));
+  double* zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double* wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   // Call the lcp_solver
   int solver_id_save = options->solverId;
@@ -57,7 +57,6 @@ void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double 
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
-  double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
   // Conversion of result
   for (i = 0; i < nc; i++) {
     /* printf("Contact number = %i\n",i); */
@@ -84,7 +83,7 @@ void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double 
   /*        printf("\n"); */
   double error;
   *info = fc2d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
-                             norm_q, &error);
+                             options, &error);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
@@ -122,24 +121,24 @@ void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double 
  * - Elimination of giant switch statements in drivers
  */
 
-static void fc2d_lexicolemke_set_default(SolverOptions *options) {
+static void fc2d_lexicolemke_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int fc2d_lexicolemke_init_wrap(void *problem, SolverOptions *options) {
+static int fc2d_lexicolemke_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int fc2d_lexicolemke_solve_wrap(void *problem, double *reaction, double *velocity,
-                                       SolverOptions *options) {
+static int fc2d_lexicolemke_solve_wrap(void* problem, double* reaction, double* velocity,
+                                       SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc2d_lexicolemke((FrictionContactProblem *)problem, reaction, velocity, &info, options);
+  fc2d_lexicolemke((FrictionContactProblem*)problem, reaction, velocity, &info, options);
   return info;
 }
 
-static void fc2d_lexicolemke_free_wrap(void *problem, SolverOptions *options) {
+static void fc2d_lexicolemke_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

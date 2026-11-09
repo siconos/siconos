@@ -3,7 +3,6 @@
 import numpy as np
 import siconos.numerics as sn
 
-
 ztol = 1e-8
 
 

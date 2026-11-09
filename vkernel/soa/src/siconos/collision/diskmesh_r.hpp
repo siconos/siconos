@@ -2,15 +2,13 @@
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/mesh.hpp"
+#include "siconos/collision/shape_of.hpp"
 
 namespace siconos::collision {
 
 struct mesh_relation {};
 
-struct diskmesh_r : item,
-                    mesh_relation,
-                    model::relation2,
-                    model::any_lagrangian_relation {
+struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian_relation {
   struct attributes {
     some::item_ref<shape::mesh> mesh;
     some::indice contact_index;
@@ -20,41 +18,30 @@ struct diskmesh_r : item,
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) mesh()
-    {
+    decltype(auto) mesh() {
       return storage::make_ref_handle(self()->data(), attr<"mesh">(*self()));
     }
     decltype(auto) shape() { return self()->mesh(); }
-    decltype(auto) contact_index()
-    {
-      return storage::attr<"contact_index">(*self());
-    }
-    decltype(auto) compute_h(auto step, auto& ds1, auto& ds2)
-    {
+    decltype(auto) contact_index() { return storage::attr<"contact_index">(*self()); }
+    decltype(auto) compute_h(auto step, auto& ds1, auto& ds2) {
       auto& q1 = ds1.q(step); /* disk */
 
-      // auto& mesh = storage::prop<"shape">(ds2);
+      // auto& mesh = storage::prop<"shape", storage::config_declared>(ds2);
       // assert ds2 mesh == mesh()
 
       auto& cindex = self()->contact_index();
 
-      return mesh().segments().distance(q1, cindex) -
-             make_handle(self()->data(), prop<"shape">(ds1)).radius();
+      return mesh().segments().distance(q1, cindex) - collision::disk_radius(ds1);
     }
 
     template <typename I, match::handle<model::lagrangian_ds> DS1,
-              match::handle<model::elastic_lagrangian_ds> DS2, typename M1,
-              typename M2>
-    void compute_jachq(I step, DS1& hds1, DS2& hds2, M1& h_matrix1,
-                       M2& h_matrix2)
-    {
-      auto& data = self()->data();
+              match::handle<model::elastic_lagrangian_ds> DS2, typename M1, typename M2>
+    void compute_jachq(I step, DS1& hds1, DS2& hds2, M1& h_matrix1, M2& h_matrix2) {
       using scalar = typename decltype(self()->env())::scalar;
 
       auto& q1 = hds1.q(step);
 
-      auto& r =
-          storage::make_handle(data, storage::prop<"shape">(hds1)).radius();
+      auto r = collision::disk_radius(hds1);
 
       /* disk coordinates */
       const scalar& xb = q1(0);
@@ -107,15 +94,13 @@ struct diskmesh_r : item,
       h_matrix2(0, 3) = -t * dty;
       h_matrix2(1, 2) = -h_matrix2(0, 3);
       h_matrix2(1, 3) = h_matrix2(0, 2);
-
     }
   };
 };
 
 }  // namespace siconos::collision
 
-namespace siconos::storage::pattern::match
-{
-  template <typename T>
-  concept mesh_relation = std::derived_from<T, collision::mesh_relation>;
+namespace siconos::storage::pattern::match {
+template <typename T>
+concept mesh_relation = std::derived_from<T, collision::mesh_relation>;
 }

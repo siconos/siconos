@@ -449,7 +449,7 @@ def source_read(app, docname, source):
 # --- Filtering on namespace warnings to avoid messages because of duplicate declarations
 # https://github.com/breathe-doc/breathe/issues/25
 # https://github.com/breathe-doc/breathe/issues/772
-# 
+#
 NAMESPACE_NAMES = (
     "siconos",
     "algebra",

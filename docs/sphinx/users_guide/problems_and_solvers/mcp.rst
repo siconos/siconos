@@ -1,6 +1,6 @@
 .. index::
    single: Mixed (Non Linear) Complementarity problem (MCP)
-   
+
 .. contents::
 
 .. _mcp_problem:

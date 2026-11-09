@@ -1,6 +1,6 @@
 .. index::
    single: Mixed Linear Complementarity Problems (MLCP)
-   
+
 .. contents::
 
 .. _mlcp_problem:
@@ -19,7 +19,7 @@ Find :math:`(z,w)` such that:
    M \ z + q = w \\ w_1=0 \\
    0 \le w_{2} \perp v \ge 0
    \end{array} \right. \text{ with } z= \left[ \begin{array}{c} u\\ v\\ \end{array} \right] \text{ and } w= \left[ \begin{array}{c} w_{1}\\ w_{2}\\ \end{array} \right]
-   
+
 
 :math:`u, w_{1}` are vectors of size n.
 
@@ -65,13 +65,13 @@ The criterion is based on :
 .. math::
 
    error = \frac{1}{\|q\| }\sum_{i} [ (z[i]*(Mz+q)[i])_{+} + (z[i])_{-} + (Mz+q)[i])_{-} ]
-   
+
 with :math:`x_{+} = max(0,x)` and :math:`x_{-} = max(0,-x)`.
 
 * :cpp:func:`mlcp_compute_error` returns 0 if :math:`error \leq tolerance`, else 1.
 * A call to this function updates the content of the input vector w with :math:`Mz + q`.
 
- 
+
 .. _mlcp_solvers:
 
 MLCP available solvers
@@ -103,7 +103,7 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
 internal solver : :cpp:enumerator:`SICONOS_LCP_PGS`.
- 
+
 out
 * iparam[SICONOS_IPARAM_MLCP_PGS_SUM_ITER], sum of local number of iterations (output from local_driver)
 * dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] sum of local errors (output from local_driver)
@@ -189,7 +189,7 @@ driver: :cpp:func:`mlcp_path_enum()`
 
 parameters : same as :cpp:enumerator:`SICONOS_MLCP_ENUM`.
 
-  
+
 Direct + enum solver (:cpp:enumerator:`SICONOS_MLCP_DIRECT_ENUM`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -209,7 +209,7 @@ parameters:
 * iparam[7] (out): Number of case the direct solved failed.
 
 
-  
+
 Simplex solver (:cpp:enumerator:`SICONOS_MLCP_SIMPLEX`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -303,4 +303,3 @@ parameters:
 * iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED]
 
 return iparam[7] for iters
-

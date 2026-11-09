@@ -13,27 +13,27 @@
   enable_cxx ? true,
   enable_openmp ? false,
   }:
-  
+
 with pkgs;
 with stdenv.lib;
 
 let
 	pythonenv = pythonX.withPackages (ps: with ps; [pip numpy ipython h5py matplotlib lxml scipy pytest]);
         boost-dev-meta = (pkgs.boost.meta // {outputsToInstall =["out" "dev"]; });
-        boost-dev = pkgs.boost // {meta = boost-dev-meta;};               
+        boost-dev = pkgs.boost // {meta = boost-dev-meta;};
 in
 
 stdenv.mkDerivation rec {
  name = "siconos-${version}";
- 
- enableParallelBuilding = true;	
+
+ enableParallelBuilding = true;
 
  nativeBuildInputs = [
     pkgconfig
     pythonX
-   ]  
+   ]
   ++ optional enable_python [pythonX.pkgs.wrapPython];
- 
+
  buildInputs = [
     gcc
     blas_implem
@@ -43,7 +43,7 @@ stdenv.mkDerivation rec {
     boost-dev
     ]
   ++ optional (numerics_only != true) [ boost ];
-  
+
   propagatedNativeBuildInputs = with pythonX.pkgs;
     if enable_python then [ cmake gfortran pythonenv]
     else [cmake gfortran];
@@ -53,14 +53,14 @@ stdenv.mkDerivation rec {
     ++ optional (enable_python != true) [ "-DWITH_PYB11_WRAPPER=OFF" ]
     ++ optional (enable_openmp == true) [ "-DWITH_OPENMP=ON" ];
 
-    
-    
+
+
  hardeningDisable = [ "format" ];
  src = ./.;
 
 
 
- 
+
   postFixup = ''
     echo "Create links in bin ..."
     if test -e $out/nix-support/propagated-native-build-inputs; then
@@ -68,7 +68,7 @@ stdenv.mkDerivation rec {
     fi
    '';
 
- 
+
   meta = with stdenv.lib; {
     homepage = http://siconos.org/;
     description = "Nonsmooth dynamical systems simulator";

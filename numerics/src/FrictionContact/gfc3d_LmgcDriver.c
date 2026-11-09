@@ -41,50 +41,50 @@ static int gfccounter = -1;
 
 // #define USE_NM_DENSE
 
-static double *alloc_memory_double(size_t size, double *p) {
-  double *r = (double *)malloc(size * sizeof(double));
+static double* alloc_memory_double(size_t size, double* p) {
+  double* r = (double*)malloc(size * sizeof(double));
   memcpy(r, p, size * sizeof(double));
   return r;
 }
 
-static CS_INT *alloc_memory_csi(size_t size, size_t *p) {
-  CS_INT *r = (CS_INT *)malloc(size * sizeof(CS_INT));
+static CS_INT* alloc_memory_csi(size_t size, size_t* p) {
+  CS_INT* r = (CS_INT*)malloc(size * sizeof(CS_INT));
   for (size_t i = 0; i < size; ++i) {
     r[i] = to_csint(p[i]);
   }
   return r;
 }
 
-int globalFrictionContact_fclib_write(GlobalFrictionContactProblem *problem, char *title,
-                                      char *description, char *mathInfo, const char *path);
+int globalFrictionContact_fclib_write(GlobalFrictionContactProblem* problem, char* title,
+                                      char* description, char* mathInfo, const char* path);
 
-int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity, double *q,
-                     double *b, double *mu, double *Mdata, size_t nzM, size_t *rowM,
-                     size_t *colM, double *Hdata, size_t nzH, size_t *rowH, size_t *colH,
-                     size_t n, size_t nc, int solver_id, size_t isize, int *iparam,
-                     size_t dsize, double *dparam, int verbose_in, int outputFile,
+int gfc3d_LmgcDriver(double* reaction, double* velocity, double* globalVelocity, double* q,
+                     double* b, double* mu, double* Mdata, size_t nzM, size_t* rowM,
+                     size_t* colM, double* Hdata, size_t nzH, size_t* rowH, size_t* colH,
+                     size_t n, size_t nc, int solver_id, size_t isize, int* iparam,
+                     size_t dsize, double* dparam, int verbose_in, int outputFile,
                      int freq_output) {
   verbose = verbose_in;
 
   /* NumericsMatrix M, H; */
-  NumericsMatrix *M = NM_new();
+  NumericsMatrix* M = NM_new();
   M->storageType = 2; /* sparse */
   M->size0 = to_int(n);
   M->size1 = to_int(n);
 
-  NumericsMatrix *H = NM_new();
+  NumericsMatrix* H = NM_new();
   H->storageType = 2;
   H->size0 = M->size0;
   H->size1 = 3 * to_int(nc);
 
-  NumericsSparseMatrix *SM = NSM_new();
-  M->matrix2 = SM;
-  SM->triplet = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
-  CSparseMatrix *_M = SM->triplet;
+  NumericsSparseMatrix* SM = NSM_new();
+  M->sparse = SM;
+  SM->triplet = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
+  CSparseMatrix* _M = SM->triplet;
   SM->origin = NSM_TRIPLET;
 
-  CS_INT *_colM = alloc_memory_csi(nzM, colM);
-  CS_INT *_rowM = alloc_memory_csi(nzM, rowM);
+  CS_INT* _colM = alloc_memory_csi(nzM, colM);
+  CS_INT* _rowM = alloc_memory_csi(nzM, rowM);
 
   _M->nzmax = to_csint(nzM);
   _M->nz = to_csint(nzM);
@@ -92,20 +92,20 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   _M->n = M->size1;
   _M->p = _colM;
   _M->i = _rowM;
-  double *_Mdata = alloc_memory_double(nzM, Mdata);
+  double* _Mdata = alloc_memory_double(nzM, Mdata);
   _M->x = _Mdata;
 
   DEBUG_PRINTF("_M->n=%lli\t", _M->n);
   DEBUG_PRINTF("_M->m=%lli\n", _M->m);
 
-  NumericsSparseMatrix *SH = NSM_new();
-  H->matrix2 = SH;
-  SH->triplet = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
-  CSparseMatrix *_H = SH->triplet;
+  NumericsSparseMatrix* SH = NSM_new();
+  H->sparse = SH;
+  SH->triplet = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
+  CSparseMatrix* _H = SH->triplet;
   SH->origin = NSM_TRIPLET;
 
-  CS_INT *_colH = alloc_memory_csi(nzH, colH);
-  CS_INT *_rowH = alloc_memory_csi(nzH, rowH);
+  CS_INT* _colH = alloc_memory_csi(nzH, colH);
+  CS_INT* _rowH = alloc_memory_csi(nzH, rowH);
 
   _H->nzmax = to_csint(nzH);
   _H->nz = to_csint(nzH);
@@ -114,7 +114,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 
   _H->p = _colH;
   _H->i = _rowH;
-  double *_Hdata = alloc_memory_double(nzH, Hdata);
+  double* _Hdata = alloc_memory_double(nzH, Hdata);
   _H->x = _Hdata;
 
   for (int i = 0; i < _M->nz; ++i) {
@@ -133,11 +133,8 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   CHECK_NULL(M);
   CHECK_NULL(H);
 
-  NumericsMatrix *MMtmp = NM_new();
-  NumericsMatrix *HHtmp = NM_new();
-
-  NM_copy(M, MMtmp);
-  NM_copy(H, HHtmp);
+  NumericsMatrix* MMtmp = NM_copy(M);
+  NumericsMatrix* HHtmp = NM_copy(H);
 
   NM_clearSparse(M);
   NM_clearSparse(H);
@@ -153,8 +150,8 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 
 #endif
 
-  GlobalFrictionContactProblem *problem =
-      (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
+  GlobalFrictionContactProblem* problem =
+      (GlobalFrictionContactProblem*)malloc(sizeof(GlobalFrictionContactProblem));
 
   problem->dimension = 3;
   problem->numberOfContacts = to_int(nc);
@@ -166,7 +163,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   problem->b = b;
   problem->mu = mu;
 
-  SolverOptions *numerics_solver_options = solver_options_create(solver_id);
+  SolverOptions* numerics_solver_options = solver_options_create(solver_id);
   size_t iSize_min =
       isize < numerics_solver_options->iSize ? isize : numerics_solver_options->iSize;
   DEBUG_PRINTF("iSize_min = %zu", iSize_min);
@@ -180,7 +177,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 
   /* solver_options_print(&numerics_solver_options); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
-  /* globalFrictionContact_printInFile(problem, file); */
+  /* globalFrictionContactProblem_printInFile(problem, file); */
   /* fclose(file); */
   int rinfo =
       gfc3d_driver(problem, reaction, velocity, globalVelocity, numerics_solver_options);
@@ -189,7 +186,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
   dparam[SICONOS_DPARAM_TOL] = numerics_solver_options->dparam[SICONOS_DPARAM_TOL];
 
   /* FILE * file1  =  fopen("tutu.dat", "w"); */
-  /* globalFrictionContact_printInFile(problem, file1); */
+  /* globalFrictionContactProblem_printInFile(problem, file1); */
   /* fclose(file1); */
   if (outputFile == 1) {
     /* dump in C format */
@@ -211,17 +208,17 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, gfccounter);
       /* printf("ndof = %i.\n", ndof); */
 
-      FILE *foutput = fopen(fname, "w");
+      FILE* foutput = fopen(fname, "w");
       int n = 100;
-      char *title = (char *)malloc(n * sizeof(char));
+      char* title = (char*)malloc(n * sizeof(char));
       strncpy(title, "LMGC dump in hdf5", n);
       size_t req_size =
           snprintf(NULL, 0, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname) +
           1;
-      char *description = malloc(req_size);
+      char* description = malloc(req_size);
       snprintf(description, req_size,
                "Rewriting in hdf5 through siconos of %s in FCLIB format", fname);
-      char *mathInfo = (char *)malloc(n * sizeof(char));
+      char* mathInfo = (char*)malloc(n * sizeof(char));
       strncpy(mathInfo, "unknown", n);
 
       globalFrictionContact_fclib_write(problem, title, description, mathInfo, fname);
@@ -285,9 +282,9 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*   size_t * _colH = alloc_memory_int(nzH, colH); */
 /*   size_t * _rowH = alloc_memory_int(nzH, rowH); */
 
-/*   M.matrix0 = NULL; */
-/*   M.matrix1 = NULL; */
-/*   M.matrix2 = NULL; */
+/*   M.dense = NULL; */
+/*   M.sparse_block = NULL; */
+/*   M.sparse = NULL; */
 /*   M.internalData = NULL; */
 
 /*   M.storageType = 2; /\* csc *\/ */
@@ -302,9 +299,9 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*   _M.i = (int *) _rowM; */
 /*   _M.x = Mdata; */
 
-/*   H.matrix0 = NULL; */
-/*   H.matrix1 = NULL; */
-/*   H.matrix2 = NULL; */
+/*   H.dense = NULL; */
+/*   H.sparse_block = NULL; */
+/*   H.sparse = NULL; */
 /*   H.internalData = NULL; */
 
 /*   H.storageType = 2; */
@@ -320,8 +317,8 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*   _H.i = (int *) _rowH; */
 /*   _H.x = Hdata; */
 
-/*   M.matrix2->triplet = &_M; */
-/*   H.matrix2->triplet = &_H; */
+/*   M.sparse->triplet = &_M; */
+/*   H.sparse->triplet = &_H; */
 
 /*   for (int i=0; i< _M.nz; ++i) */
 /*   { */

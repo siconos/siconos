@@ -35,15 +35,15 @@
 #include "numerics_errors.h"
 #include "solver_registry.h"
 
-void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
-                                              double *reaction, double *velocity, int *info,
-                                              SolverOptions *options) {
+void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem,
+                                              double* reaction, double* velocity, int* info,
+                                              SolverOptions* options) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   /* Dimension of the problem */
   int n = 3 * nc;
 
-  ConvexQP *cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
+  ConvexQP* cqp = (ConvexQP*)malloc(sizeof(ConvexQP));
   cqp->size = n;
   cqp->M = problem->M;
   cqp->q = problem->q;
@@ -54,8 +54,8 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
 
   double error = 1e24;
 
-  FrictionContactProblem_as_ConvexQP *fc3d_as_cqp =
-      (FrictionContactProblem_as_ConvexQP *)malloc(sizeof(FrictionContactProblem_as_ConvexQP));
+  FrictionContactProblem_as_ConvexQP* fc3d_as_cqp =
+      (FrictionContactProblem_as_ConvexQP*)malloc(sizeof(FrictionContactProblem_as_ConvexQP));
   cqp->env = fc3d_as_cqp;
   cqp->size = n;
 
@@ -67,13 +67,13 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
   fc3d_as_cqp->cqp = cqp;
   fc3d_as_cqp->fc3d = problem;
   fc3d_as_cqp->options = options;
-  /* frictionContact_display(fc3d_as_cqp->fc3d); */
+  /* frictionContactProblem_display(fc3d_as_cqp->fc3d); */
   // options->solverId = SICONOS_CONVEXQP_PG;
 
   // Warning : a new solver options is required here, because dWork
   // is used in convexQP_compute_error_reduced, ProjectionOnC ...
   //
-  SolverOptions *cqpsolver_options = solver_options_create(SICONOS_CONVEXQP_PG);
+  SolverOptions* cqpsolver_options = solver_options_create(SICONOS_CONVEXQP_PG);
   cqpsolver_options->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
   cqpsolver_options->iparam[SICONOS_IPARAM_MAX_ITER] =
       options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -84,7 +84,7 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
   /* **** Criterium convergence **** */
   // Warning: the function below uses options->dWork
   fc3d_Tresca_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
-                            options, norm_q, &error);
+                            options, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */
@@ -102,23 +102,24 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
   free(fc3d_as_cqp);
 }
 
-static void fc3d_ConvexQP_ProjectedGradient_Cylinder_set_default(SolverOptions *options) {
+static void fc3d_convex_qp_projected_gradient_cylinder_set_default(SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int fc3d_ConvexQP_ProjectedGradient_Cylinder_init_wrap(void *problem,
-                                                              SolverOptions *options) {
+static int fc3d_convex_qp_projected_gradient_cylinder_init_wrap(void* problem,
+                                                                SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap(void *problem, double *reaction,
-                                                               double *velocity,
-                                                               SolverOptions *options) {
+static int fc3d_convex_qp_projected_gradient_cylinder_solve_wrap(void* problem,
+                                                                 double* reaction,
+                                                                 double* velocity,
+                                                                 SolverOptions* options) {
   (void)velocity;
   int info = NUMERICS_OK;
-  fc3d_ConvexQP_ProjectedGradient_Cylinder((FrictionContactProblem *)problem, reaction,
+  fc3d_ConvexQP_ProjectedGradient_Cylinder((FrictionContactProblem*)problem, reaction,
                                            velocity, &info, options);
   return info;
 }
@@ -126,6 +127,6 @@ static int fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap(void *problem, do
 REGISTER_SOLVER(SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER,
                 "SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER",
                 "Projection on Cylinder with Local Iteration (local solver)",
-                fc3d_ConvexQP_ProjectedGradient_Cylinder_init_wrap,
-                fc3d_ConvexQP_ProjectedGradient_Cylinder_solve_wrap, NULL, NULL,
-                fc3d_ConvexQP_ProjectedGradient_Cylinder_set_default, 1000, 1e-4, 1)
+                fc3d_convex_qp_projected_gradient_cylinder_init_wrap,
+                fc3d_convex_qp_projected_gradient_cylinder_solve_wrap, NULL, NULL,
+                fc3d_convex_qp_projected_gradient_cylinder_set_default, 1000, 1e-4, 1)

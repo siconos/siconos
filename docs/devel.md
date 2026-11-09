@@ -1,4 +1,4 @@
-  
+
 # Rules for developers
 
 ## 1 - Default behavior
@@ -9,7 +9,7 @@ Style: respect [Google C++ style guide](https://google.github.io/styleguide/cppg
 ## Plugin function types (for DS, relations ...)
 
 - Declare all function prototypes in FunctionTypes.hpp
-- Naming convention: FunctionXYZ..._O or RFunctionXYZ_O with: 
+- Naming convention: FunctionXYZ..._O or RFunctionXYZ_O with:
     -  XYZ... the type of read-only in parameters, with S for scalar type, V for vector type, M for dense matrix type and Ms for sparse matrix type
     - O(=S, V, M or Ms) the read-write in-out parameter used to collect the result
     - RFunction if the return type is non void (and corresponds to the read-write in-out parameter)
@@ -21,7 +21,7 @@ Style: respect [Google C++ style guide](https://google.github.io/styleguide/cppg
                        double, Eigen::Ref<siconos::algebra::MapType>)>;
 
     ```
-  
+
  ## access (method) to stl container type class attributes
 
 - Assuming an attribute of stl type, use std::span to provide access to its content.
@@ -86,7 +86,7 @@ Each osi has usually access to work_ds: a container of vectors, saved in the gra
 work_ds = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 ```
 
-- Access to its elements (SiconosVector) is defined thanks to an enum. 
+- Access to its elements (SiconosVector) is defined thanks to an enum.
 - Each integrator has its own enum
 
 Example:

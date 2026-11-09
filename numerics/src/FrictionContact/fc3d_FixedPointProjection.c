@@ -22,22 +22,22 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "fc3d_short_names.h"            // for SICONOS_FRICTION_3D_FPP
-#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"          // for NM_gemv
-#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
+#include "NumericsFwd.h"       // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"    // for NM_gemv
+#include "SolverOptions.h"     // for SolverOptions, solver_options_nu...
+#include "fc3d_short_names.h"  // for SICONOS_FRICTION_3D_FPP
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"         // for cblas_dcopy, cblas_dnrm2, cblas_...
 #include "fc3d_Solvers.h"        // for fc3d_fixedPointProjection, fc3d_...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"    // for projectionOnCone
-#include "siconos_debug.h"       // for DEBUG_EXPR_WE, DEBUG_PRINTF
+#include "projectionOnCone.h"  // for projectionOnCone
+#include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINTF
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction,
                                double* velocity, int* info, SolverOptions* options) {
@@ -55,7 +55,6 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0;      /* Current iteration number */
@@ -196,7 +195,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
       };);
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
       DEBUG_EXPR_WE(if ((error < error_k)) { printf("(error < error_k) is satisfied\n"); });
       /*Update rho*/
       if ((rho_k * a1 < Lmin * a2) && (error < error_k)) {
@@ -230,7 +229,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
   free(reactiontmp);
 }
 
-void fc3d_fpp_set_default(SolverOptions* options) {
+void fc3d_fixed_point_projection_set_default(SolverOptions* options) {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }
 
@@ -245,9 +244,11 @@ static int fc3d_fpp_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int fc3d_fpp_solve_wrap(void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int fc3d_fpp_solve_wrap(void* problem, double* reaction, double* velocity,
+                               SolverOptions* options) {
   int info = NUMERICS_OK;
-  fc3d_fixedPointProjection((FrictionContactProblem*)problem, reaction, velocity, &info, options);
+  fc3d_fixedPointProjection((FrictionContactProblem*)problem, reaction, velocity, &info,
+                            options);
   return info;
 }
 
@@ -256,14 +257,9 @@ static void fc3d_fpp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_FPP,
-                "FC3D_FPP",
-                "Fixed Point Projection for 3D Friction Contact",
-                fc3d_fpp_init_wrap,
-                fc3d_fpp_solve_wrap,
-                fc3d_fpp_free_wrap,
-                NULL,
-                fc3d_fpp_set_default,  /* set_default */
-                1000,   /* default_max_iter */
-                1e-4,   /* default_tol */
-                0       /* is_local_solver */)
+REGISTER_SOLVER(FC3D_FPP, "FC3D_FPP", "Fixed Point Projection for 3D Friction Contact",
+                fc3d_fpp_init_wrap, fc3d_fpp_solve_wrap, fc3d_fpp_free_wrap, NULL,
+                fc3d_fixed_point_projection_set_default, /* set_default */
+                1000,                                    /* default_max_iter */
+                1e-4,                                    /* default_tol */
+                0 /* is_local_solver */)

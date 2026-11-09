@@ -19,6 +19,7 @@
 
 #include <assert.h>  // for assert
 #include <errno.h>   // for errno
+#include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs
 #include <stdio.h>   // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>  // for malloc, free, exit, EXIT_FAILURE
@@ -38,7 +39,7 @@
 #include "fclib_interface.h"
 #endif
 
-void frictionContact_display(FrictionContactProblem* problem) {
+void frictionContactProblem_display(FrictionContactProblem* problem) {
   assert(problem);
   int n = problem->dimension * problem->numberOfContacts;
   printf("FrictionContact Display :\n-------------\n");
@@ -64,7 +65,7 @@ void frictionContact_display(FrictionContactProblem* problem) {
     printf("No mu vector:\n");
 }
 
-int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
+int frictionContactProblem_printInFile(FrictionContactProblem* problem, FILE* file) {
   if (!problem) {
     CHECK_ARG(0, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
   }
@@ -74,7 +75,10 @@ int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
   fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
-  NM_write_in_file(problem->M, file);
+  {
+    int nm_info = NM_write_in_file(problem->M, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   for (i = 0; i < problem->M->size1; i++) {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
@@ -86,7 +90,7 @@ int frictionContact_printInFile(FrictionContactProblem* problem, FILE* file) {
   return 0;
 }
 
-int frictionContact_printInFilename(FrictionContactProblem* problem, char* filename) {
+int frictionContactProblem_printInFilename(FrictionContactProblem* problem, char* filename) {
   int info = 0;
   FILE* file = fopen(filename, "w");
 
@@ -94,7 +98,7 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
     return errno;
   }
 
-  info = frictionContact_printInFile(problem, file);
+  info = frictionContactProblem_printInFile(problem, file);
 
   fclose(file);
   return info;
@@ -246,7 +250,7 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_nn = 1;
       size_t col_components_nn[1] = {0};
       size_t col_components_size_nn = 1;
-      SBM_extract_component_3x3(M->matrix1, M_nn->matrix1, row_components_nn,
+      SBM_extract_component_3x3(M->sparse_block, M_nn->sparse_block, row_components_nn,
                                 row_components_size_nn, col_components_nn,
                                 col_components_size_nn);
 
@@ -254,7 +258,7 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_nt = 1;
       size_t col_components_nt[2] = {1, 2};
       size_t col_components_size_nt = 2;
-      SBM_extract_component_3x3(M->matrix1, M_nt->matrix1, row_components_nt,
+      SBM_extract_component_3x3(M->sparse_block, M_nt->sparse_block, row_components_nt,
                                 row_components_size_nt, col_components_nt,
                                 col_components_size_nt);
 
@@ -262,7 +266,7 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_tn = 2;
       size_t col_components_tn[1] = {0};
       size_t col_components_size_tn = 1;
-      SBM_extract_component_3x3(M->matrix1, M_tn->matrix1, row_components_tn,
+      SBM_extract_component_3x3(M->sparse_block, M_tn->sparse_block, row_components_tn,
                                 row_components_size_tn, col_components_tn,
                                 col_components_size_tn);
 
@@ -270,22 +274,22 @@ int createSplittedFrictionContactProblem(FrictionContactProblem* problem,
       size_t row_components_size_tt = 2;
       size_t col_components_tt[2] = {1, 2};
       size_t col_components_size_tt = 2;
-      SBM_extract_component_3x3(M->matrix1, M_tt->matrix1, row_components_tt,
+      SBM_extract_component_3x3(M->sparse_block, M_tt->sparse_block, row_components_tt,
                                 row_components_size_tt, col_components_tt,
                                 col_components_size_tt);
 
 #ifdef SN_SBM_TO_DENSE
-      M_nn->matrix0 = (double*)malloc(M_nn->size0 * M_nn->size1 * sizeof(double));
-      SBM_to_dense(M_nn->matrix1, M_nn->matrix0);
+      M_nn->dense = (double*)malloc(M_nn->size0 * M_nn->size1 * sizeof(double));
+      SBM_to_dense(M_nn->sparse_block, M_nn->dense);
       M_nn->storageType = NM_DENSE;
-      M_nt->matrix0 = (double*)malloc(M_nt->size0 * M_nt->size1 * sizeof(double));
-      SBM_to_dense(M_nt->matrix1, M_nt->matrix0);
+      M_nt->dense = (double*)malloc(M_nt->size0 * M_nt->size1 * sizeof(double));
+      SBM_to_dense(M_nt->sparse_block, M_nt->dense);
       M_nt->storageType = NM_DENSE;
-      M_tn->matrix0 = (double*)malloc(M_tn->size0 * M_tn->size1 * sizeof(double));
-      SBM_to_dense(M_tn->matrix1, M_tn->matrix0);
+      M_tn->dense = (double*)malloc(M_tn->size0 * M_tn->size1 * sizeof(double));
+      SBM_to_dense(M_tn->sparse_block, M_tn->dense);
       M_tn->storageType = NM_DENSE;
-      M_tt->matrix0 = (double*)malloc(M_tt->size0 * M_tt->size1 * sizeof(double));
-      SBM_to_dense(M_tt->matrix1, M_tt->matrix0);
+      M_tt->dense = (double*)malloc(M_tt->size0 * M_tt->size1 * sizeof(double));
+      SBM_to_dense(M_tt->sparse_block, M_tt->dense);
       M_tt->storageType = NM_DENSE;
 #endif
 
@@ -369,8 +373,7 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem) {
       (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
-  new->M = NM_new();
-  NM_copy(problem->M, new->M);
+  new->M = NM_copy(problem->M);
   new->q = (double*)malloc(to_size_t(n) * sizeof(double));
   memcpy(new->q, problem->q, to_size_t(n) * sizeof(double));
   new->mu = (double*)malloc(to_size_t(nc) * sizeof(double));
@@ -384,4 +387,163 @@ void frictionContact_rescaling(FrictionContactProblem* problem, double alpha, do
   NM_scal(alpha * gamma * gamma, problem->M);
   /* scaling of q */
   cblas_dscal(n, alpha * gamma, problem->q, 1);
+}
+
+int FrictionContactProblem_compute_contact_status_3d_bnrt(const double velocity[3],
+                                                          const double reaction[3]) {
+  double somme[3];
+  double dur[3];
+  for (int i = 0; i < 3; ++i) {
+    somme[i] = velocity[i] + reaction[i];
+    dur[i] = velocity[i] - reaction[i];
+  }
+
+  const double cesp = sqrt(DBL_EPSILON);
+  const double somme_norm =
+      sqrt(somme[0] * somme[0] + somme[1] * somme[1] + somme[2] * somme[2]);
+  const double somme_tang_norm = sqrt(somme[1] * somme[1] + somme[2] * somme[2]);
+  const double dur_tang_norm = sqrt(dur[1] * dur[1] + dur[2] * dur[2]);
+
+  const double ns = somme[0] - somme_tang_norm;
+  if (ns <= cesp * somme_norm) {
+    return SICONOS_FRICTION_CONTACT_STATUS_T;
+  }
+  if (dur[0] >= dur_tang_norm) {
+    return SICONOS_FRICTION_CONTACT_STATUS_N;
+  }
+  if (-dur[0] >= dur_tang_norm) {
+    return SICONOS_FRICTION_CONTACT_STATUS_B;
+  }
+  return SICONOS_FRICTION_CONTACT_STATUS_R;
+}
+
+void FrictionContactProblem_get_contact_statuses_3d_bnrt(const double* velocity,
+                                                         const double* reaction, size_t n,
+                                                         int* statuses) {
+  for (size_t i = 0; i < n; ++i) {
+    statuses[i] = FrictionContactProblem_compute_contact_status_3d_bnrt(&velocity[3 * i],
+                                                                        &reaction[3 * i]);
+  }
+}
+
+void FrictionContactProblem_count_contact_statuses_3d_bnrt(const double* velocity,
+                                                           const double* reaction, size_t n,
+                                                           int* nB, int* nN, int* nR,
+                                                           int* nT) {
+  int local_B = 0, local_N = 0, local_R = 0, local_T = 0;
+  for (size_t i = 0; i < n; ++i) {
+    switch (FrictionContactProblem_compute_contact_status_3d_bnrt(&velocity[3 * i],
+                                                                  &reaction[3 * i])) {
+      case SICONOS_FRICTION_CONTACT_STATUS_B:
+        local_B++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_N:
+        local_N++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_R:
+        local_R++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_T:
+        local_T++;
+        break;
+    }
+  }
+  if (nB) *nB = local_B;
+  if (nN) *nN = local_N;
+  if (nR) *nR = local_R;
+  if (nT) *nT = local_T;
+}
+
+int FrictionContactProblem_compute_strict_complementarity_3d_bnrt(
+    const double* velocity, const double* reaction, size_t n, int* nB, int* nN, int* nR,
+    double* ns, double* norm_sum, int verbose) {
+  int local_B = 0, local_N = 0, local_R = 0;
+  int nsc = 0;
+  int* statuses = (int*)malloc(n * sizeof(int));
+  FrictionContactProblem_get_contact_statuses_3d_bnrt(velocity, reaction, n, statuses);
+
+  for (size_t i = 0; i < n; ++i) {
+    switch (statuses[i]) {
+      case SICONOS_FRICTION_CONTACT_STATUS_B:
+        local_B++;
+        nsc++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_N:
+        local_N++;
+        nsc++;
+        break;
+      case SICONOS_FRICTION_CONTACT_STATUS_R:
+        local_R++;
+        nsc++;
+        break;
+      default: {
+        double somme0 = velocity[3 * i] + reaction[3 * i];
+        double somme_tang = hypot(velocity[3 * i + 1] + reaction[3 * i + 1],
+                                  velocity[3 * i + 2] + reaction[3 * i + 2]);
+        if (verbose) {
+          printf(
+              "cone %04zu: (u+r)_0 = %9.2e,  |(u+r)_bar| = %9.2e, (u+r)_0 - |(u+r)_bar| = "
+              "%9.40e\n",
+              i, somme0, somme_tang, somme0 - somme_tang);
+        } else {
+          printf("cone %zu %9.2e %9.2e\n", i, somme0, somme_tang);
+        }
+      }
+    }
+  }
+  free(statuses);
+
+  if (ns) *ns = 0.0;
+  if (norm_sum) *norm_sum = 0.0;
+  if (nsc == (int)n) {
+    double somme0 = velocity[3 * (n - 1)] + reaction[3 * (n - 1)];
+    double somme_tang = hypot(velocity[3 * (n - 1) + 1] + reaction[3 * (n - 1) + 1],
+                              velocity[3 * (n - 1) + 2] + reaction[3 * (n - 1) + 2]);
+    if (ns) *ns = somme0 - somme_tang;
+    if (norm_sum) *norm_sum = hypot(somme0, somme_tang);
+  }
+
+  if (nB) *nB = local_B;
+  if (nN) *nN = local_N;
+  if (nR) *nR = local_R;
+  return nsc;
+}
+
+int FrictionContactProblem_compute_contact_status_2d(const double velocity[2],
+                                                     const double reaction[2], double mu) {
+  const double tol = 1e-10;
+  const double rN = reaction[0];
+  const double rT = reaction[1];
+  const double uT = velocity[1];
+  const double radius = mu * rN;
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  if (fabs(rT) < radius - tol && fabs(uT) <= tol) {
+    return 1; /* stick */
+  }
+  if (uT > tol) {
+    return 2; /* slip in the positive tangent direction */
+  }
+  if (uT < -tol) {
+    return 3; /* slip in the negative tangent direction */
+  }
+  /* Near the boundary: use the sign of the friction force. */
+  return (rT < 0.0) ? 2 : 3;
+}
+
+int FrictionContactProblem_compute_contact_status_3d(const double velocity[3],
+                                                     const double reaction[3], double mu) {
+  const double tol = 1e-10;
+  const double rN = reaction[0];
+  if (rN <= tol) {
+    return 0; /* no-contact */
+  }
+  const double rT_norm = hypot(reaction[1], reaction[2]);
+  const double uT_norm = hypot(velocity[1], velocity[2]);
+  const double radius = mu * rN;
+  if (rT_norm < radius - tol && uT_norm <= tol) {
+    return 1; /* stick */
+  }
+  return 2; /* slip */
 }

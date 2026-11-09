@@ -356,5 +356,3 @@ siconos::modeling::NonSmoothDynamicalSystem::InteractionsVector() const {
 
   return interactionsVector;
 }
-
-

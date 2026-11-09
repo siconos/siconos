@@ -24,11 +24,10 @@ contactors maintained by a SiconosCollisionManager.
 #ifndef SiconosCollisionQueryResult_h
 #define SiconosCollisionQueryResult_h
 
-#include "SiconosVector.hpp"
 #include <memory>
 
 #include "SiconosSerialization.hpp"
-
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class SecondOrderDS;

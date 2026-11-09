@@ -40,7 +40,7 @@ extern "C" {
 /* Check return code of an expression. */
 #define CHECK_RETURN(EXPR)                                                             \
   do {                                                                                 \
-    if (!EXPR) {                                                                       \
+    if (!(EXPR)) {                                                                     \
       fprintf(stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__, \
               __LINE__);                                                               \
     }                                                                                  \
@@ -49,7 +49,7 @@ extern "C" {
 /* Check return code of a first expression and execute the second */
 #define CHECK_AND_DO(EXPR, TODOIFOK)                                                   \
   do {                                                                                 \
-    if (!EXPR) {                                                                       \
+    if (!(EXPR)) {                                                                     \
       fprintf(stderr, "Siconos Numerics: Warning %s failed, %s:%d\n", #EXPR, __FILE__, \
               __LINE__);                                                               \
     } else {                                                                           \

@@ -25,7 +25,7 @@ Ferris solves the subsequent AVI.
 #include <stdlib.h>  // for free, malloc, calloc
 
 #include "NumericsFwd.h"     // for LinearComplementarityProblem
-#include "NumericsMatrix.h"  // for NumericsMatrix, NM_fill
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_create_with_data
 #include "Relay_Solvers.h"   // for relay_avi_caoferris
 #include "Relay_options.h"
 #include "avi_caoferris.h"  // for avi_caoferris_stage3
@@ -33,8 +33,8 @@ Ferris solves the subsequent AVI.
 #include "numerics_errors.h"
 #include "siconos_debug.h"  // for DEBUG_PRINT_VEC_INT
 #include "solver_registry.h"
-void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options) {
+void relay_avi_caoferris(RelayProblem* problem, double* z, double* w, int* info,
+                         SolverOptions* options) {
   unsigned int n = problem->size;
   assert(n > 0);
   unsigned int s = 2 * n;
@@ -42,13 +42,12 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
   /* Copy the data from Relay problem */
   LinearComplementarityProblem lcplike_pb;
   lcplike_pb.size = s;
-  NumericsMatrix num_mat;
-  NM_fill(&num_mat, NM_DENSE, s, s, calloc(s * s, sizeof(double)));
+  NumericsMatrix* num_mat = NM_create_with_data(NM_DENSE, s, s, calloc(s * s, sizeof(double)));
 
-  lcplike_pb.M = &num_mat;
+  lcplike_pb.M = num_mat;
 
-  lcplike_pb.q = (double *)malloc(s * sizeof(double));
-  double *b_bar = (double *)malloc(s * sizeof(double));
+  lcplike_pb.q = (double*)malloc(s * sizeof(double));
+  double* b_bar = (double*)malloc(s * sizeof(double));
 
   /* We can always choose the extreme point such that the matrix of active
    * constrains is the identity and the other matrix is minus the identity.
@@ -62,29 +61,29 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
   double tmp;
   for (unsigned int i = 0; i < n; ++i) {
     tmp = 0.0;
-    lcplike_pb.M->matrix0[i * (s + 1)] = 1.0;
-    lcplike_pb.M->matrix0[(i + n) * (s + 1)] = -1.0;
+    lcplike_pb.M->dense[i * (s + 1)] = 1.0;
+    lcplike_pb.M->dense[(i + n) * (s + 1)] = -1.0;
     lcplike_pb.q[i] = problem->q[i];
     lcplike_pb.q[i + n] = -problem->lb[i] + problem->ub[i];
     for (unsigned j = 0; j < n; ++j) {
-      lcplike_pb.M->matrix0[i + (j + n) * s] = problem->M->matrix0[i + j * n];
-      tmp += problem->M->matrix0[i + j * n] * problem->lb[j];
+      lcplike_pb.M->dense[i + (j + n) * s] = problem->M->dense[i + j * n];
+      tmp += problem->M->dense[i + j * n] * problem->lb[j];
     }
     /* \bar{a} =  -\tilde{a} + Ay_e */
     lcplike_pb.q[i] += tmp;
   }
-  double *d_vec = (double *)malloc(s * sizeof(double));
+  double* d_vec = (double*)malloc(s * sizeof(double));
   for (unsigned i = 0; i < n; ++i) {
     d_vec[i] = -1.0;
     d_vec[i + n] = 0;
   }
 
   /* Set of active constraint is trivial */
-  unsigned *A = (unsigned *)malloc(n * sizeof(unsigned));
+  unsigned* A = (unsigned*)malloc(n * sizeof(unsigned));
   for (unsigned i = 0; i < n; ++i) A[i] = i + 1;
 
-  double *u_vec = (double *)calloc(s, sizeof(double));
-  double *s_vec = (double *)calloc(s, sizeof(double));
+  double* u_vec = (double*)calloc(s, sizeof(double));
+  double* s_vec = (double*)calloc(s, sizeof(double));
   /* Call directly the 3rd stage
    * Here w is used as u and z as s in the AVI */
   *info = avi_caoferris_stage3(&lcplike_pb, u_vec, s_vec, d_vec, n, A, options);
@@ -98,7 +97,7 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
   free(s_vec);
   free(A);
   free(d_vec);
-  NM_clear(lcplike_pb.M);
+  NM_free(lcplike_pb.M);
   free(lcplike_pb.q);
   free(b_bar);
 }
@@ -109,24 +108,24 @@ void relay_avi_caoferris(RelayProblem *problem, double *z, double *w, int *info,
  * This registers SICONOS_RELAY_AVI_CAOFERRIS in the global solver registry.
  */
 
-static void relay_avi_caoferris_set_default(SolverOptions *options) {
+static void relay_avi_caoferris_set_default(SolverOptions* options) {
   SOLVER_MAX_ITER(options) = 1000;
   SOLVER_TOL(options) = 1e-6;
 }
 
-static int relay_avi_caoferris_init_wrap(void *problem, SolverOptions *options) {
+static int relay_avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   return NUMERICS_OK;
 }
 
-static int relay_avi_caoferris_solve_wrap(void *problem, double *z, double *w,
-                                          SolverOptions *options) {
+static int relay_avi_caoferris_solve_wrap(void* problem, double* z, double* w,
+                                          SolverOptions* options) {
   int info = NUMERICS_OK;
-  relay_avi_caoferris((RelayProblem *)problem, z, w, &info, options);
+  relay_avi_caoferris((RelayProblem*)problem, z, w, &info, options);
   return info;
 }
 
-static void relay_avi_caoferris_free_wrap(void *problem, SolverOptions *options) {
+static void relay_avi_caoferris_free_wrap(void* problem, SolverOptions* options) {
   /* Cleanup if needed */
   (void)problem;
   (void)options;

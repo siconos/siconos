@@ -47,7 +47,7 @@ typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityPro
                                          double*, int*, SolverOptions*);
 
 int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, double* velocity,
-                         int* info, SolverOptions* options) {
+                        int* info, SolverOptions* options) {
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -59,12 +59,12 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(to_blasint(nc * 3), problem->q, 1);
 
   if (options->numberOfInternalSolvers < 1) {
-    return numerics_error("fc3d_ACLMFixedpoint",
-                   "The ACLM Fixed Point method needs options for the internal solvers, "
-                   "please check your options.");
+    return numerics_error(
+        "fc3d_ACLMFixedpoint",
+        "The ACLM Fixed Point method needs options for the internal solvers, "
+        "please check your options.");
   }
 
   SolverOptions* internalsolver_options = options->internalSolvers[0];
@@ -138,7 +138,7 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
     cumul_iter += internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
     /* **** Criterium convergence **** */
 
-    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
     if (options->callback) {
       options->callback->collectStatsIteration(options->callback->env, nc * 3, reaction,
@@ -163,10 +163,10 @@ int fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double* reaction, doubl
   dparam[SICONOS_VI_DPARAM_RHO] = internalsolver_options->dparam[SICONOS_VI_DPARAM_RHO];
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  return 0;  
+  return 0;
 }
 
-void fc3d_aclmfp_set_default(SolverOptions* options) {
+void fc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =
       SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
@@ -190,7 +190,7 @@ void fc3d_aclmfp_set_default(SolverOptions* options) {
 
 static int fc3d_aclmfp_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
-  fc3d_aclmfp_set_default(options);
+  fc3d_alart_curnier_lm_fixed_point_set_default(options);
   return NUMERICS_OK;
 }
 
@@ -209,7 +209,7 @@ static void fc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
 REGISTER_SOLVER(FC3D_ACLMFP, "FC3D_ACLMFP",
                 "Augmented Cone Linear Mapping Fixed Point for 3D Friction Contact",
                 fc3d_aclmfp_init_wrap, fc3d_aclmfp_solve_wrap, fc3d_aclmfp_free_wrap, NULL,
-                fc3d_aclmfp_set_default, /* set_default */
-                1000,                    /* default_max_iter */
-                1e-4,                    /* default_tol */
+                fc3d_alart_curnier_lm_fixed_point_set_default, /* set_default */
+                1000,                                          /* default_max_iter */
+                1e-4,                                          /* default_tol */
                 0 /* is_local_solver */)

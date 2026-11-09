@@ -5,6 +5,8 @@
     "shape": "full dataset shape; null = free size (None, as in numpy); a symbol (dim, rot, twist) takes its value from symbols for the dimension of the file; a list of shapes = alternatives (data must match one)",
     "layout": "columns of the last dimension, same grammar as v2 ('x[k]' = k columns)",
     "attrs": "HDF5 attributes of the dataset or group; opt: written only if provided",
+    "by": "index group that gives the rows of each output step: rows of step k = step_index/<table>[k] (time, first row, number of rows); a file without it: the rows of a step are found from the column t (none for a table without t)",
+    "chunks": "chunk shape of a table, when imposed",
     "opt": "on an attribute: written only if provided; on an entry of data: may be absent when the file is read (None), else reading fails",
     "<name>": "dataset or group named by the user or at write time",
     "2D": "dynamic, static: x, y, 0, then cos(θ/2), 0, 0, sin(θ/2); velocities: vx, vy, 0, 0, 0, ω (checked in output_static_objects, output_dynamic_objects, output_velocities)",
@@ -55,7 +57,9 @@
           "nodal_forces": {"dtype": "f8", "opt": true, "note": "FEM"},
           "shape_name": {"dtype": "str", "opt": true, "note": "aggregates"},
           "group": {"dtype": "int", "opt": true, "note": "aggregates"},
-          "count": {"dtype": "int", "opt": true, "note": "aggregates"}
+          "count": {"dtype": "int", "opt": true, "note": "aggregates"},
+          "radius": {"dtype": "float", "opt": true, "note": "aggregates: radius shared by the grains (disks)"},
+          "density": {"dtype": "float", "opt": true, "note": "aggregates: mass of a grain = density * area, instead of mass"}
         },
         "<contactor>": {
           "dtype": "f4", "shape": [0, 0], "note": "one empty dataset per contactor",
@@ -71,8 +75,12 @@
           }
         },
         "translations": {"dtype": "f8", "shape": [null, "dim"], "note": "aggregates"},
-        "orientations": {"dtype": "f8", "shape": [[null, "rot"], [null]], "note": "aggregates; (count,) for the 2D default"},
-        "velocities": {"dtype": "f8", "shape": [null, "twist"], "note": "aggregates"}
+        "orientations": {"dtype": "f8", "shape": [null, "rot"], "note": "aggregates"},
+        "velocities": {"dtype": "f8", "shape": [null, "twist"], "note": "aggregates"},
+        "radii": {"dtype": "f8", "shape": [null], "note": "aggregates: one radius per grain (disks)"},
+        "masses": {"dtype": "f8", "shape": [null], "note": "aggregates: one mass per grain"},
+        "shape_names": {"dtype": "vlen", "shape": [null], "note": "aggregates: the shapes of the grains (ref/<shape>)"},
+        "shape_indices": {"dtype": "i8", "shape": [null], "note": "aggregates: index in shape_names of the shape of each grain"}
       }
     },
     "nslaws": {
@@ -152,23 +160,27 @@
         }
       }
     },
-    "dynamic": {"dtype": "f4", "shape": [null, 9], "layout": ["t", "ds_id", "position[3]", "orientation[4]"], "note": "orientation wxyz"},
-    "velocities": {"dtype": "f4", "shape": [null, 8], "layout": ["t", "ds_id", "v[3]", "omega[3]"]},
-    "static": {"dtype": "f4", "shape": [null, 9], "layout": ["t", "ds_id", "position[3]", "orientation[4]"], "note": "ds_id < 0"},
-    "cf": {"opt": true, "dtype": "f4", "shape": [null, 26], "layout": ["t", "mu", "point_a[3]", "point_b[3]", "normal[3]", "reaction_global[3]",
+    "dynamic": {"dtype": "f4", "by": "step_index", "shape": [null, 9], "layout": ["t", "ds_id", "position[3]", "orientation[4]"], "note": "orientation wxyz"},
+    "velocities": {"dtype": "f4", "by": "step_index", "shape": [null, 8], "layout": ["t", "ds_id", "v[3]", "omega[3]"]},
+    "static": {"dtype": "f4", "by": "step_index", "shape": [null, 9], "layout": ["t", "ds_id", "position[3]", "orientation[4]"], "note": "ds_id < 0"},
+    "cf": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 26], "layout": ["t", "mu", "point_a[3]", "point_b[3]", "normal[3]", "reaction_global[3]",
                       "gap[3]", "relative_velocity[3]", "reaction_local[3]", "interaction_id",
                       "ds1", "ds2"],
            "note": "variable width: MechanicsIO::contactPoints follows the data size"},
-    "cf_info": {"opt": true, "dtype": "f4", "shape": [null, 5], "layout": ["t", "interaction_id", "ds1", "ds2", "static_body"]},
-    "cf_work": {"opt": true, "dtype": "f4", "shape": [null, 8], "layout": ["t", "interaction_id", "w_n", "w_t", "w_n_theta", "w_t_theta",
+    "cf_info": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 5], "layout": ["t", "interaction_id", "ds1", "ds2", "static_body"]},
+    "cf_work": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 8], "layout": ["t", "interaction_id", "w_n", "w_t", "w_n_theta", "w_t_theta",
                            "status", "w_n_pos"]},
-    "cf_internal_variables": {"opt": true, "dtype": "f4", "shape": [null, 41], "layout": ["t", "interaction_id", "values[*]"]},
-    "energy_work": {"opt": true, "dtype": "f4", "shape": [null, 9], "layout": ["t", "kinetic", "force_work", "w_n", "w_t", "w_n_theta",
+    "cf_internal_variables": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 41], "layout": ["t", "interaction_id", "values[*]"]},
+    "energy_work": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 9], "layout": ["t", "kinetic", "force_work", "w_n", "w_t", "w_n_theta",
                                "w_t_theta", "w_n_neg", "w_t_neg"]},
-    "solv": {"dtype": "f4", "shape": [null, 4], "layout": ["t", "n_iterations", "precision", "local_precision"]},
-    "domain": {"opt": true, "dtype": "f4", "shape": [null, 3], "layout": ["t", "domain", "interaction_id"], "note": "domain = (x > 0) of the contact point"},
-    "radii": {"opt": true, "dtype": "f4", "shape": [null, 2], "note": "no time column; columns provided by self._io.radii, undocumented"},
-    "p0s": {"opt": true, "dtype": "f4", "shape": [null, 4], "note": "no time column; columns provided by self._io.p0s, undocumented"},
+    "solv": {"dtype": "f4", "by": "step_index", "shape": [null, 4], "layout": ["t", "n_iterations", "precision", "local_precision"]},
+    "domain": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 3], "layout": ["t", "domain", "interaction_id"], "note": "domain = (x > 0) of the contact point"},
+    "radii": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 2], "note": "no time column; columns provided by self._io.radii, undocumented"},
+    "p0s": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 4], "note": "no time column; columns provided by self._io.p0s, undocumented"},
+    "step_index": {"opt": true,
+      "<table>": {"dtype": "f8", "shape": [null, 3], "chunks": [256, 3], "layout": ["t", "first_row", "n_rows"],
+                  "note": "one row per output step, empty steps included"}
+    },
     "siconos_mechanics_run_options": {"opt": true,
       "dtype": "f4", "shape": [0, 1], "attrs": {"options": {"dtype": "str", "note": "run_options as JSON"}}
     },

@@ -43,9 +43,9 @@ extern "C" {
  * \param[in] options solver options
  * \return NUMERICS_OK if trivial case, error code otherwise
  */
-int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem *problem,
-                                          double *velocity, double *reaction,
-                                          SolverOptions *options);
+int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem* problem,
+                                          double* velocity, double* reaction,
+                                          SolverOptions* options);
 
 /**
  * Driver for solving a 3D Cohesive Friction-Contact problem
@@ -62,10 +62,8 @@ int cohesive_friction_3d_checkTrivialCase(CohesiveFrictionContactProblem *proble
  * \note The reaction and velocity arrays must be pre-allocated with size
  *       dimension * numberOfContacts.
  */
-int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem,
-                                double *reaction,
-                                double *velocity,
-                                SolverOptions *options);
+int cohesive_friction_3d_driver(CohesiveFrictionContactProblem* problem, double* reaction,
+                                double* velocity, SolverOptions* options);
 
 /**
  * Create solver options for cohesive friction 3D problems
@@ -95,7 +93,6 @@ void cohesive_friction_3d_list_available_solvers(void);
  * \param[in] solver_id the solver identifier
  */
 void cohesive_friction_3d_print_solver_info(solver_id_t solver_id);
-
 
 #if defined(__cplusplus)
 }

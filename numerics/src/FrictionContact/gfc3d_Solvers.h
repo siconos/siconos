@@ -39,8 +39,8 @@ extern "C" {
 #endif
 
 int gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
-                                        SolverOptions* options,
-                                        SolverOptions* internalsolver_options, double error);
+                                       SolverOptions* options,
+                                       SolverOptions* internalsolver_options, double error);
 
 /**
    Check for trivial solution in the friction-contact 3D problem
@@ -265,7 +265,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
 void gfc3d_IPM_SNM(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                    double* globalVelocity, int* info, SolverOptions* options);
 
-void gfc3d_ipm_snm_set_default(SolverOptions* options);
+void gfc3d_IPM_SNM_set_default(SolverOptions* options);
 
 void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
                       double* velocity, double* globalVelocity, int* info,
@@ -274,9 +274,9 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
 /** \addtogroup SetSolverOptions
  * @{
  */
-void gfc3d_nsn_ac_set_default(SolverOptions* options);
-void gfc3d_aclmfp_set_default(SolverOptions* options);
-void gfc3d_admm_set_default(SolverOptions* options);
+void gfc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options);
+void gfc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options);
+void gfc3d_alternating_direction_method_of_multipliers_set_default(SolverOptions* options);
 
 void gfc3d_ADMM(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                 double* globalVelocity, int* info, SolverOptions* options);
@@ -299,12 +299,12 @@ void gfc3d_ipm_set_default(SolverOptions* options);
 /** \addtogroup SetSolverOptions
  * @{
  */
-void gfc3d_nsn_ac_set_default(SolverOptions* options);
-void gfc3d_aclmfp_set_default(SolverOptions* options);
-void gfc3d_admm_set_default(SolverOptions* options);
+void gfc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options);
+void gfc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options);
+void gfc3d_alternating_direction_method_of_multipliers_set_default(SolverOptions* options);
 void gfc3d_nsgs_set_default(SolverOptions* options);
-void gfc3d_vi_eg_set_default(SolverOptions* options);
-void gfc3d_vi_fpp_set_default(SolverOptions* options);
+void gfc3d_VI_extra_gradient_set_default(SolverOptions* options);
+void gfc3d_VI_fixed_point_projection_set_default(SolverOptions* options);
 
 /** @} */
 

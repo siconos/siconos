@@ -33,8 +33,8 @@
  * Vi=(Mi_2-Mi_1 Me_1^{-1} Me_2)Ri+Qi-Mi1 Me_1^{-1} Qe
  *
  */
-void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction,
-                       double* velocity, int* info, SolverOptions* options);
+void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, double* velocity,
+                       int* info, SolverOptions* options);
 
 /*  The equalities are assembled in an single block.
  *

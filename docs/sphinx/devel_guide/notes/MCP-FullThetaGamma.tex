@@ -11,7 +11,7 @@ In this section, we deal with only with the FirstOrderType2R case.
     \end{array}
 \end{equation}
 
- \paragraph{Newton's linearization of the first line of~(\ref{eq:full-toto1-ter})} The first line of the  problem~(\ref{eq:full-toto1-ter}) can be written under the form of a residue $\mathcal R$ depending only on $x_{k+1}$ and $r_{k+\gamma}$ such that 
+ \paragraph{Newton's linearization of the first line of~(\ref{eq:full-toto1-ter})} The first line of the  problem~(\ref{eq:full-toto1-ter}) can be written under the form of a residue $\mathcal R$ depending only on $x_{k+1}$ and $r_{k+\gamma}$ such that
 \begin{equation}
   \label{eq:full-NL3}
   \mathcal R (x_{k+1},r _{k+\gamma}) =0
@@ -22,7 +22,7 @@ The solution of this system of nonlinear equations is sought as a limit of the s
    \label{eq:full-NL7}
    \begin{cases}
      x^{0}_{k+1} = x_k \\ \\
-     r^{0}_{k+\gamma} = (1-\gamma ) r_{k} + \gamma r^0_{k+1}  = r_k \\ \\     
+     r^{0}_{k+\gamma} = (1-\gamma ) r_{k} + \gamma r^0_{k+1}  = r_k \\ \\
      \mathcal R_L( x^{\alpha+1}_{k+1},r^{\alpha+1}_{k+\gamma}) = \mathcal
      R(x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma})  + \left[ \nabla_{x} \mathcal
      R(x^{\alpha}_{k+1},r^{\alpha}_{k+\gamma})\right] (x^{\alpha+1}_{k+1}-x^{\alpha}_{k+1} ) + \\[2mm]
@@ -42,8 +42,8 @@ We get
 
 \[  \mathcal R
 _{\free}(x^{\alpha}_{k+1} )=\fbox{$ \mathcal R _{\free, k+1} ^{\alpha} \stackrel{\Delta}{=}  M(x^{\alpha}_{k+1} - x_{k}) -h\theta f( x^{\alpha}_{k+1} , t_{k+1}) - h(1-\theta)f(x_k,t_k)$}\]
- 
-The computation of the Jacobian of $\mathcal R$ with respect to $x$, denoted by $   W^{\alpha}_{k+1}$ leads to 
+
+The computation of the Jacobian of $\mathcal R$ with respect to $x$, denoted by $   W^{\alpha}_{k+1}$ leads to
 \begin{equation}
    \label{eq:full-NL9}
    \begin{array}{l}
@@ -60,7 +60,7 @@ By using (\ref{eq:full-rfree-1}), we get
 \begin{equation}
   \label{eq:full-rfree-2}
   \mathcal R _{\free}(x^{\alpha}_{k+1})  - h  r^{\alpha+1}_{k+\gamma}   + W^{\alpha}_{k+1} (x^{\alpha+1}_{k+1} -
-    x^{\alpha}_{k+1})  =0 
+    x^{\alpha}_{k+1})  =0
 \end{equation}
 
 %\fbox
@@ -136,7 +136,7 @@ which is linearized as
   \label{eq:full-rrL}
   \begin{array}{l}
     \boxed{r^{\alpha+1}_{k+\gamma} = g(\lambda ^{\alpha}_{k+\gamma},t_{k+\gamma}) -B^{\alpha}_{k+\gamma}
-      \lambda^{\alpha}_{k+\gamma} + B^{\alpha}_{k+\gamma} \lambda^{\alpha+1}_{k+\gamma}}       
+      \lambda^{\alpha}_{k+\gamma} + B^{\alpha}_{k+\gamma} \lambda^{\alpha+1}_{k+\gamma}}
   \end{array}
 \end{equation}
 with,
@@ -156,7 +156,7 @@ Note that the linearization is equivalent to the case (\ref{eq:rrL}) by replacin
 $\lambda^{\alpha+1}_{k+\gamma}$}
 
 Inserting (\ref{eq:full-rrL}) into~(\ref{eq:full-rfree-12}), we get the following linear relation between $x^{\alpha+1}_{k+1}$ and
-$\lambda^{\alpha+1}_{k+1}$, 
+$\lambda^{\alpha+1}_{k+1}$,
 
 \begin{equation}
    \begin{array}{l}
@@ -164,14 +164,14 @@ $\lambda^{\alpha+1}_{k+1}$,
     B^{\alpha}_{k+\gamma} (\lambda^{\alpha+1}_{k+\gamma} - \lambda^{\alpha}_{k+\gamma}) \right ] +x^\alpha_{free}
 \end{array}
 \end{equation}
-that is 
+that is
 \begin{equation}
   \begin{array}{l}
 \boxed{x^{\alpha+1}_{k+1}=x_p + h (W^{\alpha}_{k+1})^{-1}    B^{\alpha}_{k+\gamma} \lambda^{\alpha+1}_{k+\gamma}}
    \end{array}
   \label{eq:full-rfree-13}
 \end{equation}
-with 
+with
 \begin{equation}
   \boxed{x_p \stackrel{\Delta}{=}  h(W^{\alpha}_{k+1} )^{-1}\left[g(\lambda^{\alpha}_{k+\gamma},t_{k+\gamma}) -B^{\alpha}_{k+\gamma} (\lambda^{\alpha}_{k+\gamma}) \right ] +x^\alpha_{free}}
 \end{equation}
@@ -180,17 +180,17 @@ with
 \paragraph{Reduction to a linear relation between  $y^{\alpha+1}_{k+\gamma}$ and
 $\lambda^{\alpha+1}_{k+\gamma}$}
 
-Inserting (\ref{eq:full-rfree-13}) into (\ref{eq:full-NL11y}), we get the following linear relation between $y^{\alpha+1}_{k+1}$ and $\lambda^{\alpha+1}_{k+1}$, 
+Inserting (\ref{eq:full-rfree-13}) into (\ref{eq:full-NL11y}), we get the following linear relation between $y^{\alpha+1}_{k+1}$ and $\lambda^{\alpha+1}_{k+1}$,
 \begin{equation}
    \begin{array}{l}
  y^{\alpha+1}_{k+1} = y_p + \left[ h \gamma C^{\alpha}_{k+\gamma} ( W^{\alpha}_{k+1})^{-1}  B^{\alpha}_{k+1} + D^{\alpha}_{k+1} \right]\lambda^{\alpha+1}_{k+1}
    \end{array}
 \end{equation}
-with 
+with
 \begin{equation}
-y_p = y^{\alpha}_{k+1} -\mathcal R^{\alpha}_{yk+1} + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1} 
+y_p = y^{\alpha}_{k+1} -\mathcal R^{\alpha}_{yk+1} + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1}
 \end{equation}
-that is 
+that is
 \begin{equation}\boxed{
 y_p =  h(x^{\alpha}_{k+\gamma},\lambda^{\alpha}_{k+\gamma}) + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1} }
 \end{equation}
@@ -207,7 +207,7 @@ y_p =  h(x^{\alpha}_{k+\gamma},\lambda^{\alpha}_{k+\gamma}) + \gamma C^{\alpha}_
     y_p &=&  h(x^{\alpha}_{k+\gamma},\lambda^{\alpha}_{k+\gamma}) + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1}\\
         &=&  C^{\alpha}_{k+1} x^{\alpha}_{k+\gamma} + D^{\alpha}_{k+1}\lambda^{\alpha}_{k+\gamma}  + \gamma C^{\alpha}_{k+1}(x_q) - D^{\alpha}_{k+1} \lambda^{\alpha}_{k+1} \\
         &=& C^{\alpha}_{k+1}  (x^{\alpha}_{k+\gamma} + \gamma x_p - \gamma x^{\alpha}_{k+1} ) \\
-        &=& C^{\alpha}_{k+1}  ((1-\gamma) x_{k} + \gamma x_{free} ) \text {since } x_p =x_{free} 
+        &=& C^{\alpha}_{k+1}  ((1-\gamma) x_{k} + \gamma x_{free} ) \text {since } x_p =x_{free}
 \end{array}
 \end{equation}
 
@@ -236,7 +236,7 @@ change the management of \texttt{ H_alpha} Relation to be able to compute the mi
 \clearpage
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "DevNotes"
-%%% End: 
+%%% End:

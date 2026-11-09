@@ -24,15 +24,15 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, free, malloc, EXIT_FAILURE
 #include <string.h>  // for memset, NULL
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "SiconosBlas.h"    // for cblas_daxpy, cblas_dscal
 #include "SiconosLapack.h"  // for DGETRS, lapack_int, DGETRF, LA_NOTRANS
 #include "lcp_pivot.h"      // for LCP_PATHSEARCH_NON_ENTERING_T, LCP_P...
 #include "lumod_wrapper.h"  // for SN_lumod_dense_data, SN_lumod_find_a...
+#include "numerics_errors.h"
 #include "sanitizer.h"      // for cblas_dcopy_msan
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR_WE, DEBUG_G...
-#include "numerics_errors.h"
 
 #define TOL_LEXICO DBL_EPSILON * 10000
 #define MIN_INCREASE 10

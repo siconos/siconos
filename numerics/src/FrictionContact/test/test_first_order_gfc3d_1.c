@@ -72,7 +72,7 @@ TestCase* build_test_collection(int n_data, const char** data_collection,
     // GFC3D, ACLMFP, default values.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-1;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
   }

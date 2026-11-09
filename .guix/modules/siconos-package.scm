@@ -27,6 +27,7 @@
   #:use-module (gnu packages python-build)
   #:use-module (gnu packages python-science)
   #:use-module (gnu packages python-xyz)
+  #:use-module (gnu packages simulation)
   #:use-module (gnu packages swig)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages xml)
@@ -75,7 +76,7 @@ problems.")
                  #:recursive? #t
      ;            #:select? vcs-file?
      ))
-    
+
     (build-system cmake-build-system)
     (arguments
      (list
@@ -97,6 +98,7 @@ problems.")
                 (string-append "-DSICONOS_CUSTOM_INSTALL=" #$output)
                 "-DCOMPONENTS=externals;numerics;kernel;control;mechanics;io;vkernel"
                 "-DCMAKE_BUILD_TYPE=Release"
+                "-DNONOS_COMPILE_TIME_DATABASE=1"
                 "-DWITH_PYB11_WRAPPER=1"
                 "-DFCLIB_ROOT=1"
                 "-DWITH_BULLET=1"
@@ -152,9 +154,34 @@ problems.")
                   (("new_test\\(SOURCES CableDSTest.cpp")
                    "# new_test(SOURCES CableDSTest.cpp"))))
 
-                ;; wrap siconos file
-            	    (add-after 'install 'wrap-python
-              (assoc-ref py:%standard-phases 'wrap))
+                ;; wrap siconos file and friends.  py:wrap embeds the
+                ;; build-time GUIX_PYTHONPATH, which does not contain
+                ;; the site-packages of output. Record it in the
+                ;; environment before the standard wrap is run.
+                (add-after 'install 'wrap-python
+                  (lambda* (#:key inputs outputs #:allow-other-keys)
+                    (let ((own-sites
+                           (find-files (string-append (assoc-ref outputs "out")
+                                                      "/lib")
+                                       (lambda (file stat)
+                                         (and (eq? 'directory (stat:type stat))
+                                              (string-suffix? "/site-packages"
+                                                              file)))
+                                       #:directories? #t)))
+                      (for-each
+                       (lambda (site)
+                         (let ((env (getenv "GUIX_PYTHONPATH")))
+                           (setenv "GUIX_PYTHONPATH"
+                                   (string-append
+                                    site
+                                    (if (and env (not (string=? env "")))
+                                        (string-append ":" env)
+                                        "")))))
+                       own-sites)
+                      ;; standard wrap of bin/ scripts; embeds the
+                      ;; current GUIX_PYTHONPATH in each wrapper
+                      ((assoc-ref py:%standard-phases 'wrap)
+                       #:inputs inputs #:outputs outputs))))
 	      	    )))
 
     (native-inputs (list clang-toolchain-21
@@ -164,6 +191,8 @@ problems.")
                          git-minimal/pinned
                          pybind11
                          python-lxml
+                         ;; the figures of vkernel/docs/studies (vkernel_study_*)
+                         python-matplotlib
                          python-pytest
                          swig))
       (inputs (list python))
@@ -174,6 +203,7 @@ problems.")
                                 gmp
                                 hdf5
                                 lapack
+                                lpsolve
                                 nlohmann-json
                                 openblas
                                 opencascade-occt

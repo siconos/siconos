@@ -131,7 +131,8 @@ __global__ void kComputeCounts(
 	const uint *cellOffsets,
 	const uint *cellParticleCounts,
 	uint *neighborCounts,
-	const uint *reversedSortIndices
+	const uint *reversedSortIndices,
+	const bool selfQuery
 )
 {
 	uint particleIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -159,9 +160,13 @@ __global__ void kComputeCounts(
 				for (uint i = neighborCellStart; i < neighborCellStart + neighborCellCount; i++)
 				{
 					uint &neighborIndex = i;
-					Real3 diff = particles[reversedSortIndices[neighborIndex]] - particle;
+					const uint neighbor = reversedSortIndices[neighborIndex];
+					// siconos: a point is not its own neighbor, but another point at the
+					// same position is (the self exclusion was squaredDistance > 0)
+					if (selfQuery && neighbor == particleIndex) continue;
+					Real3 diff = particles[neighbor] - particle;
 					float squaredDistance = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
-					if (squaredDistance < GridInfo.SquaredSearchRadius && squaredDistance > 0.0)
+					if (squaredDistance < GridInfo.SquaredSearchRadius)
 					{
 						neighborCount++;
 					}
@@ -188,7 +193,8 @@ __global__ void kNeighborhoodQueryWithCounts(
 	const uint *cellParticleCounts,
 	const uint *neighborWriteOffsets,
 	uint *neighbors,
-	const uint *reversedSortIndices)
+	const uint *reversedSortIndices,
+	const bool selfQuery)
 {
 	uint particleIndex = blockIdx.x * blockDim.x + threadIdx.x;
 	if (particleIndex >= queryPointCount) return;
@@ -217,11 +223,24 @@ __global__ void kNeighborhoodQueryWithCounts(
 				for (uint i = neighborCellStart; i < neighborCellStart + neighborCellCount; i++)
 				{
 					uint &neighborIndex = i;
-					Real3 diff = particles[reversedSortIndices[neighborIndex]] - particle;
+					const uint neighbor = reversedSortIndices[neighborIndex];
+					if (selfQuery && neighbor == particleIndex) continue;
+					Real3 diff = particles[neighbor] - particle;
 					float squaredDistance = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
-					if (squaredDistance < GridInfo.SquaredSearchRadius && squaredDistance > 0.0)
+					if (squaredDistance < GridInfo.SquaredSearchRadius)
 					{
-						neighbors[writeOffset + neighborCount] = reversedSortIndices[neighborIndex];
+						// siconos: the cells are visited in the Morton order, not in the
+						// order of the indices. The contacts are created in the order of
+						// the neighbors and the solver depends on the order of the
+						// contacts: insert at the sorted position, as the lists of
+						// CompactNSearch are sorted (at most CUDA_MAX_NEIGHBORS entries)
+						uint k = neighborCount;
+						while (k > 0 && neighbors[writeOffset + k - 1] > neighbor)
+						{
+							neighbors[writeOffset + k] = neighbors[writeOffset + k - 1];
+							k--;
+						}
+						neighbors[writeOffset + k] = neighbor;
 						neighborCount++;
 					}
 

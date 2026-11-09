@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-import siconos.numerics as sn
 import numpy as np
+import siconos.numerics as sn
 
 # basic interface
 # Murty88, p2
@@ -65,5 +65,4 @@ def test_lcps():
 
 
 if __name__ == "__main__":
-
     test_lcps()

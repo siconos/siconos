@@ -29,18 +29,18 @@
  */
 struct LinearComplementarityProblem_as_ConvexQP {
   /* the ConvexQP associated with the FC3D problem */
-  ConvexQP *cqp;
+  ConvexQP* cqp;
   /* the FC3D associated with the ConvexQP  */
-  LinearComplementarityProblem *lcp;
+  LinearComplementarityProblem* lcp;
   /* the SolverOptions that might be used to pass some numerical parameters */
-  SolverOptions *options;
+  SolverOptions* options;
 };
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX);
+void Projection_ConvexQP_LCP(void* cqpIn, double* x, double* PX);
 
 #if defined(__cplusplus)
 }

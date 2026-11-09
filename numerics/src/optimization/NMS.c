@@ -26,10 +26,10 @@
 #include "NumericsMatrix.h"  // for NM_create, NM_clear, NumericsMatrix
 #include "SiconosBlas.h"     // for cblas_dcopy, cblas_daxpy, cblas_ddot
 #include "SiconosSets.h"     // for free_siconos_set, project_on_set
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "numerics_errors.h"
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
 
 #ifdef __cplusplus
 #undef restrict
@@ -45,7 +45,7 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
 
   /* H could be sparse ... */
   NumericsMatrix* Htmp = data_NMS->H;
-  double* H = Htmp->matrix0;
+  double* H = Htmp->dense;
   double* F = NMS_get_F(data_NMS->workspace, n);
   double* F_merit = NMS_get_F_merit(data_NMS->workspace, n);
   double* JacThetaF_merit = NMS_get_JacTheta_F_merit(data_NMS->workspace, n);
@@ -316,7 +316,7 @@ update_checkpoint:
 
 accept_z_N:
   DEBUG_PRINT("z_N z_0\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i){DEBUG_PRINTF("%e %e\n", z_N[i], z[i])});
+  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i) { DEBUG_PRINTF("%e %e\n", z_N[i], z[i]); });
 
   cblas_dcopy(n, z_N, 1, z, 1);
 

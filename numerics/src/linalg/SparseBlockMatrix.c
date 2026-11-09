@@ -2831,13 +2831,17 @@ int SBM_from_csparse_2(size_t blocksize, CSparseMatrix* sparseMat,
 
   /* Convert CSparse to CSR format */
   CSparseMatrix* sparseMatcsr = NULL;
+  int own_sparseMatcsr = 0;
 
   if (sparseMat->nz >= 0) {  // triplet
     sparseMatcsr = NM_triplet_to_csr(sparseMat);
+    own_sparseMatcsr = 1;
   } else if (sparseMat->nz == -1) {  // csc
     sparseMatcsr = NM_csc_to_csr(sparseMat);
+    own_sparseMatcsr = 1;
   } else if (sparseMat->nz == -2) {  // csr
     sparseMatcsr = sparseMat;
+    own_sparseMatcsr = 0;
   } else {
     return numerics_error("SBM_from_csparse_2", "Unknown type for the input csparse matrix\n");
   }
@@ -2994,14 +2998,14 @@ int SBM_from_csparse_2(size_t blocksize, CSparseMatrix* sparseMat,
   } */
 
   free(blocks_again);
-  cs_spfree(sparseMatcsr);
+  if (own_sparseMatcsr) cs_spfree(sparseMatcsr);
 
   return 0;
 }
 
 int SBM_from_csparse(size_t blocksize, const CSparseMatrix* const sparseMat,
                      SparseBlockStructuredMatrix* A) {
-  DEBUG_PRINT("SBM_from_csparse start\n")
+  DEBUG_PRINT("SBM_from_csparse start\n");
   CHECK_NULL(sparseMat);
   assert(sparseMat->p);
   assert(sparseMat->i);
@@ -3203,7 +3207,7 @@ int SBM_from_csparse(size_t blocksize, const CSparseMatrix* const sparseMat,
   /* 9: free temp memory */
   free(blocknum);
   free(blockline);
-  DEBUG_PRINT("SBM_from_csparse end\n")
+  DEBUG_PRINT("SBM_from_csparse end\n");
 
   return 0;
 }
@@ -3266,7 +3270,7 @@ int SBM_to_sparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix* out
         DEBUG_PRINTF("isparsecolumnstart = %zu\t", isparsecolumnstart);
         DEBUG_PRINTF("isparsecolumnend = %zu\n", isparsecolumnend);
 
-        size_t rowintheblock = isparserow;
+        size_t rowintheblock = isparserow - isparserowstart;
         for (size_t isparsecolumn = isparsecolumnstart; isparsecolumn < isparsecolumnend;
              isparsecolumn++) {
           DEBUG_PRINTF("nnz = %zu \t", nnz);
@@ -3274,10 +3278,6 @@ int SBM_to_sparse(const SparseBlockStructuredMatrix* const A, CSparseMatrix* out
           DEBUG_PRINTF("isparsecolumn = %zu \t", isparsecolumn);
 
           outSparseMat->i[nnz] = to_csint(isparsecolumn);
-
-          if (currentRowNumber != 0) {
-            rowintheblock -= A->blocksize0[currentRowNumber - 1];
-          }
 
           size_t colintheblock = isparsecolumn;
           if (colNumber != 0) {

@@ -34,9 +34,9 @@
 #elif _MSC_VER
 #define strdup _strdup
 #else  // to convert char to const char ...
-static inline char *strdup(char *src) {
+static inline char* strdup(char* src) {
   size_t len = strlen(src) + 1;
-  char *dest = (char *)malloc(len * sizeof(char));
+  char* dest = (char*)malloc(len * sizeof(char));
   strcpy(dest, src, len);
   return dest;
 }
@@ -44,16 +44,16 @@ static inline char *strdup(char *src) {
 #endif
 // --------- End of GAMS stuff ---------
 
-int lcp_test_function(TestCase *current) {
+int lcp_test_function(TestCase* current) {
   // numerics_set_verbose(2);
   int i, info = 0;
-  LinearComplementarityProblem *problem =
-      (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
+  LinearComplementarityProblem* problem =
+      (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
   info = linearComplementarity_newFromFilename(problem, current->filename);
 
 #ifdef HAVE_GAMS_C_API
   if (current->options->solverId == SICONOS_LCP_GAMS) {
-    SN_GAMSparams *GP = (SN_GAMSparams *)current->options->solverParameters;
+    SN_GAMSparams* GP = (SN_GAMSparams*)current->options->solverParameters;
     assert(GP);
     GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
     assert(current->filename);
@@ -61,8 +61,8 @@ int lcp_test_function(TestCase *current) {
   }
 #endif
 
-  double *z = (double *)calloc(problem->size, sizeof(double));
-  double *w = (double *)calloc(problem->size, sizeof(double));
+  double* z = (double*)calloc(problem->size, sizeof(double));
+  double* w = (double*)calloc(problem->size, sizeof(double));
 
   info = linearComplementarity_driver(problem, z, w, current->options);
 

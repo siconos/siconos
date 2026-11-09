@@ -41,7 +41,7 @@ Systems with relay (switching) non-smoothness.
 Contact mechanics with Coulomb friction and rolling resistance in 2D and 3D.
 - **Problem types**: 2D/3D rolling friction contact, global rolling formulations
 - **Key solvers**: NSGS, ADMM, IPM
-- **Files**: 
+- **Files**:
   - `RollingFrictionContact_options.h` (solver IDs and options)
   - `RollingFrictionContactProblem.h/.c` - Local rolling contact problem
   - `GlobalRollingFrictionContactProblem.h/.c` - Global rolling contact problem

@@ -2,7 +2,8 @@
 #ifndef ROLLING_FC_SOLVERS_BACKWARD_COMPAT_H
 #define ROLLING_FC_SOLVERS_BACKWARD_COMPAT_H
 
-#pragma message("Warning: rolling_fc_Solvers.h has moved to RollingFrictionContact/rolling_fc_Solvers.h")
+#pragma message( \
+    "Warning: rolling_fc_Solvers.h has moved to RollingFrictionContact/rolling_fc_Solvers.h")
 
 #include "rolling_fc_Solvers.h"
 

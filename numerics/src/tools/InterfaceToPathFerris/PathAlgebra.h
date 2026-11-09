@@ -18,7 +18,7 @@ extern "C" {
     \param data
 */
 int convertToPathSparse(int size0, int size1, double* matIn, int* col_start, int* col_len,
-                         int* row, double* data);
+                        int* row, double* data);
 #if defined(__cplusplus)
 }
 #endif

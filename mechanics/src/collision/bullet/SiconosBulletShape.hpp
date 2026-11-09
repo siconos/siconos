@@ -38,15 +38,12 @@ namespace siconos::collision::bullet::internal {
 // We need a bit more space to hold mesh data
 class SiconosMeshData : public btGImpactMeshShape {
  public:
-  SiconosMeshData(btStridingMeshInterface *i)
-      : btGImpactMeshShape(i), btScalarVertices(nullptr)
-  {
-  }
-  ~SiconosMeshData() noexcept
-  {
+  SiconosMeshData(btStridingMeshInterface* i)
+      : btGImpactMeshShape(i), btScalarVertices(nullptr) {}
+  ~SiconosMeshData() noexcept {
     if (btScalarVertices) delete[] btScalarVertices;
   }
-  btScalar *btScalarVertices{nullptr};
+  btScalar* btScalarVertices{nullptr};
   std::shared_ptr<btTriangleIndexVertexArray> btTriData{nullptr};
 };
 
@@ -61,9 +58,7 @@ class SiconosHeightData : public btHeightfieldTerrainShape {
                                   false),  // up = z, flip = false
         _data(data),
         _min_height(min_height),
-        _max_height(max_height)
-  {
-  }
+        _max_height(max_height) {}
   std::shared_ptr<std::vector<btScalar>> _data{nullptr};
   btScalar _min_height{0.}, _max_height{0.};
 };

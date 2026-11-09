@@ -22,7 +22,7 @@ FindMetis
 Find UMFPACK libraries and headers
 
 Usage :
- 
+
 find_package(Metis REQUIRED)
 target_link_libraries(yourlib PRIVATE Metis::Metis)
 
@@ -30,7 +30,7 @@ Set Metis_ROOT=<where Metis is installed>
 if it's not in a "classic" place or if you want a specific version
 
 header : metis.h
-lib : <prefi>metis.<suffix> 
+lib : <prefi>metis.<suffix>
 
 #]=======================================================================]
 
@@ -46,7 +46,7 @@ set_find_package_hints(NAME Metis MODULE metis)
 
 if(NOT Metis_INCLUDE_DIR)
   find_path(Metis_INCLUDE_DIR NAMES metis.h
-    PATH_SUFFIXES include 
+    PATH_SUFFIXES include
     ${_UMFPACK_INC_SEARCH_OPTS}
     )
 endif()
@@ -55,7 +55,7 @@ if(NOT Metis_LIBRARIES)
   find_library(Metis_LIBRARIES NAMES metis
     ${_Metis_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
-  
+
 endif()
 
 # -- Library setup --
@@ -71,4 +71,3 @@ if(Metis_FOUND)
     endif()
   endif()
 endif()
-

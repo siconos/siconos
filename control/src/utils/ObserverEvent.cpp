@@ -14,11 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "ObserverEvent.hpp"
+
 #include "Observer.hpp"
 
-void siconos::control::ObserverEvent::process(siconos::simulation::Simulation& sim)
-{
+void siconos::control::ObserverEvent::process(siconos::simulation::Simulation& sim) {
   _observer->process();
 }

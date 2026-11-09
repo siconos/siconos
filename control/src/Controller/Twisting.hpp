@@ -40,7 +40,7 @@ class Twisting : public CommonSMC {
    *  \param sensor the ControlSensor feeding the Actuator
    */
   Twisting(std::shared_ptr<ControlSensor> sensor)
-      : CommonSMC(ActuatorType::Twisting, sensor){};
+      : CommonSMC(ActuatorType::Twisting, sensor) {};
 
   /** Constructor for a nonlinear system.
    *

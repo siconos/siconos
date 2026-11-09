@@ -97,7 +97,7 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     qSigmaold.head(solid->dimension()) = vold;
     qSigmaold.tail(solid->stressDimension()) = sigmaold;
 
-            // Get buffer and compute full-free rhs
+    // Get buffer and compute full-free rhs
     auto& free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
     auto& full_free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)];
     auto& iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
@@ -115,12 +115,12 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
       // double conditionningMagicCoeff = (time_step/solid->S()->normInf())/100000;
       // computes Fext(ti)
       solid->computeFext(told);
-      auto coeff =  time_step * (1 - _theta);
+      auto coeff = time_step * (1 - _theta);
       // free_rhs += time_step*(1-_theta) * fext(ti)
       free_rhs.noalias() += coeff * solid->fext();
       // computes Fext(ti+1)
       solid->computeFext(tend);
-      coeff =  time_step * _theta;
+      coeff = time_step * _theta;
       // free_rhs += time_step*_theta * fext(ti+1)
       free_rhs.noalias() += coeff * solid->fext();
     }
@@ -156,7 +156,7 @@ void siconos::mechanics::fem::integrators::MoreauJeanGOSI::NonSmoothLawContribut
     auto ivd = indexSet.descriptor(inter);
     double h = simulation()->timeStep();
     MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput{
-      _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta, h)};
+        _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta, h)};
     auto& osnsp_rhs =
         *(*indexSet.properties(ivd).workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
     osnsp_rhs.setZero();

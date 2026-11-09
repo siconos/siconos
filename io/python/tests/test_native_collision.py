@@ -22,16 +22,16 @@
 #
 
 
-import numpy
 from math import sqrt
-from siconos.mechanics.collision.tools import Contactor
+
+import numpy
+import siconos
+import siconos.numerics as sn
 from siconos.io.mechanics_run import (
     MechanicsHdf5Runner,
     MechanicsHdf5Runner_run_options,
 )
-import siconos.numerics as sn
-
-import siconos
+from siconos.mechanics.collision.tools import Contactor
 
 config_native = siconos.io.mechanics_run.RunnerConfig(backend="native")
 
@@ -43,7 +43,6 @@ def make_input():
 
     # Creation of the hdf5 file for input/output
     with MechanicsHdf5Runner(config=config_native) as io:
-
         # Definition of a disk radius 1
         io.add_primitive_shape("DiskR", "Disk", [disk_radius])
 
@@ -122,7 +121,6 @@ run_options["solver_options"] = options
 def run():
 
     with MechanicsHdf5Runner(config=config_native, mode="r+") as io:
-
         # By default earth gravity is applied and the units are those
         # of the International System of Units.
         # Because of fixed collision margins used in the collision detection,
@@ -133,7 +131,6 @@ def run():
 def check():
 
     with MechanicsHdf5Runner(config=config_native, mode="r") as io:
-
         positions = io.dynamic_data()
         velocities = io.velocities_data()
 

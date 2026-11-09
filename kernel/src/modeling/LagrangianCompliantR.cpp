@@ -106,8 +106,8 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(
   }
 }
 
-void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interaction& inter,
-                                                           siconos::algebra::blocks::size_type level) {
+void siconos::modeling::LagrangianCompliantR::computeInput(
+    double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   // get lambda of the concerned interaction
 
   auto& lambda = *inter.lambda(level);

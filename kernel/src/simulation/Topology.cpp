@@ -119,7 +119,7 @@ struct VertexIsRemoved {
   VertexIsRemoved(std::shared_ptr<siconos::modeling::Interaction> I,
                   std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> sg,
                   std::shared_ptr<siconos::graphs::InteractionsGraph> asg)
-      : _I(I), __DSG(sg), __IG(asg){};
+      : _I(I), __DSG(sg), __IG(asg) {};
   bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed) {
     if (__IG->is_vertex(__DSG->bundle(ed))) {
       auto ivd = __IG->descriptor(__DSG->bundle(ed));
@@ -149,7 +149,7 @@ struct VertexIsRemovedDS {
   VertexIsRemovedDS(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
                     std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> sg,
                     std::shared_ptr<siconos::graphs::InteractionsGraph> asg)
-      : _ds(ds), __DSG(sg), __IG(asg){};
+      : _ds(ds), __DSG(sg), __IG(asg) {};
   bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed) {
     if (__IG->is_vertex(__DSG->bundle(ed))) {
       auto ivd = __IG->descriptor(__DSG->bundle(ed));

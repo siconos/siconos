@@ -22,22 +22,22 @@
 
 #include "FischerBurmeister.h"             // for Jac_F_FB, phi_FB
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
-#include "lcp_cst.h"
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "Newton_methods.h"                // for functions_LSA, init_lsa_fu...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dgemv
 #include "SolverOptions.h"
+#include "lcp_cst.h"
 void FB_compute_F_lcp(void* data_opaque, double* z, double* w) {
   // Computation of the new val w = F(z) = Mz + q
   // q --> w
   LinearComplementarityProblem* data = (LinearComplementarityProblem*)data_opaque;
   assert(data->M);
-  assert(data->M->matrix0);
+  assert(data->M->dense);
   unsigned int n = data->size;
   cblas_dcopy(n, data->q, 1, w, 1);
   // Mz+q --> w
-  cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, data->M->matrix0, n, z, 1, 1.0, w, 1);
+  cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, data->M->dense, n, z, 1, 1.0, w, 1);
 }
 
 void FB_compute_H_lcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2,
@@ -82,8 +82,8 @@ void lcp_newton_FB_set_default(SolverOptions* options) {
  * This registers SICONOS_LCP_NEWTON_FB_FBLSA in the global solver registry.
  */
 
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 static int lcp_newton_FB_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
@@ -91,7 +91,8 @@ static int lcp_newton_FB_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_newton_FB_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_newton_FB_solve_wrap(void* problem, double* z, double* w,
+                                    SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_newton_FB((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -103,12 +104,8 @@ static void lcp_newton_FB_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_LCP_NEWTON_FB_FBLSA, "LCP_NEWTON_FB",
-                "Newton Fischer-Burmeister solver for LCP",
-                lcp_newton_FB_init_wrap,
-                lcp_newton_FB_solve_wrap,
-                lcp_newton_FB_free_wrap,
-                NULL,  /* error function */
-                lcp_newton_FB_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0);     /* is_local_solver */
+                "Newton Fischer-Burmeister solver for LCP", lcp_newton_FB_init_wrap,
+                lcp_newton_FB_solve_wrap, lcp_newton_FB_free_wrap, NULL, /* error function */
+                lcp_newton_FB_set_default, 1000,                         /* default_max_iter */
+                1e-6,                                                    /* default_tol */
+                0);                                                      /* is_local_solver */

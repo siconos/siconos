@@ -39,7 +39,7 @@ The rotational velocity is then related to the $R$ by :
   \widetilde \Omega = R^\top \dot R, \text { or equivalently, } \dot R  = R \widetilde \Omega
 \end{equation}
 
-Using these coordinates, the equations of motion are given by 
+Using these coordinates, the equations of motion are given by
 \begin{equation}
   \label{eq:motion-NewtonEuler}
   \left\{\begin{array}{rcl}
@@ -124,13 +124,13 @@ Since we note that $\tilde \Omega^ 3 = - \theta^2 \tilde \Omega$ with $\theta = 
   \begin{array}[lcl]{lcl}
     \exp(\tilde \Omega) &=& \sum_{k=0}^{\infty} \frac {1}{k!} (\tilde \Omega)^k \\
                         &=&  I_{3\times 3} + \sum_{k=1}^{\infty} \frac {(-1)^{k-1}}{(2k-1)!}  \theta ^{2k-1} \tilde \Omega + (\sum_{k=0}^{\infty} \frac {(-1)^{k-1}}{(2k)!} \theta)^{2k-2} \tilde \Omega^2\\[2mm]
-                        &=&  I_{3\times 3} + \frac{\sin{\theta}} {\theta} \tilde \Omega +  \frac{(\cos{\theta}-1)}{\theta^2}\tilde \Omega^2   
-  \end{array} 
+                        &=&  I_{3\times 3} + \frac{\sin{\theta}} {\theta} \tilde \Omega +  \frac{(\cos{\theta}-1)}{\theta^2}\tilde \Omega^2
+  \end{array}
 \end{equation}
 that is
 \begin{equation}
   \label{eq:11}
-  R =  I_{3\times 3} + \frac{\sin{\theta}} {\theta} \tilde \Omega +  \frac{(\cos{\theta}-1)}{\theta^2}\tilde \Omega^2  
+  R =  I_{3\times 3} + \frac{\sin{\theta}} {\theta} \tilde \Omega +  \frac{(\cos{\theta}-1)}{\theta^2}\tilde \Omega^2
 \end{equation}
 The formula \eqref{eq:11} is the Euler--Rodrigues formula that allows to compute the rotation matrix on closed form.
 
@@ -150,7 +150,7 @@ In the numerical practice, the choice of the rotation matrix is not convenient s
   q \coloneqq \begin{bmatrix}
     x_{\cg}\\
     p
-  \end{bmatrix},\quad 
+  \end{bmatrix},\quad
   v \coloneqq \begin{bmatrix}
      v_{\cg}\\
      \Omega
@@ -159,12 +159,12 @@ In the numerical practice, the choice of the rotation matrix is not convenient s
  The relation between $v$ and the time derivative of $q$ is
 \begin{equation}
   \label{eq:TT}
-  \dot q = 
+  \dot q =
   \begin{bmatrix}
      \dot x_{\cg}\\
      \psi(p) \dot p
    \end{bmatrix}
-   = 
+   =
    \begin{bmatrix}
      I & 0 \\
      0 & \psi(p)
@@ -180,7 +180,7 @@ with $T(q) \in \RR^{{3+n_p}\times 6}$.
 The Newton-Euler equation in compact form may be written as:
 \begin{equation}
 \label{eq:Newton-Euler-compact}
-\boxed{ \left \{ 
+\boxed{ \left \{
  \begin{aligned}
   &\dot q=T(q)v, \\
   & M \dot v = F(t, q, v)
@@ -191,7 +191,7 @@ where $M\in\RR^{6\times6}$ is the total inertia matrix
 \begin{equation}
   M:= \begin{pmatrix}
     m I_{3\times 3} & 0 \\
-    0 & I 
+    0 & I
   \end{pmatrix},
 \end{equation}
 and $F(t, q, v)\in \RR^6$ collects all the forces and torques applied to the body
@@ -218,7 +218,7 @@ The Lie group $SO(3)$ is the group of linear proper orthogonal transformations i
 \end{equation}
 with the group law given by $R_1\glaw R_2 = R_1R_2$ for $R_1,R_2\in SO(3)$. The identity element is $e = I_{3\times 3}$. At any point of $R\in SO(3)$, the tangent space $T_RSO(3)$ is the set of tangent vectors at a point $R$.
 
-\paragraph{Left representation of  the tangent space at $R$, $T_RSO(3)$ } Let $S(t)$ be a smooth curve $S(\cdot) : \RR  \rightarrow SO(3)$ in $SO(3)$. An element $a$ of the tangent space at $R$ is given by 
+\paragraph{Left representation of  the tangent space at $R$, $T_RSO(3)$ } Let $S(t)$ be a smooth curve $S(\cdot) : \RR  \rightarrow SO(3)$ in $SO(3)$. An element $a$ of the tangent space at $R$ is given by
 \begin{equation}
   \label{eq:174}
   a  = \left.\frac{d}{dt} S(t)\right|_{t=0}
@@ -264,14 +264,14 @@ The notation $\tilde \Omega$ is implied by the fact that the Lie algebra is isom
 \end{equation}
 Note that $\tilde \Omega x = \Omega \times x$.
 
-\paragraph{ A special  (right)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. } 
+\paragraph{ A special  (right)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. }
 
 Let us come back to the representation of  $T_RSO(3)$ given in~\eqref{eq:49}. It is clear it can expressed with a representation that relies on $\mathfrak{so}(3)$
 \begin{equation}
   \label{eq:58}
    T_RSO(3) = \{ a = R \tilde \Omega \in \RR^{3\times 3} \mid \tilde \Omega \in \mathfrak{so}(3) \}.
 \end{equation}
-With \eqref{eq:58}, we see that there is a linear map that relates $T_RSO(3)$ to  $\mathfrak{so}(3)$. This can be formalize by noting that the left translation map for a point $R \in SO(3)$ 
+With \eqref{eq:58}, we see that there is a linear map that relates $T_RSO(3)$ to  $\mathfrak{so}(3)$. This can be formalize by noting that the left translation map for a point $R \in SO(3)$
 \begin{equation}
   \label{eq:59}
   \begin{array}[lcl]{rcl}
@@ -311,7 +311,7 @@ In other words, a tangent vector $\tilde \Omega \in \mathfrak{so}(3)$ defines a 
 
 
 \begin{ndrva}
-  what happens at $S(0)=R$, with $ a =R \tilde \Omega =\dot S(0)$ and then $\dot y(t) = F(y(t)) = R \tilde \Omega y(t) =  R\Omega \times y(t)= \dot S(0) y(t) $. What else ? 
+  what happens at $S(0)=R$, with $ a =R \tilde \Omega =\dot S(0)$ and then $\dot y(t) = F(y(t)) = R \tilde \Omega y(t) =  R\Omega \times y(t)= \dot S(0) y(t) $. What else ?
 \end{ndrva}
 
 
@@ -366,7 +366,7 @@ We conclude that $R(t) =\Lambda(R_0,S(t)) = R_0\expm(t\tilde\Omega)$ is the solu
 We can use the closed form solution for the matrix exponential of $t \tilde\Omega  \in \mathfrak{so}(3)$ as
 \begin{equation}
   \label{eq:68}
-  \expm(t\tilde\Omega) = I_{3\times 3} + \frac{\sin{t\theta}} {\theta}  \tilde\Omega  +  \frac{(\cos{t \theta}-1)}{\theta^2} \tilde\Omega^2   
+  \expm(t\tilde\Omega) = I_{3\times 3} + \frac{\sin{t\theta}} {\theta}  \tilde\Omega  +  \frac{(\cos{t \theta}-1)}{\theta^2} \tilde\Omega^2
 \end{equation}
 with $\theta = \|\Omega\|$.
 For given  $\tilde \Omega \in\mathfrak{so}(3)$, we have
@@ -399,7 +399,7 @@ Using the isomorphism between $\mathfrak so(3)$ and $\RR^3$, it possible the def
 \end{equation}
 
 \paragraph{Differential of the exponential map $\dexpm$}
-The differential of the exponential mapping, denoted by $\dexpm$ is defined as the 'right trivialized' tangent of the exponential map 
+The differential of the exponential mapping, denoted by $\dexpm$ is defined as the 'right trivialized' tangent of the exponential map
 \begin{equation}
   \label{eq:71}
   \frac{d}{dt} (\exp(\tilde \Omega(t))) = \dexp_{\tilde\Omega(t)}(\frac{d \tilde{\Omega}(t)}{dt}) \exp(\tilde\Omega(t))
@@ -408,10 +408,10 @@ The differential of the exponential mapping, denoted by $\dexpm$ is defined as t
 
 
 % \begin{ndrva}
-%   explain briefly the notion of left-invariant vector field 
+%   explain briefly the notion of left-invariant vector field
 % \end{ndrva}
 %\href{https://en.wikipedia.org/wiki/Lie_group}{https://en.wikipedia.org/wiki/Lie_group}
-%Finally, the straight line $\alpha \tilde \Omega$ for $\Omega$ 
+%Finally, the straight line $\alpha \tilde \Omega$ for $\Omega$
 
 The differential of the exponential mapping, denoted by $\dexpm$ is defined as the 'left trivialized' tangent of the exponential map
 \begin{equation}
@@ -439,13 +439,13 @@ Hence, we get
 \begin{equation}
   \label{eq:124}
    \begin{array}{lcl}
-     \dexp_{\tilde\Omega}  &=& I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2 
+     \dexp_{\tilde\Omega}  &=& I  + \frac{(1-\cos(\theta))}{\theta^2}\tilde\Omega + \frac{(\theta-\sin(\theta))}{\theta^3}\tilde\Omega^2
   \end{array}
 \end{equation}
 Since $\dexp_{\tilde\Omega}$ is a linear mapping from $\mathfrak{so(3)}$ to $\mathfrak{so(3)}$, we will use the following notation
 \begin{equation}
   \label{eq:172}
-  \dexp_{\tilde\Omega}\tilde\Gamma  \coloneqq T(\Omega)\tilde\Gamma 
+  \dexp_{\tilde\Omega}\tilde\Gamma  \coloneqq T(\Omega)\tilde\Gamma
 \end{equation}
 with
 \begin{equation}
@@ -470,7 +470,7 @@ The image of $b$ by $f'_z$   is obtained by first identifying $a$ with an elemen
   \label{eq:184}
   f'_R(b) = \lim_{t\rightarrow 0} \frac{f(R\glaw S) - f(R)}{t}
 \end{equation}
-As we have done for the exponential mapping, it is possible to get a left trivialization of  
+As we have done for the exponential mapping, it is possible to get a left trivialization of
 \begin{equation}
   \label{eq:185}
   \dd f_R = (f\circ L_R)' = f'_R \circ L'_R
@@ -490,9 +490,9 @@ thus
 Sometimes, it can be formally written as
 \begin{equation}
   \label{eq:180}
-  \dd f_R (\tilde\Omega) = C(\tilde\Omega)\tilde\Omega 
+  \dd f_R (\tilde\Omega) = C(\tilde\Omega)\tilde\Omega
 \end{equation}
-Nevertheless, an explicit expression of $C(\cdot)$ is not necessarily trivial. 
+Nevertheless, an explicit expression of $C(\cdot)$ is not necessarily trivial.
 
 Let us consider a first simple example of a mapping $f(R) = \widetilde{R  x}$ for a given $x\in\RR^3$. The computation yields
 \begin{equation}
@@ -503,7 +503,7 @@ Let us consider a first simple example of a mapping $f(R) = \widetilde{R  x}$ fo
                            &=& \widetilde{R \left. \dexp_{\tilde\Omega}(\tilde\Omega)\exp(t \tilde\Omega) \right|_{t=0}  x} \\
                            &=& \widetilde{R \dexp_{\tilde\Omega}(\tilde\Omega) x} \\
                            &=& \widetilde{R T(\Omega) \tilde\Omega  x} \\
-                           &=& \widetilde{-R T(\Omega) \tilde x \Omega } 
+                           &=& \widetilde{-R T(\Omega) \tilde x \Omega }
   \end{array}
 \end{equation}
 In that case, it is difficult to find a expression as in \eqref{eq:180}, but considering the function $g(R)$ such that $f(R) = \widetilde g(x)$ we get
@@ -526,7 +526,7 @@ with
 In Siconos we choose to parametrize the rotation with a unit quaternion $p \in \HH$ such that $R = \Phi(p)$. This parameterization has no singularity and has only one redundant variable that is determined by imposing $\|p\|=1$.
 
 
-\paragraph{Quaternion definition.} There is many ways to define quaternions. The most convenient one is to define a quaternion as 
+\paragraph{Quaternion definition.} There is many ways to define quaternions. The most convenient one is to define a quaternion as
 a $2\times 2$ complex matrix, that is an element of $\CC^{2\times 2}$. For this end, we write for $z \in \CC$, $z=a+ib$ with $a,b \in \RR^2$ and $i^2=-1$ and its conjugate $\bar z= a-ib$. Let ${e, \bf, i, j, k}$ the following matrices in $\CC^{2\times 2}$
 \begin{equation}
   \label{eq:127}
@@ -566,7 +566,7 @@ a $2\times 2$ complex matrix, that is an element of $\CC^{2\times 2}$. For this 
       - \bar y  & \bar x
     \end{bmatrix}
   \end{equation}
-where $x = p_0 + i p_1$ and $y = p_2 + i p_3$. The matrices in $\HH$ are called quaternions. 
+where $x = p_0 + i p_1$ and $y = p_2 + i p_3$. The matrices in $\HH$ are called quaternions.
 \end{definition}
 
 
@@ -587,13 +587,13 @@ With the definition of $\HH$ as a set of complex matrices, It can be show that $
     p_0\vv{q}+q_o\vv{p} + \vv{p}\times\vv{q}
   \end{bmatrix}.
 \end{equation}
-Since the product is a matrix product, it is not communicative, but it is associative.  The identity element for the quaternion product is 
+Since the product is a matrix product, it is not communicative, but it is associative.  The identity element for the quaternion product is
 \begin{equation}
 e=  \begin{bmatrix}
     1 & 0 \\
     0 & 1  \\
   \end{bmatrix} =(1,\vv{0})\label{eq:57}.
-\end{equation}Let us note that 
+\end{equation}Let us note that
 \begin{equation}
   \label{eq:74}
   (0,\vv{p})\glaw (0,\vv(q)) = - (0,\vv{q})\glaw (0,\vv{p}).
@@ -629,7 +629,7 @@ that can be represented as
 or
 \begin{equation}
   \label{eq:77}
-  p \glaw q  = 
+  p \glaw q  =
   \begin{bmatrix}
     q_0 & -q_1 & -q_2 & -q_3 \\
     q_1 & q_0 & q_3 & -q_2 \\
@@ -662,7 +662,7 @@ The adjoint quaternion of $p$ is denoted by
 We note that
 \begin{equation}
   \label{eq:131}
-  p \glaw p^\star = 
+  p \glaw p^\star =
   \begin{bmatrix}
       x &y  \\
       - \bar y  & \bar x
@@ -682,21 +682,21 @@ The norm of a quaternion is given by $|p|^2=p^\top p = p_o^2+p_1^2+p_2^2+p_3^2$.
   \label{eq:78}
   p ^{-1} = \frac 1 {|p|^2} p^\star
 \end{equation}
-A quaternion $p$ is said to be unit if $|p| =1$. 
+A quaternion $p$ is said to be unit if $|p| =1$.
 
 \paragraph{Unit quaternion and rotation}
 For two vectors $x\in \RR^3$ and $x'\in \RR^3$, we define the quaternion $p_x = (0,x)\in \HH_p$ and  $p_{x'} = (0,x')\in \HH_p$.
 For a given unit quaternion $p$, the transformation
 \begin{equation}
   \label{eq:79}
-  p_{x'} = p \glaw p_x \glaw  p^\star 
+  p_{x'} = p \glaw p_x \glaw  p^\star
 \end{equation}
 defines a rotation $R$ such that $x'  = R x$ given by
 \begin{equation}
   \label{eq:80}
   x' = (p_0^2- p^\top \vv{p}) x +2 p_0(\vv{p}\times x) +  2 (\vv{p}^\top x) p = R x
 \end{equation}
-The rotation matrix may be computed as 
+The rotation matrix may be computed as
 \begin{equation}
   \label{eq:81}
   R = \Phi(p) =
@@ -705,7 +705,7 @@ The rotation matrix may be computed as
     2(p_1p_2+p_3p_0) & 1-2 p_1^2- 2 p_3^2 & 2(p_2p_3-p_1p_0)\\
     2(p_1p_3-p_2p_0) & 2(p_2p_3+p_1p_0)  & 1-2 p_1^2- 2 p_2^2\\
   \end{bmatrix}
-\end{equation} 
+\end{equation}
 
 
 \paragraph{Computation of the time derivative of a unit  quaternion associated with a rotation.}
@@ -719,7 +719,7 @@ and can be derived as
   \label{eq:83}
   \begin{array}{lcl}
     \dot p_{x'}(t) &=& \dot p(t) \glaw p_x \glaw p^{-1}(t) + p(t) \glaw p_x \glaw \dot p^{-1}(t) \\
-                  &=& \dot p(t) \glaw p^{-1}(t)  \glaw   p_{x'}(t)  +      p_{x'}(t) \glaw p(t)  \glaw \dot p^{-1}(t)    
+                  &=& \dot p(t) \glaw p^{-1}(t)  \glaw   p_{x'}(t)  +      p_{x'}(t) \glaw p(t)  \glaw \dot p^{-1}(t)
   \end{array}
 \end{equation}
 From $p(t) \glaw p^{-1}(t) =e$, we get
@@ -740,7 +740,7 @@ The scalar part of $\dot p(t) \glaw p^{-1}(t)$ is $(\dot p(t) \glaw p^{-1}(t))_0
   |p|=1 \implies \frac{d}{dt} (p^\top p) = 0 =  \dot p^\top p + p^\top \dot p =   2( p_o \dot p_0 + \vv{p}^T\vv{\dot p}).
 \end{equation}
 Therefore, the scalar part $(\dot p(t) \glaw p^{-1}(t))_0 =0$.
-The quaternion product $\dot p(t) \glaw p^{-1}(t)$ and  $p_{x'}(t)$ is a product of quaternions with zero scalar part (see~\eqref{eq:74}), so we have 
+The quaternion product $\dot p(t) \glaw p^{-1}(t)$ and  $p_{x'}(t)$ is a product of quaternions with zero scalar part (see~\eqref{eq:74}), so we have
 \begin{equation}
   \label{eq:87}
   \begin{array}{lcl}
@@ -755,7 +755,7 @@ In terms of vector of $\RR^3$, this corresponds to
 Since $x'(t) = R(t) x$, we have $\dot x' = \dot R(t) x = \tilde \omega(t) R(t) x  = \tilde \omega(t) x'(t) $. Comparing \eqref{eq:87} and \eqref{eq:88}, we get
 \begin{equation}
   \label{eq:89}
-  \tilde \omega(t)  = 2 \vv{ \dot p(t) \glaw p^{-1}(t) } 
+  \tilde \omega(t)  = 2 \vv{ \dot p(t) \glaw p^{-1}(t) }
 \end{equation}
 or equivalently
 \begin{equation}
@@ -799,7 +799,7 @@ The relation \eqref{eq:93} can be also inverted by writing
   \label{eq:96}
    (0, \Omega(t) ) = 2 p^{-1}(t) \glaw \dot p(t)
 \end{equation}
-Using again  matrix representation of product of  quaternion, we get 
+Using again  matrix representation of product of  quaternion, we get
 \begin{equation}
   \label{eq:97}
   \Omega(t)  = 2 \vv{p^{-1}(t) \glaw \dot p(t)}  = 2  \begin{bmatrix}
@@ -821,7 +821,7 @@ Note that we have $\Psi^\top(p)\Psi(p)= I_{4\times 4 }$ and  $\Psi(p)\Psi^\top(p
 The set of all unit quaternions that we denote $\HH_1$ is the set of unitary matrices of determinant equal to $1$. From~\eqref{eq:131}, we get that
 \begin{equation}
   \label{eq:126}
-  p \glaw p^\star = e  
+  p \glaw p^\star = e
 \end{equation}
 It implies that the set $\HH_1$ is the set of special unitary complex matrices. The set is a Lie group usually denoted as $SU(2)$. Since we used multiple representation of a quaternion, we continue to use $\HH_1 \cong SU(2)$ as a notation but with the Lie group structure implied by $SU(2)$.
 
@@ -834,7 +834,7 @@ Since $q(t)\in H_1$, we have $|q(t)|=1$ and then $\frac{d}{dt} |q(t)| = 2(q_0(0)
 This relation imposes that the quaternions $2 p^\star \glaw a \in H_1$ and $2 a \glaw p^\star \in H_1$, that is, have to be pure quaternions. Therefore, it exists $\omega \in \RR^3$  and $\Omega \in \RR^3$ such that
 \begin{equation}
   \label{eq:132}
-  (0, \Omega) = 2 p ^\star \glaw a 
+  (0, \Omega) = 2 p ^\star \glaw a
 \end{equation}
 and
 \begin{equation}
@@ -870,23 +870,23 @@ We can easily verify that for $a = (0, \frac \Omega 2 ), \, b = (0, \frac \Gamma
 As for $\mathfrak so(3)$,  the Lie algebra $\mathfrak h_1$ is isomorphic to $\RR^3$ thanks to the operator $\widehat{(\cdot)} :\RR^3 \rightarrow \mathfrak h_1$ and defined by
 \begin{equation}
   \label{eq:54}
- \widehat{(\cdot)}: \Omega \mapsto \widehat \Omega = (0, \frac \Omega 2 ) 
+ \widehat{(\cdot)}: \Omega \mapsto \widehat \Omega = (0, \frac \Omega 2 )
 \end{equation}
 With this operator, the Lie Bracket can be written
 \begin{equation}
   \label{eq:137}
-  [\widehat{\Omega},\widehat{\Gamma}] = \widehat{\Omega \times \Gamma} 
+  [\widehat{\Omega},\widehat{\Gamma}] = \widehat{\Omega \times \Gamma}
 \end{equation}
 
 
-\paragraph{ A special  (right)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. } 
+\paragraph{ A special  (right)  action of Lie Group $\mathcal G$ on a manifold $\mathcal M$. }
 Let us come back to the representation of  $T_p\HH_1$ given in~\eqref{eq:133}. It is clear it can expressed with a representation that relies on $\mathfrak h_1$
 \begin{equation}
   \label{eq:158}
    T_RSO(3) = \{ a = p \glaw  \widehat \Omega \mid \widehat \Omega \in \mathfrak h_1 \}.
 \end{equation}
-With \eqref{eq:58}, we see that there is a linear map that relates $T_p\HH_1$ to  $\mathfrak h_1$. This linear map defines a vector field. 
-A special group action is defined by the left translation map for a point $p \in \HH_1$ 
+With \eqref{eq:58}, we see that there is a linear map that relates $T_p\HH_1$ to  $\mathfrak h_1$. This linear map defines a vector field.
+A special group action is defined by the left translation map for a point $p \in \HH_1$
 \begin{equation}
   \label{eq:159}
   \begin{array}[lcl]{rcl}
@@ -967,14 +967,14 @@ In the case of $\HH_1$, the definition of the operator $\Ad$ gives
   \label{eq:56}
   \ad_{\widehat\Omega}(\widehat\Gamma) = \widehat \Omega \widehat\Gamma - \widehat \Gamma \widehat\Omega  =  [\widehat \Omega,\widehat \Gamma] = \widehat{\Omega \times \Gamma}.
 \end{equation}
-Using the isomorphism between $\mathfrak h_1$ and $\RR^3$, we can use the  the mapping $\ad_{\Omega}(\Gamma) : \RR^3\times\RR^3 \rightarrow \RR^3$ given by \eqref{eq:55} to get 
+Using the isomorphism between $\mathfrak h_1$ and $\RR^3$, we can use the  the mapping $\ad_{\Omega}(\Gamma) : \RR^3\times\RR^3 \rightarrow \RR^3$ given by \eqref{eq:55} to get
 \begin{equation}
   \label{eq:145}
    \ad_{\widehat\Omega}(\widehat\Gamma) = \widehat{\Omega \times \Gamma} = \widehat{\ad_{\Omega}(\Gamma)} =  \widehat{\tilde \Omega \Gamma}
 \end{equation}
 
 \paragraph{Differential of the exponential map $\dexpq$}
-The differential of the exponential mapping, denoted by $\dexpq$ is defined as the 'right trivialized' tangent of the exponential map 
+The differential of the exponential mapping, denoted by $\dexpq$ is defined as the 'right trivialized' tangent of the exponential map
 \begin{equation}
   \label{eq:71}
   \frac{d}{dt} (\expq(\widehat \Omega(t))) = \dexpq_{\widehat\Omega(t)}(\frac{d \widehat{\Omega}(t)}{dt}) \expq(\widehat\Omega(t))
@@ -996,7 +996,7 @@ The standard time derivative of $\expq$ in the expression \eqref{eq:144} gives
 that can be expressed in $\RR^4$ by
 \begin{equation}
   \label{eq:175}
-  \frac{d}{dt}\expq(\widehat \Gamma(t))  = \nabla \expq(\widehat\Omega) \widehat{\dot\Omega} 
+  \frac{d}{dt}\expq(\widehat \Gamma(t))  = \nabla \expq(\widehat\Omega) \widehat{\dot\Omega}
 \end{equation}
 with
 \begin{equation}
@@ -1008,7 +1008,7 @@ with
   \end{bmatrix}
 \end{equation}
 
-Clearly, we have 
+Clearly, we have
 \begin{equation}
   \label{eq:177}
   \nabla \expq(\widehat\Omega) \neq  \dexpq_{\widehat\Omega}
@@ -1021,7 +1021,7 @@ Clearly, we have
   experimental
 \end{ndrva}
 
-Let $f : \HH_1 \rightarrow \RR $ be a mapping from the group to $\RR^3$. The directional derivative of $f$ in the direction $\widehat \Omega \in \mathfrak h_1$ at $p\in \HH_1$ is 
+Let $f : \HH_1 \rightarrow \RR $ be a mapping from the group to $\RR^3$. The directional derivative of $f$ in the direction $\widehat \Omega \in \mathfrak h_1$ at $p\in \HH_1$ is
 defined by
 \begin{equation}
   \label{eq:139}
@@ -1033,7 +1033,7 @@ As a first simple example let us choose $f(p) = \vv{p \glaw p_x \glaw p^\star}$ 
   \label{eq:142}
   \begin{array}{lcl}
     D Id \cdot \widehat \Omega (p) = (\widehat \Omega^r f )(p) &=& \left. \frac{d}{dt}\vv{p\glaw \expq(t\widehat \Omega) \glaw p_x \glaw (p \glaw \expq(t\widehat \Omega))^\star}  \right|_{t=0}\\
-                                                               & = & \vv{p\glaw \frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0} \glaw p_x \glaw p^\star +  p \glaw p_x \glaw (p \glaw\frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0})^\star}\\                                              
+                                                               & = & \vv{p\glaw \frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0} \glaw p_x \glaw p^\star +  p \glaw p_x \glaw (p \glaw\frac{d}{dt}\left. \expq(t\widehat \Omega) \right|_{t=0})^\star}\\
   \end{array}
 \end{equation}
 We have form the definition of the time derivative of the exponential
@@ -1050,7 +1050,7 @@ Then, the directional derivative can be written
   \label{eq:146}
   \begin{array}{lcl}
     D Id \cdot \widehat \Omega (p) &=& \vv{p\glaw \dexpq_{\widehat\Omega}(\widehat \Omega)\glaw p_x \glaw p^\star  + p \glaw p_x \glaw (\dexpq_{\widehat\Omega}(\widehat \Omega))^* \glaw  p^\star } \\
-  &=& \vv{p\glaw ( \dexpq_{\widehat\Omega}(\widehat \Omega)\glaw p_x +   p_x \glaw (\dexpq_{\widehat\Omega}(\widehat \Omega))^*) \glaw  p^\star } 
+  &=& \vv{p\glaw ( \dexpq_{\widehat\Omega}(\widehat \Omega)\glaw p_x +   p_x \glaw (\dexpq_{\widehat\Omega}(\widehat \Omega))^*) \glaw  p^\star }
   \end{array}
 \end{equation}
 
@@ -1067,7 +1067,7 @@ Then, the directional derivative can be written
     &   -p_1 & -p_2 & -p_3 \\
     0_{4\times 3}  &  p_0 & -p_3 & p_2 \\
     & p_3 & p_0 & -p_1 \\
-    & -p_2 & p_1 & p_0 
+    & -p_2 & p_1 & p_0
   \end{bmatrix}
 \end{equation}
 
@@ -1079,7 +1079,7 @@ Then, the directional derivative can be written
 \begin{ndrva}
   todo :
   \begin{itemize}
-  \item computation of the directional derivative of $R(\Omega)= exp(\tilde \Omega)$ in the direction $\tilde\Omega$, to get $T(\Omega)$  
+  \item computation of the directional derivative of $R(\Omega)= exp(\tilde \Omega)$ in the direction $\tilde\Omega$, to get $T(\Omega)$
   \end{itemize}
 \end{ndrva}
 
@@ -1099,7 +1099,7 @@ Note that the concept of exponential map for Lie group that are not parameterize
 \label{section22}
 
 
-Let us consider that the system~(\ref{eq:Newton-Euler-compact}) is  subjected to $m$ constraints, with $m_{e}$ holonomic bilateral 
+Let us consider that the system~(\ref{eq:Newton-Euler-compact}) is  subjected to $m$ constraints, with $m_{e}$ holonomic bilateral
 constraints
 \begin{equation}
   \label{eq:bilateral-constraints}
@@ -1109,7 +1109,7 @@ and  $m_{i}$ unilateral constraints
 \begin{equation}
   \label{eq:unilateral-constraints}
   g_{\n}^\alpha(q)\geq 0, \alpha \in \mathcal{I}\subset\NN,  |\mathcal I| = m_i.
-\end{equation} 
+\end{equation}
 %
 Let us denote as $J^\alpha_h(q) = \nabla^\top_q h^\alpha(q)  $ the Jacobian matrix of the bilateral constraint $h^\alpha(q)$ with respect to $q$ and as $J^\alpha_{g_\n}(q)$ respectively for $g_{\n}^\alpha(q)$  .
 %
@@ -1121,7 +1121,7 @@ The bilateral constraints at the velocity level can be obtained as:
 By duality and introducing a Lagrange multiplier $\lambda^\alpha, \alpha \in \mathcal E$, the constraint generates a force applied to the body equal to $H^{\alpha,\top}(q)\lambda^\alpha$. For the unilateral constraints, a Lagrange multiplier $\lambda_{\n}^\alpha, \alpha \in \mathcal I$ is also associated and the constraints at the velocity level can also be derived as
 \begin{equation}
   \label{eq:unilateral-constraints-velocity}
- 0 \leq  \dot g_\n^\alpha(q)= J^\alpha_{g_\n}(q) \dot q = J^\alpha_{g_\n}(q)  T(q) v , \text{ if } g_{\n}^\alpha(q) = 0,\quad  \alpha \in \mathcal{I}. 
+ 0 \leq  \dot g_\n^\alpha(q)= J^\alpha_{g_\n}(q) \dot q = J^\alpha_{g_\n}(q)  T(q) v , \text{ if } g_{\n}^\alpha(q) = 0,\quad  \alpha \in \mathcal{I}.
 \end{equation}
 Again, the force applied to the body is given by $(J^\alpha_{g_\n}(q) T(q))^\top\lambda^\alpha_\n$. {Nevertheless, there is no reason that $\lambda^\alpha_\n =r^\alpha_\n$ and $u_\n = J^\alpha_{g_\n}(q) T(q) v$ if the $g_n$ is not chosen as the signed distance (the gap function)}. This is the reason why  we prefer  directly define the normal and the tangential local relative velocity with respect to the {twist vector} as
 \begin{equation}
@@ -1139,7 +1139,7 @@ The complete system of equation of motion can finally be written as
     \left. \begin{array}{ll}
       r^\alpha= 0 , &\text{ if } g_{\n}^\alpha(q) > 0,\\[1ex]
       {K}^{\alpha,*} \ni \widehat u^\alpha  \bot~ r^\alpha \in {K}^\alpha, &\text{ if } g_{\n}^\alpha(q) = 0, \\[1ex]
-      u_{\n}^{\alpha,+} = -e_r^\alpha u_{\n}^{\alpha,-}, &\text{ if } g_{\n}^\alpha(q) = 0 \text{ and } u_{\n}^{\alpha,-} \leq 0, 
+      u_{\n}^{\alpha,+} = -e_r^\alpha u_{\n}^{\alpha,-}, &\text{ if } g_{\n}^\alpha(q) = 0 \text{ and } u_{\n}^{\alpha,-} \leq 0,
     \end{array}\right\} & \alpha \in \mathcal I  \label{eq:NewtonEuler-uni}
 \end{array}
 \end{numcases}
@@ -1201,8 +1201,8 @@ The complete Moreau--Jean scheme based on a  $\theta$-method is written as follo
       \left. \begin{array}{l}
           \vphantom{P_{k+1}^\alpha= 0,  \delta^\alpha_{k+1}=0}\\[1ex]
         \end{array}\right\}   & \alpha \not\in \mathcal I^\nu \\[1ex]
-      % 
-      % 
+      %
+      %
       \begin{array}{l}
           {K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha \\
       \end{array} &
@@ -1239,8 +1239,8 @@ where $\mathcal I^\nu$ is the set of forecast constraints, that may be evaluated
       \left. \begin{array}{l}
           \vphantom{P_{k+1}^\alpha= 0,  \delta^\alpha_{k+1}=0}\\[1ex]
         \end{array}\right\}   & \alpha \not\in \mathcal I^\nu \\[1ex]
-      % 
-      % 
+      %
+      %
       \begin{array}{l}
           {K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha \\
       \end{array} &
@@ -1262,7 +1262,7 @@ In this version, the new velocity $v_{k+1}$ can be computed explicitly, assuming
 
 \subsection{Nearly implicit version Moreau--Jean scheme based on a  $\theta$-method implemented in siconos}
 
-A first simplification is made considering a given value of $q_{k+1}$ in $T()$, $H()$ and $G()$ denoted by $\bar q_k$. This limits the computation of the Jacobians of this operators with respect to $q$. 
+A first simplification is made considering a given value of $q_{k+1}$ in $T()$, $H()$ and $G()$ denoted by $\bar q_k$. This limits the computation of the Jacobians of this operators with respect to $q$.
 \begin{equation}
     \label{eq:Moreau--Jean-theta-nearly}
     \begin{cases}
@@ -1280,8 +1280,8 @@ A first simplification is made considering a given value of $q_{k+1}$ in $T()$, 
       \left. \begin{array}{l}
           \vphantom{P_{k+1}^\alpha= 0,  \delta^\alpha_{k+1}=0}\\[1ex]
         \end{array}\right\}   & \alpha \not\in \mathcal I^\nu \\[1ex]
-      % 
-      % 
+      %
+      %
       \begin{array}{l}
           {K}^{\alpha,*} \ni \widehat u_{k+1}^\alpha~ \bot~ P_{k+1}^\alpha \in {K}^\alpha \\
       \end{array} &
@@ -1366,7 +1366,7 @@ and for the equality constraints
   \label{eq:110}
   u^{\tau+1}_{k+1} = H(\bar q_k) [  v_{free}^{\tau} + W   H^\top(\bar q_k) Q^{\tau+1}_{k+1} + W G^\top(\bar q_k) P^{\tau+1}_{k+1}]
 \end{equation}
-Finally, we get a linear relation between $u^{\tau+1}_{\n,k+1}$ and the multiplier 
+Finally, we get a linear relation between $u^{\tau+1}_{\n,k+1}$ and the multiplier
 \begin{equation}
   \label{eq:111}
  \boxed{ u^{\tau+1}_{k+1} =
@@ -1399,7 +1399,7 @@ Finally, we get a linear relation between $u^{\tau+1}_{\n,k+1}$ and the multipli
 \begin{ndrva}
 
   todo list:
-  
+
   \begin{itemize}
 
 
@@ -1407,7 +1407,7 @@ Finally, we get a linear relation between $u^{\tau+1}_{\n,k+1}$ and the multipli
 
   \item describe the computation of H and G that can be hybrid
 
-    
+
 \end{itemize}
 
 \end{ndrva}
@@ -1455,7 +1455,7 @@ If the external moment denoted by $m_{ext} (t)$ is expressed in inertial frame, 
 In that case, $  M_{ext}(q,t)$ appears as a function $q$ and we need to compute its Jacobian w.r.t $q$. This computation needs the computation of
 \begin{equation}
   \label{eq:116}
-  \nabla_{p} M_{ext}(q,t) = \nabla_{p} \Phi(p) m_{ext}(t) 
+  \nabla_{p} M_{ext}(q,t) = \nabla_{p} \Phi(p) m_{ext}(t)
 \end{equation}
 Let us compute first
 \begin{equation}
@@ -1494,14 +1494,14 @@ The expression:~$\mathcal R(v^\tau_{k+1}) =\mathcal R_{free}(v^\tau_{k+1}) - h (
 \end{ndrva}
 
 
-The expression:~$v_{free}  = v^{\tau}_{k+1} - W  \mathcal R_{free}(v^\tau_{k+1})$ is compute in {\tt MoreauJeanOSI::computeFreeState()} and saved in {\tt d->workspace(DynamicalSystem::free)}. 
+The expression:~$v_{free}  = v^{\tau}_{k+1} - W  \mathcal R_{free}(v^\tau_{k+1})$ is compute in {\tt MoreauJeanOSI::computeFreeState()} and saved in {\tt d->workspace(DynamicalSystem::free)}.
 
 
 
 The computation:~ $v^{\tau+1}_{k+1} = v_{free} + W   H^\top(\bar q_k) Q^{\tau+1}_{k+1} + W G^\top(\bar q_k) P^{\tau+1}_{k+1}$ is done in {\tt MoreauJeanOSI::updateState} and stored in {\tt d->twist()}.\\
 
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "DevNotes"
-%%% End: 
+%%% End:

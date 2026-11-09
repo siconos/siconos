@@ -1,6 +1,6 @@
 .. index::
    single: Variational Inequality (VI)
-   
+
 .. contents::
 
 .. _vi_problem:
@@ -62,7 +62,7 @@ parameters:
 * iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
 * iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY] (set but not used)
 * iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO
-  
+
   allowed values :
 
   * SICONOS_VI_LS_ARMIJO : Armijo rule with Khotbotov ratio (default)
@@ -97,45 +97,45 @@ driver: :cpp:func:`variationalInequality_HyperplaneProjection()`
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 20000
-  
+
 * iparam[SICONOS_VI_IPARAM_LS_MAX_ITER] = 100
-  
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-3
-  
+
 * dparam[SICONOS_VI_DPARAM_LS_TAU] = 1.0, tau
-  
+
 * dparam[SICONOS_VI_DPARAM_SIGMA] = 0.8, sigma
-  
+
 out :
-  
+
 * iparam[SICONOS_IPARAM_ITER_DONE] : number of iterations
-    
+
 
 SICONOS_VI_BOX_QI (:cpp:enumerator:`SICONOS_VI_BOX_QI`)
 --------------------------------------------------------
 
 Solver using the merit function proposed by Qi for box-constrained Newton QI LSA
 
-id: 
+id:
 
 driver : :cpp:func:`variationalInequality_box_newton_QiLSA()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
-* iparam[SICONOS_IPARAM_PREALLOC] = 0  
+* iparam[SICONOS_IPARAM_PREALLOC] = 0
 * iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
-  
+
 * iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0
-  
+
 * iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0 (set but not used)
-  
+
 * iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1
 
-* dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16 
-  
+* dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
-  
+
 SICONOS_VI_BOX_AVI_LSA (:cpp:enumerator:`SICONOS_VI_BOX_AVI_LSA`)
 ------------------------------------------------------------------
 
@@ -146,12 +146,12 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] = 100
 * iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1
 * iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0
-  
+
 * iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0 (set but not used)
 * iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
-* dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16 
-  
+* dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16
+
 internal solver : :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`
 
 SICONOS_VI_BOX_PATH (:cpp:enumerator:`SICONOS_VI_BOX_PATH`)
@@ -162,6 +162,5 @@ driver : :cpp:func:`vi_box_path()`
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000
-  
-* dparam[SICONOS_DPARAM_TOL] = 1e-12
 
+* dparam[SICONOS_DPARAM_TOL] = 1e-12

@@ -76,6 +76,10 @@ with MechanicsHdf5Runner(config=runner_config) as io:
 options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-2
+# legacy FC2D error measure: the default became Euclidean scaling upstream
+options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
+    sn.params.SICONOS_FRICTION_2D_SCALING_NO
+)
 options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 ok = True
@@ -161,8 +165,10 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
             ok = False
 
 if ok:
-    print("OK: strain/stress tensors match analytical affine-field values "
-          "for all elements")
+    print(
+        "OK: strain/stress tensors match analytical affine-field values "
+        "for all elements"
+    )
     sys.exit(0)
 else:
     sys.exit(1)

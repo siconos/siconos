@@ -21,6 +21,7 @@
                     //
 #include <math.h>   // for sqrt
 #include <stdio.h>  // for printf
+
 #include "numerics_errors.h"
 
 unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
@@ -117,7 +118,7 @@ unsigned int projectionOn2DRollingCone(double* r, double mu, double mur) {
 unsigned projectionOnDualRollingCone(double* u, double mu, double mur) { return 0; }
 
 void display_status_rolling_cone(unsigned int status) {
-  //printf("status = %u\n", status);
+  // printf("status = %u\n", status);
   if (status == PROJRCONE_INSIDE) {
     printf("PROJRCONE_INSIDE reaction was inside the cone\n");
   } else if (status == PROJRCONE_DUAL) {
@@ -144,17 +145,15 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
   } else {
     double mu2 = mu * mu;
     double mur2 = mur * mur;
-    //zero5x5(H);
+    // zero5x5(H);
     SET5X5(H);
     double a_1 = mu * normT + mur * normMT + r[0];
     double oneoveroneplusmu2 = 1. / (1. + mu2 + mur2);
-    double trial_rn =a_1 * oneoveroneplusmu2;
+    double trial_rn = a_1 * oneoveroneplusmu2;
     if ((normT > mu * trial_rn) && (normMT > mur * trial_rn)) {
-
       *H00 = 1. * oneoveroneplusmu2;
       double s1 = r[1] / normT;
       double s2 = r[2] / normT;
-
 
       double muoveroneplusmu2 = mu * oneoveroneplusmu2;
       *H01 = muoveroneplusmu2 * s1;
@@ -166,10 +165,10 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H03 = muroveroneplusmu2 * s3;
       *H04 = muroveroneplusmu2 * s4;
 
-      *H10 = *H01 ;
-      *H20 = *H02 ;
-      *H30=  *H03 ;
-      *H40 = *H04 ;
+      *H10 = *H01;
+      *H20 = *H02;
+      *H30 = *H03;
+      *H40 = *H04;
 
       double muoveroneplusmu2overnormT = muoveroneplusmu2 / normT;
 
@@ -205,12 +204,10 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
 
     trial_rn = b_1 * oneoveroneplusmu2;
     if ((normT > mu * trial_rn) && (normMT <= mur * trial_rn)) {
-
       *H00 = 1. * oneoveroneplusmu2;
 
       double s1 = r[1] / normT;
       double s2 = r[2] / normT;
-
 
       double muoveroneplusmu2 = mu * oneoveroneplusmu2;
       *H10 = muoveroneplusmu2 * s1;
@@ -237,8 +234,6 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
     trial_rn = c_1 * oneoveroneplusmur2;
 
     if ((normT <= mu * trial_rn) && (normMT > mur * trial_rn)) {
-
-
       *H00 = 1. * oneoveroneplusmur2;
 
       double s3 = r[3] / normMT;

@@ -46,7 +46,7 @@ class ActuatorEvent : public siconos::simulation::Event {
   /** constructor with time value as a parameter
    *  \param time the time of the Event
    */
-  ActuatorEvent(double time) : Event(time, EventType::Actuator, true){};
+  ActuatorEvent(double time) : Event(time, EventType::Actuator, true) {};
 
   /** destructor
    */
@@ -66,13 +66,12 @@ class ActuatorEvent : public siconos::simulation::Event {
    *  \param sim ignored argument.
    */
   void process(siconos::simulation::Simulation& sim);
-
 };
 }  // namespace siconos::control
 
-namespace siconos::simulation{
-    // Register the event into the factory
-  static EventRegistration<siconos::control::ActuatorEvent> reg_AC(EventType::Actuator);
+namespace siconos::simulation {
+// Register the event into the factory
+static EventRegistration<siconos::control::ActuatorEvent> reg_AC(EventType::Actuator);
 
-}
+}  // namespace siconos::simulation
 #endif  // ActuatorEvent_H

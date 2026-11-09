@@ -13,20 +13,20 @@ As usual, a complete description of the interface (members and methods) of these
 
 Note that :cpp:class:`DynamicalSystem` is an abstract class, and no object of this type can be implemented. It just provides a generic interface for all systems.
 
-  
+
 Overview
 --------
 
 The most general way to write dynamical systems in Siconos is
 
 .. math::
-   
+
   g(\dot x, x, t, z) = 0
 
 n-dimensional set of equations where
 
 * t is the time
-* :math:`x \in R^{n}` is the state. 
+* :math:`x \in R^{n}` is the state.
 * :math:`\dot x` the derivative of the state according to time
 * :math:`z \in R^{s}` is a vector of arbitrary algebraic variables, some sort of discrete state.
   For example, z may be used to set some perturbation parameters, or anything else.
@@ -68,22 +68,22 @@ First case::
 
   // we suppose that ds is an existing pointer to a LagrangianDS
   auto myF = std::make_shared<siconos::algebra::SimpleVector>(3);
-  // fill my G in ...		
+  // fill my G in ...
   ds->setFInt(*myF); // copy myF values into fInt
   // OR
   // link fInt to myF: any change in one of them will impact on the other.
-  ds->setFIntPtr(myF); 
-  
+  ds->setFIntPtr(myF);
+
 Second case::
 
   // we suppose that ds is an existing pointer to a LagrangianDS
   // and that myFunction is a c function implemented in myPlugin.cpp
   ds->setComputeFInt("myPlugin", "myFunction");
   // ...
-  ds->computeFint(qdot, q, time); 
+  ds->computeFint(qdot, q, time);
   // compute fInt value at time for the current state
 
-Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
+Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in kernel/src/plugin/DefaultPlugin.cpp for the corresponding function.
 
 
 Common interface
@@ -96,7 +96,7 @@ The following functions are (and must) be present in any class derived from Dyna
 * :cpp:func:`DynamicalSystem::icomputeRhs()`
 
 * :cpp:func:`DynamicalSystem::computeJacobianRhsOver_x()`
-  
+
 * :cpp:func:`DynamicalSystem::initializeNonSmoothInput()`
 
 * :cpp:func:`DynamicalSystem::swapInMemory()`
@@ -106,7 +106,7 @@ The following functions are (and must) be present in any class derived from Dyna
 * :cpp:func:`DynamicalSystem::resetAllNonSmoothParts()`
 
 * :cpp:func:`DynamicalSystem::resetNonSmoothPart()`
-  
+
 
 
 First order dynamical systems
@@ -122,7 +122,7 @@ They are described by the following set:
 .. math::
 
    M\dot x(t) &= f(t,x,z) + r \\
-   x(t_0)&=x_0 
+   x(t_0)&=x_0
 
 with:
 
@@ -130,11 +130,11 @@ with:
 * f(x,t): the vector field - :math:`f: \mathbb{R}^{n} \times \mathbb{R} \to \mathbb{R}^n`
 * r: input due to non-smooth behavior - Vector of size n.
 
-* JacobianXF = :math:`\nabla_x f(t,x,z)`, a nX n square matrix, is also a member of the class. 
+* JacobianXF = :math:`\nabla_x f(t,x,z)`, a nX n square matrix, is also a member of the class.
 
-* M is supposed to be invertible (if not, we can not compute x[1]=rhs ...).  
+* M is supposed to be invertible (if not, we can not compute x[1]=rhs ...).
 
-* initial conditions are given by the member x0, vector of size n. This corresponds to x value when simulation is starting, 
+* initial conditions are given by the member x0, vector of size n. This corresponds to x value when simulation is starting,
   \e ie after a call to simulation initialize() function. \n
 
 * There are plug-in functions in this class for f and its Jacobian, jacobianfx.
@@ -155,27 +155,27 @@ Linear
 
 :cpp:class:`FirstOrderLinearDS`
 
-Described by the set of n equations and initial conditions: 
+Described by the set of n equations and initial conditions:
 
 .. math::
 
    \dot x(t) &= A(t,z)x(t)+ b(t,z)+r \\
-   x(t_0)&=x_0 	
+   x(t_0)&=x_0
 
 With:
 
 * A(t,z): nXn matrix, state independent but possibly time-dependent.
 * b(t,z): Vector of size n, possibly time-dependent.
-  A and B have corresponding plug-in functions. 
+  A and B have corresponding plug-in functions.
   Other variables are those of :cpp:class:`DynamicalSystem` and FirstOrderNonLinearDS classes, but some of them are not defined and thus not usable: \n
-  
+
 * g and its gradients
 * f and its gradient
 
 And we have:
 
 .. math::
-   
+
    rhs &= M^{-1}(A(t,z)x(t)+b(t,z)) \\
    \nabla_x rhs&= M^{-1}(A(t,z)
 
@@ -190,10 +190,10 @@ Non linear
 Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions:
 
 .. math::
-   
+
    Mass(q,z) \ddot q &= f_L(t,\dot q , q , z) + p \\
    q(t_0) &= q0 \\
-   \dot q(t_0) &= velocity0 
+   \dot q(t_0) &= velocity0
 
 with:
 
@@ -208,7 +208,7 @@ with:
 
 Note that the decomposition of :math:`f_L` is just there to propose a more "comfortable" interface for user but does not interfer with simulation process.
 
-Some gradients are also required: 
+Some gradients are also required:
 
 * jacobianFInt[0] = :math:`\nabla_q F_{Int}(t,q,\dot q,z)` - nDofX nDof matrix.
 * jacobianFInt[1] = :math:`\nabla_{\dot q} F_{Int}(t,q,\dot q,z)` - nDof X nDof matrix.
@@ -217,7 +217,7 @@ Some gradients are also required:
 
 We consider that the Mass matrix is invertible and that its gradient is null.
 
-There are plug-in functions in this class for :math:`F_{int}, F_{Ext}, M, fGyr` and the four Jacobian matrices. 
+There are plug-in functions in this class for :math:`F_{int}, F_{Ext}, M, fGyr` and the four Jacobian matrices.
 
 Other variables are those of :cpp:class:`DynamicalSystem` class, but some of them are not defined and thus not usable: \n
 * g and its gradients
@@ -229,15 +229,15 @@ And we have:
 .. math::
 
    rhs = \left[
-   \begin{array}{c} 
+   \begin{array}{c}
    \dot q \\
    Mass^{-1}(f_L(t,\dot q , q , z)+p)
    \end{array}\right]
 
    \nabla_x rhs = \left[
-   \begin{array}{cc} 
+   \begin{array}{cc}
    0 & I \\
-   Mass^{-1}\nabla_{q}f_L(t,\dot q , q , z) & Mass^{-1}\nabla_{\dot q}f_L(t,\dot q , q , z) 
+   Mass^{-1}\nabla_{q}f_L(t,\dot q , q , z) & Mass^{-1}\nabla_{\dot q}f_L(t,\dot q , q , z)
    \end{array}\right]
 
 I: identity matrix.
@@ -253,8 +253,8 @@ class LagrangianLinearTIDS, derived from LagrangianDS.
 
 With:
 
-* C: constant viscosity nDof X nDof matrix 
-* K: constant rigidity nDof X nDof matrix 
+* C: constant viscosity nDof X nDof matrix
+* K: constant rigidity nDof X nDof matrix
 
 Other variables are those of :cpp:class:`DynamicalSystem` and LagrangianDS classes, but some of them are not defined and thus not usable: \n
 * g and its gradients
@@ -265,13 +265,13 @@ And we have:
 .. math::
 
    rhs = \left[
-   \begin{array}{c} 
+   \begin{array}{c}
    \dot q \\
    Mass^{-1}(F_{ext}(t,z)- Kq - C\dot q+p)
    \end{array}\right]
 
    \nabla_x rhs = \left[
-   \begin{array}{cc} 
+   \begin{array}{cc}
    0 & I \\
    -Mass^{-1}K & -Mass^{-1}C
    \end{array}\right]

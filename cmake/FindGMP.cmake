@@ -22,7 +22,7 @@ FindGMP
 Find gmp libraries and headers
 
 Usage :
- 
+
 find_package(GMP REQUIRED)
 target_link_libraries(yourlib PRIVATE GMP::GMP)
 
@@ -45,7 +45,7 @@ find_path(GMP_INCLUDE_DIR NAMES gmp.h
   PATH_SUFFIXES include
   ${_GMP_INC_SEARCH_OPTS}
   )
-  
+
 if(NOT GMP_LIBRARIES)
 if(WIN32)
     set(GMPLIB mpir)
@@ -55,7 +55,7 @@ endif()
   find_library(GMP_LIBRARIES NAMES ${GMPLIB}
     ${_GMP_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
-  
+
 endif()
 
 # -- Library setup --
@@ -63,7 +63,7 @@ find_package_handle_standard_args(GMP
   REQUIRED_VARS GMP_LIBRARIES GMP_INCLUDE_DIR)
 
 if(GMP_FOUND)
-  
+
   if(NOT TARGET GMP::GMP)
     add_library(GMP::GMP IMPORTED INTERFACE)
     set_property(TARGET GMP::GMP PROPERTY INTERFACE_LINK_LIBRARIES ${GMP_LIBRARIES})
@@ -78,4 +78,3 @@ if(GMP_FOUND)
     # endif()
   endif()
 endif()
-

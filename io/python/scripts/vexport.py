@@ -21,10 +21,9 @@ Description: Export a Siconos mechanics-IO HDF5 file in VTK format.
 """
 
 # Lighter imports before command line parsing
-from __future__ import print_function
-import sys
-import os
 import getopt
+import os
+import sys
 
 #
 # a replacement for vview --vtk-export
@@ -35,9 +34,7 @@ def usage(long=False):
     print(__doc__)
     print()
     print(
-        "Usage:  {0} [--help] [--version] [--ascii] <HDF5>".format(
-            os.path.split(sys.argv[0])[1]
-        )
+        f"Usage:  {os.path.split(sys.argv[0])[1]} [--help] [--version] [--ascii] <HDF5>"
     )
     if long:
         print()
@@ -53,19 +50,19 @@ def usage(long=False):
 try:
     opts, args = getopt.gnu_getopt(sys.argv[1:], "", ["help", "version", "ascii"])
 except getopt.GetoptError as err:
-    sys.stderr.write("{0}\n".format(str(err)))
+    sys.stderr.write(f"{err!s}\n")
     usage()
-    exit(2)
+    sys.exit(2)
 
 ascii_mode = False
 
 for o, a in opts:
     if o == "--help":
         usage(long=True)
-        exit(0)
+        sys.exit(0)
     if o == "--version":
-        print("{0} @SICONOS_VERSION@".format(os.path.split(sys.argv[0])[1]))
-        exit(0)
+        print(f"{os.path.split(sys.argv[0])[1]} @SICONOS_VERSION@")
+        sys.exit(0)
     if o in ("--ascii"):
         ascii_mode = True
 
@@ -81,31 +78,28 @@ if len(args) > 0:
 
 else:
     usage()
-    exit(1)
+    sys.exit(1)
 
 # Heavier imports after command line parsing
-import vtk
-from vtk.util import numpy_support
-from math import atan2, pi
 import bisect
-from numpy.linalg import norm
+from math import pi
+
 import numpy
-import random
+import vtk
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from vtk.util import numpy_support
 
 # attach velocity
 # contact points and associated forces are embedded in on a PolyData source
 
 
 class UnstructuredGridSource(vtk.vtkProgrammableSource):
-
     def GetOutputPort(self):
         # 3: UnstructuredGridOutput for vtkProgrammableSource
         return vtk.vtkProgrammableSource.GetOutputPort(self, 3)
 
 
 class ConvexSource(UnstructuredGridSource):
-
     def __init__(self, convex, points):
         self._convex = convex
         self._points = points
@@ -130,11 +124,11 @@ def add_compatiblity_methods(obj):
         obj.AddInputData = obj.AddInput
 
 
-transforms = dict()
-transformers = dict()
-data_connectors_v = dict()
-data_connectors_t = dict()
-data_connectors_d = dict()
+transforms = {}
+transformers = {}
+data_connectors_v = {}
+data_connectors_t = {}
+data_connectors_d = {}
 
 big_data_source = vtk.vtkMultiBlockDataGroupFilter()
 add_compatiblity_methods(big_data_source)
@@ -142,14 +136,13 @@ add_compatiblity_methods(big_data_source)
 big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
 add_compatiblity_methods(big_data_writer)
 
-contactors = dict()
-offsets = dict()
+contactors = {}
+offsets = {}
 
 vtkmath = vtk.vtkMath()
 
 
 class Quaternion:
-
     def __init__(self, *args):
         self._data = vtk.vtkQuaternion[float](*args)
 
@@ -183,7 +176,6 @@ def set_position(instance, q0, q1, q2, q3, q4, q5, q6):
     q = Quaternion((q3, q4, q5, q6))
 
     for transform, offset in zip(transforms[instance], offsets[instance]):
-
         p = q.rotate(offset[0])
 
         r = q * Quaternion(offset[1])
@@ -237,11 +229,11 @@ def build_set_displacement(dico):
 
 def step_reader(step_string):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.STEPControl import STEPControl_Reader
     from OCC.BRep import BRep_Builder
+    from OCC.IFSelect import IFSelect_ItemsByEntity, IFSelect_RetDone
+    from OCC.STEPControl import STEPControl_Reader
+    from OCC.StlAPI import StlAPI_Writer
     from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
     builder = BRep_Builder()
     comp = TopoDS_Compound()
@@ -260,10 +252,9 @@ def step_reader(step_string):
             step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
             step_reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
 
-            ok = step_reader.TransferRoot(1)
+            step_reader.TransferRoot(1)
             nbs = step_reader.NbShapes()
 
-            l = []
             for i in range(1, nbs + 1):
                 shape = step_reader.Shape(i)
 
@@ -282,9 +273,8 @@ def step_reader(step_string):
 
 def brep_reader(brep_string, indx):
 
-    from OCC.StlAPI import StlAPI_Writer
-
     from OCC.BRepTools import BRepTools_ShapeSet
+    from OCC.StlAPI import StlAPI_Writer
 
     shape_set = BRepTools_ShapeSet()
     shape_set.ReadFromString(brep_string)
@@ -307,10 +297,10 @@ def brep_reader(brep_string, indx):
 
 refs = []
 refs_attrs = []
-shape = dict()
+shape = {}
 
-pos = dict()
-instances = dict()
+pos = {}
+instances = {}
 
 with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
 
@@ -328,7 +318,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
     spos_data, dpos_data, velo_data, cf_data, solv_data = load()
 
     class DataConnector:
-
         def __init__(self, instance, data_name="velocity", data_size=6):
 
             self._instance = instance
@@ -357,7 +346,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
 
     # contact forces provider
     class ContactInfoSource:
-
         def __init__(self, data):
             self._data = None
 
@@ -429,19 +417,18 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
     #  Step 2
     #
     #
-    readers = dict()
+    readers = {}
     vtk_reader = {"vtp": vtk.vtkXMLPolyDataReader, "stl": vtk.vtkSTLReader}
 
     for shape_name in io.shapes():
-
         shape_type = io.shapes()[shape_name].attrs["type"]
 
         if shape_type in ["vtp", "stl"]:
             with io.tmpfile() as tmpf:
-                tmpf[0].write(str(io.shapes()[shape_name][:][0]))
-                tmpf[0].flush()
+                tmpf.fid.write(str(io.shapes()[shape_name][:][0]))
+                tmpf.fid.flush()
                 reader = vtk_reader[shape_type]()
-                reader.SetFileName(tmpf[1])
+                reader.SetFileName(tmpf.name)
                 reader.Update()
                 readers[shape_name] = reader
 
@@ -546,7 +533,6 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
             readers[shape_name] = source
 
     for instance_name in io.instances():
-
         instance = int(io.instances()[instance_name].attrs["id"])
         contactors[instance] = []
         transforms[instance] = []
@@ -707,11 +693,7 @@ with MechanicsHdf5(io_filename=io_filename, mode="r") as io:
         # ) # should be w.r.t initial position
 
         big_data_writer.SetFileName(
-            "{0}-{1}.{2}".format(
-                os.path.splitext(os.path.basename(io_filename))[0],
-                index,
-                big_data_writer.GetDefaultFileExtension(),
-            )
+            f"{os.path.splitext(os.path.basename(io_filename))[0]}-{index}.{big_data_writer.GetDefaultFileExtension()}"
         )
         big_data_writer.SetTimeStep(times[index])
         big_data_source.Update()

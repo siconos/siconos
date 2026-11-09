@@ -7,7 +7,7 @@ Sub-directories are named according to the standard image used as a base to prep
 
 
 
-For instance, to create a new image, named sico-bulls, based on Debian bookworm version, run 
+For instance, to create a new image, named sico-bulls, based on Debian bookworm version, run
 
 
 ```

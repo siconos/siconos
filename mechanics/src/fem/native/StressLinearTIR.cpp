@@ -39,8 +39,6 @@ siconos::mechanics::fem::StressLinearTIR::StressLinearTIR(
   _subType = siconos::modeling::RelationSubType::StressLinearTIR;
 }
 
-
-
 void siconos::mechanics::fem::StressLinearTIR::checkSize(
     const siconos::modeling::Interaction& inter) const {
   auto sizeY = inter.dimension();

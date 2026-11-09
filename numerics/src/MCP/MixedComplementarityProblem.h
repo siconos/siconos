@@ -28,9 +28,9 @@
     TODO : set properly the list of arguments for this function, when
     things will be clearer ...
  */
-typedef void (*ptrFunctionMCP)(int size, double *z, double *F);
-typedef void (*ptrFunctionMCP2)(void *env, int n, double *z, double *F);
-typedef void (*ptrFunctionMCP_nabla)(void *env, int n, double *z, NumericsMatrix *F);
+typedef void (*ptrFunctionMCP)(int size, double* z, double* F);
+typedef void (*ptrFunctionMCP2)(void* env, int n, double* z, double* F);
+typedef void (*ptrFunctionMCP_nabla)(void* env, int n, double* z, NumericsMatrix* F);
 
 /**
     Structure that contains and defines a MixedComplementarityProblem
@@ -42,8 +42,8 @@ struct MixedComplementarityProblem {
                                               \f$ F_{mcp}(z) = (G(z), H(z)) \f$ */
   ptrFunctionMCP_nabla compute_nabla_Fmcp; /**< pointer to the function used to
                                               compute \f$ \nabla_z F_{mcp} \f$ */
-  NumericsMatrix *nabla_Fmcp;              /**< storage for \f$ \nabla_z F_{mcp} \f$*/
-  void *env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp
+  NumericsMatrix* nabla_Fmcp;              /**< storage for \f$ \nabla_z F_{mcp} \f$*/
+  void* env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp
                function. When called from Python, it contains an object with
                compute_Fmcp and compute_nabla_Fmcp as methods.
                When called from C, it can reference a data struct containing
@@ -79,9 +79,9 @@ struct MixedComplementarityProblem_old {
   ptrFunctionMCP computeNablaFmcp; /** pointer to the function to compute the
                                       jacobian of F(z) */
   /** The value F(z) */
-  double *Fmcp;
+  double* Fmcp;
   /** jacobian of F(z) */
-  double *nablaFmcp;
+  double* nablaFmcp;
 };
 
 #if defined(__cplusplus)
@@ -92,17 +92,17 @@ extern "C" {
  *
  *  \param mcp structure to free
  */
-void mixedComplementarityProblem_free(MixedComplementarityProblem *mcp);
+void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp);
 
 /** \return an empty MixedComplementarityProblem instance
  */
-MixedComplementarityProblem *mixedComplementarityProblem_new(void);
+MixedComplementarityProblem* mixedComplementarityProblem_new(void);
 
 /** Delete a MixedComplementarityProblem_old
  *
  *  \param problem pointer to a MixedComplementarityProblem_old to delete
  */
-void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old *problem);
+void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem);
 
 #if defined(__cplusplus)
 }

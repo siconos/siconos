@@ -34,7 +34,3 @@ About nix :
 
 * https://nixos.org/nixos/manual/
 * http://nix-cookbook.readthedocs.io/en/latest/nix-pills.html
-
-
-
-

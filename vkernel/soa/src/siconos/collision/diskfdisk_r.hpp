@@ -2,6 +2,7 @@
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/collision/translated.hpp"
 // #include "siconos/model/model.hpp"
 
@@ -10,7 +11,6 @@ namespace siconos::collision {
 // disk fixed disk
 
 struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
-
   struct attributes {
     some::item_ref<collision::translated<shape::disk>> translated_disk_shape;
   };
@@ -19,32 +19,24 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) translated_disk_shape()
-    {
-      return make_ref_handle(self()->data(),
-                             attr<"translated_disk_shape">(*self()));
+    decltype(auto) translated_disk_shape() {
+      return make_ref_handle(self()->data(), attr<"translated_disk_shape">(*self()));
     };
 
     decltype(auto) shape() { return self()->translated_disk_shape(); }
 
-    decltype(auto) compute_h(auto step, auto& ds)
-    {
-      auto& data = self()->data();
+    [[gnu::always_inline]] decltype(auto) compute_h(auto step, auto& ds) {
       auto& q = storage::attr<"q">(ds, step);
       return collision::distance(q, translated_disk_shape().translation()) -
-             make_handle(data, prop<"shape">(ds)).radius() -
-             translated_disk_shape().translated().radius();
+             collision::disk_radius(ds) - translated_disk_shape().translated().radius();
     }
 
-    void compute_jachq(auto step, auto& ds, auto& h_matrix1)
-    {
-      auto& data = self()->data();
+    [[gnu::always_inline]] void compute_jachq(auto step, auto& ds, auto& h_matrix1) {
       using scalar = typename decltype(self()->env())::scalar;
 
       const auto& q1 = storage::attr<"q">(ds, step);
       const auto& q2 = translated_disk_shape().translation();
-      const scalar& r1 =
-          storage::make_handle(data, storage::prop<"shape">(ds)).radius();
+      const scalar r1 = collision::disk_radius(ds);
 
       //      const scalar& r2 =
       //        translated_disk_shape().item().radius();

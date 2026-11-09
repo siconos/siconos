@@ -64,12 +64,7 @@ PIVOT_0, involves one ds.
 PIVOT_1, involves two ds.
 PRISMATIC, not used, the connection to siconos is not done.
 */
-enum class JointsType {
-  Pivot0 = 0,
-  Pivot1 = 1,
-  Prismatic0 = 2,
-  Prismatic1 = 3
-};
+enum class JointsType { Pivot0 = 0, Pivot1 = 1, Prismatic0 = 2, Prismatic1 = 3 };
 
 // /** Artefact constants.
 
@@ -101,13 +96,12 @@ inline constexpr bool FaceNormal1{true};
 namespace mbtb::data {
 
 //! The dynamical bodies.
-inline std::shared_ptr<siconos::mechanisms::MBTB_Body>
-    sDS[MBTB_MAX_BODIES_NUMBER];
+inline std::shared_ptr<siconos::mechanisms::MBTB_Body> sDS[MBTB_MAX_BODIES_NUMBER];
 //! The joint relations.
 inline MBTB_JointR* sJointRelations[MBTB_MAX_JOINTS_NUMBER];
 //! The contacts.
-inline std::vector<std::shared_ptr<siconos::mechanisms::MBTB_Contact>>
-    sContacts(MBTB_MAX_CONTACTS_NUMBER);
+inline std::vector<std::shared_ptr<siconos::mechanisms::MBTB_Contact>> sContacts(
+    MBTB_MAX_CONTACTS_NUMBER);
 //! The number of bodies.
 inline unsigned int sNbOfBodies{0};
 //! The number of joints.
@@ -121,8 +115,7 @@ inline unsigned int sFreqGraphic{100};
 //! The output frequency.
 inline unsigned int sFreqOutput{100};
 //! The siconos joint interactions.
-inline std::shared_ptr<siconos::modeling::Interaction>
-    sInterJoints[MBTB_MAX_JOINTS_NUMBER];
+inline std::shared_ptr<siconos::modeling::Interaction> sInterJoints[MBTB_MAX_JOINTS_NUMBER];
 //! The siconos contact interactions.
 inline std::shared_ptr<siconos::modeling::Interaction>
     sInterContacts[MBTB_MAX_CONTACTS_NUMBER];

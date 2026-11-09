@@ -1091,7 +1091,6 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
                     printf("pts[r*3+0] = %8.4e, pts[r*3+1] =%8.4e, pts[r*3+2] =%8.4e\n",
                            pts[r * 3 + 0], pts[r * 3 + 1], pts[r * 3 + 2]););
 
-
   auto btch = std::make_shared<btConvexHullShape>(
       &pts[0], rows,
       sizeof(btScalar) * 3);  // Warning: Possible loss of memory

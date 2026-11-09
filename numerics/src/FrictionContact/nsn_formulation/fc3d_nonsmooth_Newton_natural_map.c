@@ -103,7 +103,7 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(FrictionContactProblem* probl
   }
 }
 
-void fc3d_nsn_nm_set_default(SolverOptions* options) {
+void fc3d_nonsmooth_newton_jean_moreau_set_default(SolverOptions* options) {
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
@@ -130,16 +130,17 @@ typedef struct {
   NaturalMapFun3x3Ptr computeACFun3x3;
 } NaturalMapParams;
 
-void nonsmoothEqnNaturalMapFun(void* arg, unsigned int problemSize, double* reaction,
-                               double* velocity, double* mu, double* rho, double* result,
-                               double* A, double* B);
-void nonsmoothEqnNaturalMapFun(void* arg, unsigned int problemSize, double* reaction,
-                               double* velocity, double* mu, double* rho, double* result,
-                               double* A, double* B) {
+int nonsmoothEqnNaturalMapFun(void* arg, unsigned int problemSize, double* reaction,
+                              double* velocity, double* mu, double* rho, double* result,
+                              double* A, double* B);
+int nonsmoothEqnNaturalMapFun(void* arg, unsigned int problemSize, double* reaction,
+                              double* velocity, double* mu, double* rho, double* result,
+                              double* A, double* B) {
   NaturalMapParams* acparams_p = (NaturalMapParams*)arg;
 
   fc3d_NaturalMapFunction(problemSize, acparams_p->computeACFun3x3, reaction, velocity, mu,
                           rho, result, A, B);
+  return 0;
 }
 
 void fc3d_nonsmooth_Newton_NaturalMap(FrictionContactProblem* problem, double* reaction,

@@ -11,7 +11,7 @@ if(WITH_TESTING)
     new_test(SOURCES  ContactTest.cpp ${SIMPLE_TEST_MAIN})
     new_test(SOURCES  Contact2dTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
-  
+
   if(WITH_OpenCASCADE)
     begin_tests(src/occ/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT;OpenCASCADE::OpenCASCADE")
     new_test(SOURCES  OccTest.cpp ${SIMPLE_TEST_MAIN})
@@ -25,5 +25,5 @@ if(WITH_TESTING)
   begin_tests(src/fem/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
   new_test(SOURCES SolidLinearTIDSTest.cpp ${SIMPLE_TEST_MAIN})
 
-  
+
 endif()

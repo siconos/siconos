@@ -6,6 +6,13 @@
 #include "siconos/collision/collision.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
 #include "siconos/collision/diskfsegment_r.hpp"
+#include "siconos/collision/diskmesh_r.hpp"
+#include "siconos/collision/polytopedisk_r.hpp"
+#include "siconos/collision/polytopefdisk_r.hpp"
+#include "siconos/collision/polytopefsegment_r.hpp"
+#include "siconos/collision/polytopemesh_r.hpp"
+#include "siconos/collision/polytopepolytope_r.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/pattern/base.hpp"
@@ -21,37 +28,39 @@ using namespace storage::pattern;
 template <typename Osi, typename... ContactShapes>
 struct io : item {
   using osi = Osi;
+  // declares the attached storages of systems and interactions (id, ds1, ...)
+  using topology = typename osi::topology;
   /* /!\ only system sizes defined at compile time and 2D for the moment */
-  using system = nth_t<0, typename osi::systems_t>;   // fixed dof system
-  using dsystem = nth_t<1, typename osi::systems_t>;  // runtime dof system
-                                                      // maybe empty_item
-  using interaction = nth_t<0, typename osi::interactions_t>;
+  using system = typename topology::fixed_dof_system;     // fixed dof system
+  using dsystem = typename topology::dynamic_dof_system;  // runtime dof system
+                                                          // maybe empty_item
+  using interaction = typename topology::fixed_dof_interaction;
+  // disk / fem interaction (maybe empty_item)
+  using dinteraction = typename topology::dynamic_dof_fixed_dof_interaction;
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
   using attributes = gather<
       attribute<"osi", some::item_ref<osi>>,
-      attribute<"disp_info", some::map<some::indice,
-                                       some::unbounded_vector<some::scalar>>>,
-      attribute<"p0_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<4>>>>,
-      attribute<"radii_info", some::unbounded_collection<some::vector<
-                                  some::scalar, some::indice_value<2>>>>,
-      attribute<"pos_info", some::unbounded_collection<some::vector<
-                                some::scalar, some::indice_value<4>>>>,
-      attribute<"vel_info", some::unbounded_collection<some::vector<
-                                some::scalar, some::indice_value<4>>>>,
-      attribute<"cp_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<25>>>>,
-      attribute<"co_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<4>>>>,
-      attribute<"work_info", some::unbounded_collection<some::vector<
-                                 some::scalar, some::indice_value<7>>>>>;
+      attribute<"disp_info", some::map<some::indice, some::unbounded_vector<some::scalar>>>,
+      attribute<"p0_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"radii_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<2>>>>,
+      attribute<"pos_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"vel_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"cp_info", some::unbounded_collection<
+                               some::vector<some::scalar, some::indice_value<25>>>>,
+      attribute<"co_info",
+                some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
+      attribute<"work_info", some::unbounded_collection<
+                                 some::vector<some::scalar, some::indice_value<7>>>>>;
 
   using properties =
       // an attached global ident for contact shapes
-      gather<storage::attached<ContactShapes, symbol<"ident">,
-                               some::integer>...>;
+      gather<storage::attached<ContactShapes, symbol<"ident">, some::integer>...>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -59,19 +68,18 @@ struct io : item {
 
     decltype(auto) osi() { return storage::attr<"osi">(*self()); }
 
-    decltype(auto) p0s(auto step)
-    {
+    decltype(auto) p0s(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
-      auto& involveds = storage::prop_values<system, "involved">(data, step);
-      auto& indices = storage::prop_values<system, "index">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
+      auto& involveds = storage::prop_values<system, "involved", topology>(data, step);
+      auto& indices = storage::prop_values<system, "index", topology>(data, step);
 
-      /* /!\ first osi */
-      const auto& p0_v = self()->make_handle(osi()).template visit_element<0>(
-          [](auto elem) { return elem.p0_vector_assembled(); });
+      /* /!\ the rigid systems, the first kind */
+      auto hosi = self()->make_handle(osi());
+      const auto& p0_v = std::get<0>(hosi.systems()).p0_view(hosi.p0_vector_assembled());
 
       attr<"p0_info">(*self()).clear();
 
@@ -79,50 +87,54 @@ struct io : item {
         if (involved) {
           /* contact */
           auto&& p0 = algebra::get_vector(p0_v, index);
-          attr<"p0_info">(*self()).push_back(
-              {(scalar)id, p0[0], p0[1], p0[2]});
-        }
-        else {
+          attr<"p0_info">(*self()).push_back({(scalar)id, p0[0], p0[1], p0[2]});
+        } else {
           /* without contact */
           attr<"p0_info">(*self()).push_back({(scalar)id, 0., 0., 0.});
         }
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"p0_info">(*self()).data()->data(),
-          attr<"p0_info">(*self()).size(),
+          attr<"p0_info">(*self()).data()->data(), attr<"p0_info">(*self()).size(),
           attr<"p0_info">(*self()).data()->size());
     }
 
-    decltype(auto) radii(auto step)
-    {
+    decltype(auto) radii(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
-      auto& shapes = storage::prop_values<system, "shape">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
 
       attr<"radii_info">(*self()).clear();
 
-      for (auto [id, shape] : view::zip(ids, shapes)) {
-        attr<"radii_info">(*self()).push_back(
-            {(scalar)id, storage::make_handle(data, shape).radius()});
+      // a disk's radius; a polytope's circumradius (vview scales the disk
+      // glyphs with it, polytopes are drawn from their vertices)
+      for (auto [id, h] : view::zip(ids, storage::handles<system>(data, step))) {
+        using h_t = std::decay_t<decltype(h)>;
+        scalar r = 0;
+        if constexpr (collision::may_have_shape<collision::shape::disk, h_t>()) {
+          if (collision::has_shape<collision::shape::disk>(h))
+            r = collision::shape_of<collision::shape::disk>(h).radius();
+        }
+        if constexpr (collision::may_have_shape<collision::shape::polytope, h_t>()) {
+          if (collision::has_shape<collision::shape::polytope>(h))
+            r = collision::shape_of<collision::shape::polytope>(h).rmax();
+        }
+        attr<"radii_info">(*self()).push_back({(scalar)id, r});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 2>>(
-          attr<"radii_info">(*self()).data()->data(),
-          attr<"radii_info">(*self()).size(),
+          attr<"radii_info">(*self()).data()->data(), attr<"radii_info">(*self()).size(),
           attr<"radii_info">(*self()).data()->size());
     }
 
-    decltype(auto) displacements(auto step)
-    {
+    decltype(auto) displacements(auto step) {
       auto& data = self()->data();
       if constexpr (!match::empty_item<dsystem>) {
-        auto& ids = storage::prop_values<dsystem, "id">(data, step);
+        auto& ids = storage::prop_values<dsystem, "id", topology>(data, step);
         auto& qs = storage::attr_values<dsystem, "q">(data, step);
-        auto& q0s = storage::prop_values<dsystem, "q0">(data, step);
+        auto& q0s = storage::prop_values<dsystem, "q0", topology>(data, step);
 
         attr<"disp_info">(*self()).clear();
 
@@ -133,14 +145,13 @@ struct io : item {
         return attr<"disp_info">(*self());
       }
     }
-    decltype(auto) positions(auto step)
-    {
+    decltype(auto) positions(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       //      using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
       auto& qs = storage::attr_values<system, "q">(data, step);
 
       attr<"pos_info">(*self()).clear();
@@ -150,36 +161,31 @@ struct io : item {
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"pos_info">(*self()).data()->data(),
-          attr<"pos_info">(*self()).size(),
+          attr<"pos_info">(*self()).data()->data(), attr<"pos_info">(*self()).size(),
           attr<"pos_info">(*self()).data()->size());
     }
 
-    decltype(auto) velocities(auto step)
-    {
+    decltype(auto) velocities(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       //      using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
 
-      auto& ids = storage::prop_values<system, "id">(data, step);
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
       auto& velos = storage::attr_values<system, "velocity">(data, step);
 
       attr<"vel_info">(*self()).clear();
 
       for (auto [id, velo] : view::zip(ids, velos)) {
-        attr<"vel_info">(*self()).push_back(
-            {(scalar)id, velo[0], velo[1], velo[2]});
+        attr<"vel_info">(*self()).push_back({(scalar)id, velo[0], velo[1], velo[2]});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"vel_info">(*self()).data()->data(),
-          attr<"vel_info">(*self()).size(),
+          attr<"vel_info">(*self()).data()->data(), attr<"vel_info">(*self()).size(),
           attr<"vel_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_points(auto step)
-    {
+    decltype(auto) contact_points(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
@@ -189,32 +195,28 @@ struct io : item {
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
-      auto& relations =
-          storage::attr_values<interaction, "relation">(data, step);
+      auto& relations = storage::attr_values<interaction, "relation">(data, step);
 
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
 
-      auto& h_matrices1 =
-          storage::attr_values<interaction, "h_matrix1">(data, step);
+      auto& h_matrices1 = storage::attr_values<interaction, "h_matrix1">(data, step);
 
       auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
+          storage::prop_values<interaction, "activation", topology>(data, step);
 
       attr<"cp_info">(*self()).clear();
 
       indice k = 0;
-      for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2,
-                 activation] :
-           view::zip(relations, h_matrices1, nslaws, ys, ydots, lambdas, ds1s,
-                     ds2s, activations)) {
+      for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2, activation] :
+           view::zip(relations, h_matrices1, nslaws, ys, ydots, lambdas, ds1s, ds2s,
+                     activations)) {
         auto hds1 = storage::make_handle(data, ds1);
         auto hds2 = storage::make_handle(data, ds2);
 
-        using vect =
-            std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
-                                                 translation 2 +
-                                                 orientation 1 */
+        using vect = std::decay_t<decltype(hds1.q(step))>; /* in 2D, 3 components:
+                                                          translation 2 +
+                                                          orientation 1 */
 
         if (activation) {
           // computation at the interaction level
@@ -229,40 +231,62 @@ struct io : item {
 
           vect cb;
 
-          if (ds1 != ds2) {
-            /* 2 disks */
-            scalar dc2c1 = collision::distance(c2, c1);
+          // a contact given by its two points and its normal (1 -> 2)
+          auto from_contact = [&](const auto& ct) {
+            ca = {ct.cp1[0], ct.cp1[1], 0.};
+            cb = {ct.cp2[0], ct.cp2[1], 0.};
+            cn = {ct.normal[0], ct.normal[1], 0.};
+          };
 
-            cn = (c2 - c1) / dc2c1;
-            ca = c1 + storage::make_handle(data, storage::prop<"shape">(hds1))
-                              .radius() *
-                          cn;
-            cb = c2 - storage::make_handle(data, storage::prop<"shape">(hds2))
-                              .radius() *
-                          cn;
-          }
-          else {
+          if (ds1 != ds2) {
+            variant::visit(
+                data, relation,
+                mp::overload(
+                    /* 2 disks */
+                    [&](match::handle<collision::diskdisk_r> auto) {
+                      scalar dc2c1 = collision::distance(c2, c1);
+                      cn = (c2 - c1) / dc2c1;
+                      ca = c1 + collision::disk_radius(hds1) * cn;
+                      cb = c2 - collision::disk_radius(hds2) * cn;
+                    },
+                    /* 2 polytopes: the stage's cached manifold point */
+                    [&](match::handle<collision::polytopepolytope_r<topology>> auto rrel) {
+                      ca = {rrel.cp1()[0], rrel.cp1()[1], 0.};
+                      cb = {rrel.cp2()[0], rrel.cp2()[1], 0.};
+                      cn = {rrel.normal()[0], rrel.normal()[1], 0.};
+                    },
+                    /* disk / polytope */
+                    [&](match::handle<collision::polytopedisk_r<topology>> auto rrel) {
+                      from_contact(rrel.contact(step, hds1, hds2));
+                    },
+                    [&](auto) {
+                      throw(std::runtime_error("io::contact_points: unknown ds-ds relation"));
+                    }));
+          } else {
             variant::visit(
                 data, relation,
                 mp::overload(
                     /* disk / segment */
-                    [&](storage::index<collision::diskfsegment_r, indice>
-                            rrel) {
+                    [&](storage::index<collision::diskfsegment_r, indice> rrel) {
                       auto hrel = storage::make_handle(data, rrel);
                       /* cb is the proj point on the segment, computed a
                        * second time!
                        */
                       auto segment = hrel.segment();
                       const scalar t =
-                          fmax(0, fmin(1, algebra::dot(c1 - segment.p1(),
-                                                       segment.dp2p1()) /
+                          fmax(0, fmin(1, algebra::dot(c1 - segment.p1(), segment.dp2p1()) /
                                               segment.length_sq()));
                       cb = segment.p1() + t * segment.dp2p1();
                       scalar dcbc1 = collision::distance(cb, c1);
                       cn = (cb - c1) / dcbc1;
-                      ca = c1 + cn * storage::make_handle(
-                                         data, storage::prop<"shape">(hds1))
-                                         .radius();
+                      ca = c1 + cn * collision::disk_radius(hds1);
+                    },
+                    /* polytope / fixed segment, polytope / fixed disk */
+                    [&](match::handle<collision::polytopefsegment_r<topology>> auto rrel) {
+                      from_contact(rrel.contact(step, hds1));
+                    },
+                    [&](match::handle<collision::polytopefdisk_r<topology>> auto rrel) {
+                      from_contact(rrel.contact(step, hds1));
                     },
                     /* disk / fixed disk */
                     [&](storage::index<collision::diskfdisk_r, indice> rrel) {
@@ -275,10 +299,7 @@ struct io : item {
                       scalar dc2c1 = collision::distance(c2, c1);
 
                       cn = (c2 - c1) / dc2c1;
-                      ca = c1 + storage::make_handle(
-                                    data, storage::prop<"shape">(hds1))
-                                        .radius() *
-                                    cn;
+                      ca = c1 + collision::disk_radius(hds1) * cn;
                       cb = c2 - radius2 * cn;
                     },
                     [&](auto) {
@@ -288,59 +309,149 @@ struct io : item {
                     }));
           };
 
-          auto id_ds1 = storage::prop<"id">(hds1);
-          auto id_ds2 = storage::prop<"id">(hds2);
+          auto id_ds1 = storage::prop<"id", topology>(hds1);
+          auto id_ds2 = storage::prop<"id", topology>(hds2);
 
           /* disk / segment */
-          attr<"cp_info">(*self()).push_back(
-              {storage::make_handle(data, nslaw).mu(),
-               cb[0],
-               cb[1],
-               0. /* 2D */,
-               ca[0],
-               ca[1],
-               0. /* 2D */,
-               -cn[0],
-               -cn[1],
-               0. /* 2D */,
-               p0[0],
-               p0[1],
-               0. /* 2D */,
-               y[0],
-               y[1],
-               0. /* 2D */,
-               ydot[0],
-               ydot[1],
-               0. /* 2D */,
-               lambda[0],
-               lambda[1],
-               0. /* 2D */,
-               (scalar)k,
-               (scalar)id_ds1,
-               (scalar)id_ds2});
+          attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
+                                              cb[0],
+                                              cb[1],
+                                              0. /* 2D */,
+                                              ca[0],
+                                              ca[1],
+                                              0. /* 2D */,
+                                              -cn[0],
+                                              -cn[1],
+                                              0. /* 2D */,
+                                              p0[0],
+                                              p0[1],
+                                              0. /* 2D */,
+                                              y[0],
+                                              y[1],
+                                              0. /* 2D */,
+                                              ydot[0],
+                                              ydot[1],
+                                              0. /* 2D */,
+                                              lambda[0],
+                                              lambda[1],
+                                              0. /* 2D */,
+                                              (scalar)k,
+                                              (scalar)id_ds1,
+                                              (scalar)id_ds2});
           k++;
         }
       }
+
+      // disk / fem contacts, numbered after the others as in the assembled
+      // problem
+      if constexpr (!match::empty_item<dinteraction>) {
+        auto& d_ys = storage::attr_values<dinteraction, "y">(data, step);
+        auto& d_ydots = storage::attr_values<dinteraction, "ydot">(data, step);
+        auto& d_lambdas = storage::attr_values<dinteraction, "lambda">(data, step);
+        auto& d_nslaws = storage::attr_values<dinteraction, "nslaw">(data, step);
+        auto& d_relations = storage::attr_values<dinteraction, "relation">(data, step);
+        auto& d_ds1s = storage::prop_values<dinteraction, "ds1", topology>(data, step);
+        auto& d_ds2s = storage::prop_values<dinteraction, "ds2", topology>(data, step);
+        auto& d_h_matrices1 = storage::attr_values<dinteraction, "h_matrix1">(data, step);
+        auto& d_activations =
+            storage::prop_values<dinteraction, "activation", topology>(data, step);
+
+        for (auto [relation, h_matrix1, nslaw, y, ydot, lambda, ds1, ds2, activation] :
+             view::zip(d_relations, d_h_matrices1, d_nslaws, d_ys, d_ydots, d_lambdas, d_ds1s,
+                       d_ds2s, d_activations)) {
+          if (activation) {
+            auto hds1 = storage::make_handle(data, ds1); /* disk */
+            auto hds2 = storage::make_handle(data, ds2); /* fem */
+
+            using vect = std::decay_t<decltype(hds1.q(step))>;
+
+            // impulse on the disk
+            auto p0 = h_matrix1.transpose() * lambda;
+
+            vect c1 = {hds1.q(step)[0], hds1.q(step)[1], 0.};
+            vect ca;
+            vect cb;
+            vect cn;
+
+            variant::visit(
+                data, relation,
+                mp::overload(
+                    /* disk / mesh segment: the segment of the mesh in its
+                     * reference configuration, as in diskmesh_r */
+                    [&](match::handle<collision::diskmesh_r> auto rrel) {
+                      auto segments = rrel.mesh().segments();
+                      auto ci = rrel.contact_index();
+                      vect p1 = {segments.x1(ci), segments.y1(ci), 0.};
+                      vect p2 = {segments.x2(ci), segments.y2(ci), 0.};
+                      vect dp = p2 - p1;
+                      vect d1 = c1 - p1;
+                      const scalar t =
+                          fmax(0, fmin(1, algebra::dot(d1, dp) / algebra::dot(dp, dp)));
+                      cb = p1 + t * dp;
+                      cn = (cb - c1) / collision::distance(cb, c1);
+                      ca = c1 + cn * collision::disk_radius(hds1);
+                    },
+                    /* polytope / mesh segment */
+                    [&](match::handle<collision::polytopemesh_r<topology>> auto rrel) {
+                      const auto ct = rrel.contact(step, hds1, hds2);
+                      ca = {ct.cp1[0], ct.cp1[1], 0.};
+                      cb = {ct.cp2[0], ct.cp2[1], 0.};
+                      cn = {ct.normal[0], ct.normal[1], 0.};
+                    },
+                    [&](auto) {
+                      throw(std::runtime_error("Error: not a disk-mesh relation"));
+                    }));
+
+            auto id_ds1 = storage::prop<"id", topology>(hds1);
+            auto id_ds2 = storage::prop<"id", topology>(hds2);
+
+            attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
+                                                cb[0],
+                                                cb[1],
+                                                0. /* 2D */,
+                                                ca[0],
+                                                ca[1],
+                                                0. /* 2D */,
+                                                -cn[0],
+                                                -cn[1],
+                                                0. /* 2D */,
+                                                p0[0],
+                                                p0[1],
+                                                0. /* 2D */,
+                                                y[0],
+                                                y[1],
+                                                0. /* 2D */,
+                                                ydot[0],
+                                                ydot[1],
+                                                0. /* 2D */,
+                                                lambda[0],
+                                                lambda[1],
+                                                0. /* 2D */,
+                                                (scalar)k,
+                                                (scalar)id_ds1,
+                                                (scalar)id_ds2});
+            k++;
+          }
+        }
+      }
+
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 25>>(
-          attr<"cp_info">(*self()).data()->data(),
-          attr<"cp_info">(*self()).size(),
+          attr<"cp_info">(*self()).data()->data(), attr<"cp_info">(*self()).size(),
           attr<"cp_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_info(auto step)
-    {
+    decltype(auto) contact_info(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
       using integer = typename env_t::integer;
 
-      auto& relations =
-          storage::attr_values<interaction, "relation">(data, step);
-      auto& ds1s = storage::prop_values<interaction, "ds1">(data, step);
-      auto& ds2s = storage::prop_values<interaction, "ds2">(data, step);
+      auto& relations = storage::attr_values<interaction, "relation">(data, step);
+      auto& ds1s = storage::prop_values<interaction, "ds1", topology>(data, step);
+      auto& ds2s = storage::prop_values<interaction, "ds2", topology>(data, step);
       auto& activations =
-          storage::prop_values<interaction, "activation">(data, step);
+          storage::prop_values<interaction, "activation", topology>(data, step);
 
       attr<"co_info">(*self()).clear();
 
@@ -350,46 +461,59 @@ struct io : item {
         if (activation) {
           auto hds1 = storage::make_handle(data, ds1);
           auto hds2 = storage::make_handle(data, ds2);
-          auto id_ds1 = prop<"id">(hds1);
-          auto id_ds2 = prop<"id">(hds2);
+          auto id_ds1 = prop<"id", topology>(hds1);
+          auto id_ds2 = prop<"id", topology>(hds2);
 
           indice inter_index = k++; /* index of interaction in indexset 1 */
           // a pair type of shape (unsigned int) + index
-          auto static_shape_info = variant::visit(
-              data, relation,
-              mp::overload(
-                  // relation1 with static shape : the concept is missing
-                  [&]<match::relation1 Relation>(Relation rrel) {
-                    // must provide shape method
-                    return storage::prop<"ident">(rrel.shape());
-                  },
-                  [&](auto) {
-                    // another kind of relation
-                    return (integer)0;
-                  }));
+          auto static_shape_info =
+              variant::visit(data, relation,
+                             mp::overload(
+                                 // relation1 with static shape : the concept is missing
+                                 [&]<match::relation1 Relation>(Relation rrel) {
+                                   // must provide shape method
+                                   return storage::prop<"ident", io>(rrel.shape());
+                                 },
+                                 [&](auto) {
+                                   // another kind of relation
+                                   return (integer)0;
+                                 }));
 
-          attr<"co_info">(*self()).push_back({(scalar)inter_index,
-                                              (scalar)id_ds1, (scalar)id_ds2,
-                                              (scalar)static_shape_info});
+          attr<"co_info">(*self()).push_back({(scalar)inter_index, (scalar)id_ds1,
+                                              (scalar)id_ds2, (scalar)static_shape_info});
+        }
+      }
+
+      // disk / fem contacts, numbered after the others as in contact_points
+      if constexpr (!match::empty_item<dinteraction>) {
+        auto& d_ds1s = storage::prop_values<dinteraction, "ds1", topology>(data, step);
+        auto& d_ds2s = storage::prop_values<dinteraction, "ds2", topology>(data, step);
+        auto& d_activations =
+            storage::prop_values<dinteraction, "activation", topology>(data, step);
+
+        for (auto [ds1, ds2, activation] : view::zip(d_ds1s, d_ds2s, d_activations)) {
+          if (activation) {
+            auto id_ds1 = prop<"id", topology>(storage::make_handle(data, ds1));
+            auto id_ds2 = prop<"id", topology>(storage::make_handle(data, ds2));
+            attr<"co_info">(*self()).push_back(
+                {(scalar)k++, (scalar)id_ds1, (scalar)id_ds2, (scalar)0});
+          }
         }
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
-          attr<"co_info">(*self()).data()->data(),
-          attr<"co_info">(*self()).size(),
+          attr<"co_info">(*self()).data()->data(), attr<"co_info">(*self()).size(),
           attr<"co_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_work(auto step, auto theta, auto tol)
-    {
+    decltype(auto) contact_work(auto step, auto theta, auto tol) {
       // fix: theta is omega in mechanics_run.py & MechanicsIO.hpp
       auto& data = self()->data();
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto& ydot_ks =
-          storage::attr_values<interaction, "ydot">(data, step - 1);
+      auto& ydot_ks = storage::attr_values<interaction, "ydot">(data, step - 1);
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
@@ -429,8 +553,7 @@ struct io : item {
         scalar tangent_contact_work = vt_1_average * pt_1;
         scalar answer_2 = tangent_contact_work;
 
-        scalar vt_1_average_theta =
-            theta * vt_1_plus + (1. - theta) * vt_1_minus;
+        scalar vt_1_average_theta = theta * vt_1_plus + (1. - theta) * vt_1_minus;
         scalar tangent_contact_work_theta = vt_1_average_theta * pt_1;
         scalar answer_4 = tangent_contact_work_theta;
 
@@ -458,28 +581,24 @@ struct io : item {
             // std::cout << "WARNING: the impulse is outside the Coulomb cone
             // " << std::endl;
             answer_5 = -3;  // outside the cone = -3
-          }
-          else if ((norm_pt - mu * pn < -tol)) {
+          } else if ((norm_pt - mu * pn < -tol)) {
             // std::cout << "the impulse is in the *interior* of  the Coulomb
             // cone  " << std::endl; std::cout << "norm_vt_plus  " <<
             // norm_vt_plus << std::endl;
             if (norm_vt_plus > tol) {
               // std::cout << "WARNING: but the norm of vt is not zero  " <<
               // std::endl;
-              answer_5 =
-                  -2;  // sticking with a non zero slifing velocity = -2
+              answer_5 = -2;  // sticking with a non zero slifing velocity = -2
             }
             // ?? answer_5 = -2 is always overwritten
             answer_5 = 1;  // sticking = 1
-          }
-          else {
+          } else {
             // std::cout << "the impulse is on the *boundary* of the Coulomb
             // cone  " << std::endl; std::cout << "norm_vt_plus  " <<
             // norm_vt_plus << std::endl;
             answer_5 = 2;  // sliding = 2
           }
-        }
-        else
+        } else
           answer_5 = -1;  // undetermined = -1
         if ((pn > tol) and (vn_minus > tol)) {
           // std::cout << "WARNING: we apply the impact law of positive
@@ -491,19 +610,16 @@ struct io : item {
           answer_6 = normal_contact_work;
         }
 
-        attr<"work_info">(*self()).push_back({answer_0, answer_1, answer_2,
-                                              answer_3, answer_4, answer_5,
-                                              answer_6});
+        attr<"work_info">(*self()).push_back(
+            {answer_0, answer_1, answer_2, answer_3, answer_4, answer_5, answer_6});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 7>>(
-          attr<"work_info">(*self()).data()->data(),
-          attr<"work_info">(*self()).size(),
+          attr<"work_info">(*self()).data()->data(), attr<"work_info">(*self()).size(),
           attr<"work_info">(*self()).data()->size());
     }
 
-    auto methods()
-    {
+    auto methods() {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
@@ -514,11 +630,9 @@ struct io : item {
           method("positions", &interface<Handle>::positions<indice>),
           method("displacements", &interface<Handle>::displacements<indice>),
           method("velocities", &interface<Handle>::velocities<indice>),
-          method("contact_points",
-                 &interface<Handle>::contact_points<indice>),
+          method("contact_points", &interface<Handle>::contact_points<indice>),
           method("contact_info", &interface<Handle>::contact_info<indice>),
-          method("contact_work",
-                 &interface<Handle>::contact_work<indice, scalar, scalar>));
+          method("contact_work", &interface<Handle>::contact_work<indice, scalar, scalar>));
     }
   };
 };

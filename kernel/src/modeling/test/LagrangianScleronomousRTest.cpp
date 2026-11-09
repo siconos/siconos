@@ -36,14 +36,14 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2() {
   // everything is properly set (memory) only after a call to initialize
   // which required an Interaction. See examples in siconos tutorials for reals tests.
 
-  rel->setComputehFunction([](const siconos::algebra::BlockVector &q,
+  rel->setComputehFunction([](const siconos::algebra::BlockVector& q,
                               Eigen::Ref<siconos::algebra::SiconosVector> y) {});
 
-  rel->setComputeJacobianhOver_qFunction([](const siconos::algebra::BlockVector &q,
+  rel->setComputeJacobianhOver_qFunction([](const siconos::algebra::BlockVector& q,
                                             Eigen::Ref<siconos::algebra::MapType> result) {});
 
   rel->setComputejacobianhOver_q_dotFunction(
-      [](const siconos::algebra::BlockVector &q, const siconos::algebra::BlockVector &qdot,
+      [](const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ",

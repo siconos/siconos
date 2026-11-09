@@ -22,17 +22,17 @@
 <SiconosModel>
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
-		<DS_Definition>		
+		<DS_Definition>
 			<FirstOrderNonLinearDS number='13'>
-	 			<StepsInMemory>2</StepsInMemory>				
+	 			<StepsInMemory>2</StepsInMemory>
 				<x0 vectorSize='3'>
 					1.0 2.0 3.0
 				</x0>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<M matrixRowSize='3' matrixColSize='3'>
 					<row>2.0 0.0 0.0</row>
 					<row>0.0 4.0 0.0</row>
 					<row>0.0 0.0 6.0</row>
-				</M>			
+				</M>
 			</FirstOrderNonLinearDS>
 			<FirstOrderNonLinearDS number='2'>
 				<x0 vectorSize='3'>

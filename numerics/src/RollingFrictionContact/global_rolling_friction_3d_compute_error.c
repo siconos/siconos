@@ -26,18 +26,21 @@
 #include "GlobalRollingFrictionContactProblem.h"  // for GlobalRollingFrictionContactPro...
 #include "NumericsMatrix.h"                       // for NM_gemv, NM_tgemv, Numeric...
 #include "NumericsVector.h"
-#include "SiconosBlas.h"              // for cblas_dcopy
-#include "numerics_verbose.h"         // for numerics_error, numerics_w...
+#include "SiconosBlas.h"             // for cblas_dcopy
+#include "error_computation.h"       // for error_compute_alloc_pair
+#include "friction_error_toolkit.h"  // for friction_error_toolkit_...
 #include "numerics_errors.h"
+#include "numerics_verbose.h"         // for numerics_error, numerics_w...
 #include "projectionOnRollingCone.h"  // for projectionOnRollingCone
 #include "sanitizer.h"                // for cblas_dcopy_msan
 #include "siconos_debug.h"            // for DEBUG_EXPR, DEBUG_PRINTF
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)  // = sqrt(1e-16)
 
-void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double* u, double mu, double mur,
-                                          double* error, double* worktmp,
-                                          int problemIsNotConvex) {
+void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double* u, double mu,
+                                                              double mur, double* error,
+                                                              double* worktmp,
+                                                              int problemIsNotConvex) {
   DEBUG_BEGIN("global_rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 
   if (problemIsNotConvex == 0) {
@@ -66,9 +69,10 @@ void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double*
   DEBUG_END("global_rolling_friction_3d_unitary_compute_and_add_error(...)\n");
 }
 
-int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* reaction,
-                         double* velocity, double* globalVelocity, double tolerance,
-                         double* error, int problemIsNotConvex) {
+int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem* problem,
+                                             double* reaction, double* velocity,
+                                             double* globalVelocity, double tolerance,
+                                             double* error, int problemIsNotConvex) {
   DEBUG_BEGIN("global_rolling_friction_3d_compute_error(...)\n");
   /* Checks inputs */
   if (problem == NULL || globalVelocity == NULL || velocity == NULL || reaction == NULL ||
@@ -91,19 +95,17 @@ int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem
   double norm_b = cblas_dnrm2(nd, problem->b, 1);  // = w
 
   /* --- Relative primal residual = |-Mv + Hr + f|/max{|Mv|, |Hr|, |f|} --- */
-  double* tmp_m_1 = (double*)calloc(m, sizeof(double));
-  double* tmp_m_2 = (double*)calloc(m, sizeof(double));
+  double* tmp_m_1 = NULL;
+  double* tmp_m_2 = NULL;
+  if (error_compute_alloc_pair(m, m, &tmp_m_1, &tmp_m_2)) {
+    return numerics_error("global_rolling_friction_3d_compute_error", "bad alloc");
+  }
 
-  cblas_dcopy_msan(m, problem->q, 1, tmp_m_2, 1);  // tmp_m_2 = f
+  double norm_Hr = 0.0, norm_Mv = 0.0;
+  double error_primal = friction_error_toolkit_global_primal_residual(
+      M, H, problem->q, reaction, globalVelocity, m, nc > 0, tmp_m_1, tmp_m_2, &norm_Hr,
+      &norm_Mv);
 
-  NM_gemv(1.0, H, reaction, 0.0, tmp_m_1);  // tmp_m_1 = Hr
-  double norm_Hr = cblas_dnrm2(m, tmp_m_1, 1);
-  cblas_daxpy(m, 1.0, tmp_m_1, 1, tmp_m_2, 1);     // tmp_m_2 = Hr + f
-  NM_gemv(-1.0, M, globalVelocity, 0.0, tmp_m_1);  // tmp_m_1 = -Mv
-  double norm_Mv = cblas_dnrm2(m, tmp_m_1, 1);
-  cblas_daxpy(m, 1.0, tmp_m_1, 1, tmp_m_2, 1);  // tmp_m_2 = -Mv + Hr + f
-
-  double error_primal = cblas_dnrm2(m, tmp_m_2, 1);  // error_primal = |-Mv + Hr - f|
   double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
   if (relative_scaling > MIN_RELATIVE_SCALING)
     *error = error_primal / relative_scaling;  // error = |-Mv + Hr - f|/max{|Mv|, |Hr|, |f|}
@@ -116,15 +118,17 @@ int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem
   free(tmp_m_2);
 
   /* --- Relative dual residual = |H'v + w - u|/max{|H'v|, |w|, |u|} --- */
-  double* tmp_nd_1 = (double*)calloc(nd, sizeof(double));
-  double* tmp_nd_2 = (double*)calloc(nd, sizeof(double));
+  double* tmp_nd_1 = NULL;
+  double* tmp_nd_2 = NULL;
+  if (error_compute_alloc_pair(nd, nd, &tmp_nd_1, &tmp_nd_2)) {
+    free(tmp_m_1);
+    free(tmp_m_2);
+    return numerics_error("global_rolling_friction_3d_compute_error", "bad alloc");
+  }
 
-  cblas_dcopy_msan(nd, problem->b, 1, tmp_nd_2, 1);  // tmp_nd_2 = w
-  NM_tgemv(1.0, H, globalVelocity, 0.0, tmp_nd_1);   // tmp_nd_1 = H'v
-  double norm_HTv = cblas_dnrm2(nd, tmp_nd_1, 1);
-  cblas_daxpy(nd, 1.0, tmp_nd_1, 1, tmp_nd_2, 1);    // tmp_nd_2 = H'v + w
-  cblas_daxpy(nd, -1.0, velocity, 1, tmp_nd_2, 1);   // tmp_nd_2 = H'v + w - u
-  double error_dual = cblas_dnrm2(nd, tmp_nd_2, 1);  // error_dual = |H'v + w - u|
+  double norm_HTv = 0.0;
+  double error_dual = friction_error_toolkit_global_dual_residual(
+      H, problem->b, globalVelocity, velocity, nd, tmp_nd_1, tmp_nd_2, &norm_HTv);
 
   relative_scaling = fmax(norm_u, fmax(norm_b, norm_HTv));
   if (relative_scaling > MIN_RELATIVE_SCALING)
@@ -144,8 +148,9 @@ int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem
   double error_complementarity = 0.0;
   double worktmp[5];
   for (int ic = 0; ic < nc; ic++) {
-    global_rolling_friction_3d_unitary_compute_and_add_error(&reaction[ic * 5], &velocity[ic * 5], mu[ic], mur[ic],
-                                         &error_complementarity, worktmp, problemIsNotConvex);
+    global_rolling_friction_3d_unitary_compute_and_add_error(
+        &reaction[ic * 5], &velocity[ic * 5], mu[ic], mur[ic], &error_complementarity, worktmp,
+        problemIsNotConvex);
   }
 
   error_complementarity = sqrt(error_complementarity);

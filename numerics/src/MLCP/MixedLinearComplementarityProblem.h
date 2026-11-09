@@ -76,24 +76,24 @@ struct MixedLinearComplementarityProblem {
                          is saved using (A,B,C,D,a,b), 0 otherwise*/
   int n;              /**< number of equality constraints */
   int m;              /**< number of complementarity constraints */
-  int *blocksRows;    /**< The rows from blocksRows[i] to blocksRows[i+1]-1
+  int* blocksRows;    /**< The rows from blocksRows[i] to blocksRows[i+1]-1
                          forms a block of equalities iif bloksIsComp[i]=0,
                          else the block is a complementarity block.
                          The number of total blocks is given by NbBlocks
                          such that blocksRows[NbBlocks] = n+m */
-  int *blocksIsComp;  /**< if bloksIsComp[i]=0, then block i formed by the rows
+  int* blocksIsComp;  /**< if bloksIsComp[i]=0, then block i formed by the rows
                          from blocksRows[i] to blocksRows[i+1]-1 is an equality
                          block  else the block is a complementarity block.
                       */
-  NumericsMatrix *M;  /**< M matrix of the MLCP */
-  double *q;          /**< q vector of the MLCP */
+  NumericsMatrix* M;  /**< M matrix of the MLCP */
+  double* q;          /**< q vector of the MLCP */
   // NumericsMatrix* Bblock; Bblock  ?*/
-  double *A; /**< A matrix of the MLCP */
-  double *B; /**< B matrix of the MLCP */
-  double *C; /**< C matrix of the MLCP */
-  double *D; /**< D matrix of the MLCP */
-  double *a; /**< a vector of the MLCP */
-  double *b; /**< b vector of the MLCP */
+  double* A; /**< A matrix of the MLCP */
+  double* B; /**< B matrix of the MLCP */
+  double* C; /**< C matrix of the MLCP */
+  double* D; /**< D matrix of the MLCP */
+  double* a; /**< a vector of the MLCP */
+  double* b; /**< b vector of the MLCP */
 };
 
 #if defined(__cplusplus)
@@ -104,17 +104,17 @@ extern "C" {
  *
  *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
  */
-void mixedLinearComplementarity_free(MixedLinearComplementarityProblem *problem);
+void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem);
 
 /** create empty MLCP
  *
  *  \return empy MLCP
  */
-MixedLinearComplementarityProblem *mixedLinearComplementarity_new(void);
+MixedLinearComplementarityProblem* mixedLinearComplementarity_new(void);
 
 /** display a MLCP
  */
-void mixedLinearComplementarity_display(MixedLinearComplementarityProblem *p);
+void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p);
 
 /** function to write in a file a MixedLinearComplementarityProblem
  *
@@ -122,8 +122,8 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem *p);
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem *problem,
-                                           FILE *file);
+int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* problem,
+                                           FILE* file);
 
 /** Function to read and create a MixedLinearComplementarityProblem
  *  from a file
@@ -132,8 +132,8 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem *pr
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem *problem,
-                                           FILE *file);
+int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* problem,
+                                           FILE* file);
 
 /** Function to read and create a MixedLinearComplementarityProblem
  *  from a file
@@ -142,8 +142,8 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem *pr
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem *problem,
-                                              FILE *file);
+int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem* problem,
+                                              FILE* file);
 
 /** Function to read and create a MixedLinearComplementarityProblem
  *  from a file
@@ -152,14 +152,14 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem 
  *  \param filename that contains the mlcp
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem *problem,
-                                               const char *filename);
+int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem,
+                                               const char* filename);
 
 /** Function to create a MLCP with ABCD format from M formatted MLCP
  */
 
-MixedLinearComplementarityProblem *mixedLinearComplementarity_fromMtoABCD(
-    MixedLinearComplementarityProblem *problem);
+MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(
+    MixedLinearComplementarityProblem* problem);
 
 #if defined(__cplusplus)
 }

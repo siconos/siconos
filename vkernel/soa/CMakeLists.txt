@@ -32,6 +32,11 @@ find_package(Eigen3 REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 3.0.2  CONFIG REQUIRED)
 
+# every vkernel target includes boost/hana (storage/mp/mp.hpp): outside a
+# guix profile (micromamba, brew) the boost headers are not on the default
+# include path of the compiler.
+link_libraries(Boost::boost)
+
 include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 
 if(WITH_GPU)
@@ -41,6 +46,9 @@ if(WITH_GPU)
 else()
   include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
 endif()
+
+# vendored cxd batch narrowphase headers (externals/cxd/)
+include_directories(${CMAKE_SOURCE_DIR}/externals/cxd/src)
 
 if(WITH_GPU)
   add_subdirectory(extern/cuNSearch)
@@ -56,6 +64,15 @@ if(WITH_GPU)
 endif()
 
 set(flags "${flags} -Wall --std=c++23")
+
+# Registry worlds (storage/registry.hpp) check every column lookup, which costs
+# about 1% of runtime on bench-disks at 900 disks.  This option drops the
+# checks: an access to a column that was never registered becomes undefined
+# behaviour instead of an exception.  The storage::make database is unaffected.
+option(VKERNEL_UNCHECKED_LOOKUP "registry column lookups without checks" OFF)
+if(VKERNEL_UNCHECKED_LOOKUP)
+  add_compile_definitions(VKERNEL_UNCHECKED_LOOKUP)
+endif()
 set(fconcepts_diagnostics)
 check_cxx_compiler_flag("-fbracket-depth=900" fbracket_depth)
 check_cxx_compiler_flag("-fconcepts-diagnostics-depth=1" fconcepts_diagnostics)
@@ -88,23 +105,47 @@ endif()
 
 # install(TARGETS _nothing DESTINATION nothing)
 
+# The bindings are spread over NONOS_BIND_PARTS translation units, each one
+# binding every NONOS_BIND_PARTS-th item (see src/siconos/py/py_bind_part.hpp),
+# so that they compile in parallel and with less memory each.
+set(NONOS_BIND_PARTS 4 CACHE STRING "number of translation units for the _nonos bindings")
+set(nonos_bind_sources)
+math(EXPR nonos_last_part "${NONOS_BIND_PARTS} - 1")
+foreach(part RANGE ${nonos_last_part})
+  set(nonos_part_file ${CMAKE_CURRENT_BINARY_DIR}/nonos/bind_part_${part}.cpp)
+  file(CONFIGURE OUTPUT ${nonos_part_file}
+    CONTENT "#define NONOS_PART ${part}\n#include \"siconos/py/py_bind_part.hpp\"\n")
+  list(APPEND nonos_bind_sources ${nonos_part_file})
+endforeach()
+
 python_add_library(_nonos MODULE
   ./src/siconos/py/main.cpp
-#  ./src/siconos/py/py_null.cpp
-#  ./src/siconos/py/main_disks.cpp
-#  ./src/siconos/py/py_attached_storages.cpp
-#  ./src/siconos/py/py_attributes.cpp
-#  ./src/siconos/py/py_add.cpp
-#  ./src/siconos/py/py_methods.cpp
+  ./src/siconos/py/world.cpp
+  ${nonos_bind_sources}
   WITH_SOABI)
 
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
+target_compile_definitions(_nonos PRIVATE NONOS_PARTS=${NONOS_BIND_PARTS})
 
-if(ftime_trace)
-  target_compile_options(_nonos PRIVATE
-    -ftime-trace=${CMAKE_CURRENT_BINARY_DIR}/time-trace-nonos.json
-  )
+# The binding parts all include py_bind.hpp and recompute the same world-level
+# type computations (item lists, attribute transforms, containers): about half
+# of their template instantiation time.  In the precompiled header, with
+# clang's -fpch-instantiate-templates (added by CMake), they are done once.
+# SiconosConfig.h first: the numerics headers depend on its macros (WITH_FCLIB...)
+target_precompile_headers(_nonos PRIVATE ${CMAKE_BINARY_DIR}/SiconosConfig.h
+                                         ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/py_bind.hpp)
+
+# reference build of _nonos on the storage::make database (A/B comparisons)
+option(NONOS_COMPILE_TIME_DATABASE "build _nonos on the storage::make_compile_time_database instead of the registry" OFF)
+if(NONOS_COMPILE_TIME_DATABASE)
+  target_compile_definitions(_nonos PRIVATE NONOS_COMPILE_TIME_DATABASE)
 endif()
+
+# if(ftime_trace)
+#   target_compile_options(_nonos PRIVATE
+#     -ftime-trace=${CMAKE_CURRENT_BINARY_DIR}/time-trace-nonos.json
+#   )
+# endif()
 
 if(WITH_GPU)
   target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen Boost::boost numerics pthread cuNSearch pybind11::headers)
@@ -125,6 +166,7 @@ install(TARGETS _nonos COMPONENT python DESTINATION ${SICONOS_PYTHON_INSTALL_DIR
 install(FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/__init__.py
   ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/bridge.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/simoptions.py
   COMPONENT python
   DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos/)
 
@@ -157,3 +199,6 @@ siconos_component_install_setup(${COMPONENT})
 target_compile_features(vkernel PUBLIC cxx_std_20)
 
 include(vkernel_tests.cmake)
+
+# the notes of vkernel/docs/notes, their studies: targets vkernel_study_*
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../docs/notes ${CMAKE_CURRENT_BINARY_DIR}/notes)

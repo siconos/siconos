@@ -9,12 +9,10 @@
 #pragma once
 
 #include <boost/pfr/detail/config.hpp>
-
 #include <boost/pfr/detail/core.hpp>
-
+#include <boost/pfr/detail/make_integer_sequence.hpp>
 #include <boost/pfr/detail/stdtuple.hpp>
 #include <boost/pfr/tuple_size.hpp>
-#include <boost/pfr/detail/make_integer_sequence.hpp>
 
 #ifdef BOOST_PFR_HAS_STD_MODULE
 import std;
@@ -22,7 +20,9 @@ import std;
 #include <tuple>
 #endif
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 /// \brief A `std::tuple` capable of de-structuring assignment used to support
 /// a tie of multiple lvalue references to fields of an aggregate T.
@@ -30,19 +30,19 @@ namespace boost { namespace pfr { namespace detail {
 /// \sa boost::pfr::tie_from_structure
 template <typename... Elements>
 struct tie_from_structure_tuple : std::tuple<Elements&...> {
-    using base = std::tuple<Elements&...>;
-    using base::base;
+  using base = std::tuple<Elements&...>;
+  using base::base;
 
-    template <typename T>
-    constexpr tie_from_structure_tuple& operator= (T const& t) {
-        base::operator=(
-            detail::make_stdtiedtuple_from_tietuple(
-                detail::tie_as_tuple(t),
-                detail::make_index_sequence<tuple_size_v<T>>()));
-        return *this;
-    }
+  template <typename T>
+  constexpr tie_from_structure_tuple& operator=(T const& t) {
+    base::operator=(detail::make_stdtiedtuple_from_tietuple(
+        detail::tie_as_tuple(t), detail::make_index_sequence<tuple_size_v<T>>()));
+    return *this;
+  }
 };
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-#endif // BOOST_PFR_DETAIL_TIE_FROM_STRUCTURE_TUPLE_HPP
+#endif  // BOOST_PFR_DETAIL_TIE_FROM_STRUCTURE_TUPLE_HPP

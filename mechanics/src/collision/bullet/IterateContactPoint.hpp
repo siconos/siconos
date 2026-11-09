@@ -40,10 +40,10 @@ class IterateContactPoints {
   IterateContactPoints(std::shared_ptr<btCollisionWorld> wld) : world(wld) {}
 
   struct ContactPointTuple {
-    const btCollisionObject *objectA;
-    const btCollisionObject *objectB;
-    btManifoldPoint *point;
-    btPersistentManifold *manifold;
+    const btCollisionObject* objectA;
+    const btCollisionObject* objectB;
+    btManifoldPoint* point;
+    btPersistentManifold* manifold;
   };
 
   class iterator {
@@ -54,7 +54,7 @@ class IterateContactPoints {
     int numContacts{0};
     int manifold_index{-1};
     int contact_index{-1};
-    
+
    public:
     iterator(std::shared_ptr<btCollisionWorld> wld)
         : world{wld}, numManifolds{wld->getDispatcher()->getNumManifolds()} {
@@ -64,11 +64,11 @@ class IterateContactPoints {
     iterator() = default;
 
     ~iterator() noexcept = default;
-    
-    const ContactPointTuple &operator*() { return data; };
-    const ContactPointTuple *operator->() { return &data; };
 
-    iterator &operator++() {
+    const ContactPointTuple& operator*() { return data; };
+    const ContactPointTuple* operator->() { return &data; };
+
+    iterator& operator++() {
       if (numManifolds == 0) return *this;
       contact_index++;
       while (contact_index >= numContacts) {
@@ -89,7 +89,7 @@ class IterateContactPoints {
       return *this;
     };
 
-    bool operator!=(const iterator &it) {
+    bool operator!=(const iterator& it) {
       if (it.numManifolds == 0) return numManifolds != 0;
       return data.objectA != it.data.objectA || data.objectB != it.data.objectB ||
              data.point != it.data.point;

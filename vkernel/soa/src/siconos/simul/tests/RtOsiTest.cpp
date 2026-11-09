@@ -7,11 +7,11 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/nslaws.hpp"
 #include "siconos/simul/interaction.hpp"
-#include "siconos/simul/topology.hpp"
 #include "siconos/simul/one_step_integrator.hpp"
 #include "siconos/simul/one_step_nonsmooth_problem.hpp"
 #include "siconos/simul/time_discretization.hpp"
 #include "siconos/simul/time_stepping.hpp"
+#include "siconos/simul/topology.hpp"
 #include "siconos/storage/mp/mp.hpp"
 
 namespace siconos::config {
@@ -34,14 +34,12 @@ struct env : standard_environment<T> {
 };
 
 struct make
-    : storage::make<
+    : storage::make_compile_time_database<
           config::env, fem_ds, simulation,
           storage::with_properties<
               storage::time_invariant<storage::attr_t<ball, "fext">>,
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-              storage::assembled_diagonal<storage::attr_t<
-                  typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {
-};
+              storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 
 }  // namespace siconos::config
 
@@ -56,24 +54,24 @@ void RtOsiTest::setUp() {}
 
 void RtOsiTest::tearDown() {}
 
-// check that osi elements exist and that offsets can be modified
-void RtOsiTest::testOsi0()
-{
+// check that the kinds of the integrator exist and that their offsets can be
+// modified
+void RtOsiTest::testOsi0() {
   auto data = siconos::config::make();
 
   auto osi = store::add<config::osi>(data);
 
   std::size_t i = 0;
   std::size_t j = 0;
-  mp::for_each(osi.elements(), [&](auto elem) {
-    elem.ds_offset() = i++;
-    elem.inter_offset() = j++;
-  });
+  mp::for_each(osi.systems(), [&](auto kind) { kind.ds_offset() = i++; });
+  mp::for_each(osi.interactions(), [&](auto kind) { kind.inter_offset() = j++; });
+
+  CPPUNIT_ASSERT(i == 2);
+  CPPUNIT_ASSERT(j == 2);
 
   i = 0;
   j = 0;
-  mp::for_each(osi.elements(), [&](auto elem) {
-    CPPUNIT_ASSERT((elem.ds_offset() == i++));
-    CPPUNIT_ASSERT((elem.inter_offset() == j++));
-  });
+  mp::for_each(osi.systems(), [&](auto kind) { CPPUNIT_ASSERT((kind.ds_offset() == i++)); });
+  mp::for_each(osi.interactions(),
+               [&](auto kind) { CPPUNIT_ASSERT((kind.inter_offset() == j++)); });
 }

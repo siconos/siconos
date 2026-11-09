@@ -14,19 +14,17 @@ struct sparse_set {
   using iterator = typename std::vector<T>::iterator;
   using const_iterator = typename std::vector<T>::const_iterator;
 
-  static constexpr size_type invalid_index =
-      static_cast<size_type>(-1);
+  static constexpr size_type invalid_index = static_cast<size_type>(-1);
 
   std::vector<T> dense_;
   std::vector<Key> dense_keys_;
-  std::conditional_t<std::is_integral_v<Key>,
-                     std::vector<size_type>,
-                     std::unordered_map<Key, size_type>> sparse_;
+  std::conditional_t<std::is_integral_v<Key>, std::vector<size_type>,
+                     std::unordered_map<Key, size_type>>
+      sparse_;
 
   sparse_set() = default;
 
-  bool contains(Key key) const
-  {
+  bool contains(Key key) const {
     if constexpr (std::is_integral_v<Key>) {
       auto k = static_cast<size_type>(key);
       return k < sparse_.size() && sparse_[k] != invalid_index;
@@ -35,8 +33,7 @@ struct sparse_set {
     }
   }
 
-  T& at(Key key)
-  {
+  T& at(Key key) {
     if constexpr (std::is_integral_v<Key>) {
       return dense_.at(sparse_.at(static_cast<size_type>(key)));
     } else {
@@ -44,8 +41,7 @@ struct sparse_set {
     }
   }
 
-  const T& at(Key key) const
-  {
+  const T& at(Key key) const {
     if constexpr (std::is_integral_v<Key>) {
       return dense_.at(sparse_.at(static_cast<size_type>(key)));
     } else {
@@ -53,8 +49,7 @@ struct sparse_set {
     }
   }
 
-  T* try_get(Key key)
-  {
+  T* try_get(Key key) {
     if constexpr (std::is_integral_v<Key>) {
       auto k = static_cast<size_type>(key);
       if (k < sparse_.size() && sparse_[k] != invalid_index) {
@@ -67,8 +62,7 @@ struct sparse_set {
     }
   }
 
-  const T* try_get(Key key) const
-  {
+  const T* try_get(Key key) const {
     if constexpr (std::is_integral_v<Key>) {
       auto k = static_cast<size_type>(key);
       if (k < sparse_.size() && sparse_[k] != invalid_index) {
@@ -81,8 +75,7 @@ struct sparse_set {
     }
   }
 
-  T& get_or_create(Key key)
-  {
+  T& get_or_create(Key key) {
     if (auto* p = try_get(key)) return *p;
     return emplace(key);
   }
@@ -91,16 +84,14 @@ struct sparse_set {
   // absent instead of nullptr/throwing, so callers can index unconditionally
   // (e.g. `for (auto x : sparse[i])`) without a branch, matching how a
   // static per-item array already gives a possibly-empty T for every index.
-  const T& operator[](Key key) const
-  {
+  const T& operator[](Key key) const {
     if (auto* p = try_get(key)) return *p;
     static const T empty{};
     return empty;
   }
 
   template <typename... Args>
-  T& emplace(Key key, Args&&... args)
-  {
+  T& emplace(Key key, Args&&... args) {
     if constexpr (std::is_integral_v<Key>) {
       auto k = static_cast<size_type>(key);
       if (k >= sparse_.size()) {
@@ -130,8 +121,7 @@ struct sparse_set {
     }
   }
 
-  bool erase(Key key)
-  {
+  bool erase(Key key) {
     if constexpr (std::is_integral_v<Key>) {
       auto k = static_cast<size_type>(key);
       if (k >= sparse_.size() || sparse_[k] == invalid_index) {
@@ -176,8 +166,7 @@ struct sparse_set {
     using value_type = std::pair<const Key&, T&>;
     using difference_type = std::ptrdiff_t;
     value_type operator*() const { return {(*keys)[idx], (*dense)[idx]}; }
-    kv_iterator& operator++()
-    {
+    kv_iterator& operator++() {
       ++idx;
       return *this;
     }
@@ -190,19 +179,37 @@ struct sparse_set {
 
   size_type size() const { return dense_.size(); }
   bool empty() const { return dense_.empty(); }
-  void clear()
-  {
+  void clear() {
     dense_.clear();
     dense_keys_.clear();
     sparse_.clear();
   }
-  void reserve(size_type n)
-  {
+  void reserve(size_type n) {
     dense_.reserve(n);
     dense_keys_.reserve(n);
     sparse_.reserve(n);
   }
 };
 
-}  // namespace siconos::storage
+template <typename T>
+constexpr bool is_sparse_set_v = false;
+template <typename K, typename V>
+constexpr bool is_sparse_set_v<sparse_set<K, V>> = true;
 
+/// f(key, value) for every entry of a per-item property: the dense side of a
+/// sparse set (the items without an entry are not visited), or every index of
+/// a dense per-item storage.
+template <typename C, typename F>
+void for_each_entry(C& c, F&& f) {
+  if constexpr (is_sparse_set_v<std::remove_const_t<C>>) {
+    for (std::size_t j = 0; j < c.dense_.size(); ++j) {
+      f(c.dense_keys_[j], c.dense_[j]);
+    }
+  } else {
+    for (std::size_t i = 0; i < std::size(c); ++i) {
+      f(i, c[i]);
+    }
+  }
+}
+
+}  // namespace siconos::storage

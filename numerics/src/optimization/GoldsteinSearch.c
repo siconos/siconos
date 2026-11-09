@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "GoldsteinSearch.h"
 
 #include <assert.h>  // for assert
@@ -91,15 +91,15 @@ double search_Goldstein_standalone(int n, double* theta, double preRHS, search_d
 
     DEBUG_PRINT("z ");
     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n;
-                       ++i){DEBUG_PRINTF("% 2.2e ", zc[i])} DEBUG_PRINT("\n"));
+                       ++i) { DEBUG_PRINTF("% 2.2e ", zc[i]); } DEBUG_PRINT("\n"));
 
     DEBUG_PRINT("F ");
-    DEBUG_EXPR_WE(
-        for (unsigned int i = 0; i < n; ++i){DEBUG_PRINTF("% 2.2e ", F[i])} DEBUG_PRINT("\n"));
+    DEBUG_EXPR_WE(for (unsigned int i = 0; i < n;
+                       ++i) { DEBUG_PRINTF("% 2.2e ", F[i]); } DEBUG_PRINT("\n"));
 
     DEBUG_PRINT("F_merit ");
     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n;
-                       ++i){DEBUG_PRINTF("% 2.2e ", F_merit[i])} DEBUG_PRINT("\n"));
+                       ++i) { DEBUG_PRINTF("% 2.2e ", F_merit[i]); } DEBUG_PRINT("\n"));
 
     theta_iter = 0.5 * cblas_ddot(n, F_merit, 1, F_merit, 1);
 

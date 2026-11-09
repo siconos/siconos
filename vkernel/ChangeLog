@@ -1,0 +1,46 @@
+ChangeLog for the vkernel (vectorised kernel)
+==============================================
+
+Changes since [vkernel] 5d2bd0835 (compilation optimisation)
+
+Storage / database / mp
+-----------------------
+storage::make reworked (single pack pass, no duplicate or empty columns,
+linear concat_all and tuple_unique), a registry-backed world beside it for
+runtime column lookup, compile-time and runtime database names
+(NONOS_COMPILE_TIME_DATABASE), _nonos bindings split over NONOS_BIND_PARTS.
+
+Narrowphase / collision
+-----------------------
+cxd vendored for the batch engine. Polytope relations (polytopexpolytope_r,
+polytopefdisk_r, polytopedisk_r, mesh edges, manifolds by face clipping, EPA
+depth), shape::polytope item, per-kind shape sets, polydisperse grains,
+space-filter culling, cuNSearch sorted lists.
+
+Simul / time stepping
+---------------------
+Systems and interactions as switchable sets, relation sets via
+topology::bind. Moreau-Jean into kinds, theta split, GOSI at run time,
+mark-based active set, storage::kernels and storage::schedule (the time step
+with timings and dataflow). Action-based kernel and stage names.
+
+Anitescu-Tasora / DEM / explicit
+--------------------------------
+AT: projected Gauss-Seidel CCP, warm start, APGD, Python bindings. DEM:
+penalty springs with symplectic Euler, Python ExplicitDEMOSI. Both used with
+MJ in the nscd cases, comparisons and shear studies; timed.py takes the
+scheme and its parameters as run options.
+
+Bindings / VTKHDF
+-----------------
+_nonos on the registry world by default, vnative backend for contact forces,
+convex polygons and 2d_flow, glyph view, VTKHDF export of bodies, shapes,
+statics, contacts and FEM.
+
+Guix / CMake / tests / docs
+---------------------------
+Guix packaging fixes; CMake NONOS_COMPILE_TIME_DATABASE, config_samples and
+cuda builds, ftime-trace commented out; cppunit and reference suites,
+registry-world tests, NaN checks, FEM and polytope comparisons; docs on
+manifolds, integrators and stability. Cleanup: sanitised mp.hpp and
+pattern.hpp, warning and clang-format passes.

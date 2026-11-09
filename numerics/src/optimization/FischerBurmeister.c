@@ -123,8 +123,8 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   NM_assert(NM_DENSE, nabla_F);
   NM_assert(NM_DENSE, H);
 
-  double* nabla_F_dense = nabla_F->matrix0;
-  double* H_dense = H->matrix0;
+  double* nabla_F_dense = nabla_F->dense;
+  double* H_dense = H->dense;
 
   double normi;
   int n = n1 + n2;

@@ -31,6 +31,7 @@
 #include "fc2d_Solvers.h"             // for fc2d_nsgs_sbm, fc2d_spa...
 #include "fc2d_compute_error.h"       // for fc2d_compute_error
 #include "graph_tools.h"
+#include "nsgs_utils.h"
 #include "numerics_verbose.h"  // for numerics_printf, verbose
 #include "op3x3.h"
 
@@ -55,8 +56,8 @@ static double* fc2d_extract_diagonal_blocks(FrictionContactProblem* problem) {
   int diagPos;
 
   for (unsigned int i = 0; i < nc; ++i) {
-    diagPos = (int)SBM_diagonal_block_index(problem->M->matrix1, i);
-    block = problem->M->matrix1->block[diagPos];
+    diagPos = (int)SBM_diagonal_block_index(problem->M->sparse_block, i);
+    block = problem->M->sparse_block->block[diagPos];
     for (unsigned int j = 0; j < 4; j++) sbcm[i * 4 + j] = block[j];
   }
 
@@ -67,12 +68,12 @@ static void* fc2d_free_diagonal_blocks(double* sbcm) {
   return NULL;
 }
 
-static void fc2d_nsgs_buildLocalProblem_parallel(
+static void fc2d_nsgs_build_local_problem_parallel(
     unsigned int contact, FrictionContactProblem* problem, double* blocks_contiguous,
     double* diagonal_blocks, size_t* index1_data, size_t* index2_data,
     LinearComplementarityProblem* local_problem, double* reaction) {
-  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->matrix0);
-  local_problem->M->matrix0 = &diagonal_blocks[4 * contact];
+  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->dense);
+  local_problem->M->dense = &diagonal_blocks[4 * contact];
 
   local_problem->M->size0 = 2;  // Necessary ?
   local_problem->M->size1 = 2;
@@ -94,23 +95,21 @@ static void fc2d_nsgs_buildLocalProblem_parallel(
      problem->M, reaction, local_problem->q, false); */
 }
 
-static inline double light_error_squared(double localreaction[2], double* oldreaction) {
-  double x0 = oldreaction[0] - localreaction[0];
-  double x1 = oldreaction[1] - localreaction[1];
-  return x0 * x0 + x1 * x1;
+static double light_error_squared(double localreaction[2], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 2);
 }
-static inline double squared_norm(double localreaction[2]) {
-  return (localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1]);
+static double squared_norm(double localreaction[2]) {
+  return nsgs_squared_norm(localreaction, 2);
 }
 
-static inline void accumulateLightErrorSum(double* light_error_sum, double localreaction[2],
-                                           double* oldreaction) {
+static inline void accumulate_light_error_sum(double* light_error_sum, double localreaction[2],
+                                              double* oldreaction) {
   double x0 = oldreaction[0] - localreaction[0];
   double x1 = oldreaction[1] - localreaction[1];
   *light_error_sum += x0 * x0 + x1 * x1;
 }
-static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,
-                                  double* norm_r) {
+static double calculate_light_error(double light_error_sum, unsigned int nc, double* reaction,
+                                    double* norm_r) {
   double error = sqrt(light_error_sum);
   *norm_r = cblas_dnrm2((int32_t)nc * 2, reaction, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
@@ -134,14 +133,14 @@ static int determine_convergence(double error, double tolerance, unsigned int it
   return has_not_converged;
 }
 
-static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOptions* options,
-                                      double* reaction, double* velocity, double tolerance,
-                                      double norm_q) {
+static double calculate_full_error_final(FrictionContactProblem* problem,
+                                         SolverOptions* options, double* reaction,
+                                         double* velocity, double tolerance, double norm_q) {
   double absolute_error;
   /* (*computeError)(problem, reaction , velocity, tolerance, */
   /*                 options, norm_q, &absolute_error); */
 
-  fc2d_compute_error(problem, reaction, velocity, tolerance, norm_q, &absolute_error);
+  fc2d_compute_error(problem, reaction, velocity, tolerance, options, &absolute_error);
 
   if (verbose > 0) {
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
@@ -172,7 +171,7 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
         "Residual = %14.7e < %7.3e",
         iter, error, *tolerance);
 
-    double absolute_error = calculateFullErrorFinal(
+    double absolute_error = calculate_full_error_final(
         problem, options, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q);
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
       *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
@@ -305,13 +304,13 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   SparseBlockStructuredMatrix* SBM_problem = NULL;
 
   /* Create SBM if it does not exist */
-  if (!problem->M->matrix1) {
+  if (!problem->M->sparse_block) {
     SBM_problem = SBM_new();
     switch (problem->M->storageType) {
       // Convert DENSE -> SBM
       case NM_DENSE: {
         SBM_from_dense(problem->dimension, (size_t)problem->M->size1,
-                       (size_t)problem->M->size0, problem->M->matrix0, SBM_problem);
+                       (size_t)problem->M->size0, problem->M->dense, SBM_problem);
         /* printf("Number of blocks: %d\n", SBM_problem->nbblocks);
         for (int b = 0; b < SBM_problem->nbblocks; b++) {
           printf("%e %e %e %e\n", SBM_problem->block[b][0], SBM_problem->block[b][1],
@@ -323,7 +322,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
       case NM_SPARSE: {
         // Get Csparse matrix
         CSparseMatrix* sparse = NULL;
-        if (problem->M->matrix2->origin == NSM_CSR) {
+        if (problem->M->sparse->origin == NSM_CSR) {
           sparse = NM_csr(problem->M);
         } else {
           sparse = NM_csc_trans(problem->M);
@@ -339,7 +338,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
         break;
       }
     }
-    problem->M->matrix1 = SBM_problem;
+    problem->M->sparse_block = SBM_problem;
   }
 
   /* Switch storageType to SBM temporarily */
@@ -353,20 +352,20 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   size_t* rowIndex = (size_t*)malloc(nc * sizeof(size_t));
   for (unsigned int i = 0; i < nc; i++) rowIndex[inv_permutation[i]] = i;
 
-  SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
+  SBM_column_permutation(rowIndex, problem->M->sparse_block, SBM_col_permuted);
   SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
 
   free(rowIndex);
 
-  SparseBlockStructuredMatrix* old_matrix1 = problem->M->matrix1;
-  problem->M->matrix1 = SBM_permuted;
+  SparseBlockStructuredMatrix* old_matrix1 = problem->M->sparse_block;
+  problem->M->sparse_block = SBM_permuted;
 
   /* Store all blocks in contiguous array */
-  unsigned int nbblocks = problem->M->matrix1->nbblocks;
+  unsigned int nbblocks = problem->M->sparse_block->nbblocks;
   double* blocks_contiguous = (double*)malloc(nbblocks * 4 * sizeof(double));
   double* current_block;
   for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++) {
-    current_block = problem->M->matrix1->block[blockNum];
+    current_block = problem->M->sparse_block->block[blockNum];
     for (unsigned int j = 0; j < 4; j++) {
       blocks_contiguous[blockNum * 4 + j] = current_block[j];
     }
@@ -426,12 +425,12 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
-#pragma omp parallel default(none) private(pos, local_problem, localreaction, light_error_2, \
-                                               index1_data, index2_data)                     \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)         \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,         \
-               has_not_converged, norm_q, w, itermax)                                        \
-    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,         \
+#pragma omp parallel default(none)                                                      \
+    private(pos, local_problem, localreaction, light_error_2, index1_data, index2_data) \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter)    \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,    \
+               has_not_converged, norm_q, w, itermax)                                   \
+    shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact,    \
                blocks_contiguous)
     {
       // Allocate local problem
@@ -445,15 +444,15 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       // Copy matrix info for each thread
       index1_data = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      index2_data = (size_t*)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
-      memcpy(index1_data, problem->M->matrix1->index1_data, (nc + 1) * sizeof(size_t));
-      memcpy(index2_data, problem->M->matrix1->index2_data,
-             problem->M->matrix1->nbblocks * sizeof(size_t));
+      index2_data = (size_t*)malloc(problem->M->sparse_block->nbblocks * sizeof(size_t));
+      memcpy(index1_data, problem->M->sparse_block->index1_data, (nc + 1) * sizeof(size_t));
+      memcpy(index2_data, problem->M->sparse_block->index2_data,
+             problem->M->sparse_block->nbblocks * sizeof(size_t));
 
       double* blocks_contiguous_local =
-          (double*)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
+          (double*)malloc(problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       memcpy(blocks_contiguous_local, blocks_contiguous,
-             problem->M->matrix1->nbblocks * 4 * sizeof(double));
+             problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       double* diagonal_blocks_local = fc2d_extract_diagonal_blocks(problem);
 
       double local_light_error_sum = 0.0;
@@ -479,7 +478,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
         }
 
         for (size_t color = 0; color < n_colors; color++) {
-#pragma omp for reduction(+ : light_error_sum)
+#pragma omp for reduction(+ : light_error_sum) schedule(static)
           for (unsigned int permuted_contact = (unsigned int)sum_sizes[color];
                permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
             if (freeze_contacts[permuted_contact] > 0) {
@@ -493,13 +492,13 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
             localreaction[1] = z[pos + 1];
 
             /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel(
+            fc2d_nsgs_build_local_problem_parallel(
                 permuted_contact, problem, blocks_contiguous_local, diagonal_blocks_local,
                 index1_data, index2_data, local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
-                local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
+                local_problem->M->dense, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
             local_light_error_sum += light_error_squared(localreaction, &z[pos]);
@@ -552,12 +551,12 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
           /* error evaluation */
           if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
               SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-            error = calculateLightError(light_error_sum, nc, z, &norm_r);
+            error = calculate_light_error(light_error_sum, nc, z, &norm_r);
             has_not_converged =
                 determine_convergence(error, tolerance, (unsigned int)iter, options);
           } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                      SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-            error = calculateLightError(light_error_sum, nc, z, &norm_r);
+            error = calculate_light_error(light_error_sum, nc, z, &norm_r);
             has_not_converged = determine_convergence_with_full_final(
                 problem, options, z, w, &tolerance, norm_q, error, (unsigned int)iter);
             problem->M->storageType = NM_SPARSE_BLOCK;
@@ -583,11 +582,11 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
     double light_error_sum = 0.;
     double localreaction[2];
 
-#pragma omp parallel default(none) private(pos, local_problem, localreaction, index1_data, \
-                                               index2_data)                                \
-    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter,       \
-               blocks_contiguous)                                                          \
-    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance,       \
+#pragma omp parallel default(none)                                                   \
+    private(pos, local_problem, localreaction, index1_data, index2_data)             \
+    shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter, \
+               blocks_contiguous)                                                    \
+    shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, \
                has_not_converged, norm_q, w, itermax)
     {
       // Allocate local problem
@@ -600,15 +599,15 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       // Copy matrix info for each thread
       index1_data = (size_t*)malloc((nc + 1) * sizeof(size_t));
-      index2_data = (size_t*)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
-      memcpy(index1_data, problem->M->matrix1->index1_data, (nc + 1) * sizeof(size_t));
-      memcpy(index2_data, problem->M->matrix1->index2_data,
-             problem->M->matrix1->nbblocks * sizeof(size_t));
+      index2_data = (size_t*)malloc(problem->M->sparse_block->nbblocks * sizeof(size_t));
+      memcpy(index1_data, problem->M->sparse_block->index1_data, (nc + 1) * sizeof(size_t));
+      memcpy(index2_data, problem->M->sparse_block->index2_data,
+             problem->M->sparse_block->nbblocks * sizeof(size_t));
 
       double* blocks_contiguous_local =
-          (double*)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
+          (double*)malloc(problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       memcpy(blocks_contiguous_local, blocks_contiguous,
-             problem->M->matrix1->nbblocks * 4 * sizeof(double));
+             problem->M->sparse_block->nbblocks * 4 * sizeof(double));
       double* diagonal_blocks_local = fc2d_extract_diagonal_blocks(problem);
 
       double local_light_error_sum = 0.0;
@@ -616,7 +615,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
       while ((iter < itermax) && has_not_converged) {
         for (size_t color = 0; color < n_colors; color++) {
-#pragma omp for
+#pragma omp for schedule(static)
           for (unsigned int permuted_contact = (unsigned int)sum_sizes[color];
                permuted_contact < sum_sizes[color + 1]; permuted_contact++) {
             pos = 2 * permuted_contact;
@@ -624,13 +623,13 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
             localreaction[1] = z[pos + 1];
 
             /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel(
+            fc2d_nsgs_build_local_problem_parallel(
                 permuted_contact, problem, blocks_contiguous_local, diagonal_blocks_local,
                 index1_data, index2_data, local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(
-                local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
+                local_problem->M->dense, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
             local_light_error_sum += light_error_squared(localreaction, &z[pos]);
@@ -696,7 +695,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    error = calculateFullErrorFinal(problem, options, z, w, tolerance, norm_q);
+    error = calculate_full_error_final(problem, options, z, w, tolerance, norm_q);
     problem->M->storageType = NM_SPARSE_BLOCK;
 
     has_not_converged =
@@ -741,7 +740,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
   free(inv_permutation);
 
   /* Restore problem before permutation */
-  problem->M->matrix1 = old_matrix1;
+  problem->M->sparse_block = old_matrix1;
   problem->q = old_q;
   problem->mu = old_mu;
   problem->M->storageType = old_storageType;
@@ -750,7 +749,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
 
   if (SBM_problem != NULL) {
     SBM_free(SBM_problem, SBM_FREE_ALL);
-    problem->M->matrix1 = NULL;
+    problem->M->sparse_block = NULL;
   }
 
   SBM_col_permuted =

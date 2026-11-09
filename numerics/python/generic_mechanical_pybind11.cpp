@@ -24,7 +24,7 @@
 
 namespace py = pybind11;
 
-void wrap_generic_mechanical(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
+void wrap_generic_mechanical(py::module_& m, py::module_& params, py::module_& solver_ids) {
   // GENERIC_MECHANICAL_SOLVER enum
 
   py::enum_<GENERIC_MECHANICAL_SOLVER>(solver_ids, "GENERIC_MECHANICAL_SOLVER",

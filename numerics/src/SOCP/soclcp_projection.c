@@ -30,14 +30,14 @@
 #include "SiconosBlas.h"                                  // for cblas_dgemv
 #include "SolverOptions.h"                                // for SolverOptions
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"                             // for projectionO...
-#include "projectionOnCylinder.h"                         // for projectionO...
-#include "sanitizer.h"                                    // for cblas_dcopy...
-#include "soclcp_compute_error.h"                         // for soclcp_unit...
+#include "projectionOnCone.h"      // for projectionO...
+#include "projectionOnCylinder.h"  // for projectionO...
+#include "sanitizer.h"             // for cblas_dcopy...
+#include "soclcp_compute_error.h"  // for soclcp_unit...
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 #define VERBOSE_DEBUG
 
@@ -57,7 +57,7 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
                                   double* reaction, SolverOptions* options) {
   /*  /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
   int nLocal = localproblem->n;
@@ -90,8 +90,7 @@ void soclcp_projection_free(SecondOrderConeLinearComplementarityProblem* problem
 void soclcp_projection_initialize_with_regularization(
     SecondOrderConeLinearComplementarityProblem* problem,
     SecondOrderConeLinearComplementarityProblem* localproblem) {
-  if (!localproblem->M->matrix0)
-    localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
+  if (!localproblem->M->dense) localproblem->M->dense = (double*)malloc(9 * sizeof(double));
 }
 
 void soclcp_projection_update_with_regularization(
@@ -109,15 +108,16 @@ void soclcp_projection_update_with_regularization(
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   int coneStart = problem->coneIndex[cone];
-  NM_extract_diag_block(problem->M, cone, coneStart, problem->coneIndex[cone + 1] - coneStart,
-                        &localproblem->M->matrix0);
+  CHECK_RETURN(NM_extract_diag_block(problem->M, cone, coneStart,
+                                     problem->coneIndex[cone + 1] - coneStart,
+                                     &localproblem->M->dense) == NUMERICS_OK);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current cone. ****/
   soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone, options);
 
   double rho = options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO];
-  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
+  for (int i = 0; i < 3; i++) localproblem->M->dense[i + 3 * i] += rho;
 
   double* qLocal = localproblem->q;
   int in = 3 * cone, it = in + 1, is = it + 1;
@@ -166,7 +166,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
   int nLocal = localproblem->n;
@@ -309,7 +309,7 @@ int soclcp_projectionOnCylinder_solve(
   /*  /\* Build local problem for the current cone *\/ */
   /*   soclcp_projection_update(cone, reaction); */
 
-  double* MLocal = localproblem->M->matrix0;
+  double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
   int nLocal = localproblem->n;
@@ -365,27 +365,26 @@ static int soclcp_projectionOnCone_solve_wrap(void* problem, double* reaction,
 
 REGISTER_SOLVER(SICONOS_SOCLCP_ProjectionOnCone, "SOCLCP_ProjectionOnCone",
                 "Projection on Second Order Cone (local solver)",
-                soclcp_projectionOnCone_init_wrap,
-                soclcp_projectionOnCone_solve_wrap,
-                NULL,
-                NULL,
-                soclcp_projectionOnCone_set_default,
-                100,   /* default_max_iter */
-                1e-6,  /* default_tol */
-                1);    /* is_local */
+                soclcp_projectionOnCone_init_wrap, soclcp_projectionOnCone_solve_wrap, NULL,
+                NULL, soclcp_projectionOnCone_set_default, 100, /* default_max_iter */
+                1e-6,                                           /* default_tol */
+                1);                                             /* is_local */
 
 static void soclcp_projectionOnConeWithLocalIteration_set_default(SolverOptions* options) {
   /* No specific defaults */
 }
 
-static int soclcp_projectionOnConeWithLocalIteration_init_wrap(void* problem, SolverOptions* options) {
+static int soclcp_projectionOnConeWithLocalIteration_init_wrap(void* problem,
+                                                               SolverOptions* options) {
   (void)problem;
   (void)options;
   return NUMERICS_OK;
 }
 
-static int soclcp_projectionOnConeWithLocalIteration_solve_wrap(
-    void* problem, double* reaction, double* velocity, SolverOptions* options) {
+static int soclcp_projectionOnConeWithLocalIteration_solve_wrap(void* problem,
+                                                                double* reaction,
+                                                                double* velocity,
+                                                                SolverOptions* options) {
   (void)velocity;
   return soclcp_projectionOnConeWithLocalIteration_solve(
       (SecondOrderConeLinearComplementarityProblem*)problem, reaction, options);
@@ -395,10 +394,8 @@ REGISTER_SOLVER(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration,
                 "SOCLCP_ProjectionOnConeWithLocalIteration",
                 "Projection on Second Order Cone with Local Iteration (local solver)",
                 soclcp_projectionOnConeWithLocalIteration_init_wrap,
-                soclcp_projectionOnConeWithLocalIteration_solve_wrap,
-                NULL,
-                NULL,
+                soclcp_projectionOnConeWithLocalIteration_solve_wrap, NULL, NULL,
                 soclcp_projectionOnConeWithLocalIteration_set_default,
-                100,   /* default_max_iter */
-                1e-6,  /* default_tol */
-                1);    /* is_local */
+                100,  /* default_max_iter */
+                1e-6, /* default_tol */
+                1);   /* is_local */

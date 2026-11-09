@@ -31,13 +31,13 @@ namespace siconos::fem::cable {
  */
 struct Carriers {
   Carriers() = delete;
-  Carriers(Carriers &&) = delete;
-  Carriers(const Carriers &) = delete;
-  Carriers &operator=(const Carriers &) = delete;
-  Carriers &operator=(Carriers &&) = delete;
+  Carriers(Carriers&&) = delete;
+  Carriers(const Carriers&) = delete;
+  Carriers& operator=(const Carriers&) = delete;
+  Carriers& operator=(Carriers&&) = delete;
   virtual ~Carriers() noexcept = default;
 
-  explicit Carriers(const nlohmann::json &j)
+  explicit Carriers(const nlohmann::json& j)
       : number(j.value("number", 0)),
         mass(j.value("mass", 0.0)),
         distanceBetweenCarriers(j.value("distanceBetweenCarriers", 0.0)),
@@ -68,11 +68,11 @@ struct Carriers {
 namespace nlohmann {
 template <>
 struct adl_serializer<siconos::fem::cable::Carriers> {
-  static siconos::fem::cable::Carriers from_json(const json &j) {
+  static siconos::fem::cable::Carriers from_json(const json& j) {
     return siconos::fem::cable::Carriers(j);
   }
 
-  static void to_json(ordered_json &j, const siconos::fem::cable::Carriers &c) {
+  static void to_json(ordered_json& j, const siconos::fem::cable::Carriers& c) {
     j = json{{"number", c.number},
              {"mass", c.mass},
              {"distanceBetweenCarriers", c.distanceBetweenCarriers},

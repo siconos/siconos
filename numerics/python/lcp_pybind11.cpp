@@ -24,7 +24,7 @@
 
 namespace py = pybind11;
 
-void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
+void wrap_lcp(py::module_& m, py::module_& params, py::module_& solver_ids) {
   // LCP_SOLVER enum
   py::enum_<LCP_SOLVER>(solver_ids, "LCP_SOLVER", "LCP solvers enum")
       .value("SICONOS_LCP_LEMKE", LCP_SOLVER::SICONOS_LCP_LEMKE, "Lemke LCP solver")
@@ -102,7 +102,8 @@ void wrap_lcp(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
              "Yes trivial solution skip")
       .export_values();
 
-  py::enum_<SICONOS_LCP_PIVOT_TYPE>(params, "SICONOS_LCP_PIVOT_TYPE_enum", "LCP pivot type enum")
+  py::enum_<SICONOS_LCP_PIVOT_TYPE>(params, "SICONOS_LCP_PIVOT_TYPE_enum",
+                                    "LCP pivot type enum")
       .value("SICONOS_LCP_PIVOT_BARD", SICONOS_LCP_PIVOT_TYPE::SICONOS_LCP_PIVOT_BARD,
              "Bard pivoting")
       .value("SICONOS_LCP_PIVOT_LEAST_INDEX",

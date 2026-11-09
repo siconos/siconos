@@ -6,8 +6,8 @@
 #include "fc3d_NaturalMapFGenerated.h"    // for fc3d_NaturalMapFGenerated
 #include "op3x3.h"                        // for cpy3x3, cpy3, SET3
 
-void fc3d_NaturalMapFunctionGenerated(double *reaction, double *velocity, double mu,
-                                      double *rho, double *f, double *A, double *B) {
+void fc3d_NaturalMapFunctionGenerated(double* reaction, double* velocity, double mu,
+                                      double* rho, double* f, double* A, double* B) {
   double result[21];
 
   assert(reaction);

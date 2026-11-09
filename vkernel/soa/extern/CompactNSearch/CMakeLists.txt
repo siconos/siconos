@@ -22,19 +22,19 @@ if (BUILD_AS_SHARED_LIBS)
 	if(WIN32)
 		add_definitions(-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS)
 		set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES CACHE BOOL "Export all symbols")
-	endif(WIN32)	
+	endif(WIN32)
 endif (BUILD_AS_SHARED_LIBS)
 
 SET(CMAKE_DEBUG_POSTFIX "_d")
 
-set (HEADER_FILES 
+set (HEADER_FILES
 		include/Config.h
 		include/CompactNSearch.h
 		include/PointSet.h
 		include/DataStructures.h)
 
 if (BUILD_AS_SHARED_LIBS)
-	add_library(CompactNSearch SHARED 
+	add_library(CompactNSearch SHARED
 	    ${HEADER_FILES}
 		src/CompactNSearch.cpp
 )
@@ -54,7 +54,7 @@ install(TARGETS CompactNSearch
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
-	
+
 OPTION(COMPACTNSEARCH_USE_DOUBLE_PRECISION "Use double precision"	OFF)
 set(COMPACTNSEARCH_USE_DOUBLE_PRECISION OFF)
 if (COMPACTNSEARCH_USE_DOUBLE_PRECISION)
@@ -63,11 +63,10 @@ endif (COMPACTNSEARCH_USE_DOUBLE_PRECISION)
 
 if(WIN32)
 	add_definitions(CompactNSearch -D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
-endif() 
+endif()
 
 option(BUILD_DEMO "Build example of how to use this library."
 		OFF)
 if(BUILD_DEMO)
 	add_subdirectory(demo)
 endif(BUILD_DEMO)
-

@@ -15,17 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
 from pathlib import Path
+
 import h5py
 import pytest
-import os
 
 has_mechanics_io = False
 try:
     import siconos.io.mechanics_hdf5 as sh5
 
     has_mechanics_io = True
-except Exception:
+except ImportError:
     pass
 
 
@@ -43,15 +44,15 @@ def test_create_h5():
     try:
         with h5py.File(outputfile_name, "r") as f:
             # Verify that the 'data' group exists
-            assert (
-                "data" in f
-            ), "Error: The HDF5 file does not contain the 'data' group."
+            assert "data" in f, (
+                "Error: The HDF5 file does not contain the 'data' group."
+            )
 
             # Verify that 'static' and 'velocities' datasets exist
             assert "static" in f["data"], "The 'static' dataset is missing."
-            assert (
-                "velocities" in f["data"]
-            ), "Error: The 'velocities' dataset is missing."
+            assert "velocities" in f["data"], (
+                "Error: The 'velocities' dataset is missing."
+            )
 
             # Check the dimensions of the datasets
             static_shape = f["data"]["static"].shape

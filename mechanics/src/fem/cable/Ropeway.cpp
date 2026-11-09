@@ -23,8 +23,8 @@
 #include "Rope.h"
 #include "SiconosVector.hpp"
 
-void siconos::fem::cable::Ropeway::computeCatenary(const MechanicalProperties &a_meca,
-                                                   const std::vector<Pylon> &a_piles,
+void siconos::fem::cable::Ropeway::computeCatenary(const MechanicalProperties& a_meca,
+                                                   const std::vector<Pylon>& a_piles,
                                                    int nb_nodes, double a_tol, int a_nmax) {
   /*
 
@@ -60,9 +60,9 @@ void siconos::fem::cable::Ropeway::computeCatenary(const MechanicalProperties &a
 }
 
 void siconos::fem::cable::Ropeway::prepareSupport(
-    std::vector<std::shared_ptr<Support>> &a_supports, int &a_pulleyIdx) const {
+    std::vector<std::shared_ptr<Support>>& a_supports, int& a_pulleyIdx) const {
   if (!is_down_) {
-    for (auto &r : ropes_) {
+    for (auto& r : ropes_) {
       addSupport(r, a_supports, a_pulleyIdx);
     }
   } else {
@@ -73,8 +73,8 @@ void siconos::fem::cable::Ropeway::prepareSupport(
 }
 
 void siconos::fem::cable::Ropeway::addSupport(
-    const Rope &a_rope, std::vector<std::shared_ptr<Support>> &a_supports,
-    int &a_pulleyIdx) const {
+    const Rope& a_rope, std::vector<std::shared_ptr<Support>>& a_supports,
+    int& a_pulleyIdx) const {
   if (!a_rope.start_pylon().isStation()) {  // standard case
     a_supports.push_back(std::make_shared<Support>(a_rope.start_pylon().coords(),
                                                    a_rope.start_pylon().get_radius()));
@@ -90,19 +90,19 @@ void siconos::fem::cable::Ropeway::addSupport(
 int siconos::fem::cable::Ropeway::computeNumberOfElements(double element_length,
                                                           double ropewayLength) {
   int nbelem = 0;
-  for (auto &r : ropes_) {
+  for (auto& r : ropes_) {
     nbelem += r.computeNumberOfElements(element_length, ropewayLength);
   }
   return nbelem;
 }
 
-int siconos::fem::cable::Ropeway::initializeFEM(siconos::algebra::SiconosVector &a_q,
-                                                siconos::algebra::SiconosVector &a_R,
-                                                siconos::algebra::SiconosVector &a_TS,
+int siconos::fem::cable::Ropeway::initializeFEM(siconos::algebra::SiconosVector& a_q,
+                                                siconos::algebra::SiconosVector& a_R,
+                                                siconos::algebra::SiconosVector& a_TS,
                                                 int q_offset) const {
   int offset = q_offset;
   if (!is_down_) {
-    for (auto &r : ropes_) {
+    for (auto& r : ropes_) {
       // Compute the local mesh (for each rope) and get back the offset (number of elements in
       // the rope) for the position in q, R and T vectors
       offset += r.initializeFEM(a_q, a_R, a_TS, offset);
@@ -115,11 +115,11 @@ int siconos::fem::cable::Ropeway::initializeFEM(siconos::algebra::SiconosVector 
   return offset;
 }
 
-const siconos::fem::cable::Pylon &siconos::fem::cable::Ropeway::getFirstPylon() {
+const siconos::fem::cable::Pylon& siconos::fem::cable::Ropeway::getFirstPylon() {
   return ropes_.front().start_pylon();
 }
 
-const siconos::fem::cable::Pylon &siconos::fem::cable::Ropeway::getLastPylon() {
+const siconos::fem::cable::Pylon& siconos::fem::cable::Ropeway::getLastPylon() {
   return ropes_.back().start_pylon();
 }
 
@@ -142,13 +142,13 @@ double siconos::fem::cable::Ropeway::length() const {
   // Summation of the lengths of all ropes, from station to station
   // Warning: this does not include the length of the cable around
   // the pulleys at the stations.
-  for (auto &r : ropes_) {
+  for (auto& r : ropes_) {
     l += r.length();
   }
   return l;
 }
 
-const siconos::fem::cable::MechanicalProperties &
+const siconos::fem::cable::MechanicalProperties&
 siconos::fem::cable::Ropeway::mechanicalProperties0() const {
   return ropes_.front().mechanicalProperties();
 }

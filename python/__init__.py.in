@@ -9,7 +9,7 @@ version = "@SICONOS_VERSION@"
 __all__ = ["@COMPONENTS@"][0].split(';')
 if "externals" in __all__:
     __all__.remove("externals")
-    
+
 
 
 def _translate_cmake_option(option):

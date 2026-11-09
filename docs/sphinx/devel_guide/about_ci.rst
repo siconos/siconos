@@ -10,7 +10,7 @@ The following process will be executed on a worker:
 * git clone siconos from github
 * create build dir
 * run in build dir::
-    
+
     ../CI/driver.py --run --root-dir=..
 
 
@@ -27,11 +27,11 @@ For example, if
   known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,
                 siconos_gcc_asan,
-     
+
                'siconos---vm1':
                (siconos_documentation,
                 siconos_numerics_only,
-     
+
 
 then tasks siconos_fedora_latest and siconos_gcc_asan will be executed on node vm0, while siconos_documentation and siconos_numerics_only
 will be executed on vm1.

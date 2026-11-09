@@ -35,16 +35,16 @@ class BaseModel {
  public:
   // Rule of 5
   BaseModel() = default;
-  BaseModel(const BaseModel &) = default;
-  BaseModel &operator=(const BaseModel &) = default;
-  BaseModel(BaseModel &&) = default;
-  BaseModel &operator=(BaseModel &&) = default;
+  BaseModel(const BaseModel&) = default;
+  BaseModel& operator=(const BaseModel&) = default;
+  BaseModel(BaseModel&&) = default;
+  BaseModel& operator=(BaseModel&&) = default;
   virtual ~BaseModel() noexcept = default;
 
-  void from_json(const json &j, const std::string &a_header);
+  void from_json(const json& j, const std::string& a_header);
 
  protected:
-  virtual void from_json(const json &j) = 0;
+  virtual void from_json(const json& j) = 0;
 };
 }  // namespace siconos::fem::cable
 #endif

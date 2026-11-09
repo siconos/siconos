@@ -26,8 +26,7 @@
 // #define DEBUG_MESSAGES
 // #include "siconos_debug.h"
 
-void siconos::simulation::NonSmoothEvent::process(Simulation& simulation)
-{
+void siconos::simulation::NonSmoothEvent::process(Simulation& simulation) {
   auto eventDriven = dynamic_cast<EventDriven*>(&simulation);
   if (!eventDriven)
     THROW_EXCEPTION("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");

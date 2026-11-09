@@ -69,7 +69,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::display() const 
   std::cout << "======= m " << _m << " _n " << _n << "\n";
   LinearOSNS::display();
 }
-void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks(siconos::graphs::InteractionsGraph& indexSet_dummy) {
+void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks(
+    siconos::graphs::InteractionsGraph& indexSet_dummy) {
   // The present functions checks various conditions and possibly
   // compute interactionBlocks matrices.
   //
@@ -282,13 +283,12 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
       "\n");
 }
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::displayBlocks(
-									      siconos::graphs::InteractionsGraph& indexSet) {
+    siconos::graphs::InteractionsGraph& indexSet) {
   std::cout << "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::displayBlocks(std::"
                "shared_ptr<"
                "siconos::graphs::"
                "InteractionsGraph> indexSet) "
             << "\n";
-
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {

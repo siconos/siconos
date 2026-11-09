@@ -22,23 +22,23 @@
 <SiconosModel>
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
-		<DS_Definition>		
+		<DS_Definition>
 			<LagrangianDS number='13'>
-				<StepsInMemory>2</StepsInMemory>				
+				<StepsInMemory>2</StepsInMemory>
 				<q0 vectorSize='3'>
 					1.0 2.0 3.0
 				</q0>
 				<Velocity0  vectorSize='3'>
 					4.0 5.0 6.0
 				</Velocity0>
-				<Mass matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</Mass>			
+				</Mass>
 			</LagrangianDS>
 			<LagrangianDS number='8'>
-				<StepsInMemory>1</StepsInMemory>				
+				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>
 					1 2.0 3.0
 				</q0>
@@ -55,7 +55,7 @@
 				<JacobianVelocityFGyr matrixPlugin="TestPlugin:computeJacobianVelocityFGyr"/>
 			</LagrangianDS>
 			<LagrangianDS number='4'>
-				<StepsInMemory>1</StepsInMemory>				
+				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>
 					1 2.0 3.0
 				</q0>
@@ -69,29 +69,29 @@
 				<FInt vectorSize='3'>
 					3 6 9
 				</FInt>
-				<JacobianQFInt matrixRowSize='3' matrixColSize='3'>	
+				<JacobianQFInt matrixRowSize='3' matrixColSize='3'>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
-				</JacobianQFInt>			
-				<JacobianVelocityFInt matrixRowSize='3' matrixColSize='3'>	
+				</JacobianQFInt>
+				<JacobianVelocityFInt matrixRowSize='3' matrixColSize='3'>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
-				</JacobianVelocityFInt>			
+				</JacobianVelocityFInt>
 				<FGyr vectorSize='3'>
 					4 8 12
 				</FGyr>
-				<JacobianQFGyr matrixRowSize='3' matrixColSize='3'>	
+				<JacobianQFGyr matrixRowSize='3' matrixColSize='3'>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
-				</JacobianQFGyr>			
-				<JacobianVelocityFGyr matrixRowSize='3' matrixColSize='3'>	
+				</JacobianQFGyr>
+				<JacobianVelocityFGyr matrixRowSize='3' matrixColSize='3'>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
-				</JacobianVelocityFGyr>			
+				</JacobianVelocityFGyr>
 			</LagrangianDS>
 		</DS_Definition>
 	</NSDS>

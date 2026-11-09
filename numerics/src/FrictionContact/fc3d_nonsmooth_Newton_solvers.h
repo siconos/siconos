@@ -36,15 +36,15 @@
 /** The nonsmooth function signature.
 [...]
  */
-typedef void (*fc3d_nonsmooth_Newton_solversFunPtr)(void* data, unsigned int problem_size,
-                                                    double* reaction, double* velocity,
-                                                    double* mu, double* rho, double* F,
-                                                    double* A, double* B);
+typedef int (*fc3d_nonsmooth_Newton_solversFunPtr)(void* data, unsigned int problem_size,
+                                                   double* reaction, double* velocity,
+                                                   double* mu, double* rho, double* F,
+                                                   double* A, double* B);
 
 /** The nonsmooth function signature for a 3x3 block.
  */
-typedef void (*FrictionContactNSFun3x3Ptr)(double* reaction, double* velocity, double mu,
-                                           double* rho, double* F, double* A, double* B);
+typedef int (*FrictionContactNSFun3x3Ptr)(double* reaction, double* velocity, double mu,
+                                          double* rho, double* F, double* A, double* B);
 
 /** The nonsmooth equation structure.
 [...]

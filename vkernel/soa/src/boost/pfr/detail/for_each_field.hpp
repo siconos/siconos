@@ -12,7 +12,7 @@
 #ifdef BOOST_PFR_HAS_STD_MODULE
 import std;
 #else
-#include <type_traits>      // metaprogramming stuff
+#include <type_traits>  // metaprogramming stuff
 #endif
 
 #include <boost/pfr/detail/core.hpp>
@@ -20,31 +20,31 @@ import std;
 #include <boost/pfr/detail/for_each_field_impl.hpp>
 #include <boost/pfr/detail/make_integer_sequence.hpp>
 
-namespace boost { namespace pfr { namespace detail {
+namespace boost {
+namespace pfr {
+namespace detail {
 
 template <class T, class F>
 constexpr void for_each_field(T&& value, F&& func) {
-    constexpr std::size_t fields_count_val = boost::pfr::detail::fields_count<std::remove_reference_t<T>>();
+  constexpr std::size_t fields_count_val =
+      boost::pfr::detail::fields_count<std::remove_reference_t<T>>();
 
-    ::boost::pfr::detail::for_each_field_dispatcher(
-        value,
-        [f = std::forward<F>(func)](auto&& t) mutable {
-            // MSVC related workaround. Its lambdas do not capture constexprs.
-            constexpr std::size_t fields_count_val_in_lambda
-                = boost::pfr::detail::fields_count<std::remove_reference_t<T>>();
+  ::boost::pfr::detail::for_each_field_dispatcher(
+      value,
+      [f = std::forward<F>(func)](auto&& t) mutable {
+        // MSVC related workaround. Its lambdas do not capture constexprs.
+        constexpr std::size_t fields_count_val_in_lambda =
+            boost::pfr::detail::fields_count<std::remove_reference_t<T>>();
 
-            ::boost::pfr::detail::for_each_field_impl(
-                t,
-                std::forward<F>(f),
-                detail::make_index_sequence<fields_count_val_in_lambda>{},
-                std::is_rvalue_reference<T&&>{}
-            );
-        },
-        detail::make_index_sequence<fields_count_val>{}
-    );
+        ::boost::pfr::detail::for_each_field_impl(
+            t, std::forward<F>(f), detail::make_index_sequence<fields_count_val_in_lambda>{},
+            std::is_rvalue_reference<T&&>{});
+      },
+      detail::make_index_sequence<fields_count_val>{});
 }
 
-}}} // namespace boost::pfr::detail
+}  // namespace detail
+}  // namespace pfr
+}  // namespace boost
 
-
-#endif // BOOST_PFR_DETAIL_FOR_EACH_FIELD_HPP
+#endif  // BOOST_PFR_DETAIL_FOR_EACH_FIELD_HPP

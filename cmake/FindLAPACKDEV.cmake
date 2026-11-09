@@ -8,11 +8,11 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
-# 
+#
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Siconos; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-# 
+#
 #  Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 
 #[=======================================================================[.rst:
@@ -50,11 +50,11 @@ Result Variables
 ^^^^^^^^^^^^^^^^
 
 Same as https://cmake.org/cmake/help/latest/module/FindLAPACK.html
-plus a target 'LAPACK::LAPACK' 
+plus a target 'LAPACK::LAPACK'
 
 
 Usage :
-  
+
 .. code-block:: cmake
 
     set(BLA_VENDOR OpenBlas)
@@ -127,7 +127,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
     set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
   elseif(BLAS_NAME STREQUAL "OpenBlas")
-    set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")   
+    set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")
   elseif(BLAS_NAME STREQUAL "Accelerate")
     set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
   elseif(BLAS_NAME STREQUAL "Matlab")
@@ -140,11 +140,11 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     #SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE")
     #SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${EXTRA_LAPACK_LIB})
   #endif(MSVC AND HAS_LAPACKE)
-  
+
   if(HAS_MATLAB_LAPACK)
     SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-Dptrdiff_t=long")
   endif(HAS_MATLAB_LAPACK)
-  
+
   #check_lapack_interface()
   # Functions that are required
   set(lapack_functions
@@ -169,16 +169,16 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
         EXTRA_LIBS ${LAPACK_EXTRA_LIBS}
         PREFIX ${LAPACK_PREFIX}
         SUFFIX ${LAPACK_SUFFIX})
-      
+
         list(APPEND LAPACK_LIBRARIES ${CLAPACK_LIBRARY})
         list(REMOVE_DUPLICATES LAPACK_LIBRARIES)
 
   else()
     # we assume mkl is complete ...
     set(LAPACK_LIBRARIES ${BLAS_LIBRARIES} CACHE STRING "")
-    
+
   endif()
-  
+
 endif()
 
 # -- Library setup --
@@ -197,4 +197,3 @@ endif()
 
 set(CMAKE_FIND_ROOT_PATH)
 message(" ---- End of Blas/Lapack search process ---- ")
-

@@ -19,6 +19,7 @@
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 
 #include <assert.h>  // for assert
+#include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for sqrt
 #include <stddef.h>  // for NULL
 
@@ -26,6 +27,8 @@
 #include "FrictionContactProblem.h"         // IWYU pragma: keep
 #include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_NSN_H...
 #include "NumericsFwd.h"                    // for SolverOptions, FrictionCo...
+#include "NumericsMatrix.h"                 // for NM_gemv
+#include "SiconosBlas.h"                    // for cblas_dnrm2, cblas_daxpy
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_cst.h"                         // for SICONOS_VI_ERROR_EVALUATI...
 #include "fc3d_AlartCurnier_functions.h"    // for computeAlartCurnierJeanMo...
@@ -36,8 +39,8 @@
 #include "numerics_verbose.h"
 
 void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr computeACFun3x3,
-                               double *reaction, double *velocity, double *mu, double *rho,
-                               double *result, double *A, double *B) {
+                               double* reaction, double* velocity, double* mu, double* rho,
+                               double* result, double* A, double* B) {
   assert(reaction);
   assert(velocity);
   assert(rho);
@@ -63,17 +66,18 @@ void fc3d_AlartCurnierFunction(unsigned int problemSize, AlartCurnierFun3x3Ptr c
   }
 }
 
-void nonsmoothEqnAlartCurnierFun(void *arg, unsigned int problemSize, double *reaction,
-                                 double *velocity, double *mu, double *rho, double *result,
-                                 double *A, double *B) {
-  AlartCurnierParams *acparams_p = (AlartCurnierParams *)arg;
+int nonsmoothEqnAlartCurnierFun(void* arg, unsigned int problemSize, double* reaction,
+                                double* velocity, double* mu, double* rho, double* result,
+                                double* A, double* B) {
+  AlartCurnierParams* acparams_p = (AlartCurnierParams*)arg;
 
   fc3d_AlartCurnierFunction(problemSize, acparams_p->computeACFun3x3, reaction, velocity, mu,
                             rho, result, A, B);
+  return 0;
 }
 
-void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double *reaction,
-                                        double *velocity, int *info, SolverOptions *options) {
+void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem* problem, double* reaction,
+                                        double* velocity, int* info, SolverOptions* options) {
   /* verbose=1; */
   assert(problem);
   assert(reaction);
@@ -89,6 +93,16 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double 
   assert(problem->q);
   assert(problem->mu);
   assert(problem->M);
+
+  const int num_dofs = problem->dimension * problem->numberOfContacts;
+  if ((cblas_dnrm2(num_dofs, velocity, 1) < DBL_EPSILON) &&
+      (cblas_dnrm2(num_dofs, reaction, 1) < DBL_EPSILON)) {
+    /* A zero initial velocity and reaction  makes the Alart--Curnier Jacobian singular.
+     * Initialize the velocity consistently with the provided reaction.
+     * With a null reaction this gives velocity = q. */
+    NM_gemv(1.0, problem->M, reaction, 0.0, velocity);
+    cblas_daxpy(num_dofs, 1.0, problem->q, 1, velocity, 1);
+  }
 
   assert(!options->iparam[4]);  // only host
 
@@ -116,12 +130,12 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double 
   fc3d_nonsmooth_Newton_solvers equation;
 
   equation.problem = problem;
-  equation.data = (void *)&acparams;
+  equation.data = (void*)&acparams;
   equation.function = &nonsmoothEqnAlartCurnierFun;
 
   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
       SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN) {
-    SolverOptions *options_vi_eg = solver_options_create(FC3D_VI_EG);
+    SolverOptions* options_vi_eg = solver_options_create(FC3D_VI_EG);
     SOLVER_MAX_ITER(options_vi_eg) = 50;
     SOLVER_TOL(options_vi_eg) = sqrt(SOLVER_TOL(options));
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] =
@@ -141,7 +155,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(FrictionContactProblem *problem, double 
   }
 }
 
-void fc3d_nsn_ac_set_default(SolverOptions *options) {
+void fc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options) {
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
@@ -168,7 +182,7 @@ void fc3d_nsn_ac_set_default(SolverOptions *options) {
 }
 
 // static int fc3d_nsn_ac_init_wrap(void *problem, SolverOptions *options) {
-//   fc3d_nsn_ac_set_default(options);
+//   fc3d_nonsmooth_newton_alart_curnier_set_default(options);
 //   return NUMERICS_OK;
 // }
 

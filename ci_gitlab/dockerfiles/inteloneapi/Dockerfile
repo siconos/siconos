@@ -18,7 +18,7 @@ COPY ci_gitlab/dockerfiles/siconosintelenv.yml  /home/
 RUN conda config --prepend channels conda-forge
 RUN conda env create -f /home/siconosintelenv.yml
 #RUN conda config set channel_priority strict
-#RUN conda install -y lxml pytest matplotlib h5py pybind11 vtk 
+#RUN conda install -y lxml pytest matplotlib h5py pybind11 vtk
 #COPY ci_gitlab/dockerfiles/install_boost.sh  /home/
 #RUN mkdir -p $CI_PROJECT_DIR/build
 #RUN mkdir -p $CI_PROJECT_DIR/deps

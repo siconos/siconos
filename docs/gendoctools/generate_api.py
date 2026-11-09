@@ -20,9 +20,8 @@ Siconos is a program dedicated to modeling, simulation and control
 """
 
 from pathlib import Path
-from gendoctools import cpp2rst
-from gendoctools import python2rst
 
+from gendoctools import cpp2rst, python2rst
 
 siconos_components = {
     "externals": 0,

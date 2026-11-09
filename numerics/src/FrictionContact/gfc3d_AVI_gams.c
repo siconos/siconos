@@ -39,7 +39,7 @@
 #include "siconos_debug.h"
 #define NB_APPROX 10
 
-static ptrdiff_t SN_rm_normal_part_on_H(ptrdiff_t i, ptrdiff_t j, double val, void* env) {
+static ptrdiff_t sn_rm_normal_part_on_h(ptrdiff_t i, ptrdiff_t j, double val, void* env) {
   if (j % 3 == 0) {
     return 0;
   } else {
@@ -47,13 +47,13 @@ static ptrdiff_t SN_rm_normal_part_on_H(ptrdiff_t i, ptrdiff_t j, double val, vo
   }
 }
 
-static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* mus) {
+static void fc3d_gams_generate_first_constraints(NumericsMatrix* Akmat, double* mus) {
   unsigned nb_contacts = (unsigned)Akmat->size1 / 3;
   assert(nb_contacts * 3 == (unsigned)Akmat->size1);
   unsigned nb_approx = (unsigned)Akmat->size0 / nb_contacts;
   assert(nb_approx * nb_contacts == (unsigned)Akmat->size0);
   unsigned offset_row = 0;
-  CSparseMatrix* triplet_mat = Akmat->matrix2->triplet;
+  CSparseMatrix* triplet_mat = Akmat->sparse->triplet;
 
   double angle = 2 * M_PI / (NB_APPROX + 1);
   DEBUG_PRINTF("angle: %g\n", angle);
@@ -69,7 +69,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   }
 }
 
-static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* reaction,
+static int gfc3d_avi_gams_base(GlobalFrictionContactProblem* problem, double* reaction,
                                double* velocity, SolverOptions* options,
                                const char* solverName) {
   CHECK_NULL(problem);
@@ -92,8 +92,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   int size = problem->dimension * problem->numberOfContacts;
 
-  NumericsMatrix Htmat;
-  NM_fill(&Htmat, NM_SPARSE, problem->H->size0, problem->H->size1, NULL);
+  NumericsMatrix* Htmat = NM_copy_to_sparse(problem->H, DBL_EPSILON);
   NumericsMatrix Emat;
   NM_null(&Emat);
   Emat.storageType = NM_SPARSE;
@@ -101,10 +100,10 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
   Emat.size0 = size;
   Emat.size1 = size;
 
-  Emat.matrix2->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
+  Emat.sparse->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
 
   for (unsigned i = 0; i < size; i += 3) {
-    cs_entry(Emat.matrix2->triplet, i, i, 1.);
+    cs_entry(Emat.sparse->triplet, i, i, 1.);
   }
 
   NumericsMatrix Akmat;
@@ -113,11 +112,11 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
   numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX * problem->numberOfContacts;
   Akmat.size1 = size;
-  Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                      NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-  CSparseMatrix* Ak_triplet = Akmat.matrix2->triplet;
+  Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                     NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+  CSparseMatrix* Ak_triplet = Akmat.sparse->triplet;
 
-  FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
+  fc3d_gams_generate_first_constraints(&Akmat, problem->mu);
 
   SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model,
                    sysdir, "/fc_vi.gms");
@@ -177,8 +176,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   optSetIntStr(Optr, "Keep", 0);
 
-  NM_copy_to_sparse(problem->H, &Htmat);
-  cs_fkeep(NM_csc(&Htmat), &SN_rm_normal_part_on_H, NULL);
+  cs_fkeep(NM_csc(Htmat), &sn_rm_normal_part_on_h, NULL);
 
   cblas_dcopy(size, problem->b, 1, reaction, 1);
   for (unsigned i = 0; i < size; i += 3) {
@@ -192,7 +190,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   SN_GAMS_add_NM_to_gdx(gdx_data, problem->M, "M");
   SN_GAMS_add_NM_to_gdx(gdx_data, problem->H, "H");
-  SN_GAMS_add_NM_to_gdx(gdx_data, &Htmat, "Ht");
+  SN_GAMS_add_NM_to_gdx(gdx_data, Htmat, "Ht");
   SN_GAMS_add_NM_to_gdx(gdx_data, &Emat, "E");
   SN_GAMS_add_NM_to_gdx(gdx_data, &Akmat, "Ak");
 
@@ -211,7 +209,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
   SN_free_SN_GAMS_gdx(gdx_data);
   free(gdx_data);
-  NM_clear(&Htmat);
+  NM_free(Htmat);
   NM_clear(&Emat);
   NM_clear(&Akmat);
   optFree(&Optr);
@@ -223,24 +221,24 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double* re
 
 void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double* reaction,
                          double* velocity, int* info, SolverOptions* options) {
-  *info = gfc3d_AVI_gams_base(problem, reaction, velocity, options, "path");
+  *info = gfc3d_avi_gams_base(problem, reaction, velocity, options, "path");
 }
 
 void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double* reaction,
                            double* velocity, int* info, SolverOptions* options) {
-  *info = gfc3d_AVI_gams_base(problem, reaction, velocity, options, "pathvi");
+  *info = gfc3d_avi_gams_base(problem, reaction, velocity, options, "pathvi");
 }
 
 #else
 
-void gfc3d_AVI_gams_path(GlobalFrictionContactProblem *problem, double *reaction,
-                         double *velocity, int *info, SolverOptions *options) {
+void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double* reaction,
+                         double* velocity, int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }
 
-void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem *problem, double *reaction,
-                           double *velocity, int *info, SolverOptions *options) {
+void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double* reaction,
+                           double* velocity, int* info, SolverOptions* options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }

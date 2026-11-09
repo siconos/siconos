@@ -28,6 +28,10 @@
 extern "C" {
 #endif
 
+/** Expand a local FC3D problem into a GlobalFrictionContactProblem. */
+GlobalFrictionContactProblem* fc3d_expand_to_global_problem(FrictionContactProblem* problem);
+
+/* Backward compatibility function name (deprecated) */
 GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
     FrictionContactProblem* problem);
 

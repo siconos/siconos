@@ -33,6 +33,7 @@
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs_sbm, fc2d_spa...
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
 #include "graph_tools.h"
+#include "nsgs_utils.h"
 #include "numerics_verbose.h"  // for numerics_printf, verbose
 
 /* Solver registration system */
@@ -76,7 +77,8 @@ static SparseBlockCoordinateMatrix* fc3d_extract_diagonal_blocks(
     //    sbcm->blocksize1[contact]=2;
     if (problem->M->storageType != NM_SPARSE_BLOCK)
       sbcm->block[contact] = (double*)calloc(sizeof(double*), 4);
-    NM_extract_diag_block2(problem->M, (int)contact, &sbcm->block[contact]);
+    CHECK_RETURN(NM_extract_diag_block2(problem->M, (int)contact, &sbcm->block[contact]) ==
+                 NUMERICS_OK);
   }
 
   return sbcm;
@@ -97,43 +99,40 @@ static SparseBlockCoordinateMatrix* fc3d_free_diagonal_blocks(
   return NULL;
 }
 
-static void fc2d_nsgs_buildLocalProblem_parallel(int contact, FrictionContactProblem* problem,
-                                                 SparseBlockCoordinateMatrix* diagonal_blocks,
-                                                 LinearComplementarityProblem* local_problem,
-                                                 double* reaction) {
-  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->matrix0);
-  local_problem->M->matrix0 = diagonal_blocks->block[contact];
+static void fc2d_nsgs_build_local_problem_parallel(
+    int contact, FrictionContactProblem* problem, SparseBlockCoordinateMatrix* diagonal_blocks,
+    LinearComplementarityProblem* local_problem, double* reaction) {
+  // NM_extract_diag_block2(problem->M, contact, &local_problem->M->dense);
+  local_problem->M->dense = diagonal_blocks->block[contact];
 
   local_problem->M->size0 = 2;  // Necessary ?
   local_problem->M->size1 = 2;
 
   local_problem->q[0] = problem->q[contact * 2];
   local_problem->q[1] = problem->q[contact * 2 + 1];
-  NM_row_prod_no_diag2_parallel(2 * (size_t)problem->numberOfContacts, contact,
-                                2 * (size_t)contact, problem->M, reaction, local_problem->q,
-                                false);
+  CHECK_RETURN(NM_row_prod_no_diag2_parallel(2 * (size_t)problem->numberOfContacts, contact,
+                                             2 * (size_t)contact, problem->M, reaction,
+                                             local_problem->q, false) == NUMERICS_OK);
 
   DEBUG_EXPR(NM_display(local_problem->M););
   DEBUG_EXPR(NV_display(local_problem->q, 2););
 }
 
-static inline double light_error_squared(double localreaction[2], double* oldreaction) {
-  double x0 = oldreaction[0] - localreaction[0];
-  double x1 = oldreaction[1] - localreaction[1];
-  return x0 * x0 + x1 * x1;
+static double light_error_squared(double localreaction[2], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 2);
 }
-static inline double squared_norm(double localreaction[2]) {
-  return (localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1]);
+static double squared_norm(double localreaction[2]) {
+  return nsgs_squared_norm(localreaction, 2);
 }
 
-static inline void accumulateLightErrorSum(double* light_error_sum, double localreaction[2],
-                                           double* oldreaction) {
+static inline void accumulate_light_error_sum(double* light_error_sum, double localreaction[2],
+                                              double* oldreaction) {
   double x0 = oldreaction[0] - localreaction[0];
   double x1 = oldreaction[1] - localreaction[1];
   *light_error_sum += x0 * x0 + x1 * x1;
 }
-static double calculateLightError(double light_error_sum, unsigned int nc, double* reaction,
-                                  double* norm_r) {
+static double calculate_light_error(double light_error_sum, unsigned int nc, double* reaction,
+                                    double* norm_r) {
   double error = sqrt(light_error_sum);
   *norm_r = cblas_dnrm2((int32_t)nc * 2, reaction, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
@@ -157,14 +156,14 @@ static int determine_convergence(double error, double tolerance, unsigned int it
   return has_not_converged;
 }
 
-static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOptions* options,
-                                      double* reaction, double* velocity, double tolerance,
-                                      double norm_q) {
+static double calculate_full_error_final(FrictionContactProblem* problem,
+                                         SolverOptions* options, double* reaction,
+                                         double* velocity, double tolerance, double norm_q) {
   double absolute_error;
   /* (*computeError)(problem, reaction , velocity, tolerance, */
   /*                 options, norm_q, &absolute_error); */
 
-  fc2d_compute_error(problem, reaction, velocity, tolerance, norm_q, &absolute_error);
+  fc2d_compute_error(problem, reaction, velocity, tolerance, options, &absolute_error);
 
   if (verbose > 0) {
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
@@ -195,7 +194,7 @@ static int determine_convergence_with_full_final(FrictionContactProblem* problem
         "Residual = %14.7e < %7.3e",
         iter, error, *tolerance);
 
-    double absolute_error = calculateFullErrorFinal(
+    double absolute_error = calculate_full_error_final(
         problem, options, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q);
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL]) {
       *tolerance = error / absolute_error * options->dparam[SICONOS_DPARAM_TOL];
@@ -411,13 +410,12 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
             localreaction[1] = z[pos + 1];
 
             /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel((int)contact, problem, diagonal_blocks,
-                                                 local_problem, z);
+            fc2d_nsgs_build_local_problem_parallel((int)contact, problem, diagonal_blocks,
+                                                   local_problem, z);
 
             /* Solve local problem */
-            fc2d_nsgs_local_solve(local_problem->M->matrix0,
-                                  diagonal_block_determinant[contact], local_problem->q,
-                                  problem->mu[contact], localreaction);
+            fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
+                                  local_problem->q, problem->mu[contact], localreaction);
 
             light_error_2 = light_error_squared(localreaction, &z[pos]);
 
@@ -462,12 +460,12 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
       /* error evaluation */
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        error = calculate_light_error(light_error_sum, nc, z, norm_r);
         has_not_converged =
             determine_convergence(error, tolerance, (unsigned int)iter, options);
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        error = calculate_light_error(light_error_sum, nc, z, norm_r);
         has_not_converged = determine_convergence_with_full_final(
             problem, options, z, w, &tolerance, norm_q, error, (unsigned int)iter);
       }
@@ -510,13 +508,12 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
             localreaction[1] = z[pos + 1];
 
             /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel((int)contact, problem, diagonal_blocks,
-                                                 local_problem, z);
+            fc2d_nsgs_build_local_problem_parallel((int)contact, problem, diagonal_blocks,
+                                                   local_problem, z);
 
             /* Solve local problem */
-            fc2d_nsgs_local_solve(local_problem->M->matrix0,
-                                  diagonal_block_determinant[contact], local_problem->q,
-                                  problem->mu[contact], localreaction);
+            fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
+                                  local_problem->q, problem->mu[contact], localreaction);
 
             light_error_sum += light_error_squared(localreaction, &z[pos]);
 
@@ -532,12 +529,12 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
       /*  error evaluation */
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        error = calculate_light_error(light_error_sum, nc, z, norm_r);
         has_not_converged =
             determine_convergence(error, tolerance, (unsigned int)iter, options);
       } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                  SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        error = calculate_light_error(light_error_sum, nc, z, norm_r);
         has_not_converged = determine_convergence_with_full_final(
             problem, options, z, w, &tolerance, norm_q, error, (unsigned int)iter);
       }
@@ -548,7 +545,7 @@ void fc2d_nsgs_graph(FrictionContactProblem* problem, double* z, double* w, int*
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    error = calculateFullErrorFinal(problem, options, z, w, tolerance, norm_q);
+    error = calculate_full_error_final(problem, options, z, w, tolerance, norm_q);
 
     has_not_converged =
         determine_convergence(error, dparam[SICONOS_DPARAM_TOL], (unsigned int)iter, options);

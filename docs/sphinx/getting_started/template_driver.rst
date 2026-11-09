@@ -5,7 +5,7 @@ C++ template for siconos driver
 ===============================
 
 .. highlight:: c++
-	       
+
 .. code::
 
    // Header file
@@ -18,15 +18,15 @@ C++ template for siconos driver
    try
    {
     // == User-defined parameters ==
-    
+
     // ================= Creation of the model =======================
-    
+
     // == Creation of the NonSmoothDynamicalSystem ==
     // -- DynamicalSystem(s) --
     // -- Interaction --
-    // - Relations - 
+    // - Relations -
     // - NonSmoothLaw -
-    // -- NonSmoothDynamicalSystem --	
+    // -- NonSmoothDynamicalSystem --
     // == Creation of the Simulation ==
     // -- TimeDiscretisation --
     // -- Simulation (time stepping or event-driven)
@@ -36,12 +36,12 @@ C++ template for siconos driver
 
     // --- Time loop ---
   }
-  
+
   // == Catch exceptions ==
   catch(...)
     {
       Siconos::exception::process();
     }
   // == get elapsed time ==
-  cout << "Computation Time " << time.elapsed()  << endl;  
+  cout << "Computation Time " << time.elapsed()  << endl;
   }

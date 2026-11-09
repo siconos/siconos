@@ -1,17 +1,17 @@
 # ===============================================================================
-# numerics only 
+# numerics only
 #
 # Use Mumps parallel version
-# 
+#
 #
 # ===============================================================================
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics CACHE STRING "List of siconos components to build and install")
 option(WITH_PYB11_WRAPPER "Build and install python bindings" ON)
 
 # --- Build/compiling options ---
-set(WARNINGS_LEVEL 1 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on.")
+set(WARNINGS_LEVEL 1 CACHE STRING "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on.")
 option(WITH_TESTING "Enable 'make test' target" ON)
 
 # --- Documentation setup ---

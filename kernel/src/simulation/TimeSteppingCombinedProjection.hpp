@@ -165,7 +165,7 @@ class TimeSteppingCombinedProjection : public TimeStepping {
 
   void advanceToEvent() override;
 
-  void computeCriteria(bool *runningProjection);
+  void computeCriteria(bool* runningProjection);
 };
 }  // namespace siconos::simulation
 #endif  // TIMESTEPPINGCOMBINEDPROJECTION_H

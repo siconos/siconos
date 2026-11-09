@@ -142,8 +142,8 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
 
   switch (M->storageType) {
     case NM_DENSE: {
-      assert(M->matrix0);
-      idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
+      assert(M->dense);
+      idxDataWriteDenseColMajor(Xptr, 2, M->dense);
       break;
     }
     case NM_SPARSE_BLOCK: /* Perform a conversion to sparse storage */
@@ -460,7 +460,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   unsigned nb_approx = (unsigned)Akmat->size0/nb_contacts;
   assert(nb_approx*nb_contacts == (unsigned)Akmat->size0);
   unsigned offset_row = 0;
-  CSparseMatrix* triplet_mat = Akmat->matrix2->triplet;
+  CSparseMatrix* triplet_mat = Akmat->sparse->triplet;
 
   double angle = 2*M_PI/(NB_APPROX + 1);
   DEBUG_PRINTF("angle: %g\n", angle);

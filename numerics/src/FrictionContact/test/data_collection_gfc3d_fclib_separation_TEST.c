@@ -20,16 +20,15 @@
 
 #include "test_utils.h"  // for data_collection
 
-const char **data_collection() {
+const char** data_collection() {
   int n_data_1 = 30000;
 
-  const char **data_collection_1 = (const char **)malloc(n_data_1 * sizeof(const char *));
+  const char** data_collection_1 = (const char**)malloc(n_data_1 * sizeof(const char*));
   int n_data = 0;
 
-  data_collection_1
-      [n_data++] =
-          "./fclib-sub/Global/siconos/PrimitiveSoup/"
-          "PrimitiveSoup-ndof-6000-nc-1087-183-68.hdf5";  // n=11
+  data_collection_1[n_data++] =
+      "./fclib-sub/Global/siconos/PrimitiveSoup/"
+      "PrimitiveSoup-ndof-6000-nc-1087-183-68.hdf5";  // n=11
   // data_collection_1[n_data++] =
   // "./fclib-sub/Global/siconos/Chute/Chute-ndof-13824-nc-3722-4252-1.hdf5";
   // data_collection_1[n_data++] =

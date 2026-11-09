@@ -4,7 +4,7 @@
 # with entrypoint and CI.
 
 # 1. Mamba-based image where we add all Siconos-required ubuntu packages, as root
-# 
+#
 ARG MAMBAIMAGE=mambaorg/micromamba:2.5
 FROM $MAMBAIMAGE AS mamba-base
 ENV DEBIAN_FRONTEND=noninteractive
@@ -40,7 +40,7 @@ ENV PATH /opt/conda/bin:$PATH
 WORKDIR /home/mambauser
 
 
-# 3. Prepare another micromamba env including opencascade and pyocc, 
+# 3. Prepare another micromamba env including opencascade and pyocc,
 # ready for Siconos build with mechanisms component.
 FROM mamba-base AS mamba-occenv
 USER $MAMBA_USER

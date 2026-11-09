@@ -23,7 +23,7 @@
 #include "NumericsMatrix.h"  // for NM_clear
 #include "numerics_errors.h"
 
-void freeNCP(NonlinearComplementarityProblem* ncp) {
+void NCP_free(NonlinearComplementarityProblem* ncp) {
   if (ncp->nabla_F) {
     NM_clear(ncp->nabla_F);
     free(ncp->nabla_F);

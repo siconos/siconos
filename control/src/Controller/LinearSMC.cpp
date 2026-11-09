@@ -65,7 +65,9 @@ void siconos::control::LinearSMC::actuate() {
 
   _simulationSMC->computeOneStep();
   //  if (_indx > 0)
-  { _simulationSMC->nextStep(); }
+  {
+    _simulationSMC->nextStep();
+  }
 
   // discontinous part
   *_us = *_lambda;

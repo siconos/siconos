@@ -3,7 +3,7 @@
 #
 # - automatic doxygen documentation, from source code
 # - sphinx documentation for manuals
-# 
+#
 # ============================================================
 
 include(FindPythonModule)
@@ -48,7 +48,7 @@ if(USE_DOXYGEN)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
   #file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
-  
+
   # --- Config files and their options. --
   # --> a lot for doxygen warnings (from doxy_warnings.config.in)
   # --> one for documentation (html and xml to sphinx) (from doxy.config.in)
@@ -80,7 +80,7 @@ if(USE_DOXYGEN)
   # from a call to the macro finalize_doc, in doc_tools.cmake
 endif()
 
-  
+
 #  ====== Create a Target to generate documentation ======
 if(WITH_DOCUMENTATION)
 
@@ -100,7 +100,7 @@ if(WITH_DOCUMENTATION)
   find_python_module(sphinx_copybutton REQUIRED)
   find_python_module(sphinx_design REQUIRED)
   #find_python_module(sphinxcontrib napoleon REQUIRED)
-  
+
 
   # --- copy/conf sphinx files into build directory ---
 
@@ -119,12 +119,12 @@ if(WITH_DOCUMENTATION)
     ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/*.rst)
   foreach(filepath IN LISTS files_rst)
     #get_filename_component(filename ${filepath} NAME)
-    
+
     configure_file (
       "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/${filepath}"
       "${CMAKE_CURRENT_BINARY_DIR}/sphinx/${filepath}" COPYONLY)
   endforeach()
-  
+
   # css
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/biblio.css"
@@ -135,11 +135,11 @@ if(WITH_DOCUMENTATION)
 
   # !! conf.py.in must be copied later, after doxygen setup !!
   # Done during finalize_doc call.
-  
+
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
   set(SPHINX_EXECUTABLE sphinx-build)
-  set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
+  set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)
   set(SPHINX_PARAMETERS
     #-j 8 # parallel build
     -w ${SPHINX_LOG_FILE}
@@ -162,7 +162,7 @@ if(WITH_DOCUMENTATION)
     "from gendoctools.generate_api import build_rst_api as f; f('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
     VERBATIM
     COMMENT "Create main rst files for C/C++ and python API.")
-  
+
   # -- To build html doc : make html --
   add_custom_target(html
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} 2> errors.txt ${CMAKE_CURRENT_BINARY_DIR}/build/html
@@ -176,12 +176,12 @@ if(WITH_DOCUMENTATION)
     "from gendoctools.filters import filter_sphinx_warnings as f; f('${SPHINX_LOG_FILE}')"
     VERBATIM
     COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")
-  
+
   add_custom_command(TARGET html POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
-  
+
   # -- To build latex doc : make latex --
-  # Outdated ... 
+  # Outdated ...
   # set(SPHINX_LATEX_PARAMETERS
   #   -b latex # latex output
   #   -d build/doctrees # path to doctree files

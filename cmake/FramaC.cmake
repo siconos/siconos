@@ -24,13 +24,13 @@ macro(add_frama_c_test)
   if(NOT FRAMA_C_COMMAND)
     find_program(FRAMA_C_COMMAND frama-c)
   endif()
-  
+
   if(NOT FRAMA_C_PATH)
     execute_process(COMMAND ${FRAMA_C_COMMAND} -print-path OUTPUT_VARIABLE FRAMA_C_PATH)
   endif()
 
   get_filename_component(SRC_NAME ${SRC} NAME_WE)
-  
+
   set(FRAMA_C_ARGS ${FRAMA_C_ARGS} ${ENTRY_OPT} -cpp-extra-args=-DFUNCODEGEN_CHECK -cpp-extra-args=-I${CMAKE_BINARY_DIR} -cpp-extra-args=-I${CMAKE_CURRENT_SOURCE_DIR} -cpp-extra-args=-I${FRAMA_C_PATH}/libc -cpp-extra-args=-I${FRAMA_C_PATH} -cpp-extra-args=-std=c99 -kernel-msg-key pp -val ${SRC} -val-subdivide-non-linear 1200 -slevel 4096 -print -ocode ${SRC_NAME}_cil.c -then -wp ${SRC} -no-print -wp-model float+int  -wp-timeout 40 -wp-alt-ergo-opt="-backward-compat"  -wp-out temp -wp-verbose 2 -wp-prover alt-ergo  -then -wp -wp-prover z3 -then -wp -wp-prover cvc3 -then -wp -wp-prover cvc4 -then -wp -wp-prover zenon -then -report -then -werror -werror-no-external)
 
   add_custom_target(

@@ -33,7 +33,8 @@ struct lagrangian_ds : item {
     some::vector<some::scalar, dof> q;                 ///< Position vector
     some::vector<some::scalar, dof> velocity;          ///< Velocity vector
     some::matrix<some::scalar, dof, dof> mass_matrix;  ///< Mass matrix
-    some::vector<some::scalar, dof> fext;  ///< External forces vector
+    some::vector<some::scalar, dof> fext;              ///< External forces vector
+    some::integer collision_group;                     ///< Collision group of the body
   };
 
   /**
@@ -45,26 +46,14 @@ struct lagrangian_ds : item {
     using default_interface<Handle>::self;  ///< Inherited self pointer
 
     /// @brief Access mass matrix attribute
-    decltype(auto) mass_matrix()
-    {
-      return attr<"mass_matrix">(*self());
-    }
+    decltype(auto) mass_matrix() { return attr<"mass_matrix">(*self()); }
 
-    decltype(auto) mass_matrix(auto step)
-    {
-      return attr<"mass_matrix">(*self(), step);
-    }
+    decltype(auto) mass_matrix(auto step) { return attr<"mass_matrix">(*self(), step); }
 
     /// @brief Access velocity attribute
-    decltype(auto) velocity()
-    {
-      return attr<"velocity">(*self());
-    }
+    decltype(auto) velocity() { return attr<"velocity">(*self()); }
 
-    decltype(auto) velocity(auto step)
-    {
-      return attr<"velocity">(*self(), step);
-    }
+    decltype(auto) velocity(auto step) { return attr<"velocity">(*self(), step); }
 
     /// @brief Access position attribute
     decltype(auto) q() { return attr<"q">(*self()); }
@@ -73,6 +62,11 @@ struct lagrangian_ds : item {
     /// @brief Access external forces attribute
     decltype(auto) fext() { return attr<"fext">(*self()); }
     decltype(auto) fext(auto step) { return attr<"fext">(*self(), step); }
+    /// @brief Access collision group attribute
+    decltype(auto) collision_group() { return attr<"collision_group">(*self()); }
+    decltype(auto) collision_group(auto step) {
+      return attr<"collision_group">(*self(), step);
+    }
   };
 };
 
@@ -84,7 +78,8 @@ struct elastic_lagrangian_ds : item {
     some::vector<some::scalar, dof> velocity;          ///< Velocity vector
     some::matrix<some::scalar, dof, dof> mass_matrix;  ///< Mass matrix
     some::matrix<some::scalar, dof, dof> k_matrix;     ///< Stiffness matrix
-    some::vector<some::scalar, dof> fext;  ///< External forces vector
+    some::vector<some::scalar, dof> fext;              ///< External forces vector
+    some::integer collision_group;                     ///< Collision group of the body
   };
 
   template <typename Handle>
@@ -95,12 +90,11 @@ struct elastic_lagrangian_ds : item {
   };
 };
 
-static constexpr auto has_k_matrix = mp::is_valid(
-    [](auto t) -> decltype(&(decltype(t)::attributes::k_matrix)) {});
+static constexpr auto has_k_matrix =
+    mp::is_valid([](auto t) -> decltype(&(decltype(t)::attributes::k_matrix)) {});
 
 template <typename Handle>
-static constexpr bool runtime_dof()
-{
+static constexpr bool runtime_dof() {
   using q_t = decltype(std::declval<Handle>().q());
   return match::variable_size_vector<q_t>;
 }

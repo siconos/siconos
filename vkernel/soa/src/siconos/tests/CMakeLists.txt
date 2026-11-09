@@ -4,47 +4,24 @@ if(WITH_vkernel_TESTING)
   else()
     set(COMPACTNSEARCH CompactNSearch)
   endif()
-  add_executable(t1 t1.cpp)
-  #add_executable(t2 t2.cpp)
-  add_executable(bouncing_ball bouncing_ball.cpp)
-  add_executable(unbounded_bouncing_ball unbounded_bouncing_ball.cpp)
-  add_executable(bouncing_balls bouncing_balls.cpp)
-  add_executable(bouncing_disk bouncing_disk.cpp)
-  add_executable(bouncing_disk_line bouncing_disk_line.cpp)
-  #add_executable(bouncing_disk_sf bouncing_disk_sf.cpp)
-  add_executable(bouncing_disks bouncing_disks.cpp)
-  add_executable(fixed_disks fixed_disks.cpp)
-  #add_executable(tnonos tnonos.cpp)
+
+  # The ctest tests of this directory are registered in
+  # vkernel/soa/vkernel_tests.cmake (begin_tests/new_test). This file only
+  # keeps the targets that are not ctest tests.
 
   add_executable(fem_t3 fem_t3.cpp)
-  
-  set_target_properties(t1 PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  
-  #set_target_properties(t2 PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  #set_target_properties(tnonos PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(bouncing_ball PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(unbounded_bouncing_ball PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(bouncing_balls PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(bouncing_disk PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  #set_target_properties(bouncing_disk_sf PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(bouncing_disk_line PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  #set_target_properties(bouncing_disk_sf PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(bouncing_disks PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
-  set_target_properties(fixed_disks PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
   set_target_properties(fem_t3 PROPERTIES COMPILE_FLAGS "${flags}")
-  
-  
-  target_link_libraries(t1 Eigen3::Eigen numerics pthread)
-  target_link_libraries(bouncing_ball  Eigen3::Eigen numerics pthread)
-  target_link_libraries(unbounded_bouncing_ball  Eigen3::Eigen numerics pthread)
-  target_link_libraries(bouncing_balls Eigen3::Eigen numerics pthread)
-  target_link_libraries(bouncing_disk Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  #target_link_libraries(bouncing_disk_sf Eigen3::Eigen numerics pthread fmt CompactNSearch)
-  target_link_libraries(bouncing_disk_line Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(bouncing_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
-  target_link_libraries(fixed_disks Eigen3::Eigen numerics pthread ${COMPACTNSEARCH})
 
   target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread ${COMPACTNSEARCH})
+
+  # the comparisons of Moreau-Jean with Anitescu-Tasora and DEM: CSV tables,
+  # the target vkernel_study_time_integrators (vkernel/docs/notes) runs
+  # it and makes the tables and the plots
+  add_executable(nscd_comparisons nscd_comparisons.cpp)
+  set_target_properties(nscd_comparisons PROPERTIES COMPILE_FLAGS "${flags}")
+  target_link_libraries(nscd_comparisons vkernel numerics Eigen3::Eigen pthread ${COMPACTNSEARCH})
+
+  # fem_t3 is not registered: its mesh square_200.msh and reference
+  # T3_square_200.ref are not in the repository.
+  # bouncing_disk_sf and tnonos are not built today.
 endif()
-
-

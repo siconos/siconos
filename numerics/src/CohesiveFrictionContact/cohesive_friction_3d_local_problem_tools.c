@@ -23,22 +23,15 @@
 
 #include "CohesiveFrictionContactProblem.h"
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
-#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
+#include "NumericsMatrix.h"          // for NM_create_with_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
+#include "local_problem_toolkit.h"  // for local_problem_toolkit_new
 #include "numerics_errors.h"
+#include "numerics_verbose.h"
 
 struct CohesiveLocalProblemFunctionToolkit* cohesiveLocalProblemFunctionToolkit_new(void) {
-  struct CohesiveLocalProblemFunctionToolkit* lpft =
-      (struct CohesiveLocalProblemFunctionToolkit*)malloc(
-          sizeof(struct CohesiveLocalProblemFunctionToolkit));
-
-  lpft->local_solver_cohesion = NULL;
-  lpft->local_solver_contact = NULL;
-  lpft->update_local_problem = NULL;
-  lpft->post_processed_local_result = NULL;
-  lpft->free_local_solver_cohesion = NULL;
-  lpft->free_local_solver_contact = NULL;
-  return lpft;
+  return (struct CohesiveLocalProblemFunctionToolkit*)local_problem_toolkit_new(
+      sizeof(struct CohesiveLocalProblemFunctionToolkit));
 }
 
 void cohesiveLocalProblemFunctionToolkit_display(
@@ -53,19 +46,19 @@ CohesiveFrictionContactProblem* cohesive_friction_3d_local_problem_allocate(
     NM_types storageType) {
   /* Connect local solver and local problem*/
   CohesiveFrictionContactProblem* localproblem = cohesiveFrictionContactProblem_new();
-       
+
   localproblem->numberOfContacts = 0;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->mu =  (double*)malloc(sizeof(double));
+  localproblem->mu = (double*)malloc(sizeof(double));
   localproblem->c_n = (double*)malloc(sizeof(double));
   localproblem->c_t = (double*)malloc(sizeof(double));
 
   if (storageType != NM_SPARSE_BLOCK) {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
   } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(
+    localproblem->M = NM_create_with_data(
         NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
@@ -75,7 +68,7 @@ void cohesive_friction_3d_local_problem_free(CohesiveFrictionContactProblem* loc
   if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original
      * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
+    localproblem->M->dense = NULL;
   }
   cohesiveFrictionContactProblem_free(localproblem);
 }
@@ -94,14 +87,16 @@ void cohesive_friction_3d_local_problem_compute_q(CohesiveFrictionContactProblem
   qLocal[1] = problem->q[it];
   qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
+  CHECK_RETURN(NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal,
+                                    false) == NUMERICS_OK);
 }
 
 void cohesive_friction_3d_local_problem_fill_M(CohesiveFrictionContactProblem* problem,
                                                CohesiveFrictionContactProblem* localproblem,
                                                int contact) {
   if (problem->M->storageType == NM_SPARSE) {
-    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+    localproblem->M->dense = problem->M->sparse_block->block[contact];
   } else
-    NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+    CHECK_RETURN(NM_extract_diag_block3(problem->M, contact, &localproblem->M->dense) ==
+                 NUMERICS_OK);
 }

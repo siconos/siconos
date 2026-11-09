@@ -415,7 +415,7 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     auto ivd = indexSet.descriptor(inter);
     double h = simulation()->timeStep();
     struct MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput =
-      _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta, h);
+        _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta, h);
     auto& osnsp_rhs =
         *(*indexSet.properties(ivd).workVectors)[tools::enum_to_index(wk_inter::osnsp_rhs)];
     osnsp_rhs.setZero();

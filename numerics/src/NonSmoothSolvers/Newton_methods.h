@@ -36,8 +36,8 @@
 #include <stdbool.h>  // for bool
 #endif
 
-typedef void (*compute_F_ptr)(void *data_opaque, double *z, double *F);
-typedef void (*compute_F_merit_ptr)(void *data_opaque, double *z, double *F, double *F_merit);
+typedef void (*compute_F_ptr)(void* data_opaque, double* z, double* F);
+typedef void (*compute_F_merit_ptr)(void* data_opaque, double* z, double* F, double* F_merit);
 
 /**
     Struct holding the necessary pointers to functions needed by the
@@ -47,29 +47,29 @@ typedef struct {
   compute_F_ptr compute_F;             /**< function to evaluate w = F(z) */
   compute_F_merit_ptr compute_F_merit; /**< function to evaluate F_merit(z)
                                           (e.g. F_FB, F_{min}, ...) */
-  void (*compute_H)(void *data_opaque, double *z, double *w, double *workV1, double *workV2,
-                    NumericsMatrix *H); /**< function to get an element H of T */
-  void (*compute_error)(void *data_opaque, double *z, double *w, double *nabla_theta,
-                        double tol, double *err); /**< function to compute the error */
+  void (*compute_H)(void* data_opaque, double* z, double* w, double* workV1, double* workV2,
+                    NumericsMatrix* H); /**< function to get an element H of T */
+  void (*compute_error)(void* data_opaque, double* z, double* w, double* nabla_theta,
+                        double tol, double* err); /**< function to compute the error */
   void (*compute_RHS_desc)(
-      void *data_opaque, double *z, double *w,
-      double *F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min},
+      void* data_opaque, double* z, double* w,
+      double* F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min},
                           ...), optional */
   void (*compute_H_desc)(
-      void *data_opaque, double *z, double *w, double *workV1, double *workV2,
-      NumericsMatrix *H_desc); /**< function to get an element H_desc of T_desc, optional */
+      void* data_opaque, double* z, double* w, double* workV1, double* workV2,
+      NumericsMatrix* H_desc); /**< function to get an element H_desc of T_desc, optional */
   int (*compute_descent_direction)(
-      void *data_opaque, double *z, double *w, double *descent_dir,
-      SolverOptions *options); /**< function to get the descent direction, used
+      void* data_opaque, double* z, double* w, double* descent_dir,
+      SolverOptions* options); /**< function to get the descent direction, used
                                   for instance in the Newton-Josephy method */
   void (*compute_JacTheta_merit)(
-      void *data_opaque, double *z, double *w, double *F_merit, double *workV,
-      double *JacThetaF_merit,
-      SolverOptions *options); /**< function to get the descent direction, used
+      void* data_opaque, double* z, double* w, double* F_merit, double* workV,
+      double* JacThetaF_merit,
+      SolverOptions* options); /**< function to get the descent direction, used
                                   for instance in the Newton-Josephy method */
-  void *(*get_set_from_problem_data)(
-      void *problem); /**< Function returning the set description from the  */
-  int (*ls_failure_fn)(void *problem, double *z, double *w, double *descent_dir, double err,
+  void* (*get_set_from_problem_data)(
+      void* problem); /**< Function returning the set description from the  */
+  int (*ls_failure_fn)(void* problem, double* z, double* w, double* descent_dir, double err,
                        size_t status); /**< Function to call when the line search fails */
 } functions_LSA;
 
@@ -100,8 +100,8 @@ typedef struct {
 
 /** \struct newton_LSA_data Newton_methods.h*/
 typedef struct {
-  NumericsMatrix *H;    /**< matrix */
-  void *extra_problem;  // Required to keep relay in vi_compute_decent_dir_by_avi
+  NumericsMatrix* H;    /**< matrix */
+  void* extra_problem;  // Required to keep relay in vi_compute_decent_dir_by_avi
   bool keep;            // True if extra problem handled by the caller to set_lsa_params_data
 } newton_LSA_data;
 
@@ -168,8 +168,8 @@ extern "C" {
  *  \param options options for this solver
  *  \param functions struct of function pointers to compute F, H and the error
  */
-void newton_LSA(unsigned n, double *z, double *w, int *info, void *data,
-                SolverOptions *options, functions_LSA *functions);
+void newton_LSA(unsigned n, double* z, double* w, int* info, void* data,
+                SolverOptions* options, functions_LSA* functions);
 
 /** Set the functions to compute F and F_merit and all the other pointers to
  *  NULL
@@ -178,7 +178,7 @@ void newton_LSA(unsigned n, double *z, double *w, int *info, void *data,
  *  \param compute_F function to compute F
  *  \param merit_function function to compute F_merit
  */
-static inline void init_lsa_functions(functions_LSA *functions, compute_F_ptr compute_F,
+static inline void init_lsa_functions(functions_LSA* functions, compute_F_ptr compute_F,
                                       compute_F_merit_ptr merit_function) {
   functions->compute_F = compute_F;
   functions->compute_F_merit = merit_function;
@@ -196,18 +196,18 @@ static inline void init_lsa_functions(functions_LSA *functions, compute_F_ptr co
  *
  *  \param options the solver option
  *  \param mat the */
-void set_lsa_params_data(SolverOptions *options, NumericsMatrix *mat);
+void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat);
 
 /** clear the solver-specific data
  *
  *  \param options the SolverOption structure
  */
-void newton_LSA_free_solverOptions(SolverOptions *options);
+void newton_LSA_free_solverOptions(SolverOptions* options);
 
 /** @addtogroup SetSolverOptions
     @{
 */
-void newton_lsa_set_default(SolverOptions *options);
+void newton_lsa_set_default(SolverOptions* options);
 /** @} */
 
 #if defined(__cplusplus)

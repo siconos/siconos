@@ -2,9 +2,19 @@
 
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/model/nslaws.hpp"
+#include "siconos/simul/kinds.hpp"
 #include "siconos/simul/simul_head.hpp"
+#include "siconos/storage/data_holder.hpp"
+#include "siconos/storage/schedule.hpp"
 
 namespace siconos::simul {
+
+// the timings of the stages of the time steps (see storage::schedule::timings)
+struct schedule_timings : storage::data_holder<storage::schedule::timings> {};
+
+// what the stages of the time steps do (see storage::schedule::dataflow)
+struct schedule_dataflow : storage::data_holder<storage::schedule::dataflow> {};
+
 template <match::item... Items>
 struct time_stepping : item {
   using items = gather<Items...>;
@@ -13,32 +23,32 @@ struct time_stepping : item {
   using one_step_nonsmooth_problem_t = nth_t<2, items>;
   using topology_t = typename one_step_integrator_t::topology;
 
-  using formulation_t =
-      typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
+  using formulation_t = typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
 
   struct attributes {
     some::item_ref<time_discretization_t> time_discretization;
     some::item_ref<one_step_integrator_t> one_step_integrator;
     some::item_ref<one_step_nonsmooth_problem_t> one_step_nonsmooth_problem;
     some::item_ref<topology_t> topology;
+    some::item_ref<schedule_timings> timings;
+    some::item_ref<schedule_dataflow> dataflow;
   };
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    void __init__()
-    {
+    void __init__() {
       auto& data = self()->data();
       time_discretization() = storage::add<time_discretization_t>(data);
       one_step_integrator() = storage::add<one_step_integrator_t>(data);
-      one_step_nonsmooth_problem() =
-          storage::add<one_step_nonsmooth_problem_t>(data);
+      one_step_nonsmooth_problem() = storage::add<one_step_nonsmooth_problem_t>(data);
       topology() = storage::add<topology_t>(data);
+      timings() = storage::add<schedule_timings>(data);
+      dataflow() = storage::add<schedule_dataflow>(data);
     }
 
-    void __del__()
-    {
+    void __del__() {
       // not implemented
       throw std::runtime_error("Stable pointers need to be implemented");
       storage::remove(time_discretization());
@@ -47,122 +57,96 @@ struct time_stepping : item {
       storage::remove(topology());
     }
 
-    decltype(auto) time_discretization()
-    {
-      return storage::make_ref_handle(
-          self()->data(), storage::attr<"time_discretization">(*self()));
+    decltype(auto) time_discretization() {
+      return storage::make_ref_handle(self()->data(),
+                                      storage::attr<"time_discretization">(*self()));
     }
-    decltype(auto) one_step_integrator()
-    {
+    decltype(auto) one_step_integrator() {
+      return make_ref_handle(self()->data(), storage::attr<"one_step_integrator">(*self()));
+    }
+    decltype(auto) one_step_nonsmooth_problem() {
       return make_ref_handle(self()->data(),
-                             storage::attr<"one_step_integrator">(*self()));
+                             storage::attr<"one_step_nonsmooth_problem">(*self()));
     }
-    decltype(auto) one_step_nonsmooth_problem()
-    {
-      return make_ref_handle(
-          self()->data(),
-          storage::attr<"one_step_nonsmooth_problem">(*self()));
+    decltype(auto) topology() {
+      return make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
     }
-    decltype(auto) topology()
-    {
-      return make_ref_handle(self()->data(),
-                             storage::attr<"topology">(*self()));
+    decltype(auto) timings() {
+      return make_ref_handle(self()->data(), storage::attr<"timings">(*self()));
+    }
+    decltype(auto) dataflow() {
+      return make_ref_handle(self()->data(), storage::attr<"dataflow">(*self()));
     }
 
-    decltype(auto) current_step()
-    {
-      return (*self()).time_discretization().step();
-    }
+    decltype(auto) current_step() { return (*self()).time_discretization().step(); }
 
     decltype(auto) time_step() { return self()->time_discretization().h(); }
 
-    auto compute_one_step()
-    {
+    // the schedule of a time step, given by the integrator
+    using time_step_schedule = typename one_step_integrator_t::time_step_schedule;
+
+    // one time step, the observer seeing each stage (see storage/schedule.hpp)
+    auto run_one_step(auto&& observer) {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
 
-      auto osi = one_step_integrator();
-
       indice_t step = current_step();
 
-      // loop over different kind of dynamic systems
-      mp::for_each(osi.elements(), [&](auto elem) {
-        // udpate M^-1 * fext
-        // do nothing if fext is time_invariant
-        elem.update_iteration_matrix(step);
-
-        // update jacobians
-        // do nothing if lagrangian_r is time_invariant
-        elem.update_h_matrices(step);
-
-        // vfree stored in v(step+1) & q(step+1)
-        elem.compute_free_state(step, time_step());
-
-        // -> y & ydot (step & step+1)
-        elem.compute_output(step);
-        elem.compute_output(step + 1);
-      });
-
-      // compute active interactions
-      indice_t total_number_of_involved_ds =
-          osi.compute_active_interactions(step, time_step());
-
-      if (total_number_of_involved_ds > 0) {
-        // resize assembled matrices and vectors
-        osi.assemble_setup(step);
-
-        mp::for_each(osi.elements(), [&](auto elem) {
-          // a least one activated interaction
-          elem.compute_h_matrices(step);
-        });
-
-        osi.assemble_h_matrix_for_involved_ds(step);
-
-        mp::for_each(osi.elements(), [&](auto elem) {
-          elem.assemble_mass_matrix_for_involved_ds(step);
-          elem.assemble_k_matrix_for_involved_ds(step);
-          elem.assemble_vectors(step);
-
-          elem.nsl_effect_on_free_output(step);
-        });
-
-        osi.compute_q_nsp_vector_assembled(step);
-
-        // H M^-1 H^t or H (M^-1 + h^2 * theta^2 * K) H^t
-        osi.compute_w_matrix(step, time_step());
-        self()->template solve_nonsmooth_problem<formulation_t>(step);
-
-        // velocity_vector_assembled <- mass_matrix^-1 * (h_matrix^t * lambda)
-        osi.compute_input(time_step());
-
-        mp::for_each(osi.elements(), [&](auto elem) {
-          // lambda_vector_assembled -> lambdas
-          elem.keep_lambdas(step);
-
-          // velocity_vector_assembled -> velocities
-          elem.update_velocities(step, time_step());
-          elem.update_positions(step, time_step());
-        });
-      }
-
-      else {
-        mp::for_each(osi.elements(), [&](auto elem) {
-          // from free velocity
-          elem.update_positions(step, time_step());
-        });
-      }
+      // v, q at step + 1: the free state if there is no contact
+      auto ctx = step_context{*self(), one_step_integrator(), step, time_step()};
+      storage::schedule::run<time_step_schedule>(ctx, observer);
 
       current_step() += 1;
 
       std::print("step {}\n", current_step());
-      return total_number_of_involved_ds;
+      return ctx.involved;
+    }
+
+    auto compute_one_step() {
+      return run_one_step(storage::schedule::optional_observers{
+          self()->timings().instance().get(), self()->dataflow().instance().get()});
+    }
+
+    // the timings of the stages of the next time steps, from zero
+    void enable_timings(bool on) {
+      if (on) {
+        timings().instance() = std::make_shared<storage::schedule::timings>();
+      } else {
+        timings().instance().reset();
+      }
+    }
+
+    // record what the stages of the next time steps do
+    void enable_dataflow(bool on) {
+      if (on) {
+        dataflow().instance() = std::make_shared<storage::schedule::dataflow>();
+      } else {
+        dataflow().instance().reset();
+      }
+    }
+
+    // what the stages do: their kernels, a placement, the candidates for a
+    // fusion (empty if not enabled)
+    std::string dataflow_report() {
+      auto& dataflow = self()->dataflow().instance();
+      return dataflow ? dataflow->report() : std::string{};
+    }
+
+    // the timings of the stages, one line per stage (empty if not enabled)
+    std::string timings_report() {
+      auto& timings = self()->timings().instance();
+      return timings ? timings->report() : std::string{};
+    }
+
+    // the time step as text, stage by stage
+    std::string describe_time_step() {
+      return storage::schedule::describe<time_step_schedule>();
     }
 
     template <typename Formulation>
-    void solve_nonsmooth_problem(auto step)
-    {  // for a LCP:
-       // M z = w + q
-       // 0 <= z _|_ w >= 0
+    void solve_nonsmooth_problem(auto step) {  // for a LCP:
+                                               // M z = w + q
+                                               // 0 <= z _|_ w >= 0
       auto osi = self()->one_step_integrator();
       //      resize(osi.lambda_vector_assembled(), ninter);
       //      resize(osi.ydot_vector_assembled(), ninter);
@@ -175,27 +159,28 @@ struct time_stepping : item {
           osi.mu_vector_assembled());     // mu
     }
 
-    bool has_next_event()
-    {
-      return time_discretization().t0() +
-                 current_step() * time_discretization().h() <
+    bool has_next_event() {
+      return time_discretization().t0() + current_step() * time_discretization().h() <
              time_discretization().tmax();
     }
 
     void initialize() { one_step_integrator().initialize(current_step()); }
 
-    auto methods()
-    {
+    auto methods() {
       // using env_t = decltype(self()->env());
       // using indice = typename env_t::indice;
       // using scalar = typename env_t::scalar;
 
-      return collect(
-          method("initialize", &interface<Handle>::initialize),
-          method("current_step", &interface<Handle>::current_step),
-          method("time_step", &interface<Handle>::time_step),
-          method("compute_one_step", &interface<Handle>::compute_one_step),
-          method("has_next_event", &interface<Handle>::has_next_event));
+      return collect(method("initialize", &interface<Handle>::initialize),
+                     method("current_step", &interface<Handle>::current_step),
+                     method("time_step", &interface<Handle>::time_step),
+                     method("compute_one_step", &interface<Handle>::compute_one_step),
+                     method("describe_time_step", &interface<Handle>::describe_time_step),
+                     method("enable_timings", &interface<Handle>::enable_timings),
+                     method("timings_report", &interface<Handle>::timings_report),
+                     method("enable_dataflow", &interface<Handle>::enable_dataflow),
+                     method("dataflow_report", &interface<Handle>::dataflow_report),
+                     method("has_next_event", &interface<Handle>::has_next_event));
     }
   };
 };

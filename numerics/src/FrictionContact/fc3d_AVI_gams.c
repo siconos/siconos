@@ -126,8 +126,8 @@ out_error:
 
 static inline double rad2deg(double rad) { return rad * 180 / M_PI; }
 
-static void setDashedOptions(const char* optName, const char* optValue,
-                             const char* paramFileName) {
+static void set_dashed_options(const char* optName, const char* optValue,
+                               const char* paramFileName) {
   FILE* f = fopen(paramFileName, "a");
   if (f) {
     fprintf(f, "%s %s\n", optName, paramFileName);
@@ -138,7 +138,7 @@ static void setDashedOptions(const char* optName, const char* optValue,
   }
 }
 
-static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env) {
+static CS_INT sn_rm_normal_part(CS_INT i, CS_INT j, double val, void* env) {
   if (i % 3 == 0) {
     return 0;
   } else {
@@ -146,7 +146,7 @@ static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env) {
   }
 }
 
-static int FC3D_gams_inner_loop_condensed(
+static int fc3d_gams_inner_loop_condensed(
     unsigned iter, idxHandle_t Xptr, gamsxHandle_t Gptr, optHandle_t Optr, gmoHandle_t gmoPtr,
     char* sysdir, char* model, const char* base_name, double* restrict reaction,
     double* restrict velocity, double* restrict tmpq, double* restrict lambda_r,
@@ -193,7 +193,7 @@ static int FC3D_gams_inner_loop_condensed(
 
   /* XXX ParmFile is not a string option */
   //  optSetStrStr(Optr, "ParmFile", paramFileName);
-  //  setDashedOptions("filename", gdxFileName, paramFileName);
+  //  set_dashed_options("filename", gdxFileName, paramFileName);
   optSetStrStr(Optr, "User1", gdxFileName);
   optSetStrStr(Optr, "User2", solFileName);
 
@@ -334,13 +334,13 @@ fail:
   return (int)infos[1];
 }
 
-static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* mus) {
+static void fc3d_gams_generate_first_constraints(NumericsMatrix* Akmat, double* mus) {
   unsigned nb_contacts = (unsigned)Akmat->size1 / 3;
   assert(nb_contacts * 3 == (unsigned)Akmat->size1);
   unsigned nb_approx = (unsigned)Akmat->size0 / nb_contacts;
   assert(nb_approx * nb_contacts == (unsigned)Akmat->size0);
   unsigned offset_row = 0;
-  CSparseMatrix* triplet_mat = Akmat->matrix2->triplet;
+  CSparseMatrix* triplet_mat = Akmat->sparse->triplet;
 
   double angle = 2 * M_PI / (NB_APPROX + 1);
   DEBUG_PRINTF("angle: %g\n", angle);
@@ -356,7 +356,7 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   }
 }
 
-static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
+static int fc3d_avi_gams_base(FrictionContactProblem* problem, double* reaction,
                               double* velocity, SolverOptions* options,
                               const char* solverName) {
   CHECK_NULL(problem);
@@ -386,11 +386,10 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
   unsigned size = (unsigned)problem->dimension * problem->numberOfContacts;
 
-  NumericsMatrix Wtmat;
+  NumericsMatrix* Wtmat = NULL;
   NumericsMatrix Emat;
   NumericsMatrix Akmat;
 
-  NM_null(&Wtmat);
   NM_null(&Emat);
   NM_null(&Akmat);
 
@@ -480,9 +479,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
 
   optSetIntStr(Optr, "Keep", 0);
 
-  Wtmat.storageType = NM_SPARSE;
-  NM_copy_to_sparse(problem->M, &Wtmat);
-  cs_fkeep(NM_csc(&Wtmat), &SN_rm_normal_part, NULL);
+  Wtmat = NM_copy_to_sparse(problem->M, DBL_EPSILON);
+  cs_fkeep(NM_csc(Wtmat), &sn_rm_normal_part, NULL);
   DEBUG_PRINT("FC3D_AVI_GAMS :: Wt matrix constructed\n");
 
   Emat.storageType = NM_SPARSE;
@@ -490,21 +488,21 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
   Emat.size0 = size;
   Emat.size1 = size;
 
-  Emat.matrix2->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
+  Emat.sparse->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
 
   for (unsigned i = 0; i < size; i += 3) {
-    cs_entry(Emat.matrix2->triplet, i, i, 1.);
+    cs_entry(Emat.sparse->triplet, i, i, 1.);
   }
 
   Akmat.storageType = NM_SPARSE;
   numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX * problem->numberOfContacts;
   Akmat.size1 = size;
-  Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                      NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-  CSparseMatrix* Ak_triplet = Akmat.matrix2->triplet;
+  Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                     NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+  CSparseMatrix* Ak_triplet = Akmat.sparse->triplet;
 
-  FC3D_gams_generate_first_constraints(&Akmat, problem->mu);
+  fc3d_gams_generate_first_constraints(&Akmat, problem->mu);
 
   double* tmpq = (double*)malloc(size * sizeof(double));
   unsigned size_l = (NB_APPROX + 3) * problem->numberOfContacts;
@@ -553,9 +551,9 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
     SN_logh5_vec_double(Akmat.size0, lambda_r, "lambda_r", logger_s->group);
     SN_logh5_vec_double(Akmat.size0, lambda_y, "lambda_y", logger_s->group);
 
-    int solverStat = FC3D_gams_inner_loop_condensed(
+    int solverStat = fc3d_gams_inner_loop_condensed(
         iter, Xptr, Gptr, Optr, gmoPtr, sysdir, model, template_filename, reaction, velocity,
-        tmpq, lambda_r, lambda_y, problem->M, problem->q, &Wtmat, &Emat, &Akmat, options);
+        tmpq, lambda_r, lambda_y, problem->M, problem->q, Wtmat, &Emat, &Akmat, options);
     // DEBUG_PRINT_VEC(reaction, size);
     // DEBUG_PRINT_VEC(velocity, size);
 
@@ -648,9 +646,9 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
     /* TODO we should zero out the storage and the content, but not deallocate the matrix ! */
     NM_clearSparseStorage(&Akmat);
     /* This is now a upper bound ...  */
-    Akmat.matrix2->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
-                                        NB_APPROX * problem->numberOfContacts * 3, 1, 1);
-    Ak_triplet = Akmat.matrix2->triplet;
+    Akmat.sparse->triplet = cs_spalloc(NB_APPROX * problem->numberOfContacts, size,
+                                       NB_APPROX * problem->numberOfContacts * 3, 1, 1);
+    Ak_triplet = Akmat.sparse->triplet;
     /************************************************
      * Compute the error on each contact point +
      ************************************************/
@@ -897,7 +895,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
                 free(pts);*/
 
       } else  // r = 0, or r in int(cone) but other interactions moved u
-      bad_angle: {
+      bad_angle:
+      {
         double offset_angle = atan2(ri[2], ri[1]);
         if (offset_angle >= 0.) {
           offset_angle -= M_PI;
@@ -1019,8 +1018,8 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
         offset_row += NB_APPROX;
       }
 
-        /* Update the dimension of Ak */
-        Akmat.size0 = offset_row;
+      /* Update the dimension of Ak */
+      Akmat.size0 = offset_row;
     }
     double* xtmp2 = (double*)calloc(Akmat.size0, sizeof(double));
     DEBUG_PRINT_VEC(xtmp, size);
@@ -1099,7 +1098,7 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  NM_clear(&Wtmat);
+  Wtmat = NM_free(Wtmat);
   NM_clear(&Emat);
   NM_clear(&Akmat);
 
@@ -1133,12 +1132,12 @@ TERMINATE:
 
 void fc3d_AVI_gams_path(FrictionContactProblem* problem, double* reaction, double* velocity,
                         int* info, SolverOptions* options) {
-  *info = fc3d_AVI_gams_base(problem, reaction, velocity, options, "path");
+  *info = fc3d_avi_gams_base(problem, reaction, velocity, options, "path");
 }
 
 void fc3d_AVI_gams_pathvi(FrictionContactProblem* problem, double* reaction, double* velocity,
                           int* info, SolverOptions* options) {
-  *info = fc3d_AVI_gams_base(problem, reaction, velocity, options, "pathvi");
+  *info = fc3d_avi_gams_base(problem, reaction, velocity, options, "pathvi");
 }
 
 #else

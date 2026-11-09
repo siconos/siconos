@@ -55,7 +55,7 @@ void compute_F(void* problem, int n, double* __restrict__ l, double* __restrict_
 void compute_nabla_F(void* problem, int n, double* __restrict__ l,
                      NumericsMatrix* __restrict__ nabla_F_mat) {
   data* d = (data*)VI_get_env(problem);
-  double* __restrict__ nabla_F = nabla_F_mat->matrix0;
+  double* __restrict__ nabla_F = nabla_F_mat->dense;
 
   double l0 = l[0];
   double l1 = l[1];

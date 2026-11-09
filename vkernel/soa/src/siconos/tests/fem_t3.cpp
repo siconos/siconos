@@ -35,8 +35,8 @@ struct rt_relation : model::rt_lagrangian_r {};
 struct interaction : simul::interaction<nslaw, relation> {};
 struct rt_rt_interaction : simul::rt_rt_interaction<nslaw, rt_relation> {};
 struct topo
-    : simul::topology<ball, interaction, fem_ds,
-                      storage::pattern::empty_item, rt_rt_interaction> {};
+    : simul::topology<ball, interaction, fem_ds, storage::pattern::empty_item,
+                      rt_rt_interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
@@ -45,33 +45,30 @@ template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 1>>;
 };
-struct make : storage::make<
-                  env, fem_ds, simulation,
-                  storage::with_properties<
-                      storage::wrapped<config::interaction,
-                                       storage::some::unbounded_collection>,
-                      storage::wrapped<config::relation,
-                                       storage::some::unbounded_collection>,
-                      storage::wrapped<config::rt_rt_interaction,
-                                       storage::some::unbounded_collection>,
-                      storage::wrapped<config::rt_relation,
-                                       storage::some::unbounded_collection>,
-                      storage::unbounded<storage::attr_t<fem_ds, "q">>,
-                      storage::unbounded<storage::attr_t<fem_ds, "velocity">>,
-                      storage::unbounded<storage::attr_t<fem_ds, "fext">>,
-                      storage::sparse<storage::attr_t<fem_ds, "mass_matrix">>,
-                      storage::sparse<storage::attr_t<fem_ds, "k_matrix">>,
-                      storage::dynamic_storage<
-                          storage::attached<config::ball,
-                                            storage::pattern::symbol<"bc_velocities_0">,
-                                            storage::some::unbounded_vector<
-                                                storage::some::indice>>>,
-                      storage::dynamic_storage<
-                          storage::attached<config::fem_ds,
-                                            storage::pattern::symbol<"bc_velocities_0">,
-                                            storage::some::unbounded_collection<
-                                                storage::some::indice>>>>> {
-};
+struct make
+    : storage::make_compile_time_database<
+          env, fem_ds, simulation,
+          storage::with_properties<
+              storage::wrapped<config::interaction,
+                               storage::some::unbounded_collection>,
+              storage::wrapped<config::relation,
+                               storage::some::unbounded_collection>,
+              storage::wrapped<config::rt_rt_interaction,
+                               storage::some::unbounded_collection>,
+              storage::wrapped<config::rt_relation,
+                               storage::some::unbounded_collection>,
+              storage::unbounded<storage::attr_t<fem_ds, "q">>,
+              storage::unbounded<storage::attr_t<fem_ds, "velocity">>,
+              storage::unbounded<storage::attr_t<fem_ds, "fext">>,
+              storage::sparse<storage::attr_t<fem_ds, "mass_matrix">>,
+              storage::sparse<storage::attr_t<fem_ds, "k_matrix">>,
+              storage::dynamic_storage<storage::attached<
+                  config::ball, storage::pattern::symbol<"bc_velocities_0">,
+                  storage::some::unbounded_vector<storage::some::indice>>>,
+              storage::dynamic_storage<storage::attached<
+                  config::fem_ds, storage::pattern::symbol<"bc_velocities_0">,
+                  storage::some::unbounded_collection<
+                      storage::some::indice>>>>> {};
 
 }  // namespace siconos::config
 
@@ -164,7 +161,7 @@ int main(int args, char* argv[])
 
       handle inter = simul.topology().link(fe_solid);
       inter.nslaw() = nslaw;
-      inter.relation() = rt_rel;
+      simul.topology().bind(inter, rt_rel);
     }
   }
 
@@ -182,12 +179,12 @@ int main(int args, char* argv[])
   //     storage::attr<"q">(fe_solid, 0) +
   //     h * storage::attr<"velocity">(fe_solid, 0);
 
-
   auto indices = FEsolid->boundaryConditions()->velocityIndices();
-  static_assert(storage::is_dynamic_storage_v<
-                config::fem_ds, std::decay_t<decltype(data)>,
-                "bc_velocities_0">);
-  auto& bc_set = storage::prop_values<config::fem_ds, "bc_velocities_0">(data, 0);
+  static_assert(
+      storage::is_dynamic_storage_v<
+          config::fem_ds, std::decay_t<decltype(data)>, "bc_velocities_0">);
+  auto& bc_set =
+      storage::prop_values<config::fem_ds, "bc_velocities_0">(data, 0);
   auto& bc_vel = bc_set.emplace(fe_solid.index().value());
   bc_vel.resize(indices.size());
   for (size_t i = 0; i < indices.size(); ++i) {
@@ -230,7 +227,7 @@ int main(int args, char* argv[])
   while (simul.has_next_event()) {
     // compute_one_step returns the number of involved dynamical systems
 
-    uint ninvds = simul.compute_one_step();
+    unsigned int ninvds = simul.compute_one_step();
 
     auto step = simul.current_step();
 

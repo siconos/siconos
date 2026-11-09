@@ -190,6 +190,8 @@ void siconos::integrators::OneStepIntegrator::updateOutput(double time) {
 }
 
 void siconos::integrators::OneStepIntegrator::updateInput(double time) {
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi
+   */
   for (auto level = _levelMinForInput; level < _levelMaxForInput + 1; level++)
     updateInput(time, level);
 }

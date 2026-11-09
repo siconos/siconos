@@ -26,7 +26,9 @@
 #include "NumericsMatrix.h"                // for NM_gemv, NM_tgemv, Numeric...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // IWYU pragma: keep
+#include "error_computation.h"             // for error_compute_alloc_pair
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
+#include "friction_error_toolkit.h"        // for friction_error_toolkit_...
 #include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -66,7 +68,6 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
 
   DEBUG_PRINTF("norm_b = %12.8e\n", norm_b);
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
-  double norm_r = cblas_dnrm2(m, reaction, 1);
   DEBUG_PRINTF("norm of reaction %e\n", cblas_dnrm2(m, reaction, 1));
   DEBUG_PRINTF("norm of global velocity  %e\n", cblas_dnrm2(n, globalVelocity, 1));
 
@@ -89,23 +90,13 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   double* tmp = options->dWork;
   double* tmp_1 = &options->dWork[n];
 
-  cblas_dcopy_msan(n, q, 1, tmp_1, 1);
-  if (nc > 0) {
-    NM_gemv(1.0, H, reaction, 0.0, tmp);
-  }
-  double norm_Hr = cblas_dnrm2(n, tmp, 1);
+  double norm_Hr = 0.0, norm_Mv = 0.0;
+  *error = friction_error_toolkit_global_primal_residual(
+      M, H, q, reaction, globalVelocity, n, nc > 0, tmp, tmp_1, &norm_Hr, &norm_Mv);
   DEBUG_PRINTF("norm of H r %e\n", norm_Hr);
-
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
-
-  NM_gemv(-1.0, M, globalVelocity, 0.0, tmp);
-  double norm_Mv = cblas_dnrm2(n, tmp, 1);
   DEBUG_PRINTF("norm of M v %e\n", norm_Mv);
 
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
-
   double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
-  *error = cblas_dnrm2(n, tmp_1, 1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
   if (fabs(relative_scaling) > MIN_RELATIVE_SCALING) *error = *error / relative_scaling;
 
@@ -122,25 +113,30 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
 
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, H, globalVelocity, 1.0, velocity);
-  double norm_u = cblas_dnrm2(m, velocity, 1);
-  DEBUG_PRINTF("norm of velocity %e\n", norm_u);
+  friction_error_toolkit_recompute_local_velocity(H, problem->b, globalVelocity, m, velocity);
+  DEBUG_PRINTF("norm of velocity %e\n", cblas_dnrm2(m, velocity, 1));
 
-  double worktmp[3];
-  for (int ic = 0; ic < nc; ic++) {
-    fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
-                                       &error_complementarity, worktmp);
+  int norm = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
+  int scope = SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE;
+  int reduction = SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX;
+  double alpha = 1.0;
+  if (options != NULL) {
+    norm = options->iparam[SICONOS_FRICTION_3D_SCALING_NORM];
+    scope = options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE];
+    reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
+    alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
   }
+  double* comp_work = NULL;
+  double* comp_tmp = NULL;
+  if (error_compute_alloc_pair(nc, m, &comp_work, &comp_tmp)) {
+    return numerics_error("gfc3d_compute_error", "bad alloc");
+  }
+  error_complementarity = fc3d_compute_complementarity_error(
+      nc, reaction, velocity, mu, norm, scope, reduction, alpha, comp_work, comp_tmp);
+  free(comp_work);
+  free(comp_tmp);
 
-  error_complementarity = sqrt(error_complementarity);
-
-  DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
-
-  relative_scaling = fmax(norm_u, norm_r);
-  if (fabs(relative_scaling) > MIN_RELATIVE_SCALING)
-    error_complementarity = error_complementarity / relative_scaling;
-  DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
+  DEBUG_PRINTF("scaled error in complementarity= %e\n", error_complementarity);
 
   *error += error_complementarity;
   DEBUG_PRINTF("relative error = %e\n", *error);
@@ -231,8 +227,7 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
 
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, H, globalVelocity, 1.0, velocity);
+  friction_error_toolkit_recompute_local_velocity(H, problem->b, globalVelocity, m, velocity);
   double norm_u = cblas_dnrm2(m, velocity, 1);
   DEBUG_PRINTF("norm of velocity %e\n", norm_u);
 
@@ -246,10 +241,16 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reactio
 
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
-  NM_Cholesky_solve(NM_preserve(M), tmp, 1);
-  cblas_dcopy(m, problem->b, 1, tmp_1, 1);
-  NM_tgemv(1, H, tmp, 1.0, tmp_1);
-  // cblas_daxpy(n, 1.0, problem->b, 1, tmp_1, 1);
+  int info_cholesky = NM_Cholesky_solve(NM_preserve(M), tmp, 1);
+  if (info_cholesky) {
+    numerics_error_log("gfc3d_compute_error_r", "NM_Cholesky_solve failed, we switch to LU");
+    int info_lu = NM_LU_solve(NM_preserve(M), tmp, 1);
+    if (info_lu) {
+      numerics_error_log("gfc3d_compute_error_r", "NM_LU_solve failed");
+    }
+  }
+
+  friction_error_toolkit_recompute_local_velocity(H, problem->b, tmp, m, tmp_1);
   double norm_q_local = cblas_dnrm2(m, tmp_1, 1);
 
   // relative_scaling = fmax(norm_u, norm_r);
@@ -290,8 +291,8 @@ int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* proble
 
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, problem->H, globalVelocity, 1.0, velocity);
+  friction_error_toolkit_recompute_local_velocity(problem->H, problem->b, globalVelocity, m,
+                                                  velocity);
 
   *error = 0.;
   double worktmp[3];
@@ -371,23 +372,13 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double* re
   double* tmp = options->dWork;
   double* tmp_1 = &options->dWork[n];
 
-  cblas_dcopy_msan(n, q, 1, tmp_1, 1);
-  if (nc > 0) {
-    NM_gemv(1.0, H, reaction, 0.0, tmp);
-  }
-  double norm_Hr = cblas_dnrm2(n, tmp, 1);
+  double norm_Hr = 0.0, norm_Mv = 0.0;
+  *error = friction_error_toolkit_global_primal_residual(
+      M, H, q, reaction, globalVelocity, n, nc > 0, tmp, tmp_1, &norm_Hr, &norm_Mv);
   DEBUG_PRINTF("norm of H r %e\n", norm_Hr);
-
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
-
-  NM_gemv(-1.0, M, globalVelocity, 0.0, tmp);
-  double norm_Mv = cblas_dnrm2(n, tmp, 1);
   DEBUG_PRINTF("norm of M v %e\n", norm_Mv);
 
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
-
   double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
-  *error = cblas_dnrm2(n, tmp_1, 1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
   if (fabs(relative_scaling) > MIN_RELATIVE_SCALING) *error = *error / relative_scaling;
 

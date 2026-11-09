@@ -371,12 +371,10 @@ namespace d1_minus_linear {
 // Free functions
 
 template <typename DS>
-concept LDS = requires(DS ds) {
-  ds.velocity();
-};
+concept LDS = requires(DS ds) { ds.velocity(); };
 
 template <typename DS>
-requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
+  requires LDS<DS>  // LagrangianDS, LagrangianSparseDS and heirs
 void compute_residufree_lagrangian(double time_step, double time, DS& lagds,
                                    siconos::algebra::SiconosVector& free_tdg,
                                    siconos::algebra::SiconosVector& residufree) {

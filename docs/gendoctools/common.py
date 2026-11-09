@@ -20,8 +20,8 @@ Siconos is a program dedicated to modeling, simulation and control
  limitations under the License.
 """
 
-import shutil
 import pickle
+import shutil
 import textwrap
 from pathlib import Path
 
@@ -59,7 +59,6 @@ def build_doxygen_xml_index(xml_path, srcdir):
     result = {}
 
     for xmlfile in xml_path.glob("*.xml"):
-
         # Ignore index.xml
         if xmlfile.name == "index.xml":
             continue
@@ -77,7 +76,6 @@ def build_doxygen_xml_index(xml_path, srcdir):
         kind = compound.attrib.get("kind")
 
         if kind in ("class", "struct", "file"):
-
             location = compound.find("location")
             if location is None:
                 continue
@@ -161,9 +159,7 @@ def parse_doxygen_config(filename):
     with open(filename) as ff:
         # remove comment lines
         conf = [
-            n.strip()
-            for n in ff.readlines()
-            if (not n.startswith("#") and not n.startswith("\n"))
+            n.strip() for n in ff if (not n.startswith("#") and not n.startswith("\n"))
         ]
         for d in conf:
             if d.count("=") > 0:
@@ -176,7 +172,7 @@ def parse_doxygen_config(filename):
 
 
 def filter_dot_in_xml_formulas(xmlfile):
-    """Replace \\dot with \dot in xml input.
+    """Replace \\dot with \\dot in xml input.
 
     dot is confusing for doxygen (may be latex or graphviz),
     so in latex formula inside \rst

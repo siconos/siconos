@@ -124,10 +124,10 @@ void siconos::modeling::LagrangianSparseRheonomousR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& positions, double time) {
   // Warning: the jacobian must be allocated and of the right size before a call to this
   // function
-  auto isComputed = siconos::algebra::computeSparse(
-      jacobianhOver_q_storage_, computejacobianhOver_q_, computejacobianhOver_q_python_,
-      "jacobianhOver_q_storage_", positions, time);
-  // isComputed == false => means jacobian is constant, functions not set
+  siconos::algebra::computeSparse(jacobianhOver_q_storage_, computejacobianhOver_q_,
+                                  computejacobianhOver_q_python_, "jacobianhOver_q_storage_",
+                                  positions, time);
+  // Return value == false => means jacobian is constant, functions not set
 }
 
 void siconos::modeling::LagrangianSparseRheonomousR::computeOutput(

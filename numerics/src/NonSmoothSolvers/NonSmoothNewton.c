@@ -19,16 +19,16 @@
 
 #include <stdlib.h>  // for free, malloc, NULL, calloc
 
-#include "Newton_methods.h"    // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
-#include "NumericsMatrix.h"    // for NM_create, NM_clear, NM_DENSE, Numerics...
-#include "SiconosBlas.h"       // for cblas_dnrm2, cblas_daxpy, cblas_dscal
-#include "SiconosLapack.h"     // for lapack_int, DGESV
-#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
-#include "math.h"              // for fmax, pow
-#include "numerics_verbose.h"
+#include "Newton_methods.h"  // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
+#include "NumericsMatrix.h"  // for NM_create, NM_clear, NM_DENSE, Numerics...
+#include "SiconosBlas.h"     // for cblas_dnrm2, cblas_daxpy, cblas_dscal
+#include "SiconosLapack.h"   // for lapack_int, DGESV
+#include "SolverOptions.h"   // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "math.h"            // for fmax, pow
 #include "numerics_errors.h"
-#include "stdio.h"             // for fprintf, stderr
-#include "stdlib.h"            // for exit, EXIT_FAILURE
+#include "numerics_verbose.h"
+#include "stdio.h"   // for fprintf, stderr
+#include "stdlib.h"  // for exit, EXIT_FAILURE
 
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
@@ -105,8 +105,9 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   /* Memory allocation for phi and its jacobian */
   double* phiVector = (double*)malloc((size_t)n * sizeof(double));
 
-  NumericsMatrix* H = NM_create(NM_DENSE, n, n);
-  double* jacobianPhiMatrix = H->matrix0;
+  NumericsMatrix* H =
+      NM_create_with_data(NM_DENSE, n, n, malloc((size_t)n * n * sizeof(double)));
+  double* jacobianPhiMatrix = H->dense;
 
   /** Memory allocation for the merit function and its gradient */
   double psi;

@@ -24,19 +24,19 @@
 #include "SolverOptions.h"           // for SolverOptions
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "SiconosBlas.h"           // for cblas_dcopy
+#include "SiconosBlas.h"  // for cblas_dcopy
+#include "numerics_errors.h"
 #include "projectionOnCylinder.h"  // for projectionOnCylinder
 #include "projectionOnDisk.h"      // for projectionOnDisk
 #include "siconos_debug.h"         // for DEBUG_PRINT
-#include "numerics_errors.h"
-void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX) {
+void Projection_ConvexQP_FC3D_Cylinder(void* cqpIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)\n")
 
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  FrictionContactProblem_as_ConvexQP *pb = (FrictionContactProblem_as_ConvexQP *)cqp->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  SolverOptions *options = pb->options;
-  // frictionContact_display(fc3d);
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  FrictionContactProblem_as_ConvexQP* pb = (FrictionContactProblem_as_ConvexQP*)cqp->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  SolverOptions* options = pb->options;
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nLocal = fc3d->dimension;
@@ -47,14 +47,14 @@ void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX) {
   }
 }
 
-void Projection_ConvexQP_FC3D_Disk(void *cqpIn, double *x, double *PX) {
+void Projection_ConvexQP_FC3D_Disk(void* cqpIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)\n")
 
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  FrictionContactProblem_as_ConvexQP *pb = (FrictionContactProblem_as_ConvexQP *)cqp->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  SolverOptions *options = pb->options;
-  // frictionContact_display(fc3d);
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  FrictionContactProblem_as_ConvexQP* pb = (FrictionContactProblem_as_ConvexQP*)cqp->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  SolverOptions* options = pb->options;
+  // frictionContactProblem_display(fc3d);
 
   int nLocal = 2;
   int n = fc3d->numberOfContacts * nLocal;

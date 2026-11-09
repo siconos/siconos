@@ -21,48 +21,48 @@
 
 <SiconosModel>
 	<NSDS bvp='false'>
-	
+
 		<!-- DSs defined in the problem -->
-		<DS_Definition>		
+		<DS_Definition>
 			<LagrangianLinearTIDS number='3'>
-	 			<StepsInMemory>1</StepsInMemory>				
+	 			<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
 				</q0>
 				<Velocity0  vectorSize='3'>
 					0.0 0.0 0.0
 				</Velocity0>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<M matrixRowSize='3' matrixColSize='3'>
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</M>			
+				</M>
 			</LagrangianLinearTIDS>
-			
-			<LagrangianLinearTIDS number='8'> 
-				<StepsInMemory>1</StepsInMemory>				
+
+			<LagrangianLinearTIDS number='8'>
+				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='1'>
 					0.0
-				</q0>	
+				</q0>
 				<Velocity0 vectorSize='1'>
 					0.0
 				</Velocity0>
-				<M matrixRowSize='1' matrixColSize='1'>	
+				<M matrixRowSize='1' matrixColSize='1'>
 					<row>1.0 </row>
-				</M>			
-			</LagrangianLinearTIDS>	
+				</M>
+			</LagrangianLinearTIDS>
 		</DS_Definition>
 
 
-		<!-- Interactions defined in the problem -->		
+		<!-- Interactions defined in the problem -->
 		<Interaction_Definition>
-			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->	
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->
 			<Interaction number='12' Id='Ball-Ground'>
                 		<size> 1 </size>
 			 	<!-- List of couple of DS concerned by this interaction -->
-		                <DS_Concerned vectorSize='2'>3 8</DS_Concerned>		
-	           	        <!-- Relation of this interaction -->				
-			        <Interaction_Content>		
+		                <DS_Concerned vectorSize='2'>3 8</DS_Concerned>
+	           	        <!-- Relation of this interaction -->
+			        <Interaction_Content>
 					<LagrangianRelation type="LinearTI">
 						<H matrixRowSize='1' matrixColSize='4'>
                  	                         <row> 1.0  0.0  0.0 -0.0</row>
@@ -70,15 +70,15 @@
 						<b vectorSize='1'>
 							0.0
 						</b>
-					</LagrangianRelation>			
+					</LagrangianRelation>
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
-						<e>0.9</e>				
+						<e>0.9</e>
 					</NewtonImpactLaw>
-				</Interaction_Content>	
-			</Interaction>				
+				</Interaction_Content>
+			</Interaction>
 
-		</Interaction_Definition>		
-	
+		</Interaction_Definition>
+
 	</NSDS>
 </SiconosModel>

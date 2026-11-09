@@ -96,7 +96,7 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, doubl
   /* TO CHECK COLORING
 
   CSparseMatrix *sparse;
-  if (M->matrix2->origin == NSM_CSR)
+  if (M->sparse->origin == NSM_CSR)
   {
     sparse = NM_csr(M);
   }
@@ -145,8 +145,9 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, doubl
     err = 0.;
 
     for (size_t color = 0; color < n_colors; color++) {
-#pragma omp parallel for reduction(+ : err) default(none) private(zi, right, i, row) shared( \
-        q, z, inv_permutation, permutation, diag, M, n, sum_sizes, color, w, lefts, is_last)
+#pragma omp parallel for reduction(+ : err) default(none) shared(stderr)              \
+    private(zi, right, i, row) shared(q, z, inv_permutation, permutation, diag, M, n, \
+                                          sum_sizes, color, w, lefts, is_last)
       for (size_t i = sum_sizes[color]; i < sum_sizes[color + 1]; i++) {
         row = inv_permutation[i];
         right = q[row];
@@ -156,8 +157,9 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem* problem, doubl
 
         lefts[row] = 0.;
 
-        NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color], sum_sizes[color + 1], M,
-                          permutation, z, &lefts[row], &right, false);
+        CHECK_RETURN(NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color],
+                                       sum_sizes[color + 1], M, permutation, z, &lefts[row],
+                                       &right, false) == NUMERICS_OK);
 
         w[row] += right + z[row] / diag[row];
 

@@ -25,11 +25,11 @@
 #include "NumericsFwd.h"       // for MixedComplementarityProblem...
 #include "NumericsVerbose.h"   // for numerics_set_verbose
 #include "SolverOptions.h"     // for SolverOptions, solver_optio...
-static double *M;
-static double *q;
+static double* M;
+static double* q;
 
-void testF(int size, double *z, double *F);
-void testF(int size, double *z, double *F) {
+void testF(int size, double* z, double* F);
+void testF(int size, double* z, double* F) {
   /* printf("call to MCP function F(z) ...\n");   */
   /* for (int i =0 ; i <size; i++) */
   /* { */
@@ -50,8 +50,8 @@ void testF(int size, double *z, double *F) {
   /* printf("End call to MCP function F(z) ...\n");   */
 }
 
-void testNablaF(int size, double *z, double *nablaF);
-void testNablaF(int size, double *z, double *nablaF) {
+void testNablaF(int size, double* z, double* nablaF);
+void testNablaF(int size, double* z, double* nablaF) {
   /* printf("call to MCP function nablaF(z) ...\n"); */
 
   for (int i = 0; i < size; i++) {
@@ -68,11 +68,11 @@ int main(void) {
   int n = 10;
 
   /* Set solver options */
-  SolverOptions *options = solver_options_create(SICONOS_MCP_OLD_FB);
+  SolverOptions* options = solver_options_create(SICONOS_MCP_OLD_FB);
   /* FB solver */
   /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem_old *problem =
-      (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
+  MixedComplementarityProblem_old* problem =
+      (MixedComplementarityProblem_old*)malloc(sizeof(MixedComplementarityProblem_old));
 
   problem->sizeEqualities = n - 5;
   problem->sizeInequalities = 5;
@@ -81,8 +81,8 @@ int main(void) {
   problem->Fmcp = NULL;
   problem->nablaFmcp = NULL;
 
-  M = (double *)calloc(n * n, sizeof(double));
-  q = (double *)calloc(n, sizeof(double));
+  M = (double*)calloc(n * n, sizeof(double));
+  q = (double*)calloc(n, sizeof(double));
 
   for (int i = 0; i < n; i++) {
     q[i] = -i + 7.;
@@ -95,8 +95,8 @@ int main(void) {
   numerics_set_verbose(1);
 
   int size = problem->sizeEqualities + problem->sizeInequalities;
-  double *z = (double *)malloc(size * sizeof(double));
-  double *w = (double *)malloc(size * sizeof(double));
+  double* z = (double*)malloc(size * sizeof(double));
+  double* w = (double*)malloc(size * sizeof(double));
 
   for (int i = 0; i < size; i++) {
     z[i] = 0.0;

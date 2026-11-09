@@ -67,7 +67,7 @@ static void compute_Fncp_ZIT(void* env, int n, double* restrict z, double* restr
 
 static void compute_nabla_Fncp_ZIT(void* env, int n, double* restrict z, NumericsMatrix* restrict nabla_Fncp)
 {
-  double* restrict nabla_Fncp_dense = nabla_Fncp->matrix0;
+  double* restrict nabla_Fncp_dense = nabla_Fncp->dense;
 
   data_ZIT* d = (data_ZIT*) env;
   double l0 = 2.0*z[0] - 1.0;
@@ -137,7 +137,7 @@ int main(void)
  options->iparam[SICONOS_IPARAM_PREALLOC] = 1;
 
   problem->env = &sim_data;
-  problem->nabla_F = NM_create_from_data(NM_DENSE, N, N, nablaF);
+  problem->nabla_F = NM_create_with_data(NM_DENSE, N, N, nablaF);
 
   unsigned k = 0;
 

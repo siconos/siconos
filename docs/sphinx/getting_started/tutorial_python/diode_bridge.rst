@@ -1,7 +1,7 @@
 .. _diode_bridge_example:
 
 
-   
+
 Tutorial: A 4-diodes bridge wave rectifier
 ==========================================
 
@@ -38,7 +38,7 @@ The diode behavior is presented on :ref:`fig_diode`, the left-hand sketch displa
    :align: center
 
    fig 2: diode characteristics
-	
+
 The diodes, supposed to be ideal, lead to *complementarity* between voltage and intensity, introducing nonsmoothness into the system. This will be detailed later.
 
 
@@ -72,14 +72,14 @@ Siconos can obviously be used in an interactive python session or notebook. This
 Let us start with a short description of the three main steps always required to run a simulation.
 
 #. First of all, you will need to describe properly the system as a nonsmooth dynamical system, i.e. :
-   
+
    * define the ordinary differential equations set (the **Dynamical Systems**) that represent the dynamics,
    * define the 'nonsmooth' part of the system, through **nonsmooth laws**  and **relations** between variables that may constraint the state.
 
 #. Then you will need to choose a simulation strategy, to define how the nonsmooth system will be integrated over a time step : which discretisation and integrators for the dynamics (**one-step integrators**), which formulation and solvers for the **nonsmooth problem** and so on.
 #. Finally, you will need to run your simulation and post-process the results.
 
- 
+
 
 .. contents::
    :backlinks: entry
@@ -95,55 +95,55 @@ branch constitutive equations, the dynamics of the system writes
 
 .. math::
 
-   \left[\begin{array}{c} 
+   \left[\begin{array}{c}
    \dot v_L\\
    \dot i_L
    \end{array}\right]=
-   \left[\begin{array}{cc} 
+   \left[\begin{array}{cc}
    0 & \frac{-1}{C}\\
    \frac{1}{L} & 0
    \end{array}\right].
-   \left[\begin{array}{c} 
+   \left[\begin{array}{c}
    v_L\\
    i_L
    \end{array}\right]
    +
-   \left[\begin{array}{cccc} 
+   \left[\begin{array}{cccc}
    0 & 0 & \frac{-1}{C} & \frac{1}{C}\\
    0 & 0 & 0 & 0
    \end{array}\right].
-   \left[\begin{array}{c} 
+   \left[\begin{array}{c}
    -v_{DR1}\\
    -v_{DF2}\\
    i_{DF1}\\
-   i_{DR2} 
+   i_{DR2}
    \end{array}\right]
 
 and if we denote
 
 .. math::
 
-   x = \left[\begin{array}{c} 
+   x = \left[\begin{array}{c}
    \dot v_L\\
    \dot i_L
    \end{array}\right], \
-   \lambda = \left[\begin{array}{c} 
+   \lambda = \left[\begin{array}{c}
    -v_{DR1}\\
    -v_{DF2}\\
    i_{DF1}\\
    i_{DR2}
-   \end{array}\right], A=\left[\begin{array}{cc} 
+   \end{array}\right], A=\left[\begin{array}{cc}
    0 & \frac{-1}{C}\\
    \frac{1}{L} & 0
-   \end{array}\right], r= \left[\begin{array}{cccc} 
+   \end{array}\right], r= \left[\begin{array}{cccc}
    0 & 0 & \frac{-1}{C} & \frac{1}{C}\\
    0 & 0 & 0 & 0
    \end{array}\right].\lambda
-   
+
 we get a first order linear system
 
 .. math::
-   
+
    \dot x = A x + r
 
 with the unknowns :math:`x` and :math:`r`.
@@ -157,7 +157,7 @@ which inherits from :cpp:class:`siconos::modeling::DynamicalSystem`. Check :ref:
    import siconos.modeling as sm
    # numpy for vectors and matrices
    import numpy as np
-   
+
    # dynamical system parameters
    Lvalue = 1e-2    # inductance
    Cvalue = 1e-6    # capacitance
@@ -167,7 +167,7 @@ which inherits from :cpp:class:`siconos::modeling::DynamicalSystem`. Check :ref:
    # A matrix of the linear oscillator
    A = np.zeros((2, 2), dtype=np.float64)
    A.flat[...] = [0., -1.0/Cvalue, 1.0/Lvalue, 0.]
-   
+
    # build the dynamical system
    ds = sk.FirstOrderLinearDS(x0, A)
 
@@ -199,7 +199,7 @@ For the oscillator of :ref:`fig_diode_bridge`, there exist some linear relations
    -v_{DF1}\\
    -v_{DR2}
    \end{array} \right]
-   = 
+   =
    \left[ \begin{array}{cc}
    0 & 0\\
    0 & 0\\
@@ -224,7 +224,7 @@ For the oscillator of :ref:`fig_diode_bridge`, there exist some linear relations
    -v_{DF2}\\
    i_{DF1}\\
    i_{DR2}
-   \end{array} \right] 
+   \end{array} \right]
 
 with
 
@@ -236,13 +236,13 @@ and recalling that
 
 .. math::
 
-   \lambda = \left[\begin{array}{c} 
+   \lambda = \left[\begin{array}{c}
    -v_{DR1}\\
    -v_{DF2}\\
    i_{DF1}\\
    i_{DR2}
    \end{array}\right],
-   B = \left[\begin{array}{cccc} 
+   B = \left[\begin{array}{cccc}
    0 & 0 & \frac{-1}{C} & \frac{1}{C}\\
    0 & 0 & 0 & 0
    \end{array}\right], \ r = B\lambda
@@ -285,7 +285,7 @@ which inherits from :cpp:class:`siconos::modeling::Relation`. Check :ref:`relati
 
    # nslaw + relation == interaction
    interaction = sk.Interaction(nonsmooth_law, relation)
-       
+
 Notice that a complete :cpp:class:`siconos::modeling::FirstOrderLinearTIR` writes
 
 .. math::
@@ -307,11 +307,11 @@ Complementarity between two variables :math:`y \in R^m, \lambda \in R^m` writes
 or, using ":math:`\perp`" symbol,
 
 .. math::
-   
+
    0 \leq y\, \perp \, \lambda \geq 0\\
 
 The inequalities must be considered component-wise.
-   
+
 Then, back to our circuit, the complementarity conditions, results of the ideal diodes characteristics are given by:
 
 .. math::
@@ -338,14 +338,14 @@ The interaction can be completely defined::
   interaction = sk.Interaction(nonsmooth_law, relation)
 
 Notice that this interaction just describe some relations and laws but is not connected to any real dynamical system, for the moment.
-  
+
 The modeling part is almost complete, since only one dynamical system and one interaction are needed to describe the problem.
 They must be gathered into a specific object, the :cpp:class:`NonSmoothDynamicalSystem`.
 The building of this object is quite simple: just
 set the time window for the simulation, include dynamical systems and link them to the correct interactions.
 
 ::
-   
+
    # dynamical systems and interactions must be gathered into a NonSmoothDynamicalSystem
    t0 = 0. # initial time
    T = 5.0e-3 # duration of the simulation
@@ -394,8 +394,8 @@ Next, based on the simulation strategy and the time-integration, a one-step nons
 Considering the following discretization of the previously defined relations and nonsmooth law
 
 .. math::
-   
-   y_{i+1} &= C(t_{i+1})x_{i+1} + D(t_{i+1})\lambda_{i+1} \\	
+
+   y_{i+1} &= C(t_{i+1})x_{i+1} + D(t_{i+1})\lambda_{i+1} \\
    R_{i+1} &= B(t_{i+1})\lambda_{i+1}\\
    0 \leq y_{i+1}\ &\perp  \lambda_{i+1} \geq 0  \\
 
@@ -405,7 +405,7 @@ we get
 
    y_{i+1} &= q + M\lambda_{i+1} \\
    0 \leq y_{i+1}\ &\perp  \lambda_{i+1} \geq 0  \\
-  
+
 with
 
 .. math::
@@ -421,7 +421,7 @@ To each formulation, one must associate a solver, picked from the list given in 
   osnspb = sk.LCP(sn.solver_ids.SICONOS_LCP_NSQP)
 
 Notice that solvers come from siconos numerics and are identified thanks to an id. The connection between ids and solvers is given in :ref:`lcp_solvers`.
-  
+
 Then the last step consists in the simulation creation, with its time discretisation::
 
   # simulation and time discretisation
@@ -452,7 +452,7 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
   data_plot[k, 2] = x[1] # inductor current
   data_plot[k, 3] = y[0] # diode R1 current
   data_plot[k, 4] = - lamb[0] # diode R1 voltage
-  data_plot[k, 5] = - lamb[1] # diode F2 voltage 
+  data_plot[k, 5] = - lamb[1] # diode F2 voltage
   data_plot[k, 6] = lamb[2] # diode F1 current
   data_plot[k, 7] = y[0] + lamb[2] # resistor current
   while simu.hasNextEvent():
@@ -472,7 +472,7 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
 * :cpp:func:`Simulation::hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
 * :cpp:func:`Simulation::nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
 * :cpp:func:`Simulation::computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
-  obtain the so-called free-state, that is without non-smooth effects, then it will formalize and solve a LCP before re-integrate the dynamics using the LCP results. 
+  obtain the so-called free-state, that is without non-smooth effects, then it will formalize and solve a LCP before re-integrate the dynamics using the LCP results.
 
 The results can now be postprocessed, with matplotlib for example::
 

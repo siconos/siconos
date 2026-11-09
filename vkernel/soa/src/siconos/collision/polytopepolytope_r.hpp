@@ -1,0 +1,159 @@
+#pragma once
+
+#include "siconos/algebra/algebra.hpp"
+#include "siconos/collision/collision_head.hpp"
+#include "siconos/collision/cxd_narrowphase.hpp"
+#include "siconos/model/lagrangian_ds.hpp"
+#include "siconos/storage/storage.hpp"
+
+namespace siconos::collision {
+
+/* Polytope x polytope contact relation (2D convex polygons, dof 3).
+
+   Structural reference: diskdisk_r (item + model::relation2 +
+   any_lagrangian_relation, G-matrix writing into M& args). The relation is
+   batch-BACKED: it carries no compute of its own, the cxd_narrowphase
+   stage item (Node template below; its own stage in Task 5) fills the
+   cached status/h/normal/cp1/cp2 in one batch per step, and the two
+   compute methods below read the cache/make sure the cache is fresh. An
+   unbound narrowphase ref (standalone hand-cached world) no-ops.
+
+   Templated on Topo only, so the relation <-> narrowphase mutual refs
+   stay acyclic (narrowphase = cxd_narrowphase<Topo>, same Topo). */
+template <typename Topo>
+struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relation {
+  using dof = some::indice_parameter<"dof">;
+  using narrowphase_t = cxd_narrowphase<Topo>;
+
+  struct attributes {
+    // loaded once at rebind time by the stage; unbound = stage-less
+    // standalone (manually cached) relation
+    some::item_ref<narrowphase_t> narrowphase;
+    // which point of the pair's contact manifold (0 or 1) this relation
+    // stands for: a polytope pair has one interaction per manifold point
+    some::indice point_index;
+    some::indice status;  // 0 separated, 1 enclosed (cxd::status value)
+    some::scalar h;       // +distance when separated / -depth when enclosed
+    some::vector<some::scalar, some::indice_value<2>> normal;  // 1 -> 2
+    some::vector<some::scalar, some::indice_value<2>> cp1;
+    some::vector<some::scalar, some::indice_value<2>> cp2;
+    some::vector<some::scalar, some::indice_value<2>> init_dir;  // batch warm start
+    // signature of the pair's two bodies at the last stage run; lets the
+    // relation ensure skip the full-world scan (O(1) read per pair)
+    some::indice cache_pair_checksum;
+  };
+
+  template <typename Handle>
+  struct interface : default_interface<Handle> {
+    using default_interface<Handle>::self;
+
+    decltype(auto) status() { return storage::attr<"status">(*self()); }
+    decltype(auto) point_index() { return storage::attr<"point_index">(*self()); }
+    decltype(auto) h() { return storage::attr<"h">(*self()); }
+    // the stage writes this ref at its rebind step (cxd_narrowphase's rebind
+    // sets rel.narrowphase() = the stage handle)
+    decltype(auto) narrowphase() { return storage::attr<"narrowphase">(*self()); }
+    decltype(auto) normal() { return storage::attr<"normal">(*self()); }
+    decltype(auto) cp1() { return storage::attr<"cp1">(*self()); }
+    decltype(auto) cp2() { return storage::attr<"cp2">(*self()); }
+    decltype(auto) init_dir() { return storage::attr<"init_dir">(*self()); }
+    decltype(auto) cache_pair_checksum() {
+      return storage::attr<"cache_pair_checksum">(*self());
+    }
+
+    /* ensure the stage cache is fresh for this step. The stage ref is bound
+       once at rebind (the stage item writes rel.narrowphase() = itself);
+       the standalone hand-cached case (Task 4 world) keeps the attribute
+       defaulted and must no-op. Bound test: the ref value must index an
+       EXISTING stage item in the world, so a legit stage at index 0 counts
+       as bound (ledger ruling, refined at Task 5). */
+    void ensure(auto step) {
+      auto& data = self()->data();
+      auto& ref = storage::attr<"narrowphase">(*self());
+      using np_t = typename std::decay_t<decltype(ref)>::type;
+      // storage::handles is sized by the item count of the stage collection
+      const auto n_stage = std::size(storage::handles<np_t>(data));
+      if (ref.value() >= n_stage) return;  // unbound: standalone relation
+      storage::make_ref_handle(data, ref).ensure(step);
+    }
+
+    /* Pair-aware fast path. The cache of THIS pair only depends on its two
+       bodies, so hash those (O(vertices)) and compare with the signature
+       stamped by the last stage run. A match returns without touching the
+       stage; a miss runs the stage, which re-stamps every relation. The
+       first changed pair therefore pays one O(n) scan, the rest are O(1)
+       instead of each relation rescanning the whole world (O(n^2)). */
+    void ensure(auto step, auto& ds1, auto& ds2) {
+      auto& data = self()->data();
+      auto& ref = storage::attr<"narrowphase">(*self());
+      using np_t = typename std::decay_t<decltype(ref)>::type;
+      const auto n_stage = std::size(storage::handles<np_t>(data));
+      if (ref.value() >= n_stage) return;  // unbound: standalone relation
+      auto stage = storage::make_ref_handle(data, ref);
+      const auto sig = stage.pair_checksum(ds1, ds2, step);
+      if (stage.cache_step() == step && storage::attr<"cache_pair_checksum">(*self()) == sig) {
+        return;  // pair unchanged: cached row valid, no world scan
+      }
+      stage.ensure(step);  // run stamps every relation's pair signature
+    }
+
+    template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>
+    [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
+      ensure(step, ds1, ds2);
+      return storage::attr<"h">(*self());
+    }
+
+    /* G layout mirrors diskdisk_r (rows: normal / tangent, columns x y
+       theta), hand-derived in the plan Task 4 pins:
+
+       t = z^n (ccw perpendicular); arm_i = cp_i - c(q_i); z^arm = (-ay, ax)
+
+       G1 = [[-n_x, -n_y, -n.(z^arm1)], [-t_x, -t_y, -t.(z^arm1)]]
+       G2 = [[+n_x, +n_y, +n.(z^arm2)], [+t_x, +t_y, +t.(z^arm2)]]  */
+    template <typename S, match::handle<model::lagrangian_ds> DS1,
+              match::handle<model::lagrangian_ds> DS2, typename M>
+    [[gnu::always_inline]] void compute_jachq(S step, DS1& ds1, DS2& ds2, M& g1, M& g2) {
+      ensure(step, ds1, ds2);
+
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
+      auto& q1 = storage::attr<"q">(ds1, step);
+      auto& q2 = storage::attr<"q">(ds2, step);
+      auto& n = storage::attr<"normal">(*self());
+      auto& c1 = storage::attr<"cp1">(*self());
+      auto& c2 = storage::attr<"cp2">(*self());
+
+      const scalar nx = n[0];
+      const scalar ny = n[1];
+      const scalar tx = -ny;
+      const scalar ty = nx;
+
+      const scalar a1x = c1[0] - q1(0);
+      const scalar a1y = c1[1] - q1(1);
+      const scalar a2x = c2[0] - q2(0);
+      const scalar a2y = c2[1] - q2(1);
+
+      const scalar za1x = -a1y;
+      const scalar za1y = a1x;
+      const scalar za2x = -a2y;
+      const scalar za2y = a2x;
+
+      g1(0, 0) = -nx;
+      g1(0, 1) = -ny;
+      g1(0, 2) = -(nx * za1x + ny * za1y);
+      g1(1, 0) = -tx;
+      g1(1, 1) = -ty;
+      g1(1, 2) = -(tx * za1x + ty * za1y);
+
+      g2(0, 0) = nx;
+      g2(0, 1) = ny;
+      g2(0, 2) = nx * za2x + ny * za2y;
+      g2(1, 0) = tx;
+      g2(1, 1) = ty;
+      g2(1, 2) = tx * za2x + ty * za2y;
+    }
+  };
+};
+
+}  // namespace siconos::collision

@@ -32,8 +32,8 @@ typedef HMODULE PluginHandle;
 typedef void* PluginHandle;
 #endif
 
-#include "open_lib.h"
 #include "numerics_errors.h"
+#include "open_lib.h"
 
 void* open_library(const char* lib_name, const int flags) {
   void* HandleRes;

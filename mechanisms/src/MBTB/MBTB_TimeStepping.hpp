@@ -36,11 +36,10 @@ class MBTB_TimeStepping : public siconos::simulation::TimeStepping {
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
-  MBTB_TimeStepping(
-      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-      std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
-      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb)
+  MBTB_TimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+                    std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+                    std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+                    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb)
       : siconos::simulation::TimeStepping(nsds, td, osi, osnspb) {}
 
   virtual ~MBTB_TimeStepping() noexcept = default;

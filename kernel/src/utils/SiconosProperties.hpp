@@ -245,7 +245,7 @@ class Properties {
 template <typename T, typename G>
 class VertexProperties : public Properties<T, G, typename G::VIndexAccess> {
  public:
-  VertexProperties(G& g) : Properties<T, G, typename G::VIndexAccess>(g){};
+  VertexProperties(G& g) : Properties<T, G, typename G::VIndexAccess>(g) {};
 
   typedef void serializable;
 
@@ -264,7 +264,7 @@ class VertexProperties : public Properties<T, G, typename G::VIndexAccess> {
 template <typename T, typename G>
 class VertexSPProperties : public VertexProperties<std::shared_ptr<T>, G> {
  public:
-  VertexSPProperties(G& g) : VertexProperties<std::shared_ptr<T>, G>(g){};
+  VertexSPProperties(G& g) : VertexProperties<std::shared_ptr<T>, G>(g) {};
 
   typedef typename boost::property_traits<typename G::VIndexAccess>::key_type key_type;
   typedef void serializable;
@@ -288,7 +288,7 @@ class VertexSPProperties : public VertexProperties<std::shared_ptr<T>, G> {
 template <typename T, typename G>
 class EdgeProperties : public Properties<T, G, typename G::EIndexAccess> {
  public:
-  EdgeProperties(G& g) : Properties<T, G, typename G::EIndexAccess>(g){};
+  EdgeProperties(G& g) : Properties<T, G, typename G::EIndexAccess>(g) {};
 
   typedef void serializable;
 
@@ -344,7 +344,7 @@ class VertexSubProperties : public SubProperties<T, G, typename G::VIndexAccess>
   typedef Properties<T, G, typename G::VIndexAccess> RefProperties;
 
   VertexSubProperties(RefProperties& p, G& g)
-      : SubProperties<T, G, typename G::VIndexAccess>(p, g){};
+      : SubProperties<T, G, typename G::VIndexAccess>(p, g) {};
 };
 
 template <typename T, typename G>
@@ -353,7 +353,7 @@ class EdgeSubProperties : public SubProperties<T, G, typename G::EIndexAccess> {
   typedef Properties<T, G, typename G::EIndexAccess> RefProperties;
 
   EdgeSubProperties(RefProperties& p, G& g)
-      : SubProperties<T, G, typename G::EIndexAccess>(p, g){};
+      : SubProperties<T, G, typename G::EIndexAccess>(p, g) {};
 };
 
 }  // namespace siconos::graphs

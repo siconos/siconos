@@ -2,11 +2,11 @@
 
 namespace siconos::storage::database {
 
-  template<typename Info, typename UnderlyingDb>
-  struct database {
-    using info = Info;
+template <typename Info, typename UnderlyingDb>
+struct database {
+  using info = Info;
 
-    UnderlyingDb _data;
-  };
+  UnderlyingDb _data;
+};
 
-}
+}  // namespace siconos::storage::database

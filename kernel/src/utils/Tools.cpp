@@ -16,14 +16,11 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-
 #include "Tools.hpp"
 
+#include <stdio.h>
 
-
-void siconos::tools::progressBar(double percentage)
-{
+void siconos::tools::progressBar(double percentage) {
   int val = (int)(percentage * 100);
   int lpad = (int)(percentage * PBWIDTH);
   int rpad = PBWIDTH - lpad;

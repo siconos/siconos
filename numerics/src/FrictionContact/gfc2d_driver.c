@@ -24,6 +24,10 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs
 #include "fc3d_short_names.h"
+#include "gfc2d_Solvers.h"                        // for gfc2d_nsgs_wr
+#include "gfc2d_VI_ExtraGradient.h"               // for gfc2d_VI_ExtraGradient
+#include "gfc2d_VI_FixedPointProjection.h"        // for gfc2d_VI_FixedPointProjection
+#include "gfc2d_nonsmooth_Newton_AlartCurnier.h"  // for gfc2d_nonsmooth_Newton_AlartCurnier
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR
@@ -85,7 +89,7 @@ static int fccounter = 0;
 int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                  double* globalVelocity, SolverOptions* options) {
   assert(options->isSet);
-  DEBUG_EXPR(NV_display(globalVelocity, problem_ori->M->size0););
+  DEBUG_EXPR(NV_display(globalVelocity, problem->M->size0););
 
 #ifdef DUMP_PROBLEM
   char fname[256];
@@ -94,7 +98,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   printf("Dump %s file\n", fname);
 
   FILE* foutput = fopen(fname, "w");
-  globalFrictionContact_printInFile(problem, foutput);
+  globalFrictionContactProblem_printInFile(problem, foutput);
   fclose(foutput);
 #endif
 
@@ -123,6 +127,24 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
 
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
+    case GFC2D_NSN_AC: {
+      gfc2d_nonsmooth_Newton_AlartCurnier(problem, reaction, velocity, globalVelocity, &info,
+                                          options);
+      break;
+    }
+    case GFC2D_VI_FPP: {
+      gfc2d_VI_FixedPointProjection(problem, reaction, velocity, globalVelocity, &info,
+                                    options);
+      break;
+    }
+    case GFC2D_VI_EG: {
+      gfc2d_VI_ExtraGradient(problem, reaction, velocity, globalVelocity, &info, options);
+      break;
+    }
+    case GFC2D_NSGS_WR: {
+      gfc2d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
+      break;
+    }
     case FC2D_NSGS: {
       printf("SICONOS_FRICTION_2D_NSGS");
       numerics_printf_verbose(
@@ -131,14 +153,14 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
           "Friction-Contact 3D problem ==========================\n");
       verbose = 1;
       // We compute only if the local problem has contacts
-      DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
+      DEBUG_PRINTF("Number of contacts = %i \n", problem->H->size1 / 3);
       if (problem->H->size1 > 0) {
         // Reformulation
         numerics_printf_verbose(
             1, "Reformulation info a reduced problem onto local variables ...\n");
         FrictionContactProblem* localproblem =
-            globalFrictionContact_reformulation_FrictionContact(problem);
-        DEBUG_EXPR(frictionContact_display(localproblem););
+            globalFrictionContact_reduce_to_FrictionContact(problem);
+        DEBUG_EXPR(frictionContactProblem_display(localproblem););
 
         // call solver for the local problem
         info = fc2d_driver(localproblem, reaction, velocity, options);

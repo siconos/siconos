@@ -26,8 +26,8 @@
 #include "Circle.hpp"
 #include "Contact2d3DR.hpp"
 #include "Contact2dR.hpp"
-#include "ContactVelocityAngularVelocityR.hpp"
 #include "ContactR.hpp"
+#include "ContactVelocityAngularVelocityR.hpp"
 #include "Disk.hpp"
 #include "InteractionManager.hpp"
 #include "Lagrangian2d2DR.hpp"
@@ -125,7 +125,7 @@ PYBIND11_MODULE(_collision, m) {
 
   py::class_<siconos::collision::SiconosContactor, py::smart_holder>(m, "SiconosContactor")
       .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>,
-                    const siconos::algebra::SiconosVector &, int>(),
+                    const siconos::algebra::SiconosVector&, int>(),
            py::arg("shape"), py::arg("offset") = siconos::algebra::SiconosVector::Unit(7, 3),
            py::arg("collision_group") = 0)
       .def_property_readonly("id", &siconos::collision::SiconosContactor::id)
@@ -191,7 +191,7 @@ PYBIND11_MODULE(_collision, m) {
   py::class_<siconos::collision::BodyShapeRecord, py::smart_holder>(m, "BodyShapeRecord")
       .def("display", &siconos::collision::BodyShapeRecord::display)
       .def("__repr__",
-           [](const siconos::collision::BodyShapeRecord &a) {
+           [](const siconos::collision::BodyShapeRecord& a) {
              a.display();
              return "\n";
            })
@@ -208,9 +208,9 @@ PYBIND11_MODULE(_collision, m) {
       //                                     // as long as object is referenced
       //            py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("position"),
       //            py::arg("velocity"), py::arg("mass"), py::arg("inertia"))
-      .def(py::init<const siconos::algebra::SiconosVector7 &,
-                    const siconos::algebra::SiconosVector6 &, double,
-                    const siconos::algebra::SiconosMatrix33 &>(),
+      .def(py::init<const siconos::algebra::SiconosVector7&,
+                    const siconos::algebra::SiconosVector6&, double,
+                    const siconos::algebra::SiconosMatrix33&>(),
            py::arg("q0"), py::arg("twist0"), py::arg("mass"), py::arg("inertia"))
       //     py::arg("copy_t"))
 
@@ -218,8 +218,8 @@ PYBIND11_MODULE(_collision, m) {
            py::arg("useContactorInertia"))
       .def(
           "setContactors",
-          [](siconos::collision::RigidBodyDS &self,
-             siconos::collision::SiconosContactorSet &cs) {
+          [](siconos::collision::RigidBodyDS& self,
+             siconos::collision::SiconosContactorSet& cs) {
             self.setContactors(std::make_shared<siconos::collision::SiconosContactorSet>(cs));
           },
           py::arg("contactors"))
@@ -237,8 +237,8 @@ PYBIND11_MODULE(_collision, m) {
            &siconos::collision::RigidBody2dDS::setUseContactorInertia)
       .def(
           "setContactors",
-          [](siconos::collision::RigidBody2dDS &self,
-             siconos::collision::SiconosContactorSet &cs) {
+          [](siconos::collision::RigidBody2dDS& self,
+             siconos::collision::SiconosContactorSet& cs) {
             self.setContactors(std::make_shared<siconos::collision::SiconosContactorSet>(cs));
           },
           py::arg("contactors"))
@@ -255,10 +255,13 @@ PYBIND11_MODULE(_collision, m) {
       .def_readonly("bodyShapeRecordA", &siconos::collision::ContactR::bodyShapeRecordA)
       .def_readonly("bodyShapeRecordB", &siconos::collision::ContactR::bodyShapeRecordB);
 
-  py::class_<siconos::collision::ContactVelocityAngularVelocityR, siconos::modeling::NewtonEulerVelocityAngularVelocityR,
-             py::smart_holder>(m, "ContactVelocityAngularVelocityR")
-      .def_readonly("bodyShapeRecordA", &siconos::collision::ContactVelocityAngularVelocityR::bodyShapeRecordA)
-      .def_readonly("bodyShapeRecordB", &siconos::collision::ContactVelocityAngularVelocityR::bodyShapeRecordB);
+  py::class_<siconos::collision::ContactVelocityAngularVelocityR,
+             siconos::modeling::NewtonEulerVelocityAngularVelocityR, py::smart_holder>(
+      m, "ContactVelocityAngularVelocityR")
+      .def_readonly("bodyShapeRecordA",
+                    &siconos::collision::ContactVelocityAngularVelocityR::bodyShapeRecordA)
+      .def_readonly("bodyShapeRecordB",
+                    &siconos::collision::ContactVelocityAngularVelocityR::bodyShapeRecordB);
 
   py::class_<siconos::collision::Contact2d3DR, siconos::modeling::Lagrangian2d3DR,
              py::smart_holder>(m, "Contact2d3DR")

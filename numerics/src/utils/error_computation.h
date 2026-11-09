@@ -111,6 +111,27 @@ static inline double error_make_relative(double error, double reference) {
   return error;
 }
 
+/** Allocate two double buffers, freeing the first if the second fails.
+ *
+ * \param[in] n1 number of elements in the first buffer
+ * \param[in] n2 number of elements in the second buffer
+ * \param[out] p1 first buffer (set to NULL on failure)
+ * \param[out] p2 second buffer (set to NULL on failure)
+ * \return 0 on success, 1 on allocation failure
+ */
+static inline int error_compute_alloc_pair(size_t n1, size_t n2, double** p1, double** p2) {
+  *p1 = (double*)malloc(n1 * sizeof(double));
+  *p2 = (double*)malloc(n2 * sizeof(double));
+  if (!*p1 || !*p2) {
+    free(*p1);
+    free(*p2);
+    *p1 = NULL;
+    *p2 = NULL;
+    return 1;
+  }
+  return 0;
+}
+
 /** Check if error is converged within tolerance
  *
  * \param[in] error Current error

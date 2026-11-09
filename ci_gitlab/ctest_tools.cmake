@@ -37,7 +37,7 @@ function(post_ctest)
       return()
     endif()
   endif()
-  
+
   if(NOT _STATUS EQUAL 0 OR NOT _RESULT EQUAL 0)
     message(FATAL_ERROR "\n\n *** ${run_PHASE} process failed *** \n\n")
   endif()
@@ -47,9 +47,9 @@ function(post_ctest)
 
 endfunction()
 
-# Set site name (cdash) according to current host status. 
+# Set site name (cdash) according to current host status.
 function(set_site_name)
-  
+
   # -- Query host system information --
   # --> to set ctest site for cdash.
   #include(cmake_host_system_information)
@@ -64,7 +64,7 @@ function(set_site_name)
   string(STRIP ${osplatform} osplatform)
 
   if(CI_GITLAB)
-    string(SUBSTRING $ENV{CI_JOB_IMAGE} 39 -1 dockerimagename) 
+    string(SUBSTRING $ENV{CI_JOB_IMAGE} 39 -1 dockerimagename)
     string(STRIP ${dockerimagename} dockerimagename)
     set(hostname "[ ${dockerimagename} from gitlab registry]")
   endif()
@@ -95,7 +95,7 @@ function(set_cdash_build_name)
       WORKING_DIRECTORY ${CTEST_SOURCE_DIRECTORY})
     set(branch_commit "${COMMIT_REF_NAME}-${COMMIT_SHORT_SHA}")
   endif()
-  include(${CTEST_SOURCE_DIRECTORY}/cmake/SiconosVersion.cmake)  
+  include(${CTEST_SOURCE_DIRECTORY}/cmake/SiconosVersion.cmake)
   set(_name "Siconos(${SICONOS_VERSION}-devel,${branch_commit})")
   if(USER_OPTIONS_FILE)
     get_filename_component(_fname ${USER_OPTIONS_FILE} NAME)
@@ -104,7 +104,7 @@ function(set_cdash_build_name)
     string(STRIP ${_name} _name)
   else() # Config = config_samples/default.cmake
     set(_name "${_name}-options=default.cmake")
-    string(STRIP ${_name} _name)    
+    string(STRIP ${_name} _name)
   endif()
   set(CTEST_BUILD_NAME "${_name}" PARENT_SCOPE)
 endfunction()
@@ -122,8 +122,8 @@ function(write_notes)
      file(APPEND ${CTEST_BINARY_DIRECTORY}/notes.txt "- Runner: ci-gitlab runner $ENV{CI_RUNNER_DESCRIPTION}\n")
   else()
     file(APPEND ${CTEST_BINARY_DIRECTORY}/notes.txt "- host name: ${hostname}\n")
-  endif() 
- 
+  endif()
+
   file(APPEND ${CTEST_BINARY_DIRECTORY}/notes.txt "\n\n ------- Siconos user options file ------\n\n")
   if(USER_OPTIONS_FILE)
     file(READ ${USER_OPTIONS_FILE} _options_file)
@@ -137,4 +137,3 @@ function(write_notes)
   set(CTEST_NOTES_FILES ${CTEST_BINARY_DIRECTORY}/notes.txt PARENT_SCOPE)
 
 endfunction()
-

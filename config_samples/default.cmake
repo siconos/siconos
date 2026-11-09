@@ -7,11 +7,11 @@
 # ===============================================================================
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics io CACHE STRING "List of siconos components to build and install")
 option(WITH_PYB11_WRAPPER "Build and install python bindings" ON)
 
 # --- Build/compiling options ---
-set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on.")
+set(WARNINGS_LEVEL 0 CACHE STRING "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on.")
 option(WITH_TESTING "Enable 'make test' target" ON)
 
 # --- Documentation setup ---
@@ -26,6 +26,3 @@ option(WITH_SUPERLU "Compilation with the SuperLU solver" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version" OFF)
 option(WITH_FCLIB "link with fclib when this mode is enable" OFF)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = off." ON)
-
-
-

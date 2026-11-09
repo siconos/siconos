@@ -4,7 +4,7 @@
 #
 # The objective is to call component_setup to create the target <COMPONENT>.
 # Before, it's necessary to set:
-# 
+#
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
@@ -24,7 +24,7 @@ set(${COMPONENT}_DIRS)
 
 # By default this component has no sources, everything is optional :
 # - serialization/generation part : sources in serialization and generation
-# - mechanicsIO : sources in mechanics 
+# - mechanicsIO : sources in mechanics
 
 list(APPEND ${COMPONENT}_DIRS src)
 
@@ -114,7 +114,7 @@ endif()
 if(io_DIRS) # the component may be empty if mechanics and serialization are off
   include(ComponentSetup)
   create_siconos_component(${COMPONENT})
-  
+
   # --- Extra setup for the component ---
   # Right now boost::serialization does some nasty things... so we have to
   # disable some undefined behavior checks ...
@@ -123,7 +123,7 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     target_compile_options(io PRIVATE "-fno-sanitize=alignment")
     target_compile_options(io PRIVATE "-fno-sanitize=null")
   endif()
-  
+
   if(WITH_GENERATION)
     # add dependencies for header generation
     add_custom_target(SerializersGeneration ALL
@@ -131,31 +131,31 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     add_dependencies(sicpykernel SerializersGeneration)
     add_dependencies(${COMPONENT} SerializersGeneration)
   endif()
-  
+
   # Links with other Siconos components
-  
+
   if (CMAKE_SKIP_RPATH)
     # if no RPATH, then linking does not work for tests without specifying externals
     target_link_libraries(io PRIVATE externals)
   endif()
-  
+
   target_link_libraries(io PRIVATE numerics)
   target_link_libraries(io PUBLIC kernel)
-  
+
   if(HAVE_SICONOS_CONTROL)
     target_link_libraries(io PRIVATE control)
   endif()
-  
+
   if(HAVE_SICONOS_MECHANICS)
     target_link_libraries(io PUBLIC mechanics)
     # This will bring the links with Opencascade, if required ...
   endif()
-  
+
   if(HAVE_SICONOS_MECHANISMS)
     target_link_libraries(io PUBLIC mechanisms)
     # This will bring the links with Opencascade, if required ...
   endif()
-  
+
   # --- Search component dependencies ---
   if(WITH_SERIALIZATION)
     # boost must have been searched for in SiconosSetup ...
@@ -170,13 +170,13 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
       target_include_directories(io PRIVATE ${CMAKE_BINARY_DIR}/io)
     endif()
   endif()
-  
+
   # if(WITH_VTK)
   #   # https://cmake.org/cmake/help/latest/module/FindVTK.html
   #   find_package(VTK)
   #   target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
   # endif()
- 
+
   # --- tests ---
   include(${COMPONENT}_tests.cmake)
 
@@ -184,16 +184,16 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   if(WITH_PYB11_WRAPPER)
     add_subdirectory(python)
   endif()
-  
+
   # ---- Installation ----
   # Call siconos_component_install_setup(<COMPONENT>)
   # to prepare installation of the current target.
   #
   # Before, it's necessary to set:
-  # 
+  #
   # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
   #    that contain headers files that must be installed.
-  # 
+  #
   # set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
   if(WITH_SERIALIZATION)
     list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/serialization)
@@ -201,7 +201,7 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
       list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/generation)
     endif()
   endif()
-  
+
   # if(HAVE_SICONOS_MECHANICS)
   #   list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/mechanics)
   # endif()
@@ -212,7 +212,3 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
 
   siconos_component_install_setup(${COMPONENT})
  endif()
-
-
-
-

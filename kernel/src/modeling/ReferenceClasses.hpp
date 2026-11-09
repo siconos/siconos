@@ -226,10 +226,10 @@ class ClassA {
 
   /** Default constructor */
   ClassA() = delete;
-  ClassA(const ClassA &) = delete;
-  ClassA(ClassA &&) = delete;
-  ClassA &operator=(const ClassA &) = delete;
-  ClassA &operator=(ClassA &&) = delete;
+  ClassA(const ClassA&) = delete;
+  ClassA(ClassA&&) = delete;
+  ClassA& operator=(const ClassA&) = delete;
+  ClassA& operator=(ClassA&&) = delete;
 
  public:
   // Rule 1: all required attributes must be properly set after constructor call
@@ -282,7 +282,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVector2Function(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+  void setComputeVector2Function(const siconos::modeling::func_prototypes::FunctionS_V& fct);
 
   /** Update ...
    *
@@ -296,7 +296,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVector3Function(const siconos::modeling::func_prototypes::FunctionVVS_V &fct);
+  void setComputeVector3Function(const siconos::modeling::func_prototypes::FunctionVVS_V& fct);
 
   inline std::shared_ptr<siconos::algebra::MapVectorType> vectorNameSpan() const {
     return vectorNameSpan_view_;
@@ -304,7 +304,7 @@ class ClassA {
 
   /** \return describe ...
    */
-  inline siconos::algebra::MapVectorType &vectorNameSpan_view() const {
+  inline siconos::algebra::MapVectorType& vectorNameSpan_view() const {
     return *vectorNameSpan_view_;
   }
 
@@ -324,7 +324,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVectorNameSpanFunction(const FunctionSpanT_V &fext_func);
+  void setComputeVectorNameSpanFunction(const FunctionSpanT_V& fext_func);
 
   /** default function to compute ...
    *
@@ -334,7 +334,7 @@ class ClassA {
 
   /** \return describe ...
    */
-  inline siconos::algebra::MapVectorType &vectorNameDirect_view() {
+  inline siconos::algebra::MapVectorType& vectorNameDirect_view() {
     return vectorNameDirect_view_.value();
   }
 
@@ -355,7 +355,7 @@ class ClassA {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeVectorNameDirectFunction(
-      const siconos::modeling::func_prototypes::FunctionS_V &fext_func);
+      const siconos::modeling::func_prototypes::FunctionS_V& fext_func);
 
   /** default function to compute ...
    *
@@ -388,7 +388,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMatrix1Function(const FunctionVS_M &fext_func);
+  void setComputeMatrix1Function(const FunctionVS_M& fext_func);
 
   /** default function to compute ...
    *

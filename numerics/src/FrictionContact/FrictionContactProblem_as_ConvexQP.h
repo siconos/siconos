@@ -28,20 +28,20 @@
  */
 struct FrictionContactProblem_as_ConvexQP {
   /* the ConvexQP associated with the FC3D problem */
-  ConvexQP *cqp;
+  ConvexQP* cqp;
   /* the FC3D associated with the ConvexQP  */
-  FrictionContactProblem *fc3d;
+  FrictionContactProblem* fc3d;
   /* the SolverOptions that might be used to pass some numerical parameters */
-  SolverOptions *options;
+  SolverOptions* options;
 };
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX);
+void Projection_ConvexQP_FC3D_Cylinder(void* cqpIn, double* x, double* PX);
 
-void Projection_ConvexQP_FC3D_Disk(void *cqpIn, double *x, double *PX);
+void Projection_ConvexQP_FC3D_Disk(void* cqpIn, double* x, double* PX);
 
 #if defined(__cplusplus)
 }

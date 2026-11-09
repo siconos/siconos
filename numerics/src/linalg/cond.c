@@ -25,21 +25,21 @@
 #include "SiconosLapack.h"  // for DGESVD, lapack_int
 #include "safe_casts.h"
 
-double cond(double *A, size_t n, size_t m) {
+double cond(double* A, size_t n, size_t m) {
   size_t dimS = m < n ? m : n;
-  double *S = (double *)malloc(dimS * sizeof(double));
+  double* S = (double*)malloc(dimS * sizeof(double));
 
   char JOBU = 'N';
   int LDU = 1;
   char JOBVT = 'N';
   int LDVT = 1;
   size_t size = n * m * sizeof(double);
-  double *Atmp = (double *)malloc(size);
+  double* Atmp = (double*)malloc(size);
   memcpy(Atmp, A, size);
 
   lapack_int InfoDGSVD = -1;
 
-  double *superb = (double *)malloc((min(m, n) - 1) * sizeof(double));
+  double* superb = (double*)malloc((min(m, n) - 1) * sizeof(double));
   lapack_int n_la = to_blasint(n);
   lapack_int m_la = to_blasint(m);
   DGESVD(JOBU, JOBVT, n_la, m_la, Atmp, n_la, S, NULL, LDU, NULL, LDVT, superb, &InfoDGSVD);

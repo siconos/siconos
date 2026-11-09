@@ -22,30 +22,30 @@
 <SiconosModel>
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
-		<DS_Definition>		
+		<DS_Definition>
 			<LagrangianLinearTIDS number='13'>
-				<StepsInMemory>2</StepsInMemory>				
+				<StepsInMemory>2</StepsInMemory>
 				<q0 vectorSize='3'>
 					1.0 2.0 3.0
 				</q0>
 				<Velocity0  vectorSize='3'>
 					4.0 5.0 6.0
 				</Velocity0>
-				<Mass matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 2.0 0.0</row>
 					<row>0.0 0.0 3.0</row>
-				</Mass>			
-				<K matrixRowSize='3' matrixColSize='3'>	
+				</Mass>
+				<K matrixRowSize='3' matrixColSize='3'>
 					<row>1.0 2.0 3.0</row>
 					<row>4.0 5.0 6.0</row>
 					<row>7.0 8.0 9.0</row>
-				</K>			
-				<C matrixRowSize='3' matrixColSize='3'>	
+				</K>
+				<C matrixRowSize='3' matrixColSize='3'>
 					<row>5.0 6.0 7.0</row>
 					<row>2.0 3.0 1.0</row>
 					<row>8.0 8.0 9.0</row>
-				</C>			
+				</C>
 				<FExt vectorPlugin="TestPlugin:computeFExt"/>
 			</LagrangianLinearTIDS>
 		</DS_Definition>

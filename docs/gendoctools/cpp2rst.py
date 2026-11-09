@@ -30,12 +30,13 @@ Siconos is a program dedicated to modeling, simulation and control
 """
 
 import os
-import textwrap
 import re
-import buildtools as bt
-from pathlib import Path
-from gendoctools import common
+import textwrap
 from collections import defaultdict
+from pathlib import Path
+
+import buildtools as bt
+from gendoctools import common
 
 try:
     import lxml.etree as ET
@@ -142,7 +143,6 @@ def create_breathe_files(
 
     # -- Create rst for classes, structs and files found in xml directory --
     for hfile in headers:
-
         xml2rst(
             Path(hfile),
             srcdir,
@@ -223,7 +223,7 @@ def write_breathe_type_rst(
     )
     # title
     gen = ":orphan:\n\n"
-    gen += ".. _{}:\n\n".format(refid)
+    gen += f".. _{refid}:\n\n"
     gen += title
     gen += len(title) * "-" + "\n\n"
 
@@ -247,7 +247,7 @@ def write_breathe_type_rst(
         info["directive"],
         name,
     )
-    gen += "   :project: {}\n".format(component_name)
+    gen += f"   :project: {component_name}\n"
     # Only classes/structs have members
     if kind in ("class", "struct"):
         gen += "   :members:\n"
@@ -493,7 +493,6 @@ def xml2rst(
 
     # Round 3 write rst files for headers
     for xmlfile in xml_files:
-
         common.filter_dot_in_xml_formulas(xmlfile)
 
         root = ET.parse(xmlfile).getroot()
@@ -519,7 +518,7 @@ def xml2rst(
             gen += f"Generated from commit `{git_commit[:7]}`\n\n"
             repo_url = git_url.rstrip("/")
             source_url = f"{repo_url}/-/blob/{git_commit}/{relpath}"
-            gen += "Source code: " f"`{relpath} <{source_url}>`_\n\n"
+            gen += f"Source code: `{relpath} <{source_url}>`_\n\n"
 
         rst_id = file_rst
         outputname = Path(sphinx_directory, rst_id + ".rst")
@@ -671,7 +670,7 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
     # --> default values for missing keys
 
     if outputname.stem == "autodoc_functions":
-        for refid, (kind, name, descr, target, declared_in) in all_index.items():
+        for refid, (kind, name, descr, target, declared_in) in all_index.values():
             if kind != "function":
                 continue
             namespaces["Functions"].append(
@@ -682,7 +681,6 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
                 )
             )
         with open(outputname, "wt") as out:
-
             out.write(subtitle)
             for name, target, descr in sorted(namespaces["Functions"]):
                 disp = common.rst_escape(name)
@@ -721,7 +719,6 @@ def autodoc_collect(outputname, files_list, all_index, component_name, subtitle=
             namespaces[namespace].append((name, rst_id, descr))
 
         for namespace in sorted(namespaces):
-
             out.write(f"\n{namespace}\n")
             out.write(f"{'-' * len(namespace)}\n\n")
             for name, rst_id, descr in sorted(namespaces[namespace]):

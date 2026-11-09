@@ -50,7 +50,7 @@ NSGSProblemCallbacks callbacks = {
 };
 
 // Call the solver
-nsgs_driver(problem, reaction, velocity, &info, options, 
+nsgs_driver(problem, reaction, velocity, &info, options,
             &callbacks, nc, q, M);
 ```
 
@@ -78,7 +78,7 @@ NSGSLocalToolkit toolkit = {
 };
 
 // Solve
-nsgs_solve(problem, reaction, velocity, &info, options, 
+nsgs_solve(problem, reaction, velocity, &info, options,
            &toolkit, &problem_data);
 ```
 
@@ -103,9 +103,9 @@ To migrate an existing solver (e.g., fc2d_nsgs):
 
 ```c
 // Original fc2d_nsgs - becomes a thin wrapper
-void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w, 
+void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w,
                int *info, SolverOptions *options) {
-    
+
     // Setup callbacks
     static NSGSProblemCallbacks callbacks = {
         .problem_name = "fc2d",
@@ -116,7 +116,7 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w,
         .alloc_local = fc2d_alloc_local_wrapper,
         .incremental_error = fc2d_incr_error_wrapper,
     };
-    
+
     // Call generic solver
     nsgs_driver(problem, z, w, info, options, &callbacks,
                 problem->numberOfContacts, problem->q, problem->M);

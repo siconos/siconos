@@ -146,18 +146,18 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   siconos::algebra::blocks::SharedVector _relationVectors = {};
 
   /** \brief Internal variables for stateful non-smooth laws.
-   * 
+   *
    * Storage for internal state variables that persist across time steps.
    * Used primarily by cohesive zone models to store:
    * - Damage parameters (e.g., beta in [0,1])
    * - Cohesive force history
    * - Displacement jump accumulation
    * - Contact geometry at initialization
-   * 
+   *
    * The internal variables are stored as a SharedVector of shared_ptr to
    * SiconosVector, allowing flexible storage of different variable types
    * and sizes. The specific layout depends on the non-smooth law type.
-   * 
+   *
    * \see CohesiveZoneModelNIFNSL::initializeInternalVariables()
    * \see Interaction::initInternalVariablesMemory()
    * \see Interaction::swapInternalVariablesInMemory()
@@ -165,13 +165,13 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   std::shared_ptr<siconos::algebra::blocks::SharedVector3> _internalVariables{nullptr};
 
   /** \brief Internal variables from the previous time step.
-   * 
+   *
    * Stores a copy of internal variables at the previous time step (k).
    * This is used for:
    * - Predictor-corrector schemes requiring previous state
    * - Restart capabilities
    * - Convergence checking in fixed-point iterations
-   * 
+   *
    * The swap between _internalVariables and _internalVariables_k is
    * performed by swapInternalVariablesInMemory() after time step convergence.
    */
@@ -535,12 +535,12 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   // -- internal variables --
 
   /** \brief Get the internal variables vector (current time step).
-   * 
+   *
    * Returns the internal state variables used by cohesive zone models
    * and other stateful non-smooth laws. These variables are initialized
    * by NonSmoothLaw::initializeInternalVariables() and updated by
    * NonSmoothLaw::updateInternalVariables() at each time step.
-   * 
+   *
    * \return shared pointer to internal variables vector
    * \return nullptr if internal variables have not been initialized
    * \see CohesiveZoneModelNIFNSL for typical usage
@@ -551,11 +551,11 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   };
 
   /** \brief Get internal variables from the previous time step.
-   * 
+   *
    * Returns the internal state variables from the previous converged
    * time step (k). This is used for predictor-corrector schemes and
    * convergence checking.
-   * 
+   *
    * \return shared pointer to previous internal variables vector
    * \return nullptr if internal variables memory has not been initialized
    * \see swapInternalVariablesInMemory() for the swapping mechanism
@@ -565,11 +565,11 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   };
 
   /** \brief Set the internal variables vector.
-   * 
+   *
    * Directly sets the internal variables storage. This is typically
    * called by NonSmoothLaw::initializeInternalVariables() during
    * interaction initialization.
-   * 
+   *
    * \param vars shared pointer to internal variables vector
    * \warning The caller is responsible for ensuring the vector layout
    *          matches what the non-smooth law expects
@@ -580,27 +580,27 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   };
 
   /** \brief Initialize internal variables memory for time stepping.
-   * 
+   *
    * Allocates and initializes _internalVariables_k as a copy of
    * _internalVariables. This is called during simulation initialization
    * to enable the two-step storage required for time integration.
-   * 
+   *
    * \see swapInternalVariablesInMemory() for the update mechanism
    */
   void initInternalVariablesMemory();
 
   /** \brief Swap internal variables after time step convergence.
-   * 
+   *
    * Copies the current internal variables (_internalVariables) to the
    * previous time step storage (_internalVariables_k). This is called
    * by the simulation after a time step has converged, ensuring that
    * internalVariables_k() returns the state from the last converged step.
-   * 
+   *
    * The typical flow is:
    * 1. During time step: use/modify _internalVariables
    * 2. After convergence: swapInternalVariablesInMemory() saves state
    * 3. Next time step: _internalVariables_k contains previous state
-   * 
+   *
    * \note This is called automatically by Simulation::swapInMemory()
    * \see initInternalVariablesMemory() for initial allocation
    * \see internalVariables_k() to access previous state

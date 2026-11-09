@@ -18,6 +18,7 @@
 #include "projectionOnDisk.h"
 
 #include <math.h>
+
 #include "numerics_errors.h"
 
 void projectionOnDisk(double* r, double R) {

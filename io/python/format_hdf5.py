@@ -1,4 +1,3 @@
-#!/usr/bin/env @Python_EXECUTABLE@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
@@ -15,15 +14,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import h5py
-import numpy as np
 import json
 import os
 import re
 
-vlen_dtype = h5py.vlen_dtype(str) # variable-length string, used to create "vlen" datasets
+import h5py
+import numpy as np
 
-def check_datatype(data, format, symbols={}):
+vlen_dtype = h5py.vlen_dtype(
+    str
+)  # variable-length string, used to create "vlen" datasets
+
+
+def check_datatype(data, format, symbols=None):
     # Examples
     # "dimension": {"enum": [2, 3], "default": 3}
     # "stops": {"dtype": "float", "shape": [null, 3], "opt": true, "note": "[axis, position, direction]"},
@@ -34,23 +37,36 @@ def check_datatype(data, format, symbols={}):
         if data not in enum:
             raise ValueError(f"{data} not in {enum}")
     if "dtype" in format:
-        dtypes = format["dtype"] if isinstance(format["dtype"], list) else [format["dtype"]]
-        for dtype in dtypes: # first dtype of the list that accepts data
+        dtypes = (
+            format["dtype"] if isinstance(format["dtype"], list) else [format["dtype"]]
+        )
+        for dtype in dtypes:  # first dtype of the list that accepts data
             if dtype == "vlen" or dtype == "str":
-                if data.dtype.kind in "USO": # str, bytes (h5py 3 read) or object
+                if data.dtype.kind in "USO":  # str, bytes (h5py 3 read) or object
                     break
             elif np.can_cast(data.dtype, dtype):
                 break
         else:
-            raise ValueError(f"{data} can not be casted to the expected type : {data.dtype} -- expected : {dtypes}")
+            raise ValueError(
+                f"{data} can not be casted to the expected type : {data.dtype} -- expected : {dtypes}"
+            )
     if "shape" in format:
-        shapes = format["shape"] if isinstance(format["shape"][0], list) else [format["shape"]]
-        for shape in shapes: # first shape of the list that matches data
-            if data.ndim == len(shape) and all(s_format is None or s_data == symbols.get(s_format, s_format)
-                                               for s_data, s_format in zip(data.shape, shape)):
+        shapes = (
+            format["shape"]
+            if isinstance(format["shape"][0], list)
+            else [format["shape"]]
+        )
+        for shape in shapes:  # first shape of the list that matches data
+            if data.ndim == len(shape) and all(
+                s_format is None or s_data == (symbols or {}).get(s_format, s_format)
+                for s_data, s_format in zip(data.shape, shape)
+            ):
                 break
         else:
-            raise ValueError(f"{data} does not have the expected shapes : {data.shape} -- expected : {shapes}")
+            raise ValueError(
+                f"{data} does not have the expected shapes : {data.shape} -- expected : {shapes}"
+            )
+
 
 def info(layout):
     """attrs["info"] of a table, from the layout of its columns ('x[k]' = k columns, 'x[*]' = the rest)."""
@@ -66,10 +82,15 @@ def info(layout):
         col += n
     return ",\n ".join(lines)
 
+
 class FormatAdaptor:
-    def __init__(self, filename, mode="r", version=(1,0), compression=False):
+    def __init__(self, filename, mode="r", version=(1, 0), compression=False):
         if version[0] == 1:
-            with open(os.path.join(os.path.dirname(__file__), "format_v1.json"), "r", encoding="utf-8") as f:
+            with open(
+                os.path.join(os.path.dirname(__file__), "format_v1.json"),
+                "r",
+                encoding="utf-8",
+            ) as f:
                 self.format = json.load(f)
         self.attributes = self.format["attributes"]
         self.symbols_format = self.format["symbols"]
@@ -77,24 +98,40 @@ class FormatAdaptor:
         self.compression = compression
         self.hdf5 = h5py.File(filename, mode)
         self.writable = self.hdf5.mode != "r"
-        self.data = self.hdf5["data"] if "data" in self.hdf5 else self.hdf5.create_group("data") if self.writable else None
-        self.dimension = int(self.hdf5.attrs.get("dimension", self.attributes["dimension"]["default"]))
+        self.data = (
+            self.hdf5["data"]
+            if "data" in self.hdf5
+            else self.hdf5.create_group("data")
+            if self.writable
+            else None
+        )
+        self.dimension = int(
+            self.hdf5.attrs.get("dimension", self.attributes["dimension"]["default"])
+        )
         check_datatype(self.dimension, self.attributes["dimension"])
 
     @property
     def symbols(self):
         """Value of each symbol for the current dimension of the file (it may change while writing)."""
-        dimension = str(int(self.hdf5.attrs.get("dimension", self.attributes["dimension"]["default"])))
+        dimension = str(
+            int(
+                self.hdf5.attrs.get(
+                    "dimension", self.attributes["dimension"]["default"]
+                )
+            )
+        )
         return {name: values[dimension] for name, values in self.symbols_format.items()}
 
     def open(self, exclude=()):
         """Every entry of the format in /data: created if missing (writable file), else None if
         the format says it is optional ("opt"), else reading fails. Entries named at write
-        time ('<...>') and those of exclude are left to the caller."""
+        time ('<...>'), the index groups (targets of "by", see init_index) and those of
+        exclude are left to the caller."""
         if self.data is None:
             raise ValueError(f"no /data group in {self.hdf5.filename}")
+        indexes = {spec["by"] for spec in self.data_format.values() if "by" in spec}
         for name, spec in self.data_format.items():
-            if "<" in name or name in exclude or name in self.data:
+            if "<" in name or name in exclude or name in indexes or name in self.data:
                 continue
             if self.writable:
                 self.get_group(name) if "dtype" not in spec else self.get_dataset(name)
@@ -128,31 +165,46 @@ class FormatAdaptor:
                 raise KeyError(f"'{path}' not described by the format")
         return spec
 
-    def add_into_group(self, group, dataset, /, data=None, compression=False, **dataset_kwargs):
-        #add interaction, group : permanent interaction, dataset : <interaction>, ...
+    def add_into_group(
+        self, group, dataset, /, data=None, compression=False, **dataset_kwargs
+    ):
+        # add interaction, group : permanent interaction, dataset : <interaction>, ...
         current_group = self.get_group(group)
         if dataset not in current_group:
-            dataset_kwargs = {k: v for k, v in dataset_kwargs.items() if v is not None} # None = not given
+            dataset_kwargs = {
+                k: v for k, v in dataset_kwargs.items() if v is not None
+            }  # None = not given
             spec = self._spec(f"{group}/{dataset}")
             attrs = spec.get("attrs", {})
             unknown = dataset_kwargs.keys() - attrs.keys()
             if unknown:
-                raise KeyError(f"{group}/{dataset}: attributes {sorted(unknown)} not in the format")
+                raise KeyError(
+                    f"{group}/{dataset}: attributes {sorted(unknown)} not in the format"
+                )
             for name, fmt in attrs.items():
-                if name in dataset_kwargs: check_datatype(dataset_kwargs[name], fmt, self.symbols)
+                if name in dataset_kwargs:
+                    check_datatype(dataset_kwargs[name], fmt, self.symbols)
                 elif not fmt.get("opt"):
-                    raise ValueError(f"{group}/{dataset}: required attribute '{name}' missing")
-            if "dtype" not in spec: # no dtype in the format: group (input/<object>, external_functions/<function>)
+                    raise ValueError(
+                        f"{group}/{dataset}: required attribute '{name}' missing"
+                    )
+            if (
+                "dtype" not in spec
+            ):  # no dtype in the format: group (input/<object>, external_functions/<function>)
                 data_hdf5 = current_group.create_group(dataset)
             else:
-                if data is not None: # data already carries its types: written as is
+                if data is not None:  # data already carries its types: written as is
                     check_datatype(data, spec, self.symbols)
                     data_hdf5 = current_group.create_dataset(
-                        dataset, data=data, compression="gzip" if compression else None)
-                else: # empty structure built from the format
+                        dataset, data=data, compression="gzip" if compression else None
+                    )
+                else:  # empty structure built from the format
                     data_hdf5 = current_group.create_dataset(
-                        dataset, shape=spec["shape"], dtype=vlen_dtype if spec["dtype"] == "vlen" else spec["dtype"],
-                        compression="gzip" if compression else None)
+                        dataset,
+                        shape=spec["shape"],
+                        dtype=vlen_dtype if spec["dtype"] == "vlen" else spec["dtype"],
+                        compression="gzip" if compression else None,
+                    )
             data_hdf5.attrs.update(dataset_kwargs)
         return current_group[dataset]
 
@@ -164,9 +216,22 @@ class FormatAdaptor:
         spec = self._spec(dataset)
         ncols = spec["shape"][-1]
         comp = self.compression and ncols > 0
-        table = self.data.create_dataset(dataset, (0, ncols), maxshape=(None, ncols), dtype=spec["dtype"],
-                                         chunks=(4000, ncols) if comp else None,
-                                         compression="gzip" if comp else None, compression_opts=9 if comp else None)
+        chunks = (
+            tuple(spec["chunks"])
+            if "chunks" in spec
+            else (4000, ncols)
+            if comp
+            else None
+        )
+        table = self.data.create_dataset(
+            dataset,
+            (0, ncols),
+            maxshape=(None, ncols),
+            dtype=spec["dtype"],
+            chunks=chunks,
+            compression="gzip" if comp else None,
+            compression_opts=9 if comp else None,
+        )
         if "layout" in spec:
             table.attrs["info"] = info(spec["layout"])
         return table
@@ -177,3 +242,59 @@ class FormatAdaptor:
         if not self.writable:
             return None
         return self.data.require_group(group)
+
+    # -- tables addressed by an index ("by"): the rows of each output step --
+    def indexed_tables(self):
+        """{table: index group} for the tables of the format that have a "by"."""
+        return {
+            name: spec["by"] for name, spec in self.data_format.items() if "by" in spec
+        }
+
+    def table_rows(self, name):
+        table = self.data.get(name)
+        return 0 if table is None else table.shape[0]
+
+    def init_index(self):
+        """Create the index of the indexed tables. False if the file already has rows written
+        without an index (an index would only cover the last steps), else True."""
+        tables = self.indexed_tables()
+        if all(index in self.data for index in tables.values()):
+            return True
+        if any(self.table_rows(name) > 0 for name in tables):
+            return False
+        for name, index in tables.items():
+            self.get_dataset(f"{index}/{name}")
+        return True
+
+    def index_rows(self, rows_before, time):
+        """Append the rows of one output step to the index: rows_before = {table: rows before the step}."""
+        tables = self.indexed_tables()
+        for name, first in rows_before.items():
+            table = self.data[f"{tables[name]}/{name}"]
+            table.resize(table.shape[0] + 1, 0)
+            table[-1, :] = [time, first, self.table_rows(name) - first]
+
+    def rows(self, name, nonempty=False):
+        """Rows of each output step of a table: (times, starts, ends). From its index when the
+        file has one, else from its time column (first column 't' of its layout), which gives
+        the nonempty steps only; None for a table without index and time column.
+        nonempty: keep only the steps with rows."""
+        spec = self._spec(name)
+        index = self.data.get(f"{spec['by']}/{name}") if "by" in spec else None
+        if index is not None:
+            rows = index[:]
+            times, starts = rows[:, 0], rows[:, 1].astype(np.int64)
+            ends = starts + rows[:, 2].astype(np.int64)
+            if nonempty:
+                keep = ends > starts
+                times, starts, ends = times[keep], starts[keep], ends[keep]
+            return times, starts, ends
+        if spec.get("layout", [None])[0] != "t":
+            return None
+        table = self.data.get(name)
+        if table is None or table.shape[0] == 0:
+            empty = np.empty(0, dtype=np.int64)
+            return np.empty(0), empty, empty
+        times, starts = np.unique(table[:, 0], return_index=True)
+        ends = np.append(starts[1:], table.shape[0])
+        return times, starts.astype(np.int64), ends.astype(np.int64)

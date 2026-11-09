@@ -28,9 +28,8 @@ Please modify them with care (or not at all!)
 
 
 Some extra options (designed for developers or advanced users) are available in the file [advanced_options.cmake](../cmake/advanced_options.cmake)
-and can be set with the command line 
+and can be set with the command line
 
 ```
 cmake -DOPTION_NAME=OPTION_VALUE ...
 ```
-

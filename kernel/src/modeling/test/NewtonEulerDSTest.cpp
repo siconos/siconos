@@ -95,49 +95,49 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1_alias() {
   neds.setComputeFextFunction(
       [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
         auto i = 0;
-        for (auto &v : result) v = time * i++;
+        for (auto& v : result) v = time * i++;
       });
 
   neds.setComputeMextFunction(
       [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
         auto i = 0;
-        for (auto &v : result) v = time * i++;
+        for (auto& v : result) v = time * i++;
       });
 
   neds.setComputeFintFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
          Eigen::Ref<siconos::algebra::MapVectorType> result) {
         auto i = 0;
-        for (auto &v : result) v = time * i++;
+        for (auto& v : result) v = time * i++;
       });
 
   neds.setComputeJacobianFintOver_qFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   neds.setComputeJacobianFintOver_twistFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   neds.setComputeMintFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
          Eigen::Ref<siconos::algebra::MapVectorType> result) {
         auto i = 0;
-        for (auto &v : result) v = time * i++;
+        for (auto& v : result) v = time * i++;
       });
 
   neds.setComputeJacobianMintOver_qFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   neds.setComputeJacobianMintOver_twistFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   neds.computeWrench(twist, q, time);

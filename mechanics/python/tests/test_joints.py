@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 
+import numpy as np
 import siconos.mechanics.joints as mj
 import siconos.modeling as sm
-import numpy as np
 
 
 def test_joints():

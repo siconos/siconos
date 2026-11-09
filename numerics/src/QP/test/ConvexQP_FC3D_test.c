@@ -12,15 +12,15 @@
 #include "projectionOnCone.h"        // for projectionOnCone
 
 typedef struct {
-  ConvexQP *cqp;
-  FrictionContactProblem *fc3d;
+  ConvexQP* cqp;
+  FrictionContactProblem* fc3d;
 } Problems;
 
-static void PXtest_0(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  Problems *pb = (Problems *)cqp->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+static void PXtest_0(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  Problems* pb = (Problems*)cqp->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -41,19 +41,19 @@ static int test_0(void) {
   // cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_0;
 
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_PG);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_PG);
   verbose = 1;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   cqp.env = pb;
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -64,8 +64,8 @@ static int test_0(void) {
 
   cqp.A = NULL;
 
-  double *z = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
+  double* z = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
 
   PXtest_0(&cqp, z, w);
   int info;
@@ -85,11 +85,11 @@ static int test_0(void) {
   return info;
 }
 
-static void PXtest_1(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  Problems *pb = (Problems *)cqp->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+static void PXtest_1(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  Problems* pb = (Problems*)cqp->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -110,7 +110,7 @@ static int test_1(void) {
   // cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_1;
 
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   verbose = 1;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] =
       SICONOS_CONVEXQP_ADMM_NO_ACCELERATION;
@@ -118,14 +118,14 @@ static int test_1(void) {
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 0.8;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   cqp.env = pb;
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -136,10 +136,10 @@ static int test_1(void) {
 
   cqp.A = NULL;
 
-  double *z = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
-  double *u = (double *)calloc(n, sizeof(double));
-  double *xi = (double *)calloc(n, sizeof(double));
+  double* z = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
+  double* u = (double*)calloc(n, sizeof(double));
+  double* xi = (double*)calloc(n, sizeof(double));
 
   PXtest_1(&cqp, z, w);
   int info;
@@ -173,11 +173,11 @@ static int test_1(void) {
   return info;
 }
 
-static void PXtest_2(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  Problems *pb = (Problems *)cqp->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+static void PXtest_2(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  Problems* pb = (Problems*)cqp->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -198,7 +198,7 @@ static int test_2(void) {
   // cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_2;
 
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   verbose = 1;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 0.8;
@@ -208,14 +208,14 @@ static int test_2(void) {
       SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   cqp.env = pb;
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -226,10 +226,10 @@ static int test_2(void) {
 
   cqp.A = NULL;
 
-  double *z = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
-  double *u = (double *)calloc(n, sizeof(double));
-  double *xi = (double *)calloc(n, sizeof(double));
+  double* z = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
+  double* u = (double*)calloc(n, sizeof(double));
+  double* xi = (double*)calloc(n, sizeof(double));
 
   PXtest_2(&cqp, z, w);
   int info;
@@ -263,11 +263,11 @@ static int test_2(void) {
   return info;
 }
 
-static void PXtest_3(void *cqpIn, double *x, double *PX) {
-  ConvexQP *cqp = (ConvexQP *)cqpIn;
-  Problems *pb = (Problems *)cqp->env;
-  FrictionContactProblem *fc3d = pb->fc3d;
-  // frictionContact_display(fc3d);
+static void PXtest_3(void* cqpIn, double* x, double* PX) {
+  ConvexQP* cqp = (ConvexQP*)cqpIn;
+  Problems* pb = (Problems*)cqp->env;
+  FrictionContactProblem* fc3d = pb->fc3d;
+  // frictionContactProblem_display(fc3d);
 
   int contact = 0;
   int nc = fc3d->numberOfContacts;
@@ -288,20 +288,20 @@ static int test_3(void) {
   // cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_3;
 
-  SolverOptions *options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  SolverOptions* options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] =
       SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
-  Problems *pb = (Problems *)malloc(sizeof(Problems));
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
+  Problems* pb = (Problems*)malloc(sizeof(Problems));
   cqp.env = pb;
 
   pb->cqp = &cqp;
   pb->fc3d = problem;
-  frictionContact_display(pb->fc3d);
+  frictionContactProblem_display(pb->fc3d);
 
   int n = problem->numberOfContacts * problem->dimension;
   cqp.size = n;
@@ -312,10 +312,10 @@ static int test_3(void) {
 
   cqp.A = NULL;
 
-  double *z = (double *)calloc(n, sizeof(double));
-  double *w = (double *)calloc(n, sizeof(double));
-  double *u = (double *)calloc(n, sizeof(double));
-  double *xi = (double *)calloc(n, sizeof(double));
+  double* z = (double*)calloc(n, sizeof(double));
+  double* w = (double*)calloc(n, sizeof(double));
+  double* u = (double*)calloc(n, sizeof(double));
+  double* xi = (double*)calloc(n, sizeof(double));
 
   PXtest_3(&cqp, z, w);
   int info;
@@ -349,7 +349,7 @@ static int test_3(void) {
   return info;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif

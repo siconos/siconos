@@ -81,7 +81,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
   *info = 0;
 
   assert(problem->M);
-  assert(problem->M->matrix0);
+  assert(problem->M->dense);
   assert(problem->q);
 
   int n_row = problem->M->size0;
@@ -130,7 +130,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
   }
 
   while (enum_next(zw_indices, problem->m, enum_struct) && itermax-- > 0) {
-    mlcp_enum_build_M_Block(zw_indices, M_linear_system, problem->M->matrix0, n, m, n_row,
+    mlcp_enum_build_M_Block(zw_indices, M_linear_system, problem->M->dense, n, m, n_row,
                             indexInBlock);
 
     /* copy q_ref in q */
@@ -141,7 +141,9 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double* 
       DGELS(LA_NOTRANS, n_row, npm, NRHS, M_linear_system, n_row, q_linear_system, n_row,
             &LAinfo);
       numerics_printf_verbose(1, "Solution of dgels");
-      { NM_dense_display(q_linear_system, n_row, 1, 0); }
+      {
+        NM_dense_display(q_linear_system, n_row, 1, 0);
+      }
     } else {
       DGESV(npm, NRHS, M_linear_system, npm, ipiv, q_linear_system, npm, &LAinfo);
       numerics_printf_verbose(1, "Solution of dgesv");
@@ -301,7 +303,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double* z, double* w,
   EnumerationStruct* enum_struct = enum_init(problem->m);
 
   while (enum_next(zw_indices, problem->m, enum_struct) && itermax-- > 0) {
-    mlcp_enum_build_M(zw_indices, M_linear_system, problem->M->matrix0, n, m, n_row);
+    mlcp_enum_build_M(zw_indices, M_linear_system, problem->M->dense, n, m, n_row);
 
     /* copy q_ref in q */
     memcpy(q_linear_system, q_linear_system_ref, n_row * sizeof(double));

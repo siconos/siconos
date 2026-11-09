@@ -27,7 +27,7 @@ OPTION(BUILD_AS_SHARED_LIBS "Build all the libraries as shared" ON)
 if (BUILD_AS_SHARED_LIBS)
 	if(WIN32)
 		set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON CACHE BOOL "Export all symbols")
-	endif(WIN32)	
+	endif(WIN32)
 endif (BUILD_AS_SHARED_LIBS)
 
 set(CMAKE_CXX_STANDARD 14)

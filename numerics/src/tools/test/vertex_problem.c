@@ -25,7 +25,7 @@
 int main(void) {
   double Hdat[] = {1, 0, -1, 0, 0, 1, 0, -1};
 
-  NumericsMatrix* H = NM_create_from_data(NM_DENSE, 4, 2, Hdat);
+  NumericsMatrix* H = NM_create_with_data(NM_DENSE, 4, 2, Hdat);
 
   double K[] = {-2, -3, -7, -8};
 
@@ -33,7 +33,7 @@ int main(void) {
   int basis[11] = {0};
 
   siconos_find_vertex(&P, 2, basis);
-  H->matrix0 = NULL;
+  H->dense = NULL;
   NM_free(H);
   for (unsigned i = 0; i < 11; ++i) printf("%d ", basis[i]);
   printf("\n");

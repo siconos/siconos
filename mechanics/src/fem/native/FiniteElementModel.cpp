@@ -1114,8 +1114,9 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direc
   B = coeff * B;
 }
 
-void siconos::mechanics::fem::FiniteElementModel::computeElementaryStrainDisplacementMatrix_direct(
-    FiniteElement& fe, siconos::algebra::SiconosDenseMatrix& B) {
+void siconos::mechanics::fem::FiniteElementModel::
+    computeElementaryStrainDisplacementMatrix_direct(FiniteElement& fe,
+                                                     siconos::algebra::SiconosDenseMatrix& B) {
   const auto& nodes = fe.nodes();
   double x1 = nodes[0]->x();
   double x2 = nodes[1]->x();
@@ -1355,18 +1356,21 @@ siconos::mechanics::fem::FiniteElementModel::getContactSegments(int contact_tag)
 }
 
 std::vector<siconos::algebra::Index>
-siconos::mechanics::fem::FiniteElementModel::getContactGlobalIndices(const Eigen::Ref<const Eigen::MatrixXd>& contact_coords) const {
+siconos::mechanics::fem::FiniteElementModel::getContactGlobalIndices(
+    const Eigen::Ref<const Eigen::MatrixXd>& contact_coords) const {
   std::vector<siconos::algebra::Index> indices;
   indices.reserve((contact_coords.rows() - 1) * 4);
 
   for (int i = 0; i < contact_coords.rows() - 1; ++i) {
     Eigen::Vector2d p1(contact_coords(i, 0), contact_coords(i, 1));
-    Eigen::Vector2d p2(contact_coords(i+1, 0), contact_coords(i+1, 1));
+    Eigen::Vector2d p2(contact_coords(i + 1, 0), contact_coords(i + 1, 1));
 
-    auto v1_it = std::find_if(mesh_->vertices().begin(), mesh_->vertices().end(),
-        [&](const auto& v) { return v->x() == p1(0) && v->y() == p1(1); });
-    auto v2_it = std::find_if(mesh_->vertices().begin(), mesh_->vertices().end(),
-        [&](const auto& v) { return v->x() == p2(0) && v->y() == p2(1); });
+    auto v1_it =
+        std::find_if(mesh_->vertices().begin(), mesh_->vertices().end(),
+                     [&](const auto& v) { return v->x() == p1(0) && v->y() == p1(1); });
+    auto v2_it =
+        std::find_if(mesh_->vertices().begin(), mesh_->vertices().end(),
+                     [&](const auto& v) { return v->x() == p2(0) && v->y() == p2(1); });
 
     if (v1_it == mesh_->vertices().end() || v2_it == mesh_->vertices().end())
       THROW_EXCEPTION("Contact coordinate not found in mesh vertices");

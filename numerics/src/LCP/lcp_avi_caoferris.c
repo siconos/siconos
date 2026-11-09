@@ -31,8 +31,8 @@ Ferris solves the subsequent AVI.
 #include "lcp_cst.h"                       // for SICONOS_LCP_AVI_CAOFERRIS
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                        SolverOptions* options) {
   unsigned int n = problem->size;
@@ -70,7 +70,8 @@ static int lcp_avi_caoferris_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_avi_caoferris_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_avi_caoferris_solve_wrap(void* problem, double* z, double* w,
+                                        SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_avi_caoferris((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -82,12 +83,10 @@ static void lcp_avi_caoferris_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER(SICONOS_LCP_AVI_CAOFERRIS, "LCP_AVI_CAOFERRIS",
-                       "AVI Cao-Ferris solver for LCP",
-                       lcp_avi_caoferris_init_wrap,
-                       lcp_avi_caoferris_solve_wrap,
-                       lcp_avi_caoferris_free_wrap,
-                       NULL,  /* error function */
-                       lcp_avi_caoferris_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+                "AVI Cao-Ferris solver for LCP", lcp_avi_caoferris_init_wrap,
+                lcp_avi_caoferris_solve_wrap, lcp_avi_caoferris_free_wrap,
+                NULL,                          /* error function */
+                lcp_avi_caoferris_set_default, /* set_default */
+                1000,                          /* default_max_iter */
+                1e-6,                          /* default_tol */
+                0);                            /* is_local_solver */

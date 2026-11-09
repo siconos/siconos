@@ -1,6 +1,6 @@
 .. index::
    single: Convex Quadratic Programming problems (ConvexQP)
-   
+
 .. contents::
 
 .. _convexqp_problem:
@@ -84,7 +84,7 @@ parameters:
 * dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = 1e-9
 * dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] =0.9
 * dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] = 2.0/3.0
-  
+
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
 convex QP, VI solvers`(:cpp:enumerator:`SICONOS_CONVEXQP_VI_FPP` and :cpp:enumerator:`SICONOS_CONVEXQP_VI_EG`)
@@ -112,7 +112,6 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] = 20000
 * iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
-  
+
 * dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0
 * dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA] = 0.999
-

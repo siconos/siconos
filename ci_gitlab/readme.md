@@ -12,7 +12,7 @@ Job type are:
     * Docker images are saved in the project registry, in 'sources',  see https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/container_registry.
     * The images are built from Dockerfiles saved in [ci_gitlab/dockerfiles](./ci_gitlab/dockerfiles)
 
-* [B] Those to configure, build or test Siconos 
+* [B] Those to configure, build or test Siconos
 
     * They are executed on one of the images saved in the registry.
     * Build and tests results are published on [siconos-dashboard](http://siconos-dashboard.univ-grenoble-alpes.fr:8080/index.php?project=siconos).
@@ -24,12 +24,12 @@ Job type are:
     * The image is usually named siconos-<CI_COMMIT_REF_NAME>-<osname>, eg siconoslab-main
 
 
-| Commit starts with ...   |  [skip ci]  | [docker-build]                          | [all-jobs] | any other message |       
+| Commit starts with ...   |  [skip ci]  | [docker-build]                          | [all-jobs] | any other message |
 | ---                      |  ------     |----------------                         |---------------------------------------|-------------------|
 | push to main           |   :x:       | :white_check_mark: all [A]<br>:white_check_mark: all [B] (debian, ubuntu ...)<br>:white_check_mark: [C] on ubuntu20.04 |useless| :white_check_mark: all [A] <br>:white_check_mark: [C] on ubuntu20.04 |
 | push to any other branch |   :x:       | :white_check_mark: all [A]<br>:white_check_mark: [B] on ubuntu20.04<br>:white_check_mark: [C] on ubuntu20.04 | :white_check_mark: all [A] (debian, ubuntu ...)<br>:white_check_mark: [C] on ubuntu20.04 | :white_check_mark: [B] on ubuntu20.04<br>:white_check_mark: [C] on ubuntu20.04|
 
-* "bridge examples" job: when the commit message contains "[with examples], the push will triggered the CI process in siconos-tutorials project and 
+* "bridge examples" job: when the commit message contains "[with examples], the push will triggered the CI process in siconos-tutorials project and
 run all examples with the version of Siconos (MR or branch or main) corresponding to the current push. It will be executed on the docker image
 built and saved during the current CI pipeline (named siconos-<branch-name> and saved in siconos-tutorials registries).
 
@@ -52,7 +52,7 @@ as in
 cmake -DUSER_OPTIONS_FILE=<path-to-siconos>/config_samples/siconos_lite.cmake
 ```
 
-  
+
 * [dockerfiles](./dockerfiles): contains directories (with Dockerfiles and some other
 required files) used to build Docker images "ready-to-use" for Siconos install.
 
@@ -99,7 +99,7 @@ To (re)-build a docker image locally, try
 source docker-local.sh <image-name>
 ```
 
-Replace <image-name> by any name matching a directory in ci_gitlab/dockerfiles, depending on the image you need 
+Replace <image-name> by any name matching a directory in ci_gitlab/dockerfiles, depending on the image you need
 (e.g. ubuntu20.04).
 
 This will:
@@ -118,4 +118,3 @@ Or upload it to siconos registries on gricad-gitlab:
 ```
 docker push gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20-04
 ```
-

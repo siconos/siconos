@@ -13,14 +13,14 @@
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "numerics_verbose.h"              // for verbose
-#include "siconos_debug.h"  
+#include "numerics_errors.h"
+#include "numerics_verbose.h"  // for verbose
+#include "siconos_debug.h"
 
-void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                         SolverOptions *options) {  
-
-  NumericsMatrix *M = problem->M;
-  double *q = problem->q;
+void lcp_jacobi(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+                SolverOptions* options) {
+  NumericsMatrix* M = problem->M;
+  double* q = problem->q;
 
   assert(M);
   assert(q);
@@ -38,34 +38,33 @@ void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Preparation of the diagonal of the inverse matrix */
-  double *diag = (double *)malloc((size_t)n * sizeof(double));
+  double* diag = (double*)malloc((size_t)n * sizeof(double));
   NM_get_invdiag(n, info, M, diag);
 
   /* Check if diagonal has a zero */
   if (*info == 2) {
     return;
   }
-  
+
   /* Solver variables */
   int iter = 0;
   double err = 1.;
 
-  double *new_z = (double *)malloc((size_t)n * sizeof(double));
+  double* new_z = (double*)malloc((size_t)n * sizeof(double));
 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
-
     // Compute new_z
     for (int i = 0; i < n; i++) {
       new_z[i] = q[i];
       DEBUG_PRINTF("zi = %e\n", new_z[i]);
-      NM_row_prod_no_diag1x1((size_t)n, i, i, M, z, &new_z[i], false);
+      CHECK_RETURN(NM_row_prod_no_diag1x1((size_t)n, i, i, M, z, &new_z[i], false) ==
+                   NUMERICS_OK);
       DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], new_z[i]);
 
-      new_z[i] = -(new_z[i])*diag[i];
+      new_z[i] = -(new_z[i]) * diag[i];
 
-      if (new_z[i] < 0)
-        new_z[i] = 0.0;
+      if (new_z[i] < 0) new_z[i] = 0.0;
     }
 
     cblas_dcopy(n, new_z, 1, z, 1);
@@ -103,5 +102,4 @@ void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int
 
   free(diag);
   free(new_z);
-
 }

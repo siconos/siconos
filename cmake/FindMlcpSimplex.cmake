@@ -22,7 +22,7 @@ FindMlcpSimplex
 Find the mlcp_simplex library and header.
 
 Usage :
- 
+
 find_package(MlcpSimplex REQUIRED)
 target_link_libraries(yourlib PRIVATE MlcpSimplex::MlcpSimplex)
 

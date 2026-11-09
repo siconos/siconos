@@ -24,7 +24,7 @@ set(SICONOS_HAS_OpenCASCADE TRUE CACHE INTERNAL "True if OpenCASCADE API has bee
 
 if(OpenCASCADE_FOUND)
 
-  if(OpenCASCADE_WITH_VTK) # Required for 7.6 but not for 7.7, 7.8  ... 
+  if(OpenCASCADE_WITH_VTK) # Required for 7.6 but not for 7.7, 7.8  ...
     find_package(VTK  REQUIRED  COMPONENTS CommonCore RenderingOpenGL2 RenderingFreeType)
   endif()
 
@@ -39,5 +39,3 @@ if(OpenCASCADE_FOUND)
 
 
 endif()
-
-

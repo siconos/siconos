@@ -17,23 +17,21 @@
 #
 
 # ignore flake8 warning for line too long, only for this file
-# noqa: E501
 
-import webbrowser
-from OCC.Visualization import Tesselator
-import OCC
-from time import time
-import os
-import tempfile
-
-from OCC.STEPControl import STEPControl_Reader
-from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-import sys
 import math
-import vtk
-
-import siconos.io.mechanics_run as IO
+import os
+import sys
+import tempfile
+import webbrowser
 from operator import itemgetter
+from time import time
+
+import OCC
+import siconos.io.mechanics_run as IO
+import vtk
+from OCC.IFSelect import IFSelect_ItemsByEntity, IFSelect_RetDone
+from OCC.STEPControl import STEPControl_Reader
+from OCC.Visualization import Tesselator
 
 vtkmath = vtk.vtkMath()
 
@@ -2090,7 +2088,7 @@ def different_elements(seq):
     return len(c)
 
 
-class HTMLHeader(object):
+class HTMLHeader:
     def __init__(self, background_color="#000000"):
         self._background_color = background_color
 
@@ -2100,7 +2098,7 @@ class HTMLHeader(object):
         return header_str
 
 
-class HTMLBody(object):
+class HTMLBody:
     def __init__(
         self,
         background_color="#000000",
@@ -2466,7 +2464,7 @@ class HTMLBody(object):
         return body_str
 
 
-class ThreejsRenderer(object):
+class ThreejsRenderer:
     def __init__(
         self,
         background_color="#123345",
@@ -2533,7 +2531,7 @@ class ThreejsRenderer(object):
         print("Opening html output in the default webbrowser ...")
         # previous version us a os.system call to the "open" command
         # but this is a platform (osx) specific solution
-        _path = "file:///{0}".format(os.path.join(os.getcwd(), self._html_filename))
+        _path = f"file:///{os.path.join(os.getcwd(), self._html_filename)}"
         webbrowser.open_new_tab(_path)
 
     def CreateDictionaryOfShapes(self, dictionaryOfShapes):
@@ -2585,7 +2583,6 @@ def usage():
 
 # -----------------------------MODIFICATIONS------------------------------------#
 if __name__ == "__main__":
-
     output_path = os.getcwd()
     bin_path = os.path.dirname(os.path.realpath(__file__))
     share_path = os.path.join(bin_path, "../share/siconos/")
@@ -2630,20 +2627,12 @@ if __name__ == "__main__":
         print("########### Load shapes")
         obj_by_id = dict()
         # ----------------------Loading .step and .stp Files ( begin)------------------------#
-        dictionaryOfShapes = (
-            {}
-        )  # dictionaryOfShapes will contain the mesh of the objects
-        translation = (
-            {}
-        )  # translation and orientation are dictionaries that will contain the offset of translation and quaternion
+        dictionaryOfShapes = {}  # dictionaryOfShapes will contain the mesh of the objects
+        translation = {}  # translation and orientation are dictionaries that will contain the offset of translation and quaternion
         orientation = {}
 
         print("%s" % dictionaryOfShapes)
-        for (
-            instance
-        ) in (
-            io.instances()
-        ):  # we run through the id's and not the order of the objects so we might see object3 first then object1 and object2 so we need to initialize first the list
+        for instance in io.instances():  # we run through the id's and not the order of the objects so we might see object3 first then object1 and object2 so we need to initialize first the list
             id = io.instances()[instance].attrs["id"]
             obj_by_id[id] = instance
             obj = instance
@@ -2720,8 +2709,8 @@ if __name__ == "__main__":
         lastRowNumber = 0
         j = 0
         while (
-            i + j
-        ) < numberOfTimeStepsVectors * numberOfVectors:  # while the whole file is not overflied
+            (i + j) < numberOfTimeStepsVectors * numberOfVectors
+        ):  # while the whole file is not overflied
             timeStepNow = cf_data[rowNumber][
                 0
             ]  # timesteps represents the first arrow at a given time
@@ -2770,7 +2759,7 @@ if __name__ == "__main__":
 
         # for a given vector arrow it is also important to take the maximum norm of this vector in the entire cycle of the animation
         listOfMaxima = []
-        for key in interstellarVectors.keys():
+        for key in interstellarVectors:
             liste = []
             for i in range(len(interstellarVectors[key]["forceDirectionX"])):
                 u = 0
@@ -2816,24 +2805,16 @@ if __name__ == "__main__":
                 ]  # initial translation
                 interstellar[_id]["initialQuaternion"]["quaternionX"] = orientation[
                     _id
-                ][
-                    0
-                ]  # initial quaternion
+                ][0]  # initial quaternion
                 interstellar[_id]["initialQuaternion"]["quaternionY"] = orientation[
                     _id
-                ][
-                    1
-                ]  # initial quaternion
+                ][1]  # initial quaternion
                 interstellar[_id]["initialQuaternion"]["quaternionZ"] = orientation[
                     _id
-                ][
-                    2
-                ]  # initial quaternion
+                ][2]  # initial quaternion
                 interstellar[_id]["initialQuaternion"]["quaternionW"] = orientation[
                     _id
-                ][
-                    3
-                ]  # initial quaternion
+                ][3]  # initial quaternion
             if _id < 0:
                 interstellar[_id]["positionX"] = translation[_id][0]
                 interstellar[_id]["positionY"] = translation[_id][1]

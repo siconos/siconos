@@ -21,6 +21,7 @@ limitations under the License.
 """
 
 import argparse
+import json
 import os
 import tempfile
 import subprocess
@@ -34,6 +35,80 @@ import shutil
 import hashlib
 
 
+# the simulation options: the dests of the "Simulation options" argument
+# group; they are the keys of nonos/simoptions.py (the run options of
+# siconos.io.mechanics_run, all the backends, and the objects of
+# nonos.bridge, the vnative backend only)
+SIM_OPTION_DESTS = (
+    "t0",
+    "T",
+    "h",
+    "output_format",
+    "scheme",
+    "theta",
+    "gamma",
+    "constraint_activation_threshold",
+    "solver",
+    "tolerance",
+    "max_iter",
+    "dem_kn",
+    "dem_cn",
+    "dem_kt",
+    "timings",
+    "dataflow",
+    "resume",
+)
+
+# the schemes of the vnative integrator, mirrored from
+# nonos/simoptions.py; the short names of the first version are still
+# accepted (the alias is resolved before the choices are checked)
+SIM_SCHEMES = (
+    "MoreauJean",
+    "MoreauJeanGOSI",
+    "AnitescuTasora",
+    "AnitescuTasoraAPGD",
+    "DEM",
+)
+SIM_SCHEME_ALIASES = {
+    "mj": "MoreauJean",
+    "gosi": "MoreauJeanGOSI",
+    "at": "AnitescuTasora",
+    "at-apgd": "AnitescuTasoraAPGD",
+    "dem": "DEM",
+}
+
+
+def sim_scheme(value):
+    """a scheme of the vnative integrator, old short names included"""
+    return SIM_SCHEME_ALIASES.get(value, value)
+
+
+def collect_sim_options(args):
+    """the given simulation options, as a dict (none given: empty)"""
+    options = {}
+    for dest in SIM_OPTION_DESTS:
+        value = getattr(args, dest)
+        if value is not None and value is not False:
+            options[dest] = value
+    return options
+
+
+# the wrapper of a python driver run with simulation options: it loads
+# nonos/simoptions.py (SICONOS_SIMOPTIONS_PATH), applies the options
+# (SICONOS_SIM_OPTIONS, a json object) and runs the driver with runpy,
+# so that the driver sees its own name and arguments in sys.argv
+SIMOPTIONS_WRAPPER = """\
+import importlib.util, json, os, runpy, sys
+_spec = importlib.util.spec_from_file_location(
+    "siconos_simoptions", os.environ["SICONOS_SIMOPTIONS_PATH"])
+_simoptions = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_simoptions)
+_simoptions.apply(json.loads(os.environ["SICONOS_SIM_OPTIONS"]))
+sys.argv = sys.argv[1:]
+runpy.run_path(sys.argv[0], run_name="__main__")
+"""
+
+
 def main():
     """process :
     - parse command line
@@ -45,6 +120,21 @@ def main():
     # -- Parse command line --
     parser = parse_command_line()
     args = parser.parse_args()
+
+    # C++ drivers keep the old command line semantics: the tokens after
+    # the driver name are siconos options, not arguments of the driver
+    # (the "<driver> <args>" shape is for python drivers only). Re-parse
+    # strictly: it either succeeds (the tokens were siconos options) or
+    # fails with the usual argparse error.
+    if (
+        args.driver is not None
+        and not args.driver.endswith(".py")
+        and args.script_args
+    ):
+        args = parse_command_line(with_remainder=False).parse_args()
+        args.script_args = []
+
+    sim_options = collect_sim_options(args)
 
     # -- Clean current dir (.siconos) --
     # Command : siconos --clean
@@ -92,6 +182,14 @@ def main():
 
     # Check driver file type
     args.is_python = main_source.suffix == ".py"
+
+    if sim_options and not args.is_python:
+        print(
+            "siconos: the simulation options (--t0 --T --h --output-format "
+            "--scheme ... --resume) need a python driver",
+            file=sys.stderr,
+        )
+        sys.exit(2)
 
     args.driver_dir = main_source.parent
     assert args.driver_dir.is_dir()
@@ -188,13 +286,39 @@ def main():
                 env["PYTHONPATH"] += ":" + siconos_pythonpath.resolve().as_posix()
             else:
                 env["PYTHONPATH"] = siconos_pythonpath.resolve().as_posix()
+            if sim_options:
+                # the simulation options: a wrapper loads
+                # nonos/simoptions.py, applies them and runs the driver
+                simoptions_path = Path(siconos_pythonpath, "nonos", "simoptions.py")
+                if not simoptions_path.exists():
+                    print(
+                        "siconos: the simulation options need the vkernel "
+                        f"python package ({simoptions_path})",
+                        file=sys.stderr,
+                    )
+                    sys.exit(2)
+                env["SICONOS_SIMOPTIONS_PATH"] = str(simoptions_path)
+                env["SICONOS_SIM_OPTIONS"] = json.dumps(sim_options)
+                cmd += ["-c", SIMOPTIONS_WRAPPER]
+
+        # the arguments of the driver: the ones after its name, and the
+        # old form "<driver> -cla <args>" (the arguments after the driver
+        # name are its own, so the "-cla" there is not a siconos option)
+        driver_args = list(args.script_args or [])
+        if driver_args[:1] in (["-cla"], ["--cline-args"]):
+            driver_args = (args.cline_args or []) + driver_args[1:]
+        elif args.cline_args:
+            driver_args = args.cline_args + driver_args
 
         cmd += [Path(args.exe_full_name).as_posix()]
-        if args.cline_args:
-            cmd += args.cline_args
+        if driver_args:
+            cmd += driver_args
 
         # Execute ...
-        format_msg("run " + " ".join(cmd), args.quiet)
+        display_cmd = [
+            "<simoptions>" if part == SIMOPTIONS_WRAPPER else part for part in cmd
+        ]
+        format_msg("run " + " ".join(display_cmd), args.quiet)
         logging.info(msg)
         env["LD_LIBRARY_PATH"] = args.rundir.as_posix()
         run_command(cmd, args.quiet, env)
@@ -327,7 +451,7 @@ def siconos_clean(build_dir=None, quiet=True):
             raise
 
 
-def parse_command_line():
+def parse_command_line(with_remainder=True):
     """Use argparse (python3) to read command line options."""
     # Build parser
     parser = argparse.ArgumentParser(
@@ -339,7 +463,22 @@ def parse_command_line():
 
     # Main source file.
     msg = "driver file name (.cpp or .py) to build and run a simulation. "
+    msg += "The siconos options go before the driver. For python drivers, "
+    msg += "the arguments after the driver name are the arguments of the "
+    msg += "driver itself: siconos [siconos options] driver.py [driver "
+    msg += "arguments]. For C++ drivers, the command line is the same as "
+    msg += "before (siconos options only, in any order)."
     parser.add_argument("driver", help=msg, nargs="?")
+
+    # the arguments of the driver, after its name (python drivers only;
+    # for C++ drivers the command line is re-parsed strictly, as before)
+    if with_remainder:
+        parser.add_argument(
+            "script_args",
+            nargs=argparse.REMAINDER,
+            default=[],
+            help="arguments of the python driver (everything after the driver name)",
+        )
 
     # verbosity
     verbose_mode = parser.add_mutually_exclusive_group()
@@ -410,6 +549,87 @@ def parse_command_line():
     msg += "the executable (python or c++) "
     parser.add_argument("--cline-args", "-cla", help=msg, action="extend", nargs="+")
     # action='append')
+
+    # -- Simulation options (python drivers) --
+    # Override what the driver script chose, before it runs (see
+    # nonos/simoptions.py). The run options (t0, T, h, output-format) are
+    # shared by all the backends; the rest are the vnative backend only.
+    sim_group = parser.add_argument_group(
+        "Simulation options (python drivers, override the driver's choices)"
+    )
+    sim_group.add_argument(
+        "--t0", type=float, help="initial time of the simulation (run option)"
+    )
+    sim_group.add_argument(
+        "--T", type=float, help="final time of the simulation (run option)"
+    )
+    sim_group.add_argument(
+        "--h", type=float, help="time-step size (run option)"
+    )
+    sim_group.add_argument(
+        "--output-format",
+        choices=("siconos", "vtkhdf", "both"),
+        help="the tables of the hdf5 file, the ParaView files, or both "
+        "(run option)",
+    )
+    sim_group.add_argument(
+        "--scheme",
+        type=sim_scheme,
+        choices=SIM_SCHEMES,
+        help="the scheme of the vnative integrator: MoreauJean (Moreau-Jean "
+        "on the local problem), MoreauJeanGOSI (Moreau-Jean on the global "
+        "problem), AnitescuTasora or AnitescuTasoraAPGD (cone "
+        "complementarity, solved by projected Gauss-Seidel or APGD), DEM "
+        "(explicit penalty springs). The short names mj, gosi, at, at-apgd "
+        "and dem are accepted too",
+    )
+    sim_group.add_argument("--theta", type=float, help="theta of the vnative integrator")
+    sim_group.add_argument("--gamma", type=float, help="gamma of the vnative integrator")
+    sim_group.add_argument(
+        "--constraint-activation-threshold",
+        type=float,
+        help="constraint activation threshold of the vnative integrator",
+    )
+    sim_group.add_argument(
+        "--solver",
+        help="the solver id, a name of siconos.numerics.solver_ids, SICONOS_ "
+        "optional; --scheme MoreauJeanGOSI needs a global solver "
+        "(GLOBAL_FRICTION_2D_NSN_AC if none is given)",
+    )
+    sim_group.add_argument(
+        "--tolerance", type=float, help="tolerance of the vnative solver"
+    )
+    sim_group.add_argument(
+        "--max-iter", type=int, help="maximum number of iterations of the vnative solver"
+    )
+    sim_group.add_argument(
+        "--dem-kn", type=float, help="normal stiffness k_n of the explicit DEM penalty law"
+    )
+    sim_group.add_argument(
+        "--dem-cn", type=float, help="normal damping c_n of the explicit DEM penalty law"
+    )
+    sim_group.add_argument(
+        "--dem-kt", type=float, help="tangential stiffness k_t of the explicit DEM penalty law"
+    )
+    sim_group.add_argument(
+        "--timings",
+        action="store_true",
+        help="time the stages of the time steps and print the timings on "
+        "stderr at the end (vnative)",
+    )
+    sim_group.add_argument(
+        "--dataflow",
+        action="store_true",
+        help="print what the stages do: the kernels, their reads and writes, "
+        "a placement, and the candidates for a fusion (vnative)",
+    )
+    sim_group.add_argument(
+        "--resume",
+        action="store_true",
+        help="resume the vkernel simulation from where it stopped: the "
+        "hdf5 output file is opened in append mode and the simulation resumes "
+        "from the last saved time (the driver must already have been run once)",
+    )
 
     # -- Build options (compile, link ...) for main) --
     compile_group = parser.add_argument_group("Build options (compiling and linking)")

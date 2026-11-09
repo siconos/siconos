@@ -75,9 +75,9 @@ class mymath_FunctionSetRoot {
   //!          of this class. <br>
   //!          The range (1, F.NbVariables()) must be especially <br>
   //!          respected for all vectors and matrix declarations. <br>
-  Standard_EXPORT mymath_FunctionSetRoot(
-      math_FunctionSetWithDerivatives& F, const math_Vector& Tolerance,
-      const Standard_Integer NbIterations = 100);
+  Standard_EXPORT mymath_FunctionSetRoot(math_FunctionSetWithDerivatives& F,
+                                         const math_Vector& Tolerance,
+                                         const Standard_Integer NbIterations = 100);
 
   //! is used in a sub-class to initialize correctly all the fields <br>
   //!          of this class. <br>
@@ -85,9 +85,8 @@ class mymath_FunctionSetRoot {
   //!          respected for all vectors and matrix declarations. <br>
   //!          The method SetTolerance must be called after this <br>
   //!          constructor. <br>
-  Standard_EXPORT mymath_FunctionSetRoot(
-      math_FunctionSetWithDerivatives& F,
-      const Standard_Integer NbIterations = 100);
+  Standard_EXPORT mymath_FunctionSetRoot(math_FunctionSetWithDerivatives& F,
+                                         const Standard_Integer NbIterations = 100);
 
   //! is used to improve the root of the function F <br>
   //!          from the initial guess StartingPoint. <br>
@@ -95,9 +94,10 @@ class mymath_FunctionSetRoot {
   //!          NbIterations. <br>
   //!          In this case, the solution is found when: <br>
   //!          abs(Xi - Xi-1)(j) <= Tolerance(j) for all unknowns. <br>
-  Standard_EXPORT mymath_FunctionSetRoot(
-      math_FunctionSetWithDerivatives& F, const math_Vector& StartingPoint,
-      const math_Vector& Tolerance, const Standard_Integer NbIterations = 100);
+  Standard_EXPORT mymath_FunctionSetRoot(math_FunctionSetWithDerivatives& F,
+                                         const math_Vector& StartingPoint,
+                                         const math_Vector& Tolerance,
+                                         const Standard_Integer NbIterations = 100);
 
   //! is used to improve the root of the function F <br>
   //!          from the initial guess StartingPoint. <br>
@@ -105,10 +105,12 @@ class mymath_FunctionSetRoot {
   //!          by NbIterations. <br>
   //!          In this case, the solution is found when: <br>
   //!          abs(Xi - Xi-1) <= Tolerance for all unknowns. <br>
-  Standard_EXPORT mymath_FunctionSetRoot(
-      math_FunctionSetWithDerivatives& F, const math_Vector& StartingPoint,
-      const math_Vector& Tolerance, const math_Vector& infBound,
-      const math_Vector& supBound, const Standard_Integer NbIterations = 100);
+  Standard_EXPORT mymath_FunctionSetRoot(math_FunctionSetWithDerivatives& F,
+                                         const math_Vector& StartingPoint,
+                                         const math_Vector& Tolerance,
+                                         const math_Vector& infBound,
+                                         const math_Vector& supBound,
+                                         const Standard_Integer NbIterations = 100);
 
   Standard_EXPORT virtual void Delete();
   Standard_EXPORT virtual ~mymath_FunctionSetRoot() { Delete(); }
@@ -121,8 +123,7 @@ class mymath_FunctionSetRoot {
   //! solution. <br> Warning <br> This method is called when computation of the
   //! solution is <br> not performed by the constructors. <br>
   Standard_EXPORT void Perform(math_FunctionSetWithDerivatives& F,
-                               const math_Vector& StartingPoint,
-                               const math_Vector& infBound,
+                               const math_Vector& StartingPoint, const math_Vector& infBound,
                                const math_Vector& supBound);
 
   //! This routine is called at the end of each iteration <br>
@@ -218,8 +219,7 @@ class mymath_FunctionSetRoot {
 
 inline Standard_Boolean mymath_FunctionSetRoot::IsDone() const { return Done; }
 
-inline Standard_OStream& operator<<(Standard_OStream& o,
-                                    const mymath_FunctionSetRoot& F) {
+inline Standard_OStream& operator<<(Standard_OStream& o, const mymath_FunctionSetRoot& F) {
   F.Dump(o);
   return o;
 }

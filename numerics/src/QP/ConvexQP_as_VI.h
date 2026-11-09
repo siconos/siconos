@@ -29,20 +29,20 @@
  */
 struct ConvexQP_as_VI {
   /* the VI associated with the CQP problem */
-  VariationalInequality *vi;
+  VariationalInequality* vi;
   /* the CQP associated with the VI  */
-  ConvexQP *cqp;
+  ConvexQP* cqp;
   /* the SolverOptions that might be used to pass some numerical parameters */
-  SolverOptions *options;
+  SolverOptions* options;
 };
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-void Function_VI_CQP(void *self, int n, double *x, double *F);
+void Function_VI_CQP(void* self, int n, double* x, double* F);
 
-void Projection_VI_CQP(void *viIn, double *x, double *PX);
+void Projection_VI_CQP(void* viIn, double* x, double* PX);
 
 #if defined(__cplusplus)
 }

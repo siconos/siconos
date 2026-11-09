@@ -327,17 +327,17 @@ bool SN_logh5_NM(NumericsMatrix* mat, const char* name, SN_logh5* logger) {
 
   switch (storageType) {
     case NM_DENSE: {
-      result = SN_logh5_mat_dense(mat->size0, mat->size1, mat->matrix0, "values", mat_group);
+      result = SN_logh5_mat_dense(mat->size0, mat->size1, mat->dense, "values", mat_group);
       break;
     }
     case NM_SPARSE_BLOCK: {
-      if (!(mat->matrix2 && mat->matrix2->csc)) {
+      if (!(mat->sparse && mat->sparse->csc)) {
         fprintf(stderr, "SN_logh5_NM :: sparse block matrix are currently not supported\n");
         break;
       }
     }
     case NM_SPARSE: {
-      CSparseMatrix* cs = mat->matrix2->csc;
+      CSparseMatrix* cs = mat->sparse->csc;
       assert(cs && "SN_logh5_NM only csc matrix are supported");
       SN_logh5_csparse(cs, NULL, mat_group);
       break;

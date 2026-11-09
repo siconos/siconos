@@ -44,12 +44,12 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1() {
 
   auto rel_cst = std::make_shared<siconos::modeling::FirstOrderType1R>();
 
-  rel_cst->setComputehFunction([](const siconos::algebra::BlockVector &state,
+  rel_cst->setComputehFunction([](const siconos::algebra::BlockVector& state,
                                   Eigen::Ref<siconos::algebra::SiconosVector> y) {});
 
   rel_cst->setComputegFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
-         siconos::algebra::BlockVector &res) {});
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+         siconos::algebra::BlockVector& res) {});
 
   siconos::algebra::SiconosMatrix cst_mat{3, 3};
   cst_mat.setRandom();
@@ -59,18 +59,18 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1() {
 
   auto rel = std::make_shared<siconos::modeling::FirstOrderType1R>();
 
-  rel->setComputehFunction([](const siconos::algebra::BlockVector &state,
+  rel->setComputehFunction([](const siconos::algebra::BlockVector& state,
                               Eigen::Ref<siconos::algebra::SiconosVector> y) {});
 
-  rel->setComputegFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
-                              siconos::algebra::BlockVector &res) {});
+  rel->setComputegFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+                              siconos::algebra::BlockVector& res) {});
 
   rel->setComputeJacobianhOver_stateFunction(
-      [](const siconos::algebra::BlockVector &state,
+      [](const siconos::algebra::BlockVector& state,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   rel->setComputeJacobiangOver_lambdaFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1b : ",

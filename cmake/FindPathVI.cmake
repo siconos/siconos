@@ -22,7 +22,7 @@ FindPathVI
 Find Path library
 
 Usage :
- 
+
 find_package(PathVI REQUIRED)
 target_link_libraries(yourlib PRIVATE PathVI::PathVI)
 
@@ -54,7 +54,7 @@ find_package_handle_standard_args(PathVI
   REQUIRED_VARS PathVI_LIBRARIES)
 
 if(PathVI_FOUND)
-  
+
   if(NOT TARGET PathVI::PathVI)
     add_library(PathVI::PathVI IMPORTED INTERFACE)
     set_property(TARGET PathVI::PathVI PROPERTY INTERFACE_LINK_LIBRARIES ${PathVI_LIBRARIES})
@@ -64,4 +64,3 @@ if(PathVI_FOUND)
     endif()
   endif()
 endif()
-

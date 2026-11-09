@@ -37,17 +37,17 @@ enum COHESIVE_FRICTION_SOLVER {
 
   /** NSGS with projection and local iteration */
   SICONOS_COHESIVE_FRICTION_3D_NSGS_PROJECTION_WITH_LOCAL_ITERATION,
-  
+
 };
 
 /**
  * Index for double parameters in SolverOptions->dparam
  */
 enum COHESIVE_FRICTION_DPARAM {
-  
+
   /** Local tolerance for internal solvers */
   SICONOS_COHESIVE_FRICTION_DPARAM_LOCAL_TOLERANCE,
-  
+
 };
 
 /**
@@ -57,7 +57,7 @@ enum COHESIVE_FRICTION_IPARAM {
 
   /** Current contact number (for internal use) */
   SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER = 5,
-  
+
 };
 
 #endif  // COHESIVEFRICTIONCONTACT_OPTIONS_H

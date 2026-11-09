@@ -1,6 +1,6 @@
 FROM intel/oneapi-hpckit:latest
 RUN apt update  && apt upgrade -y &&  apt install -y -qq \
-libgl1 
+libgl1
 ENV CXX icpx
 ENV CC icx
 ENV FC ifx
@@ -16,4 +16,4 @@ COPY ci_gitlab/dockerfiles/siconosintelenv.yml  /home/
 RUN  grep -v '[ -z "\$PS1" ] && return' /root/.bashrc  > /root/newbashrc  && mv  /root/newbashrc /root/.bashrc
 
 # -- Install siconosenv env --
-RUN chmod +x /home/install_intel_micromambaenv.sh  && /home/install_intel_micromambaenv.sh 
+RUN chmod +x /home/install_intel_micromambaenv.sh  && /home/install_intel_micromambaenv.sh

@@ -41,12 +41,12 @@ class MechanicalProperties {
   /** Default and only constructor */
   MechanicalProperties() = default;
 
-  explicit MechanicalProperties(const nlohmann::json &j)
+  explicit MechanicalProperties(const nlohmann::json& j)
       : crossSectionRigidity_(j.value("EA", 1.0)),
         linearDensity_(j.value("linearDensity", 0.0)),
         initialTension_(j.value("T0", 1.0)) {}
 
-  MechanicalProperties &operator=(const MechanicalProperties &) = default;
+  MechanicalProperties& operator=(const MechanicalProperties&) = default;
   ~MechanicalProperties() noexcept = default;
 
   inline auto crossSectionRigidity() const { return crossSectionRigidity_; }
@@ -67,11 +67,11 @@ class MechanicalProperties {
 namespace nlohmann {
 template <>
 struct adl_serializer<siconos::fem::cable::MechanicalProperties> {
-  static siconos::fem::cable::MechanicalProperties from_json(const json &j) {
+  static siconos::fem::cable::MechanicalProperties from_json(const json& j) {
     return siconos::fem::cable::MechanicalProperties(j);
   }
 
-  static void to_json(json &j, const siconos::fem::cable::MechanicalProperties &input) {
+  static void to_json(json& j, const siconos::fem::cable::MechanicalProperties& input) {
     j = json{{"EA", input.crossSectionRigidity()},
              {"linearDensity", input.linearDensity()},
              {"T0", input.initialTension()}};

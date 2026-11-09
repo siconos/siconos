@@ -337,10 +337,6 @@ class EulerMoreauOSI : public OneStepIntegrator {
    */
   void updateOutput(double time) override;
 
-  /** update the input of the Interaction attached to this Integrator
-   */
-  void updateInput(double time) override;
-
   /** update the output of the Interaction attached to this Integrator
    *
    *  \param time current time

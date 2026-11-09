@@ -97,18 +97,16 @@ class QP : public OneStepNSProblem {
   void display() const;
 
   /* pure virtual in OneStepNSProblem.hpp */
-  void computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor&)
-  {
+  void computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor&) {
     assert(false);
   }
 
-  void computeDiagonalInteractionBlock(const siconos::graphs::InteractionsGraph::VDescriptor&)
-  {
+  void computeDiagonalInteractionBlock(
+      const siconos::graphs::InteractionsGraph::VDescriptor&) {
     assert(false);
   }
 
-  virtual bool preCompute(double time)
-  {
+  virtual bool preCompute(double time) {
     assert(false);
     return false;
   }

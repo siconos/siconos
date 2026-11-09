@@ -48,11 +48,11 @@ class ComplementarityConditionNSL : public NonSmoothLaw {
    */
   inline void display() const override {};
 
-  virtual void accept(nonsmooth_laws::Visitor &tourist) const override {
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

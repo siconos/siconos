@@ -60,15 +60,14 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
   if (verbose > 0) {
     solver_options_print(options);
   }
 
   if (options->numberOfInternalSolvers < 1) {
     *info = numerics_error("fc3d_proximal",
-                   "The PROX method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >1");
+                           "The PROX method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >1");
     return;
   }
   SolverOptions* internalsolver_options = options->internalSolvers[0];
@@ -83,7 +82,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   double sigma = 0.0;
   double nu = 0.0;
 
-  fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+  fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
   if (iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY] ==
 
@@ -139,7 +138,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
     } else if (internalsolver_options->solverId == FC3D_NSN_AC) {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier;
     } else if (internalsolver_options->solverId == FC3D_NSN_AC_NEW) {
-      internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier_new;
+      internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier_reformulated;
     } else if (internalsolver_options->solverId == FC3D_NSN_FB) {
       internalsolver = &fc3d_nonsmooth_Newton_FischerBurmeister;
     } else if (internalsolver_options->solverId == FC3D_IPM_SNM) {
@@ -150,8 +149,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
     }
   } else {
     *info = numerics_error("fc3d_proximal",
-                   "The PROX method needs options for the internal solvers, "
-                   "soptions->internalSolvers should be different from NULL");
+                           "The PROX method needs options for the internal solvers, "
+                           "soptions->internalSolvers should be different from NULL");
     return;
   }
 
@@ -185,7 +184,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       cblas_daxpy(n, -alpha, reactionold, 1, problem->q, 1);
 
       /* add proximal regularization on M */
-      NM_add_to_diag3(M, alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, alpha) == NUMERICS_OK);
 
       numerics_printf_verbose(1, "---- FC3D - PROXIMAL - alpha = %8.4e\n", alpha);
 
@@ -212,9 +211,9 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       /* substract proximal regularization on q */
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1);
       /* substract proximal regularization on M */
-      NM_add_to_diag3(M, -alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, -alpha) == NUMERICS_OK);
 
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       numerics_printf_verbose(1,
                               "---- FC3D - PROXIMAL - | %3d | %14.7e | %7.3e | alpha = %12.8e",
@@ -259,7 +258,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   /*     (*internalsolver)(problem, reaction , velocity , info , internalsolver_options); */
 
   /*     /\* **** Criterium convergence **** *\/ */
-  /*     fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
+  /*     fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
    */
 
   /*     int iter_internalsolver = internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE]; */
@@ -310,7 +309,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       cblas_daxpy(n, -alpha, reactionold, 1, problem->q, 1);
 
       /* add proximal regularization on M */
-      NM_add_to_diag3(M, alpha);
+      CHECK_RETURN(NM_add_to_diag3(M, alpha) == NUMERICS_OK);
 
       fc3d_set_internalsolver_tolerance(nc, options, internalsolver_options, error);
 
@@ -325,8 +324,8 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
       /* substract proximal regularization on q */
       cblas_daxpy(n, alpha, reactionold, 1, problem->q, 1);
       /* substract proximal regularization on M */
-      NM_add_to_diag3(M, -alpha);
-      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      CHECK_RETURN(NM_add_to_diag3(M, -alpha) == NUMERICS_OK);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error);
 
       if (*info) {
         numerics_printf_verbose(1, "---- FC3D - PROXIMAL - internalsolver no convergence");

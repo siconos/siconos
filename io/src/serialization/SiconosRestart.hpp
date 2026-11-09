@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosRestart.hpp
   \brief provides pre-compiled functions for a full Siconos Model
@@ -28,8 +28,7 @@
 
 /** SICONOS
  */
-namespace siconos
-{
+namespace siconos {
 
 /** save a Siconos Simulation with the full simulation state into a
  *  file
@@ -44,6 +43,6 @@ void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string&
  */
 std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename);
 
-}
+}  // namespace siconos
 
 #endif

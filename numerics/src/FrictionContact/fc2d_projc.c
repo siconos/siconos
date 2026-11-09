@@ -19,8 +19,8 @@
 #include "fc2d_Solvers.h"  // for fc2d_projc
 #include "numerics_errors.h"
 
-void fc2d_projc(double xi[], int *nn, int statusi[], double pi[], double fric[],
-                double *projc1, int *projc2) {
+void fc2d_projc(double xi[], int* nn, int statusi[], double pi[], double fric[],
+                double* projc1, int* projc2) {
   int i, nc, n = *nn, stat;
 
   double mu1;

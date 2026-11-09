@@ -43,8 +43,8 @@ extern "C" {
  \param[in,out] error value
  \return 0 if ok
  */
-int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, double tolerance,
-                                   SolverOptions *options, double norm, double *error);
+int convexQP_compute_error_reduced(ConvexQP* problem, double* z, double* w, double tolerance,
+                                   SolverOptions* options, double norm, double* error);
 
 /** Error computation for a ConvexQP problem;
     this function requires dWork to point to
@@ -61,9 +61,9 @@ int convexQP_compute_error_reduced(ConvexQP *problem, double *z, double *w, doub
     \param[in,out] error value
     \return 0 if ok
  */
-int convexQP_compute_error(ConvexQP *problem, double *z, double *xi, double *w, double *u,
-                           double tolerance, double scaling, SolverOptions *options,
-                           double norm_q, double norm_b, double *error);
+int convexQP_compute_error(ConvexQP* problem, double* z, double* xi, double* w, double* u,
+                           double tolerance, double scaling, SolverOptions* options,
+                           double norm_q, double norm_b, double* error);
 
 #if defined(__cplusplus)
 }

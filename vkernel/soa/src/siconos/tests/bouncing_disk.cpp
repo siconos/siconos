@@ -1,9 +1,11 @@
+#include <cppunit/TestAssert.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include "siconos/siconos.hpp"
-
-#include <print>
 #include <fstream>
 #include <print>
+
+#include "ref_check.hpp"
+#include "siconos/siconos.hpp"
 
 namespace siconos::config {
 
@@ -28,151 +30,159 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make<
+    : storage::make_compile_time_database<
           env, simulation, disk_shape,
           storage::with_properties<
               storage::attached<disk, storage::pattern::symbol<"shape">,
                                 storage::some::item_ref<disk_shape>>,
               storage::time_invariant<storage::attr_t<disk, "fext">>,
               storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::attr_t<typename osi::assembled_osi_t,
-                                  "mass_matrix_assembled">>>> {};
+              storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
-int main(int argc, char* argv[])
-{
-  using namespace siconos;
-  using storage::pattern::wrap;
-  using namespace storage;
+namespace {
 
-  config::data_t data;
+class BouncingDiskTest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(BouncingDiskTest);
+  CPPUNIT_TEST(testBouncingDisk);
+  CPPUNIT_TEST_SUITE_END();
 
-  // unsigned int nDof = 3;         // degrees of freedom for the disk
-  double t0 = 0;               // initial computation time
-  double tmax = 10;            // final computation time
-  double h = 0.005;            // time step
-  double position_init = 1.0;  // initial position for lowest bead.
-  double velocity_init = 0.0;  // initial velocity for lowest bead.
-  double theta = 0.5;          // theta for MoreauJeanOSI integrator
-  double radius = 0.1;         // Disk radius
-  double m = 1.;               // Disk mass
-  double g = 9.81;             // Gravity
+ public:
+  void testBouncingDisk() {
+    using namespace siconos;
+    using storage::pattern::wrap;
+    using namespace storage;
 
-  std::print("====> Model loading ...\n");
+    config::data_t data;
 
-  // --------------------------
-  // -- The dynamical_system --
-  // --------------------------
-  auto d1 = storage::add<config::disk>(data);
-  //  auto d2 = storage::add<config::disk>(data);
+    // unsigned int nDof = 3;         // degrees of freedom for the disk
+    double t0 = 0;               // initial computation time
+    double tmax = 10;            // final computation time
+    double h = 0.005;            // time step
+    double position_init = 1.0;  // initial position for lowest bead.
+    double velocity_init = 0.0;  // initial velocity for lowest bead.
+    double theta = 0.5;          // theta for MoreauJeanOSI integrator
+    double radius = 0.1;         // Disk radius
+    double m = 1.;               // Disk mass
+    double g = 9.81;             // Gravity
 
-  d1.q() = {0, position_init, 0};
-  d1.velocity() = {0, velocity_init, 0};
-  d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
+    std::print("====> Model loading ...\n");
 
-  storage::make_handle(data, prop<"shape">(d1)).radius() = radius;
+    // --------------------------
+    // -- The dynamical_system --
+    // --------------------------
+    auto d1 = storage::add<config::disk>(data);
+    //  auto d2 = storage::add<config::disk>(data);
 
-  // -- Set external forces (weight) --
-  d1.fext() = {0., -m * g, 0.};
+    d1.q() = {0, position_init, 0};
+    d1.velocity() = {0, velocity_init, 0};
+    d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-  // ------------------
-  // -- The relation --
-  // ------------------
+    storage::make_handle(data, prop<"shape">(d1)).radius() = radius;
 
-  // -- nslaw --
-  double e = 0.9;
-  auto nslaw = storage::add<config::nslaw>(data);
-  nslaw.e() = e;
+    // -- Set external forces (weight) --
+    d1.fext() = {0., -m * g, 0.};
 
-  //  auto lcp = storage::add<config::lcp>(data);
-  auto fc2d = storage::add<config::fc2d>(data);
-  fc2d.create();
-  //  lcp.instance()->dimension = 2;
-  //  fc2d.instance()->mu = 0.1;
+    // ------------------
+    // -- The relation --
+    // ------------------
 
-  // ------------------
-  // --- Simulation ---
-  // ------------------
-  auto simulation = storage::add<config::simulation>(data);
+    // -- nslaw --
+    double e = 0.9;
+    auto nslaw = storage::add<config::nslaw>(data);
+    nslaw.e() = e;
 
-  simulation.one_step_integrator().theta() = theta;
-  simulation.one_step_integrator().constraint_activation_threshold() = 0.;
-  simulation.time_discretization().t0() = t0;
-  simulation.time_discretization().h() = h;
+    //  auto lcp = storage::add<config::lcp>(data);
+    auto fc2d = storage::add<config::fc2d>(data);
+    fc2d.create();
+    //  lcp.instance()->dimension = 2;
+    //  fc2d.instance()->mu = 0.1;
 
-  simulation.time_discretization().tmax() = tmax;
-  // -- set the formulation for the one step nonsmooth problem --
-  auto osnspb = simulation.one_step_nonsmooth_problem();
-  osnspb.problem() = fc2d;
+    // ------------------
+    // --- Simulation ---
+    // ------------------
+    auto simulation = storage::add<config::simulation>(data);
 
-  // -- set the options --
-  auto so = storage::add<simul::solver_options>(data);
-  so.create(SICONOS_FRICTION_2D_NSGS);
-  osnspb.options() = so;
+    simulation.one_step_integrator().theta() = theta;
+    simulation.one_step_integrator().constraint_activation_threshold() = 0.;
+    simulation.time_discretization().t0() = t0;
+    simulation.time_discretization().h() = h;
 
-  auto ground_r = storage::add<config::diskfsegment_r>(data);
-  auto segment = ground_r.segment();
-  segment.x1() = -1.;
-  segment.y1() = 0;
-  segment.x2() = 1;
-  segment.y2() = 0;
-  segment.initialize();
-  segment.maxpoints() = 1000;
+    simulation.time_discretization().tmax() = tmax;
+    // -- set the formulation for the one step nonsmooth problem --
+    auto osnspb = simulation.one_step_nonsmooth_problem();
+    osnspb.problem() = fc2d;
 
-  // Interaction disk-floor
-  auto interaction = simulation.topology().link(d1);
-  // interaction.h_matrix1() = {1., 0., 0.};
+    // -- set the options --
+    auto so = storage::add<simul::solver_options>(data);
+    so.create(SICONOS_FRICTION_2D_NSGS);
+    osnspb.options() = so;
 
-  interaction.relation() = ground_r;
-  interaction.nslaw() = nslaw;
+    auto ground_r = storage::add<config::diskfsegment_r>(data);
+    auto segment = ground_r.segment();
+    segment.x1() = -1.;
+    segment.y1() = 0;
+    segment.x2() = 1;
+    segment.y2() = 0;
+    segment.initialize();
+    segment.maxpoints() = 1000;
 
-  // =========================== End of model definition
-  // ===========================
-  // ================================= Computation
-  // =================================
+    // Interaction disk-floor
+    auto interaction = simulation.topology().link(d1);
+    // interaction.h_matrix1() = {1., 0., 0.};
 
-  //  auto fd = io::open<ascii>("result.dat");
+    simulation.topology().bind(interaction, ground_r);
+    interaction.nslaw() = nslaw;
 
-  // fix this for constant fext
-  simulation.initialize();
+    // =========================== End of model definition
+    // ===========================
+    // ================================= Computation
+    // =================================
 
-  std::ofstream result_file("result.dat");
-  // std::ofstream cout("result.dat");
+    //  auto fd = io::open<ascii>("bouncing_disk.dat");
 
-  // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
-  std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-             simulation.current_step() * simulation.time_step(),
-             storage::attr<"q">(d1, simulation.current_step())(1),
-             storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
-             0.);
+    // fix this for constant fext
+    simulation.initialize();
 
-  while (simulation.has_next_event()) {
-    auto ninvds = simulation.compute_one_step();
-    //    auto q = storage::attr<"q">(d1, simulation.current_step())(1);
-    //    auto v = storage::attr<"velocity">(d1,
-    //    simulation.current_step())(1);
+    std::ofstream result_file("bouncing_disk.dat");
+    // std::ofstream cout("bouncing_disk.dat");
 
-    double p0, lambda;
-    if (ninvds > 0) {
-      p0 = get_vector(
-          simulation.one_step_integrator().visit_element<0>(
-              [](auto elem) { return elem.p0_vector_assembled(); }),
-          0)(1);
-
-      lambda = get_vector(
-          simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-    }
-    else {
-      p0 = 0;
-      lambda = 0;
-    }
-
+    // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
     std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(d1, simulation.current_step())(1),
-               storage::attr<"velocity">(d1, simulation.current_step())(1),
-               p0, lambda);
+               storage::attr<"velocity">(d1, simulation.current_step())(1), 0., 0.);
+
+    while (simulation.has_next_event()) {
+      auto ninvds = simulation.compute_one_step();
+      //    auto q = storage::attr<"q">(d1, simulation.current_step())(1);
+      //    auto v = storage::attr<"velocity">(d1,
+      //    simulation.current_step())(1);
+
+      double p0, lambda;
+      if (ninvds > 0) {
+        // the second component of the impulse on the disk
+        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 1)(0);
+
+        lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      } else {
+        p0 = 0;
+        lambda = 0;
+      }
+
+      std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                 simulation.current_step() * simulation.time_step(),
+                 storage::attr<"q">(d1, simulation.current_step())(1),
+                 storage::attr<"velocity">(d1, simulation.current_step())(1), p0, lambda);
+    }
+    //  io::close(fd);
+
+    result_file.close();
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_disk.dat"), "bouncing_disk.ref",
+                       1e-8);
   }
-  //  io::close(fd);
-}
+};
+
+CPPUNIT_TEST_SUITE_REGISTRATION(BouncingDiskTest);
+
+}  // namespace

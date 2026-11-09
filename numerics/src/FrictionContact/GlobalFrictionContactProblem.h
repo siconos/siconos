@@ -21,6 +21,27 @@
 /*!\file GlobalFrictionContactProblem.h
   Definition of a structure to handle global friction-contact (2D or 3D)
   problems.
+
+  A global friction-contact problem is defined by the data
+  \f$(M, H, q, b, \mu)\f$. It consists in finding a global velocity
+  \f$v\in{\mathrm{I\!R}}^n\f$ and a local reaction
+  \f$r\in{\mathrm{I\!R}}^m\f$ such that
+  \f[
+    M v = q + H r,
+  \f]
+  and, for each contact \f$\alpha=1,\dots,n_c\f$, the local velocity
+  \f$u_\alpha = (H^T v + b)_\alpha\f$ and the local reaction
+  \f$r_\alpha\f$ satisfy the Signorini--Coulomb friction conditions in
+  dimension \f$d\f$ (with \f$d=2\f$ or \f$d=3\f$ and \f$m = d\,n_c\f$).
+
+  Eliminating the global velocity yields the equivalent (reduced or local)
+  friction-contact problem
+  \f[
+    W r + q_{\text{loc}} = u
+  \f]
+  where \f$W = H^T M^{-1} H\f$, \f$q_{\text{loc}} = H^T M^{-1} q + b\f$,
+  and \f$C_\mu\f$ is the product of Coulomb friction cones defined by the
+  friction coefficients \f$\mu\f$.
 */
 
 #include <stdio.h>  // for NULL, FILE
@@ -28,7 +49,23 @@
 #include "NumericsFwd.h"  // for GlobalFrictionContactProblem, NumericsMatrix
 
 /**
-    The structure that defines a Friction-Contact (3D or 2D ) problem
+    The structure that defines a global Friction-Contact (3D or 2D) problem.
+
+    Given the data \f$(M, H, q, b, \mu)\f$, the unknowns are a global
+    velocity \f$v\in{\mathrm{I\!R}}^n\f$ and a local reaction
+    \f$r\in{\mathrm{I\!R}}^m\f$ satisfying
+    \f[
+      M v = q + H r,
+    \f]
+    together with the Signorini--Coulomb friction law between the local
+    velocity \f$u = H^T v + b\f$ and the reaction \f$r\f$, contact-wise in
+    dimension \f$d\f$ (\f$d=2\f$ or \f$d=3\f$, \f$m = d\,n_c\f$).
+
+    An equivalent local formulation is obtained by eliminating \f$v\f$:
+    \f[
+      W r + q_{\text{loc}} = u
+    \f]
+    with \f$W = H^T M^{-1} H\f$ and \f$q_{\text{loc}} = H^T M^{-1} q + b\f$.
 */
 
 struct GlobalFrictionContactProblem {
@@ -38,31 +75,31 @@ struct GlobalFrictionContactProblem {
   int numberOfContacts;
   /** \f$ M \in {\mathrm{I\!R}}^{n \times n} \f$,
       a matrix with \f$ n\f$ the number of dof in the system */
-  NumericsMatrix *M;
+  NumericsMatrix* M;
   /**  \f$ {H} \in {{\mathrm{I\!R}}}^{n \times m} \f$,
        a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
-  NumericsMatrix *H;
+  NumericsMatrix* H;
   /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
-  double *q;
+  double* q;
   /** norm-2 of q */
   double norm_q;
   /** \f$ {b} \in {{\mathrm{I\!R}}}^{m} \f$ */
-  double *b;
+  double* b;
   /** norm-2 of b */
   double norm_b;
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction
       coefficients
       (\f$ n_c = \f$ numberOfContacts) */
-  double *mu;
+  double* mu;
 
   /** \f$ M^{-1} \in {\mathrm{I\!R}}^{n \times n} \f$ */
-  NumericsMatrix *M_inverse;
+  NumericsMatrix* M_inverse;
 
   /** name of the problem **/
-  char *name;
+  char* name;
 
   /** opaque environment, solver specific */
-  void *env;
+  void* env;
 };
 
 #if defined(__cplusplus)
@@ -74,13 +111,13 @@ extern "C" {
 
    \return a pointer to a GlobalFrictionContactProblem
 */
-GlobalFrictionContactProblem *globalFrictionContactProblem_new(void);
+GlobalFrictionContactProblem* globalFrictionContactProblem_new(void);
 
 /** displays the problem onto screen
  *
  *  \param[in] problem to be displayed
  */
-void globalFrictionContact_display(GlobalFrictionContactProblem *problem);
+void globalFrictionContactProblem_display(GlobalFrictionContactProblem* problem);
 
 /**
    Saves problem struct into a file.
@@ -89,7 +126,8 @@ void globalFrictionContact_display(GlobalFrictionContactProblem *problem);
    \param[in] file file descriptor
    \return file status (1 if everything has worked properly)
 */
-int globalFrictionContact_printInFile(GlobalFrictionContactProblem *problem, FILE *file);
+int globalFrictionContactProblem_printInFile(GlobalFrictionContactProblem* problem,
+                                             FILE* file);
 
 /**
    Saves problem struct into a file.
@@ -98,15 +136,15 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem *problem, FIL
    \param[in] filename name of the input file
    \return file status (1 if everything has worked properly)
 */
-int globalFrictionContact_printInFileName(GlobalFrictionContactProblem *problem,
-                                          const char *filename);
+int globalFrictionContactProblem_printInFilename(GlobalFrictionContactProblem* problem,
+                                                 const char* filename);
 
 /** read a GlobalFrictionContactProblem from a file descriptor
  *
  *  \param file descriptor
  *  \return problem the problem to read
  */
-GlobalFrictionContactProblem *globalFrictionContact_newFromFile(FILE *file);
+GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file);
 
 /** read a GlobalFrictionContactProblem from a file (.dat or hdf5 if fclib is
  *  on) from its filename
@@ -114,17 +152,17 @@ GlobalFrictionContactProblem *globalFrictionContact_newFromFile(FILE *file);
  *  \param filename the name of the input file
  *  \return problem the problem to read
  */
-GlobalFrictionContactProblem *globalFrictionContact_new_from_filename(const char *filename);
+GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char* filename);
 
 /**
    Release memory for the problem structure
 
    \param[inout] problem global-Friction problem structure to be freed
 */
-void globalFrictionContact_free(GlobalFrictionContactProblem *problem);
+void globalFrictionContactProblem_free(GlobalFrictionContactProblem* problem);
 
-GlobalFrictionContactProblem *globalFrictionContact_copy(
-    GlobalFrictionContactProblem *problem);
+GlobalFrictionContactProblem* globalFrictionContact_copy(
+    GlobalFrictionContactProblem* problem);
 
 /** Compute the global velocity given the reaction
  *
@@ -133,12 +171,38 @@ GlobalFrictionContactProblem *globalFrictionContact_copy(
  *  \param[out] globalVelocity the global velocity computed by inverting the
  *  system.
  */
-int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem *problem,
-                                                double *reaction, double *globalVelocity);
+int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem* problem,
+                                                double* reaction, double* globalVelocity);
 
-/** Refomulation into local problem */
-FrictionContactProblem *globalFrictionContact_reformulation_FrictionContact(
-    GlobalFrictionContactProblem *problem);
+/** Compute per-contact rho values from a diagonal approximation of the
+ *  reduced friction-contact problem.
+ *
+ *  The reduced matrix \f$W = H^T M^{-1} H\f$ is approximated by
+ *  \f$W_{\mathrm{diag}} = H^T D^{-1} H\f$ where \f$D\f$ is the diagonal of
+ *  the global mass matrix \f$M\f$.  For each contact the diagonal block of
+ *  this approximation is formed and the NSN rho parameter is derived from it
+ *  (reciprocal of the diagonal entries in 2D, split-spectral-norm estimate
+ *  in 3D).
+ *
+ *  \param[in] problem the global friction-contact problem
+ *  \param[out] rho vector of rho values, size \c problem->dimension *
+ *              problem->numberOfContacts
+ *  \return 0 on success, a numerics error code otherwise
+ */
+int globalFrictionContact_compute_rho_from_diagonal_approximation(
+    GlobalFrictionContactProblem* problem, double* rho);
+
+/** Reduce the global friction-contact problem to a local FrictionContactProblem.
+ *
+ *  This eliminates the global velocity by computing the reduced matrix and
+ *  vector of the equivalent local problem.
+ */
+FrictionContactProblem* globalFrictionContact_reduce_to_FrictionContact(
+    GlobalFrictionContactProblem* problem);
+
+/* Backward compatibility function name (deprecated) */
+FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
+    GlobalFrictionContactProblem* problem);
 #if defined(__cplusplus)
 }
 #endif

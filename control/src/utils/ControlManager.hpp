@@ -23,12 +23,11 @@
 #ifndef ControlManager_H
 #define ControlManager_H
 
-#include "SiconosVector.hpp"
 #include <memory>
 #include <set>
 
 #include "SiconosSerialization.hpp"
-
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;
@@ -149,14 +148,12 @@ class ControlManager {
   /** \return the list of Actuators associated to this manager.
    *
    */
-  inline const std::set<std::shared_ptr<Actuator>> getActuators() const
-  {
+  inline const std::set<std::shared_ptr<Actuator>> getActuators() const {
     return _allActuators;
   };
 
   /** \return the list of Observers associated to this manager */
-  inline const std::set<std::shared_ptr<Observer>> getObservers() const
-  {
+  inline const std::set<std::shared_ptr<Observer>> getObservers() const {
     return _allObservers;
   };
 

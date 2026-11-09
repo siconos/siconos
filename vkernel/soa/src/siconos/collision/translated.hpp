@@ -13,6 +13,7 @@ struct translated : item {
   struct attributes {
     some::item_ref<item_t> translated;
     some::vector<some::scalar, some::indice_value<3>> translation;
+    some::integer collision_group;
   };
 
   template <typename Handle>
@@ -20,15 +21,12 @@ struct translated : item {
     using default_interface<Handle>::self;
 
     // access to the translated shape
-    decltype(auto) translated()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"translated">(*self()));
+    decltype(auto) translated() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"translated">(*self()));
     };
 
     // translated points coordinates
-    decltype(auto) point_coord(auto point_index)
-    {
+    decltype(auto) point_coord(auto point_index) {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
       using vector_t = typename env_t::template vector<scalar, 3>;
@@ -38,8 +36,7 @@ struct translated : item {
       return coord;
     }
 
-    decltype(auto) points_coords()
-    {
+    decltype(auto) points_coords() {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
 
@@ -47,10 +44,8 @@ struct translated : item {
              view::transform([&](auto i) { return point_coord(i); });
     }
 
-    decltype(auto) translation()
-    {
-      return storage::attr<"translation">(*self());
-    }
+    decltype(auto) translation() { return storage::attr<"translation">(*self()); }
+    decltype(auto) collision_group() { return storage::attr<"collision_group">(*self()); }
   };
 };
 }  // namespace siconos::collision

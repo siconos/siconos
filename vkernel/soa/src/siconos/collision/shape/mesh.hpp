@@ -18,34 +18,26 @@ struct mesh : item {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    void __init__()
-    {
+    void __init__() {
       // Create the associated chained_segment
       auto& data = self()->data();
       auto seg = storage::add<chained_segment>(data);
       attr<"segments">(*self()) = seg.index();
     }
 
-    void __del__()
-    {
+    void __del__() {
       throw std::runtime_error("Stable pointers need to be implemented");
       // Create the associated chained_segment
       storage::remove(segments());
     }
 
-    decltype(auto) segments()
-    {
-      return storage::make_ref_handle(self()->data(),
-                                      storage::attr<"segments">(*self()));
+    decltype(auto) segments() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"segments">(*self()));
     }
 
-    decltype(auto) global_indices()
-    {
-      return storage::attr<"global_indices">(*self());
-    }
+    decltype(auto) global_indices() { return storage::attr<"global_indices">(*self()); }
 
-    decltype(auto) set_nodes(auto& nodes)
-    {
+    decltype(auto) set_nodes(auto& nodes) {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
 
@@ -60,15 +52,12 @@ struct mesh : item {
 
     decltype(auto) indices() { return storage::attr<"indices">(*self()); }
 
-    auto methods()
-    {
+    auto methods() {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
-      using unbounded_matrix =
-          typename env_t::template unbounded_matrix<scalar>;
+      using unbounded_matrix = typename env_t::template unbounded_matrix<scalar>;
 
-      return collect(method("set_nodes",
-                            &interface<Handle>::set_nodes<unbounded_matrix>));
+      return collect(method("set_nodes", &interface<Handle>::set_nodes<unbounded_matrix>));
     }
   };
 };

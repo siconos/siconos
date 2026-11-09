@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "NumericsMatrix.h"
+#include "numerics_errors.h"
 #include "numerics_verbose.h"
 
 CohesiveFrictionContactProblem* cohesiveFrictionContactProblem_new(void) {
@@ -181,8 +182,10 @@ int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem* problem,
   fprintf(file, "%d\n", problem->numberOfContacts);
   fprintf(file, "%d\n", problem->numberOfCohesivePoints);
 
-  NM_write_in_file(problem->M, file);
-
+  {
+    int nm_info = NM_write_in_file(problem->M, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   int m = problem->dimension * (problem->numberOfContacts + problem->numberOfCohesivePoints);
   for (int i = 0; i < m; i++) {
     fprintf(file, "%.32e\n", problem->q[i]);
@@ -220,11 +223,22 @@ int cohesiveFrictionContact_printInFile(CohesiveFrictionContactProblem* problem,
   }
 
   // Write required matrices W, V, X, U
-  NM_write_in_file(problem->W, file);
-  NM_write_in_file(problem->V, file);
-  NM_write_in_file(problem->X, file);
-  NM_write_in_file(problem->U, file);
-
+  {
+    int nm_info = NM_write_in_file(problem->W, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
+  {
+    int nm_info = NM_write_in_file(problem->V, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
+  {
+    int nm_info = NM_write_in_file(problem->X, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
+  {
+    int nm_info = NM_write_in_file(problem->U, file);
+    if (nm_info != NUMERICS_OK) return nm_info;
+  }
   return 0;
 }
 
@@ -414,7 +428,8 @@ int cohesiveFrictionContactProblem_build_M_q_from_blocks(
       problem->M = NM_create(NM_SPARSE, M_size, M_size);
       NM_triplet_alloc(problem->M, M_size);
     } else {
-      problem->M = NM_create(NM_DENSE, M_size, M_size);
+      problem->M = NM_create_with_data(NM_DENSE, M_size, M_size,
+                                       calloc(M_size * M_size, sizeof(double)));
     }
   }
 

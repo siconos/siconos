@@ -50,8 +50,7 @@ namespace siconos::mechanisms::internal {
 // We should probably regroup/refactorize those functions with
 // those from mechanics doing quite the same thing ...
 
-gp_Pnt _CADMBTB_FacePoint(const TopoDS_Face& face, Standard_Real u,
-                          Standard_Real v) {
+gp_Pnt _CADMBTB_FacePoint(const TopoDS_Face& face, Standard_Real u, Standard_Real v) {
   // get bounds of face
   /* Standard_Real umin, umax, vmin, vmax;
    BRepTools::UVBounds(face, umin, umax, vmin, vmax);          // create surface
@@ -82,8 +81,7 @@ gp_Pnt _CADMBTB_EdgePoint(const TopoDS_Edge& edge, Standard_Real u) {
   return aPaux;
 }
 
-gp_Dir _CADMBTB_FaceNormal(const TopoDS_Face& face, Standard_Real u,
-                           Standard_Real v) {
+gp_Dir _CADMBTB_FaceNormal(const TopoDS_Face& face, Standard_Real u, Standard_Real v) {
   // get bounds of face
   //  Standard_Real umin, umax, vmin, vmax;
   //  BRepTools::UVBounds(face, umin, umax, vmin, vmax);
@@ -123,8 +121,7 @@ void _myf_FaceFace(double* x, double* fx, double* gx, const TopoDS_Face& face1,
   aVP2P1.SetX(aP1.X() - aP2.X());
   aVP2P1.SetY(aP1.Y() - aP2.Y());
   aVP2P1.SetZ(aP1.Z() - aP2.Z());
-  *fx = aVP2P1.X() * aVP2P1.X() + aVP2P1.Y() * aVP2P1.Y() +
-        aVP2P1.Z() * aVP2P1.Z();
+  *fx = aVP2P1.X() * aVP2P1.X() + aVP2P1.Y() * aVP2P1.Y() + aVP2P1.Z() * aVP2P1.Z();
   // printf("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
   gx[0] = 2 * aV1u.Dot(aVP2P1);
   gx[1] = 2 * aV1v.Dot(aVP2P1);
@@ -154,8 +151,7 @@ void _myf_FaceEdge(double* x, double* fx, double* gx, const TopoDS_Face& face1,
   aVP2P1.SetX(aP1.X() - aP2.X());
   aVP2P1.SetY(aP1.Y() - aP2.Y());
   aVP2P1.SetZ(aP1.Z() - aP2.Z());
-  *fx = aVP2P1.X() * aVP2P1.X() + aVP2P1.Y() * aVP2P1.Y() +
-        aVP2P1.Z() * aVP2P1.Z();
+  *fx = aVP2P1.X() * aVP2P1.X() + aVP2P1.Y() * aVP2P1.Y() + aVP2P1.Z() * aVP2P1.Z();
   // printf("myf %e %e %e %e --> %e\n",x[0],x[1],x[2],x[3],*fx);
   gx[0] = 2 * aV1u.Dot(aVP2P1);
   gx[1] = 2 * aV1v.Dot(aVP2P1);
@@ -166,12 +162,11 @@ void _myf_FaceEdge(double* x, double* fx, double* gx, const TopoDS_Face& face1,
 }  // namespace siconos::mechanisms::internal
 
 void siconos::mechanisms::_CADMBTB_getMinDistanceFaceFace_using_n2qn1(
-    unsigned int idContact, unsigned int idFace1, unsigned int idFace2,
-    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2,
-    Standard_Real& Y2, Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY,
-    Standard_Real& nZ, unsigned int normalFromFace1, Standard_Real& MinDist) {
-  unsigned int idFace11 =
-      data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts);
+    unsigned int idContact, unsigned int idFace1, unsigned int idFace2, Standard_Real& X1,
+    Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2, Standard_Real& Y2,
+    Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
+    unsigned int normalFromFace1, Standard_Real& MinDist) {
+  unsigned int idFace11 = data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts);
   unsigned int idFace21 =
       data::sNumberOfObj + (2 * idContact + 1 - 2 * data::sNumberOfContacts);
   assert(idFace11 == idFace1);
@@ -284,19 +279,17 @@ void siconos::mechanisms::_CADMBTB_getMinDistanceFaceFace_using_n2qn1(
       df1 = f;
 
       int mode = 1;
-      siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode,
-                                     binf, bsup, iz, rz);
+      siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode, binf, bsup, iz,
+                                     rz);
 
       while (mode > 7) {
         internal::_myf_FaceFace(x, &f, g, face1, face2);
-        siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode,
-                                       binf, bsup, iz, rz);
+        siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode, binf, bsup,
+                                       iz, rz);
       }
 #ifdef DEBUG_USING_N2QN1
-      printf("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1],
-             sqrt(f));
-      printf("_CADMBTB_getMinDistanceFaceFace_using_n2qn1 dist = %e\n",
-             sqrt(f));
+      printf("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1], sqrt(f));
+      printf("_CADMBTB_getMinDistanceFaceFace_using_n2qn1 dist = %e\n", sqrt(f));
 #endif
       double sqrt_f = sqrt(f);
       if (MinDist > sqrt_f) {
@@ -310,8 +303,7 @@ void siconos::mechanisms::_CADMBTB_getMinDistanceFaceFace_using_n2qn1(
           aPaux1.Coord(X1, Y1, Z1);
           gp_Pnt aPaux2 = internal::_CADMBTB_FacePoint(face2, x[2], x[3]);
           aPaux2.Coord(X2, Y2, Z2);
-          if (((X1 - X2) * nX + (Y1 - Y2) * nY + (Z1 - Z2) * nZ) > 0)
-            normal.Reverse();
+          if (((X1 - X2) * nX + (Y1 - Y2) * nY + (Z1 - Z2) * nZ) > 0) normal.Reverse();
           normal.Coord(nX, nY, nZ);
 
         } else {
@@ -430,12 +422,11 @@ void siconos::mechanisms::_CADMBTB_getMinDistanceFaceFace_using_n2qn1(
 
 /*idContact useful for the memory management of n2qn1.*/
 void siconos::mechanisms::_CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
-    unsigned int idContact, unsigned int idFace1, unsigned int idFace2,
-    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2,
-    Standard_Real& Y2, Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY,
-    Standard_Real& nZ, unsigned int normalFromFace1, Standard_Real& MinDist) {
-  unsigned int idFace11 =
-      data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts);
+    unsigned int idContact, unsigned int idFace1, unsigned int idFace2, Standard_Real& X1,
+    Standard_Real& Y1, Standard_Real& Z1, Standard_Real& X2, Standard_Real& Y2,
+    Standard_Real& Z2, Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
+    unsigned int normalFromFace1, Standard_Real& MinDist) {
+  unsigned int idFace11 = data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts);
   unsigned int idFace21 =
       data::sNumberOfObj + (2 * idContact + 1 - 2 * data::sNumberOfContacts);
   unsigned int reverted = 0;
@@ -533,22 +524,21 @@ void siconos::mechanisms::_CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
 
     int mode = 1;
 
-    siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode,
-                                   binf, bsup, iz, rz);
+    siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode, binf, bsup, iz,
+                                   rz);
 
     while (mode > 7) {
       internal::_myf_FaceEdge(x, &f, g, face1, edge2);
       //      ACE_times[ACE_TIMER_CAD_12].start();
-      siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode,
-                                     binf, bsup, iz, rz);
+      siconos::fortran::optim::n2qn1(&n, x, &f, g, dxim, &df1, &epsabs, &mode, binf, bsup, iz,
+                                     rz);
       //      ACE_times[ACE_TIMER_CAD_12].stop();
     }
     //    ACE_times[ACE_TIMER_CAD_12].stop();
     //    ACE_times[ACE_TIMER_CAD_14].start();
     double sqrt_f = sqrt(f);
 #ifdef DEBUG_USING_N2QN1
-    printf("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1],
-           sqrt_f);
+    printf("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1], sqrt_f);
     printf("_CADMBTB_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n", sqrt_f);
 #endif
     if (MinDist > sqrt_f) {
@@ -607,8 +597,7 @@ void siconos::mechanisms::_CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
           "ny=%lf, nz=%lf \n",
           nX, nY, nZ);
     printf("    First contact point  :  X1=%lf, Y1=%lf, Z1=%lf \n", X1, Y1, Z1);
-    printf("    Second contact point  :  X2=%lf, Y2=%lf, Z2=%lf \n", X2, Y2,
-           Z2);
+    printf("    Second contact point  :  X2=%lf, Y2=%lf, Z2=%lf \n", X2, Y2, Z2);
   }
   //  ACE_times[ACE_TIMER_CAD_14].stop();
   //  ACE_times[ACE_TIMER_CAD_1].stop();

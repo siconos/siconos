@@ -45,11 +45,11 @@ int main(void) {
 
   FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, NM, q, mu);
 
-  //  frictionContact_display(FC);
+  //  frictionContactProblem_display(FC);
 
-  assert(FC->M->matrix1->blocksize0[2] == 9);
-  assert(FC->M->matrix1->blocksize0[1] == 6);
-  assert(FC->M->matrix1->block[0][0] == 1.);
+  assert(FC->M->sparse_block->blocksize0[2] == 9);
+  assert(FC->M->sparse_block->blocksize0[1] == 6);
+  assert(FC->M->sparse_block->block[0][0] == 1.);
 
   free(NM);
   NM = NULL;

@@ -4,7 +4,7 @@
 #
 # The objective is to call component_setup to create the target <COMPONENT>.
 # Before, it's necessary to set:
-# 
+#
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
@@ -62,7 +62,7 @@ endif()
 # ------ include interface ------
 # What is needed at build time
 # by other targets to compile with current component.
-# 
+#
 # It means that a call to
 #  target_link_libraries(truc PRIVATE mechanics)
 # will imply -I<dirs> with dirs listed in
@@ -110,10 +110,10 @@ endif()
 # to prepare installation of the current target.
 #
 # Before, it's necessary to set:
-# 
+#
 # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
 #    that contain headers files that must be installed.
-# 
+#
 set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   ${${COMPONENT}_DIRS} # All .hpp are installed
   )

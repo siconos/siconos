@@ -75,6 +75,13 @@ namespace cuNSearch
 	void NeighborhoodSearch::z_sort()
 	{
 		//Do nothing as the sort step is part of the main implementation
+
+		// siconos: the user reorders the points with sort_field after this
+		// call, the static point sets included, whereas their device copies are
+		// only uploaded at the first search: their neighbor indices would then
+		// name other points. As CompactNSearch::z_sort, force the next search
+		// to rebuild every point set (it also refreshes their sort tables).
+		isInitialized = false;
 	}
 
 	void
@@ -157,4 +164,3 @@ namespace cuNSearch
 		updatePointSet(pointSets[i]);
 	}
 }
-

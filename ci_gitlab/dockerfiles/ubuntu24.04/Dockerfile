@@ -1,5 +1,5 @@
 # 1.ubuntu 24.04 image where we add all Siconos-required ubuntu packages, as root
-# 
+#
 FROM ubuntu:24.04 AS siconos-base
 ENV TZ=Europe/Paris
 ENV DEBIAN_FRONTEND=noninteractive
@@ -74,8 +74,5 @@ USER siconos-user
 COPY ci_gitlab/dockerfiles/install_petsc.sh /home/siconos-user
 ENV PETSC_INSTALL_DIR="$VIRTUAL_ENV"
 RUN sh /home/siconos-user/install_petsc.sh
-# setup to help siconos cmake process to find petsc 
-ENV petsc_ROOT="$VIRTUAL_ENV" 
-
-
-
+# setup to help siconos cmake process to find petsc
+ENV petsc_ROOT="$VIRTUAL_ENV"

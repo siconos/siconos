@@ -1,11 +1,12 @@
 #pragma once
 
 #include "interaction.hpp"
-#include "moreau_jean_element.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_r.hpp"
-#include "siconos/simul/moreau_jean_assembled.hpp"
-#include "siconos/simul/moreau_jean_element.hpp"
+#include "siconos/simul/kinds.hpp"
+#include "siconos/simul/moreau_jean.hpp"
+#include "siconos/simul/moreau_jean_gosi.hpp"
+#include "siconos/simul/selectable_scheme.hpp"
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/utils/range.hpp"
@@ -13,278 +14,282 @@
 
 namespace siconos::simul {
 
+// the item types of a tuple of item_ref that are not empty items
+template <typename... Refs>
+constexpr auto non_empty(mp::tuple<Refs...> refs) {
+  return mp::unpack(
+      mp::filter(refs,
+                 [](const auto& h) constexpr {
+                   using t = typename std::decay_t<decltype(h)>::type;
+                   return mp::bool_c<!std::derived_from<t, empty_item>>;
+                 }),
+      []<typename... Kinds>(Kinds...) { return mp::tuple<typename Kinds::type...>{}; });
+}
+
+// a tuple of item_ref to the item types of a tuple
+template <typename... Items>
+constexpr auto refs(mp::tuple<Items...>) {
+  return some::tuple<some::item_ref<Items>...>{};
+}
+
+// the storage a scheme needs on the systems (interactions) of a kind, none
+// on an empty kind
+template <typename Scheme, typename System>
+struct system_storage_of {
+  using type = typename Scheme::template system_storage<System>;
+};
+template <typename Scheme>
+struct system_storage_of<Scheme, empty_item> {
+  using type = gather<>;
+};
+template <typename Scheme, typename Interaction>
+struct interaction_storage_of {
+  using type = typename Scheme::template interaction_storage<Interaction>;
+};
+template <typename Scheme>
+struct interaction_storage_of<Scheme, empty_item> {
+  using type = gather<>;
+};
+
 template <typename Topology>
 struct one_step_integrator {
-  using indice_t = std::size_t;
-
   using ct_interaction = typename Topology::fixed_dof_interaction;
-
-  using rt_ct_interaction =
-      typename Topology::dynamic_dof_fixed_dof_interaction;
-
-  using rt_rt_interaction =
-      typename Topology::dynamic_dof_dynamic_dof_interaction;
+  using rt_ct_interaction = typename Topology::dynamic_dof_fixed_dof_interaction;
+  using rt_rt_interaction = typename Topology::dynamic_dof_dynamic_dof_interaction;
 
   using ct_system = typename Topology::fixed_dof_system;
   using rt_system = typename Topology::dynamic_dof_system;
 
-  struct moreau_jean : item {
+  // an integrator of the systems and interactions of the topology, Scheme
+  // giving the stages of a time step and of the initial state
+  template <typename Scheme>
+  struct integrator : item {
     using topology = Topology;
 
-    using systems_t = gather<ct_system, rt_system>;
-    using interactions_t =
-        gather<ct_interaction, rt_ct_interaction, rt_rt_interaction>;
+    // the kinds of systems and of interactions (see kinds.hpp), with the
+    // storage the scheme needs on them
+    template <typename System>
+    using system_kind_t =
+        system_kind<System, Topology, typename system_storage_of<Scheme, System>::type>;
+    template <typename Interaction, typename Systems1, typename Systems2>
+    using interaction_kind_t =
+        interaction_kind<Interaction, Systems1, Systems2, Topology,
+                         typename interaction_storage_of<Scheme, Interaction>::type>;
 
-    using ct_osi_t =
-        moreau_jean_element<ct_system, ct_interaction, moreau_jean_assembled>;
-    using rt_ct_osi_t = moreau_jean_element<rt_system, rt_ct_interaction,
-                                            moreau_jean_assembled>;
-    using rt_rt_osi_t = moreau_jean_element<rt_system, rt_rt_interaction,
-                                            moreau_jean_assembled>;
+    using ct_systems_t = system_kind_t<ct_system>;
+    using rt_systems_t = system_kind_t<rt_system>;
 
-    using all_elements_t =
-        mp::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_ct_osi_t>,
-                  some::item_ref<rt_rt_osi_t>>;
+    using ct_interactions_t = interaction_kind_t<ct_interaction, ct_systems_t, ct_systems_t>;
+    using rt_ct_interactions_t =
+        interaction_kind_t<rt_ct_interaction, ct_systems_t, rt_systems_t>;
+    using rt_rt_interactions_t =
+        interaction_kind_t<rt_rt_interaction, rt_systems_t, rt_systems_t>;
 
-    using elements_t = decltype(mp::unpack(
-        mp::filter(all_elements_t{},
-                   [](const auto& h) constexpr {
-                     using t = typename std::decay_t<decltype(h)>::type;
-                     return mp::bool_c<!std::derived_from<t, empty_item>>;
-                   }),
-        []<typename... Elems>(Elems...) { return some::tuple<Elems...>{}; }));
+    // the non-empty kinds, in the order of the assembled problem
+    using system_kinds_t = decltype(non_empty(
+        mp::tuple<some::item_ref<ct_systems_t>, some::item_ref<rt_systems_t>>{}));
+    using interaction_kinds_t = decltype(non_empty(
+        mp::tuple<some::item_ref<ct_interactions_t>, some::item_ref<rt_ct_interactions_t>,
+                  some::item_ref<rt_rt_interactions_t>>{}));
 
-    using assembled_osi_t = moreau_jean_assembled;
+    // the stages of a time step, of the initial state
+    using time_step_schedule = typename Scheme::time_step_schedule;
+    using initial_schedule = typename Scheme::initial_schedule;
 
-    using items = gather<topology, ct_osi_t, rt_ct_osi_t, rt_rt_osi_t,
-                         moreau_jean_assembled>;
+    // the global problem (see moreau_jean_gosi.hpp)
+    using global_problem_t = simul::moreau_jean_gosi::global_problem;
+
+    using items = decltype(mp::concat(
+        mp::concat(mp::tuple<topology, global_problem_t>{}, system_kinds_t{}),
+        interaction_kinds_t{}));
+
+    using size_1_t = some::indice_value<1>;
+    using assembled_matrix =
+        some::assembled_matrix<some::matrix<some::scalar, size_1_t, size_1_t>>;
+    using assembled_vector = some::assembled_vector<some::vector<some::scalar, size_1_t>>;
 
     struct attributes {
-      elements_t elements;
-      some::item_ref<assembled_osi_t> assembled_osi;
+      // the scheme of a selectable integrator (see selectable_scheme.hpp)
+      some::indice scheme;
+      some::scalar theta;
+      some::scalar gamma;
+      some::scalar constraint_activation_threshold;
+      // the penalty contact law of the explicit DEM scheme (see dem.hpp)
+      some::scalar normal_stiffness;
+      some::scalar normal_damping;
+      some::scalar tangential_stiffness;
+      // the assembled problem
+      assembled_matrix mass_matrix_assembled;
+      assembled_matrix iteration_matrix_assembled;
+      assembled_matrix k_matrix_assembled;
+      assembled_matrix h_matrix_assembled;
+      assembled_matrix w_matrix_assembled;
+      assembled_vector lambda_vector_assembled;
+      assembled_vector ydot_vector_assembled;
+      assembled_vector velocity_vector_assembled;
+      assembled_vector p0_vector_assembled;
+      assembled_vector q_nsp_vector_assembled;
+      assembled_vector mu_vector_assembled;
+      assembled_vector b_vector_assembled;
+      // the kinds
+      decltype(refs(system_kinds_t{})) systems;
+      decltype(refs(interaction_kinds_t{})) interactions;
+      some::item_ref<global_problem_t> global_problem;
     };
 
     template <typename Handle>
     struct interface : default_interface<Handle> {
       using default_interface<Handle>::self;
 
-      decltype(auto) assembled_osi()
-      {
-        return storage::make_ref_handle(self()->data(),
-                                        attr<"assembled_osi">(*self()));
-      }
-      void __init__()
-      {
-        auto osi = storage::add<assembled_osi_t>(self()->data());
-        assembled_osi() = osi;
+      void __init__() {
+        auto add = [&]<typename Kind>(Kind kind) {
+          kind = storage::add<typename Kind::type>(self()->data());
+        };
+        mp::for_each(systems(), add);
+        mp::for_each(interactions(), add);
 
-        mp::for_each(elements(), [&]<typename Elem>(Elem elem) {
-          elem = storage::add<typename Elem::type>(self()->data());
-          elem.assembled_osi() = osi;
-        });
+        // the gap at the middle of the step for the active set
+        gamma() = 0.5;
+
+        auto problem = storage::add<global_problem_t>(self()->data());
+        problem.create();
+        global_problem() = problem;
       }
 
-      void __del__()
-      {
+      void __del__() {
         // not implemented
         throw std::runtime_error("Stable pointers need to be implemented");
-        storage::remove(assembled_osi());
+      }
 
-        mp::for_each(elements(), [&]<typename Elem>(Elem elem) {
-          storage::remove(elem);
+      decltype(auto) scheme() { return storage::attr<"scheme">(*self()); }
+      decltype(auto) theta() { return storage::attr<"theta">(*self()); }
+      decltype(auto) global_problem() {
+        return storage::make_ref_handle(self()->data(),
+                                        storage::attr<"global_problem">(*self()));
+      }
+      decltype(auto) gamma() { return storage::attr<"gamma">(*self()); }
+      decltype(auto) constraint_activation_threshold() {
+        return storage::attr<"constraint_activation_threshold">(*self());
+      }
+      decltype(auto) normal_stiffness() { return storage::attr<"normal_stiffness">(*self()); }
+      decltype(auto) normal_damping() { return storage::attr<"normal_damping">(*self()); }
+      decltype(auto) tangential_stiffness() {
+        return storage::attr<"tangential_stiffness">(*self());
+      }
+
+      decltype(auto) mass_matrix_assembled() {
+        return storage::attr<"mass_matrix_assembled">(*self());
+      }
+      decltype(auto) iteration_matrix_assembled() {
+        return storage::attr<"iteration_matrix_assembled">(*self());
+      }
+      decltype(auto) k_matrix_assembled() {
+        return storage::attr<"k_matrix_assembled">(*self());
+      }
+      decltype(auto) h_matrix_assembled() {
+        return storage::attr<"h_matrix_assembled">(*self());
+      }
+      decltype(auto) w_matrix_assembled() {
+        return storage::attr<"w_matrix_assembled">(*self());
+      }
+      decltype(auto) lambda_vector_assembled() {
+        return storage::attr<"lambda_vector_assembled">(*self());
+      }
+      decltype(auto) ydot_vector_assembled() {
+        return storage::attr<"ydot_vector_assembled">(*self());
+      }
+      decltype(auto) velocity_vector_assembled() {
+        return storage::attr<"velocity_vector_assembled">(*self());
+      }
+      decltype(auto) p0_vector_assembled() {
+        return storage::attr<"p0_vector_assembled">(*self());
+      }
+      decltype(auto) q_nsp_vector_assembled() {
+        return storage::attr<"q_nsp_vector_assembled">(*self());
+      }
+      decltype(auto) mu_vector_assembled() {
+        return storage::attr<"mu_vector_assembled">(*self());
+      }
+      decltype(auto) b_vector_assembled() {
+        return storage::attr<"b_vector_assembled">(*self());
+      }
+
+      // the kinds of systems, of interactions, as handles
+      decltype(auto) systems() {
+        return mp::transform(storage::attr<"systems">(*self()), [&](auto kind) {
+          return storage::make_handle(self()->data(), kind);
         });
       }
 
-      void initialize(auto step)
-      {
-        mp::for_each(elements(), [&](auto elem) { elem.initialize(step); });
-      }
-
-      decltype(auto) theta() { return assembled_osi().theta(); }
-
-      decltype(auto) gamma() { return assembled_osi().gamma(); }
-
-      decltype(auto) constraint_activation_threshold()
-      {
-        return assembled_osi().constraint_activation_threshold();
-      }
-
-      static constexpr auto index_elements() { return elements_t{}; }
-
-      decltype(auto) elements()
-      {
-        return mp::transform(
-            storage::attr<"elements">(*self()), [&](auto elem) {
-              return storage::make_handle(self()->data(), elem);
-            });
-      }
-
-      template <size_t N, typename Func>
-      decltype(auto) visit_element(Func&& func)
-      {
-        return func(std::get<N>(elements()));
-      }
-
-      decltype(auto) mass_matrix_assembled()
-      {
-        return assembled_osi().mass_matrix_assembled();
-      };
-
-      decltype(auto) iteration_matrix_assembled()
-      {
-        return assembled_osi().iteration_matrix_assembled();
-      }
-
-      decltype(auto) k_matrix_assembled()
-      {
-        return assembled_osi().k_matrix_assembled();
-      };
-
-      decltype(auto) h_matrix_assembled()
-      {
-        return assembled_osi().h_matrix_assembled();
-      };
-
-      decltype(auto) w_matrix_assembled()
-      {
-        return assembled_osi().w_matrix_assembled();
-      };
-
-      decltype(auto) lambda_vector_assembled()
-      {
-        return assembled_osi().lambda_vector_assembled();
-      };
-
-      decltype(auto) velocity_vector_assembled()
-      {
-        return assembled_osi().velocity_vector_assembled();
-      };
-
-      decltype(auto) p0_vector_assembled()
-      {
-        return assembled_osi().p0_vector_assembled();
-      };
-
-      decltype(auto) q_nsp_vector_assembled()
-      {
-        return assembled_osi().q_nsp_vector_assembled();
-      };
-
-      decltype(auto) y_vector_assembled()
-      {
-        return assembled_osi().y_vector_assembled();
-      };
-
-      decltype(auto) ydot_vector_assembled()
-      {
-        return assembled_osi().ydot_vector_assembled();
-      };
-
-      decltype(auto) mu_vector_assembled()
-      {
-        return assembled_osi().mu_vector_assembled();
-      };
-
-      static constexpr auto with_runtime_dofs()
-      {
-        return mp::any_of(typename elements_t::types{}, []<typename Elem>(
-                                                            Elem) {
-          return
-              typename Elem::type::template interface<Handle>{}.runtime_dof();
+      decltype(auto) interactions() {
+        return mp::transform(storage::attr<"interactions">(*self()), [&](auto kind) {
+          return storage::make_handle(self()->data(), kind);
         });
       }
 
-      static constexpr auto with_k_matrix()
-      {
-        return mp::any_of(
-            typename elements_t::types{}, []<typename Elem>(Elem) {
-              return typename Elem::type::template interface<Handle>{}
-                  .system_with_k_matrix();
-            });
+      // the kind of systems Kind. Returned by value: systems() is a fresh
+      // temporary tuple
+      template <typename Kind>
+      auto systems_of() {
+        constexpr auto n = mp::index_of<Kind>(mp::std_tuple(system_kinds_t{}));
+        return std::get<n>(systems());
       }
 
-      static constexpr auto with_friction()
-      {
-        return mp::any_of(
-            typename elements_t::types{}, []<typename Elem>(Elem) {
-              return typename Elem::type::template interface<Handle>{}
-                  .nslaw_with_friction();
-            });
+      // the state before the first step
+      void initialize(auto step) {
+        auto ctx = step_context{nullptr, *self(), step, 0.};
+        storage::schedule::run<initial_schedule>(ctx);
       }
 
-      // whether this topology declares a real (non-empty) rt_ct_interaction
-      // (fem/disk contact) resp. rt_rt_interaction (fem/fem "self" contact,
-      // e.g. against a fixed ground) - distinct from with_k_matrix(), which
-      // is true for ANY rt-family element (rt_ct or rt_rt) sharing a
-      // k_matrix-bearing system, regardless of which one(s) are present.
-      static constexpr auto with_rt_ct_interaction()
-      {
-        return !std::derived_from<rt_ct_interaction, empty_item>;
+      static constexpr auto with_k_matrix() {
+        return mp::any_of(system_kinds_t{}, []<typename Kind>(Kind) {
+          return typename Kind::template interface<Handle>{}.with_k_matrix();
+        });
       }
 
-      static constexpr auto with_rt_rt_interaction()
-      {
-        return !std::derived_from<rt_rt_interaction, empty_item>;
+      static constexpr auto with_friction() {
+        return mp::any_of(interaction_kinds_t{}, []<typename Kind>(Kind) {
+          return typename Kind::template interface<Handle>{}.nslaw_with_friction();
+        });
       }
 
-      // rt_rt_osi_t's position in elements() is 2 when rt_ct_osi_t is also
-      // present (declaration order ct, rt_ct, rt_rt), or 1 if rt_ct is
-      // empty_item and thus filtered out of elements(). Returned by value
-      // (not decltype(auto)): elements() is a fresh temporary tuple each
-      // call, so std::get<N>(elements()) is a reference into a temporary
-      // that dies at the end of this function - returning it by decltype
-      // would hand the caller a dangling reference.
-      auto rt_rt_element()
-      {
-        if constexpr (with_rt_ct_interaction()) {
-          return std::get<2>(elements());
-        }
-        else {
-          return std::get<1>(elements());
-        }
-      }
+      // the sizes of the assembled problem, the offsets of the kinds in it
+      void assemble_setup(auto step) {
+        using indice_t = typename decltype(self()->env())::indice;
 
-      void assemble_setup(auto step)
-      {
-        using env_t = decltype(self()->env());
-        using indice_t = typename env_t::indice;
+        indice_t ods = 0;       // offset ds
+        indice_t ointer = 0;    // offset inter
+        indice_t num_fric = 0;  // total number of friction nslaws for mu vector size.
 
-        indice_t ods = 0;     // offset ds
-        indice_t ointer = 0;  // offset inter
-        indice_t num_fric =
-            0;  // total number of friction nslaws for mu vector size.
+        mp::for_each(systems(), [&ods, &step](auto kind) {
+          kind.compute_total_dofs(step);
+          kind.ds_offset() = ods;
+          ods += kind.total_dofs();
+        });
 
-        mp::for_each(
-            elements(), [&ods, &ointer, &num_fric, &step](auto elem) {
-              elem.compute_total_dofs(step);
-
-              elem.ds_offset() = ods;
-              elem.inter_offset() = ointer;
-              ods += elem.total_dofs();
-
-              ointer += elem.number_of_interactions() * elem.nslaw_size();
-
-              if constexpr (elem.nslaw_with_friction()) {
-                num_fric += elem.number_of_interactions();
-              }
-            });
+        mp::for_each(interactions(), [&ointer, &num_fric](auto kind) {
+          kind.inter_offset() = ointer;
+          ointer += kind.number_of_interactions() * kind.nslaw_size();
+          if constexpr (kind.nslaw_with_friction()) {
+            num_fric += kind.number_of_interactions();
+          }
+        });
 
         indice_t raw_ds_size = ods;
         indice_t raw_inter_size = ointer;
 
         if constexpr (with_k_matrix()) {
           algebra::resize(k_matrix_assembled(), raw_ds_size, raw_ds_size);
-          algebra::resize(iteration_matrix_assembled(), raw_ds_size,
-                          raw_ds_size);
+          algebra::resize(iteration_matrix_assembled(), raw_ds_size, raw_ds_size);
         }
         algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
         algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
         algebra::resize(w_matrix_assembled(), raw_inter_size, raw_inter_size);
         algebra::resize(lambda_vector_assembled(), raw_inter_size);
         algebra::resize(velocity_vector_assembled(), raw_ds_size);
-        algebra::resize(y_vector_assembled(), raw_inter_size);
         algebra::resize(ydot_vector_assembled(), raw_inter_size);
         algebra::resize(q_nsp_vector_assembled(), raw_inter_size);
+        algebra::resize(b_vector_assembled(), raw_inter_size);
         algebra::resize(p0_vector_assembled(), raw_ds_size);
 
         if constexpr (with_friction()) {
@@ -294,622 +299,78 @@ struct one_step_integrator {
         }
       }
 
-      auto compute_active_interactions(auto step, auto h)
-      {
-        auto& data = self()->data();
-        using env = decltype(self()->env());
-        using indice = typename env::indice;
-
-        auto& ct_ys = storage::attr_values<ct_interaction, "y">(data, step);
-        auto& ct_ydots =
-            storage::attr_values<ct_interaction, "ydot">(data, step);
-
-        auto& ct_ids1s =
-            storage::prop_values<ct_interaction, "ds1">(data, step);
-        auto& ct_ids2s =
-            storage::prop_values<ct_interaction, "ds2">(data, step);
-        auto& ct_ndss =
-            storage::prop_values<ct_interaction, "nds">(data, step);
-
-        auto& ct_activations =
-            storage::prop_values<ct_interaction, "activation">(data, step);
-
-        auto& ct_involveds =
-            storage::prop_values<ct_system, "involved">(data, step);
-
-        const auto& ct_interactions =
-            storage::handles<ct_interaction>(data, step);
-
-        // all ds -> not involved
-        // view::concat: c++26
-        for (auto [involved] : view::zip(ct_involveds)) {
-          involved = false;
-        };
-
-        auto gamma_v = 0.5;
-
-        indice ct_ds_counter = 0;
-        indice ct_inter_counter = 0;
-
-        indice rt_ds_counter = 0;
-        indice rt_ct_inter_counter = 0;
-
-        for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
-             view::zip(ct_ys, ct_ydots, ct_activations, ct_ndss, ct_ids1s,
-                       ct_ids2s, ct_interactions)) {
-          activation = ((y + gamma_v * h * ydot)(0) <=
-                        self()->constraint_activation_threshold());
-
-          if (activation) {
-            ct_inter_counter++;
-
-            auto ds2 = storage::make_handle(data, ids2);
-
-            if (!prop<"involved">(ds2)) {
-              prop<"involved">(ds2) = true;
-              prop<"index">(ds2) = ct_ds_counter++;
-            }
-
-            if (nds == 2) {
-              auto ds1 = storage::make_handle(data, ids1);
-
-              if (!prop<"involved">(ds1)) {
-                prop<"involved">(ds1) = true;
-                prop<"index">(ds1) = ct_ds_counter++;
-              };
-            }
-          }
-        }
-
-        std::print(
-            "  [compute_active_interactions] total number of ct ds: "
-            "{}, "
-            "total "
-            "number of "
-            "ct interactions: {}\n",
-            std::size(ct_involveds), std::size(ct_activations));
-
-        if constexpr (with_k_matrix()) {
-          // reset rt_system involvement once per step, regardless of which
-          // rt-family interaction type(s) (rt_ct and/or rt_rt) are actually
-          // present - both key off this same shared per-rt_system property.
-          auto& rt_involveds =
-              storage::prop_values<rt_system, "involved">(data, step);
-
-          for (auto [involved] : view::zip(rt_involveds)) {
-            involved = false;
-          };
-        }
-
-        if constexpr (with_rt_ct_interaction()) {
-          auto& rt_ct_ys =
-              storage::attr_values<rt_ct_interaction, "y">(data, step);
-          auto& rt_ct_ydots =
-              storage::attr_values<rt_ct_interaction, "ydot">(data, step);
-          auto& rt_ct_ids1s =
-              storage::prop_values<rt_ct_interaction, "ds1">(data, step);
-          auto& rt_ct_ids2s =
-              storage::prop_values<rt_ct_interaction, "ds2">(data, step);
-          auto& rt_ct_ndss =
-              storage::prop_values<rt_ct_interaction, "nds">(data, step);
-
-          auto& rt_ct_activations =
-              storage::prop_values<rt_ct_interaction, "activation">(data,
-                                                                    step);
-
-          // already reset once above, unconditionally, for the whole
-          // rt_system regardless of which rt-family interaction is present
-          auto& rt_involveds =
-              storage::prop_values<rt_system, "involved">(data, step);
-
-          const auto& rt_ct_interactions =
-              storage::handles<rt_ct_interaction>(data, step);
-
-          for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
-               view::zip(rt_ct_ys, rt_ct_ydots, rt_ct_activations, rt_ct_ndss,
-                         rt_ct_ids1s, rt_ct_ids2s, rt_ct_interactions)) {
-            activation = ((y + gamma_v * h * ydot)(0) <=
-                          self()->constraint_activation_threshold());
-
-            if (activation) {
-              rt_ct_inter_counter++;
-
-              auto ds2 = storage::make_handle(data, ids2);
-
-              if (!prop<"involved">(ds2)) {
-                prop<"involved">(ds2) = true;
-                prop<"index">(ds2) = rt_ds_counter++;
-              }
-
-              // /!\ a rt system can only be in interaction with a ct system
-              // i.e no rt rt interaction yet
-              assert(nds == 2);
-              {
-                auto ds1 = storage::make_handle(data, ids1);
-
-                if (!prop<"involved">(ds1)) {
-                  prop<"involved">(ds1) = true;
-                  prop<"index">(ds1) = ct_ds_counter++;
-                };
-              }
-            }
-          }
-          std::print(
-              "  [compute_active_interactions] total number of rt ds: "
-              "{}, "
-              "total "
-              "number of "
-              "rt ct interactions: {}\n",
-              std::size(rt_involveds), std::size(rt_ct_activations));
-
-          auto rt_elem = std::get<1>(elements());
-
-          rt_elem.number_of_interactions() = rt_ct_inter_counter;
-          rt_elem.number_of_involved_ds() = rt_ds_counter;
-        }
-
-        indice rt_rt_inter_counter = 0;
-
-        if constexpr (with_rt_rt_interaction()) {
-          // fem "self" contact (e.g. against a fixed ground): ds1 == ds2,
-          // both indexed into the same rt_system as rt_ct above - continue
-          // (not reset) rt_involveds/rt_ds_counter so a rt_system ds already
-          // marked involved via rt_ct keeps its index.
-          auto& rt_rt_ys =
-              storage::attr_values<rt_rt_interaction, "y">(data, step);
-          auto& rt_rt_ydots =
-              storage::attr_values<rt_rt_interaction, "ydot">(data, step);
-          auto& rt_rt_ids1s =
-              storage::prop_values<rt_rt_interaction, "ds1">(data, step);
-          auto& rt_rt_ids2s =
-              storage::prop_values<rt_rt_interaction, "ds2">(data, step);
-          auto& rt_rt_ndss =
-              storage::prop_values<rt_rt_interaction, "nds">(data, step);
-
-          auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation">(data,
-                                                                    step);
-
-          const auto& rt_rt_interactions =
-              storage::handles<rt_rt_interaction>(data, step);
-
-          for (auto [y, ydot, activation, nds, ids1, ids2, inter] :
-               view::zip(rt_rt_ys, rt_rt_ydots, rt_rt_activations, rt_rt_ndss,
-                         rt_rt_ids1s, rt_rt_ids2s, rt_rt_interactions)) {
-            activation = ((y + gamma_v * h * ydot)(0) <=
-                          self()->constraint_activation_threshold());
-
-            if (activation) {
-              rt_rt_inter_counter++;
-
-              auto ds2 = storage::make_handle(data, ids2);
-
-              if (!prop<"involved">(ds2)) {
-                prop<"involved">(ds2) = true;
-                prop<"index">(ds2) = rt_ds_counter++;
-              }
-
-              if (nds == 2) {
-                auto ds1 = storage::make_handle(data, ids1);
-
-                if (!prop<"involved">(ds1)) {
-                  prop<"involved">(ds1) = true;
-                  prop<"index">(ds1) = rt_ds_counter++;
-                };
-              }
-            }
-          }
-
-          std::print(
-              "  [compute_active_interactions] number of activated rt rt "
-              "interactions: {}\n",
-              rt_rt_inter_counter);
-
-          auto rt_rt_elem = rt_rt_element();
-
-          rt_rt_elem.number_of_interactions() = rt_rt_inter_counter;
-          rt_rt_elem.number_of_involved_ds() = rt_ds_counter;
-        }
-
-        std::print(
-            "  [compute_active_interactions] number of involved ct ds:{}, "
-            "number of "
-            "activated ct interactions: {}\n",
-            ct_ds_counter, ct_inter_counter);
-
-        std::print(
-            "  [compute_active_interactions] number of involved rt ds:{}, "
-            "number of "
-            "activated ct rt interactions: {}\n",
-            rt_ds_counter, rt_ct_inter_counter);
-
-        auto ct_elem = std::get<0>(elements());
-
-        ct_elem.number_of_interactions() = ct_inter_counter;
-        ct_elem.number_of_involved_ds() = ct_ds_counter;
-
-        return ct_ds_counter + rt_ds_counter;
+      // the active set: mark the active interactions and their systems, then
+      // the ranks by scans (kernels::offsets): the row of an active
+      // interaction among the active interactions of its kind, the index of
+      // an involved system among the involved systems of its kind, both in
+      // the order of the items. The number of involved systems.
+      auto compute_active_interactions(auto step, auto h) {
+        return compute_active_interactions(step, h, gamma(),
+                                           constraint_activation_threshold());
       }
 
-      auto assemble_h_matrix_for_involved_ds(auto step)
-      {
-        using env_t = decltype(self()->env());
-        using scalar = typename env_t::scalar;
-        using matrix_1x1_t = typename env_t::template matrix<scalar, 1, 1>;
+      // the same with a given gamma and threshold (gamma = 0: the gap at step)
+      auto compute_active_interactions(auto step, auto h, auto gamma, auto threshold) {
+        mp::for_each(systems(), [&](auto kind) { kind.clear_involved(step); });
 
-        auto& data = self()->data();
+        // a system may be involved by interactions of several kinds (a rigid
+        // one by a rigid-FEM interaction)
+        mp::for_each(interactions(),
+                     [&](auto kind) { kind.mark_active(step, h, gamma, threshold); });
 
-        // assumption: compile time element is the first one.
-        auto ct_elem = std::get<0>(elements());
-
-        auto&& ct_h_matrix = ct_elem.h_matrix_assembled();
-
-        auto& ct_activations =
-            storage::prop_values<ct_interaction, "activation">(data, step);
-
-        auto& rt_ct_activations =
-            storage::prop_values<rt_ct_interaction, "activation">(data, step);
-
-        // auto& rt_rt_activations =
-        //     storage::prop_values<rt_rt_interaction, "activation">(data,
-        //     step);
-
-        auto& ct_h_mat1s =
-            storage::attr_values<ct_interaction, "h_matrix1">(data, step);
-        auto& ct_h_mat2s =
-            storage::attr_values<ct_interaction, "h_matrix2">(data, step);
-
-        // auto& rt_rt_h_mat1s =
-        //     storage::attr_values<rt_rt_interaction, "h_matrix1">(data,
-        //     step);
-        // auto& rt_rt_h_mat2s =
-        //     storage::attr_values<rt_rt_interaction, "h_matrix2">(data,
-        //     step);
-
-        auto& ct_ids1s =
-            storage::prop_values<ct_interaction, "ds1">(data, step);
-        auto& ct_ids2s =
-            storage::prop_values<ct_interaction, "ds2">(data, step);
-
-        // auto& rt_rt_ids1s =
-        //     storage::prop_values<rt_rt_interaction, "ds1">(data, step);
-        // auto& rt_rt_ids2s =
-        //     storage::prop_values<rt_rt_interaction, "ds2">(data, step);
-
-        auto& ct_indices =
-             storage::prop_values<ct_system, "index">(data, step);
-
-        auto& ct_bc_velocities_0s =
-            storage::prop_values<ct_system, "bc_velocities_0">(data, step);
-
-        size_t i_ct = 0;
-        for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
-             view::zip(ct_activations, ct_h_mat1s, ct_h_mat2s, ct_ids1s,
-                       ct_ids2s)) {
-          // ct / ct activation (i.e disk/disk)
-          if (activation) {
-            auto j1 = ct_indices[ids1.value()];
-            auto j2 = ct_indices[ids2.value()];
-
-            // modification on a copy
-            auto h_mat1_mod = h_mat1;
-            auto h_mat2_mod = h_mat2;
-
-            // BC velocities for ds1
-            //  zero columns in h_mat1_mod / BC DOFs in ds1
-            for (auto bc_local_idx : ct_bc_velocities_0s[ids1.value()]) {
-              h_mat1_mod.col(bc_local_idx).setZero();
-            }
-
-            if (j1 != j2) {
-              // BC velocities for ds2
-              // zero columns in h_mat2_mod / BC DOFs in ds2
-              for (auto bc_local_idx : ct_bc_velocities_0s[ids2.value()]) {
-                h_mat2_mod.col(bc_local_idx).setZero();
-              }
-
-              // insertion
-              set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
-              set_value(ct_h_matrix, i_ct, j2, h_mat2_mod);
-            }
-            else {
-              // self interaction
-              set_value(ct_h_matrix, i_ct, j2, h_mat1_mod);
-            }
-
-            i_ct++;
-          }
-        }
-
-        if constexpr (with_rt_ct_interaction()) {
-          auto rt_elem = std::get<1>(elements());
-          auto&& rt_h_matrix = algebra::mat_view<matrix_1x1_t>(
-              assembled_osi().h_matrix_assembled(), rt_elem.inter_offset(),
-              rt_elem.ds_offset());
-
-          auto& rt_ct_h_mat1s =
-              storage::attr_values<rt_ct_interaction, "h_matrix1">(data,
-                                                                   step);
-          auto& rt_ct_h_mat2s =
-              storage::attr_values<rt_ct_interaction, "h_matrix2">(data,
-                                                                   step);
-           auto& rt_ct_ids1s =
-               storage::prop_values<rt_ct_interaction, "ds1">(data, step);
-           auto& rt_ct_ids2s =
-               storage::prop_values<rt_ct_interaction, "ds2">(data, step);
-           auto& rt_ct_rels =
-               storage::attr_values<rt_ct_interaction, "relation">(data, step);
-            auto& rt_indices =
-                storage::prop_values<rt_system, "index">(data, step);
-
-            auto& rt_bc_velocities_0s =
-                storage::prop_values<rt_system, "bc_velocities_0">(data, step);
-
-           size_t i_rt = 0;
-           for (auto [activation, h_mat1, h_mat2, ids1, ids2, rel] :
-                view::zip(rt_ct_activations, rt_ct_h_mat1s, rt_ct_h_mat2s,
-                          rt_ct_ids1s, rt_ct_ids2s, rt_ct_rels)) {
-             if (activation) {
-               // ct / rt activation (i.e disk/fem)
-               auto j1 = ct_indices[ids1.value()];
-               auto j2 = rt_elem.sum_dofs()[rt_indices[ids2.value()]];
-
-               // modification on a copy
-               auto h_mat1_mod = h_mat1;
-
-               // BC velocities for ds1
-               // zero columns in h_mat1_mod / BC DOFs in ds1
-               for (auto bc_local_idx : ct_bc_velocities_0s[ids1.value()]) {
-                 h_mat1_mod.col(bc_local_idx).setZero();
-               }
-
-               // insertion
-               set_value(ct_h_matrix, i_ct, j1, h_mat1_mod);
-
-               // contact index in original mesh
-               variant::visit(
-                   data, rel,
-                   mp::overload(
-                       [&](match::handle<collision::diskmesh_r> auto rrel) {
-                         auto base_idx = 4 * rrel.contact_index();
-                         auto dof0 = rrel.mesh().global_indices()[base_idx];
-                         auto dof1 =
-                             rrel.mesh().global_indices()[base_idx + 1];
-                         auto dof2 =
-                             rrel.mesh().global_indices()[base_idx + 2];
-                         auto dof3 =
-                             rrel.mesh().global_indices()[base_idx + 3];
-
-                         for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                           set_value(rt_h_matrix,
-                                     i + i_rt * rt_elem.nslaw_size(),
-                                     dof0 + j2, h_mat2(i, 0));
-                           set_value(rt_h_matrix,
-                                     i + i_rt * rt_elem.nslaw_size(),
-                                     dof1 + j2, h_mat2(i, 1));
-                           set_value(rt_h_matrix,
-                                     i + i_rt * rt_elem.nslaw_size(),
-                                     dof2 + j2, h_mat2(i, 2));
-                           set_value(rt_h_matrix,
-                                     i + i_rt * rt_elem.nslaw_size(),
-                                     dof3 + j2, h_mat2(i, 3));
-                         }
-                       },
-                       [](auto) {})  // in the case of no rt ct relation
-                   );
-
-               // BC velocities for ds2
-               for (auto i = 0; i < algebra::nrows(h_mat2); ++i) {
-                 for (auto bc_local_idx : rt_bc_velocities_0s[ids2.value()]) {
-                   set_value(rt_h_matrix, i + i_rt * rt_elem.nslaw_size(),
-                             j2 + bc_local_idx, 0.);
-                 }
-               }
-
-               i_ct++;
-               i_rt++;
-             }
-           }
-         }
-
-        if constexpr (with_rt_rt_interaction()) {
-          auto rt_rt_elem = rt_rt_element();
-          auto&& rt_rt_h_matrix = algebra::mat_view<matrix_1x1_t>(
-              assembled_osi().h_matrix_assembled(), rt_rt_elem.inter_offset(),
-              rt_rt_elem.ds_offset());
-
-          auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation">(data,
-                                                                    step);
-          auto& rt_rt_h_mat1s =
-              storage::attr_values<rt_rt_interaction, "h_matrix1">(data,
-                                                                   step);
-          auto& rt_rt_ndss =
-              storage::prop_values<rt_rt_interaction, "nds">(data, step);
-          auto& rt_rt_ids2s =
-              storage::prop_values<rt_rt_interaction, "ds2">(data, step);
-
-          auto& rt_rt_indices =
-              storage::prop_values<rt_system, "index">(data, step);
-          auto& rt_rt_bc_velocities_0s =
-              storage::prop_values<rt_system, "bc_velocities_0">(data, step);
-
-          size_t i_rt_rt = 0;
-          for (auto [activation, h_mat1, nds, ids2] :
-               view::zip(rt_rt_activations, rt_rt_h_mat1s, rt_rt_ndss,
-                         rt_rt_ids2s)) {
-            if (activation) {
-              // fem "self" contact (e.g. against a fixed ground): only
-              // ds1 == ds2 (nds == 1) is supported today, matching
-              // rt_lagrangian_r's relation1-only compute_jachq and
-              // topology::link's only rt_rt-producing overload.
-              assert(nds == 1);
-
-              auto j2 = rt_rt_elem.sum_dofs()[rt_rt_indices[ids2.value()]];
-
-              auto h_mat1_mod = h_mat1;
-
-              // BC velocities for ds2 (== ds1 here)
-              for (auto bc_local_idx : rt_rt_bc_velocities_0s[ids2.value()]) {
-                h_mat1_mod.col(bc_local_idx).setZero();
-              }
-
-              set_value(rt_rt_h_matrix, i_rt_rt, j2, h_mat1_mod);
-
-              i_rt_rt++;
-            }
-          }
-        }
-       }
-
-      void compute_w_matrix(auto step, auto time_step)
-      {
-        if constexpr (with_k_matrix()) {
-          // stiffness matrix is present
-          if (algebra::nnz(k_matrix_assembled()) == 0) {
-            // fem systems are not involved in contact
-            compute_w_matrix_with_diagonal_mass_matrix();
-          }
-          else {
-            // fem systems are involved in contact
-            algebra::add(1., mass_matrix_assembled(),
-                         time_step * time_step * theta() * theta(),
-                         k_matrix_assembled(), iteration_matrix_assembled());
-
-            // H (M+ h^2 \theta^2 K)^-1 H^t
-            compute_kkt_matrix(h_matrix_assembled(),
-                               iteration_matrix_assembled(),
-                               w_matrix_assembled());
-          }
-        }
-        else {
-          // fem systems are not present in data
-          compute_w_matrix_with_diagonal_mass_matrix();
-        }
+        typename decltype(self()->env())::indice involved = 0;
+        mp::for_each(systems(), [&](auto kind) { involved += kind.index_involved(step); });
+        return involved;
       }
 
-      void compute_w_matrix_with_diagonal_mass_matrix()
-      {
-        // mass matrix is assumed to be diagonal
-        using env = decltype(self()->env());
-
-        // xxx properties on h_matrix1, if any, are lost here
-        auto tmp_matrix = typename traits::config<env>::template convert<
-            some::assembled_matrix<some::transposed_matrix<
-                typename ct_osi_t::h_matrix1>>>::type{};
-
-        // assumption: compile time element is the first one.
-        auto ct_elem = std::get<0>(elements());
-
-        auto&& h_mat = ct_elem.h_matrix_assembled();
-        auto&& m_mat = ct_elem.mass_matrix_assembled();
-        auto&& w_mat = ct_elem.w_matrix_assembled();
-
-        resize(tmp_matrix, size1(h_mat), size0(h_mat));
-        if constexpr (with_k_matrix()) {
-          solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat,
-                                             tmp_matrix);
-        }
-        else {
-          solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
-        }
-        prod(h_mat, tmp_matrix, w_mat);
+      // the blocks of H of the active interactions of a kind
+      void assemble_h_matrix(auto step, auto kind) {
+        using kind_t = typename decltype(kind)::type;
+        kind.assemble_h_matrix(step, h_matrix_assembled(),
+                               systems_of<typename kind_t::systems1>(),
+                               systems_of<typename kind_t::systems2>());
       }
 
-      // compute H vfree
-      void compute_q_nsp_vector_assembled(auto step)
-      {
-        auto& data = self()->data();
-        auto ct_elem = std::get<0>(elements());
-
-        auto& ct_ydots_next =
-            storage::attr_values<ct_interaction, "ydot">(data, step + 1);
-        auto& ct_activations =
-            storage::prop_values<ct_interaction, "activation">(data, step);
-
-        auto k = 0;
-        for (auto [ydot_next, activation] :
-             view::zip(ct_ydots_next, ct_activations)) {
-          if (activation) {
-            set_value(ct_elem.q_nsp_vector_assembled(), k++, ydot_next);
-          }
-        }
-
-        if constexpr (with_rt_ct_interaction()) {
-          auto& rt_ct_ydots_next =
-              storage::attr_values<rt_ct_interaction, "ydot">(data, step + 1);
-          auto& rt_ct_activations =
-              storage::prop_values<rt_ct_interaction, "activation">(data,
-                                                                    step);
-
-          for (auto [ydot_next, activation] :
-               view::zip(rt_ct_ydots_next, rt_ct_activations)) {
-            if (activation) {
-              // /!\ with ct_elem offsets (0), should be directly in
-              // global q_nsp_vector_assembled()
-              set_value(ct_elem.q_nsp_vector_assembled(), k++, ydot_next);
-            }
-          }
-        }
-
-        if constexpr (with_rt_rt_interaction()) {
-          auto& rt_rt_ydots_next =
-              storage::attr_values<rt_rt_interaction, "ydot">(data, step + 1);
-          auto& rt_rt_activations =
-              storage::prop_values<rt_rt_interaction, "activation">(data,
-                                                                    step);
-
-          for (auto [ydot_next, activation] :
-               view::zip(rt_rt_ydots_next, rt_rt_activations)) {
-            if (activation) {
-              // /!\ with ct_elem offsets (0), should be directly in
-              // global q_nsp_vector_assembled()
-              set_value(ct_elem.q_nsp_vector_assembled(), k++, ydot_next);
-            }
-          }
-        }
+      // the involved FEM systems as factored diagonal blocks of the assembled
+      // iteration matrix
+      std::vector<algebra::factored_block> factored_blocks(auto step, auto time_step) {
+        std::vector<algebra::factored_block> blocks;
+        mp::for_each(systems(), [&](auto kind) {
+          kind.collect_factored_blocks(step, time_step, theta(), blocks);
+        });
+        return blocks;
       }
 
-      void compute_input(auto time_step)
-      {
-        auto& h_matrix = h_matrix_assembled();
-        auto& lambda = lambda_vector_assembled();
-        auto& p0 = p0_vector_assembled();
-        auto& velo = velocity_vector_assembled();
-        auto& mass_matrix = mass_matrix_assembled();
-
-        resize(p0, size1(h_matrix));
-        resize(velo, size1(h_matrix));
-
-        transpose(h_matrix);
-        prodt1(h_matrix, lambda, p0);
-
-        if constexpr (with_k_matrix()) {
-          if (algebra::nnz(k_matrix_assembled()) > 0) {
-            solve_linear_system(iteration_matrix_assembled(), p0, velo);
-          }
-          else {
-            solve_linear_system(mass_matrix, p0, velo);
-          }
-        }
-        else {
-          solve_linear_system(mass_matrix, p0, velo);
-        }
+      // drop the FEM factorizations, to be called after changing the mass
+      // or stiffness matrix of a FEM system (h and theta changes are
+      // detected)
+      void invalidate_fem_operators() {
+        mp::for_each(systems(), [](auto kind) { kind.invalidate_fem_operators(); });
       }
 
-      auto methods()
-      {
-        using env_t = decltype(self()->env());
-        using indice = typename env_t::indice;
-        using scalar = typename env_t::scalar;
-
+      auto methods() {
         return collect(
-            method("compute_input",
-                   &interface<Handle>::compute_input<scalar>),
-            method("compute_w_matrix",
-                   &interface<Handle>::compute_w_matrix<indice, scalar>));
+            method("invalidate_fem_operators", &interface<Handle>::invalidate_fem_operators));
       }
     };
   };
+
+  // the Moreau-Jean scheme on the local problem (see moreau_jean.hpp)
+  struct moreau_jean : integrator<simul::moreau_jean::scheme> {};
+
+  // the Moreau-Jean scheme on the global problem (see moreau_jean_gosi.hpp)
+  struct moreau_jean_gosi : integrator<simul::moreau_jean_gosi::scheme> {};
+
+  // the Anitescu-Tasora scheme, projected Gauss-Seidel or APGD (see
+  // anitescu_tasora.hpp)
+  struct anitescu_tasora : integrator<simul::anitescu_tasora::scheme> {};
+  struct anitescu_tasora_apgd : integrator<simul::anitescu_tasora::apgd_scheme> {};
+
+  // the explicit DEM scheme (see dem.hpp)
+  struct dem : integrator<simul::dem::scheme> {};
+
+  // one of them, chosen at run time by the scheme attribute (see
+  // selectable_scheme.hpp)
+  struct selectable : integrator<simul::selectable_scheme::scheme> {};
 };
 }  // namespace siconos::simul

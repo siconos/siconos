@@ -1137,9 +1137,6 @@ struct siconos::io::ContactInternalVariableVisitor
 template <>
 void siconos::io::ContactInternalVariableVisitor::operator()(
     const siconos::modeling::NewtonEuler3DR& rel) {
-
-
-
   const auto& posa = rel.pc1();
   const auto& posb = rel.pc2();
   const auto& nc = rel.nc();
@@ -1147,15 +1144,13 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
-
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   auto internalVariables = inter->internalVariables();
 
   if (internalVariables) {
     siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-    cf.noalias() = rel.H_NE_prod_T().transpose() *
-                   *inter->lambda(0);
+    cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(0);
 
     // std::cout << " lambda_0 " ;
     // siconos::algebra::print(*inter->lambda(0));
@@ -1171,11 +1166,12 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
         cnt_vector++;
       }
     }
-    //printf(" size: %i \n", size);
+    // printf(" size: %i \n", size);
 
     answer.resize(size);
 
-    answer(0) = mu;  // we output all the quantities in this order to be compatible with vview --> to be improved
+    answer(0) = mu;  // we output all the quantities in this order to be compatible with vview
+                     // --> to be improved
     answer(1) = posa(0);
     answer(2) = posa(1);
     answer(3) = posa(2);
@@ -1188,7 +1184,7 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
     answer(10) = cf(0);
     answer(11) = cf(1);
     answer(12) = cf(2);
-    answer(13) =id;
+    answer(13) = id;
 
     int cnt = 14;
     cnt_vector = 0;
@@ -1198,13 +1194,12 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
         // v->display();
         for (int k = 0; k < v->size(); k++) {
           answer(cnt) = (*v)(k);
-	  //printf("cnt : %i\t over size: %i \n", cnt, size);
+          // printf("cnt : %i\t over size: %i \n", cnt, size);
           cnt++;
-
         }
       }
-      // std::cout << "BinaryCohesiveNSL::TANGENT_2 is: " << siconos::mechanics::czm::BinaryCohesiveNSL::TANGENT_2 <<
-      // std::endl;
+      // std::cout << "BinaryCohesiveNSL::TANGENT_2 is: " <<
+      // siconos::mechanics::czm::BinaryCohesiveNSL::TANGENT_2 << std::endl;
       if (cnt_vector >= siconos::mechanics::czm::BinaryCohesiveNSL::TANGENT_2) break;
       cnt_vector++;
     }
@@ -1212,7 +1207,7 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
   } else {
     answer.resize(0);
   }
-  //getchar();
+  // getchar();
 }
 
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactInternalVariables(

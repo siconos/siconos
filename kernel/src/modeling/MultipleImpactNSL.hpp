@@ -39,7 +39,7 @@ class MultipleImpactNSL : public NonSmoothLaw {
 
  public:
   // Default Constructor
-  MultipleImpactNSL() : NonSmoothLaw(1){};
+  MultipleImpactNSL() : NonSmoothLaw(1) {};
   // Constructor with parameters
   MultipleImpactNSL(double, double, double, siconos::algebra::Index _dim = 1);
   // Destructor
@@ -61,9 +61,11 @@ class MultipleImpactNSL : public NonSmoothLaw {
   // Display the information about the multiple impact law
   void display() const override;
   // visitors hook
-    virtual void accept(nonsmooth_laws::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif

@@ -64,5 +64,4 @@ shape in a contactor.
 #endif
 #endif
 
-
 #endif

@@ -23,18 +23,18 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine HAVE_SICONOS_IO
 
 // -- Global options --
-// 
-#cmakedefine SICONOS_USE_MAP_FOR_HASH // Prefer std::map to std::unordered_map 
+//
+#cmakedefine SICONOS_USE_MAP_FOR_HASH // Prefer std::map to std::unordered_map
 
 // -- Blas Lapack config --
-// Where does cblas come from? 
+// Where does cblas come from?
 #cmakedefine HAS_MKL_CBLAS
 #cmakedefine HAS_ACCELERATE // includes also lapack from Accelerate
 // mkl stuff.
 #cmakedefine WITH_MKL_SPBLAS
 #cmakedefine WITH_MKL_PARDISO
 
-// Which Lapack? 
+// Which Lapack?
 #cmakedefine HAS_MKL_LAPACKE
 #cmakedefine HAS_MATLAB_LAPACK
 
@@ -96,4 +96,3 @@ Example : if cmake is executed with WITH_MPI=ON
 
 
 #endif
-

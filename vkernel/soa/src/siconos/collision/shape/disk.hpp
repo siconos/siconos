@@ -1,8 +1,8 @@
 #pragma once
+#include <numbers>
 
 namespace siconos::collision::shape {
 struct disk : item {
-
   struct attributes {
     some::scalar radius;
     some::indice maxpoints;

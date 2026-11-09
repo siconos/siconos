@@ -26,12 +26,12 @@ set_install_path
  Sets
  - CMAKE_INSTALL_PREFIX
  - PIP_INSTALL_OPTIONS (cache) (useful only if PYTHON_WRAPPER is ON)
- - SICONOS_PYTHON_INSTALL_DIR (cache) with the full path where 
+ - SICONOS_PYTHON_INSTALL_DIR (cache) with the full path where
    Siconos python packages will be installed (useful only if PYTHON_WRAPPER is ON)
 
-    
+
 #]=======================================================================]
-  
+
 
 # -- Set install behavior --
 # Two things are to be taken into account:
@@ -39,13 +39,13 @@ set_install_path
 # - install of python packages
 # This is quite a mess ...
 # Standard user should use default behavior and we hope that they use a virtual env for Python (conda, venv ...)
-# 
+#
 # 1- We forbid CMAKE_INSTALL_PREFIX set by user
-# 
+#
 # 2- Default leads to "user" install (no root privileges)
 #     - make install and python install in CONDA_PREFIX or VIRTUAL_ENV if they exist.
 #     - else, make install in $HOME/.siconos and python as if run with pip install --user.
-# 
+#
 # 3- if SICONOS_INSTALL_SYSTEM_WIDE is True
 #     - install with root privileges
 #     - in std path (/usr/local ...)
@@ -59,20 +59,20 @@ set_install_path
 # like systems where pip use site-packages, the distro dist-packages and so on.
 # See https://www.python.org/dev/peps/pep-0668/
 # Note : witth python 3.10, --prefix option of pip always add "local" to install path.
-# 
+#
 # Thus, we choose:
 #
 # - default behavior: install in CONDA_PREFIX or VIRTUAL_ENV if they exist. If not run pip install --user
 # - system wide install behavior: run pip install, assuming that the caller is root. Else ... well, a warning has been send by cmake earlier.
 # - fully isolated install: run pip install --prefix, assuming that the user knows what he's doing.
-# 
+#
 # Notice that the case: cmake as user in python venv + system wide install as root (outside venv) will lead to unexpected and unwanted results ...
-# 
+#
 function(set_install_path)
 
   # --- Ensure that CMAKE_INSTALL_PREFIX is not set by user
   if(NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt) 
+    if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
       # if CMAKE_INSTALL_PREFIX has been explicitely set and if it's the first cmake run
       message(FATAL_ERROR "Please do not set CMAKE_INSTALL_PREFIX.")
     endif()
@@ -101,7 +101,7 @@ Since make/pip install must be run as root, possibly outside this env., this mig
   else()
 
     # -- First, find where python packages will be installed by pip or equivalent --
-    
+
     if(IN_VENV)
       execute_process(COMMAND ${Python_EXECUTABLE} -c "import sysconfig;print(sysconfig.get_paths()['purelib'])" OUTPUT_VARIABLE PY_INSTALL_DIR)
     else()

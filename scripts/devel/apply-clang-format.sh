@@ -22,7 +22,7 @@ find-dominating-file() {
 
 # Run clang-format -i on all of the things
 for dir in "$@"; do
-    pushd "${dir}" &>/dev/null
+    pushd "${dir}" &>/dev/null || exit
     if ! find-dominating-file . .clang-format; then
         echo "Failed to find dominating .clang-format starting at $PWD"
         continue

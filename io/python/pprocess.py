@@ -19,40 +19,36 @@
 
 import contextlib
 import warnings
-from siconos.io.mechanics_hdf5 import MechanicsHdf5
-from OCC.Core.gp import gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
-from OCC.Core.TopLoc import TopLoc_Location
 
-# from OCC.Display.SimpleGui import get_backend
-
-from OCC.Core.STEPControl import (
-    STEPControl_Reader,
-    STEPControl_Writer,
-    STEPControl_AsIs,
-)
-
+import siconos.io.mechanics_run as IO
+import siconos.mechanics.quaternions as quat_tools
+from OCC.Core import Graphic3d
 from OCC.Core.BRep import BRep_Builder
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
-from OCC.Core.TopoDS import TopoDS_Compound
-
-from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-
-import OCC.Core.Graphic3d as Graphic3d
+from OCC.Core.gp import gp_Quaternion, gp_Trsf, gp_Vec, gp_XYZ
+from OCC.Core.IFSelect import IFSelect_ItemsByEntity, IFSelect_RetDone
 from OCC.Core.Quantity import (
-    Quantity_NOC_DARKVIOLET,
     Quantity_NOC_BLUE1,
+    Quantity_NOC_DARKVIOLET,
     Quantity_NOC_GREEN,
-    Quantity_NOC_RED,
     Quantity_NOC_ORANGE,
+    Quantity_NOC_RED,
     Quantity_NOC_SALMON,
     Quantity_NOC_YELLOW,
 )
 
-import siconos.io.mechanics_run as IO
+# from OCC.Display.SimpleGui import get_backend
+from OCC.Core.STEPControl import (
+    STEPControl_AsIs,
+    STEPControl_Reader,
+    STEPControl_Writer,
+)
+from OCC.Core.TopLoc import TopLoc_Location
+from OCC.Core.TopoDS import TopoDS_Compound
 
 # from siconos.io.SimpleGui import init_display
 from OCC.Display.SimpleGui import init_display
-import siconos.mechanics.quaternions as quat_tools
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 
 def memoize(f):
@@ -73,11 +69,10 @@ def make_slider(minv, maxv, vstep):
     from PyQt4 import QtCore, QtGui  # , QtOpenGL
 
     class SlidersGroup(QtGui.QGroupBox):
-
         valueChanged = QtCore.pyqtSignal(int)
 
         def __init__(self, orientation, title, parent=None):
-            super(SlidersGroup, self).__init__(title, parent)
+            super().__init__(title, parent)
 
             self.slider = QtGui.QSlider(orientation)
             self.slider.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -109,7 +104,7 @@ def make_slider(minv, maxv, vstep):
 
     class SliderWindow(QtGui.QWidget):
         def __init__(self):
-            super(SliderWindow, self).__init__()
+            super().__init__()
 
             self.horizontalSliders = SlidersGroup(QtCore.Qt.Horizontal, "Steps")
 
@@ -177,7 +172,6 @@ warnings.warn(
 )
 
 with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r") as io:
-
     display, start_display, add_menu, add_function_to_menu, win, app = init_display()
 
     dpos_data = io.dynamic_data()[:]
@@ -209,7 +203,6 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
         )
 
         with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
-
             step_reader = STEPControl_Reader()
 
             status = step_reader.ReadFile(tmpfile[1])
@@ -235,7 +228,7 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
 
                 return result
 
-    obj_by_id = dict()
+    obj_by_id = {}
     for instance in io.instances():
         obj_by_id[io.instances()[instance].attrs["id"]] = instance
 
@@ -271,7 +264,7 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
 
         step_writer.Transfer(shape, STEPControl_AsIs)
         # status =
-        step_writer.Write("siconos-mechanisms-{0}.stp".format(step_str))
+        step_writer.Write(f"siconos-mechanisms-{step_str}.stp")
 
     def vstep(step_str):
 
@@ -284,7 +277,6 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
         builder.MakeCompound(comp)
 
         for _id in range(positions.shape[0]):
-
             q0, q1, q2, q3, q4, q5, q6 = [float(x) for x in positions[_id, :]]
 
             obj = obj_by_id[_id + 1]
@@ -319,7 +311,7 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
     #    add_menu('run')
     #    add_function_to_menu('run', run)
 
-    from PyQt4 import QtGui, QtCore
+    from PyQt4 import QtCore, QtGui
 
     sl = make_slider(0, nbsteps, vstep)
     dw = QtGui.QDockWidget()

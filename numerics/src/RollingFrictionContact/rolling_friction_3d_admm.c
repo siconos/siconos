@@ -129,7 +129,7 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
                                                int is_rho_variable, double norm_q,
                                                LinearSolverPtr linear_solver) {
   /* verbose=2;  */
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -139,16 +139,15 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
   int m = 5 * nc;
   NumericsMatrix* M = NULL;
 
-  /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE =
-     SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE, we force the copy into a NM_SPARSE
+  /* if SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE =
+     SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE, we force the copy into a NM_SPARSE
      storageType */
 
-  if (iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] ==
-          SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE &&
+  if (iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] ==
+          SICONOS_FRICTION_3D_FORCED_SPARSE_STORAGE &&
       problem->M->storageType == NM_SPARSE_BLOCK) {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
-    M = NM_create(NM_SPARSE, problem->M->size0, problem->M->size1);
-    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
+    M = NM_copy_to_sparse(problem->M, DBL_EPSILON);
     NSM_diag_indices(M);
   } else {
     M = problem->M;
@@ -236,8 +235,9 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
     DEBUG_PRINTF("\n\n\n############### iteration:%i\n", iter);
 
     if (has_rho_changed) {
-      NM_copy(M, W);
-      NM_add_to_diag5(W, rho);
+      NM_free(W);
+      W = NM_copy(M);
+      CHECK_RETURN(NM_add_to_diag5(W, rho) == NUMERICS_OK);
     }
 
     /********************/
@@ -532,7 +532,7 @@ static void rolling_friction_3d_admm_asymmetric(
     double* restrict velocity, int* restrict info, SolverOptions* restrict options, double rho,
     int is_rho_variable, double norm_q) {
   /* verbose=2; */
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -582,8 +582,7 @@ static void rolling_friction_3d_admm_asymmetric(
   double* b_s = data->b;
 
   /*  constraints matrix */
-  NumericsMatrix* A = NM_new();
-  NM_copy(M, A);
+  NumericsMatrix* A = NM_copy(M);
   CSparseMatrix* A_triplet = NM_triplet(A);
 
   A->storageType = NM_SPARSE;
@@ -643,8 +642,10 @@ static void rolling_friction_3d_admm_asymmetric(
     DEBUG_PRINTF("\n\n\n############### iteration:%i\n", iter);
 
     if (has_rho_changed) {
-      NM_copy(M_s, W);
-      NM_gemm(rho, Atrans, A, 1.0, W);
+      NM_free(W);
+      W = NM_copy(M_s);
+      CHECK_RETURN(NM_gemm(rho, Atrans, A, 1.0, W) == NUMERICS_OK);
+
       DEBUG_EXPR(NM_display(W));
     }
 
@@ -653,8 +654,7 @@ static void rolling_friction_3d_admm_asymmetric(
     /*******************************/
 
     cblas_dcopy(m, q, 1, q_s, 1);
-    DEBUG_EXPR(
-        fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error););
+    DEBUG_EXPR(fc3d_compute_error(problem, reaction, velocity, tolerance, options, &error););
     DEBUG_EXPR(NV_display(velocity, m););
     DEBUG_EXPR(NV_display(&xi[m], m););
 
@@ -970,7 +970,7 @@ void rolling_friction_3d_admm(RollingFrictionContactProblem* restrict problem,
                               double* restrict reaction, double* restrict velocity,
                               int* restrict info, SolverOptions* restrict options) {
   /* verbose=1; */
-  /* frictionContact_display(problem); */
+  /* frictionContactProblem_display(problem); */
 
   /* Number of contacts */
   int nc = problem->numberOfContacts;
@@ -1069,8 +1069,8 @@ void rolling_friction_3d_admm_set_default(SolverOptions* options) {
       SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
       SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
-  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =
-      SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE] =
+      SICONOS_FRICTION_3D_KEEP_STORAGE;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] =
       SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN;

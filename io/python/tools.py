@@ -18,15 +18,16 @@
 
 """Functions and tools used in mechanics_run and mechanics_hdf5"""
 
-import tempfile
-import sys
+import os
 import shutil
 import subprocess
-import os
-from contextlib import contextmanager
-import numpy as np
+import sys
+import tempfile
 import time
 import warnings
+from contextlib import contextmanager
+
+import numpy as np
 import siconos.mechanics.collision
 
 warnings.simplefilter("always", UserWarning)
@@ -50,33 +51,28 @@ def tmpfile(suffix="", prefix="siconos_io", contents=None, debug=False):
     """
     A context manager for a named temporary file.
     """
-    (_fid, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
-    fid = open(tfilename, "w")
-    if contents is not None:
-        fid.write(contents)
-        fid.flush()
+    fd, filename = tempfile.mkstemp(
+        suffix=suffix,
+        prefix=prefix,
+    )
+    fid = os.fdopen(fd, "w")
 
-    class TmpFile:
+    try:
+        if contents is not None:
+            fid.write(contents)
+            fid.flush()
 
-        def __init__(self, fid, name):
-            self.fid = fid
-            self.name = name
+        class TmpFile:
+            def __init__(self, fid, name):
+                self.fid = fid
+                self.name = name
 
-        def __getitem__(self, n):
-            if n == 0:
-                return self.fid
-            elif n == 1:
-                return self.name
-            else:
-                raise IndexError
+        yield TmpFile(fid, filename)
 
-    r = TmpFile(fid, tfilename)
-
-    yield r
-    fid.close()
-    os.close(_fid)
-    if not debug:
-        os.remove(tfilename)
+    finally:
+        fid.close()
+        if not debug:
+            os.remove(filename)
 
 
 def warn(msg):
@@ -128,7 +124,6 @@ if sys.version_info.major + 0.1 * sys.version_info.minor < 3.3:
 
 
 class Timer:
-
     def __init__(self):
         self._t0 = time_measure()
 
@@ -162,7 +157,7 @@ def load_siconos_mesh(shape_filename, scale=None):
 
     if polydata.GetCellType(0) == 5:
         apoints = np.empty((3, num_points), dtype=np.float64, order="F")
-        for i in range(0, points.GetNumberOfTuples()):
+        for i in range(points.GetNumberOfTuples()):
             p = points.GetTuple(i)
             apoints[0, i] = p[0]
             apoints[1, i] = p[1]
@@ -173,7 +168,7 @@ def load_siconos_mesh(shape_filename, scale=None):
 
         aindices = np.empty(num_triangles * 3, dtype=int)
 
-        for i in range(0, num_triangles):
+        for i in range(num_triangles):
             c = polydata.GetCell(i)
             aindices[i * 3 + 0] = c.GetPointIds().GetId(0)
             aindices[i * 3 + 1] = c.GetPointIds().GetId(1)
@@ -183,8 +178,8 @@ def load_siconos_mesh(shape_filename, scale=None):
         dims = apoints.max(axis=0) - apoints.min(axis=0)
 
     else:  # assume convex shape
-        coors = dict()
-        for i in range(0, points.GetNumberOfTuples()):
+        coors = {}
+        for i in range(points.GetNumberOfTuples()):
             coors[points.GetTuple(i)] = 1
         coors = np.array(coors.keys())
         dims = coors.max(axis=0) - coors.min(axis=0)
@@ -192,29 +187,37 @@ def load_siconos_mesh(shape_filename, scale=None):
 
     return shape, dims
 
+
 def extract_bc_global_dofs(fesolid, mesh_data):
     """
     Return global DOF indices for vertices with physical tag 2 ("Dirichlet BC").
     """
-    import meshio
     import tempfile
 
-    with tempfile.NamedTemporaryFile(suffix='.msh', mode='w') as tmp:
+    import meshio
+
+    with tempfile.NamedTemporaryFile(suffix=".msh", mode="w") as tmp:
         tmp.write(mesh_data)
         tmp.flush()
         mesh = meshio.read(tmp.name)
 
     # 1. "Dirichlet BC"
-    tag_to_name = {int(tag): name.decode() if isinstance(name, bytes) else name 
-                   for name, (tag, dim) in mesh.field_data.items()}
-    dirichlet_tag = next((tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None)
+    tag_to_name = {
+        int(tag): name.decode() if isinstance(name, bytes) else name
+        for name, (tag, dim) in mesh.field_data.items()
+    }
+    dirichlet_tag = next(
+        (tag for tag, name in tag_to_name.items() if name == "Dirichlet BC"), None
+    )
     if dirichlet_tag is None:
         return []
 
     # 2. collect boundary vertex IDs (1-based GMSH indices) with tag 2
     bc_vertex_ids = set()
-    for cell_block, data_block in zip(mesh.cells, mesh.cell_data.get('gmsh:physical', [])):
-        if cell_block.type == 'vertex':
+    for cell_block, data_block in zip(
+        mesh.cells, mesh.cell_data.get("gmsh:physical", [])
+    ):
+        if cell_block.type == "vertex":
             tags = data_block[0] if isinstance(data_block, list) else data_block
             for i, tag in enumerate(tags):
                 if tag == dirichlet_tag:
@@ -231,7 +234,7 @@ def extract_bc_global_dofs(fesolid, mesh_data):
     dim = 2  # 2D FEM
 
     for cell_block in mesh.cells:
-        if cell_block.type != 'triangle':
+        if cell_block.type != "triangle":
             continue
         for tri in cell_block.data:
             for vid_1based in tri:

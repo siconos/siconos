@@ -1,7 +1,13 @@
 #pragma once
 
+#include <concepts>
+#include <stdexcept>
+#include <type_traits>
+
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/collision/collision_head.hpp"
+#include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
@@ -10,23 +16,28 @@ namespace siconos::collision {
 struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
   using dof = some::indice_parameter<"dof">;
 
-  struct attributes {}; // empty
+  struct attributes {};  // empty
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    template <match::handle<model::lagrangian_ds> DS1,
-              match::handle<model::lagrangian_ds> DS2>
-    decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2)
-    {
+    // diskdisk_r is the generic radius-based binder: it is right for two disks
+    // and for nothing else (a polytope exposes radius() as its circumradius).
+    // disk_radius throws for a body without a disk shape: decided at compile
+    // time for a static "shape" declaration, by the disk set membership for
+    // per-kind shapes. It is a throw and NOT a static_assert because std::visit
+    // instantiates every relation alternative of an interaction, so in a
+    // polytope world diskdisk_r is a legitimate placeholder that the cxd
+    // narrowphase stage rebinds before any gap is computed. Reaching the throw
+    // means the placeholder was never rebound: the silent circumradius bug.
+    template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>
+    [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 = storage::make_handle(self()->data(), storage::prop<"shape">(ds1))
-                     .radius();
-      auto& r2 = storage::make_handle(self()->data(), storage::prop<"shape">(ds2))
-                     .radius();
+      auto r1 = collision::disk_radius(ds1);
+      auto r2 = collision::disk_radius(ds2);
 
       auto dx = q2[0] - q1[0];
       auto dy = q2[1] - q1[1];
@@ -36,15 +47,13 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
 
     template <typename S, match::handle<model::lagrangian_ds> DS1,
               match::handle<model::lagrangian_ds> DS2, typename M>
-    void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1, M& h_matrix2)
-    {
-      auto& data = self()->data();
-
+    [[gnu::always_inline]] void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1,
+                                              M& h_matrix2) {
       auto& q1 = storage::attr<"q">(ds1, step);
       auto& q2 = storage::attr<"q">(ds2, step);
 
-      auto& r1 = storage::make_handle(data, storage::prop<"shape">(ds1)).radius();
-      auto& r2 = storage::make_handle(data, storage::prop<"shape">(ds2)).radius();
+      auto r1 = collision::disk_radius(ds1);
+      auto r2 = collision::disk_radius(ds2);
 
       auto x1 = q1(0);
       auto y1 = q1(1);

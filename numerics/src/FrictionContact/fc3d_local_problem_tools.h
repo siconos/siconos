@@ -40,8 +40,7 @@ typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*,
 typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeLocalSolverPtr)( FrictionContactProblem*,
-                                   SolverOptions*);
+typedef void (*FreeLocalSolverPtr)(FrictionContactProblem*, SolverOptions*);
 
 typedef void (*CopyLocalReactionPtr)(double*, double*);
 

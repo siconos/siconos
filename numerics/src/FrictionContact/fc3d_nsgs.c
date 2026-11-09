@@ -41,6 +41,7 @@
 #include "fc3d_unitary_enumerative.h"
 #include "gfc3d_ipm.h"
 #include "naming_conventions.h"
+#include "nsgs_utils.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_printf
 #include "op3x3.h"             // For cpy3
@@ -66,42 +67,36 @@ static int fccounter = -1;
 /*   double err = INFINITY; */
 /*   for (i = 0 ; i < m ; ++i) */
 /*   { */
-/*     *error += Compute_NCP_error1(i, err); */
 /*   } */
 /* } */
 
-static inline void performRelaxation_3(double localreaction[3], double* oldreaction,
-                                       double omega) {
-  localreaction[0] = omega * localreaction[0] + (1.0 - omega) * oldreaction[0];
-  localreaction[1] = omega * localreaction[1] + (1.0 - omega) * oldreaction[1];
-  localreaction[2] = omega * localreaction[2] + (1.0 - omega) * oldreaction[2];
+static void perform_relaxation_3(double localreaction[3], double* oldreaction, double omega) {
+  nsgs_relaxation(localreaction, oldreaction, 3, omega);
 }
 
-static inline double light_error_squared_3(double localreaction[3], double* oldreaction) {
-  return (pow(oldreaction[0] - localreaction[0], 2) +
-          pow(oldreaction[1] - localreaction[1], 2) +
-          pow(oldreaction[2] - localreaction[2], 2));
+static double light_error_squared_3(double localreaction[3], double* oldreaction) {
+  return nsgs_light_error_squared(localreaction, oldreaction, 3);
 }
 
-static inline double squared_norm_3(double localreaction[3]) {
-  return (pow(localreaction[0], 2) + pow(localreaction[1], 2) + pow(localreaction[2], 2));
+static double squared_norm_3(double localreaction[3]) {
+  return nsgs_squared_norm(localreaction, 3);
 }
 
-static double calculateLightError(double light_error_sum, size_t nc, double* reaction,
-                                  double* norm_r) {
+static double calculate_light_error(double light_error_sum, size_t nc, double* reaction,
+                                    double* norm_r) {
   double error = sqrt(light_error_sum);
   *norm_r = cblas_dnrm2(to_blasint(nc * 3), reaction, 1);
   if (fabs(*norm_r) > DBL_EPSILON) error /= (*norm_r);
   return error;
 }
 
-static void acceptLocalReactionUnconditionally(unsigned int contact, double* reaction,
-                                               double localreaction[3]) {
+static void accept_local_reaction_unconditionally(unsigned int contact, double* reaction,
+                                                  double localreaction[3]) {
   memcpy(&reaction[contact * 3], localreaction, sizeof(double) * 3);
 }
 
-static void statsIterationCallback(FrictionContactProblem* problem, SolverOptions* options,
-                                   double* reaction, double* velocity, double error) {
+static void stats_iteration_callback(FrictionContactProblem* problem, SolverOptions* options,
+                                     double* reaction, double* velocity, double error) {
   if (options->callback) {
     options->callback->collectStatsIteration(options->callback->env,
                                              to_size_t(problem->numberOfContacts * 3),
@@ -131,7 +126,7 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem,
   localproblem->mu[0] = problem->mu[contact];
 }
 
-int  fc3d_nsgs_initialize_local_solver(
+int fc3d_nsgs_initialize_local_solver(
     struct LocalProblemFunctionToolkit* local_function_toolkit, ComputeErrorPtr* computeError,
     FrictionContactProblem* problem, FrictionContactProblem* localproblem,
     SolverOptions* options) {
@@ -141,7 +136,7 @@ int  fc3d_nsgs_initialize_local_solver(
 
   if (problem->dimension == 3) {
     local_function_toolkit->copy_local_reaction = cpy3;
-    local_function_toolkit->perform_relaxation = &performRelaxation_3;
+    local_function_toolkit->perform_relaxation = &perform_relaxation_3;
     local_function_toolkit->light_error_squared = &light_error_squared_3;
     local_function_toolkit->squared_norm = &squared_norm_3;
   }
@@ -183,8 +178,7 @@ int  fc3d_nsgs_initialize_local_solver(
     /* Newton solver (Alart-Curnier) */
     case OC_NSN: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-	&fc3d_nsgs_update;
+      local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
@@ -192,8 +186,7 @@ int  fc3d_nsgs_initialize_local_solver(
     }
     case OC_NSN_GP: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-	&fc3d_nsgs_update;
+      local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
@@ -201,8 +194,7 @@ int  fc3d_nsgs_initialize_local_solver(
     }
     case OC_NSN_GP_HYBRID: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-	&fc3d_nsgs_update;
+      local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
       local_function_toolkit->free_local_solver =
           &fc3d_onecontact_nonsmooth_Newton_solvers_free;
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
@@ -230,11 +222,11 @@ int  fc3d_nsgs_initialize_local_solver(
 
     /* Fixed Point solver (Glocker Formulation) */
     case FC3D_NCPG_FP: {
-      local_function_toolkit->local_solver = &fc3d_FixedP_solve;
+      local_function_toolkit->local_solver = &fc3d_fixed_point_solve;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
-      local_function_toolkit->free_local_solver = &fc3d_FixedP_free;
+      local_function_toolkit->free_local_solver = &fc3d_fixed_point_free;
       /* *computeError = &fake_compute_error_nsgs; */
-      fc3d_FixedP_initialize(problem, localproblem, local_opts);
+      fc3d_fixed_point_initialize(problem, localproblem, local_opts);
       break;
     }
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder: {
@@ -271,16 +263,16 @@ int  fc3d_nsgs_initialize_local_solver(
       break;
     }
     default: {
-      return  numerics_error("fc3d_nsgs_initialize_local_solver",
-                     "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n",
-                     solver_options_id_to_name(local_opts->solverId));
+      return numerics_error("fc3d_nsgs_initialize_local_solver",
+                            "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n",
+                            solver_options_id_to_name(local_opts->solverId));
     }
   }
-  return 0;  
+  return 0;
 }
 
-static unsigned int* allocShuffledContacts(FrictionContactProblem* problem,
-                                           SolverOptions* options) {
+static unsigned int* alloc_shuffled_contacts(FrictionContactProblem* problem,
+                                             SolverOptions* options) {
   unsigned int* scontacts = 0;
   size_t nc = to_size_t(problem->numberOfContacts);
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
@@ -299,8 +291,8 @@ static unsigned int* allocShuffledContacts(FrictionContactProblem* problem,
   }
   return scontacts;
 }
-static unsigned int* allocfreezingContacts(FrictionContactProblem* problem,
-                                           SolverOptions* options) {
+static unsigned int* alloc_freezing_contacts(FrictionContactProblem* problem,
+                                             SolverOptions* options) {
   unsigned int* fcontacts = 0;
   size_t nc = to_size_t(problem->numberOfContacts);
   if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
@@ -312,11 +304,11 @@ static unsigned int* allocfreezingContacts(FrictionContactProblem* problem,
   return fcontacts;
 }
 
-static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
-                              CopyLocalReactionPtr copyLocalReaction, unsigned int contact,
-                              FrictionContactProblem* problem,
-                              FrictionContactProblem* localproblem, double* reaction,
-                              SolverOptions* local_opts, double localreaction[3]) {
+static int solve_local_reaction(UpdatePtr update_localproblem, SolverPtr local_solver,
+                                CopyLocalReactionPtr copyLocalReaction, unsigned int contact,
+                                FrictionContactProblem* problem,
+                                FrictionContactProblem* localproblem, double* reaction,
+                                SolverOptions* local_opts, double localreaction[3]) {
   (*update_localproblem)(contact, problem, localproblem, reaction, local_opts);
 
   local_opts->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
@@ -335,12 +327,13 @@ int file_exists(const char* fname) {
   return 0;
 }
 
-static void acceptLocalReactionFiltered(FrictionContactProblem* localproblem,
-                                        SolverOptions* local_opts, unsigned int contact,
-                                        int iter, double* reaction, double localreaction[3]) {
+static void accept_local_reaction_filtered(FrictionContactProblem* localproblem,
+                                           SolverOptions* local_opts, unsigned int contact,
+                                           int iter, double* reaction,
+                                           double localreaction[3]) {
   if (isnan(SOLVER_RESIDUAL(local_opts)) || isinf(SOLVER_RESIDUAL(local_opts)) ||
       SOLVER_RESIDUAL(local_opts) > 1.0) {
-    DEBUG_EXPR(frictionContact_display(localproblem));
+    DEBUG_EXPR(frictionContactProblem_display(localproblem));
 
     DEBUG_PRINTF(
         "Discard local reaction for contact %i at iteration %i "
@@ -388,15 +381,15 @@ static void acceptLocalReactionFiltered(FrictionContactProblem* localproblem,
            sizeof(double) * localproblem->dimension);
 }
 
-static double calculateFullErrorAdaptiveInterval(FrictionContactProblem* problem,
-                                                 ComputeErrorPtr computeError,
-                                                 SolverOptions* options, int iter,
-                                                 double* reaction, double* velocity,
-                                                 double tolerance, double norm_q) {
+static double calculate_full_error_adaptive_interval(FrictionContactProblem* problem,
+                                                     ComputeErrorPtr computeError,
+                                                     SolverOptions* options, int iter,
+                                                     double* reaction, double* velocity,
+                                                     double tolerance, double norm_q) {
   double error = 1e+24;
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] > 0) {
     if (iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0) {
-      (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+      (*computeError)(problem, reaction, velocity, tolerance, options, &error);
       if (error > tolerance && options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                                    SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
@@ -408,16 +401,17 @@ static double calculateFullErrorAdaptiveInterval(FrictionContactProblem* problem
         iter, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY],
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]);
   } else
-    (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &error);
+    (*computeError)(problem, reaction, velocity, tolerance, options, &error);
 
   return error;
 }
 
-static double calculateFullErrorFinal(FrictionContactProblem* problem, SolverOptions* options,
-                                      ComputeErrorPtr computeError, double* reaction,
-                                      double* velocity, double tolerance, double norm_q) {
+static double calculate_full_error_final(FrictionContactProblem* problem,
+                                         SolverOptions* options, ComputeErrorPtr computeError,
+                                         double* reaction, double* velocity, double tolerance,
+                                         double norm_q) {
   double absolute_error;
-  (*computeError)(problem, reaction, velocity, tolerance, options, norm_q, &absolute_error);
+  (*computeError)(problem, reaction, velocity, tolerance, options, &absolute_error);
 
   if (verbose > 0) {
     if (absolute_error > SOLVER_TOL(options)) {
@@ -453,10 +447,11 @@ static int determine_convergence(double error, double tolerance, int iter,
   return hasNotConverged;
 }
 
-static inline void nsgs_print_iteration_stats(int iter, double incremental_error,
-                                              double full_error, double tolerance,
-                                              double user_tolerance, int frozen, size_t nc,
-                                              int hasNotConverged, int verbose) {
+static inline void fc3d_nsgs_print_iteration_stats(int iter, double incremental_error,
+                                                   double full_error, double tolerance,
+                                                   double user_tolerance, int frozen,
+                                                   size_t nc, int hasNotConverged,
+                                                   int verbose) {
   if (verbose <= 0 || iter % verbose != 0) return;
 
   /* Print header on first iteration */
@@ -514,8 +509,8 @@ static int check_convergence_with_adaptation(FrictionContactProblem* problem,
   /*     "Residual = %14.7e < %7.3e", */
   /*     iter, incr_error, tm->working_tolerance); */
 
-  *full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                        SOLVER_TOL(options), norm_q);
+  *full_error = calculate_full_error_final(problem, options, computeError, reaction, velocity,
+                                           SOLVER_TOL(options), norm_q);
 
   /* Use tolerance manager to handle adaptation logic */
   SolverOptions* local_opts =
@@ -574,8 +569,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   double norm_r[] = {1e24};
   if (options->numberOfInternalSolvers < 1) {
     *info = numerics_error("fc3d_nsgs",
-                   "The NSGS method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >= 1");
+                           "The NSGS method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >= 1");
     return;
   }
 
@@ -610,13 +605,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   unsigned int* freeze_contacts = NULL;
   int frozen_contact = 0;
 
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->sparse_block;
   if (problem->M->storageType == NM_SPARSE) {
-    if (problem->M->matrix1) {
+    if (problem->M->sparse_block) {
       printf("Warning matrix 1 different from NULL");
     }
 
-    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+    problem->M->sparse_block = NM_extract_diagonal_blocks(problem->M, problem->dimension);
   }
 
   /*****  Initialize various solver options *****/
@@ -626,8 +621,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
                                     localproblem, options);
 
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
-  scontacts = allocShuffledContacts(problem, options);
-  freeze_contacts = allocfreezingContacts(problem, options);
+  scontacts = alloc_shuffled_contacts(problem, options);
+  freeze_contacts = alloc_freezing_contacts(problem, options);
   /*****  Check solver options *****/
   if (!(options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
             SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE ||
@@ -635,11 +630,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
             SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
         options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
             SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
-    *info = numerics_error("fc3d_nsgs",
-                   "options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] must be equal to "
-                   "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
-                   "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
-                   "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
+    *info =
+        numerics_error("fc3d_nsgs",
+                       "options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] must be equal to "
+                       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE (0), "
+                       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE (1) or "
+                       "SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP (2)");
     return;
   }
 
@@ -651,64 +647,211 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
             SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
             SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)) {
-
-    *info = numerics_error("fc3d_nsgs",
-                   "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] must be equal to "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
-                   "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
+    *info = numerics_error(
+        "fc3d_nsgs",
+        "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] must be equal to "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0), "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1), "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) or "
+        "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
 
     return;
   }
   // FILE *iterates = NULL;
   /*****  NSGS Iterations *****/
 
-  /* A special case for the most common options (should correspond
-   * with mechanics_run.py **/
-  if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-          SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE &&
-      options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] == 0 &&
-      options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] ==
-          SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE &&
+  /* Main NSGS loop. */
+
+  /* short cut on options */
+  unsigned with_freezing_contact =
+      options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0;
+  unsigned int with_shuffle = options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
+                                  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
+                              options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
+                                  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP;
+  unsigned int with_shuffle_each_loop = options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
+                                        SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP;
+  unsigned int with_relaxation = options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] ==
+                                 SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE;
+  unsigned int with_filter_local_solution =
       options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] ==
-          SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE &&
+      SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE;
+
+  unsigned int with_error_evaluation_light =
       options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
+      SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT;
+  unsigned int with_error_evaluation_light_with_full_final =
+      options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+      SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+
+  unsigned int with_error_evaluation_light_with_full =
+      options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+      SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL;
+
+#ifdef NSGS_FC3D_BATCHED_PASSES
+  {
+    double* light_error_2 = calloc(nc, sizeof(double));
+    double* local_solutions = calloc(nc * 3, sizeof(double));
+    double* reaction_old = calloc(nc * 3, sizeof(double));
+    double* local_residuals = NULL;
+    unsigned int* freeze_contacts_start = NULL;
+    if (with_filter_local_solution) local_residuals = calloc(nc, sizeof(double));
+    if (with_freezing_contact) freeze_contacts_start = calloc(nc, sizeof(unsigned int));
+
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
       double light_error_sum = 0.0;
 
       fc3d_set_internalsolver_tolerance(nc, options, local_opts, incr_error);
 
-      for (unsigned int i = 0; i < nc; ++i) {
-        contact = i;
+      unsigned int number_of_freezed_contact = 0;
+      double tmp = (double)nc * (double)nc / 1000.;
+      double tmp_criteria1 = tolerance * tolerance / tmp;
+      double tmp_criteria2 = *norm_r * *norm_r / tmp;
 
-        solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
-                           localProblemFunctionToolkit->local_solver,
-                           localProblemFunctionToolkit->copy_local_reaction, contact, problem,
-                           localproblem, reaction, local_opts, localreaction);
+      if (with_freezing_contact) {
+        for (unsigned int i = 0; i < nc; ++i) {
+          if (freeze_contacts[i] > 0) number_of_freezed_contact++;
+        }
 
-        light_error_sum += localProblemFunctionToolkit->light_error_squared(
-            localreaction, &reaction[contact * 3]);
+        if (number_of_freezed_contact >= nc - 1) {
+          numerics_printf_verbose(1, "number of freezed contact is too large : %i\n",
+                                  number_of_freezed_contact);
+          for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
+        }
 
-        /* #if 0 */
-        acceptLocalReactionFiltered(localproblem, local_opts, contact, iter, reaction,
-                                    localreaction);
+        memcpy(freeze_contacts_start, freeze_contacts, nc * sizeof(unsigned int));
       }
 
-      incr_error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+      /* Save old reaction for batched passes. */
+      memcpy(reaction_old, reaction, nc * 3 * sizeof(double));
 
-      hasNotConverged = determine_convergence(incr_error, tolerance, iter, options);
+      /* Pass 1: local solve and accept (preserves GS update semantics).
+         Only this pass follows the (possibly shuffled) contact order. */
+      for (unsigned int i = 0; i < nc; ++i) {
+        if (with_shuffle) {
+          if (with_shuffle_each_loop) uint_shuffle(scontacts, nc);
+          contact = scontacts[i];
+        } else
+          contact = i;
 
-      statsIterationCallback(problem, options, reaction, velocity, incr_error);
+        if (freeze_contacts_start && freeze_contacts_start[contact] > 0) {
+          freeze_contacts[contact] -= 1;
+          continue;
+        }
+
+        /* Solve directly into local_solutions[contact] to avoid the extra
+           localreaction -> local_solutions copy. copyLocalReaction still
+           writes the old reaction into that slot before the solver runs. */
+        solve_local_reaction(localProblemFunctionToolkit->update_local_problem,
+                             localProblemFunctionToolkit->local_solver,
+                             localProblemFunctionToolkit->copy_local_reaction, contact,
+                             problem, localproblem, reaction, local_opts,
+                             &local_solutions[contact * 3]);
+
+        if (local_residuals) local_residuals[contact] = SOLVER_RESIDUAL(local_opts);
+
+        if (with_filter_local_solution)
+          accept_local_reaction_filtered(localproblem, local_opts, contact, iter, reaction,
+                                         &local_solutions[contact * 3]);
+        else
+          accept_local_reaction_unconditionally(contact, reaction,
+                                                &local_solutions[contact * 3]);
+      }
+
+      /* Pass 2: error and freezing state.
+         To match the original single-loop criteria, the light error and the
+         freezing decision are evaluated on the *relaxed* local value.
+         No shuffle here: contiguous memory access. */
+      {
+        for (contact = 0; contact < nc; ++contact) {
+          if (freeze_contacts_start && freeze_contacts_start[contact] > 0) {
+            light_error_sum += light_error_2[contact];
+            continue;
+          }
+
+          double relaxed_local[3];
+          memcpy(relaxed_local, &local_solutions[contact * 3], sizeof(double) * 3);
+          if (with_relaxation)
+            localProblemFunctionToolkit->perform_relaxation(relaxed_local,
+                                                            &reaction_old[contact * 3], omega);
+
+          light_error_2[contact] = localProblemFunctionToolkit->light_error_squared(
+              relaxed_local, &reaction_old[contact * 3]);
+
+          light_error_sum += light_error_2[contact];
+
+          if (with_freezing_contact) {
+            double squared_norm_localreaction =
+                localProblemFunctionToolkit->squared_norm(relaxed_local);
+            int relative_convergence_criteria =
+                light_error_2[contact] <= tmp_criteria1 * squared_norm_localreaction;
+            int small_reaction_criteria = squared_norm_localreaction <= tmp_criteria2;
+
+            if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
+              freeze_contacts[contact] =
+                  options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
+            }
+          }
+        }
+      }
+
+      /* Pass 3: relaxation applied as a separate pass over the accepted reaction.
+         No shuffle here: contiguous memory access. */
+      if (with_relaxation) {
+        for (contact = 0; contact < nc; ++contact) {
+          if (freeze_contacts_start && freeze_contacts_start[contact] > 0) continue;
+
+          localProblemFunctionToolkit->perform_relaxation(&local_solutions[contact * 3],
+                                                          &reaction_old[contact * 3], omega);
+          memcpy(&reaction[contact * 3], &local_solutions[contact * 3], sizeof(double) * 3);
+        }
+      }
+
+      if (with_error_evaluation_light) {
+        incr_error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
+        hasNotConverged = determine_convergence(incr_error, tolerance, iter, options);
+      } else if (with_error_evaluation_light_with_full_final) {
+        incr_error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
+        hasNotConverged = determine_convergence_with_full_final(
+            problem, options, computeError, reaction, velocity, &tolerance, norm_q, incr_error,
+            &full_error, iter);
+
+        if (!(tolerance > 0.0)) {
+          numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
+          numerics_warning("fc3d_nsgs", "we stop the iterations");
+          break;
+        }
+      } else if (with_error_evaluation_light_with_full) {
+        full_error = calculate_full_error_adaptive_interval(
+            problem, computeError, options, iter, reaction, velocity, tolerance, norm_q);
+        incr_error = full_error;
+        hasNotConverged = determine_convergence(full_error, tolerance, iter, options);
+      }
+
+      stats_iteration_callback(problem, options, reaction, velocity, incr_error);
+      if (verbose > 0) {
+        frozen_contact = 0;
+        if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
+          for (unsigned int i = 0; i < nc; ++i) {
+            if (freeze_contacts[i] > 0) {
+              frozen_contact++;
+            }
+          }
+        }
+      }
+      fc3d_nsgs_print_iteration_stats(iter, incr_error, full_error, tolerance,
+                                      SOLVER_TOL(options), frozen_contact, nc, hasNotConverged,
+                                      verbose);
     }
+    free(light_error_2);
+    free(local_solutions);
+    free(reaction_old);
+    free(local_residuals);
+    free(freeze_contacts_start);
   }
-
-  /* All other cases, we put all the ifs inline.. otherwise, too many
-   * variations to have dedicated loops, but add more if there are
-   * common cases to avoid checking booleans on every iteration. **/
-  else {
+#else
+  {
     double* light_error_2 = light_error_2 = calloc(nc, sizeof(double));
 
     //  verbose=1;
@@ -723,7 +866,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
       double tmp_criteria1 = tolerance * tolerance / tmp;
       double tmp_criteria2 = *norm_r * *norm_r / tmp;
 
-      if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
+      if (with_freezing_contact) {
         for (unsigned int i = 0; i < nc; ++i) {
           if (freeze_contacts[i] > 0) number_of_freezed_contact++;
         }
@@ -735,18 +878,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
         }
       }
       for (unsigned int i = 0; i < nc; ++i) {
-        if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
-            options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
-          if (options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-              SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
-            uint_shuffle(scontacts, nc);
+        if (with_shuffle) {
+          if (with_shuffle_each_loop) uint_shuffle(scontacts, nc);
           contact = scontacts[i];
         } else
           contact = i;
 
-        if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
+        if (with_freezing_contact) {
           if (freeze_contacts[contact] > 0) {
             /* we skip freeze contacts */
             freeze_contacts[contact] -= 1;
@@ -755,14 +893,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           }
         }
 
-        solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
+        solve_local_reaction(localProblemFunctionToolkit->update_local_problem,
 
-                           localProblemFunctionToolkit->local_solver,
-                           localProblemFunctionToolkit->copy_local_reaction, contact, problem,
-                           localproblem, reaction, local_opts, localreaction);
+                             localProblemFunctionToolkit->local_solver,
+                             localProblemFunctionToolkit->copy_local_reaction, contact,
+                             problem, localproblem, reaction, local_opts, localreaction);
 
-        if (options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] ==
-            SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
+        if (with_relaxation)
           localProblemFunctionToolkit->perform_relaxation(localreaction,
                                                           &reaction[contact * 3], omega);
 
@@ -778,7 +915,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
         /*   printf("localreaction[%i] = %16.8e\n",2,localreaction[0]); */
         /* } */
 
-        if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
+        if (with_freezing_contact) {
           double squared_norm_localreaction =
               localProblemFunctionToolkit->squared_norm(localreaction);
           int relative_convergence_criteria =
@@ -813,32 +950,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           }
         }
 
-        if (options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] ==
-            SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
-          acceptLocalReactionFiltered(localproblem, local_opts, contact, iter, reaction,
-                                      localreaction);
+        if (with_filter_local_solution)
+          accept_local_reaction_filtered(localproblem, local_opts, contact, iter, reaction,
+                                         localreaction);
         else
-          acceptLocalReactionUnconditionally(contact, reaction, localreaction);
+          accept_local_reaction_unconditionally(contact, reaction, localreaction);
       }
 
-      /* DEBUG_EXPR( */
-      /*   if(options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
-      /*   { */
-      /*     int frozen_contact=0; */
-      /*     for(unsigned int ii = 0 ; ii < nc ; ++ii) if (freeze_contacts[ii] >0)
-       * frozen_contact++; */
-      /*     numerics_printf_verbose(1,"number of frozen contacts %i at iter : %i",
-       * frozen_contact, iter ); */
-      /*   } */
-      /*   ); */
-
-      if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-          SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-        incr_error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+      if (with_error_evaluation_light) {
+        incr_error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         hasNotConverged = determine_convergence(incr_error, tolerance, iter, options);
-      } else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-        incr_error = calculateLightError(light_error_sum, nc, reaction, norm_r);
+      } else if (with_error_evaluation_light_with_full_final) {
+        incr_error = calculate_light_error(light_error_sum, nc, reaction, norm_r);
         hasNotConverged = determine_convergence_with_full_final(
             problem, options, computeError, reaction, velocity, &tolerance, norm_q, incr_error,
             &full_error, iter);
@@ -849,18 +972,17 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           break;
         }
 
-      } else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL) {
-        full_error = calculateFullErrorAdaptiveInterval(problem, computeError, options, iter,
-                                                        reaction, velocity, tolerance, norm_q);
+      } else if (with_error_evaluation_light_with_full) {
+        full_error = calculate_full_error_adaptive_interval(
+            problem, computeError, options, iter, reaction, velocity, tolerance, norm_q);
         incr_error = full_error;
         hasNotConverged = determine_convergence(full_error, tolerance, iter, options);
       }
 
-      statsIterationCallback(problem, options, reaction, velocity, incr_error);
+      stats_iteration_callback(problem, options, reaction, velocity, incr_error);
       if (verbose > 0) {
         frozen_contact = 0;
-        if (options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
+        if (with_freezing_contact) {
           for (unsigned int i = 0; i < nc; ++i) {
             if (freeze_contacts[i] > 0) {
               frozen_contact++;
@@ -868,16 +990,17 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
           }
         }
       }
-      nsgs_print_iteration_stats(iter, incr_error, full_error, tolerance, SOLVER_TOL(options),
-                                 frozen_contact, nc, hasNotConverged, verbose);
+      fc3d_nsgs_print_iteration_stats(iter, incr_error, full_error, tolerance,
+                                      SOLVER_TOL(options), frozen_contact, nc, hasNotConverged,
+                                      verbose);
     }
     free(light_error_2);
   }
+#endif
   /* Full criterium */
-  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
-      SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-    full_error = calculateFullErrorFinal(problem, options, computeError, reaction, velocity,
-                                         tolerance, norm_q);
+  if (with_error_evaluation_light_with_full_final) {
+    full_error = calculate_full_error_final(problem, options, computeError, reaction, velocity,
+                                            tolerance, norm_q);
 
     hasNotConverged = determine_convergence(full_error, SOLVER_TOL(options), iter, options);
   }
@@ -887,7 +1010,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
   /*     fccounter++; */
   /*     snprintf(fname, sizeof(fname), "problem_%i_%i.dat", nc,itermax); */
   /*     FILE * file = fopen(fname, "w"); */
-  /*     frictionContact_printInFile(problem, file); */
+  /*     frictionContactProblem_printInFile(problem, file); */
   /*     fclose(file); */
   /*   }  */
 
@@ -904,8 +1027,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double* reaction, double* veloci
 
   /** Free memory **/
   if (problem->M->storageType == NM_SPARSE) {
-    SBM_free(problem->M->matrix1, SBM_FREE_ALL);
-    problem->M->matrix1 = matrix1;
+    SBM_free(problem->M->sparse_block, SBM_FREE_ALL);
+    problem->M->sparse_block = matrix1;
   }
 
   localProblemFunctionToolkit->free_local_solver(localproblem, local_opts);

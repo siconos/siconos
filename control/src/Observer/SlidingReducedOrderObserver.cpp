@@ -140,8 +140,11 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     siconos::algebra::SiconosMatrix tmpC{*_C};
     for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     Eigen::BDCSVD<siconos::algebra::SiconosMatrix> svd(
         tmpC, Eigen::ComputeThinU | Eigen::ComputeThinV);
+#pragma GCC diagnostic pop
     siconos::algebra::SiconosVector result = svd.solve(tmpV);
     *(_xHat) -= result;
     *(_DS->x()) -= result;

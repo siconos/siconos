@@ -9,7 +9,7 @@ Dynamical systems integration over a time-step or between two events must be def
 * Euler-Moreau (:cpp:class:`EulerMoreauOSI`)
 
 For first-order dynamical systems, in an 'event-capturing' simulation strategy.
-  
+
 .. math::
 
    M x_{k+1} &= M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1}) + h(1-\gamma)r(t_k) \\
@@ -33,8 +33,8 @@ Another variant can also be used (FullThetaGamma scheme)
 For mechanical (second-order) systems, in an 'event-capturing' simulation strategy.
 
 .. math::
-   
-   M (v_{k+1}-v_k) + h K q_{k+\theta} + h C v_{k+\theta} - h F_{k+\theta} = p_{k+1} = G P_{k+1}\\ 
+
+   M (v_{k+1}-v_k) + h K q_{k+\theta} + h C v_{k+\theta} - h F_{k+\theta} = p_{k+1} = G P_{k+1}\\
    q_{k+1} = q_{k} + h v_{k+\theta}, \\
    U_{k+1} = G^\top\, v_{k+1}, \\
    \begin{array}{lcl}
@@ -50,11 +50,11 @@ Numerically, this set is defined as
    \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and } U_k \leq 0 \}.
 
 * Schatzman-Paoli (:cpp:class:`SchatzmanPaoliOSI`)
-* zero-order  (:cpp:class:`ZeroOrderHoldOSI`) 
+* zero-order  (:cpp:class:`ZeroOrderHoldOSI`)
 * Lsodar (:cpp:class:`LsodarOSI`)
 
 For 'event-driven' simulation strategy. Integrator based on LSODAR (https://computation.llnl.gov/casc/odepack/) rootfinding routine :
-"Lsodar solves problems dy/dt = f with full or banded Jacobian and automatic method selection, and at the same time, it finds the roots of any of a set of given functions of the form g(t,y). This is often useful for finding stop conditions or points at which switches are to be made in the function f". 
+"Lsodar solves problems dy/dt = f with full or banded Jacobian and automatic method selection, and at the same time, it finds the roots of any of a set of given functions of the form g(t,y). This is often useful for finding stop conditions or points at which switches are to be made in the function f".
 In Siconos, Lsodar is used for event-driven algorithm, to integrate the dynamics with stops at new non-smooth events (violation of a constraint)
 
 * Hem5 (:cpp:class:`Hem5OSI`)

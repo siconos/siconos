@@ -307,12 +307,12 @@ void NM_MUMPS_set_par(NumericsMatrix* A, int par) { NM_MUMPS_id(A)->par = par; }
 void NM_MUMPS_set_sym(NumericsMatrix* A, int sym) { NM_MUMPS_id(A)->sym = sym; }
 
 void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B) {
-  if (A->matrix2 && A->matrix2->linearSolverParams &&
-      A->matrix2->linearSolverParams->solver == NSM_MUMPS &&
-      A->matrix2->linearSolverParams->linear_solver_data) {
+  if (A->sparse && A->sparse->linearSolverParams &&
+      A->sparse->linearSolverParams->solver == NSM_MUMPS &&
+      A->sparse->linearSolverParams->linear_solver_data) {
     /* copy id of A into B */
     DMUMPS_STRUC_C* B_id = NM_MUMPS_id(B);
-    memcpy(B_id, A->matrix2->linearSolverParams->linear_solver_data, sizeof(DMUMPS_STRUC_C));
+    memcpy(B_id, A->sparse->linearSolverParams->linear_solver_data, sizeof(DMUMPS_STRUC_C));
   }
 }
 #endif

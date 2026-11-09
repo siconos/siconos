@@ -17,15 +17,13 @@
 #
 import math
 
-from siconos.mechanics.collision.tools import Volume, Material
-from siconos.io.mechanics_run import MechanicsHdf5Runner
-from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
-from OCC.Core.gp import gp_Pnt, gp_Ax2, gp_Dir
-from OCC.Core.BRep import BRep_Builder
-from OCC.Core.TopoDS import TopoDS_Compound
-
 import siconos.io.mechanics_run
-
+from OCC.Core.BRep import BRep_Builder
+from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
+from OCC.Core.gp import gp_Ax2, gp_Dir, gp_Pnt
+from OCC.Core.TopoDS import TopoDS_Compound
+from siconos.io.mechanics_run import MechanicsHdf5Runner
+from siconos.mechanics.collision.tools import Material, Volume
 
 config_occ = siconos.io.mechanics_run.RunnerConfig(backend="occ")
 
@@ -117,7 +115,6 @@ def test_sphere_1m():
 
 def test_two_sphere_1m():
     with MechanicsHdf5Runner(config=config_occ) as io:
-
         io.add_occ_shape("two_spheres_r1_shp", comp)
 
         #################
@@ -222,7 +219,6 @@ def test_two_sphere_1m_steel_water():
 
 def test_sphere_01m():
     with MechanicsHdf5Runner(config=config_occ) as io:
-
         io.add_occ_shape("sphere_r01_shp", sphere_r01_shape)
 
         ###############
@@ -259,7 +255,6 @@ def test_sphere_01m():
 
 def test_sphere_001m():
     with MechanicsHdf5Runner(config=config_occ) as io:
-
         io.add_occ_shape("sphere_r001_shp", sphere_r001_shape)
 
         ###############

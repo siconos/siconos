@@ -32,8 +32,8 @@
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 /*
  *
@@ -217,13 +217,11 @@ static int mlcp_psor_solve_wrap(void* problem, double* z, double* w, SolverOptio
   return info;
 }
 
-REGISTER_SOLVER(SICONOS_MLCP_PSOR, "MLCP_PSOR",
-                "Projected Successive Over-Relaxation for Mixed Linear Complementarity Problems",
-                mlcp_psor_init_wrap,
-                mlcp_psor_solve_wrap,
-                NULL,  /* free function */
-                NULL,  /* error function */
-                mlcp_psor_set_default,
-                50000, /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+REGISTER_SOLVER(
+    SICONOS_MLCP_PSOR, "MLCP_PSOR",
+    "Projected Successive Over-Relaxation for Mixed Linear Complementarity Problems",
+    mlcp_psor_init_wrap, mlcp_psor_solve_wrap, NULL, /* free function */
+    NULL,                                            /* error function */
+    mlcp_psor_set_default, 50000,                    /* default_max_iter */
+    1e-6,                                            /* default_tol */
+    0 /* is_local_solver */);

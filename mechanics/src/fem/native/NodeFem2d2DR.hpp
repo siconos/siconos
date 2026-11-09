@@ -59,9 +59,9 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
 
   /** constructor
    */
-  NodeFem2d2DR(std::shared_ptr<FENode> node, const siconos::algebra::SiconosVector2 &pc2,
-               const siconos::algebra::SiconosVector2 &normal,
-               const siconos::algebra::SiconosVector2 &tangent)
+  NodeFem2d2DR(std::shared_ptr<FENode> node, const siconos::algebra::SiconosVector2& pc2,
+               const siconos::algebra::SiconosVector2& normal,
+               const siconos::algebra::SiconosVector2& tangent)
       : LagrangianScleronomousR(),
         node_(node),
         contactPoint2_(pc2),
@@ -72,7 +72,7 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
    */
   virtual ~NodeFem2d2DR() noexcept = default;
 
-  void initialize(siconos::modeling::Interaction &inter) override;
+  void initialize(siconos::modeling::Interaction& inter) override;
 
   /**
      to compute the output y = h(q,z) of the Relation
@@ -81,25 +81,25 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
      \param z user defined parameters (optional)
      \param y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector &q,
+  void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
   inline std::shared_ptr<FENode> node() const { return node_; }
-  inline const siconos::algebra::SiconosVector2 &pc1() const { return contactPoint1_; }
+  inline const siconos::algebra::SiconosVector2& pc1() const { return contactPoint1_; }
 
-  inline const siconos::algebra::SiconosVector2 &pc2() const { return contactPoint2_; }
+  inline const siconos::algebra::SiconosVector2& pc2() const { return contactPoint2_; }
 
-  inline const siconos::algebra::SiconosVector2 &nc() const { return nc_; }
-  inline const siconos::algebra::SiconosVector2 &tangent() const { return tangent_; }
+  inline const siconos::algebra::SiconosVector2& nc() const { return nc_; }
+  inline const siconos::algebra::SiconosVector2& tangent() const { return tangent_; }
 
   /** update the contact points from references
    */
-  void updateContactPoint(const siconos::algebra::SiconosVector2 &pc2,
-                          const siconos::algebra::SiconosVector2 &normal,
-                          const siconos::algebra::SiconosVector2 &tangent);
+  void updateContactPoint(const siconos::algebra::SiconosVector2& pc2,
+                          const siconos::algebra::SiconosVector2& normal,
+                          const siconos::algebra::SiconosVector2& tangent);
 
   /** update the contact points from array
    */

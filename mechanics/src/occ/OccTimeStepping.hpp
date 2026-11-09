@@ -27,11 +27,10 @@ class NonSmoothDynamicalSystem;
 
 namespace siconos::mechanics::occ {
 class OccTimeStepping : public siconos::simulation::TimeStepping {
-
-public:
+ public:
   OccTimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
                   std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
-      : TimeStepping(nsds, td){};
+      : TimeStepping(nsds, td) {};
 
   virtual void updateWorldFromDS();
 };

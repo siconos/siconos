@@ -54,9 +54,9 @@ set(BUILDNAME "${BUILDNAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}"
 if(CROSSCOMPILING_LINUX_TO_WINDOWS)
   set(BUILDNAME "${BUILDNAME}-CrossCompilingFromLinuxToWindows")
 endif()
-  
+
 # Tests coverage (taken from ViSp)
-    
+
 #
 # Note: all of this is done with a recent cmake version (>2.6.0) with:
 # cmake -DCMAKE_BUILD_TYPE=Profile
@@ -86,12 +86,12 @@ IF(WITH_TESTS_COVERAGE)
     SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
     SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
   ENDIF(CXX_HAVE_FTEST_COVERAGE AND CXX_HAVE_PROFILE_ARCS)
-  
+
   IF(C_HAVE_FTEST_COVERAGE)
     MESSAGE("Adding test coverage flags to C compiler : -ftest-coverage")
     SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ftest-coverage -fprofile-arcs")
     SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
     SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
   ENDIF(C_HAVE_FTEST_COVERAGE)
-  
+
 ENDIF(WITH_TESTS_COVERAGE)

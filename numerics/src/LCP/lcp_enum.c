@@ -127,8 +127,8 @@ void lcp_enum(LinearComplementarityProblem* problem, double* z, double* w, int* 
   int multipleSolutions = options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS];
   int numberofSolutions = 0;
 
-  if (!problem->M->matrix0) {
-    numerics_printf("lcp_enum failed, problem->M->matrix0 is null");
+  if (!problem->M->dense) {
+    numerics_printf("lcp_enum failed, problem->M->dense is null");
   }
 
   if (verbose) numerics_printf("lcp_enum begin, size %d tol %e", size, tol);
@@ -149,7 +149,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double* z, double* w, int* 
   EnumerationStruct* enum_struct = enum_init(size);
   enum_struct->current = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
   while (enum_next(zw_indices, size, enum_struct)) {
-    lcp_buildM(zw_indices, M_linear_system, problem->M->matrix0, size, column_of_zero);
+    lcp_buildM(zw_indices, M_linear_system, problem->M->dense, size, column_of_zero);
     memcpy(q_linear_system, q_linear_systemref, (size) * sizeof(double));
     /*     if (verbose) */
     /*       printCurrentSystem(); */

@@ -18,7 +18,7 @@ ensures \is_finite((double) result[1]);
 ensures \is_finite((double) result[2]);*/
 void fc3d_NaturalMapFGenerated(double rn, double rt1, double rt2, double un, double ut1,
                                double ut2, double mu, double rhon, double rhot1, double rhot2,
-                               double *result) {
+                               double* result) {
   /*@ assert \is_finite((double) ut1); */
   /*@ assert \is_finite((double) epsilon); */
   /*@ assert \is_finite((double) un); */

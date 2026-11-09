@@ -24,7 +24,8 @@
 namespace siconos::collision {
 class BodyShapeRecord;
 
-class ContactVelocityAngularVelocityR : public siconos::modeling::NewtonEulerVelocityAngularVelocityR {
+class ContactVelocityAngularVelocityR
+    : public siconos::modeling::NewtonEulerVelocityAngularVelocityR {
  private:
   ACCEPT_SERIALIZATION(ContactVelocityAngularVelocityR);
 

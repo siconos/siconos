@@ -33,7 +33,9 @@
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 
+#include "NM_types.h"
 #include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 
 namespace py = pybind11;
 
@@ -61,10 +63,10 @@ static void inspect_array(py::array arr) {
 }
 
 template <typename T>
-py::array_t<double> get_matrix(const T &self, NumericsMatrix *T::*matrix_attr) {
-  NumericsMatrix *matrix = self.*matrix_attr;
+py::array_t<double> get_matrix(const T& self, NumericsMatrix* T::* matrix_attr) {
+  NumericsMatrix* matrix = self.*matrix_attr;
 
-  if (!matrix || !matrix->matrix0) {
+  if (!matrix || !matrix->dense) {
     throw std::runtime_error("Input matrix has not been allocated.");
   }
 
@@ -72,17 +74,17 @@ py::array_t<double> get_matrix(const T &self, NumericsMatrix *T::*matrix_attr) {
   auto cols = matrix->size1;
   return py::array_t<double>({rows, cols},                             // Shape
                              {sizeof(double), sizeof(double) * rows},  // Strides
-                             matrix->matrix0, py::capsule(matrix->matrix0));
+                             matrix->dense, py::capsule(matrix->dense));
 }
 
 template <typename T>
-py::object get_matrix_sparse(const T &self, NumericsMatrix *T::*matrix_attr) {
-  NumericsMatrix *matrix = self.*matrix_attr;
-  if (!matrix || !matrix->matrix2 || !matrix->matrix2->csc) {
+py::object get_matrix_sparse(const T& self, NumericsMatrix* T::* matrix_attr) {
+  NumericsMatrix* matrix = self.*matrix_attr;
+  if (!matrix || !matrix->sparse || !matrix->sparse->csc) {
     throw std::runtime_error("input matrix is not allocated.");
   }
 
-  CSparseMatrix *csc = matrix->matrix2->csc;
+  CSparseMatrix* csc = matrix->sparse->csc;
   // py::capsule data_capsule(csc->x, [](void *) {});
   // py::capsule indices_capsule(csc->i, [](void *) {});
   // py::capsule indptr_capsule(csc->p, [](void *) {});
@@ -123,45 +125,34 @@ py::object get_matrix_sparse(const T &self, NumericsMatrix *T::*matrix_attr) {
   return csc_matrix;
 }
 template <typename T>
-void set_matrix(T &self, NumericsMatrix *T::*matrix_attr, py::array_t<double> array) {
+void set_matrix(T& self, NumericsMatrix* T::* matrix_attr, py::array_t<double> array) {
   int size = self.dimension * self.numberOfContacts;
 
   if (array.ndim() != 2) {
     throw std::runtime_error("Input matrix must be a 2D matrix.");
   }
-  NumericsMatrix *&matrix = self.*matrix_attr;
-  if (!matrix) {
-    matrix = new NumericsMatrix();
-    matrix->storageType = NM_DENSE;
+  NumericsMatrix*& matrix = self.*matrix_attr;
+  if (matrix) {
+    matrix->dense = nullptr;  // data is borrowed from numpy
+    NM_free(matrix);
   }
-
-  matrix->size0 = array.shape(0);
-  matrix->size1 = array.shape(1);
-  matrix->matrix0 = static_cast<double *>(array.mutable_data());
+  matrix = NM_create_with_data(NM_DENSE, array.shape(0), array.shape(1),
+                               static_cast<double*>(array.mutable_data()));
 }
 
 template <typename T>
-void set_array(T &self, double *&array_ptr, py::array_t<double> arr, int expected_size = -1) {
+void set_array(T& self, double*& array_ptr, py::array_t<double> arr, int expected_size = -1) {
   // expected size must be given when it's possible. If equal to -1, then no check
   auto buf = arr.request();
   if (expected_size > 0) {
     if (buf.ndim != 1 || buf.shape[0] != expected_size)
       throw std::runtime_error("Incorrect array size");
   }
-  array_ptr = static_cast<double *>(buf.ptr);
+  array_ptr = static_cast<double*>(buf.ptr);
 }
 
 template <typename T>
-void set_matrix_sparse(T &self, NumericsMatrix *T::*matrix_attr, py::object pymat) {
-  NumericsMatrix *&matrix = self.*matrix_attr;
-  if (!matrix) {
-    matrix = new NumericsMatrix();
-    matrix->storageType = NM_SPARSE;
-    matrix->matrix2 = new NumericsSparseMatrix();
-  }
-
-  NumericsSparseMatrix *sparseMat = matrix->matrix2;
-
+void set_matrix_sparse(T& self, NumericsMatrix* T::* matrix_attr, py::object pymat) {
   // Ensure CSC format (conversion). Copy if not? Check this
   // py::object csc_M = pymat.attr("tocsc")();
   py::object csc_M = pymat.attr("tocsc")();
@@ -178,10 +169,10 @@ void set_matrix_sparse(T &self, NumericsMatrix *T::*matrix_attr, py::object pyma
   }
 
   // Build CSparseMatrix
-  sparseMat->csc = new CSparseMatrix();
-  sparseMat->csc->nzmax = data_array.shape(0);
-  sparseMat->csc->m = shape.first;
-  sparseMat->csc->n = shape.second;
+  CSparseMatrix* csc = new CSparseMatrix();
+  csc->nzmax = data_array.shape(0);
+  csc->m = shape.first;
+  csc->n = shape.second;
 
   inspect_array(indices_array);
   inspect_array(data_array);
@@ -191,22 +182,29 @@ void set_matrix_sparse(T &self, NumericsMatrix *T::*matrix_attr, py::object pyma
   // sparseMat->csc->i = static_cast<int64_t *>(indices_array.request().ptr);
   //  sparseMat->csc->x = static_cast<double *>(data_array.mutable_data());
   // sparseMat->csc->x = static_cast<double *>(data_array.request().ptr);
-  sparseMat->csc->x =
-      csc_M.attr("data")
-          .cast<py::array_t<double, py::array::c_style | py::array::forcecast>>()
-          .mutable_data();
+  csc->x = csc_M.attr("data")
+               .cast<py::array_t<double, py::array::c_style | py::array::forcecast>>()
+               .mutable_data();
 
-  sparseMat->csc->i =
-      csc_M.attr("indices")
-          .cast<py::array_t<int64_t, py::array::c_style | py::array::forcecast>>()
-          .mutable_data();
+  csc->i = csc_M.attr("indices")
+               .cast<py::array_t<int64_t, py::array::c_style | py::array::forcecast>>()
+               .mutable_data();
 
-  sparseMat->csc->p =
-      csc_M.attr("indptr")
-          .cast<py::array_t<int64_t, py::array::c_style | py::array::forcecast>>()
-          .mutable_data();
+  csc->p = csc_M.attr("indptr")
+               .cast<py::array_t<int64_t, py::array::c_style | py::array::forcecast>>()
+               .mutable_data();
 
-  sparseMat->csc->nz = -1;  // CSC format
+  csc->nz = -1;  // CSC format
+
+  NumericsMatrix*& matrix = self.*matrix_attr;
+  if (!matrix) {
+    // use NM_create and
+    matrix = NM_create(NM_SPARSE, shape.first, shape.second);
+  }
+
+  NumericsSparseMatrix* sparseMat = matrix->sparse;
+  sparseMat->origin = NSM_CSC;
+  sparseMat->csc = csc;
 
   matrix->size0 = shape.first;
   matrix->size1 = shape.second;
@@ -248,8 +246,8 @@ struct SparseMatrixMemoryOwner {
     NumericsMatrix)
  */
 template <typename T>
-NumericsMatrix *set_matrix_dense_new(T &self, py::object numpy_matrix,
-                                     std::shared_ptr<DenseMatrixMemoryOwner> &mem) {
+NumericsMatrix* set_matrix_dense_new(T& self, py::object numpy_matrix,
+                                     std::shared_ptr<DenseMatrixMemoryOwner>& mem) {
   if (!py::isinstance<py::array>(numpy_matrix))
     throw std::runtime_error("Expected a Numpy array");
 
@@ -260,12 +258,8 @@ NumericsMatrix *set_matrix_dense_new(T &self, py::object numpy_matrix,
   mem = std::make_shared<DenseMatrixMemoryOwner>();
   mem->data = array;
 
-  auto *nm = new NumericsMatrix;
-  nm->size0 = array.shape(0);
-  nm->size1 = array.shape(1);
-  nm->matrix0 = static_cast<double *>(mem->data.mutable_data());
-  nm->matrix2 = nullptr;
-  nm->storageType = NM_DENSE;
+  auto* nm = NM_create_with_data(NM_DENSE, array.shape(0), array.shape(1),
+                                 static_cast<double*>(mem->data.mutable_data()));
 
   return nm;
 }
@@ -279,8 +273,8 @@ NumericsMatrix *set_matrix_dense_new(T &self, py::object numpy_matrix,
    NumericsMatrix)
  */
 template <typename T>
-NumericsMatrix *set_matrix_sparse_new(T &self, py::object scipy_matrix,
-                                      std::shared_ptr<SparseMatrixMemoryOwner> &mem) {
+NumericsMatrix* set_matrix_sparse_new(T& self, py::object scipy_matrix,
+                                      std::shared_ptr<SparseMatrixMemoryOwner>& mem) {
   // Check input matrix validity
   if (!py::hasattr(scipy_matrix, "data") || !py::hasattr(scipy_matrix, "indices") ||
       !py::hasattr(scipy_matrix, "indptr"))
@@ -296,30 +290,26 @@ NumericsMatrix *set_matrix_sparse_new(T &self, py::object scipy_matrix,
   auto shape = scipy_matrix.attr("shape").cast<std::pair<ssize_t, ssize_t>>();
 
   // Build CSparse matrix with mem views
-  auto *csc = new CSparseMatrix;
+  auto* csc = new CSparseMatrix;
   csc->m = shape.first;
   csc->n = shape.second;
-  csc->x = static_cast<double *>(mem->data.mutable_data());
-  csc->i = static_cast<int64_t *>(mem->indices.mutable_data());
-  csc->p = static_cast<int64_t *>(mem->indptr.mutable_data());
+  csc->x = static_cast<double*>(mem->data.mutable_data());
+  csc->i = static_cast<int64_t*>(mem->indices.mutable_data());
+  csc->p = static_cast<int64_t*>(mem->indptr.mutable_data());
   csc->nzmax = mem->data.shape(0);
   csc->nz = -1;
 
-  // Build NumericsMatrix with CSparse
-  auto *nsm = new NumericsSparseMatrix;
+  auto* nsm = NSM_new();
   nsm->csc = csc;
+  nsm->origin = NSM_CSC;
 
-  auto *nm = new NumericsMatrix;
-  nm->size0 = csc->m;
-  nm->size1 = csc->n;
-  nm->matrix2 = nsm;
-  nm->storageType = NM_SPARSE;
+  auto* nm = NM_create_with_data(NM_SPARSE, csc->m, csc->n, nsm);
 
   return nm;
 }
 
 template <typename T>
-py::array_t<double> get_array(const T &self, double *array_ptr, int size) {
+py::array_t<double> get_array(const T& self, double* array_ptr, int size) {
   return py::array_t<double>({size},                            // Shape
                              {sizeof(double)},                  // Strides
                              array_ptr, py::capsule(array_ptr)  // Data pointer

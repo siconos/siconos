@@ -23,7 +23,7 @@ See https://github.com/nlohmann/json
 A library to use json from c++.
 
 If so:
-- look for the proper nlohmann version 
+- look for the proper nlohmann version
 - configure siconos to link with nlohmann
 
 The following options control if and how JSON is used
@@ -42,7 +42,7 @@ location might be used later as input to nlohmann_ROOT.
   #   by providing JSON_ROOT on cmake command line.
   #   => find it and check the version
 
-  
+
 # Full config :
 # - Download, build and install Bullet
 # - Create a target JSON::NLOHMANN
@@ -56,12 +56,12 @@ if(WITH_JSON_INSTALL)
   # cmake_policy(SET CMP0072 NEW) # FindOpenGL prefers GLVND
   # cmake_policy(PUSH)
   # if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.20")
-  #   cmake_policy(SET CMP0115 OLD) # 
+  #   cmake_policy(SET CMP0115 OLD) #
   #   cmake_policy(PUSH)
   # endif()
   set(FETCHCONTENT_QUIET OFF) # verbose mode for fetchcontent. Comment/uncomment according to your needs.
 
-  
+
   set(JSON_Install ON) # To install nlohmman targets
   FetchContent_Declare(json
     GIT_REPOSITORY    https://github.com/nlohmann/json.git
@@ -73,19 +73,18 @@ if(WITH_JSON_INSTALL)
     LOG_INSTALL TRUE
     )
   FetchContent_MakeAvailable(json)
-    
+
   message(STATUS "Built, installed and used nlohmann  version ${nlohmann_json_VERSION_STRING} in ${nlohmann_json_ROOT_DIR}.")
-  set(nlohmann_json_VERSION 3.2 CACHE INTERNAL "Json version") 
+  set(nlohmann_json_VERSION 3.2 CACHE INTERNAL "Json version")
   set(SICONOS_HAS_JSON TRUE CACHE INTERNAL "Json activated and found")
   set(nlohmann_json_DIR ${CMAKE_INSTALL_PREFIX} CACHE INTERNAL "") # for siconos-config generation, to help finding nlhomman at runtime.
-  
+
 else()# if(WITH_JSON OR JSON_ROOT)
   message("Json is required. If research process fails, try to\n
         - install nlohmann-json (brew, apt ...) and run cmake again for Siconos
         - OR configure Siconos with WITH_JSON_INSTALL=ON to automatically install nlohmann-json\n
         - OR use JSON_ROOT=<path-to-nlohmann> to help cmake to find your json install.\n")
   find_package(nlohmann_json 3.2 REQUIRED)
-  set(SICONOS_HAS_JSON TRUE CACHE INTERNAL "Json activated and found") 
-  set(nlohmann_json_VERSION 3.2 CACHE INTERNAL "Json version") 
+  set(SICONOS_HAS_JSON TRUE CACHE INTERNAL "Json activated and found")
+  set(nlohmann_json_VERSION 3.2 CACHE INTERNAL "Json version")
 endif()
-

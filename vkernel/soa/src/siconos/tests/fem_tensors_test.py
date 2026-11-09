@@ -13,6 +13,7 @@ with ``pytest`` once the Siconos Python environment is available.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 
@@ -24,74 +25,68 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
+# The test files live next to this one.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
 # Absolute path to the tiny Gmsh mesh shipped with the vkernel tests.
-MESH_PATH = (
-    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-    "siconos/vkernel/soa/src/siconos/tests/mesh_N5.msh"
-)
+MESH_PATH = os.path.join(_HERE, "mesh_N5.msh")
 
 # ``fem.py`` lives next to this test file.
-FEM_SCRIPT = (
-    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-    "siconos/vkernel/soa/src/siconos/tests/fem.py"
-)
+FEM_SCRIPT = os.path.join(_HERE, "fem.py")
 
 # Analytical affine-field regression check (see module docstring there).
-ANALYTICAL_SCRIPT = (
-    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-    "siconos/vkernel/soa/src/siconos/tests/fem_tensor_analytical.py"
-)
+ANALYTICAL_SCRIPT = os.path.join(_HERE, "fem_tensor_analytical.py")
 
-# Siconos Python bindings are not installed system-wide in this workspace.
-# They are built in-tree and exposed via PYTHONPATH, matching the workflow
-# documented in STATE.org / GUIX-INSTALL.org.
+# Siconos Python bindings are not installed system-wide: they are built
+# in-tree and exposed via PYTHONPATH and LD_LIBRARY_PATH, from the build
+# directory given by SICONOS_BUILD_DIR.
+_BUILD_DIR = os.environ.get("SICONOS_BUILD_DIR", "")
+
 _SICONOS_PYTHONPATHS = [
-    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-    "siconos/vkernel/soa/src/siconos/py",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/python",
+    os.path.join(_HERE, "..", "py"),
+    os.path.join(_BUILD_DIR, "python"),
 ]
 
 # The shared libraries produced by the build are not on the system loader
-# path by default. STATE.org prescribes the exact LD_LIBRARY_PATH needed
-# to run the Python bindings in-tree.
+# path by default.
 _SICONOS_LIBRARY_PATHS = [
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/numerics",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/mechanics",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/kernel",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/io",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/externals",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/vkernel/soa",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/control",
-    "/scratch/maurice/agent-atlas/build/Debug-constraint-tensor-guix/vkernel/soa/extern/CompactNSearch",
+    os.path.join(_BUILD_DIR, d)
+    for d in (
+        "numerics",
+        "mechanics",
+        "kernel",
+        "io",
+        "externals",
+        "vkernel/soa",
+        "control",
+        "vkernel/soa/extern/CompactNSearch",
+    )
 ]
 
 
 def _fem_subprocess_env():
     """Environment (PYTHONPATH/LD_LIBRARY_PATH) needed to run the in-tree
-    Siconos Python bindings, matching the workflow documented in
-    STATE.org / GUIX-INSTALL.org."""
-    env = dict(__import__("os").environ)
+    Siconos Python bindings of SICONOS_BUILD_DIR."""
+    if not _BUILD_DIR:
+        pytest.skip("SICONOS_BUILD_DIR is not set")
+    env = dict(os.environ)
     existing_pythonpath = env.get("PYTHONPATH", "")
     pythonpath_extra = ":".join(_SICONOS_PYTHONPATHS)
     env["PYTHONPATH"] = (
-        (pythonpath_extra + ":" + existing_pythonpath) if existing_pythonpath else pythonpath_extra
+        (pythonpath_extra + ":" + existing_pythonpath)
+        if existing_pythonpath
+        else pythonpath_extra
     )
 
     existing_ld = env.get("LD_LIBRARY_PATH", "")
     ld_extra = ":".join(_SICONOS_LIBRARY_PATHS)
-    env["LD_LIBRARY_PATH"] = (
-        (ld_extra + ":" + existing_ld) if existing_ld else ld_extra
-    )
+    env["LD_LIBRARY_PATH"] = (ld_extra + ":" + existing_ld) if existing_ld else ld_extra
     return env
 
 
-# The Siconos Python extensions in this build tree are compiled for
-# Python 3.11, so we must use that interpreter explicitly rather than
-# whatever ``sys.executable`` points to.
-_PYTHON = (
-    "/home/maurice/wkt/siconos/main-devel-constraint-tensor/"
-    "siconos/.venv311/bin/python"
-)
+# The Siconos Python extensions must be loaded by the interpreter they were
+# compiled for: SICONOS_PYTHON, or the interpreter running the tests.
+_PYTHON = os.environ.get("SICONOS_PYTHON", sys.executable)
 
 
 def _run_fem_simulation(tmp_path, mesh_path: str) -> None:

@@ -31,12 +31,12 @@
 #include "SolverOptions.h"                      // for SolverOptions, solver...
 #include "SparseBlockMatrix.h"                  // for SparseBlockStructured...
 #include "lcp_cst.h"
-#include "mlcp_cst.h"          // for SICONOS_MLCP_PGS_SBM
+#include "mlcp_cst.h"  // for SICONOS_MLCP_PGS_SBM
 #include "numerics_verbose.h"
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
                                            SparseBlockStructuredMatrix* const blmat,
@@ -47,7 +47,7 @@ static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber,
   /* Position in vector blmat->block of the required diagonal block */
   int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
-  local_problem->M->matrix0 = blmat->block[diagPos];
+  local_problem->M->dense = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];
   int pos = 0;
 
@@ -81,11 +81,12 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
        with no null row (ie no rows with all blocks equal to null)
   */
 
-  if (problem->M->matrix1 == NULL) {
+  if (problem->M->sparse_block == NULL) {
     numerics_printf_verbose(0, "mlcp_PGS_SBM, storageType =%i", problem->M->storageType);
-    fprintf(stderr,
-            "mlcp_PGS_SBM error: wrong storage type (problem->M->matrix1 == NULL) for input "
-            "matrix M of the MLCP.\n");
+    fprintf(
+        stderr,
+        "mlcp_PGS_SBM error: wrong storage type (problem->M->sparse_block == NULL) for input "
+        "matrix M of the MLCP.\n");
     *info = 1;
     return;
   }
@@ -100,7 +101,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   double tolerance = options[0].dparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the MLCP */
-  SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
+  SparseBlockStructuredMatrix* blmat = problem->M->sparse_block;
   double* q = problem->q;
 
   /* Number of non-null blocks in blmat */
@@ -116,9 +117,9 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
       (LinearComplementarityProblem*)malloc(sizeof(*local_problem));
   local_problem->M = (NumericsMatrix*)malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0;  // dense storage
-  local_problem->M->matrix0 = NULL;
-  local_problem->M->matrix1 = NULL;
-  local_problem->M->matrix2 = NULL;
+  local_problem->M->dense = NULL;
+  local_problem->M->sparse_block = NULL;
+  local_problem->M->sparse = NULL;
   local_problem->M->internalData = NULL;
 
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat
@@ -144,9 +145,9 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
   options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] = 0.0;
 
   if (options->numberOfInternalSolvers < 1) {
-    * info = numerics_error("mlcp_nsgs_SBM",
-                   "The MLCP_PGS_SBM method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >1");
+    *info = numerics_error("mlcp_nsgs_SBM",
+                           "The MLCP_PGS_SBM method needs options for the internal solvers, "
+                           "options[0].numberOfInternalSolvers should be >1");
   }
 
   // Current local solver options
@@ -173,7 +174,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double* z, double*
       } else /* Solve a linear system*/
       {
         if (local_problem->size == 1) {
-          double d = local_problem->M->matrix0[0];
+          double d = local_problem->M->dense[0];
           if (fabs(d) < DBL_EPSILON) {
             printf("Numerics::mlcp_pgs_sbm, error: vanishing diagonal term \n");
             printf(" The problem cannot be solved with this method \n");
@@ -239,7 +240,7 @@ void mlcp_pgs_sbm_set_default(SolverOptions* options) {
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
     options->internalSolvers = calloc(1, sizeof(SolverOptions*));
-  }else {
+  } else {
     solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
@@ -257,7 +258,8 @@ static int mlcp_pgs_sbm_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w,
+                                   SolverOptions* options) {
   int info = NUMERICS_OK;
   mlcp_pgs_SBM((MixedLinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -265,11 +267,9 @@ static int mlcp_pgs_sbm_solve_wrap(void* problem, double* z, double* w, SolverOp
 
 REGISTER_SOLVER(SICONOS_MLCP_PGS_SBM, "MLCP_PGS_SBM",
                 "Projected Gauss-Seidel for MLCP with Sparse Block Matrix",
-                mlcp_pgs_sbm_init_wrap,
-                mlcp_pgs_sbm_solve_wrap,
-                NULL,  /* free function */
-                NULL,  /* error function */
-                mlcp_pgs_sbm_set_default,  /* set_default */
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                mlcp_pgs_sbm_init_wrap, mlcp_pgs_sbm_solve_wrap, NULL, /* free function */
+                NULL,                                                  /* error function */
+                mlcp_pgs_sbm_set_default,                              /* set_default */
+                1000,                                                  /* default_max_iter */
+                1e-6,                                                  /* default_tol */
+                0 /* is_local_solver */);

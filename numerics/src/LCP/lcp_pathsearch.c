@@ -27,16 +27,16 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "SiconosBlas.h"    // for cblas_dcopy, cblas_daxpy
 #include "lcp_cst.h"        // for SICONOS_LCP_PIVOT_PATHSEARCH
 #include "lcp_pivot.h"      // for LCP_PATHSEARCH_LEAVING_T
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_EXPR_WE
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 /* This function is here to test the pivotal code of the path search */
 void lcp_pathsearch(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                     SolverOptions* options) {
@@ -137,7 +137,8 @@ static int lcp_pathsearch_init_wrap(void* problem, SolverOptions* options) {
   return NUMERICS_OK;
 }
 
-static int lcp_pathsearch_solve_wrap(void* problem, double* z, double* w, SolverOptions* options) {
+static int lcp_pathsearch_solve_wrap(void* problem, double* z, double* w,
+                                     SolverOptions* options) {
   int info = NUMERICS_OK;
   lcp_pathsearch((LinearComplementarityProblem*)problem, z, w, &info, options);
   return info;
@@ -148,13 +149,10 @@ static void lcp_pathsearch_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(SICONOS_LCP_PATHSEARCH, "LCP_PATHSEARCH",
-                       "Path search solver for LCP",
-                       lcp_pathsearch_init_wrap,
-                       lcp_pathsearch_solve_wrap,
-                       lcp_pathsearch_free_wrap,
-                       NULL,  /* error function */
-                       lcp_pathsearch_set_default,  /* set_default */
-                       1000,  /* default_max_iter */
-                       1e-6,  /* default_tol */
-                       0);     /* is_local_solver */
+REGISTER_SOLVER(SICONOS_LCP_PATHSEARCH, "LCP_PATHSEARCH", "Path search solver for LCP",
+                lcp_pathsearch_init_wrap, lcp_pathsearch_solve_wrap, lcp_pathsearch_free_wrap,
+                NULL,                       /* error function */
+                lcp_pathsearch_set_default, /* set_default */
+                1000,                       /* default_max_iter */
+                1e-6,                       /* default_tol */
+                0);                         /* is_local_solver */

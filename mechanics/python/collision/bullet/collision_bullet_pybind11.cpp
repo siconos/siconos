@@ -26,8 +26,8 @@
 #include "BodyBulletShapeRecord.hpp"
 #include "Bullet2d3DR.hpp"
 #include "Bullet2dR.hpp"
-#include "BulletVelocityAngularVelocityR.hpp"
 #include "BulletR.hpp"
+#include "BulletVelocityAngularVelocityR.hpp"
 #include "Contact2d3DR.hpp"
 #include "SecondOrderDS.hpp"  // IWYU pragma: keep
 #include "SiconosBulletCollisionManager.hpp"
@@ -153,8 +153,9 @@ PYBIND11_MODULE(_bullet, m) {
                                siconos::collision::ContactR, py::smart_holder>(m, "BulletR");
 
   auto bullet5dr_py =
-      py::class_<siconos::collision::bullet::BulletVelocityAngularVelocityR, siconos::collision::ContactVelocityAngularVelocityR,
-                 py::smart_holder>(m, "BulletVelocityAngularVelocityR");
+      py::class_<siconos::collision::bullet::BulletVelocityAngularVelocityR,
+                 siconos::collision::ContactVelocityAngularVelocityR, py::smart_holder>(
+          m, "BulletVelocityAngularVelocityR");
   auto bullet2d3dr_py =
       py::class_<siconos::collision::bullet::Bullet2d3DR, siconos::collision::Contact2d3DR,
                  py::smart_holder>(m, "Bullet2d3DR");

@@ -40,8 +40,8 @@ void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restr
 
 void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F,
                NumericsMatrix* restrict nabla_F, NumericsMatrix* restrict H) {
-  double* nabla_F_dense = nabla_F->matrix0;
-  double* H_dense = H->matrix0;
+  double* nabla_F_dense = nabla_F->dense;
+  double* H_dense = H->dense;
 
   int n = n1 + n2;
   if (n1 > 0) {

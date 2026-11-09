@@ -3,7 +3,7 @@
 
 Todo List
 =========
-  
+
 *  :cpp:struct:`GlobalFrictionContactProblem`
 
   * Implement ProdTransSBM
@@ -43,4 +43,3 @@ Todo List
 *  ``NonSmoothDrivers.h``
 
    * solve_qp does not exist
-

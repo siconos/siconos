@@ -246,7 +246,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert() {
       _numericsMatrix.get()->storageType = _storageType;
       _numericsMatrix.get()->size0 = _dimRow;
       _numericsMatrix.get()->size1 = _dimColumn;
-      _numericsMatrix->matrix0 = _M1->data();  // Pointer link, be careful when freed.
+      _numericsMatrix->dense = _M1->data();  // Pointer link, be careful when freed.
       DEBUG_EXPR(NM_display(_numericsMatrix.get()););
       DEBUG_EXPR(_M1->display(););
       break;
@@ -257,7 +257,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert() {
       _numericsMatrix.get()->storageType = _storageType;
       _numericsMatrix.get()->size0 = _dimRow;
       _numericsMatrix.get()->size1 = _dimColumn;
-      _numericsMatrix->matrix1 =
+      _numericsMatrix->sparse_block =
           &*_M2->getNumericsMatSparse();  // Pointer link, be careful when freed.
       break;
     }
@@ -544,14 +544,13 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeM(
 void siconos::nonsmooth_formulations::OSNSMatrix::computeV(
     std::shared_ptr<NumericsMatrix> Htrans, std::shared_ptr<NumericsMatrix> Winverse,
     std::shared_ptr<NumericsMatrix> H0) {
-  DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
 
   // Compute V = H^T * Winverse * H0
   // This maps cohesive forces from indexSet0 to the OSNS problem
 
-  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
-  
+  NumericsMatrix* NM1 = NM_multiply(Winverse.get(), H0.get());
+
   _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
 
   _dimRow = _numericsMatrix->size0;
@@ -559,22 +558,20 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeV(
 
   NM_free(NM1);
 
-  DEBUG_END(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
+  DEBUG_END("siconos::nonsmooth_formulations::OSNSMatrix::computeV(Htrans, Winverse, H0)\n");
 }
 void siconos::nonsmooth_formulations::OSNSMatrix::computeU(
     std::shared_ptr<NumericsMatrix> Htrans, std::shared_ptr<NumericsMatrix> Winverse,
     std::shared_ptr<NumericsMatrix> H0) {
-  DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
 
   // Compute U = H0^T * Winverse * H
 
   auto H0trans_NM = NM_transpose(H0.get());
   auto H_NM = NM_transpose(Htrans.get());
-  
-  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H_NM);
- 
+
+  NumericsMatrix* NM1 = NM_multiply(Winverse.get(), H_NM);
+
   _numericsMatrix.reset(NM_multiply(H0trans_NM, NM1), NM_free);
 
   _dimRow = _numericsMatrix->size0;
@@ -583,20 +580,18 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeU(
   NM_free(NM1);
   NM_free(H_NM);
   NM_free(H0trans_NM);
-  
-  DEBUG_END(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
+
+  DEBUG_END("siconos::nonsmooth_formulations::OSNSMatrix::computeU(Htrans, Winverse, H0)\n");
 }
 void siconos::nonsmooth_formulations::OSNSMatrix::computeX(
     std::shared_ptr<NumericsMatrix> H0, std::shared_ptr<NumericsMatrix> Winverse) {
-  DEBUG_BEGIN(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeX(Htrans, Winverse, H0)\n");
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::OSNSMatrix::computeX(Htrans, Winverse, H0)\n");
 
   // Compute X = H0^T * Winverse * H0
 
   auto H0trans_NM = NM_transpose(H0.get());
-  NumericsMatrix *  NM1 = NM_multiply(Winverse.get(), H0.get());
-  
+  NumericsMatrix* NM1 = NM_multiply(Winverse.get(), H0.get());
+
   _numericsMatrix.reset(NM_multiply(H0trans_NM, NM1), NM_free);
 
   _dimRow = _numericsMatrix->size0;
@@ -604,8 +599,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeX(
 
   NM_free(NM1);
   NM_free(H0trans_NM);
-  DEBUG_END(
-      "siconos::nonsmooth_formulations::OSNSMatrix::computeX(Htrans, Winverse, H0)\n");
+  DEBUG_END("siconos::nonsmooth_formulations::OSNSMatrix::computeX(Htrans, Winverse, H0)\n");
 }
 
 // Display data

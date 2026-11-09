@@ -24,9 +24,9 @@
 
 #include <gmp.h>
 
+#include <functional>
 #include <limits>
 #include <vector>
-#include <functional>
 
 #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 
@@ -181,7 +181,7 @@ class TimeDiscretisation {
    *
    *  \return true if the timestep is constant
    */
-  inline bool hConst() const {return step_is_constant_;};
+  inline bool hConst() const { return step_is_constant_; };
 
   /** determine whether the TimeDiscretisation is using GMP
    *

@@ -123,8 +123,8 @@ int rolling_friction_2d_driver(RollingFrictionContactProblem* problem, double* r
    \param[in,out] options structure used to define the solver(s) and their parameters
    \return result (0 if successful otherwise 1).
 */
-int cohesive_friction_3d_driver(CohesiveFrictionContactProblem *problem, double *reaction,
-                                double *velocity, SolverOptions *options);
+int cohesive_friction_3d_driver(CohesiveFrictionContactProblem* problem, double* reaction,
+                                double* velocity, SolverOptions* options);
 
 /**
    General interface to solvers for global friction-contact 2D problem

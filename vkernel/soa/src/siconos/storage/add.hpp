@@ -2,32 +2,33 @@
 
 #include <assert.h>
 
-#include "siconos/storage/mp/mp.hpp"
+#include "siconos/storage/handle.hpp"
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/memory.hpp"
+#include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
-#include "siconos/storage/handle.hpp"
 
 namespace siconos::storage {
 
 using namespace siconos::storage::pattern;
 
+// storage::make_compile_time_database database: the columns of Item are enumerated at
+// compile time
 template <match::item Item>
-decltype(auto) add(auto&& data) {
+decltype(auto) add_static(auto&& data) {
   // types
   using data_t = std::decay_t<decltype(data)>;
   using info_t = get_info_t<data_t>;
-  using all_keeps_t = decltype(all_properties_as<property::keep>(data));
+  using all_time_levels_t = decltype(all_properties_as<property::time_levels>(data));
   using indice = typename info_t::template env<Item>::indice;
 
   // get attached storages from all properties
-  constexpr auto attached_storages = mp::filter(
-      typename info_t::all_properties_t{}, is_attached_storage<Item>);
+  constexpr auto attached_storages =
+      mp::filter(typename info_t::all_properties_t{}, is_attached_storage<Item>);
 
   // attrs = attributes + attached_storages
-  constexpr auto attrs =
-      mp::tuple_unique(concat(attributes(Item{}), attached_storages));
+  constexpr auto attrs = mp::tuple_unique(concat(attributes(Item{}), attached_storages));
 
   using attrs_t = std::decay_t<decltype(attrs)>;
 
@@ -35,42 +36,34 @@ decltype(auto) add(auto&& data) {
     // there is some attributes or attached_storages
     indice index = 0;
     mp::for_each(attrs, [&data, &index]<match::attribute A>(A) {
-      mp::for_each(
-          mp::range<memory_size<A, all_keeps_t>()>,
-          // memory keep is taken into account
-          [&data, &index](auto step) {
-            auto&& storage = memory(
-                step, mp::get<A>(static_cast<data_t&&>(data).store()));
+      mp::for_each(mp::range<memory_size<A, all_time_levels_t>()>,
+                   // one value per time level
+                   [&data, &index](auto step) {
+                     auto&& storage =
+                         memory(step, mp::get<A>(static_cast<data_t&&>(data).store()));
 
-            using storage_t = std::decay_t<decltype(storage)>;
+                     using storage_t = std::decay_t<decltype(storage)>;
 
-            if constexpr (match::push_back<storage_t>) {
-              if constexpr (match::static_capacity<storage_t>) {
-                  // boost::container::static_vector or similar
-                  if (storage.size() == storage.capacity())
-                  {}
-                  else
-                  {
-                    storage.push_back(typename storage_t::value_type{});
-                    assert(index > 0 ? index == std::size(storage) - 1
-                           : index == 0);
-                    index = std::size(storage) - 1;
-                  }
-                }
-                else
-              // item has been wrapped into a std::vector or similar
-              storage.push_back(typename storage_t::value_type{});
-              assert(index > 0 ? index == std::size(storage) - 1
-                               : index == 0);
-              index = std::size(storage) - 1;
-            }
-            else {
-              // FIX maybe ?
-              // std::array or similar : creation only in the first element
-              storage[0] = typename storage_t::value_type{};
-              index = 0;
-            }
-          });
+                     if constexpr (match::push_back<storage_t>) {
+                       if constexpr (match::static_capacity<storage_t>) {
+                         // boost::container::static_vector or similar: the inline
+                         // capacity is only a hint, the container grows on the heap,
+                         // so push_back always accepts the element.
+                         storage.push_back(typename storage_t::value_type{});
+                         assert(index > 0 ? index == std::size(storage) - 1 : index == 0);
+                         index = std::size(storage) - 1;
+                       } else
+                         // item has been wrapped into a std::vector or similar
+                         storage.push_back(typename storage_t::value_type{});
+                       assert(index > 0 ? index == std::size(storage) - 1 : index == 0);
+                       index = std::size(storage) - 1;
+                     } else {
+                       // FIX maybe ?
+                       // std::array or similar : creation only in the first element
+                       storage[0] = typename storage_t::value_type{};
+                       index = 0;
+                     }
+                   });
     });
 
     // build handle
@@ -81,17 +74,34 @@ decltype(auto) add(auto&& data) {
       h.__init__();
     }
     return h;
-  }
-  else {
+  } else {
     // item without attribute or attached storage
     return make_full_handle<Item>(data, indice{0});
   }
 };
 
+template <match::item Item>
+decltype(auto) add(auto&& data) {
+  if constexpr (requires { data.store()._registry; }) {
+    // registry world: the columns of Item were listed at registration, so
+    // they are walked at run time, with no compile-time scan of the world
+    using indice =
+        typename get_info_t<std::decay_t<decltype(data)>>::template env<Item>::indice;
+    const auto index = static_cast<indice>(data.store()._registry.template push_item<Item>());
+    auto h = make_full_handle<Item>(data, index);
+    // handle initialization is not mandatory
+    if constexpr (has_init(h)) {
+      h.__init__();
+    }
+    return h;
+  } else {
+    return add_static<Item>(data);
+  }
+}
+
 // Multiple add at once.
 template <match::item Item>
-decltype(auto) add(auto&&data, std::size_t count)
-{
+decltype(auto) add(auto&& data, std::size_t count) {
   return view::iota(std::size_t{0}, count) |
          view::transform([&data](auto&&) { return add<Item>(data); });
 }

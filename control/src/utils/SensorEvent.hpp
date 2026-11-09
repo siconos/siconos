@@ -35,7 +35,7 @@ class SensorEvent : public siconos::simulation::Event {
   ACCEPT_SERIALIZATION(SensorEvent);
 
   using EventType = siconos::simulation::EventType;
-  
+
   /** The sensor linked to the present event */
   std::shared_ptr<Sensor> _sensor{nullptr};
 
@@ -46,7 +46,7 @@ class SensorEvent : public siconos::simulation::Event {
   /** constructor with time value as a parameter
    *  \param time the starting time of the Event
    */
-  SensorEvent(double time) : Event(time, EventType::Sensor, true){};
+  SensorEvent(double time) : Event(time, EventType::Sensor, true) {};
 
   /** destructor
    */
@@ -68,13 +68,12 @@ class SensorEvent : public siconos::simulation::Event {
   void process(siconos::simulation::Simulation& sim);
 };
 
-
 }  // namespace siconos::control
 
-namespace siconos::simulation{
+namespace siconos::simulation {
 
-    // Register the event into the factory
-  static EventRegistration<siconos::control::SensorEvent> reg_SE(EventType::Sensor);
-}
+// Register the event into the factory
+static EventRegistration<siconos::control::SensorEvent> reg_SE(EventType::Sensor);
+}  // namespace siconos::simulation
 
 #endif  // SensorEvent_H

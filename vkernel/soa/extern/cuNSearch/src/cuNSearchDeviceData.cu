@@ -1,5 +1,7 @@
 #include "cuNSearchDeviceData.h"
 
+#include <cstring>
+
 #include <thrust/device_ptr.h>
 #include <thrust/sort.h>
 #include <thrust/gather.h>
@@ -28,7 +30,7 @@ namespace cuNSearch
 	{
 		if (pointSet.n_points() == 0)
 			return;
-			
+
 		auto pointSetImpl = pointSet.impl.get();
 
 		Int3 data[2];
@@ -41,7 +43,7 @@ namespace cuNSearch
 			(Real3*)CudaHelper::GetPointer(pointSetImpl->d_Particles),
 			static_cast<unsigned int>(pointSet.n_points()),
 			m_SearchRadius,
-			CudaHelper::GetPointer(d_MinMax), 
+			CudaHelper::GetPointer(d_MinMax),
 			CudaHelper::GetPointer(d_MinMax) + 1
 			);
 		CudaHelper::CheckLastError();
@@ -81,7 +83,7 @@ namespace cuNSearch
 	{
 		if (pointSet.n_points() == 0)
 			return;
-	
+
 		auto pointSetImpl = pointSet.impl.get();
 		Real3 sceneMin = pointSetImpl->Min;
 		Real3 sceneMax = pointSetImpl->Max;
@@ -177,11 +179,58 @@ namespace cuNSearch
 	{
 		if (queryPointSet.n_points() == 0)
 			return;
-	
+
 		auto queryPointSetImpl = queryPointSet.impl.get();
 		auto pointSetImpl = pointSet.impl.get();
 
 		uint particleCount = static_cast<uint>(queryPointSet.n_points());
+		// siconos: a point is excluded from its own neighbors by its index
+		const bool selfQuery = &queryPointSet == &pointSet;
+
+		// An empty target point set has no grid data at all: computeMinMax and
+		// computeCellInformation return early for it, hence its gridInfo is
+		// uninitialized and its cell arrays (d_CellOffsets, d_CellParticleCounts)
+		// are empty. Running the neighbor kernels on such a point set accesses
+		// out of bounds device memory: it either raises an illegal memory access
+		// or silently corrupts device data (which may later be read back as a
+		// bogus bounding box and lead to a huge grid, hence to a failing device
+		// allocation).
+		// An empty point set contains no point, so the query has no neighbor in
+		// it: the neighbor list is left empty. This is also the behaviour of the
+		// CPU implementation (CompactNSearch), which resizes the neighbor lists
+		// of every point set, whatever their number of points.
+		if (pointSet.n_points() == 0)
+		{
+			auto &neighborSet = queryPointSet.neighbors[neighborListEntry];
+
+			if (neighborSet.ParticleCountAllocationSize < particleCount)
+			{
+				if (neighborSet.ParticleCountAllocationSize != 0)
+				{
+					cudaFreeHost(neighborSet.Offsets);
+					cudaFreeHost(neighborSet.Counts);
+				}
+
+				neighborSet.ParticleCountAllocationSize = static_cast<unsigned int>(particleCount * 1.5);
+				cudaMallocHost(&neighborSet.Offsets, sizeof(uint) * neighborSet.ParticleCountAllocationSize);
+				cudaMallocHost(&neighborSet.Counts, sizeof(uint) * neighborSet.ParticleCountAllocationSize);
+			}
+
+			if (neighborSet.NeighborCountAllocationSize == 0)
+			{
+				neighborSet.NeighborCountAllocationSize = 1;
+				cudaMallocHost(&neighborSet.Neighbors, sizeof(uint) * neighborSet.NeighborCountAllocationSize);
+			}
+
+			// no neighbor at all in an empty point set
+			memset(neighborSet.Counts, 0, sizeof(uint) * particleCount);
+			memset(neighborSet.Offsets, 0, sizeof(uint) * particleCount);
+
+			CudaHelper::CheckLastError();
+			CudaHelper::DeviceSynchronize();
+
+			return;
+		}
 
 		USE_TIMING(Timing::startTiming("Execute kNeighborCount"));
 		d_NeighborCounts.resize(particleCount);
@@ -196,7 +245,8 @@ namespace cuNSearch
 			CudaHelper::GetPointer(pointSetImpl->d_CellParticleCounts),
 
 			CudaHelper::GetPointer(d_NeighborCounts),
-			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices)
+			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices),
+			selfQuery
 			);
 
 		CudaHelper::CheckLastError();
@@ -239,7 +289,8 @@ namespace cuNSearch
 
 			CudaHelper::GetPointer(d_NeighborWriteOffsets),
 			CudaHelper::GetPointer(d_Neighbors),
-			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices)
+			CudaHelper::GetPointer(pointSetImpl->d_ReversedSortIndices),
+			selfQuery
 			);
 
 		CudaHelper::CheckLastError();

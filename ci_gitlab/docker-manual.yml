@@ -25,4 +25,3 @@ centos-7:docker-build:
 #   extends: .docker-build
 #   stage: docker-build-layer2
 #   needs: ["ubuntu18.04:docker-build"]
-

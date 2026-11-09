@@ -34,10 +34,10 @@ typedef int solver_id_t;
     Structure used to store user callbacks inside solvers
 */
 typedef struct {
-  void *env; /**< general user environment */
+  void* env; /**< general user environment */
   void (*collectStatsIteration)(
-      void *env, size_t size, double *reaction, double *velocity, double error,
-      void *extra_data); /**<pointer on a function
+      void* env, size_t size, double* reaction, double* velocity, double error,
+      void* extra_data); /**<pointer on a function
                           * Its signature is: user env, problem size, reaction,
                           * velocity, error at end of solver iteration (when
                           * this makes sense) and an extra data structure */
@@ -67,27 +67,27 @@ struct SolverOptions {
   bool isSet;       /**< true(1) if the structure is ready to be used by a numerics
                        driver. */
   size_t iSize;     /**< iSize size of vector iparam */
-  int *iparam;      /**< list of solver parameters (integer type); Check solvers doc
+  int* iparam;      /**< list of solver parameters (integer type); Check solvers doc
                        for details. */
   size_t dSize;     /**< size of vector dparam */
-  double *dparam;   /**< list of solver parameters (double type); Check solvers
+  double* dparam;   /**< list of solver parameters (double type); Check solvers
                        doc for details. */
   bool filterOn;    /**< if true (1), check solution validity after the driver
                        call. Default = 1.    For example if filterOn = 1 for a LCP,
                        lcp_compute_error()    will be called at the end of the
                        process). */
   size_t dWorkSize; /**< size of double type internal work array.*/
-  double *dWork;    /**< internal (double type) work array.*/
+  double* dWork;    /**< internal (double type) work array.*/
   size_t iWorkSize; /**< size of integer type internal work array.*/
-  int *iWork;       /**< internal (integer type) work array.*/
+  int* iWork;       /**< internal (integer type) work array.*/
   size_t numberOfInternalSolvers;         /**< the number of internal or local
                                              'sub-solvers' used by the solver         (size of
                                              internalSolvers) .*/
-  struct SolverOptions **internalSolvers; /**< list of internal solver options*/
-  Callback *callback;                     /**< pointer to user-defined callback*/
-  void *solverParameters;                 /**< additional parameters specific to the solver
+  struct SolverOptions** internalSolvers; /**< list of internal solver options*/
+  Callback* callback;                     /**< pointer to user-defined callback*/
+  void* solverParameters;                 /**< additional parameters specific to the solver
                                              (GAMS and NewtonMethod only) */
-  void *solverData;                       /**< additional data specific to the solver */
+  void* solverData;                       /**< additional data specific to the solver */
 };
 
 /** Some value for iparam index */
@@ -115,9 +115,9 @@ enum SICONOS_IPARAM_ERROR_EVALUATION_ENUM {
 enum SICONOS_DPARAM {
   SICONOS_DPARAM_TOL = 0,
   SICONOS_DPARAM_RESIDU = 1,
-  SICONOS_DPARAM_TIME_BEFORE_LOOP = 20, // time before while loop in fc2d_nsgs_graph_permut
-  SICONOS_DPARAM_TIME_IN_LOOP = 21, // time inside while loop in fc2d_nsgs_graph_permut
-  SICONOS_DPARAM_TIME_AFTER_LOOP = 22 // time after while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_BEFORE_LOOP = 20,  // time before while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_IN_LOOP = 21,      // time inside while loop in fc2d_nsgs_graph_permut
+  SICONOS_DPARAM_TIME_AFTER_LOOP = 22    // time after while loop in fc2d_nsgs_graph_permut
 };
 
 #if defined(__cplusplus)
@@ -129,7 +129,7 @@ extern "C" {
 
     \param options the structure to be displayed
 */
-void solver_options_print(SolverOptions *options);
+void solver_options_print(SolverOptions* options);
 
 /**
    Clear and free all pointer members of the structure, then
@@ -137,7 +137,7 @@ void solver_options_print(SolverOptions *options);
 
    \param options the structure to be cleared.
 */
-void solver_options_delete(SolverOptions *options);
+void solver_options_delete(SolverOptions* options);
 
 /**
    Copy an existing set of options, to create a new one. Warning : callback,
@@ -147,7 +147,7 @@ void solver_options_delete(SolverOptions *options);
    \param source an existing solver options structure
    \return a pointer to options set, ready to use by a driver.
 */
-SolverOptions *solver_options_copy(SolverOptions *source);
+SolverOptions* solver_options_copy(SolverOptions* source);
 
 /**
    Change one of the internal solver of a previously defined SolverOptions set.
@@ -163,7 +163,7 @@ SolverOptions *solver_options_copy(SolverOptions *source);
    \param solver_id id number of the new internal solver to be
    created/updated
 */
-void solver_options_update_internal(SolverOptions *parent, size_t internal_solver_number,
+void solver_options_update_internal(SolverOptions* parent, size_t internal_solver_number,
                                     int solver_id);
 
 /** return the id of a solver based on its name
@@ -171,14 +171,14 @@ void solver_options_update_internal(SolverOptions *parent, size_t internal_solve
  *  \param pName the name of the solver
  *  \return the id of the solver or 0 if it failed
  */
-int solver_options_name_to_id(const char *pName);
+int solver_options_name_to_id(const char* pName);
 
 /** return the name of a solver given its id
  *
  *  \param Id the id of the solver
  *  \return the name of the solver
  */
-const char *solver_options_id_to_name(int Id);
+const char* solver_options_id_to_name(int Id);
 
 /**
     return the internal solver options set
@@ -187,7 +187,7 @@ const char *solver_options_id_to_name(int Id);
     \param number of the targeted solver
     \return a pointer to the internal solver options set
 */
-SolverOptions *solver_options_get_internal_solver(SolverOptions *options, size_t n);
+SolverOptions* solver_options_get_internal_solver(SolverOptions* options, size_t n);
 
 /**
    set internal solver
@@ -196,7 +196,7 @@ SolverOptions *solver_options_get_internal_solver(SolverOptions *options, size_t
    \param number of the targeted solver
    \param the solver options to be used as internal solver number n
 */
-void solver_options_set_internal_solver(SolverOptions *options, size_t n, SolverOptions *NSO);
+void solver_options_set_internal_solver(SolverOptions* options, size_t n, SolverOptions* NSO);
 
 /* ===========================================================================
  * Registry-based Solver Options (NEW)
@@ -213,7 +213,7 @@ void solver_options_set_internal_solver(SolverOptions *options, size_t n, Solver
  * \param solver_id The solver ID (e.g., SICONOS_FRICTION_3D_NSGS)
  * \return Pointer to created options, or NULL if solver not found
  */
-SolverOptions *solver_options_create(int solver_id);
+SolverOptions* solver_options_create(int solver_id);
 
 /**
  * Create solver options by name.
@@ -223,7 +223,7 @@ SolverOptions *solver_options_create(int solver_id);
  * \param solver_name The solver name (e.g., "FC3D_NSGS")
  * \return Pointer to created options, or NULL if name not found
  */
-SolverOptions *solver_options_create_by_name(const char *solver_name);
+SolverOptions* solver_options_create_by_name(const char* solver_name);
 
 /**
  * Create options and apply solver initialization.
@@ -234,7 +234,7 @@ SolverOptions *solver_options_create_by_name(const char *solver_name);
  * \param problem Optional problem pointer (for problem-specific init)
  * \return Pointer to created and initialized options, or NULL on failure
  */
-SolverOptions *solver_options_create_and_init(int solver_id, void *problem);
+SolverOptions* solver_options_create_and_init(int solver_id, void* problem);
 
 /**
  * Reset options to registered defaults.
@@ -243,7 +243,7 @@ SolverOptions *solver_options_create_and_init(int solver_id, void *problem);
  *
  * \param options The options to reset (modified in place)
  */
-void solver_options_reset_to_defaults(SolverOptions *options);
+void solver_options_reset_to_defaults(SolverOptions* options);
 
 #if defined(__cplusplus)
 }

@@ -132,7 +132,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* problem, unsigned i
  *  \param[in] problem the printed problem
  *  \param[in,out] file the output file
  */
-void genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file);
+int genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file);
 
 /** Read a GenericMechanicalProblem from a file descriptor.
  * \param[in] file the file descriptor
@@ -156,7 +156,7 @@ void genericMechanicalProblem_display(GenericMechanicalProblem* problem);
  *  The memory of the elementary block matrix is not managed here: the user
  *  must ensure it. In Siconos, the Kernel allocates the global NumericsMatrix
  *  and the diagonal block is plugged later in gmp_gauss_seidel
- *  (localProblem->M->matrix0 = diagBlock).
+ *  (localProblem->M->dense = diagBlock).
  *
  *  \param[in,out] problem         the GenericMechanicalProblem
  *  \param[in]     problemType  type of the added sub-problem

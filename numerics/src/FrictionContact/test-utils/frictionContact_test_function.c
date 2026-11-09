@@ -88,7 +88,7 @@ int frictionContact_test_function(TestCase* current) {
 
   FrictionContactProblem* problem = frictionContact_new_from_filename(current->filename);
   FILE* foutput = fopen("checkinput.dat", "w");
-  info = frictionContact_printInFile(problem, foutput);
+  info = frictionContactProblem_printInFile(problem, foutput);
 
 #ifdef WITH_FCLIB
   int global_hdf5_output = 0;
@@ -103,7 +103,7 @@ int frictionContact_test_function(TestCase* current) {
     char filename[100];
     snprintf(filename, sizeof(filename), "gfc3d_%d.hdf5", rand());
 
-    GlobalFrictionContactProblem* gfc3d = fc3d_reformulation_global_problem(problem);
+    GlobalFrictionContactProblem* gfc3d = fc3d_expand_to_global_problem(problem);
 
     char* title = "--";
     char* description = "--";

@@ -38,23 +38,23 @@ struct GlobalRollingFrictionContactProblem {
   int numberOfContacts;
   /** \f$ {M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
      a matrix with \f$ n \f$ the number of dof in the system */
-  NumericsMatrix *M;
+  NumericsMatrix* M;
   /**  \f$ {H} \in {{\mathrm{I\!R}}}^{n \times m} \f$,
        a matrix with \f$ m = d  n_c \f$ stored in NumericsMatrix structure */
-  NumericsMatrix *H;
+  NumericsMatrix* H;
   /** \f$ {q} \in {{\mathrm{I\!R}}}^{m} \f$ */
-  double *q;
+  double* q;
   /** \f$ {b} \in {{\mathrm{I\!R}}}^{m} \f$ */
-  double *b;
+  double* b;
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c = \f$ numberOfContacts) */
-  double *mu;
+  double* mu;
   /** \f$ {\mu_r} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction
       coefficients
       (\f$ n_c = \f$ numberOfContacts) */
-  double *mu_r;
+  double* mu_r;
   /** name of the problem **/
-  char *name;
+  char* name;
 };
 
 #if defined(__cplusplus)
@@ -63,7 +63,7 @@ extern "C" {
 
 /* create an empty GlobalRollingFrictionContactProblem
  * \return an empty fcp */
-GlobalRollingFrictionContactProblem *globalRollingFrictionContactProblem_new(void);
+GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(void);
 
 /** new GlobalRollingFrictionContactProblem from minimal set of data
  *
@@ -74,20 +74,20 @@ GlobalRollingFrictionContactProblem *globalRollingFrictionContactProblem_new(voi
  *  \param[in] mu the mu vector
  *  \return a pointer to a GlobalRollingFrictionContactProblem structure
  */
-GlobalRollingFrictionContactProblem *globalRollingFrictionContactProblem_new_with_data(
-    int dim, int nc, NumericsMatrix *M, double *q, double *mu, double *mu_r);
+GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new_with_data(
+    int dim, int nc, NumericsMatrix* M, double* q, double* mu, double* mu_r);
 
 /** free a GlobalRollingFrictionContactProblem
  *
  *  \param problem the problem to free
  */
-void globalRollingFrictionContactProblem_free(GlobalRollingFrictionContactProblem *problem);
+void globalRollingFrictionContactProblem_free(GlobalRollingFrictionContactProblem* problem);
 
 /** display a GlobalRollingFrictionContactProblem
  *
  *  \param problem the problem to display
  */
-void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem *problem);
+void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* problem);
 
 /** print a GlobalRollingFrictionContactProblem in a file (numerics .dat format)
  *
@@ -95,8 +95,8 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem *p
  *  \param file the dest file
  *  \return 0 if successfull
  */
-int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem *problem,
-                                             FILE *file);
+int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem* problem,
+                                             FILE* file);
 
 /** print a GlobalRollingFrictionContactProblem in a file (numerics .dat format)
  *  from its filename
@@ -105,15 +105,15 @@ int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int globalRollingFrictionContact_printInFilename(GlobalRollingFrictionContactProblem *problem,
-                                                 char *filename);
+int globalRollingFrictionContact_printInFilename(GlobalRollingFrictionContactProblem* problem,
+                                                 char* filename);
 
 /** read a GlobalRollingFrictionContactProblem from a file descriptor
  *
  *  \param file descriptor
  *  \return problem the problem to read
  */
-GlobalRollingFrictionContactProblem *globalRollingFrictionContact_newFromFile(FILE *file);
+GlobalRollingFrictionContactProblem* globalRollingFrictionContact_newFromFile(FILE* file);
 
 /** read a GlobalRollingFrictionContactProblem from a file (.dat or hdf5 if
  *  fclib is on) from its filename
@@ -121,8 +121,8 @@ GlobalRollingFrictionContactProblem *globalRollingFrictionContact_newFromFile(FI
  *  \param filename the name of the input file
  *  \return problem the problem to read
  */
-GlobalRollingFrictionContactProblem *globalRollingFrictionContact_new_from_filename(
-    const char *filename);
+GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filename(
+    const char* filename);
 
 /** Compute the global velocity given the reaction
  *
@@ -133,12 +133,12 @@ GlobalRollingFrictionContactProblem *globalRollingFrictionContact_new_from_filen
  *  system.
  */
 int globalRollingFrictionContact_computeGlobalVelocity(
-    GlobalRollingFrictionContactProblem *problem, double *reaction, double *globalVelocity);
+    GlobalRollingFrictionContactProblem* problem, double* reaction, double* globalVelocity);
 
 /* Reformulation into local problem */
-RollingFrictionContactProblem *
+RollingFrictionContactProblem*
 globalRollingFrictionContact_reformulation_RollingFrictionContact(
-    GlobalRollingFrictionContactProblem *problem);
+    GlobalRollingFrictionContactProblem* problem);
 
 #if defined(__cplusplus)
 }

@@ -71,11 +71,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
 
         // Create M matrix from numpy array
         py::buffer_info M_info = M.request();
-        problem->M = NM_create(NM_DENSE, M_info.shape[0], M_info.shape[1]);
-        problem->M->matrix0 =
-            (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        std::memcpy(problem->M->matrix0, M_info.ptr,
-                    M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        double* M_data = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        std::memcpy(M_data, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        problem->M = NM_create_with_data(NM_DENSE, M_info.shape[0], M_info.shape[1], M_data);
 
         // Copy q vector
         py::buffer_info q_info = q.request();
@@ -117,11 +115,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
 
         // Create M matrix from numpy array
         py::buffer_info M_info = M.request();
-        problem->M = NM_create(NM_DENSE, M_info.shape[0], M_info.shape[1]);
-        problem->M->matrix0 =
-            (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        std::memcpy(problem->M->matrix0, M_info.ptr,
-                    M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        double* M_data = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        std::memcpy(M_data, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        problem->M = NM_create_with_data(NM_DENSE, M_info.shape[0], M_info.shape[1], M_data);
 
         // Copy q vector
         py::buffer_info q_info = q.request();
@@ -160,11 +156,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
 
         // Create M matrix from numpy array
         py::buffer_info M_info = M.request();
-        problem->M = NM_create(NM_DENSE, M_info.shape[0], M_info.shape[1]);
-        problem->M->matrix0 =
-            (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        std::memcpy(problem->M->matrix0, M_info.ptr,
-                    M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        double* M_data = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        std::memcpy(M_data, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
+        problem->M = NM_create_with_data(NM_DENSE, M_info.shape[0], M_info.shape[1], M_data);
 
         // Copy q vector
         py::buffer_info q_info = q.request();

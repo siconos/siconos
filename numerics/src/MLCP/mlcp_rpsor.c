@@ -32,8 +32,8 @@
 #define EPSDIAG DBL_EPSILON
 
 /* Solver registration system */
-#include "solver_registry.h"
 #include "numerics_errors.h"
+#include "solver_registry.h"
 /*
  *
  * double *z : size n+m
@@ -212,12 +212,10 @@ static int mlcp_rpsor_solve_wrap(void* problem, double* z, double* w, SolverOpti
 }
 
 REGISTER_SOLVER(SICONOS_MLCP_RPSOR, "MLCP_RPSOR",
-                "Regularized Projected Successive Over-Relaxation for Mixed Linear Complementarity Problems",
-                mlcp_rpsor_init_wrap,
-                mlcp_rpsor_solve_wrap,
-                NULL,  /* free function */
-                NULL,  /* error function */
-                mlcp_rpsor_set_default,
-                1000,  /* default_max_iter */
-                1e-6,  /* default_tol */
-                0      /* is_local_solver */);
+                "Regularized Projected Successive Over-Relaxation for Mixed Linear "
+                "Complementarity Problems",
+                mlcp_rpsor_init_wrap, mlcp_rpsor_solve_wrap, NULL, /* free function */
+                NULL,                                              /* error function */
+                mlcp_rpsor_set_default, 1000,                      /* default_max_iter */
+                1e-6,                                              /* default_tol */
+                0 /* is_local_solver */);

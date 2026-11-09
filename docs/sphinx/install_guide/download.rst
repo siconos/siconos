@@ -82,9 +82,6 @@ Debian
 
 .. warning::
    Siconos version in Debian packages is outdated
-   
+
 
 * Siconos 4.2.0 https://packages.debian.org/sid/siconos  sid(unstable)
-
-
-
