@@ -1,9 +1,9 @@
 {
-// Plan 2.0 : portage et boundary sans distinction entre Neumann & Dirichlet.
-// Plan 2.1 : gestion des boundary conditions avec un type, Un rechargement à froid devrait marcher
-// Plan 2.2 : le rechargement à chaud devrait marcher
-// compression param : tjrs, compress var : optionnel
   "doc": {
+    "plan": ["Plan 2.0 : portage et boundary sans distinction entre Neumann & Dirichlet.",
+             "Plan 2.1 : gestion des boundary conditions avec un type, Un rechargement à froid devrait marcher",
+             "Plan 2.2 : le rechargement à chaud devrait marcher",
+             "compression param : tjrs, compress var : optionnel"],
     "dtype": "f64, f32, i64, i32, u64, u32, u8: fixed types; float_type, int_type; bool; str: short utf-8 string (names); vlen: large text (STEP, BREP, mesh, scripts)",
     "mode": "0: light, 1: classic, 2: heavy; a field of mode m is written if the file mode >= m",
     "shape": "dimensions after the first one; the first one is set by 'by' (S for index_*, N for a registry, T for a state)",
@@ -72,7 +72,7 @@
     "id": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
     "name": {"dtype": "str", "mode": 0, "by": "index_param", "shape": []},
     "center_of_mass": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["dim"]},
-    "mass": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": []}, //runtime
+    "mass": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": [], "note": "runtime"},
     "inertia": {"dtype": "float_type", "mode": 1, "by": "index_param", "shape": ["idof", "idof"]},
     "allow_self_collide": {"dtype": "bool", "mode": 2, "by": "index_param", "shape": []},
     "position": {"dtype": "float_type", "mode": 0, "by": "index_var", "shape": ["dim"]},
@@ -98,7 +98,7 @@
     "translation": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["dim"]},
     "orientation": {"dtype": "float_type", "mode": 0, "by": "index_param", "shape": ["rot"]},
     "group": {"dtype": "int_type", "mode": 1, "by": "index_param", "shape": []},
-    "subshape": {"dtype": "u8", "mode": 1, "by": "index_param", "shape": [], // Verifier les noms dans occ sinon subgeometry
+    "subshape": {"dtype": "u8", "mode": 1, "by": "index_param", "shape": [], "note": "Verifier les noms dans occ sinon subgeometry",
                  "enum": ["shape", "face", "edge"]},
     "subshape_range": {"dtype": "u64", "mode": 1, "by": "index_param", "shape": [2]},
     "subshape_index": {"dtype": "int_type", "mode": 1, "by": "subshape_range", "shape": []}
@@ -145,7 +145,7 @@
   },
   "contacts": {
     "index_var": {"dtype": "u64", "mode": 1, "by": "../time", "shape": [2]},
-    "interaction": {"dtype": "int_type", "mode": 1, "by": "index_var", "shape": []}, // ligne dans le bloc k de interactions
+    "interaction": {"dtype": "int_type", "mode": 1, "by": "index_var", "shape": [], "note": "ligne dans le bloc k de interactions"},
     "point_a": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["dim"]},
     "point_b": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["dim"]},
     "normal": {"dtype": "float_type", "mode": 1, "by": "index_var", "shape": ["dim"]},
@@ -163,7 +163,7 @@
       "solver_name": {"dtype": "str", "mode": 2, "by": "index_param", "shape": []},
       "integer_param_range": {"dtype": "u64", "mode": 2, "by": "index_param", "shape": [2]},
       "double_param_range": {"dtype": "u64", "mode": 2, "by": "index_param", "shape": [2]},
-      "integer_params": {"dtype": "i32", "mode": 2, "by": "integer_param_range", "shape": []}, // verifier int type
+      "integer_params": {"dtype": "i32", "mode": 2, "by": "integer_param_range", "shape": [], "note": "verifier int type"},
       "double_params": {"dtype": "f64", "mode": 2, "by": "double_param_range", "shape": []},
       "n_iterations": {"dtype": "int_type", "mode": 2, "by": "index_var", "shape": []},
       "precision": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []},
@@ -179,12 +179,12 @@
     "index_var": {"dtype": "u64", "mode": 2, "by": "../time", "shape": [2]},
     "kinetic": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []},
     "force_work": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []},
-    "work_n": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
-    "work_t": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
-    "work_n_theta": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
-    "work_t_theta": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
-    "work_n_neg": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
-    "work_t_neg": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": []}, // verifier si c'est un doublon de contact_work
+    "work_n": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": [], "note": "verifier si c'est un doublon de contact_work"},
+    "work_t": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": [], "note": "verifier si c'est un doublon de contact_work"},
+    "work_n_theta": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": [], "note": "verifier si c'est un doublon de contact_work"},
+    "work_t_theta": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": [], "note": "verifier si c'est un doublon de contact_work"},
+    "work_n_neg": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": [], "note": "verifier si c'est un doublon de contact_work"},
+    "work_t_neg": {"dtype": "float_type", "mode": 2, "by": "index_var", "shape": [], "note": "verifier si c'est un doublon de contact_work"},
     "contact_gap": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["dim"]},
     "contact_relative_velocity": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["dim"]},
     "contact_reaction_global": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["dim"]},
@@ -193,10 +193,8 @@
     "contact_status": {"dtype": "int_type", "mode": 2, "by": "../contacts/index_var", "shape": []},
     "contact_internal_variables": {"dtype": "float_type", "mode": 2, "by": "../contacts/index_var", "shape": ["n_internal"]}
   },
-  // Groups : Finite element problems
-  // Registre : maillage par corps FE (remaillage rare -> nouveau bloc). Champs : un groupe par champ,
-  // espace et nature en attributs, une ligne par corps FE et par pas, alignée sur le registre.
   "fem": {
+    "note": "Groups : Finite element problems. Registre : maillage par corps FE (remaillage rare -> nouveau bloc). Champs : un groupe par champ, espace et nature en attributs, une ligne par corps FE et par pas, alignée sur le registre.",
     "index_param": {"dtype": "u64", "mode": 0, "by": "../time", "shape": [2]},
     "body": {"dtype": "int_type", "mode": 0, "by": "index_param", "shape": []},
     "node_range": {"dtype": "u64", "mode": 0, "by": "index_param", "shape": [2]},
@@ -223,10 +221,10 @@
       "value": {"dtype": "f64", "mode": 2, "by": "value_range", "shape": []}
     }
   },
-  "boundary_conditions": { // Dirichlet, Neumann, Robin, Periodic -> v2.1
-    "Dirichlet": { //
+  "boundary_conditions": {"note": "Dirichlet, Neumann, Robin, Periodic -> v2.1",
+    "Dirichlet": {
     },
-    "Neumann" : { // Spring
+    "Neumann" : {"note": "Spring"
 
     },
     "index_param": {"dtype": "u64", "mode": 1, "by": "../time", "shape": [2]},
