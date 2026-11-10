@@ -3,13 +3,10 @@
 #include <boost/hana/fwd/type.hpp>
 #define BOOST_HANA_CONFIG_ENABLE_STRING_UDL 1
 #include <algorithm>
+#include <array>
 #include <boost/hana.hpp>
 #include <boost/hana/at.hpp>
 #include <boost/hana/equal.hpp>
-#ifdef __clang__
-#include <boost/hana/experimental/type_name.hpp>
-#endif
-#include <array>
 #include <boost/hana/ext/std/array.hpp>
 #include <boost/hana/ext/std/tuple.hpp>
 #include <boost/hana/functional/overload_linearly.hpp>
@@ -25,6 +22,8 @@
 #include <boost/type_index.hpp>
 #include <cstdint>
 #include <numeric>
+#include <source_location>
+#include <string>
 #include <type_traits>
 
 // #include "boost/hana/ext/boost/ublas.hpp"
@@ -54,9 +53,77 @@ constexpr bool type_trace() {
 
 namespace hana = boost::hana;
 
-#ifdef __clang__
-using hana::experimental::type_name;
-#endif
+namespace detail {
+
+constexpr bool is_identifier_char(char c) {
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+         c == '_';
+}
+
+// the compiler's spelling of the function, with T in it:
+// "... [with T = name; ...]" (gcc) or "... [T = name]" (clang)
+template <typename T>
+constexpr std::string_view pretty_function() {
+  return std::source_location::current().function_name();
+}
+
+template <typename T>
+constexpr std::string make_type_name() {
+  const std::string_view f = pretty_function<T>();
+  const auto b = f.find("T = ") + 4;
+  const std::string_view full = f.substr(b, f.find_first_of(";]", b) - b);
+
+  // without the namespaces: an identifier followed by :: is dropped
+  std::string name;
+  std::string word;
+  for (std::size_t k = 0; k < full.size(); ++k) {
+    const char c = full[k];
+    if (is_identifier_char(c)) {
+      word += c;
+    } else if (c == ':' && k + 1 < full.size() && full[k + 1] == ':') {
+      word.clear();
+      ++k;
+    } else {
+      name += word;
+      word.clear();
+      name += c;
+    }
+  }
+  name += word;
+
+  // string_literal<N>{"x"} -> "x"
+  for (auto p = name.find("string_literal<"); p != std::string::npos;
+       p = name.find("string_literal<", p)) {
+    const auto open = name.find('{', p);
+    const auto close = name.find('}', open);
+    name =
+        name.substr(0, p) + name.substr(open + 1, close - open - 1) + name.substr(close + 1);
+  }
+
+  // gcc spells nested closing brackets "> >", clang ">>"
+  for (auto p = name.find("> >"); p != std::string::npos; p = name.find("> >", p)) {
+    name.erase(p + 1, 1);
+  }
+  return name;
+}
+
+// the characters of the name, computed once at compile time: a constexpr
+// std::string cannot outlive the constant evaluation
+template <typename T>
+inline constexpr auto type_name_chars = [] {
+  std::array<char, make_type_name<T>().size()> a{};
+  std::ranges::copy(make_type_name<T>(), a.begin());
+  return a;
+}();
+
+}  // namespace detail
+
+// the name of a type, without the namespaces, the string literals of its
+// template arguments as strings
+template <typename T>
+constexpr std::string_view type_name() {
+  return {detail::type_name_chars<T>.data(), detail::type_name_chars<T>.size()};
+}
 
 using hana::append;
 using hana::at;

@@ -1242,11 +1242,11 @@ struct space_filter : item {
                 using system2_t = typename p2_t::item_t;
 
                 // print("point1 {},{},{}\n",
-                //       mp::type_name<system1_t>().c_str(),
+                //       mp::type_name<system1_t>(),
                 //       handle_point1.coord()(0),
                 //       handle_point1.coord()(1));
                 // print("point2 {},{},{}\n",
-                //       mp::type_name<system2_t>().c_str(),
+                //       mp::type_name<system2_t>(),
                 //       handle_point2.coord()(0),
                 //       handle_point2.coord()(1));
 

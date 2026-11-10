@@ -22,7 +22,6 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/utils/check.hpp"
 #if defined(__clang__)
-#include <boost/hana/experimental/type_name.hpp>
 #endif
 using fmt::print;
 
@@ -342,11 +341,11 @@ int main() {
   //   for_each(ustore5,
   //           []<typename Key, typename Value>(Key&& key, Value&& value)
   //        {
-  //              print("{}\n", boost::hana::experimental::type_name<Key>().c_str());
+  //              print("{}\n", mp::type_name<Key>());
   //       });
 
 #ifdef __clang__
-//   print("-->{}\n", boost::hana::experimental::type_name<mp::pair<ball, zz>>().c_str());
+//   print("-->{}\n", mp::type_name<mp::pair<ball, zz>>());
 #endif
   auto dd = make_storage<env, wrap<some::unbounded_collection, ball>,
                          with_properties<diagonal<ball::mass_matrix>, time_levels<ball::q, 10>,

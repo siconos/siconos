@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cctype>
 #include <cstddef>
 #include <numeric>
 #include <string>
@@ -52,55 +51,13 @@ struct next {};
 
 namespace detail {
 
-// the name of a type, without the namespaces, the string literals of its
-// template arguments as strings
-template <typename T>
-std::string type_name() {
-  std::string_view f = __PRETTY_FUNCTION__;
-  const auto b = f.find("T = ") + 4;
-  const std::string full(f.substr(b, f.find_first_of(";]", b) - b));
-
-  // without the namespaces: an identifier followed by :: is dropped
-  std::string name;
-  std::string word;
-  for (std::size_t k = 0; k < full.size(); ++k) {
-    const char c = full[k];
-    if (std::isalnum(static_cast<unsigned char>(c)) || c == '_') {
-      word += c;
-    } else if (c == ':' && k + 1 < full.size() && full[k + 1] == ':') {
-      word.clear();
-      ++k;
-    } else {
-      name += word;
-      word.clear();
-      name += c;
-    }
-  }
-  name += word;
-
-  // string_literal<N>{"x"} -> "x"
-  for (auto p = name.find("string_literal<"); p != std::string::npos;
-       p = name.find("string_literal<", p)) {
-    const auto open = name.find('{', p);
-    const auto close = name.find('}', open);
-    name =
-        name.substr(0, p) + name.substr(open + 1, close - open - 1) + name.substr(close + 1);
-  }
-
-  // gcc spells nested closing brackets "> >", clang ">>"
-  for (auto p = name.find("> >"); p != std::string::npos; p = name.find("> >", p)) {
-    name.erase(p + 1, 1);
-  }
-  return name;
-}
-
 // a placeholder or an item: its label if it has one
 template <typename T>
 std::string label() {
   if constexpr (requires { T::label; }) {
     return std::string(T::label);
   } else {
-    return type_name<T>();
+    return std::string(mp::type_name<T>());
   }
 }
 
@@ -293,7 +250,7 @@ template <typename Item, typename Tag, typename Declarer>
 struct set {
   using item = Item;
   static std::string text() {
-    return detail::label<Item>() + " in " + detail::type_name<Tag>();
+    return detail::label<Item>() + " in " + std::string(mp::type_name<Tag>());
   }
   template <typename Ctx>
   static void for_each(auto& data, auto, std::size_t, auto&& f) {
@@ -387,7 +344,7 @@ std::string space_text() {
   if constexpr (requires { S::text(); }) {
     return S::text();
   } else {
-    return type_name<S>();
+    return std::string(mp::type_name<S>());
   }
 }
 
@@ -453,7 +410,7 @@ template <typename K>
 kernel_info info() {
   kernel_info i;
   if constexpr (requires { typename K::fields; }) {
-    i.name = detail::type_name<K>();
+    i.name = mp::type_name<K>();
     i.space = detail::space_text<typename K::space>();
     detail::add_accesses<K>(i, static_cast<typename K::fields*>(nullptr));
     i.host_only = std::is_base_of_v<host_only, K>;
@@ -528,7 +485,7 @@ void run(auto& data, auto step, auto&& p) {
   } else {
     if (recording) {
       auto i = info<K>();
-      i.item = detail::type_name<resolve_t<Ctx, typename K::space::item>>();
+      i.item = mp::type_name<resolve_t<Ctx, typename K::space::item>>();
       recording->push_back(std::move(i));
     }
     [&]<typename... Kernels>(fused<Kernels...>*) {

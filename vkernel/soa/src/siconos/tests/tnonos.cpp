@@ -22,7 +22,6 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/utils/check.hpp"
 #if defined(__clang__)
-#include <boost/hana/experimental/type_name.hpp>
 #endif
 using fmt::print;
 

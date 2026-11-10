@@ -30,7 +30,6 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
 #if defined(__clang__)
-#include <boost/hana/experimental/type_name.hpp>
 #endif
 
 namespace siconos {
