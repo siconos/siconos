@@ -250,6 +250,11 @@ if(WITH_TESTING)
       set(libs
           "$<TARGET_FILE_DIR:numerics>:$<TARGET_FILE_DIR:kernel>:$<TARGET_FILE_DIR:mechanics>:$<TARGET_FILE_DIR:externals>:$<TARGET_FILE_DIR:externals_fortran>"
       )
+      # the neighbor search of a GPU build, a library of its own: else the
+      # installed one
+      if(TARGET cuNSearch)
+        string(APPEND libs ":$<TARGET_FILE_DIR:cuNSearch>")
+      endif()
       set_tests_properties(
         ${pt_NAME}
         PROPERTIES ENVIRONMENT
