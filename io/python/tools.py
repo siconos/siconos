@@ -250,3 +250,68 @@ def extract_bc_global_dofs(fesolid, mesh_data):
             global_dofs.extend(vertex_to_dof[vid])
 
     return global_dofs
+
+
+def chain_contact_segments(segments):
+    """Order the contact segments of a FEM mesh into one chain.
+
+    segments: the contact line elements, in any order and orientation, each
+    as the dofs (x0, y0, x1, y1) of its two vertices
+    (FiniteElementModel.getContactSegments).
+
+    Returns (vertices, chained): vertices, the x dof of each vertex along the
+    chain, the first one repeated at the end if the chain is closed;
+    chained, the segments in chain order, oriented so that segment i goes
+    from vertices[i] to vertices[i + 1]. This is the layout of the vnative
+    chained_segment shape: n vertices for n - 1 segments, the dofs of the
+    segment i at 4 i in the global indices.
+
+    Raises ValueError if the segments do not form a single chain (a branch,
+    or several disjoint chains)."""
+
+    segments = [tuple(int(d) for d in s) for s in segments]
+    if not segments:
+        return [], []
+
+    # the segments at each vertex, a vertex being known by its x dof
+    at_vertex = {}
+    for k, s in enumerate(segments):
+        for v in (s[0], s[2]):
+            at_vertex.setdefault(v, []).append(k)
+
+    branches = [v for v, ks in at_vertex.items() if len(ks) > 2]
+    if branches:
+        raise ValueError(
+            f"contact segments: {len(branches)} vertices shared by more than two "
+            "segments, the contact boundary is not a single chain"
+        )
+
+    # an open chain starts at one of its two ends, a closed one anywhere
+    ends = [v for v, ks in at_vertex.items() if len(ks) == 1]
+    start = ends[0] if ends else segments[0][0]
+
+    vertices = [start]
+    chained = []
+    used = set()
+    v = start
+    while True:
+        free = [k for k in at_vertex[v] if k not in used]
+        if not free:
+            break
+        k = free[0]
+        used.add(k)
+        s = segments[k]
+        if s[0] != v:
+            s = (s[2], s[3], s[0], s[1])
+        chained.append(s)
+        v = s[2]
+        vertices.append(v)
+
+    if len(chained) != len(segments):
+        raise ValueError(
+            f"contact segments: {len(segments) - len(chained)} of {len(segments)} "
+            "segments are not connected to the chain, the contact boundary must be "
+            "a single closed loop or open line"
+        )
+
+    return vertices, chained

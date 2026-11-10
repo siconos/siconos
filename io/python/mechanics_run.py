@@ -1181,39 +1181,33 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     contact_tag = 4  # msh tag contact convention
 
                     femodel = fesolid.FEModel()
-                    mesh = femodel.mesh()
 
-                    # Get FEM contact segments
-                    segments = femodel.getContactSegments(contact_tag)
+                    # the contact segments, in the file order and orientation
+                    # of the mesh lines, put in chain order: the
+                    # chained_segment shape has n nodes for n - 1 segments,
+                    # segment i from node i to node i + 1, a closed loop
+                    # repeating its first node at the end
+                    contact_vertices, segments = (
+                        siconos.io.tools.chain_contact_segments(
+                            femodel.getContactSegments(contact_tag)
+                        )
+                    )
 
-                    # Build DOF -> coord mapping from FEM model
+                    # x dof -> coordinates of the node
                     dof_to_coord = {}
                     for node in femodel.nodes():
                         dofs = node.global_dof_index()
                         if len(dofs) >= 2:
                             dof_to_coord[dofs[0]] = (node.x(), node.y())
-                            dof_to_coord[dofs[1]] = (node.x(), node.y())
 
-                    # contact_nodes: unique vertices in chain order (first vertex of each segment)
-                    # For chained_segment shape: N nodes for N segments (closed loop)
-                    contact_nodes = []
-                    for seg in segments:
-                        dof_x = seg[0]
-                        if dof_x in dof_to_coord:
-                            contact_nodes.append(
-                                [dof_to_coord[dof_x][0], dof_to_coord[dof_x][1], 0.0]
-                            )
-                        else:
-                            v_idx = dof_x // 2
-                            vertex = mesh.vertices()[v_idx]
-                            contact_nodes.append([vertex.x(), vertex.y(), 0.0])
+                    contact_nodes = np.array(
+                        [[*dof_to_coord[v], 0.0] for v in contact_vertices],
+                        dtype=np.float64,
+                    ).reshape(-1, 3)
 
-                    contact_nodes = np.array(contact_nodes, dtype=np.float64)
-
-                    # global_indices: 4 DOFs per segment (vertex_i + vertex_{i+1}) - FLATTEN SEGMENTS
-                    global_indices = np.array(
-                        segments, dtype=np.uint64
-                    ).flatten()  # 20 × 4 = 80 DOFs
+                    # the 4 dofs (x1, y1, x2, y2) of each segment, segment i
+                    # at 4 i
+                    global_indices = np.array(segments, dtype=np.uint64).flatten()
 
                     body.init_fem(
                         mesh_data,
