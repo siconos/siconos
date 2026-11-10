@@ -42,8 +42,11 @@ message(STATUS "Generate __init__.py file ...")
 configure_file(__init__.py.in ${CMAKE_CURRENT_BINARY_DIR}/siconos/__init__.py)
 
 # ====== Create a Target to clean sources (remove .pyc files) and build dir ======
-file(GLOB_RECURSE PYCFILES "${CMAKE_SOURCE_DIR}/*.pyc")
-add_custom_target(pyclean COMMAND rm -f ${PYCFILES}
+# The .pyc files are searched when the target runs, not at configure time,
+# and without crossing a mount: a recursive glob of the source tree follows
+# everything that lives in it, e.g. a container root bind-mounting the tree
+# into itself, and never ends.
+add_custom_target(pyclean COMMAND find ${CMAKE_SOURCE_DIR} -xdev -name "*.pyc" -delete
   COMMAND make clean
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/build
   COMMENT "Clean sources and build.")
