@@ -32,11 +32,6 @@ find_package(Eigen3 REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 3.0.2  CONFIG REQUIRED)
 
-# every vkernel target includes boost/hana (storage/mp/mp.hpp): outside a
-# guix profile (micromamba, brew) the boost headers are not on the default
-# include path of the compiler.
-link_libraries(Boost::boost)
-
 include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 
 if(WITH_GPU)
@@ -55,6 +50,14 @@ if(WITH_GPU)
 else()
   add_subdirectory(extern/CompactNSearch)
 endif()
+
+# every vkernel target includes boost/hana (storage/mp/mp.hpp): outside a
+# guix profile (micromamba, brew) the boost headers are not on the default
+# include path of the compiler. Not on the vendored neighbour search above:
+# in a guix profile the boost include dir is the profile include dir, and
+# nvcc given it as -isystem finds the glibc math.h before the libstdc++ one,
+# which breaks libcu++ <cuda/std/cmath> (no ::isgreater).
+link_libraries(Boost::boost)
 
 
 link_directories(${CMAKE_BUILD_DIR})

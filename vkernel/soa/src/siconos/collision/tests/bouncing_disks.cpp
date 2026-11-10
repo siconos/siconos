@@ -24,14 +24,12 @@ using translated_disk_shape = collision::translated<disk_shape>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
-struct interaction
-    : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
+struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
 struct topo : simul::topology<disk, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
-using pointl =
-    collision::point<storage::pattern::empty_item, collision::shape::segment>;
+using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
 // using pointtds = collision::point<translated_disk_shape>;
 struct neighborhood : collision::neighborhood<pointd, pointl> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
@@ -45,30 +43,26 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t
-    : storage::make_runtime_database<
-          env, simulation, interaction_manager, io, segment_shape, disk_shape,
-          storage::with_properties<
-              storage::wrapped<disk, some::unbounded_collection>,
-              storage::wrapped<diskdisk_r, some::unbounded_collection>,
-              storage::wrapped<diskfsegment_r, some::unbounded_collection>,
-              storage::wrapped<pointl, some::unbounded_collection>,
-              storage::wrapped<pointd, some::unbounded_collection>,
-              //          storage::wrapped<pointtds,
-              //          some::unbounded_collection>,
-              storage::wrapped<interaction, some::unbounded_collection>,
-              storage::wrapped<segment_shape, some::unbounded_collection>,
-              storage::wrapped<disk_shape, some::unbounded_collection>,
-              storage::wrapped<translated_disk_shape,
-                               some::unbounded_collection>,
-              storage::attached<disk, storage::pattern::symbol<"shape">,
-                                storage::some::item_ref<disk_shape>>,
-              storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
-              storage::diagonal<
-                  storage::pattern::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {
-};
+struct data_t : storage::make_runtime_database<
+                    env, simulation, interaction_manager, io, segment_shape, disk_shape,
+                    storage::with_properties<
+                        storage::wrapped<disk, some::unbounded_collection>,
+                        storage::wrapped<diskdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+                        storage::wrapped<pointl, some::unbounded_collection>,
+                        storage::wrapped<pointd, some::unbounded_collection>,
+                        //          storage::wrapped<pointtds,
+                        //          some::unbounded_collection>,
+                        storage::wrapped<interaction, some::unbounded_collection>,
+                        storage::wrapped<segment_shape, some::unbounded_collection>,
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
+                        storage::wrapped<translated_disk_shape, some::unbounded_collection>,
+                        storage::attached<disk, storage::pattern::symbol<"shape">,
+                                          storage::some::item_ref<disk_shape>>,
+                        storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
+                        storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
+                        storage::assembled_diagonal<
+                            storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {
@@ -79,8 +73,7 @@ class BouncingDisksTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
  public:
-  void testBouncingDisks()
-  {
+  void testBouncingDisks() {
     using namespace siconos;
     using storage::pattern::wrap;
     using namespace storage;
@@ -117,13 +110,11 @@ class BouncingDisksTest : public CppUnit::TestFixture {
     using disk_handle_t = decltype(storage::add<config::disk>(data));
     std::vector<disk_handle_t> disks;
     disks.reserve(ndisks);
-    for (std::size_t i = 0; i < ndisks; ++i)
-      disks.push_back(storage::add<config::disk>(data));
+    for (std::size_t i = 0; i < ndisks; ++i) disks.push_back(storage::add<config::disk>(data));
 
     for (std::size_t i = 0; i < disks.size(); ++i) {
       auto& disk = disks[i];
-      storage::prop<"id", config::topo>(disk) =
-          static_cast<unsigned int>(i + 1);
+      storage::prop<"id", config::topo>(disk) = static_cast<unsigned int>(i + 1);
 
       disk.q() = {0, position_init * static_cast<unsigned int>(i + 1), 0};
       disk.velocity() = {0, velocity_init, 0};
@@ -212,14 +203,12 @@ class BouncingDisksTest : public CppUnit::TestFixture {
 
     // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
     // std::ofstream cout("result.dat");
-    std::print(result_file,
-               "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+    std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
                simulation.current_step() * simulation.time_step(),
                storage::attr<"q">(disk1, simulation.current_step())(1),
                storage::attr<"q">(disk2, simulation.current_step())(1),
                storage::attr<"velocity">(disk1, simulation.current_step())(1),
-               storage::attr<"velocity">(disk2, simulation.current_step())(1),
-               0., 0.);
+               storage::attr<"velocity">(disk2, simulation.current_step())(1), 0., 0.);
 
     // auto& vds = storage::prop_values<config::interaction, "vd">(
     //     data, simulation.current_step());
@@ -235,31 +224,25 @@ class BouncingDisksTest : public CppUnit::TestFixture {
 
       double p0, lambda;
       if (ninvds > 0) {
-        p0 = get_vector(
-            simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
-        lambda = get_vector(
-            simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
-      }
-      else {
+        p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(), 0)(0);
+        lambda = get_vector(simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
+      } else {
         p0 = 0;
         lambda = 0;
       }
 
-      std::print(
-          result_file,
-          "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-          simulation.current_step() * simulation.time_step(),
-          storage::attr<"q">(disk1, simulation.current_step())(1),
-          storage::attr<"q">(disk2, simulation.current_step())(1),
-          storage::attr<"velocity">(disk1, simulation.current_step())(1),
-          storage::attr<"velocity">(disk2, simulation.current_step())(1), p0,
-          lambda);
+      std::print(result_file, "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+                 simulation.current_step() * simulation.time_step(),
+                 storage::attr<"q">(disk1, simulation.current_step())(1),
+                 storage::attr<"q">(disk2, simulation.current_step())(1),
+                 storage::attr<"velocity">(disk1, simulation.current_step())(1),
+                 storage::attr<"velocity">(disk2, simulation.current_step())(1), p0, lambda);
     }
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_disks.dat"),
-                       "bouncing_disks.ref", 1e-8);
+    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_disks.dat"), "bouncing_disks.ref",
+                       1e-8);
   }
 };
 

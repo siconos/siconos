@@ -37,8 +37,7 @@ struct topo : simul::topology<disk, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
-using pointl =
-    collision::point<storage::pattern::empty_item, collision::shape::segment>;
+using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
 struct neighborhood : collision::neighborhood<pointd, pointl> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
@@ -49,24 +48,21 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t
-    : storage::make_runtime_database<
-          env, simulation, interaction_manager, segment_shape, disk_shape,
-          storage::with_properties<
-              storage::wrapped<disk, some::unbounded_collection>,
-              storage::wrapped<diskdisk_r, some::unbounded_collection>,
-              storage::wrapped<diskfsegment_r, some::unbounded_collection>,
-              storage::wrapped<interaction, some::unbounded_collection>,
-              storage::wrapped<segment_shape, some::unbounded_collection>,
-              storage::wrapped<disk_shape, some::unbounded_collection>,
-              storage::attached<disk, storage::pattern::symbol<"shape">,
-                                storage::some::item_ref<disk_shape>>,
-              storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
-              storage::diagonal<
-                  storage::pattern::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {
-};
+struct data_t : storage::make_runtime_database<
+                    env, simulation, interaction_manager, segment_shape, disk_shape,
+                    storage::with_properties<
+                        storage::wrapped<disk, some::unbounded_collection>,
+                        storage::wrapped<diskdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+                        storage::wrapped<interaction, some::unbounded_collection>,
+                        storage::wrapped<segment_shape, some::unbounded_collection>,
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
+                        storage::attached<disk, storage::pattern::symbol<"shape">,
+                                          storage::some::item_ref<disk_shape>>,
+                        storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
+                        storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
+                        storage::assembled_diagonal<
+                            storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {
@@ -77,8 +73,7 @@ class IoContactPointsTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
  public:
-  void testIoContactPoints()
-  {
+  void testIoContactPoints() {
     using namespace siconos;
     using namespace storage;
 
@@ -102,8 +97,7 @@ class IoContactPointsTest : public CppUnit::TestFixture {
     using disk_handle_t = decltype(storage::add<config::disk>(data));
     std::vector<disk_handle_t> disks;
     disks.reserve(ndisks);
-    for (std::size_t i = 0; i < ndisks; ++i)
-      disks.push_back(storage::add<config::disk>(data));
+    for (std::size_t i = 0; i < ndisks; ++i) disks.push_back(storage::add<config::disk>(data));
 
     for (std::size_t i = 0; i < disks.size(); ++i) {
       auto& disk = disks[i];
@@ -171,20 +165,18 @@ class IoContactPointsTest : public CppUnit::TestFixture {
       // compute_output (called inside compute_one_step) zeroes y before the
       // nonlinear relation branches, so y[1] must be defined (==0, finite)
       // for every active interaction this step.
-      auto& ys = storage::attr_values<config::interaction, "y">(
-          data, simulation.current_step());
+      auto& ys =
+          storage::attr_values<config::interaction, "y">(data, simulation.current_step());
       for (auto [y] : view::zip(ys)) {
         ++checks;
-        CPPUNIT_ASSERT_MESSAGE(
-            "y[1] (tangential gap row) is zero and finite",
-            std::isfinite(y[0]) && std::isfinite(y[1]) && y[1] == 0.);
+        CPPUNIT_ASSERT_MESSAGE("y[1] (tangential gap row) is zero and finite",
+                               std::isfinite(y[0]) && std::isfinite(y[1]) && y[1] == 0.);
       }
     }
 
     // Require at least one contact to have been produced, so the check is not
     // vacuous: disks fall onto the ground segment within the window.
-    CPPUNIT_ASSERT_MESSAGE("at least one interaction was observed",
-                           checks > 0);
+    CPPUNIT_ASSERT_MESSAGE("at least one interaction was observed", checks > 0);
 
     std::print("io_contact_points: {} y-rows checked\n", checks);
   }

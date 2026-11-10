@@ -44,14 +44,12 @@ using translated_disk_shape = collision::translated<disk_shape>;
 
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
-struct interaction
-    : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
+struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r> {};
 struct topo : simul::topology<disk, interaction> {};
 struct osi : simul::one_step_integrator<topo>::moreau_jean {};
 struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk, collision::empty_shape>;
-using pointl =
-    collision::point<storage::pattern::empty_item, collision::shape::segment>;
+using pointl = collision::point<storage::pattern::empty_item, collision::shape::segment>;
 struct neighborhood : collision::neighborhood<pointd, pointl> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
@@ -61,28 +59,24 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 };
 
-struct data_t
-    : storage::make_runtime_database<
-          env, simulation, space_filter, segment_shape, disk_shape,
-          storage::with_properties<
-              storage::wrapped<disk, some::unbounded_collection>,
-              storage::wrapped<diskdisk_r, some::unbounded_collection>,
-              storage::wrapped<diskfsegment_r, some::unbounded_collection>,
-              storage::wrapped<pointl, some::unbounded_collection>,
-              storage::wrapped<pointd, some::unbounded_collection>,
-              storage::wrapped<interaction, some::unbounded_collection>,
-              storage::wrapped<segment_shape, some::unbounded_collection>,
-              storage::wrapped<disk_shape, some::unbounded_collection>,
-              storage::wrapped<translated_disk_shape,
-                               some::unbounded_collection>,
-              storage::attached<disk, storage::pattern::symbol<"shape">,
-                                storage::some::item_ref<disk_shape>>,
-              storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
-              storage::diagonal<
-                  storage::pattern::attr_t<disk, "mass_matrix">>,
-              storage::assembled_diagonal<
-                  storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {
-};
+struct data_t : storage::make_runtime_database<
+                    env, simulation, space_filter, segment_shape, disk_shape,
+                    storage::with_properties<
+                        storage::wrapped<disk, some::unbounded_collection>,
+                        storage::wrapped<diskdisk_r, some::unbounded_collection>,
+                        storage::wrapped<diskfsegment_r, some::unbounded_collection>,
+                        storage::wrapped<pointl, some::unbounded_collection>,
+                        storage::wrapped<pointd, some::unbounded_collection>,
+                        storage::wrapped<interaction, some::unbounded_collection>,
+                        storage::wrapped<segment_shape, some::unbounded_collection>,
+                        storage::wrapped<disk_shape, some::unbounded_collection>,
+                        storage::wrapped<translated_disk_shape, some::unbounded_collection>,
+                        storage::attached<disk, storage::pattern::symbol<"shape">,
+                                          storage::some::item_ref<disk_shape>>,
+                        storage::time_invariant<storage::pattern::attr_t<disk, "fext">>,
+                        storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
+                        storage::assembled_diagonal<
+                            storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
 }  // namespace siconos::config
 
 namespace {
@@ -95,8 +89,7 @@ struct run_result {
   std::string dataflow;  // what the stages of the time steps did
 };
 
-run_result run_deposit(bool with_dataflow = false)
-{
+run_result run_deposit(bool with_dataflow = false) {
   using namespace siconos;
   using namespace storage;
 
@@ -123,8 +116,7 @@ run_result run_deposit(bool with_dataflow = false)
   for (std::size_t i = 0; i < n; ++i) {
     for (std::size_t j = 0; j < n; ++j) {
       auto disk = storage::add<config::disk>(data);
-      prop<"id", config::topo>(disk) =
-          static_cast<unsigned int>(disks.size() + 1);
+      prop<"id", config::topo>(disk) = static_cast<unsigned int>(disks.size() + 1);
       const double x = spacing * (i + 1.);
       disk.q() = {x, slope_y(x) + 1.1 * radius + spacing * j, 0};
       disk.velocity() = {0, 0, 0};
@@ -200,9 +192,8 @@ run_result run_deposit(bool with_dataflow = false)
     ngbh.search();
     spacef.update_index_set0(simulation.current_step());
     simulation.compute_one_step();
-    result.max_interactions =
-        std::max(result.max_interactions,
-                 std::size(storage::handles<config::interaction>(data, 0)));
+    result.max_interactions = std::max(
+        result.max_interactions, std::size(storage::handles<config::interaction>(data, 0)));
   }
 
   result.dataflow = simulation.dataflow_report();
@@ -224,8 +215,7 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
  public:
-  void testSortedNeighbors()
-  {
+  void testSortedNeighbors() {
     using Real = CompactNSearch::Real;
 
     // a jittered grid of points and a line of points crossing it
@@ -234,8 +224,7 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
     unsigned int seed = 12345;
     auto jitter = [&seed]() {
       seed = 1664525u * seed + 1013904223u;
-      return static_cast<Real>(seed >> 8) / static_cast<Real>(1u << 24) -
-             Real(0.5);
+      return static_cast<Real>(seed >> 8) / static_cast<Real>(1u << 24) - Real(0.5);
     };
     for (unsigned int i = 0; i < n; ++i) {
       for (unsigned int j = 0; j < n; ++j) {
@@ -258,11 +247,9 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
       for (unsigned int other = 0; other < 2; ++other) {
         for (unsigned int i = 0; i < points.n_points(); ++i) {
           for (unsigned int k = 1; k < points.n_neighbors(other, i); ++k) {
-            if (points.neighbor(other, i, k - 1) >=
-                points.neighbor(other, i, k)) {
-              CPPUNIT_FAIL(std::format(
-                  "neighbors of point {} of set {} in set {} not sorted", i,
-                  ps, other));
+            if (points.neighbor(other, i, k - 1) >= points.neighbor(other, i, k)) {
+              CPPUNIT_FAIL(std::format("neighbors of point {} of set {} in set {} not sorted",
+                                       i, ps, other));
             }
           }
           pairs += points.n_neighbors(other, i);
@@ -273,13 +260,11 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
     CPPUNIT_ASSERT(pairs > 100000);
   }
 
-  void testSameRunSameStates()
-  {
+  void testSameRunSameStates() {
     auto first = run_deposit();
     auto second = run_deposit();
 
-    std::print("max interactions: {} / {}\n", first.max_interactions,
-               second.max_interactions);
+    std::print("max interactions: {} / {}\n", first.max_interactions, second.max_interactions);
 
     // a flow with many contacts, not a few isolated ones
     CPPUNIT_ASSERT(first.max_interactions > 200);
@@ -287,16 +272,14 @@ class ReproducibleDisksTest : public CppUnit::TestFixture {
     CPPUNIT_ASSERT_EQUAL(first.states.size(), second.states.size());
     for (std::size_t k = 0; k < first.states.size(); ++k) {
       if (first.states[k] != second.states[k]) {
-        CPPUNIT_FAIL(
-            std::format("runs differ: state {} of disk {}: {:.17g} / {:.17g}",
-                        k % 6, k / 6, first.states[k], second.states[k]));
+        CPPUNIT_FAIL(std::format("runs differ: state {} of disk {}: {:.17g} / {:.17g}", k % 6,
+                                 k / 6, first.states[k], second.states[k]));
       }
     }
   }
 
   // what the stages of the time steps do, and recording it changes nothing
-  void testDataflow()
-  {
+  void testDataflow() {
     auto recorded = run_deposit(true);
     auto plain = run_deposit();
     std::print("{}", recorded.dataflow);

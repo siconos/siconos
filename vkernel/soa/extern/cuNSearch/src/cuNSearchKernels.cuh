@@ -3,7 +3,10 @@
 #include "Types.h"
 #include "GridInfo.h"
 
-#define CUDA_MAX_NEIGHBORS 70
+// siconos: no CUDA_MAX_NEIGHBORS cap. kComputeCounts counts every neighbor
+// and the lists are allocated from these counts: a cap only dropped the
+// neighbors visited last, a subset depending on the order of the points in
+// their cells (atomicAdd), hence missed contacts from one run to another.
 #define CUDA_META_GRID_GROUP_SIZE 8
 #define CUDA_META_GRID_BLOCK_SIZE (CUDA_META_GRID_GROUP_SIZE*CUDA_META_GRID_GROUP_SIZE*CUDA_META_GRID_GROUP_SIZE)
 
