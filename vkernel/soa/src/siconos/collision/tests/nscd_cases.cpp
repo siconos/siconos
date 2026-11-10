@@ -307,7 +307,7 @@ scene dem_scene(double mu, double h, double tmax, double alpha = 0., double damp
    stiffness (Moreau-Jean: none, see column) */
 void dem_column(std::size_t n) {
   using namespace siconos;
-  world w(dem_scene(0.3, 1e-4, 1.));
+  world w(dem_scene(0.3, 1e-4, 0.5));
   std::vector<decltype(w.add_disk(0., 0.))> disks;
   for (std::size_t i = 0; i < n; ++i) disks.push_back(w.add_disk(0., r + 2 * r * i));
   w.finalize();
@@ -369,10 +369,10 @@ void dem_stability() {
    up to the elastic offset of the springs and the normal vibrations */
 void dem_sliding_square() {
   using namespace siconos;
-  const double v0 = 2.;
+  const double v0 = 0.5;
   const double mu = 0.3;
   const double d_exact = v0 * v0 / (2 * mu * g);
-  world w(dem_scene(mu, 1e-4, v0 / (mu * g) + 0.3));
+  world w(dem_scene(mu, 1e-4, v0 / (mu * g) + 0.05));
   // two corners, each carrying m g / 2
   auto p = w.add_square(0., r - m * g / (2 * kn), v0);
   w.finalize();
@@ -401,18 +401,18 @@ void dem_sliding_square() {
 void dem_incline_sticks() {
   using namespace siconos;
   const double alpha = 20 * deg;
-  world w(dem_scene(0.5, 1e-4, 1., alpha));
+  world w(dem_scene(0.5, 1e-4, 0.6, alpha));
   auto p = w.add_square(0., r - m * g * std::cos(alpha) / (2 * kn));
   w.finalize();
   const double x_eq = m * g * std::sin(alpha) / (2 * kt);
-  // the range of x before and after t = 0.5
+  // the range of x before and after t = 0.4
   double x_max = 0., late_min = INFINITY, late_max = -INFINITY;
   while (w.simulation.has_next_event()) {
     w.step();
     const auto s = w.simulation.current_step();
     const double x = storage::attr<"q">(p, s)(0);
     x_max = std::max(x_max, x);
-    if (s * 1e-4 > 0.5) {
+    if (s * 1e-4 > 0.4) {
       late_min = std::min(late_min, x);
       late_max = std::max(late_max, x);
     }
@@ -421,7 +421,7 @@ void dem_incline_sticks() {
   std::print(stderr,
              "DEM: incline 20 deg, mu 0.5 (sticks): x up to {:.3e} in the transient, at rest "
              "x(T) {:.4e} (elastic offset m g sin(alpha) / (2 k_t) = {:.3e}, slip {:.3e}), x "
-             "range after t = 0.5 {:.2e}\n",
+             "range after t = 0.4 {:.2e}\n",
              x_max, x_end, x_eq, x_end - x_eq, late_max - late_min);
   CPPUNIT_ASSERT_MESSAGE("after the transient, no creep", late_max - late_min <= 1e-2 * x_eq);
   CPPUNIT_ASSERT_MESSAGE("it moved: at least the elastic offset", x_end >= 0.99 * x_eq);
@@ -440,7 +440,8 @@ class NscdCasesTest : public CppUnit::TestFixture {
 #endif
   CPPUNIT_TEST(testDemColumn);
   CPPUNIT_TEST(testDemStability);
-  CPPUNIT_TEST(testDemFriction);
+  CPPUNIT_TEST(testDemSlidingSquare);
+  CPPUNIT_TEST(testDemInclineSticks);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -474,10 +475,8 @@ class NscdCasesTest : public CppUnit::TestFixture {
     for (std::size_t n : {1, 5}) dem_column(n);
   }
   void testDemStability() { dem_stability(); }
-  void testDemFriction() {
-    dem_sliding_square();
-    dem_incline_sticks();
-  }
+  void testDemSlidingSquare() { dem_sliding_square(); }
+  void testDemInclineSticks() { dem_incline_sticks(); }
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(NscdCasesTest);

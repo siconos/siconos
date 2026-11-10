@@ -146,10 +146,24 @@ if(WITH_TESTING)
   new_test(NAME vkernel_io_contact_points SOURCES io_contact_points.cpp
            ${SIMPLE_TEST_MAIN})
   # the analytic cases of the NSCD scheme: sliding block, incline, column
-  new_test(NAME vkernel_nscd_cases SOURCES nscd_cases.cpp ${SIMPLE_TEST_MAIN})
+  # (one test per case)
+  set(nscd_dem_cases testDemColumn testDemStability testDemSlidingSquare
+                     testDemInclineSticks)
+  list(TRANSFORM nscd_dem_cases PREPEND NscdCasesTest::)
+  set(nscd_cases
+      testSlidingSquare
+      testInclineSticks
+      testInclineSlides
+      testColumn
+      testAnitescuTasoraFrictionless
+      testAnitescuTasoraSeparation
+      testAnitescuTasoraWarmStart)
+  list(TRANSFORM nscd_cases PREPEND NscdCasesTest::)
+  new_test(NAME vkernel_nscd_cases SOURCES nscd_cases.cpp ${SIMPLE_TEST_MAIN}
+           CASES ${nscd_cases} ${nscd_dem_cases})
   # the DEM cases on the dem integrator, with the storage of its own scheme
   new_test(NAME vkernel_nscd_cases_dem SOURCES nscd_cases.cpp ${SIMPLE_TEST_MAIN}
-           COMPILE_DEFINITIONS NSCD_DEM_ONLY)
+           COMPILE_DEFINITIONS NSCD_DEM_ONLY CASES ${nscd_dem_cases})
 
   # the same deposit run twice with a multithreaded neighbor search must give
   # bitwise identical states
