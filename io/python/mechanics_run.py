@@ -2257,9 +2257,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         positions = np.concatenate([translations, orientations], axis=1)
         velocities = np.asarray(obj["velocities"][:], dtype=np.float64)
         mass = obj.attrs.get("mass", None)
-        # inertia = obj.attrs.get("inertia", None)
         # base_id = obj.attrs["id"]
         count = obj.attrs["count"]
+        # the inertia: per grain, shared, or computed from the shape
+        if "inertias" in obj:
+            inertia = np.asarray(obj["inertias"][:], dtype=np.float64)
+        elif np.size(obj.attrs.get("inertia", [])) == 1:
+            inertia = np.broadcast_to(float(np.ravel(obj.attrs["inertia"])[0]), count)
+        else:
+            inertia = None
 
         if last_rows is not None:
             ids = int(obj.attrs["id"]) + np.arange(count)
@@ -2306,7 +2312,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 hulls,
                 shape_indices,
                 mass,
-                mass * polar / area,
+                mass * polar / area if inertia is None else inertia,
                 positions,
                 velocities,
                 collision_group,
@@ -2337,7 +2343,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             assert mass is not None
 
             bodies = self.config.default_bodies_class(
-                radii, mass, positions, velocities, collision_group
+                radii, mass, positions, velocities, collision_group, inertia=inertia
             )
         np.vectorize(self._nsds.insertDynamicalSystem)(bodies.get())
         np.vectorize(self._set_external_forces)(bodies.get())

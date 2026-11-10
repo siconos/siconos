@@ -594,28 +594,41 @@ class BodyWrap:
 
 # many bodies
 class Bodies(BodyBase):
-    def __init__(self, radius, mass, positions, velocities, collision_group=0):
+    def __init__(
+        self, radius, mass, positions, velocities, collision_group=0, inertia=None
+    ):
         bodies = self._add_bodies(positions, velocities)
 
-        # radius and mass: a scalar shared by all the grains, or one
-        # value per grain (polydisperse packing)
+        # radius, mass and inertia: a scalar shared by all the grains, or one
+        # value per grain (polydisperse packing); the inertia of a uniform
+        # disk, m r^2 / 2, if not given
         n = len(positions)
         radii = np.asarray(radius, dtype=np.float64)
         masses = np.asarray(mass, dtype=np.float64)
-        for what, values in (("radius", radii), ("mass", masses)):
+        inertias = (
+            masses * radii * radii / 2
+            if inertia is None
+            else np.asarray(inertia, dtype=np.float64)
+        )
+        for what, values in (
+            ("radius", radii),
+            ("mass", masses),
+            ("inertia", inertias),
+        ):
             if values.ndim > 1 or (values.ndim == 1 and values.shape[0] != n):
                 raise ValueError(f"{what} must be a scalar or have one value per grain")
 
         for body, r in zip(bodies.get(), np.broadcast_to(radii, n)):
             body.set_disk_shape(self.disk_shape(r))
 
-        if radii.ndim == 0 and masses.ndim == 0:
-            m, r = float(masses), float(radii)
-            bodies.set_mass_matrix(array([m, m, m * r * r / 2]))
+        if masses.ndim == 0 and inertias.ndim == 0:
+            m = float(masses)
+            bodies.set_mass_matrix(array([m, m, float(inertias)]))
         else:
             m = np.broadcast_to(masses, n)
-            r = np.broadcast_to(radii, n)
-            bodies.multiple_set_mass_matrix(np.column_stack([m, m, m * r * r / 2]))
+            bodies.multiple_set_mass_matrix(
+                np.column_stack([m, m, np.broadcast_to(inertias, n)])
+            )
 
         bodies.set_fext(array([0, 0, 0]))  # default
         bodies.set_collision_group(collision_group)

@@ -1028,7 +1028,7 @@ class MechanicsHdf5:
         given per grain. Radius and mass are shared by default; ``radii`` and
         ``mass`` (or ``density``) may be given per grain to create a
         polydisperse packing. The inertia of each grain is computed from its
-        own mass and shape.
+        own mass and shape, unless ``inertia`` is given.
 
         Parameters
         ----------
@@ -1048,9 +1048,10 @@ class MechanicsHdf5:
         mass: float or array_like (N,), optional
             Mass of the grains, shared or one per grain. With neither mass
             nor density, the aggregate is static.
-        inertia: array_like, optional
-            Stored, but not used at import: the inertia is computed from the
-            mass and the radius of each grain.
+        inertia: float or array_like (N,), optional
+            The inertia of the grains about their centre of mass (2D), shared
+            or one per grain. Default: computed from the mass and the shape
+            of each grain (m r^2 / 2 for a disk).
         radii: float or array_like (N,), optional
             Radius of the grains, shared or one per grain. Default: the
             radius of the disk shape. Disks only.
@@ -1077,6 +1078,10 @@ class MechanicsHdf5:
             radii = np.asarray(radii, dtype=np.float64)
             if radii.ndim > 0 and radii.shape != (n,):
                 raise ValueError("radii must be a scalar or of length N")
+        if inertia is not None:
+            inertia = np.asarray(inertia, dtype=np.float64)
+            if inertia.ndim > 0 and inertia.shape != (n,):
+                raise ValueError("inertia must be a scalar or of length N")
         if not isinstance(shapes, (list, tuple)):
             shapes = [shapes]
         if shape_indices is None:
@@ -1140,7 +1145,8 @@ class MechanicsHdf5:
             density=None if density is None else float(density),
             # a shared radius is an attribute, per-grain radii a dataset
             radius=float(radii) if radii is not None and radii.ndim == 0 else None,
-            inertia=None if inertia is None else np.asarray(inertia, dtype=np.float64),
+            # a shared inertia is an attribute, per-grain inertias a dataset
+            inertia=float(inertia) if inertia is not None and inertia.ndim == 0 else None,
             count=n,
             time_of_birth=time_of_birth if time_of_birth >= 0 else None,
             time_of_death=time_of_death if time_of_death >= 0 else None,
@@ -1161,6 +1167,7 @@ class MechanicsHdf5:
             ("masses", mass if mass is not None and mass.ndim > 0 else None),
             ("translations", translations),
             ("radii", radii if radii is not None and radii.ndim > 0 else None),
+            ("inertias", inertia if inertia is not None and inertia.ndim > 0 else None),
             ("orientations", orientations),
             ("velocities", velocities),
         )

@@ -83,6 +83,7 @@
         "velocities": {"dtype": "f8", "shape": [null, "twist"], "note": "aggregates"},
         "radii": {"dtype": "f8", "shape": [null], "note": "aggregates: one radius per grain (disks)"},
         "masses": {"dtype": "f8", "shape": [null], "note": "aggregates: one mass per grain"},
+        "inertias": {"dtype": "f8", "shape": [null], "note": "aggregates: one inertia per grain (2D)"},
         "shape_names": {"dtype": "vlen", "shape": [null], "note": "aggregates: the shapes of the grains (ref/<shape>)"},
         "shape_indices": {"dtype": "i8", "shape": [null], "note": "aggregates: index in shape_names of the shape of each grain"}
       }
