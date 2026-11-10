@@ -2587,44 +2587,52 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         Outputs translations and orientations of static objects
         """
         time = self.current_time()
-        p = 0
 
         # append new static position
         current_line = self._format_adaptor["static"].shape[0]
         self._format_adaptor["static"].resize(current_line + len(self._static), 0)
         self._static_rows = slice(current_line, current_line + len(self._static))
 
-        p = current_line
+        # the rows of every static object, written at once: a write per row
+        # is slow, with many static objects (a ground of grains)
+        rows = []
         for static in self._static.values():
             translation = static["origin"]
             rotation = static["orientation"]
             if self._dimension == 3:
-                self._format_adaptor["static"][p, :] = [
-                    time,
-                    static["number"],
-                    translation[0],
-                    translation[1],
-                    translation[2],
-                    rotation[0],
-                    rotation[1],
-                    rotation[2],
-                    rotation[3],
-                ]
+                rows.append(
+                    [
+                        time,
+                        static["number"],
+                        translation[0],
+                        translation[1],
+                        translation[2],
+                        rotation[0],
+                        rotation[1],
+                        rotation[2],
+                        rotation[3],
+                    ]
+                )
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
-                self._format_adaptor["static"][p, :] = [
-                    time,
-                    static["number"],
-                    translation[0],
-                    translation[1],
-                    0.0,
-                    cos(rotation[0] / 2.0),
-                    0.0,
-                    0.0,
-                    sin(rotation[0] / 2.0),
-                ]
+                rows.append(
+                    [
+                        time,
+                        static["number"],
+                        translation[0],
+                        translation[1],
+                        0.0,
+                        cos(rotation[0] / 2.0),
+                        0.0,
+                        0.0,
+                        sin(rotation[0] / 2.0),
+                    ]
+                )
 
-            p += 1
+        if rows:
+            self._format_adaptor["static"][self._static_rows, :] = np.array(
+                rows, dtype=np.float64
+            )
 
         # print('current_line , self._format_adaptor["static"]', current_line, self._format_adaptor["static"])
         # input()
