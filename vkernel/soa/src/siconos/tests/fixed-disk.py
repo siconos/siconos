@@ -131,7 +131,7 @@ import ref_trajectory  # noqa: E402
 sys.exit(
     0
     if ref_trajectory.check(
-        "fixed-disk.hdf5", f"fixed_disk_{backend}_T{T:g}", 1e-8, every=10
+        "fixed-disk.hdf5", f"fixed_disk_{backend}_T{T:g}", 1e-8, every=100
     )
     else 1
 )

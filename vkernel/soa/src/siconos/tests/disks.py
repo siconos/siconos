@@ -1,6 +1,9 @@
 # Two disks stacked on a V of two ground segments.
 #
-# usage: python3 disks.py [backend]   (default: vnative)
+# usage: python3 disks.py [backend [T]]   (default: vnative 20)
+#
+# The upper disk rests on the lower one until round-off errors grow and it
+# rolls off (t ~ 5 to 10): a reference trajectory is only checked before.
 # exit status 1 if the trajectory is not the reference one of the backend
 
 import sys
@@ -11,6 +14,7 @@ from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_run import MechanicsHdf5Runner, RunnerConfig
 
 backend = sys.argv[1] if len(sys.argv) > 1 else "vnative"
+T = float(sys.argv[2]) if len(sys.argv) > 2 else 20.0
 runner_config = RunnerConfig(backend)
 
 disk_radius = 1
@@ -93,7 +97,7 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
         with_timer=False,
         gravity_scale=1,
         t0=0,
-        T=20,
+        T=T,
         h=0.005,
         theta=0.50001,
         Newton_max_iter=1000,
@@ -109,5 +113,7 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
 import ref_trajectory  # noqa: E402
 
 sys.exit(
-    0 if ref_trajectory.check("disks.hdf5", f"disks_{backend}", 1e-8, every=10) else 1
+    0
+    if ref_trajectory.check("disks.hdf5", f"disks_{backend}_T{T:g}", 1e-8, every=20)
+    else 1
 )

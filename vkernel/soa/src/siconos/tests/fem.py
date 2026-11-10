@@ -16,6 +16,8 @@ from siconos.io.mechanics_run import (
 import nonos
 
 shape_filename = sys.argv[1]
+# the end time, optional
+T = float(sys.argv[2]) if len(sys.argv) > 2 else 2.0
 
 backend = "vnative"  # not implemented for bullet
 runner_config = RunnerConfig(backend)
@@ -62,7 +64,7 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
     io.run(
         with_timer=True,
         t0=0,
-        T=2,
+        T=T,
         h=0.005,
         theta=0.5001,
         Newton_max_iter=1,

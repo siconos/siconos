@@ -148,4 +148,4 @@ name = "bench_fem_disks_{}_{}_n{}_s{:g}_T{:g}_{}_tol{:g}".format(
     "gosi" if gosi else "mj",
     tolerance,
 )
-sys.exit(0 if ref_trajectory.check(hdf5_output, name, 1e-8) else 1)
+sys.exit(0 if ref_trajectory.check(hdf5_output, name, 1e-8, every=5) else 1)

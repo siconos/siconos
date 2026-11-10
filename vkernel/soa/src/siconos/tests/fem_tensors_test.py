@@ -94,15 +94,27 @@ def _run_fem_simulation(tmp_path, mesh_path: str) -> None:
     """Run ``fem.py`` in an isolated temp directory.
 
     The script writes ``fem.hdf5`` in its current working directory, so we
-    cd into ``tmp_path`` beforehand to avoid polluting the source tree.
+    cd into ``tmp_path`` beforehand to avoid polluting the source tree. A
+    few steps are enough for the datasets: T = 0.05.
     """
     # Run in tmp_path so fem.hdf5 is created there.
     subprocess.run(
-        [_PYTHON, FEM_SCRIPT, mesh_path],
+        [_PYTHON, FEM_SCRIPT, mesh_path, "0.05"],
         cwd=tmp_path,
         env=_fem_subprocess_env(),
         check=True,
     )
+
+
+@pytest.fixture(scope="module")
+def fem_hdf5(tmp_path_factory):
+    """``fem.hdf5`` of one run of ``fem.py``, shared by the tests that only
+    read it."""
+    tmp_path = tmp_path_factory.mktemp("fem")
+    _run_fem_simulation(tmp_path, MESH_PATH)
+    hdf5_path = tmp_path / "fem.hdf5"
+    assert hdf5_path.is_file(), "fem.py did not produce fem.hdf5"
+    return hdf5_path
 
 
 def _run_analytical_check(tmp_path, mesh_path: str) -> subprocess.CompletedProcess:
@@ -127,18 +139,13 @@ def _run_analytical_check(tmp_path, mesh_path: str) -> subprocess.CompletedProce
 # ---------------------------------------------------------------------------
 
 
-def test_fem_tensor_datasets_exist(tmp_path):
+def test_fem_tensor_datasets_exist(fem_hdf5):
     """The HDF5 file must contain both strain and stress datasets.
 
     Dataset naming convention: ``fem_<tensor>_<ds_id>`` where ``ds_id``
     is the dynamical-system id assigned by the mechanics runner.
     """
-    _run_fem_simulation(tmp_path, MESH_PATH)
-
-    hdf5_path = tmp_path / "fem.hdf5"
-    assert hdf5_path.is_file(), "fem.py did not produce fem.hdf5"
-
-    with h5py.File(hdf5_path, "r") as f:
+    with h5py.File(fem_hdf5, "r") as f:
         # The mechanics runner stores per-DS outputs under the ``data`` group.
         assert "data" in f, "HDF5 file missing 'data' group"
 
@@ -157,7 +164,7 @@ def test_fem_tensor_datasets_exist(tmp_path):
         )
 
 
-def test_fem_tensor_dataset_attributes(tmp_path):
+def test_fem_tensor_dataset_attributes(fem_hdf5):
     """Each tensor dataset must carry the expected attributes.
 
     ``output_fem_epsilon`` / ``output_fem_sigma`` in ``mechanics_run.py``
@@ -166,9 +173,7 @@ def test_fem_tensor_dataset_attributes(tmp_path):
       - ``components``  (3 strings: exx/eyy/exy or sxx/syy/sxy)
       - ``num_elements`` (number of T3 elements in the mesh)
     """
-    _run_fem_simulation(tmp_path, MESH_PATH)
-
-    with h5py.File(tmp_path / "fem.hdf5", "r") as f:
+    with h5py.File(fem_hdf5, "r") as f:
         data = f["data"]
 
         for ds_name in data.keys():
@@ -192,7 +197,7 @@ def test_fem_tensor_dataset_attributes(tmp_path):
             assert num_elements > 0, f"{ds_name} has non-positive num_elements"
 
 
-def test_fem_tensor_dataset_layout(tmp_path):
+def test_fem_tensor_dataset_layout(fem_hdf5):
     """Dataset columns must follow the flat per-element convention.
 
     mechanics_run.py writes rows as::
@@ -202,9 +207,7 @@ def test_fem_tensor_dataset_layout(tmp_path):
     so ``shape[1] == 2 + 3 * num_elements`` and every row has the same
     ``ds_id`` in column 1.
     """
-    _run_fem_simulation(tmp_path, MESH_PATH)
-
-    with h5py.File(tmp_path / "fem.hdf5", "r") as f:
+    with h5py.File(fem_hdf5, "r") as f:
         data = f["data"]
 
         for ds_name in data.keys():
@@ -229,15 +232,13 @@ def test_fem_tensor_dataset_layout(tmp_path):
             )
 
 
-def test_fem_tensor_values_are_finite(tmp_path):
+def test_fem_tensor_values_are_finite(fem_hdf5):
     """Tensor entries should be finite numbers at every output step.
 
     A non-finite value here indicates a crash inside the FEM strain/stress
     computation or a broken write path.
     """
-    _run_fem_simulation(tmp_path, MESH_PATH)
-
-    with h5py.File(tmp_path / "fem.hdf5", "r") as f:
+    with h5py.File(fem_hdf5, "r") as f:
         data = f["data"]
 
         for ds_name in data.keys():

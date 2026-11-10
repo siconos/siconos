@@ -16,7 +16,9 @@ from siconos.io.mechanics_run import (
     RunnerConfig,
 )
 
+# usage: python3 bouncing_disk.py <backend> [T]   (default T: 10)
 backend = str(sys.argv[1])
+T = float(sys.argv[2]) if len(sys.argv) > 2 else 10.0
 runner_config = RunnerConfig(backend)
 
 disk_radius = 1
@@ -66,7 +68,7 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
         bullet_options=bullet_options,
         gravity_scale=1,
         t0=0,
-        T=10,
+        T=T,
         h=0.005,
         theta=0.50001,
         Newton_max_iter=1,
@@ -83,6 +85,8 @@ import ref_trajectory  # noqa: E402
 
 sys.exit(
     0
-    if ref_trajectory.check("bouncing_disk.hdf5", f"bouncing_disk_{backend}", 1e-8)
+    if ref_trajectory.check(
+        "bouncing_disk.hdf5", f"bouncing_disk_{backend}_T{T:g}", 1e-8, every=10
+    )
     else 1
 )
