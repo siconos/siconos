@@ -170,12 +170,6 @@ __global__ void kComputeCounts(
 					{
 						neighborCount++;
 					}
-
-					if (neighborCount == CUDA_MAX_NEIGHBORS)
-					{
-						neighborCounts[particleIndex] = neighborCount;
-						return;
-					}
 				}
 			}
 
@@ -233,7 +227,7 @@ __global__ void kNeighborhoodQueryWithCounts(
 						// order of the indices. The contacts are created in the order of
 						// the neighbors and the solver depends on the order of the
 						// contacts: insert at the sorted position, as the lists of
-						// CompactNSearch are sorted (at most CUDA_MAX_NEIGHBORS entries)
+						// CompactNSearch are sorted
 						uint k = neighborCount;
 						while (k > 0 && neighbors[writeOffset + k - 1] > neighbor)
 						{
@@ -242,11 +236,6 @@ __global__ void kNeighborhoodQueryWithCounts(
 						}
 						neighbors[writeOffset + k] = neighbor;
 						neighborCount++;
-					}
-
-					if (neighborCount == CUDA_MAX_NEIGHBORS)
-					{
-						return;
 					}
 				}
 			}

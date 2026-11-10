@@ -535,7 +535,7 @@ struct io : item {
         scalar vn_plus = ydot(0);
         scalar pn = lambda(0);
 
-        scalar vn_average = 1 / 2. * (vn_plus * vn_minus);
+        scalar vn_average = 1 / 2. * (vn_plus + vn_minus);
         scalar normal_contact_work = vn_average * pn;
         scalar answer_1 = normal_contact_work;
 

@@ -20,6 +20,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "FrictionContactProblem.h"
 #include "FrictionContact_options.h"
