@@ -149,14 +149,22 @@ namespace cuNSearch
 			pointSetImpl->d_CellOffsets.begin());
 		CudaHelper::DeviceSynchronize();
 
-		kCountingSortIndices << <pointSetImpl->BlockStartsForParticles, pointSetImpl->ThreadsPerBlock >> > (
-			gridInfo,
-			CudaHelper::GetPointer(pointSetImpl->d_ParticleCellIndices),
-			CudaHelper::GetPointer(pointSetImpl->d_CellOffsets),
-			CudaHelper::GetPointer(d_TempSortIndices),
-			CudaHelper::GetPointer(pointSetImpl->d_SortIndices)
-			);
+		// siconos: the rank of a particle in its cell (kCountingSortIndices)
+		// comes from an atomicAdd, in the order of the GPU scheduling, and
+		// sort_field reorders the bodies with the sort indices: the contacts,
+		// hence the solution, changed from a run to another. A stable sort by
+		// cell gives the same cells in the same order, the particles of a cell
+		// by index: the z-order sort is reproducible, as CompactNSearch::z_sort
+		d_TempSortIndices.assign(
+			pointSetImpl->d_ParticleCellIndices.begin(),
+			pointSetImpl->d_ParticleCellIndices.end());
+		thrust::sequence(pointSetImpl->d_SortIndices.begin(), pointSetImpl->d_SortIndices.end());
+		thrust::stable_sort_by_key(
+			d_TempSortIndices.begin(),
+			d_TempSortIndices.end(),
+			pointSetImpl->d_SortIndices.begin());
 
+		CudaHelper::CheckLastError();
 		CudaHelper::DeviceSynchronize();
 
 		auto &tempSequence = d_TempSortIndices;
