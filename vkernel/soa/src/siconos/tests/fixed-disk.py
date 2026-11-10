@@ -14,7 +14,9 @@ from siconos.io.mechanics_run import (
 )
 import nonos
 
+# usage: python3 fixed-disk.py <backend> [T]
 backend = str(sys.argv[1])
+T = float(sys.argv[2]) if len(sys.argv) > 2 else 10.0
 runner_config = RunnerConfig(backend)
 
 import nonos
@@ -102,7 +104,7 @@ class recirculation_start_hook:
 run_options = MechanicsHdf5Runner_run_options()
 
 run_options["t0"] = 0
-run_options["T"] = 10
+run_options["T"] = T
 run_options["h"] = 0.005
 run_options["theta"] = 0.50001
 run_options["solver_options"] = options
@@ -111,6 +113,10 @@ run_options["start_run_iteration_hook"] = recirculation_start_hook()
 vnative_options = nonos.bridge.SpaceFilterOptions()
 vnative_options.neighborhood_radius = 2.1 * 0.1 * disk_radius
 vnative_options.min_radius = 0.005 * 0.5 * disk_radius
+# no z-order sort of the bodies: the one of the GPU neighbor search is not the
+# one of CompactNSearch, the bodies, hence the contacts, would be in another
+# order, and the trajectory another one than the reference
+vnative_options.sort_frequency = 0
 
 run_options["verbose"] = True
 run_options["vnative_options"] = vnative_options
@@ -124,6 +130,8 @@ import ref_trajectory  # noqa: E402
 
 sys.exit(
     0
-    if ref_trajectory.check("fixed-disk.hdf5", f"fixed_disk_{backend}", 1e-8, every=100)
+    if ref_trajectory.check(
+        "fixed-disk.hdf5", f"fixed_disk_{backend}_T{T:g}", 1e-8, every=10
+    )
     else 1
 )

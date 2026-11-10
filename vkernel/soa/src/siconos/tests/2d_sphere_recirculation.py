@@ -772,6 +772,10 @@ import nonos.bridge  # noqa: E402
 vnative_options = nonos.bridge.SpaceFilterOptions()
 vnative_options.neighborhood_radius = grain_size * 1.01
 vnative_options.min_radius = grain_size / 2
+# no z-order sort of the bodies: the one of the GPU neighbor search is not the
+# one of CompactNSearch, the bodies, hence the contacts, would be in another
+# order, and the trajectory another one than the reference
+vnative_options.sort_frequency = 0
 
 run_options["vnative_options"] = vnative_options
 

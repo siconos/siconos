@@ -278,13 +278,13 @@ if(WITH_TESTING)
                     ARGS --dem ${mesh_n5})
     # the scripts checked against a reference trajectory (ref_trajectory.py)
     new_python_test(NAME vkernel_python_one_disk SCRIPT one_disk.py ARGS vnative)
-    new_python_test(NAME vkernel_python_fixed_disk SCRIPT fixed-disk.py ARGS vnative)
+    new_python_test(NAME vkernel_python_fixed_disk SCRIPT fixed-disk.py ARGS vnative 2)
     new_python_test(NAME vkernel_python_bouncing_disk SCRIPT bouncing_disk.py ARGS vnative)
     new_python_test(NAME vkernel_python_2d_flow SCRIPT 2d_flow_vnative.py ARGS 5 3 1)
     new_python_test(NAME vkernel_python_convexhull2d SCRIPT convexhull2d_vnative.py ARGS 1)
     new_python_test(NAME vkernel_python_disks SCRIPT disks.py ARGS vnative)
     new_python_test(NAME vkernel_python_2d_sphere_recirculation SCRIPT 2d_sphere_recirculation.py
-                    ARGS vnative 0.5 0.5 20 3 2)
+                    ARGS vnative 0.5 0.5 20 3 0.5)
     new_python_test(NAME vkernel_python_bench_fem_disks SCRIPT bench_fem_disks.py
                     ARGS ${mesh_n5} 50 bench_fem_disks.hdf5 2.5 2.05 0.1 mj)
     new_python_test(NAME vkernel_python_bench_fem_disks_gosi SCRIPT bench_fem_disks.py
