@@ -155,6 +155,7 @@ if(WITH_TESTING)
       testInclineSticks
       testInclineSlides
       testColumn
+      testBasicProblem
       testAnitescuTasoraFrictionless
       testAnitescuTasoraSeparation
       testAnitescuTasoraWarmStart)

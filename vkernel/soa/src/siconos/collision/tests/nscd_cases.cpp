@@ -22,6 +22,11 @@
    4. a column of N disks at rest in contact: no interpenetration at any
       contact, whatever N (a penalty scheme has a bottom overlap ~ N m g /
       k_n).
+   5. the 2D basic frictional contact problem of Jean (1999, eq 34): a
+      square on one corner, one step, the closed form impulse of each of the
+      four regimes (no contact, forward and backward sliding, sticking), with
+      the normal-tangential coupling W_NT that a disk or a square on its face
+      does not have.
 
    The integrator is the selectable one: the same cases checks the
    Anitescu-Tasora scheme (simul/anitescu_tasora.hpp, its sweeps at the same
@@ -138,6 +143,105 @@ void incline(double alpha, double mu, double h, std::size_t scheme = schemes::lo
   CPPUNIT_ASSERT_MESSAGE("no lift-off: y stays at r", max_dy <= 1e-10);
   CPPUNIT_ASSERT_MESSAGE("no lift-off: vy stays 0", max_vy <= 1e-10);
   CPPUNIT_ASSERT_MESSAGE("no tipping (mu < 1): theta stays 0", max_theta <= 1e-10);
+}
+
+/* 5. the 2D basic frictional contact problem, Jean, "The non-smooth contact
+   dynamics method", CMAME 177 (1999), section 5.2, eq (33)-(34). A square
+   tilted by phi in (0, 45 deg) rests on its lowest corner, at (rx, ry) from
+   its centre; the other corner is at the gap 2 r sin(phi). With T = x and
+   N = y, the relative velocity of the corner is U = H v,
+
+     H = [1 0 -ry; 0 1 rx],  W = H M^-1 H^T,  W_NT = -rx ry / I,
+
+   so a_NT = -W_NT / W_NN != 0 couples the normal impulse to the friction.
+   With U_f = H v_free, J = W^-1 U_f, J_NN = -U_fN / W_NN and under (33),
+   -1 < mu a_NT < 1, the impulse hR of the step is (34):
+
+     no contact        U_fN > 0           hR = 0
+     forward sliding   J_T + mu J_N > 0   hR_N = J_NN / (1 + mu a_NT), hR_T = -mu hR_N
+     backward sliding  J_T - mu J_N < 0   hR_N = J_NN / (1 - mu a_NT), hR_T = mu hR_N
+     sticking          otherwise          hR = -J
+
+   (the paper prints the sticking impulse -f and J_NN = -U_f / W_NN: typos;
+   these are from U = U_f + W hR). Moreau-Jean, e = 0: U is H v(k + 1), so
+   v(k + 1) = v_free + M^-1 H^T hR, with v_free = v(k) + h M^-1 fext. */
+enum class regime { no_contact, forward_sliding, backward_sliding, sticking };
+
+const char* name(regime rg) {
+  switch (rg) {
+    case regime::no_contact:
+      return "no contact";
+    case regime::forward_sliding:
+      return "forward sliding";
+    case regime::backward_sliding:
+      return "backward sliding";
+    default:
+      return "sticking";
+  }
+}
+
+void basic_problem(double mu, double vx, double vy, regime expected) {
+  using namespace siconos;
+  const double phi = 30 * deg;
+  const double h = 1e-3;
+  const double c = std::cos(phi), s = std::sin(phi);
+  const double rx = -(c - s) * r, ry = -(c + s) * r;  // the lowest corner
+  const double inertia = m * (2 * r) * (2 * r) / 6.;  // as add_square
+  world w({.mu = mu, .h = h, .tmax = 1.});
+  auto p = w.add_square(0., 0.);
+  p.q() = {0., (c + s) * r, phi};
+  p.velocity() = {vx, vy, 0.};
+  w.finalize();
+  w.step();
+  const auto& v = storage::attr<"velocity">(p, w.simulation.current_step());
+
+  // the closed form, eq (34)
+  const double vfx = vx, vfy = vy - g * h, vfo = 0.;
+  const double uft = vfx - vfo * ry, ufn = vfy + vfo * rx;
+  const double wtt = 1 / m + ry * ry / inertia, wnn = 1 / m + rx * rx / inertia,
+               wnt = -rx * ry / inertia;
+  const double det = wtt * wnn - wnt * wnt;
+  const double jt = (wnn * uft - wnt * ufn) / det, jn = (wtt * ufn - wnt * uft) / det;
+  const double jnn = -ufn / wnn, ant = -wnt / wnn;
+  regime rg;
+  double rt = 0., rn = 0.;
+  if (ufn > 0) {
+    rg = regime::no_contact;
+  } else if (jt + mu * jn > 0) {
+    rg = regime::forward_sliding;
+    rn = jnn / (1 + mu * ant);
+    rt = -mu * rn;
+  } else if (jt - mu * jn < 0) {
+    rg = regime::backward_sliding;
+    rn = jnn / (1 - mu * ant);
+    rt = mu * rn;
+  } else {
+    rg = regime::sticking;
+    rt = -jt;
+    rn = -jn;
+  }
+  const double ex = vfx + rt / m, ey = vfy + rn / m, eo = vfo + (-ry * rt + rx * rn) / inertia;
+  const double err = std::max({std::abs(v(0) - ex), std::abs(v(1) - ey), std::abs(v(2) - eo)});
+  const double ut = v(0) - v(2) * ry, un = v(1) + v(2) * rx;
+  std::print(stderr,
+             "basic problem (34), {}: mu a_NT = {:.4f}, U_f = ({:.6f}, {:.6f}), hR = ({:.9f}, "
+             "{:.9f}), U = ({:.3e}, {:.3e}), max |v - v_exact| {:.2e}\n",
+             name(rg), mu * ant, uft, ufn, rt, rn, ut, un, err);
+  CPPUNIT_ASSERT_MESSAGE("the data are in the expected regime", rg == expected);
+  CPPUNIT_ASSERT_MESSAGE("the uniqueness condition (33)", std::abs(mu * ant) < 1);
+  CPPUNIT_ASSERT_MESSAGE("v(k + 1) = v_free + M^-1 H^T hR", err <= 1e-10);
+  if (rg == regime::no_contact) {
+    CPPUNIT_ASSERT_MESSAGE("no contact: the corner leaves", un > 0);
+  } else {
+    CPPUNIT_ASSERT_MESSAGE("contact: U_N = 0", std::abs(un) <= 1e-10);
+    CPPUNIT_ASSERT_MESSAGE("contact: R_N > 0", rn > 0);
+  }
+  if (rg == regime::forward_sliding)
+    CPPUNIT_ASSERT_MESSAGE("forward sliding: U_T > 0", ut > 1e-10);
+  if (rg == regime::backward_sliding)
+    CPPUNIT_ASSERT_MESSAGE("backward sliding: U_T < 0", ut < -1e-10);
+  if (rg == regime::sticking)
+    CPPUNIT_ASSERT_MESSAGE("sticking: U_T = 0", std::abs(ut) <= 1e-10);
 }
 
 /* 4. a column of n disks, in contact and at rest: the free velocity -g h of
@@ -434,6 +538,7 @@ class NscdCasesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testInclineSticks);
   CPPUNIT_TEST(testInclineSlides);
   CPPUNIT_TEST(testColumn);
+  CPPUNIT_TEST(testBasicProblem);
   CPPUNIT_TEST(testAnitescuTasoraFrictionless);
   CPPUNIT_TEST(testAnitescuTasoraSeparation);
   CPPUNIT_TEST(testAnitescuTasoraWarmStart);
@@ -456,6 +561,16 @@ class NscdCasesTest : public CppUnit::TestFixture {
   }
   void testColumn() {
     for (std::size_t n : {1, 5, 20, 50}) column(n, 5e-3);
+  }
+  void testBasicProblem() {
+    // phi = 30 deg: a_NT = 0.62
+    basic_problem(0.5, 1., 1., regime::no_contact);
+    basic_problem(0.5, 2., -1., regime::forward_sliding);
+    basic_problem(0.5, -3., -1., regime::backward_sliding);
+    basic_problem(0.5, 0.1, -1., regime::sticking);
+    // close to the limit of (33), mu a_NT = 0.8: the backward friction
+    // amplifies the normal impulse by 1 / (1 - mu a_NT) = 5
+    basic_problem(1.28, -2., -0.01, regime::backward_sliding);
   }
   void testAnitescuTasoraFrictionless() {
     for (auto scheme : {schemes::cone_complementarity, schemes::cone_complementarity_apgd}) {
