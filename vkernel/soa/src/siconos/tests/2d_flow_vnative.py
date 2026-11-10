@@ -123,3 +123,9 @@ with h5py.File(fname, "r") as f:
             last[0, 0], len(last), last[:, 3].min(), last[:, 3].mean(), last[:, 3].max()
         )
     )
+
+# the check: the trajectory against the reference of these parameters
+import ref_trajectory  # noqa: E402
+
+name = f"2d_flow_vnative_{n_row}x{n_col}_T{T:g}"
+sys.exit(0 if ref_trajectory.check(fname, name, 1e-8) else 1)

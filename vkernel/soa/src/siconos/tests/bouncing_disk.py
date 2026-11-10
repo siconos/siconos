@@ -77,3 +77,12 @@ with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
         output_contact_forces=True,
         output_frequency=None,
     )
+
+# the check: the trajectory against the reference of the backend
+import ref_trajectory  # noqa: E402
+
+sys.exit(
+    0
+    if ref_trajectory.check("bouncing_disk.hdf5", f"bouncing_disk_{backend}", 1e-8)
+    else 1
+)

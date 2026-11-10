@@ -72,8 +72,9 @@ def _fem_subprocess_env():
     env = dict(os.environ)
     existing_pythonpath = env.get("PYTHONPATH", "")
     pythonpath_extra = ":".join(_SICONOS_PYTHONPATHS)
+    # after the PYTHONPATH given: the source nonos package has no _nonos
     env["PYTHONPATH"] = (
-        (pythonpath_extra + ":" + existing_pythonpath)
+        (existing_pythonpath + ":" + pythonpath_extra)
         if existing_pythonpath
         else pythonpath_extra
     )

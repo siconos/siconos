@@ -218,4 +218,74 @@ if(WITH_TESTING)
 
   set_target_properties(RtOsiTest PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")
+
+  # The python scripts of src/siconos/tests, on the build tree: a nonos
+  # package next to the build (the module and its python files), the siconos
+  # package of the build, its libraries before the install ones (_nonos is
+  # built with the install rpath). Each script checks its results and exits
+  # with a nonzero status on a failure.
+  if(WITH_PYB11_WRAPPER)
+    set(nonos_test_path ${CMAKE_CURRENT_BINARY_DIR}/python)
+    foreach(f __init__.py bridge.py simoptions.py)
+      configure_file(src/siconos/py/nonos/${f} ${nonos_test_path}/nonos/${f} COPYONLY)
+    endforeach()
+    add_custom_command(
+      TARGET _nonos
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:_nonos> ${nonos_test_path}/nonos/)
+
+    # new_python_test(NAME <test> SCRIPT <file in src/siconos/tests> [PYTEST]
+    #                 [ARGS ...]): the script, or its tests with PYTEST
+    function(new_python_test)
+      cmake_parse_arguments(pt "PYTEST" "NAME;SCRIPT" "ARGS" ${ARGN})
+      set(rundir ${CMAKE_CURRENT_BINARY_DIR}/python-tests/${pt_NAME})
+      file(MAKE_DIRECTORY ${rundir})
+      set(script ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/tests/${pt_SCRIPT})
+      if(pt_PYTEST)
+        set(command ${Python_EXECUTABLE} -m pytest -p no:cacheprovider ${script} ${pt_ARGS})
+      else()
+        set(command ${Python_EXECUTABLE} ${script} ${pt_ARGS})
+      endif()
+      add_test(NAME ${pt_NAME} COMMAND ${command} WORKING_DIRECTORY ${rundir})
+      set(libs
+          "$<TARGET_FILE_DIR:numerics>:$<TARGET_FILE_DIR:kernel>:$<TARGET_FILE_DIR:mechanics>:$<TARGET_FILE_DIR:externals>:$<TARGET_FILE_DIR:externals_fortran>"
+      )
+      set_tests_properties(
+        ${pt_NAME}
+        PROPERTIES ENVIRONMENT
+                   "PYTHONPATH=${nonos_test_path}:${SICONOS_PB11_BINARY_DIR};LD_LIBRARY_PATH=${libs}:$ENV{LD_LIBRARY_PATH};MPLBACKEND=Agg;MPLCONFIGDIR=${rundir}/mpl;SICONOS_BUILD_DIR=${CMAKE_BINARY_DIR};SICONOS_CHECK_REF=1;PYTHONDONTWRITEBYTECODE=1"
+      )
+    endfunction()
+
+    new_python_test(NAME vkernel_python_fremond_oblique_disk SCRIPT fremond_oblique_disk.py)
+    new_python_test(NAME vkernel_python_sliding_square_schemes SCRIPT sliding_square_schemes.py)
+    new_python_test(NAME vkernel_python_add_objects SCRIPT test_add_objects.py PYTEST)
+    new_python_test(NAME vkernel_python_nonos SCRIPT test_nonos.py PYTEST)
+    new_python_test(NAME vkernel_python_remove_static_segment SCRIPT test_remove_static_segment.py
+                    PYTEST)
+    # fem.py and fem_tensor_analytical.py
+    new_python_test(NAME vkernel_python_fem_tensors SCRIPT fem_tensors_test.py PYTEST)
+    set(mesh_n5 ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/tests/mesh_N5.msh)
+    new_python_test(NAME vkernel_python_two_fem_bodies SCRIPT two_fem_bodies.py ARGS ${mesh_n5})
+    new_python_test(NAME vkernel_python_two_fem_bodies_gosi SCRIPT two_fem_bodies.py
+                    ARGS --gosi ${mesh_n5})
+    new_python_test(NAME vkernel_python_two_fem_bodies_dem SCRIPT two_fem_bodies.py
+                    ARGS --dem ${mesh_n5})
+    # the scripts checked against a reference trajectory (ref_trajectory.py)
+    new_python_test(NAME vkernel_python_one_disk SCRIPT one_disk.py ARGS vnative)
+    new_python_test(NAME vkernel_python_fixed_disk SCRIPT fixed-disk.py ARGS vnative)
+    new_python_test(NAME vkernel_python_bouncing_disk SCRIPT bouncing_disk.py ARGS vnative)
+    new_python_test(NAME vkernel_python_2d_flow SCRIPT 2d_flow_vnative.py ARGS 5 3 1)
+    new_python_test(NAME vkernel_python_convexhull2d SCRIPT convexhull2d_vnative.py ARGS 1)
+    new_python_test(NAME vkernel_python_disks SCRIPT disks.py ARGS vnative)
+    new_python_test(NAME vkernel_python_2d_sphere_recirculation SCRIPT 2d_sphere_recirculation.py
+                    ARGS vnative 0.5 0.5 20 3 2)
+    new_python_test(NAME vkernel_python_bench_fem_disks SCRIPT bench_fem_disks.py
+                    ARGS ${mesh_n5} 50 bench_fem_disks.hdf5 2.5 2.05 0.1 mj)
+    new_python_test(NAME vkernel_python_bench_fem_disks_gosi SCRIPT bench_fem_disks.py
+                    ARGS ${mesh_n5} 50 bench_fem_disks.hdf5 2.5 2.05 0.1 gosi)
+    # the mesh of the FEM tests, generated again
+    new_python_test(NAME vkernel_python_square_mesh SCRIPT square_mesh.py ARGS 5 mesh_N5.msh
+                    ${mesh_n5})
+  endif()
 endif()

@@ -21,7 +21,7 @@ import nonos
 
 import numpy as np
 from math import sqrt
-from random import random
+from random import Random
 
 disk_radius = 1
 N = 10
@@ -74,7 +74,8 @@ options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 class recirculation_start_hook:
     def __init__(self):
-        pass
+        # seeded: the run is reproducible, and checked against a reference
+        self._random = Random(0)
 
     def initialize(self, io):
         self._io = io
@@ -92,7 +93,7 @@ class recirculation_start_hook:
 
             jj = nds
 
-            ds.setQ0Ptr([(random() - 0.5) / 10, maxy + 0.2 * (i + 1), 0.0])
+            ds.setQ0Ptr([(self._random.random() - 0.5) / 10, maxy + 0.2 * (i + 1), 0.0])
             ds.setVelocity0Ptr([0.0, 0.0, 0.0])
             ds.resetToInitialState()
             ds.swapInMemory()
@@ -117,3 +118,12 @@ run_options["vnative_options"] = vnative_options
 
 with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
     io.run(run_options)
+
+# the check: the trajectory against the reference of the backend
+import ref_trajectory  # noqa: E402
+
+sys.exit(
+    0
+    if ref_trajectory.check("fixed-disk.hdf5", f"fixed_disk_{backend}", 1e-8, every=100)
+    else 1
+)

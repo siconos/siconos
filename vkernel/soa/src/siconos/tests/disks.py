@@ -1,33 +1,21 @@
+# Two disks stacked on a V of two ground segments.
+#
+# usage: python3 disks.py [backend]   (default: vnative)
+# exit status 1 if the trajectory is not the reference one of the backend
+
+import sys
+
 import siconos.numerics as sn
-import siconos.kernel as sk
-
-import numpy
-from math import sqrt
-
-import random
-
 
 from siconos.mechanics.collision.tools import Contactor
+from siconos.io.mechanics_run import MechanicsHdf5Runner, RunnerConfig
 
-try:
-    from nonos.mechanics_run import MechanicsHdf5Runner
-    import nonos
-
-    nonos.mechanics_run.set_backend("vnative")
-except Exception:
-    from siconos.io.mechanics_run import (
-        MechanicsHdf5Runner,
-        MechanicsHdf5Runner_run_options,
-        set_backend,
-    )
-
-    sn.numerics_set_verbose(True)
-    set_backend("native")
-
+backend = sys.argv[1] if len(sys.argv) > 1 else "vnative"
+runner_config = RunnerConfig(backend)
 
 disk_radius = 1
 
-with MechanicsHdf5Runner() as io:
+with MechanicsHdf5Runner(config=runner_config) as io:
     io.add_primitive_shape("DiskR", "Disk", [disk_radius])
 
     io.add_primitive_shape("Ground-0", "Segment", (-10, 10, 0, 0))
@@ -87,9 +75,9 @@ with MechanicsHdf5Runner() as io:
     #               orientation=[0], velocity=[0, 0, 0], mass=1)
 
 
-options = sk.SolverOptions(sn.SICONOS_FRICTION_2D_NSGS)
-options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 20
-options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-4
+options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 20
+options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-4
 # legacy FC2D error measure: the default became Euclidean scaling upstream
 options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
     sn.params.SICONOS_FRICTION_2D_SCALING_NO
@@ -100,7 +88,7 @@ def noforces(body):
     pass
 
 
-with MechanicsHdf5Runner(mode="r+") as io:
+with MechanicsHdf5Runner(mode="r+", config=runner_config) as io:
     io.run(
         with_timer=False,
         gravity_scale=1,
@@ -116,3 +104,10 @@ with MechanicsHdf5Runner(mode="r+") as io:
         output_contact_forces=True,
         output_frequency=None,
     )
+
+# the check: the trajectory against the reference of the backend
+import ref_trajectory  # noqa: E402
+
+sys.exit(
+    0 if ref_trajectory.check("disks.hdf5", f"disks_{backend}", 1e-8, every=10) else 1
+)

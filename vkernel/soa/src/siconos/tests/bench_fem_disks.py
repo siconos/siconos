@@ -133,3 +133,19 @@ with MechanicsHdf5Runner(
     mode="r+", config=runner_config, io_filename=hdf5_output
 ) as io:
     io.run(run_options)
+
+# the check: the trajectory against the reference of these parameters
+import os  # noqa: E402
+
+import ref_trajectory  # noqa: E402
+
+name = "bench_fem_disks_{}_{}_n{}_s{:g}_T{:g}_{}_tol{:g}".format(
+    os.path.splitext(os.path.basename(shape_filename))[0],
+    ndisks,
+    "none" if neighborhood_factor is None else f"{neighborhood_factor:g}",
+    spacing_factor,
+    final_time,
+    "gosi" if gosi else "mj",
+    tolerance,
+)
+sys.exit(0 if ref_trajectory.check(hdf5_output, name, 1e-8) else 1)

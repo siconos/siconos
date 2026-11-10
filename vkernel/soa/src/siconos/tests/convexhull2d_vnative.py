@@ -80,3 +80,8 @@ with h5py.File(fname, "r") as f:
             )
         )
     print("cf rows:", f["data"]["cf"].shape if "cf" in f["data"] else None)
+
+# the check: the trajectory against the reference of these parameters
+import ref_trajectory  # noqa: E402
+
+sys.exit(0 if ref_trajectory.check(fname, f"convexhull2d_vnative_T{T:g}", 1e-8) else 1)

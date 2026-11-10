@@ -6,31 +6,44 @@
 
 # rebuild the work of Thierry Faug in paper 2009 : "Mean steady flow on a wall overflow by free-surface gravity-driven dense flow"
 # the grains have form of SPHERES
+#
+# usage: python3 2d_sphere_recirculation.py <backend> [en mu inclination [n_row [T]]]
+# exit status 1 if the trajectory is not the reference one of the parameters
+# (see ref_trajectory.py)
 
 import sys
 
 # from siconos.mechanics.collision.convexhull import ConvexHull2d
 from siconos.mechanics.collision.tools import Contactor
-import nonos
-from nonos.mechanics_run import MechanicsHdf5Runner, MechanicsHdf5Runner_run_options
-from nonos.bridge import SpaceFilterOptions
+from siconos.io.mechanics_run import (
+    MechanicsHdf5Runner,
+    MechanicsHdf5Runner_run_options,
+    RunnerConfig,
+)
 import siconos.numerics as sn
-import siconos.kernel as sk
-from siconos.mechanics.collision.bullet import SiconosBulletOptions
+import siconos.simulation as sim
+from siconos.mechanics.collision.bullet import (
+    SiconosBulletDimension,
+    SiconosBulletOptions,
+)
 
 import numpy
 import random
 import math
 
 backend = str(sys.argv[1])
-nonos.mechanics_run.set_backend(backend)
+runner_config = RunnerConfig(backend)
+
+# seeded: the grain sizes and their times of birth, the run is reproducible
+random.seed(0)
+numpy.random.seed(0)
 
 bullet_options = SiconosBulletOptions()
 bullet_options.worldScale = 100000
 bullet_options.contactBreakingThreshold = 0.04
-bullet_options.dimension = 1  # siconos.mechanics.collision.bullet.SICONOS_BULLET_2D
-bullet_options.perturbationIterations = 0.0
-bullet_options.minimumPointsPerturbationThreshold = 0.0
+bullet_options.dimension = SiconosBulletDimension.TwoD
+bullet_options.perturbationIterations = 0
+bullet_options.minimumPointsPerturbationThreshold = 0
 
 
 # inclination = math.pi*4/45. #16°
@@ -54,15 +67,15 @@ test = False
 test_performance = False
 performance_verbose = True
 
-if len(sys.argv) > 2:
-    en = sys.argv[1]
-    mu = float(sys.argv[2])
-    inclination = float(sys.argv[3])
+if len(sys.argv) > 4:
+    en = float(sys.argv[2])
+    mu = float(sys.argv[3])
+    inclination = float(sys.argv[4])
     angle = inclination * math.pi / 180.0
-    if len(sys.argv) >= 5:
-        n_row = int(sys.argv[4])
     if len(sys.argv) >= 6:
-        T = float(sys.argv[5])
+        n_row = int(sys.argv[5])
+    if len(sys.argv) >= 7:
+        T = float(sys.argv[6])
 
 # if dist not in ['uniform', 'double', 'exp']:
 #    print("dist = [uniform | double | exp]")
@@ -232,14 +245,14 @@ g = 9.81
 
 
 def apply_gravity(body):
-    # Fonction define inclination of the gratvity
+    # the gravity, inclined: a kernel body or a vnative one
     g = 9.81
-    weight = [
-        body.scalarMass() * g * math.sin(angle),
-        -body.scalarMass() * g * math.cos(angle),
-        0.0,
-    ]
-    body.setFExtPtr(weight)  # scalMass() dans quel bibli ?
+    m = body.scalarMass() if hasattr(body, "scalarMass") else body.getMassValue()
+    weight = numpy.array([m * g * math.sin(angle), -m * g * math.cos(angle), 0.0])
+    if hasattr(body, "setFExtPtr"):
+        body.setFExtPtr(weight)
+    else:
+        body.setConstantFext(weight)
 
 
 def create_grain(
@@ -403,7 +416,7 @@ def create_ground_line(ground_size_ratio=1500, line_grain_size=0.001):
 
 if not restart:
     # Creation of the hdf5 file for input/output
-    with MechanicsHdf5Runner(mode="w", io_filename=fn) as io:
+    with MechanicsHdf5Runner(mode="w", io_filename=fn, config=runner_config) as io:
         max_x, max_y, min_x, min_y, initial_grains_locations = create_grains(
             io,
             n_row=n_row,
@@ -536,14 +549,14 @@ else:
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
 
-options = sk.SolverOptions(sn.SICONOS_FRICTION_2D_NSGS)
-options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 100
-options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-3
+options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
+options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-3
 # legacy FC2D error measure: the default became Euclidean scaling upstream
 options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
     sn.params.SICONOS_FRICTION_2D_SCALING_NO
 )
-options.iparam[sn.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
+options.iparam[sn.params.SICONOS_NSGS_FREEZING_CONTACT] = 10
 
 
 class output_end_run_iteration_hook:
@@ -732,11 +745,13 @@ run_options["constraint_activation_threshold"] = 1e-05
 run_options["start_run_iteration_hook"] = srih
 run_options["end_run_iteration_hook"] = erih
 
-run_options["Newton_options"] = sk.SICONOS_TS_LINEAR
+run_options["Newton_options"] = sim.LINEAR
 
 run_options["skip_last_update_output"] = True
 run_options["skip_reset_lambdas"] = True
-run_options["osns_assembly_type"] = sk.REDUCED_DIRECT
+# the assembly of the classic kernel (not in every build of its wrappers)
+if hasattr(sim, "REDUCED_DIRECT"):
+    run_options["osns_assembly_type"] = sim.REDUCED_DIRECT
 
 # run_options['osns_assembly_type']= sk.GLOBAL_REDUCED
 # run_options['osi']= sk.MoreauJeanGOSI
@@ -744,8 +759,7 @@ run_options["osns_assembly_type"] = sk.REDUCED_DIRECT
 if performance_verbose:
     run_options["verbose"] = True
     run_options["with_timer"] = True
-    run_options["explode_Newton_solve"] = False
-    run_options["explode_computeOneStep"] = False
+    run_options["explode_computeOneStep_in_python"] = False
 
 run_options["violation_verbose"] = True
 run_options["output_frequency"] = output_frequency
@@ -753,13 +767,23 @@ run_options["output_frequency"] = output_frequency
 run_options["time_stepping"] = None
 run_options["set_external_forces"] = apply_gravity
 
-vnative_options = SpaceFilterOptions()
+import nonos.bridge  # noqa: E402
+
+vnative_options = nonos.bridge.SpaceFilterOptions()
 vnative_options.neighborhood_radius = grain_size * 1.01
 vnative_options.min_radius = grain_size / 2
 
 run_options["vnative_options"] = vnative_options
 
-with MechanicsHdf5Runner(mode="r+", io_filename=fn) as io:
+with MechanicsHdf5Runner(mode="r+", io_filename=fn, config=runner_config) as io:
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
     io.run(run_options)
+
+# the check: the trajectory against the reference of these parameters
+import ref_trajectory  # noqa: E402
+
+name = "2d_sphere_recirculation_{}_N{}_e{:g}_mu{:g}_angle{:g}_T{:g}".format(
+    backend, N, float(en), float(mu), inclination, T
+)
+sys.exit(0 if ref_trajectory.check(fn, name, 1e-8, every=10) else 1)

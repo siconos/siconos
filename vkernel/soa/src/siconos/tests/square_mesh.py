@@ -4,7 +4,9 @@
 # (3), the contact nodes all around (4, segments counter-clockwise from the
 # bottom left node).
 #
-# usage: python3 square_mesh.py <N> <output.msh>
+# usage: python3 square_mesh.py <N> <output.msh> [reference.msh]
+# with a reference: exit status 1 if the output is not the same file (the
+# ctest test: N = 5 and mesh_N5.msh)
 
 import sys
 
@@ -53,3 +55,9 @@ with open(output, "w") as f:
     for k, e in enumerate(elements, start=1):
         f.write(f"{k} {e}\n")
     f.write("$EndElements\n")
+
+if len(sys.argv) > 3:
+    with open(output) as a, open(sys.argv[3]) as b:
+        same = a.read() == b.read()
+    print(f"{output} {'is' if same else 'FAILED: is not'} {sys.argv[3]}")
+    sys.exit(0 if same else 1)

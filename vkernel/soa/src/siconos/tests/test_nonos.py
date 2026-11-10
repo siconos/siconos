@@ -13,14 +13,14 @@ def test_make():
 
 def test_add():
     data = m.disks.make_storage()
-    disk = m.disks.add_disk(data)
+    disk = m.disks.add_body(data)
 
 
 def test_q():
     import numpy
 
     data = m.disks.make_storage()
-    disk = m.disks.add_disk(data)
+    disk = m.disks.add_body(data)
     disk.set_q(np.array([1, 2, 3], dtype=np.float64))
     q = disk.q()
     assert list(q) == [1, 2, 3]
@@ -36,17 +36,16 @@ def test_nslaw():
     assert nslaw.e() == 0.7
 
 
-def test_diskdisk_r():
+def test_disk_shape():
+    # the shape is the body's: diskdisk_r binds any pair of bodies
     data = m.disks.make_storage()
-    relation = m.disks.add_diskdisk_r(data)
-    disk_shape1 = m.disks.add_disk_shape(data)
-    disk_shape2 = m.disks.add_disk_shape(data)
-    relation.set_disk1(disk_shape1)
-    relation.set_disk2(disk_shape2)
-    relation.disk1().set_radius(1.0)
-    relation.disk2().set_radius(2.0)
-    assert relation.disk1().radius() == 1.0
-    assert relation.disk2().radius() == 2.0
+    shape = m.disks.add_disk_shape(data)
+    shape.set_radius(2.0)
+    body = m.disks.add_body(data)
+    assert not body.is_disk()
+    body.set_disk_shape(shape)
+    assert body.is_disk()
+    assert shape.radius() == 2.0
 
 
 def test_time_stepping():
@@ -78,7 +77,7 @@ def test_interaction_manager():
 #    io = m.disks.add_io(data)
 #    assert io.positions(0).shape[0] == 0
 #    assert io.positions(0).shape[1] == 5
-#    disk = m.disks.add_disk(data)
+#    disk = m.disks.add_body(data)
 #    assert io.positions(0).shape[0] == 1
 
 # test_time_stepping()
