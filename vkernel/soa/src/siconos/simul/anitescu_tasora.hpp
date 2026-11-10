@@ -349,7 +349,11 @@ struct sweep : stage<
                    "Run one sweep: lambda <- P_K(lambda - eta (H v + e ydot)), "
                    "v <- v + M^-1 H^T dlambda, interaction by interaction"> {
   static void run(auto& c) {
-    if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
+    if constexpr (std::decay_t<decltype(c.kind)>::nslaw_is_fremond()) {
+      if (c.kind.number_of_interactions() > 0) {
+        throw std::runtime_error("anitescu_tasora: the Frémond impact law is not supported");
+      }
+    } else if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
       using scalar = typename decltype(c.kind.env())::scalar;
       sweep_state<scalar> p;
       c.kind.template run<apply_projected_gauss_seidel>(c.step, p);

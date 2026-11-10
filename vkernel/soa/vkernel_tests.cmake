@@ -89,6 +89,8 @@ if(WITH_TESTING)
     bouncing_disk_line.ref
     DEPS
     "${COMPACTNSEARCH}")
+  new_test(NAME vkernel_fremond_disk SOURCES fremond_disk.cpp ${SIMPLE_TEST_MAIN}
+           DEPS "${COMPACTNSEARCH}")
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_nslaws_multi_group SOURCES nslaws_multi_group.cpp
@@ -181,6 +183,7 @@ if(WITH_TESTING)
       vkernel_bouncing_balls
       vkernel_bouncing_disk
       vkernel_bouncing_disk_line
+      vkernel_fremond_disk
       vkernel_bouncing_disks
       vkernel_fixed_disks
       vkernel_registry_remove

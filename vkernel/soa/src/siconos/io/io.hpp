@@ -14,6 +14,7 @@
 #include "siconos/collision/polytopepolytope_r.hpp"
 #include "siconos/collision/shape_of.hpp"
 #include "siconos/model/lagrangian_r.hpp"
+#include "siconos/model/nslaws.hpp"
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -564,8 +565,9 @@ struct io : item {
 
         /* Compute contact status
          * Warning the status are consistent for the sticking and sliding
-         * only with fully implicit discretization o NewtonImpact law
-         * and not wih Fremond impact law
+         * only with fully implicit discretization o NewtonImpact law;
+         * with the Fremond impact law friction acts on the theta-weighted
+         * tangential velocity
          */
 
         scalar answer_5;
@@ -573,6 +575,10 @@ struct io : item {
 
         scalar norm_pt = sqrt(pt_1 * pt_1);
         scalar norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
+        if constexpr (std::derived_from<typename interaction::nslaw,
+                                        model::fremond_impact_friction>) {
+          norm_vt_plus = sqrt(vt_1_average_theta * vt_1_average_theta);
+        }
         // scalar norm_vt_minus = sqrt(vt_1_minus*vt_1_minus);
         if ((pn < tol) and (vn_plus + e * vn_minus > tol))
           answer_5 = 0;  // take-off = 0

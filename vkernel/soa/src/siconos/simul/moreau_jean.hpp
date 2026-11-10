@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/simul/contacts.hpp"
 #include "siconos/simul/kinds.hpp"
@@ -20,6 +22,20 @@ namespace siconos::simul::moreau_jean {
      lambda solution of the frictional contact problem (W, q, mu)
      v(k + 1) = v_free + A^-1 H^T lambda
      q(k + 1) = q(k) + h (theta v(k + 1) + (1 - theta) v(k))
+
+   With the Frémond impact law (model::fremond_impact_friction, Acary &
+   Collins-Craft, JTCAM 2025) Coulomb friction is written on u(k + theta)
+   = theta u(k + 1) + (1 - theta) u(k) instead of u(k + 1): the problem of a
+   contact is w = theta W lambda + q with q = theta H v_free + (1 - theta)
+   ydot(k) + (theta (1 + e) - 1) ydot_N(k). The cone complementarity is
+   invariant under a positive scaling of the (w, q) of a contact, so it is
+   divided by theta: W is unchanged, and so is the normal row of q, only
+
+     q_T = H_T v_free + (1 - theta) / theta ydot_T(k)
+
+   lambda is the same impulse, the velocity update is unchanged, and the
+   Newton and the Frémond contacts can share one problem. With theta = 1 it
+   is the Newton impact law.
 
    The kernels of the scheme, its stages, then the schedules (the time step,
    the initial state). The rest of a step is in contacts.hpp. */
@@ -44,10 +60,23 @@ struct update_contact_next_velocity
 
 // the Newton impact law on the free output derivative: e on the normal
 // component only, no tangential restitution (et = 0 in the kernel)
-struct apply_impact_law
+struct apply_newton_impact_law
     : kernel<all<interactions>, in<"ydot">, through<"nslaw", "e">, inout<"ydot", next>> {
   static void apply(const auto&, const auto& ydot, const auto& e, auto& ydot_next) {
     ydot_next(0) += e * ydot(0);
+  }
+};
+
+// the Frémond impact law on the free output derivative, divided by theta
+// (see above): the Newton impact law on the normal component, Coulomb
+// friction on u(k + theta) through the tangential ones
+struct apply_fremond_impact_law
+    : kernel<all<interactions>, in<"ydot">, through<"nslaw", "e">, inout<"ydot", next>> {
+  static void apply(const auto& p, const auto& ydot, const auto& e, auto& ydot_next) {
+    ydot_next(0) += e * ydot(0);
+    for (decltype(ydot_next.size()) i = 1; i < ydot_next.size(); ++i) {
+      ydot_next(i) += (1 - p.theta) / p.theta * ydot(i);
+    }
   }
 };
 
@@ -67,10 +96,30 @@ using storage::schedule::stage;
 
 // on a kind of interactions
 
+struct apply_impact_law
+    : stage<"Apply the Newton or the Frémond impact law on the free ydot at step + 1"> {
+  static void run(auto& c) {
+    if constexpr (std::decay_t<decltype(c.kind)>::nslaw_is_fremond()) {
+      c.kind.template run<moreau_jean::apply_fremond_impact_law>(
+          c.step, theta_method::stages::parameters(c.kind, c.h, c.integrator.theta()));
+    } else {
+      c.kind.template run<moreau_jean::apply_newton_impact_law>(c.step, nullptr);
+    }
+  }
+};
+
+// for the schemes without the Frémond impact law
 struct apply_newton_impact_law
     : stage<"Apply the Newton impact law on the free ydot at step + 1"> {
   static void run(auto& c) {
-    c.kind.template run<moreau_jean::apply_impact_law>(c.step, nullptr);
+    if constexpr (std::decay_t<decltype(c.kind)>::nslaw_is_fremond()) {
+      if (c.kind.number_of_interactions() > 0) {
+        throw std::runtime_error(
+            "the Frémond impact law is implemented in the Moreau-Jean scheme only");
+      }
+    } else {
+      c.kind.template run<moreau_jean::apply_newton_impact_law>(c.step, nullptr);
+    }
   }
 };
 
@@ -208,7 +257,7 @@ using time_step_schedule = sequence<
     when<co::with_contacts,
          co::setup_assembly,
          for_interactions<co::compute_time_invariant_jacobians, co::assemble_h_matrix, co::assemble_multipliers,
-                          mj::apply_newton_impact_law, mj::assemble_free_velocity_output>,
+                          mj::apply_impact_law, mj::assemble_free_velocity_output>,
          for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix>,
          mj::assemble_delassus_operator,
          mj::solve,

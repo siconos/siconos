@@ -41,6 +41,20 @@ struct newton_impact_friction : item {
 };
 
 /**
+ * @brief Frémond impact law with friction
+ *
+ * The Newton impact law in the normal direction, Coulomb friction written
+ * on the theta-weighted velocity u(k + theta) instead of u(k + 1), see
+ * Acary & Collins-Craft, On the Moreau-Jean scheme with the Frémond impact
+ * law, JTCAM 2025. With 1/2 <= theta <= 1 / (1 + e) the Moreau-Jean scheme
+ * dissipates energy at every contact; with theta = 1 it is the Newton
+ * impact law. No tangential restitution: Frémond's law is et = 1 by
+ * construction. Same parameters as newton_impact_friction, and a friction
+ * law for everything that tests for it.
+ */
+struct fremond_impact_friction : newton_impact_friction {};
+
+/**
  * @brief Newton impact law without friction
  *
  * Models a simple Newton impact law with only normal restitution.

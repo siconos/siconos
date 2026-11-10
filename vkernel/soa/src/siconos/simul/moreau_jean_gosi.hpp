@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/simul/contacts.hpp"
 #include "siconos/simul/kinds.hpp"
@@ -81,6 +83,11 @@ using storage::schedule::stage;
 
 struct assemble_impact_terms : stage<"Assemble b = e ydot at step, the impact terms"> {
   static void run(auto& c) {
+    if constexpr (std::decay_t<decltype(c.kind)>::nslaw_is_fremond()) {
+      if (c.kind.number_of_interactions() > 0) {
+        throw std::runtime_error("moreau_jean_gosi: the Frémond impact law is not supported");
+      }
+    }
     c.kind.template run<moreau_jean_gosi::assemble_impact_term>(
         c.step, block_vector{c.kind.lambda_view(c.integrator.b_vector_assembled())});
   }

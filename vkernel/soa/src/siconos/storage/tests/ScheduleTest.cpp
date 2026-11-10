@@ -169,7 +169,7 @@ class ScheduleTest : public CppUnit::TestFixture {
             "      Compute the jacobians H, if the relations do not change\n"
             "      Assemble H of the active interactions\n"
             "      Assemble lambda, ydot, mu of the active interactions\n"
-            "      Apply the Newton impact law on the free ydot at step + 1\n"
+            "      Apply the Newton or the Frémond impact law on the free ydot at step + 1\n"
             "      Assemble q = H v_free, the free output derivatives\n"
             "    for each kind of systems:\n"
             "      Assemble M of the involved systems\n"

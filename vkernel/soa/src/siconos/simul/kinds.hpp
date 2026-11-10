@@ -327,6 +327,11 @@ struct interaction_kind : item {
       return std::derived_from<nslaw, model::newton_impact_friction>;
     }
 
+    // Coulomb friction on u(k + theta), see model::fremond_impact_friction
+    static constexpr auto nslaw_is_fremond() {
+      return std::derived_from<nslaw, model::fremond_impact_friction>;
+    }
+
     // the context of the kernels of this kind (see simul/kernels.hpp)
     struct kernel_context {
       using interaction = Interaction;
