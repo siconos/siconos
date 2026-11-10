@@ -1232,8 +1232,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     if given_inertia is None:
                         inertia = mass * polar / area
                     else:
-                        gi = np.asarray(given_inertia, dtype=float)
-                        inertia = float(gi.ravel()[0] if gi.size == 1 else gi[2, 2])
+                        inertia = self.vnative_inertia(given_inertia)
 
                     initial_pos = np.concatenate([translation, orientation], axis=0)
                     self._q0.append(initial_pos.copy())
@@ -1257,8 +1256,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     body = body_class()
                     radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
+                    # the inertia of a uniform disk if not given
+                    inertia = (
+                        None
+                        if given_inertia is None
+                        else self.vnative_inertia(given_inertia)
+                    )
                     body.init_disk(
-                        radius, mass, self._q0[-1], self._v0[-1], ctor.collision_group
+                        radius,
+                        mass,
+                        self._q0[-1],
+                        self._v0[-1],
+                        ctor.collision_group,
+                        inertia=inertia,
                     )
                     self._set_external_forces(body)
                 else:
@@ -2163,6 +2173,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._deaths[time_of_death].append((name, obj, body, flag))
             else:
                 self._deaths[time_of_death] = [(name, obj, body, flag)]
+
+    @staticmethod
+    def vnative_inertia(given_inertia):
+        """The inertia of a 2D vnative body from the one given to add_object:
+        a scalar, or the zz entry of the principal inertias or of a 3x3
+        matrix"""
+        gi = np.asarray(given_inertia, dtype=float).ravel()
+        if gi.size == 1:
+            return float(gi[0])
+        if gi.size == 3:
+            return float(gi[2])
+        return float(gi.reshape(3, 3)[2, 2])
 
     def convex_shape_2d(self, shape_name):
         """The convex hull of a 2D convex shape, its area and its polar

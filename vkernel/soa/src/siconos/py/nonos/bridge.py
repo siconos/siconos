@@ -457,7 +457,11 @@ class Body(BodyBase):
 
         body.set_shape(mesh_shape)
 
-    def init_disk(self, radius, mass, position, velocity, collision_group=0):
+    def init_disk(
+        self, radius, mass, position, velocity, collision_group=0, inertia=None
+    ):
+        """A disk; inertia about its centre, the one of a uniform disk
+        (m r^2 / 2) if not given."""
         self.set_count(self.count() + 1)
         self._ident = self.count()
 
@@ -467,7 +471,9 @@ class Body(BodyBase):
         body.set_collision_group(collision_group)
         body.set_q(array(position))
         body.set_velocity(array(velocity))
-        body.set_mass_matrix(array([mass, mass, mass * radius * radius / 2]))
+        if inertia is None:
+            inertia = mass * radius * radius / 2
+        body.set_mass_matrix(array([mass, mass, inertia]))
         body.set_disk_shape(self.disk_shape(radius))
         body.set_fext(array([0, 0, 0]))  # default
 
