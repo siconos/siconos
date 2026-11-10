@@ -132,7 +132,7 @@ endmacro()
 # ========================================
 function(new_test)
   set(oneValueArgs NAME HDF5)
-  set(multiValueArgs SOURCES DATA DEPS COMPILE_DEFINITIONS)
+  set(multiValueArgs SOURCES DATA DEPS COMPILE_DEFINITIONS CASES)
   cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # -- set test name --
@@ -258,9 +258,20 @@ endif()
     set(command ${command}".exe")
   endif()
 
-  # Add the test in the pipeline
-  add_test(NAME ${TEST_NAME} COMMAND ${command} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR})
-  set_siconos_test_properties(NAME ${TEST_NAME})
+  # Add the test in the pipeline, or with CASES one test <name>.<case> per
+  # CppUnit test case of the executable (Suite::testMethod, the argument of
+  # TestMain.cpp): they run in parallel, a failure names its case
+  if(TEST_CASES)
+    foreach(case IN LISTS TEST_CASES)
+      string(REGEX REPLACE ".*::" "" case_name ${case})
+      add_test(NAME ${TEST_NAME}.${case_name} COMMAND ${command} ${case}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR})
+      set_siconos_test_properties(NAME ${TEST_NAME}.${case_name})
+    endforeach()
+  else()
+    add_test(NAME ${TEST_NAME} COMMAND ${command} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR})
+    set_siconos_test_properties(NAME ${TEST_NAME})
+  endif()
 
 endfunction()
 
