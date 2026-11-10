@@ -22,6 +22,8 @@ class Stored:
         # 1 again, and no shape handle into it
         BodyBase.set_count(0)
         BodyBase.shapes().clear()
+        # no law of a previous storage
+        NewtonImpactFrictionNSL.laws.clear()
 
     @classmethod
     def data(cls):
@@ -196,11 +198,23 @@ class SpaceFilter(Stored):
 
 
 class NewtonImpactFrictionNSL(Stored):
+    # the class names of the laws of the storage: the scheme of the
+    # integrator depends on them (see Simulation.insertIntegrator)
+    laws = set()
+
     def __init__(self, e, not_used, mu, dimension):
         self._handle = vkernel.disks.add_nslaw(self.data())
         self._handle.set_e(e)
         self._handle.set_mu(mu)
         # self._handle.set_dimension(dimension)
+        NewtonImpactFrictionNSL.laws.add(type(self).__name__)
+
+
+class FremondImpactFrictionNSL(NewtonImpactFrictionNSL):
+    """The Frémond impact law (Acary & Collins-Craft, JTCAM 2025): the
+    parameters of the Newton one, Coulomb friction on the theta-weighted
+    velocity. The vkernel has one law type: the Frémond law is the
+    Moreau-Jean-Frémond scheme of the integrator, on every interaction."""
 
 
 class Osi(Stored):
@@ -317,6 +331,21 @@ class Simulation(Stored):
             vosi.set_tangential_stiffness(osi.tangential_stiffness)
         else:
             scheme = SCHEME_LOCAL_PROBLEM
+        # the Frémond impact law is a scheme of the vkernel, on all the
+        # interactions: it cannot be mixed with the Newton law, and only
+        # Moreau-Jean on the local problem implements it
+        laws = NewtonImpactFrictionNSL.laws
+        if "FremondImpactFrictionNSL" in laws:
+            if "NewtonImpactFrictionNSL" in laws:
+                raise ValueError(
+                    "vnative: the Frémond and the Newton impact laws cannot be mixed"
+                )
+            if scheme != SCHEME_LOCAL_PROBLEM:
+                raise ValueError(
+                    f"vnative: the Frémond impact law needs a MoreauJeanOSI, "
+                    f"the osi is a {type(osi).__name__}"
+                )
+            scheme = SCHEME_LOCAL_PROBLEM_FREMOND
         self.handle().one_step_integrator().set_scheme(scheme)
 
     def insertNonSmoothProblem(self, osnspb):
