@@ -19,6 +19,20 @@ cmake -DUSER_OPTIONS_FILE=path_to/somefile.cmake ...
 
 [default.cmake](./default.cmake) is the default when USER_OPTIONS_FILE is not set.
 
+Each component can also be enabled or disabled directly from the command line
+with a `WITH_<component>` option, for example:
+
+```bash
+cmake -S path_to_sources -B build-siconos -DWITH_numerics=ON -DWITH_kernel=ON
+```
+
+The available components are: `externals`, `numerics`, `kernel`, `control`,
+`mechanics`, `mechanisms`, `io`, `vkernel`.  Dependencies are resolved
+automatically, so enabling `mechanics` also enables `kernel`, `numerics` and
+`externals`.
+
+The legacy `COMPONENTS` variable is still supported: if it is set, it is used
+as the source of truth and `WITH_<component>` options are ignored.
 
 
 :warning: all files in the present directory are used in the Gitlab continuous integration process.

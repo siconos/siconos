@@ -65,8 +65,14 @@ git clone https://github.com/siconos/siconos.git
 cd siconos
 
 # Configure and build
-cmake -S . -B build -DUSER_OPTIONS_FILE=config_samples/default.cmake
+cmake -S . -B build
 cmake --build build -j$(nproc)
+
+# Or select components explicitly, e.g. only numerics and kernel:
+# cmake -S . -B build -DWITH_numerics=ON -DWITH_kernel=ON
+
+# Or use a configuration file:
+# cmake -S . -B build -DUSER_OPTIONS_FILE=config_samples/default.cmake
 
 # Run tests (optional)
 ctest --test-dir build

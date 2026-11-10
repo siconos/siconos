@@ -102,16 +102,68 @@ endif()
 include(cmake/advanced_options.cmake)
 
 # Set target names from components list
+# Components can be selected either:
+# - by setting the COMPONENTS list variable (legacy/config-file style), or
+# - by setting WITH_<component> boolean options.
+# If COMPONENTS is not set, it is derived from WITH_<component> options.
+set(AVAILABLE_COMPONENTS externals numerics kernel control mechanics mechanisms io vkernel)
+
+# Dependency map: each component depends on the listed components.
+# The final COMPONENTS list is ordered according to AVAILABLE_COMPONENTS.
+set(_component_deps_externals "")
+set(_component_deps_numerics "externals")
+set(_component_deps_kernel "externals;numerics")
+set(_component_deps_control "numerics;kernel")
+set(_component_deps_mechanics "kernel")
+set(_component_deps_mechanisms "mechanics")
+set(_component_deps_io "kernel")
+set(_component_deps_vkernel "mechanics")
+
+if(NOT COMPONENTS)
+  # Derive COMPONENTS from WITH_<component> options.
+  set(_requested_components "")
+  foreach(_comp IN LISTS AVAILABLE_COMPONENTS)
+    if(WITH_${_comp})
+      list(APPEND _requested_components ${_comp})
+    endif()
+  endforeach()
+
+  # Add dependencies recursively.
+  set(_components_with_deps ${_requested_components})
+  set(_new_components ${_requested_components})
+  while(_new_components)
+    set(_next_new "")
+    foreach(_comp IN LISTS _new_components)
+      foreach(_dep IN LISTS _component_deps_${_comp})
+        if(NOT _dep IN_LIST _components_with_deps)
+          list(APPEND _components_with_deps ${_dep})
+          list(APPEND _next_new ${_dep})
+        endif()
+      endforeach()
+    endforeach()
+    set(_new_components ${_next_new})
+  endwhile()
+
+  # Order components according to AVAILABLE_COMPONENTS.
+  set(COMPONENTS "")
+  foreach(_comp IN LISTS AVAILABLE_COMPONENTS)
+    if(_comp IN_LIST _components_with_deps)
+      list(APPEND COMPONENTS ${_comp})
+    endif()
+  endforeach()
+
+  message(STATUS "Components selected from WITH_* options: ${COMPONENTS}")
+endif()
+
 if(NOT COMPONENTS)
   message(WARNING "Components list is empty - Nothing will be built.")
 endif()
 
-set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io vkernel")
 foreach(component_name IN LISTS COMPONENTS)
   # Check and set components list
   string(TOUPPER ${component_name} upname)
-  list(FIND ${AVAILABLE_COMPONENTS} ${component_name} comp_exists)
-  if(NOT comp_exists)
+  list(FIND AVAILABLE_COMPONENTS ${component_name} comp_exists)
+  if(comp_exists EQUAL -1)
     message(FATAL_ERROR "Unknown siconos component : ${component_name}")
   endif()
   set(HAVE_SICONOS_${upname} TRUE)

@@ -21,6 +21,7 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine HAVE_SICONOS_MECHANICS
 #cmakedefine HAVE_SICONOS_MECHANISMS
 #cmakedefine HAVE_SICONOS_IO
+#cmakedefine HAVE_SICONOS_VKERNEL
 
 // -- Global options --
 //

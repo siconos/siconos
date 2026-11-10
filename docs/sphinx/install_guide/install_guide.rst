@@ -137,6 +137,36 @@ to collect information about Siconos installation.
      In that case, if ISOLATED_INSTALL=false (default) Siconos Python packages will remain in the default python install path.
      If ISOLATED_INSTALL=true, everything (including Siconos Python packages) will be installed in <someplace>
 
+Selecting components
+~~~~~~~~~~~~~~~~~~~~
+
+Siconos is split into several components. By default, the standard components
+(`externals`, `numerics`, `kernel`, `control`, `mechanics` and `io`) are built.
+
+You can select components using ``WITH_<component>`` CMake options, for example::
+
+  cmake -S path_to_sources -B build-siconos \
+        -DWITH_numerics=ON -DWITH_kernel=ON -DWITH_mechanics=ON
+
+The available components are:
+
+* ``externals``
+* ``numerics``
+* ``kernel``
+* ``control``
+* ``mechanics``
+* ``mechanisms``
+* ``io``
+* ``vkernel``
+
+Dependencies are resolved automatically: enabling ``mechanics`` also enables
+``kernel``, ``numerics`` and ``externals``.
+
+Alternatively, you can still set the ``COMPONENTS`` list variable directly
+(either on the command line or in a config file). When ``COMPONENTS`` is set,
+it takes precedence over the ``WITH_<component>`` options.
+
+
 .. _siconos_whatsinstalled:
 
 What will be installed?
