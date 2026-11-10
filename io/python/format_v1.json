@@ -4,6 +4,8 @@
     "dtype": "numpy names: f4 = every table created by data() (forced, integers included); f8 = datasets created directly; S = byte string; void = opaque bytes (pickle); vlen = variable-length string (h5py, not numpy); int, float, str, bool = attribute types",
     "shape": "full dataset shape; null = free size (None, as in numpy); a symbol (dim, rot, twist) takes its value from symbols for the dimension of the file; a list of shapes = alternatives (data must match one)",
     "layout": "columns of the last dimension, same grammar as v2 ('x[k]' = k columns)",
+    "attributes": "attributes of the file (next to /data): const: written when the file is created, a file with another value is not read; enum: allowed values; default: value when not given; a file without version attributes is a v1 file",
+    "format": "the text of this file, stored in the dataset /format (variable-length string) when the file is created",
     "attrs": "HDF5 attributes of the dataset or group; opt: written only if provided",
     "by": "index group that gives the rows of each output step: rows of step k = step_index/<table>[k] (time, first row, number of rows); a file without it: the rows of a step are found from the column t (none for a table without t)",
     "chunks": "chunk shape of a table, when imposed",
@@ -13,6 +15,8 @@
     "ids": "ds_id > 0 dynamic bodies, < 0 static bodies (input/<object>.attrs['id'])"
   },
   "attributes": {
+    "version_major": {"const": 1},
+    "version_minor": {"const": 0},
     "dimension": {"enum": [2, 3], "default": 3}
   },
   "symbols": {
@@ -148,6 +152,10 @@
     },
     "plugins": {"opt": true,
       "<plugin>": {"dtype": "vlen", "shape": [1], "attrs": {"filename": {"dtype": "str"}}}
+    },
+    "script": {"opt": true,
+      "source": {"dtype": "vlen", "shape": [], "attrs": {"filename": {"dtype": "str"}},
+                 "note": "the Python script that created the file (sys.argv[0]), written once"}
     },
     "external_functions": {"opt": true,
       "<function>": {

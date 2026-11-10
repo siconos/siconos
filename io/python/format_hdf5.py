@@ -53,7 +53,7 @@ def check_datatype(data, format, symbols=None):
     if "shape" in format:
         shapes = (
             format["shape"]
-            if isinstance(format["shape"][0], list)
+            if format["shape"] and isinstance(format["shape"][0], list)
             else [format["shape"]]
         )
         for shape in shapes:  # first shape of the list that matches data
@@ -91,24 +91,47 @@ class FormatAdaptor:
                 "r",
                 encoding="utf-8",
             ) as f:
-                self.format = json.load(f)
+                self.format_text = f.read()
+            self.format = json.loads(self.format_text)
         self.attributes = self.format["attributes"]
         self.symbols_format = self.format["symbols"]
         self.data_format = self.format["data"]
         self.compression = compression
         self.hdf5 = h5py.File(filename, mode)
-        self.writable = self.hdf5.mode != "r"
-        self.data = (
-            self.hdf5["data"]
-            if "data" in self.hdf5
-            else self.hdf5.create_group("data")
-            if self.writable
-            else None
-        )
-        self.dimension = int(
-            self.hdf5.attrs.get("dimension", self.attributes["dimension"]["default"])
-        )
-        check_datatype(self.dimension, self.attributes["dimension"])
+        try:
+            self.writable = self.hdf5.mode != "r"
+            self.data = (
+                self.hdf5["data"]
+                if "data" in self.hdf5
+                else self.hdf5.create_group("data")
+                if self.writable
+                else None
+            )
+            # version of the format (const attributes) and the format itself (dataset /format)
+            for name, spec in self.attributes.items():
+                if "const" not in spec:
+                    continue
+                if name in self.hdf5.attrs:
+                    if self.hdf5.attrs[name] != spec["const"]:
+                        raise ValueError(
+                            f"{self.hdf5.filename}: {name} = {self.hdf5.attrs[name]}, "
+                            f"the format read is {name} = {spec['const']}"
+                        )
+                elif self.writable:
+                    self.hdf5.attrs[name] = spec["const"]
+            if self.writable and "format" not in self.hdf5:
+                self.hdf5.create_dataset(
+                    "format", data=self.format_text, dtype=vlen_dtype
+                )
+            self.dimension = int(
+                self.hdf5.attrs.get(
+                    "dimension", self.attributes["dimension"]["default"]
+                )
+            )
+            check_datatype(self.dimension, self.attributes["dimension"])
+        except Exception:
+            self.hdf5.close()  # a file that is not read is not left open
+            raise
 
     @property
     def symbols(self):
