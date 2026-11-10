@@ -184,17 +184,13 @@ class SpaceFilter(Stored):
             self._ngbh.sort()
 
     def removeStaticBody(self, body):
-        self._ngbh.search()  # needed after sort
-
-        # only segments are removable
-        if type(body) == type([]):
-            # box2d
-            self.handle().remove_static_segment(0, body[0])
-            self.handle().remove_static_segment(0, body[1])
-            self.handle().remove_static_segment(0, body[2])
-            self.handle().remove_static_segment(0, body[3])
-        else:
-            self.handle().remove_static_segment(0, body)
+        # only segments are removable, a box2d is four of them. A removal
+        # resets the neighborhood search (its hash table is rebuilt from the
+        # coordinates), which the next removal needs initialized, as after a
+        # sort: a search before each one
+        for segment in body if isinstance(body, list) else [body]:
+            self._ngbh.search()
+            self.handle().remove_static_segment(0, segment)
 
 
 class NewtonImpactFrictionNSL(Stored):
