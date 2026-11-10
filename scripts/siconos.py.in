@@ -68,6 +68,7 @@ SIM_SCHEMES = (
     "AnitescuTasora",
     "AnitescuTasoraAPGD",
     "DEM",
+    "MoreauJeanFremond",
 )
 SIM_SCHEME_ALIASES = {
     "mj": "MoreauJean",
@@ -75,6 +76,7 @@ SIM_SCHEME_ALIASES = {
     "at": "AnitescuTasora",
     "at-apgd": "AnitescuTasoraAPGD",
     "dem": "DEM",
+    "mjf": "MoreauJeanFremond",
 }
 
 
@@ -580,8 +582,11 @@ def parse_command_line(with_remainder=True):
         "on the local problem), MoreauJeanGOSI (Moreau-Jean on the global "
         "problem), AnitescuTasora or AnitescuTasoraAPGD (cone "
         "complementarity, solved by projected Gauss-Seidel or APGD), DEM "
-        "(explicit penalty springs). The short names mj, gosi, at, at-apgd "
-        "and dem are accepted too",
+        "(explicit penalty springs), MoreauJeanFremond (Moreau-Jean on the "
+        "local problem with the Fremond impact law: Coulomb friction on the "
+        "theta-weighted velocity, energy-consistent for 1/2 <= theta <= "
+        "1/(1+e)). The short names mj, gosi, at, at-apgd, dem and mjf are "
+        "accepted too",
     )
     sim_group.add_argument("--theta", type=float, help="theta of the vnative integrator")
     sim_group.add_argument("--gamma", type=float, help="gamma of the vnative integrator")

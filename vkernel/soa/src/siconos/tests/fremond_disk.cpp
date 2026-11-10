@@ -17,7 +17,7 @@
 // i.e. vx+ = 3/7 with theta = 1/2, where the kinetic energy is conserved
 // for e = 1, and the Newton value with theta = 1. vy+ = e in both.
 
-#define SICONOS_FREMOND_DISK_CONFIG(NS, LAW)                                         \
+#define SICONOS_FREMOND_DISK_CONFIG(NS, LAW, OSI)                                    \
   namespace siconos::NS {                                                            \
   struct disk : model::lagrangian_ds {};                                             \
   struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};                 \
@@ -28,7 +28,7 @@
   using diskfsegment_r = collision::diskfsegment_r;                                  \
   struct interaction : simul::interaction<nslaw, diskdisk_r, diskfsegment_r> {};     \
   struct topo : simul::topology<disk, interaction> {};                               \
-  struct osi : simul::one_step_integrator<topo>::moreau_jean {};                     \
+  struct osi : simul::one_step_integrator<topo>::OSI {};                             \
   struct td : simul::time_discretization<> {};                                       \
   struct simulation : simul::time_stepping<td, osi, osnspb> {};                      \
   template <typename T>                                                              \
@@ -55,8 +55,10 @@
   };                                                                                 \
   }
 
-SICONOS_FREMOND_DISK_CONFIG(newton_config, newton_impact_friction)
-SICONOS_FREMOND_DISK_CONFIG(fremond_config, fremond_impact_friction)
+SICONOS_FREMOND_DISK_CONFIG(newton_config, newton_impact_friction, moreau_jean)
+SICONOS_FREMOND_DISK_CONFIG(fremond_config, fremond_impact_friction, moreau_jean)
+// the scheme chosen at run time, the Newton law: as in the python module
+SICONOS_FREMOND_DISK_CONFIG(selectable_config, newton_impact_friction, selectable)
 
 namespace {
 
@@ -65,8 +67,9 @@ struct outcome {
   int impacts;
 };
 
+// scheme: the scheme of a selectable integrator (see selectable_scheme.hpp)
 template <typename Config>
-outcome oblique_impact(double theta, double e, double mu) {
+outcome oblique_impact(double theta, double e, double mu, std::size_t scheme = 0) {
   using namespace siconos;
   using namespace storage;
 
@@ -91,6 +94,9 @@ outcome oblique_impact(double theta, double e, double mu) {
 
   auto simulation = storage::add<typename Config::simulation>(data);
   simulation.one_step_integrator().theta() = theta;
+  if constexpr (requires { simulation.one_step_integrator().scheme(); }) {
+    simulation.one_step_integrator().scheme() = scheme;
+  }
   simulation.one_step_integrator().constraint_activation_threshold() = 0.;
   simulation.time_discretization().t0() = 0.;
   simulation.time_discretization().h() = h;
@@ -148,6 +154,7 @@ class FremondDiskTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testFremondSticksOnAverage);
   CPPUNIT_TEST(testFremondThetaOneIsNewton);
   CPPUNIT_TEST(testFremondSlidingDissipates);
+  CPPUNIT_TEST(testSelectableScheme);
   CPPUNIT_TEST_SUITE_END();
 
   static constexpr double tol = 1e-10;
@@ -187,6 +194,26 @@ class FremondDiskTest : public CppUnit::TestFixture {
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.8, r.vx, tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1., r.vy, tol);
     CPPUNIT_ASSERT(r.kinetic_energy_after < r.kinetic_energy_before - 1e-3);
+  }
+
+  // the scheme chosen at run time on the Newton law: Moreau-Jean is the
+  // Newton scheme, Moreau-Jean-Frémond the Frémond one, bit for bit
+  void testSelectableScheme() {
+    namespace schemes = siconos::simul::selectable_scheme;
+    for (double mu : {1., 0.1}) {
+      auto n = oblique_impact<siconos::newton_config::types>(0.5, 1., mu);
+      auto f = oblique_impact<siconos::fremond_config::types>(0.5, 1., mu);
+      auto sn = oblique_impact<siconos::selectable_config::types>(0.5, 1., mu,
+                                                                  schemes::local_problem);
+      auto sf = oblique_impact<siconos::selectable_config::types>(
+          0.5, 1., mu, schemes::local_problem_fremond);
+      CPPUNIT_ASSERT_EQUAL(1, sf.impacts);
+      CPPUNIT_ASSERT_EQUAL(n.vx, sn.vx);
+      CPPUNIT_ASSERT_EQUAL(n.omega, sn.omega);
+      CPPUNIT_ASSERT_EQUAL(f.vx, sf.vx);
+      CPPUNIT_ASSERT_EQUAL(f.vy, sf.vy);
+      CPPUNIT_ASSERT_EQUAL(f.omega, sf.omega);
+    }
   }
 };
 

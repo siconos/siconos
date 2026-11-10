@@ -12,7 +12,7 @@ Two groups of options:
     run_options before run_initialize reads them.
   - the objects of nonos.bridge, the vnative backend only: the scheme of the
     integrator (MoreauJean, MoreauJeanGOSI, AnitescuTasora,
-    AnitescuTasoraAPGD, DEM) and its theta, gamma and
+    AnitescuTasoraAPGD, DEM, MoreauJeanFremond) and its theta, gamma and
     constraint activation threshold, the solver and its tolerance and maximum
     number of iterations, the penalty law of the explicit DEM scheme (dem_kn,
     dem_cn, dem_kt), and the observers: the timings of the stages of the time
@@ -38,6 +38,7 @@ SCHEME_GLOBAL_PROBLEM = 1
 SCHEME_CONE_COMPLEMENTARITY = 2
 SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
+SCHEME_LOCAL_PROBLEM_FREMOND = 5
 
 SCHEMES = {
     "MoreauJean": SCHEME_LOCAL_PROBLEM,
@@ -45,6 +46,7 @@ SCHEMES = {
     "AnitescuTasora": SCHEME_CONE_COMPLEMENTARITY,
     "AnitescuTasoraAPGD": SCHEME_CONE_COMPLEMENTARITY_APGD,
     "DEM": SCHEME_EXPLICIT_PENALTY,
+    "MoreauJeanFremond": SCHEME_LOCAL_PROBLEM_FREMOND,
 }
 # the short names of the first version, still accepted
 SCHEME_ALIASES = {
@@ -53,6 +55,7 @@ SCHEME_ALIASES = {
     "at": "AnitescuTasora",
     "at-apgd": "AnitescuTasoraAPGD",
     "dem": "DEM",
+    "mjf": "MoreauJeanFremond",
 }
 SCHEME_NAMES = {v: k for k, v in SCHEMES.items()}
 

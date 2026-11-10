@@ -108,6 +108,17 @@ struct apply_impact_law
   }
 };
 
+// the Moreau-Jean-Frémond scheme: the Frémond impact law whatever the law of
+// the interactions (a law without friction has no tangential component, its
+// impact law is Newton's)
+struct apply_fremond_impact_law
+    : stage<"Apply the Frémond impact law on the free ydot at step + 1"> {
+  static void run(auto& c) {
+    c.kind.template run<moreau_jean::apply_fremond_impact_law>(
+        c.step, theta_method::stages::parameters(c.kind, c.h, c.integrator.theta()));
+  }
+};
+
 // for the schemes without the Frémond impact law
 struct apply_newton_impact_law
     : stage<"Apply the Newton impact law on the free ydot at step + 1"> {
@@ -248,22 +259,31 @@ namespace mj = stages;
 // one stage per line: the schedules read as the algorithm
 // clang-format off
 
-// the Moreau-Jean time step
-using time_step_schedule = sequence<
-    "Moreau-Jean time step",
+// a Moreau-Jean time step, with its impact law stage
+template <storage::pattern::string_literal Name, typename ImpactLaw>
+using time_step_schedule_with = sequence<
+    Name,
     for_systems<th::recompute_minv_f, th::compute_free_state>,
     for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs, co::compute_free_outputs>,
     co::compute_active_set,
     when<co::with_contacts,
          co::setup_assembly,
          for_interactions<co::compute_time_invariant_jacobians, co::assemble_h_matrix, co::assemble_multipliers,
-                          mj::apply_impact_law, mj::assemble_free_velocity_output>,
+                          ImpactLaw, mj::assemble_free_velocity_output>,
          for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix>,
          mj::assemble_delassus_operator,
          mj::solve,
          mj::apply_velocity_correction,
          for_interactions<co::keep_multipliers>,
          for_systems<mj::update_contact_state>>>;
+
+// the Moreau-Jean time step: the impact law of the interactions
+using time_step_schedule = time_step_schedule_with<"Moreau-Jean time step", mj::apply_impact_law>;
+
+// the Moreau-Jean-Frémond time step: the Frémond impact law on every
+// interaction, chosen when the simulation is set up (see selectable_scheme.hpp)
+using fremond_time_step_schedule =
+    time_step_schedule_with<"Moreau-Jean-Frémond time step", mj::apply_fremond_impact_law>;
 
 // the state before the first step
 using initial_schedule =
