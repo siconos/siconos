@@ -470,3 +470,79 @@ def test_global_friction_contact_solve_with_rho():
         problem.solve(
             reaction, velocity, global_velocity, options, rho=np.ones(dim + 1)
         )
+
+
+def test_gfc_rho_from_diagonal_enums():
+    p = sn.params
+    assert (
+        int(
+            p.SICONOS_FRICTION_2D_NSN_WARM_START_enum.SICONOS_FRICTION_2D_NSN_WARM_START_AUTO
+        )
+        == 2
+    )
+    assert (
+        int(
+            p.SICONOS_FRICTION_2D_NSN_WARM_START_enum.SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL
+        )
+        == 3
+    )
+    assert (
+        int(
+            p.SICONOS_FRICTION_3D_NSN_WARM_START_enum.SICONOS_FRICTION_3D_NSN_WARM_START_RHO_FROM_DIAGONAL
+        )
+        == 3
+    )
+    assert (
+        int(p.SICONOS_FRICTION_2D_NSN_IPARAM_enum.SICONOS_FRICTION_2D_NSN_FORMULATION)
+        == 23
+    )
+
+
+@pytest.mark.parametrize("dim", [2, 3])
+def test_gfc_compute_rho_from_diagonal_approximation(dim):
+    nc = 2
+    m = dim * nc
+    n = m
+    # Non-diagonal M: only its diagonal enters the approximation.
+    M = np.diag(np.arange(2.0, 2.0 + n)).astype(np.float64, order="F")
+    M[0, 1] = M[1, 0] = 0.1
+    H = np.eye(n, m, dtype=np.float64, order="F")
+    q = np.zeros(n, dtype=np.float64)
+    mu = np.full(nc, 0.3, dtype=np.float64)
+    problem = sn.GlobalFrictionContactProblem(dim, nc, M, H, q, mu)
+
+    rho = problem.compute_rho_from_diagonal_approximation()
+    assert rho.shape == (m,)
+    assert np.all(rho > 0.0)
+    if dim == 2:
+        # W_diag = H^T D^{-1} H = D^{-1}, so rho = 1 / W_diag = diag(M).
+        assert np.allclose(rho, np.diag(M))
+
+
+def test_gfc2d_nsn_rho_from_diagonal_solve():
+    nc = 1
+    n = m = 2
+    M = np.diag([2.0, 4.0]).astype(np.float64, order="F")
+    H = np.eye(n, m, dtype=np.float64, order="F")
+    q = np.array([-1.0, 0.0], dtype=np.float64)
+    b = np.zeros(m, dtype=np.float64)
+    mu = np.array([0.3], dtype=np.float64)
+    problem = sn.GlobalFrictionContactProblem(2, nc, M, H, q, mu, b)
+
+    assert np.allclose(problem.compute_rho_from_diagonal_approximation(), [2.0, 4.0])
+
+    p = sn.params
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_GLOBAL_FRICTION_2D_NSN_AC)
+    options.iparam[p.SICONOS_IPARAM_enum.SICONOS_IPARAM_MAX_ITER] = 100
+    options.dparam[p.SICONOS_DPARAM_enum.SICONOS_DPARAM_TOL] = 1e-10
+    options.iparam[
+        p.SICONOS_FRICTION_2D_NSN_IPARAM_enum.SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY
+    ] = p.SICONOS_FRICTION_2D_NSN_WARM_START_enum.SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL
+
+    reaction = np.zeros(m, dtype=np.float64)
+    velocity = np.zeros(m, dtype=np.float64)
+    global_velocity = np.zeros(n, dtype=np.float64)
+    info = problem.solve(reaction, velocity, global_velocity, options)
+    assert info == 0
+    assert np.allclose(reaction, [1.0, 0.0], atol=1e-8)
+    assert np.allclose(velocity, [0.0, 0.0], atol=1e-8)

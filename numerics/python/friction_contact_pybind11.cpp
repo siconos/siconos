@@ -487,6 +487,19 @@ struct GlobalFrictionContactProblemWrapper {
     return info;
   }
 
+  py::array_t<double> compute_rho_from_diagonal_approximation() {
+    const int dim = problem->dimension;
+    if (dim != 2 && dim != 3)
+      throw std::runtime_error(
+          "compute_rho_from_diagonal_approximation: only 2D and 3D problems are supported");
+    py::array_t<double> rho(static_cast<py::ssize_t>(dim) * problem->numberOfContacts);
+    int info = globalFrictionContact_compute_rho_from_diagonal_approximation(
+        problem, rho.mutable_data());
+    check_numerics_error(
+        info, "GlobalFrictionContactProblem.compute_rho_from_diagonal_approximation");
+    return rho;
+  }
+
   int warm_start(py::array_t<double> reaction, py::array_t<double> velocity,
                  py::array_t<double> globalVelocity, SolverOptions* solver_options) {
     int default_solver_options = 0;
@@ -848,6 +861,12 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
            py::arg("solver_options") = nullptr, py::arg("rho") = py::none(),
            "Solve the global friction contact problem. When rho is provided, it is "
            "used as the per-contact Alart-Curnier scaling vector (3 values per contact).")
+      .def("compute_rho_from_diagonal_approximation",
+           &GlobalFrictionContactProblemWrapper::compute_rho_from_diagonal_approximation,
+           "Compute the NSN rho vector (dimension * numberOfContacts values) from the "
+           "diagonal approximation W ~ H^T diag(M)^{-1} H of the reduced matrix. "
+           "This is what the solver uses with the *_NSN_WARM_START_RHO_FROM_DIAGONAL "
+           "strategy.")
       .def("warm_start", &GlobalFrictionContactProblemWrapper::warm_start, py::arg("reaction"),
            py::arg("velocity"), py::arg("global_velocity"),
            py::arg("solver_options") = nullptr,
@@ -1339,6 +1358,8 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_3D_NSN_WARM_START_YES", SICONOS_FRICTION_3D_NSN_WARM_START_YES)
       .value("SICONOS_FRICTION_3D_NSN_WARM_START_AUTO",
              SICONOS_FRICTION_3D_NSN_WARM_START_AUTO)
+      .value("SICONOS_FRICTION_3D_NSN_WARM_START_RHO_FROM_DIAGONAL",
+             SICONOS_FRICTION_3D_NSN_WARM_START_RHO_FROM_DIAGONAL)
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_3D_NSN_REGULARIZATION>(
@@ -1443,12 +1464,25 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
       .value("SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER",
              SICONOS_FRICTION_2D_NSN_WARM_START_MAX_ITER)
       .value("SICONOS_FRICTION_2D_NSN_REGULARIZATION", SICONOS_FRICTION_2D_NSN_REGULARIZATION)
+      .value("SICONOS_FRICTION_2D_NSN_FORMULATION", SICONOS_FRICTION_2D_NSN_FORMULATION)
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_2D_NSN_WARM_START>(params,
                                                      "SICONOS_FRICTION_2D_NSN_WARM_START_enum")
       .value("SICONOS_FRICTION_2D_NSN_WARM_START_NO", SICONOS_FRICTION_2D_NSN_WARM_START_NO)
       .value("SICONOS_FRICTION_2D_NSN_WARM_START_YES", SICONOS_FRICTION_2D_NSN_WARM_START_YES)
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_AUTO",
+             SICONOS_FRICTION_2D_NSN_WARM_START_AUTO)
+      .value("SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL",
+             SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL)
+      .export_values();
+
+  py::enum_<enum SICONOS_FRICTION_2D_NSN_FORMULATION>(
+      params, "SICONOS_FRICTION_2D_NSN_FORMULATION_enum")
+      .value("SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER",
+             SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER)
+      .value("SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU",
+             SICONOS_FRICTION_2D_NSN_FORMULATION_JEAN_MOREAU)
       .export_values();
 
   py::enum_<enum SICONOS_FRICTION_2D_NSN_REGULARIZATION>(
