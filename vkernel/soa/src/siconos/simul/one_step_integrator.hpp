@@ -65,6 +65,9 @@ struct one_step_integrator {
   template <typename Scheme>
   struct integrator : item {
     using topology = Topology;
+    // one per simulation, its kinds and global problem with it: it goes
+    // with the store
+    static constexpr bool removable = false;
 
     // the kinds of systems and of interactions (see kinds.hpp), with the
     // storage the scheme needs on them
@@ -154,11 +157,6 @@ struct one_step_integrator {
         auto problem = storage::add<global_problem_t>(self()->data());
         problem.create();
         global_problem() = problem;
-      }
-
-      void __del__() {
-        // not implemented
-        throw std::runtime_error("Stable pointers need to be implemented");
       }
 
       decltype(auto) scheme() { return storage::attr<"scheme">(*self()); }

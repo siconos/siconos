@@ -40,6 +40,14 @@ struct data_t : decltype(storage()
                 ){};
 }  // namespace siconos::config
 
+// the simulation and its integrator live as long as the store: storage::remove
+// refuses them at compile time; a ball may go
+namespace match = siconos::storage::pattern::match;
+static_assert(match::not_removable<siconos::config::simulation>);
+static_assert(match::not_removable<siconos::config::osi>);
+static_assert(!match::not_removable<siconos::config::ball>);
+static_assert(!match::not_removable<siconos::config::interaction>);
+
 namespace {
 
 class RegistryRemoveTest : public CppUnit::TestFixture {

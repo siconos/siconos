@@ -23,6 +23,8 @@ static auto move_back = [](const auto i, auto& a) constexpr {
 
 static auto remove = [](auto& data, auto&& h) {
   using item_t = typename std::decay_t<decltype(h)>::type;
+  static_assert(!match::not_removable<item_t>,
+                "storage::remove: this item lives as long as the store (removable = false)");
 
   if constexpr (requires { data.store()._registry; }) {
     // registry world: walk the columns listed for item_t at registration,

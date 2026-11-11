@@ -57,6 +57,13 @@ concept item = requires { typename T::item_t; };
 template <typename T>
 concept items = item<T> && requires { typename T::items; };
 
+/* an item whose lifetime is the store's (static constexpr bool removable =
+   false): storage::remove refuses it at compile time. Its removal would
+   swap and pop it, and the item_ref of the other items to the moved one
+   would be stale (see storage/remove.hpp) */
+template <typename T>
+concept not_removable = item<T> && requires { requires !T::removable; };
+
 template <typename T>
 concept properties = item<T> && requires { typename T::properties; };
 

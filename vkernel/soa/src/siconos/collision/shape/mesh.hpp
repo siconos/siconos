@@ -8,6 +8,10 @@ namespace siconos::collision::shape {
 
 struct mesh : item {
   using items = gather<chained_segment>;
+  // its chained_segment would have to go with it, and the segments refs of
+  // the other meshes follow the one moved by the removal: it goes with the
+  // store
+  static constexpr bool removable = false;
 
   struct attributes {
     some::item_ref<chained_segment> segments;
@@ -23,12 +27,6 @@ struct mesh : item {
       auto& data = self()->data();
       auto seg = storage::add<chained_segment>(data);
       attr<"segments">(*self()) = seg.index();
-    }
-
-    void __del__() {
-      throw std::runtime_error("Stable pointers need to be implemented");
-      // Create the associated chained_segment
-      storage::remove(segments());
     }
 
     decltype(auto) segments() {

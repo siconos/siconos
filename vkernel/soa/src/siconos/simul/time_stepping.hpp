@@ -18,6 +18,9 @@ struct schedule_dataflow : storage::data_holder<storage::schedule::dataflow> {};
 template <match::item... Items>
 struct time_stepping : item {
   using items = gather<Items...>;
+  // one per store, its items shared (the topology with the space filter):
+  // it goes with the store
+  static constexpr bool removable = false;
   using time_discretization_t = nth_t<0, items>;
   using one_step_integrator_t = nth_t<1, items>;
   using one_step_nonsmooth_problem_t = nth_t<2, items>;
@@ -46,15 +49,6 @@ struct time_stepping : item {
       topology() = storage::add<topology_t>(data);
       timings() = storage::add<schedule_timings>(data);
       dataflow() = storage::add<schedule_dataflow>(data);
-    }
-
-    void __del__() {
-      // not implemented
-      throw std::runtime_error("Stable pointers need to be implemented");
-      storage::remove(time_discretization());
-      storage::remove(one_step_integrator());
-      storage::remove(one_step_nonsmooth_problem());
-      storage::remove(topology());
     }
 
     decltype(auto) time_discretization() {
