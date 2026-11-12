@@ -412,18 +412,11 @@ auto make_ref_handle(D& data, index<T, R>& indx) {
 }
 
 /**
- * @brief Create a reference handle from rvalue index
- * @tparam T Item type
- * @tparam R Index value type
- * @tparam D Data storage type
- * @param data Data storage
- * @param indx Index object (moved)
- * @return Reference handle object
+ * A reference handle holds a reference to its index: from a temporary it
+ * would dangle.
  */
 template <typename T, typename R, typename D>
-auto make_ref_handle(D& data, index<T, R>&& indx) {
-  return handle<handle_ref, T, R, D>{data, static_cast<index<T, R>&&>(indx)};
-}
+auto make_ref_handle(D& data, index<T, R>&& indx) = delete;
 
 /**
  * @brief Generator for creating ranges of handles to all items of a given
