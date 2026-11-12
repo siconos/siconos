@@ -53,6 +53,7 @@ namespace {
 class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(RegistryRemoveTest);
   CPPUNIT_TEST(testRegistryRemove);
+  CPPUNIT_TEST(testReadCreatesNoEntry);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -102,6 +103,35 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
                            bcs.contains(0) && is_bc(bcs.at(0), {2, 22}));
     CPPUNIT_ASSERT_MESSAGE("ball 1 still has no BC set", !bcs.contains(1));
     CPPUNIT_ASSERT_MESSAGE("nothing left at index 2", !bcs.contains(2));
+  }
+
+  // a read of a dynamic property creates no entry for an item without it: it
+  // would change which items the loops over the entries visit, and what is
+  // serialized
+  void testReadCreatesNoEntry() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::data_t data;
+
+    auto ball0 = storage::add<config::ball>(data);
+    auto ball1 = storage::add<config::ball>(data);
+
+    auto& bc0 = storage::prop<"bc_velocities_0", config::topo>(ball0);
+    bc0.resize(1);
+    bc0[0] = 7;
+
+    auto& bcs = storage::prop_values<config::ball, "bc_velocities_0", config::topo>(data, 0);
+    CPPUNIT_ASSERT_MESSAGE("one BC set", bcs.size() == 1);
+
+    const auto& read1 = storage::read_prop<"bc_velocities_0", config::topo>(ball1);
+    CPPUNIT_ASSERT_MESSAGE("ball 1 reads an empty BC set", read1.size() == 0);
+    CPPUNIT_ASSERT_MESSAGE("the read of ball 1 created no entry",
+                           bcs.size() == 1 && !bcs.contains(1));
+
+    const auto& read0 = storage::read_prop<"bc_velocities_0", config::topo>(ball0);
+    CPPUNIT_ASSERT_MESSAGE("ball 0 reads its BC set", read0.size() == 1 && read0[0] == 7);
+    CPPUNIT_ASSERT_MESSAGE("still one BC set", bcs.size() == 1);
   }
 };
 

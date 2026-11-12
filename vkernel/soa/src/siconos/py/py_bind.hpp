@@ -44,6 +44,28 @@ template <typename Item>
 static constexpr auto is_attached_to =
     mp::is_a_model<[]<typename T>() constexpr { return match::attached_storage<T, Item>; }>;
 
+/// the value returned by the getter of the attached storage S: for a static
+/// one, a reference into the storage; a dynamic one is read without creating
+/// an entry, and a matrix is copied since an item without the property has no
+/// value in the storage to refer to
+template <storage::pattern::string_literal Name, typename S, typename Handle>
+static decltype(auto) getter_value(Handle& h) {
+  if constexpr (requires { typename S::dynamic_storage_t; }) {
+    decltype(auto) value = storage::read_prop<Name, disks_world_properties>(h);
+    using value_t = std::decay_t<decltype(value)>;
+    if constexpr (match::matrix<value_t> && !match::diagonal_matrix<value_t>) {
+      return value_t(value);
+    } else {
+      return out_formatter(h, value);
+    }
+  } else {
+    return out_formatter(h, storage::prop<Name, disks_world_properties>(h));
+  }
+}
+
+template <storage::pattern::string_literal Name, typename S, typename Handle>
+using getter_t = std::decay_t<decltype(getter_value<Name, S>(std::declval<Handle&>()))>;
+
 using disks_items_t =
     decltype(mp::transform(typename disks_info_t::all_items_t{}, []<match::item I>(I) {
       if constexpr (match::wrap<I>) {
@@ -119,9 +141,8 @@ void bind_item(py::module_& disks) {
             return dc
                 .def(
                     std::format("{}", astor_name.str.value).c_str(),
-                    [](handle_t& h) -> target_type {
-                      return out_formatter(
-                          h, storage::prop<astor_name.str, disks_world_properties>(h));
+                    [](handle_t& h)->getter_t<astor_name.str, S, handle_t> {
+                      return getter_value<astor_name.str, S>(h);
                     },
                     py::return_value_policy::reference)
                 .def(std::format("set_{}", astor_name.str.value).c_str(), [](handle_t& h,
@@ -156,8 +177,8 @@ void bind_item(py::module_& disks) {
                     [](handles_wrap<std::vector<handle_t>>& h_multiple) {
                       return std::ranges::to<std::vector>(
                           h_multiple.handles | view::transform([](auto&& h) {
-                            return out_formatter(
-                                h, storage::prop<astor_name.str, disks_world_properties>(h));
+                            return getter_t<astor_name.str, S, handle_t>(
+                                getter_value<astor_name.str, S>(h));
                           }));
                     },
                     py::return_value_policy::reference)

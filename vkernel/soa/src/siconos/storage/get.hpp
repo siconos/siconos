@@ -90,6 +90,11 @@ template <string_literal S, typename Decl = world_declared>
 static auto prop =
     [](auto h) constexpr -> decltype(auto) { return h.template property<S, Decl>(); };
 
+// the read access: no entry is created for an item without a dynamic property
+template <string_literal S, typename Decl = world_declared>
+static auto read_prop =
+    [](auto h) constexpr -> decltype(auto) { return h.template read_property<S, Decl>(); };
+
 template <string_literal S>
 static auto attr =
     []<typename H>(H h, typename H::indice step = 0) constexpr -> decltype(auto) {

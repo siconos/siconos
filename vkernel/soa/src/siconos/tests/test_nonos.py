@@ -48,6 +48,18 @@ def test_disk_shape():
     assert shape.radius() == 2.0
 
 
+def test_bc_velocities_0():
+    # a dynamic property: the getter of a body without one reads an empty
+    # set (and creates none), the setter creates it
+    data = m.disks.make_storage()
+    body0 = m.disks.add_body(data)
+    body1 = m.disks.add_body(data)
+    assert len(body1.bc_velocities_0()) == 0
+    body0.set_bc_velocities_0(np.array([0, 2], dtype=np.uint64))
+    assert list(body0.bc_velocities_0()) == [0, 2]
+    assert len(body1.bc_velocities_0()) == 0
+
+
 def test_time_stepping():
 
     data = m.disks.make_storage()

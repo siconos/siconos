@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <utility>
 
 #include "siconos/storage/get.hpp"
 #include "siconos/storage/mp/mp.hpp"
@@ -224,13 +225,34 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @tparam S Compile-time string literal
    * @tparam Decl where the attached storage is declared (see world_declared)
    * @param step Memory step index
-   * @return Reference to the attached storage value
+   * @return Reference to the attached storage value. A dynamic property is
+   * created for an item without it: this is the write access, read_property
+   * is the read one.
    */
   template <string_literal S, typename Decl = world_declared>
   constexpr decltype(auto) property(indice step = 0) {
     using data_t = std::decay_t<decltype(data())>;
     if constexpr (is_dynamic_storage_v<T, data_t, S, Decl>) {
       return prop_dynamic_memory<T, S, Decl>(data()).get_or_create(this->index().value());
+    } else {
+      return property<symbol<S>, Decl>(symbol<S>{}, step);
+    }
+  }
+
+  /**
+   * @brief Read an attached storage property by compile-time string
+   * @tparam S Compile-time string literal
+   * @tparam Decl where the attached storage is declared (see world_declared)
+   * @param step Memory step index
+   * @return For a dynamic property, a const reference to the value, or to a
+   * shared empty value for an item without it: the read creates no entry. For
+   * a static property, the same as property.
+   */
+  template <string_literal S, typename Decl = world_declared>
+  constexpr decltype(auto) read_property(indice step = 0) {
+    using data_t = std::decay_t<decltype(data())>;
+    if constexpr (is_dynamic_storage_v<T, data_t, S, Decl>) {
+      return std::as_const(prop_dynamic_memory<T, S, Decl>(data()))[this->index().value()];
     } else {
       return property<symbol<S>, Decl>(symbol<S>{}, step);
     }
