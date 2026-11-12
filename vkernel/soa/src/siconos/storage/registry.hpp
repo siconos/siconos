@@ -152,16 +152,19 @@ struct column final : column_base {
       }
       value = std::move(out);
     } else {
-      // as storage::permute does for the static database (gather)
+      // as storage::permute does for the static database (gather): in
+      // place, the buffer is kept
       for (auto& storage : value) {
         using storage_t = std::decay_t<decltype(storage)>;
         if constexpr (match::push_back<storage_t>) {
-          storage_t out;
-          out.reserve(std::size(perm));
+          storage_t tmp;
+          tmp.reserve(std::size(perm));
           for (std::size_t k = 0; k < std::size(perm); ++k) {
-            out.push_back(std::move(storage[perm[k]]));
+            tmp.push_back(std::move(storage[perm[k]]));
           }
-          storage = std::move(out);
+          for (std::size_t k = 0; k < std::size(perm); ++k) {
+            storage[k] = std::move(tmp[k]);
+          }
         }
       }
     }

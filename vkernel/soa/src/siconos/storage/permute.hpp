@@ -12,16 +12,20 @@
 namespace siconos::storage {
 
 namespace permute_detail {
-/// a storage of one step, reordered: its item k is the item perm[k]
+/// a storage of one step, reordered in place: its item k is the item
+/// perm[k]. Its buffer is kept: a pointer to it (the coordinates given to
+/// the neighbor search) stays valid
 static auto gather = [](const std::vector<std::size_t>& perm, auto& a) {
   if constexpr (match::push_back<std::decay_t<decltype(a)>>) {
     assert(std::size(a) == std::size(perm));
-    std::decay_t<decltype(a)> out;
-    out.reserve(std::size(perm));
+    std::decay_t<decltype(a)> tmp;
+    tmp.reserve(std::size(perm));
     for (std::size_t k = 0; k < std::size(perm); ++k) {
-      out.push_back(std::move(a[perm[k]]));
+      tmp.push_back(std::move(a[perm[k]]));
     }
-    a = std::move(out);
+    for (std::size_t k = 0; k < std::size(perm); ++k) {
+      a[k] = std::move(tmp[k]);
+    }
   }
   // else a single item (std::array): nothing to reorder
 };

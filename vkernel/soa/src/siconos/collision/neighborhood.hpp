@@ -1,7 +1,11 @@
 #pragma once
 
+#include <numeric>
+#include <vector>
+
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/storage/pattern/base.hpp"
+#include "siconos/storage/permute.hpp"
 #include "siconos/storage/storage.hpp"
 
 #define USE_DOUBLE
@@ -92,12 +96,17 @@ struct neighborhood : storage::data_holder<CompactNSearch::NeighborhoodSearch> {
       instance->z_sort();
 
       indice i = 0;
-      mp::for_each(points_t{}, [&instance, &data, &i]<typename Point>(Point p) {
+      mp::for_each(points_t{}, [&instance, &data, &i]<typename Point>(Point) {
         auto&& ps = instance->point_set(i++);
-        // apply function only if some points exist
         if (ps.n_points() > 0) {
-          storage::apply_fun(data, p,
-                             [&ps]<typename Array>(Array& a) { ps.sort_field(a.data()); });
+          // the z-order of the points as a permutation (sort_field puts the
+          // item perm[k] at k), applied by storage::permute to every storage
+          // of the points, dynamic properties included. The columns keep
+          // their buffers: the point set still refers to the coordinates
+          std::vector<std::size_t> perm(ps.n_points());
+          std::iota(perm.begin(), perm.end(), std::size_t{0});
+          ps.sort_field(perm.data());
+          storage::permute<Point>(data, perm);
         }
       });
     }

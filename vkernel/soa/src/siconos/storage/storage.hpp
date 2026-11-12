@@ -12,27 +12,6 @@
 
 namespace siconos::storage {
 
-static auto apply_fun = []<typename Item, typename SomeFun>(auto& data, Item,
-                                                            SomeFun&& some_fun) {
-  using item_t = Item;
-  using info_t = get_info_t<decltype(data)>;
-  using all_time_levels_t = decltype(all_properties_as<property::time_levels>(data));
-
-  using indice = typename info_t::template env<item_t>::indice;
-
-  auto attrs =
-      mp::tuple_unique(concat(attributes(item_t{}), attached_storages(item_t{}, data)));
-
-  if constexpr (mp::size(attrs) > mp::size_c<0>) {
-    mp::for_each(attrs, [&data, &some_fun]<match::attribute A>(A) {
-      return mp::for_each(
-          mp::range<memory_size<A, all_time_levels_t>()>, [&data, &some_fun](indice step) {
-            static_cast<SomeFun&&>(some_fun)(memory(step, mp::get<A>(data.store())));
-          });
-    });
-  }
-};
-
 // template <match::item T>
 // static constexpr void for_each_attribute(T)
 // {
