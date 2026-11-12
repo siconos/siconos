@@ -22,8 +22,10 @@
 #include <float.h>
 #include <math.h>
 
+#include "CohesiveFrictionContact_options.h"
 #include "NumericsMatrix.h"
 #include "SiconosBlas.h"
+#include "SolverOptions.h"
 #include "fc3d_compute_error.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -79,6 +81,17 @@ int cohesive_friction_3d_compute_error(CohesiveFrictionContactProblem* problem,
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, velocity, incy);      // w <-q
   NM_prod_mv_3x3(n, n, problem->M, reaction, velocity);  // w = Mz +q
+
+  /* Compliance: w += epsilon D z (see SICONOS_COHESIVE_FRICTION_COMPLIANCE) */
+  if (options) {
+    const int compliance = options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_COMPLIANCE];
+    const double eps = options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_COMPLIANCE];
+    if (compliance != SICONOS_COHESIVE_FRICTION_COMPLIANCE_NO && eps != 0.0) {
+      const int start =
+          (compliance == SICONOS_COHESIVE_FRICTION_COMPLIANCE_ALL) ? 0 : dim * nc;
+      for (int i = start; i < n; i++) velocity[i] += eps * reaction[i];
+    }
+  }
 
   /* Loop over all contacts and accumulate error */
   for (int ic = 0, ic3 = 0; ic < nc; ic++, ic3 += dim) {

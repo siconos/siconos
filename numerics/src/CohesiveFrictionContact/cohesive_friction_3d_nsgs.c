@@ -44,6 +44,8 @@
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "op3x3.h"
+#include "projectionOnCone.h"
+#include "projectionOnDisk.h"
 #include "solver_registry.h"
 #include "tolerance_manager.h"
 
@@ -58,6 +60,182 @@ typedef int (*CohesiveComputeErrorPtr)(CohesiveFrictionContactProblem*, double*,
 
 static void perform_relaxation_3(double localreaction[3], double* oldreaction, double omega) {
   nsgs_relaxation(localreaction, oldreaction, 3, omega);
+}
+
+/* Projected over-relaxation: r <- P_K(omega r_new + (1 - omega) r_old), where K is the
+ * friction cone for a contact and {-c_n} x disk(c_t) for a cohesive point.  The projection
+ * is needed for omega > 1, since the extrapolated point may leave K. */
+static void project_on_feasible_set(CohesiveFrictionContactProblem* problem,
+                                    unsigned int contact, double r[3]) {
+  unsigned int nc = (unsigned int)problem->numberOfContacts;
+  if (contact < nc) {
+    projectionOnCone(r, problem->mu[contact]);
+  } else {
+    r[0] = -problem->c_n[contact - nc];
+    projectionOnDisk(&r[1], problem->c_t[contact - nc]);
+  }
+}
+
+static void perform_projected_relaxation(CohesiveFrictionContactProblem* problem,
+                                         unsigned int contact, double localreaction[3],
+                                         double* oldreaction, double omega) {
+  nsgs_relaxation(localreaction, oldreaction, 3, omega);
+  project_on_feasible_set(problem, contact, localreaction);
+}
+
+/* ===========================================================================
+ * Anderson acceleration of the NSGS sweep (type II, Walker & Ni 2011)
+ *
+ * Let G be one NSGS sweep, x_k the reaction before the sweep, g_k = G(x_k) and
+ * f_k = g_k - x_k.  With dF = [f_{i+1} - f_i], dG = [g_{i+1} - g_i] over the last m
+ * sweeps, gamma = argmin ||f_k - dF gamma|| and
+ *     x_{k+1} = P_K(g_k - dG gamma),
+ * where P_K is the blockwise projection on the feasible set.  The history is
+ * cleared when ||f_k|| > safeguard * ||f_{k-1}|| or the least-squares system is
+ * singular.
+ * =========================================================================== */
+typedef struct {
+  int m;       /* memory depth */
+  int n;       /* problem size */
+  int count;   /* number of stored columns */
+  int head;    /* next column to overwrite */
+  int has_old; /* f_old / g_old are valid */
+  double reg;  /* relative Tikhonov regularization */
+  double safeguard;
+  double norm_f_old;
+  double* dF;    /* n x m */
+  double* dG;    /* n x m */
+  double* f_old; /* n */
+  double* g_old; /* n */
+  double* f;     /* n */
+  double* H;     /* m x m */
+  double* gamma; /* m */
+  int restarts;
+} CohesiveAndersonState;
+
+static CohesiveAndersonState* cohesive_anderson_new(int m, int n, double reg,
+                                                    double safeguard) {
+  CohesiveAndersonState* st = (CohesiveAndersonState*)calloc(1, sizeof(CohesiveAndersonState));
+  st->m = m;
+  st->n = n;
+  st->reg = reg;
+  st->safeguard = safeguard;
+  st->dF = (double*)calloc((size_t)n * m, sizeof(double));
+  st->dG = (double*)calloc((size_t)n * m, sizeof(double));
+  st->f_old = (double*)calloc(n, sizeof(double));
+  st->g_old = (double*)calloc(n, sizeof(double));
+  st->f = (double*)calloc(n, sizeof(double));
+  st->H = (double*)calloc((size_t)m * m, sizeof(double));
+  st->gamma = (double*)calloc(m, sizeof(double));
+  return st;
+}
+
+static void cohesive_anderson_free(CohesiveAndersonState* st) {
+  if (!st) return;
+  free(st->dF);
+  free(st->dG);
+  free(st->f_old);
+  free(st->g_old);
+  free(st->f);
+  free(st->H);
+  free(st->gamma);
+  free(st);
+}
+
+/* Solve the k x k SPD system H gamma = gamma (in place) by Cholesky.
+ * Returns 0 on success, 1 if H is not numerically positive definite. */
+static int cohesive_anderson_cholesky_solve(int k, double* H, double* x) {
+  for (int j = 0; j < k; ++j) {
+    double d = H[j + j * k];
+    for (int l = 0; l < j; ++l) d -= H[j + l * k] * H[j + l * k];
+    if (!(d > 0.0)) return 1;
+    d = sqrt(d);
+    H[j + j * k] = d;
+    for (int i = j + 1; i < k; ++i) {
+      double v = H[i + j * k];
+      for (int l = 0; l < j; ++l) v -= H[i + l * k] * H[j + l * k];
+      H[i + j * k] = v / d;
+    }
+  }
+  for (int i = 0; i < k; ++i) { /* L y = b */
+    double v = x[i];
+    for (int l = 0; l < i; ++l) v -= H[i + l * k] * x[l];
+    x[i] = v / H[i + i * k];
+  }
+  for (int i = k - 1; i >= 0; --i) { /* L^T x = y */
+    double v = x[i];
+    for (int l = i + 1; l < k; ++l) v -= H[l + i * k] * x[l];
+    x[i] = v / H[i + i * k];
+  }
+  return 0;
+}
+
+/* x: reaction before the sweep, g: reaction after the sweep (overwritten by the
+ * accelerated iterate, before projection). Returns 1 if an extrapolation was applied. */
+static int cohesive_anderson_step(CohesiveAndersonState* st, const double* x, double* g) {
+  const int n = st->n;
+  double norm_f2 = 0.0;
+  for (int i = 0; i < n; ++i) {
+    st->f[i] = g[i] - x[i];
+    norm_f2 += st->f[i] * st->f[i];
+  }
+  const double norm_f = sqrt(norm_f2);
+
+  if (st->has_old && norm_f > st->safeguard * st->norm_f_old) {
+    /* residual increased: restart from the plain sweep */
+    st->count = 0;
+    st->head = 0;
+    st->restarts++;
+  } else if (st->has_old) {
+    double* dFc = st->dF + (size_t)st->head * n;
+    double* dGc = st->dG + (size_t)st->head * n;
+    for (int i = 0; i < n; ++i) {
+      dFc[i] = st->f[i] - st->f_old[i];
+      dGc[i] = g[i] - st->g_old[i];
+    }
+    st->head = (st->head + 1) % st->m;
+    if (st->count < st->m) st->count++;
+  }
+  memcpy(st->f_old, st->f, n * sizeof(double));
+  memcpy(st->g_old, g, n * sizeof(double));
+  st->norm_f_old = norm_f;
+  st->has_old = 1;
+
+  const int k = st->count;
+  if (k == 0) return 0;
+
+  /* Normal equations (dF^T dF + lambda I) gamma = dF^T f */
+  double diag_max = 0.0;
+  for (int a = 0; a < k; ++a) {
+    const double* Fa = st->dF + (size_t)a * n;
+    for (int b = 0; b <= a; ++b) {
+      const double* Fb = st->dF + (size_t)b * n;
+      double s = 0.0;
+      for (int i = 0; i < n; ++i) s += Fa[i] * Fb[i];
+      st->H[a + b * k] = s;
+      st->H[b + a * k] = s;
+    }
+    double s = 0.0;
+    for (int i = 0; i < n; ++i) s += Fa[i] * st->f[i];
+    st->gamma[a] = s;
+    if (st->H[a + a * k] > diag_max) diag_max = st->H[a + a * k];
+  }
+  if (!(diag_max > 0.0)) return 0;
+  const double lambda = st->reg * diag_max;
+  for (int a = 0; a < k; ++a) st->H[a + a * k] += lambda;
+
+  if (cohesive_anderson_cholesky_solve(k, st->H, st->gamma)) {
+    st->count = 0;
+    st->head = 0;
+    st->restarts++;
+    return 0;
+  }
+  for (int a = 0; a < k; ++a) {
+    const double* Ga = st->dG + (size_t)a * n;
+    const double ga = st->gamma[a];
+    for (int i = 0; i < n; ++i) g[i] -= ga * Ga[i];
+  }
+  return 1;
 }
 
 static double light_error_squared_3(double localreaction[3], double* oldreaction) {
@@ -260,14 +438,43 @@ static unsigned int* alloc_freezing_contacts(CohesiveFrictionContactProblem* pro
   return fcontacts;
 }
 
+/** Compliance applied to the local problems (see SICONOS_COHESIVE_FRICTION_COMPLIANCE) */
+typedef struct {
+  int strategy;
+  double epsilon;
+  double M[9]; /* compliant copy of the current diagonal block */
+} CohesiveCompliance;
+
+static int compliance_applies(const CohesiveCompliance* c, unsigned int contact,
+                              unsigned int nc) {
+  if (!c || c->strategy == SICONOS_COHESIVE_FRICTION_COMPLIANCE_NO || c->epsilon == 0.0)
+    return 0;
+  if (c->strategy == SICONOS_COHESIVE_FRICTION_COMPLIANCE_ALL) return 1;
+  return contact >= nc;
+}
+
 static int solve_local_reaction(
     struct CohesiveLocalProblemFunctionToolkit* localProblemFunctionToolkit,
     unsigned int contact, CohesiveFrictionContactProblem* problem,
     CohesiveFrictionContactProblem* localproblem, FrictionContactProblem* localproblem_contact,
     double* reaction, SolverOptions* local_opts_contact, SolverOptions* local_opts_cohesion,
-    double localreaction[3]) {
+    double localreaction[3], CohesiveCompliance* compliance) {
   (*localProblemFunctionToolkit->update_local_problem)(contact, problem, localproblem,
                                                        reaction, local_opts_contact);
+
+  /* Swap in a compliant copy of the diagonal block: the block of the problem (or the
+   * diagonal blocks extracted from it) is never modified. */
+  double* M_block = localproblem->M->dense;
+  const int use_compliance =
+      compliance_applies(compliance, contact, (unsigned int)problem->numberOfContacts);
+  if (use_compliance) {
+    memcpy(compliance->M, M_block, 9 * sizeof(double));
+    compliance->M[0] += compliance->epsilon;
+    compliance->M[4] += compliance->epsilon;
+    compliance->M[8] += compliance->epsilon;
+    localproblem->M->dense = compliance->M;
+  }
+  int info = 0;
 
   localProblemFunctionToolkit->copy_local_reaction(&(reaction[contact * problem->dimension]),
                                                    localreaction);
@@ -279,15 +486,16 @@ static int solve_local_reaction(
     localproblem_contact->q = localproblem->q;
     localproblem_contact->mu = localproblem->mu;
 
-    return (*localProblemFunctionToolkit->local_solver_contact)(
+    info = (*localProblemFunctionToolkit->local_solver_contact)(
         localproblem_contact, localreaction, local_opts_contact);
   } else {
     local_opts_cohesion->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_CURRENT_CONTACT_NUMBER] =
         contact - problem->numberOfContacts;
-    return (*localProblemFunctionToolkit->local_solver_cohesion)(localproblem, localreaction,
+    info = (*localProblemFunctionToolkit->local_solver_cohesion)(localproblem, localreaction,
                                                                  local_opts_cohesion);
   }
-  //  return -1;
+  if (use_compliance) localproblem->M->dense = M_block;
+  return info;
 }
 
 #if 0
@@ -462,6 +670,35 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
     return numerics_error("cohesive_friction_3d_nsgs", "NULL pointer argument");
   }
 
+  /* Projected over-relaxation (omega = 1: plain NSGS) */
+  const int relaxation =
+      (options->iparam[SICONOS_NSGS_RELAXATION] == SICONOS_NSGS_RELAXATION_TRUE);
+  const double omega = options->dparam[SICONOS_NSGS_RELAXATION_VALUE];
+  if (relaxation && !(omega > 0.0 && omega < 2.0)) {
+    return numerics_error("cohesive_friction_3d_nsgs",
+                          "relaxation parameter omega = %g must be in (0, 2)", omega);
+  }
+  const int anderson_memory =
+      options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_ANDERSON_MEMORY];
+
+  CohesiveCompliance compliance;
+  compliance.strategy = options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_COMPLIANCE];
+  compliance.epsilon = options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_COMPLIANCE];
+  if (compliance.strategy < SICONOS_COHESIVE_FRICTION_COMPLIANCE_NO ||
+      compliance.strategy > SICONOS_COHESIVE_FRICTION_COMPLIANCE_ALL) {
+    return numerics_error("cohesive_friction_3d_nsgs", "unknown compliance strategy %d",
+                          compliance.strategy);
+  }
+  if (compliance.strategy != SICONOS_COHESIVE_FRICTION_COMPLIANCE_NO &&
+      !(compliance.epsilon >= 0.0)) {
+    return numerics_error("cohesive_friction_3d_nsgs", "compliance epsilon = %g must be >= 0",
+                          compliance.epsilon);
+  }
+  if (anderson_memory < 0) {
+    return numerics_error("cohesive_friction_3d_nsgs",
+                          "Anderson memory depth = %d must be >= 0", anderson_memory);
+  }
+
   /* cohesiveFrictionContact_display(problem); */
 
   /* Number of contacts */
@@ -572,10 +809,21 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
   double* light_error_2 = light_error_2 = calloc(nc + ncoh, sizeof(double));
 
+  CohesiveAndersonState* anderson = NULL;
+  double* reaction_before_sweep = NULL;
+  if (anderson_memory > 0) {
+    double reg = options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_ANDERSON_REGULARIZATION];
+    double safeguard = options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_ANDERSON_SAFEGUARD];
+    anderson = cohesive_anderson_new(anderson_memory, 3 * (nc + ncoh), reg > 0.0 ? reg : 1e-10,
+                                     safeguard > 0.0 ? safeguard : 1.0);
+    reaction_before_sweep = (double*)malloc(3 * (nc + ncoh) * sizeof(double));
+  }
+
   // verbose=1;
   while ((iter < itermax) && (hasNotConverged > 0)) {
     ++iter;
     double light_error_sum = 0.0;
+    if (anderson) memcpy(reaction_before_sweep, reaction, 3 * (nc + ncoh) * sizeof(double));
 
     // fc3d_set_internalsolver_tolerance(nc, options, local_opts_contact, incr_error);
 
@@ -613,12 +861,12 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
 
       solve_local_reaction(localProblemFunctionToolkit, contact, problem,
                            localproblem_cohesion, localproblem_contact, reaction,
-                           local_opts_contact, local_opts_cohesion, localreaction);
+                           local_opts_contact, local_opts_cohesion, localreaction,
+                           &compliance);
 
-      /* if (options->iparam[SICONOS_NSGS_RELAXATION] == SICONOS_NSGS_RELAXATION_TRUE) */
-      /*   localProblemFunctionToolkit->perform_relaxation(localreaction, &reaction[contact *
-       * 3], */
-      /*                                                   omega); */
+      if (relaxation)
+        perform_projected_relaxation(problem, contact, localreaction, &reaction[contact * 3],
+                                     omega);
 
       light_error_2[contact] = localProblemFunctionToolkit->light_error_squared(
           localreaction, &reaction[contact * 3]);
@@ -677,6 +925,11 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
         accept_local_reaction_unconditionally(contact, reaction, localreaction);
     }
 
+    if (anderson && cohesive_anderson_step(anderson, reaction_before_sweep, reaction)) {
+      for (unsigned int c = 0; c < nc + ncoh; ++c)
+        project_on_feasible_set(problem, c, &reaction[3 * c]);
+    }
+
     if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
         SICONOS_NSGS_ERROR_EVALUATION_LIGHT) {
       incr_error = calculate_light_error(light_error_sum, nc + ncoh, reaction, norm_r);
@@ -717,6 +970,12 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
                                frozen_contact, hasNotConverged, verbose);
   }
   free(light_error_2);
+  if (anderson) {
+    numerics_printf_verbose(1, "---- Cohesive NSGS - Anderson(m = %d): %d restarts",
+                            anderson->m, anderson->restarts);
+    cohesive_anderson_free(anderson);
+    free(reaction_before_sweep);
+  }
 
   /* Full criterium */
   if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -765,16 +1024,10 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   DEBUG_PRINTF("Final iteration: %d, error: %e\n", iter, error);
   DEBUG_END("cohesive_friction_3d_nsgs(...)\n");
   // getchar();
-  if (iter == itermax && hasNotConverged > 0) {
-    char filename[100] = "diamond_sphere_sphere_pack_unscaled.dat";
-    printf("export problem in %s", filename);
-    cohesiveFrictionContact_printInFilename(problem, filename);
-    // getchar();
-
-    return NUMERICS_ERR_MAX_ITER;
-  } else {
-    return (full_error <= tolerance) ? NUMERICS_OK : NUMERICS_ERR_DIVERGENCE;
-  }
+  /* hasNotConverged has been evaluated against the user tolerance SOLVER_TOL(options)
+   * (the working tolerance may have been adapted during the iterations). */
+  if (hasNotConverged == 0) return NUMERICS_OK;
+  return (iter == itermax) ? NUMERICS_ERR_MAX_ITER : NUMERICS_ERR_DIVERGENCE;
 }
 
 /* ===========================================================================
@@ -819,6 +1072,13 @@ static void cohesive_friction_3d_nsgs_set_default(SolverOptions* options) {
   SOLVER_TOL(options) = 1e-4;
 
   options->dparam[SICONOS_NSGS_INTERNAL_ERROR_RATIO] = 10.0;
+  options->dparam[SICONOS_NSGS_RELAXATION_VALUE] = 1.0;
+  options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_ANDERSON_MEMORY] = 0;
+  options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_ANDERSON_REGULARIZATION] = 1e-10;
+  options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_ANDERSON_SAFEGUARD] = 1.0;
+  options->iparam[SICONOS_COHESIVE_FRICTION_IPARAM_COMPLIANCE] =
+      SICONOS_COHESIVE_FRICTION_COMPLIANCE_NO;
+  options->dparam[SICONOS_COHESIVE_FRICTION_DPARAM_COMPLIANCE] = 0.0;
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 2;
