@@ -72,7 +72,8 @@ class SpaceFilter(Stored):
 
         # ident is attached in io.hpp
         # it is negative for static shape
-        segment.set_ident(-self._static_shape_counter)
+        ident = -self._static_shape_counter
+        segment.set_ident(ident)
         self._static_shape_counter = self._static_shape_counter + 1
 
         diskfsegment = vkernel.disks.add_diskfsegment_r(self.data())
@@ -80,7 +81,9 @@ class SpaceFilter(Stored):
 
         self.handle().insert_diskfsegment_r(diskfsegment)
 
-        return segment
+        # the ident, not the handle: a handle holds an index, that a removal
+        # of another segment may move (see removeStaticBody)
+        return ident
 
     def insertMesh(self, points):
         mesh
@@ -187,10 +190,12 @@ class SpaceFilter(Stored):
         # only segments are removable, a box2d is four of them. A removal
         # resets the neighborhood search (its hash table is rebuilt from the
         # coordinates), which the next removal needs initialized, as after a
-        # sort: a search before each one
-        for segment in body if isinstance(body, list) else [body]:
+        # sort: a search before each one. A segment is given by its ident
+        # (insertSegment): storage::remove moves the last segment into the
+        # freed slot, so an index kept since the insertion may be stale
+        for ident in body if isinstance(body, list) else [body]:
             self._ngbh.search()
-            self.handle().remove_static_segment(0, segment)
+            self.handle().remove_static_segment(0, ident)
 
 
 class NewtonImpactFrictionNSL(Stored):

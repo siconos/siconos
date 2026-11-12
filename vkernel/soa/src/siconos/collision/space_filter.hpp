@@ -1,7 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <concepts>
+#include <format>
 #include <limits>
 #include <numbers>
 #include <print>
@@ -62,6 +64,13 @@ struct hash<siconos::storage::mp::tuple<First, Second, Third>> {
 }  // namespace std
 
 namespace siconos::collision {
+
+/// declarer of every property of the world of a registry Data (see
+/// storage::world_declared), as disks_world_properties of the bindings
+template <typename Data>
+struct world_properties_of : storage::pattern::item {
+  using properties = typename Data::world_info_t::all_properties_t;
+};
 
 template <typename Topology, typename Neighborhood>
 struct space_filter : item {
@@ -316,6 +325,29 @@ struct space_filter : item {
       // never recomputes its keys, and these points are not found where they
       // are. The next search rebuilds the hash table from the coordinates.
       neighborhood().instance()->reset();
+    }
+
+    // remove the static segment of the given ident (the "ident" attached by
+    // io): an index held outside the storage goes stale on any removal, as
+    // storage::remove moves the last segment into the freed slot
+    template <typename Step, typename SegmentHandle, typename Ident>
+    void remove_static_segment(Step step, Ident ident) {
+      using indice = typename decltype(self()->env())::indice;
+      using item_t = typename SegmentHandle::type;
+      auto& data = self()->data();
+      using data_t = std::decay_t<decltype(data)>;
+      // the handles of a registry world only know the configuration: search
+      // every property of the world, as io is not known here
+      using decl_t = std::conditional_t<requires { typename data_t::world_info_t; },
+                                        world_properties_of<data_t>, storage::world_declared>;
+      auto& idents = storage::prop_values<item_t, "ident", decl_t>(data, step);
+      auto found = std::ranges::find(idents, ident);
+      if (found == idents.end()) {
+        throw std::runtime_error(std::format("no static segment of ident {}", ident));
+      }
+      remove_static_item(
+          step, storage::make_handle(
+                    data, storage::index<item_t, indice>(indice(found - idents.begin()))));
     }
 
     void insert_diskfsegment_r(auto hdl) {
@@ -1316,6 +1348,7 @@ struct space_filter : item {
       using data_t = std::decay_t<decltype(self()->data())>;
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
+      using integer = typename env_t::integer;
       // using scalar = typename env_t::scalar;
       using diskfsegment_r_t = std::decay_t<decltype(storage::make_handle(
           std::declval<data_t&>(), storage::index<collision::diskfsegment_r, indice>{}))>;
@@ -1347,7 +1380,8 @@ struct space_filter : item {
           method("insert_nonsmooth_law",
                  &interface<Handle>::insert_nonsmooth_law<ref_nslaw_t, indice, indice>),
           method("remove_static_segment",
-                 &interface<Handle>::template remove_static_item<indice, segment_handle_t>));
+                 &interface<Handle>::template remove_static_segment<indice, segment_handle_t,
+                                                                    integer>));
     }
   };
 };
