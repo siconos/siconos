@@ -164,6 +164,42 @@ def test_fem_tensor_datasets_exist(fem_hdf5):
         )
 
 
+def test_fem_stiffness_is_static_csc_metadata(fem_hdf5):
+    """The linear-FEM stiffness matrix is exported once in sparse CSC form."""
+    with h5py.File(fem_hdf5, "r") as f:
+        data = f["data"]
+        groups = [name for name in data if name.startswith("fem_stiffness_")]
+
+        assert len(groups) == 1, "Expected one static stiffness group for the FEM body"
+        stiffness = data[groups[0]]
+        assert stiffness.attrs["format"] == "csc"
+
+        rows = int(stiffness.attrs["rows"])
+        cols = int(stiffness.attrs["cols"])
+        nnz = int(stiffness.attrs["nnz"])
+        outer = stiffness["outer"][:]
+        inner = stiffness["inner"][:]
+        values = stiffness["values"][:]
+
+        assert rows > 0 and rows == cols
+        assert outer.dtype == np.dtype("int64")
+        assert inner.dtype == np.dtype("int64")
+        assert values.dtype == np.dtype("float64")
+        assert len(outer) == cols + 1
+        assert len(inner) == len(values) == nnz
+        assert outer[0] == 0 and outer[-1] == nnz
+        assert np.all(np.diff(outer) >= 0)
+        assert np.all((0 <= inner) & (inner < rows))
+        assert nnz > 0
+
+        # Reconstruct the small test matrix without requiring SciPy sparse.
+        matrix = np.zeros((rows, cols), dtype=np.float64)
+        for column in range(cols):
+            start, end = outer[column : column + 2]
+            np.add.at(matrix[:, column], inner[start:end], values[start:end])
+        assert np.allclose(matrix, matrix.T, rtol=1e-12, atol=1e-12)
+
+
 def test_fem_tensor_dataset_attributes(fem_hdf5):
     """Each tensor dataset must carry the expected attributes.
 

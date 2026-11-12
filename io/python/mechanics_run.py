@@ -2775,6 +2775,41 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             dataset[current_line, 1] = ds_id
             dataset[current_line, 2 : 2 + len(sigma)] = sigma
 
+    def output_fem_stiffness(self):
+        """Write each vnative linear-FEM stiffness matrix once in CSC form."""
+        matrices = self._io.stiffness_matrices(self._nsds)
+        for ds_id, matrix in matrices.items():
+            name = f"fem_stiffness_{ds_id}"
+            rows, cols = matrix.shape
+            outer = np.asarray(matrix.indptr, dtype=np.int64)
+            inner = np.asarray(matrix.indices, dtype=np.int64)
+            values = np.asarray(matrix.data, dtype=np.float64)
+
+            if name in self._data:
+                group = self._data[name]
+                expected = ("csc", rows, cols, len(values))
+                actual = (
+                    group.attrs.get("format"),
+                    int(group.attrs.get("rows", -1)),
+                    int(group.attrs.get("cols", -1)),
+                    int(group.attrs.get("nnz", -1)),
+                )
+                if actual != expected:
+                    raise RuntimeError(
+                        f"Existing {name} has incompatible stiffness metadata: "
+                        f"expected {expected}, found {actual}"
+                    )
+                continue
+
+            group = self._data.create_group(name)
+            group.attrs["format"] = "csc"
+            group.attrs["rows"] = rows
+            group.attrs["cols"] = cols
+            group.attrs["nnz"] = len(values)
+            group.create_dataset("outer", data=outer)
+            group.create_dataset("inner", data=inner)
+            group.create_dataset("values", data=values)
+
     def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
@@ -4255,6 +4290,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 coord_name = f"fem_coords_{ds_id}"
                 if coord_name not in self._data:
                     self._data.create_dataset(coord_name, data=coords)
+
+        if self.config.backend == "vnative":
+            self.output_fem_stiffness()
 
         self.print_verbose("first output static and dynamic objects ...")
         self.init_step_index()

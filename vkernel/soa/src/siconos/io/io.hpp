@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <map>
 #include <stdexcept>
 
 #include "siconos/algebra/numerics.hpp"
@@ -146,6 +148,26 @@ struct io : item {
         return attr<"disp_info">(*self());
       }
     }
+
+    auto stiffness_matrices(auto step) {
+      using env_t = decltype(self()->env());
+      using indice = typename env_t::indice;
+      using scalar = typename env_t::scalar;
+      using stiffness_matrices_t =
+          std::map<indice, std::reference_wrapper<algebra::sparse_matrix<scalar>>>;
+      stiffness_matrices_t result;
+
+      if constexpr (!match::empty_item<dsystem>) {
+        auto& data = self()->data();
+        auto& ids = storage::prop_values<dsystem, "id", topology>(data, step);
+        auto& matrices = storage::attr_values<dsystem, "k_matrix">(data, step);
+        for (auto [id, matrix] : view::zip(ids, matrices))
+          result.emplace(id, std::ref(matrix));
+      }
+
+      return result;
+    }
+
     decltype(auto) positions(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
@@ -635,6 +657,7 @@ struct io : item {
           method("radii", &interface<Handle>::radii<indice>),
           method("positions", &interface<Handle>::positions<indice>),
           method("displacements", &interface<Handle>::displacements<indice>),
+          method("stiffness_matrices", &interface<Handle>::stiffness_matrices<indice>),
           method("velocities", &interface<Handle>::velocities<indice>),
           method("contact_points", &interface<Handle>::contact_points<indice>),
           method("contact_info", &interface<Handle>::contact_info<indice>),

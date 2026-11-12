@@ -839,6 +839,11 @@ class MechanicsIO(Stored):
     def displacements(self, nsds):
         return self.handle().displacements(self._simulation.handle().current_step())
 
+    def stiffness_matrices(self, nsds):
+        return self.handle().stiffness_matrices(
+            self._simulation.handle().current_step()
+        )
+
     def positions(self, nsds):
         return self.handle().positions(self._simulation.handle().current_step())
 
