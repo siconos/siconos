@@ -48,6 +48,7 @@ if(HAVE_SICONOS_MECHANICS)
   foreach(pyfile IN LISTS pyfiles)
     configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/io/${pyfile} @ONLY)
   endforeach()
+  configure_file(format_v1.json ${SICONOS_PB11_BINARY_DIR}/siconos/io/format_v1.json COPYONLY)
 
   # -- collect python files used to create scripts --
 

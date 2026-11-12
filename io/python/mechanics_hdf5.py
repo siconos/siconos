@@ -18,18 +18,12 @@ import os
 import pickle
 import sys
 
-import h5py
 import numpy as np
 import siconos.io.tools
 import siconos.mechanics.collision.tools as smct
+from siconos.io import format_hdf5
 from siconos.mechanics import have_occ  # , have_bullet
 from siconos.mechanics.quaternions import quaternion_get
-
-# fix compatibility with h5py version
-if hasattr(h5py, "vlen_dtype"):
-    h5py_vlen_dtype = h5py.vlen_dtype
-elif hasattr(h5py, "new_vlen"):
-    h5py_vlen_dtype = h5py.new_vlen
 
 # Mapping from joint type to expected number of points and axes.
 # Format: joint_type -> (number_of_points, number_of_axes)
@@ -93,7 +87,6 @@ def group(h, name, must_exist=True):
             except ValueError:
                 # could not create group, return None
                 # (file is probably in read-only mode)
-                # Note FP: maybe this should be fatal rather than returning None?
                 return None
 
 
@@ -113,29 +106,14 @@ def data(h, name, nbcolumns, use_compression=False):
         )
 
 
+def text_data(text):
+    """A variable-length string stored as a (1,) dataset (shapes, plugins)."""
+    return np.array([text], dtype=format_hdf5.vlen_dtype)
+
+
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
     dataset[dataset.shape[0] - 1, :] = line
-
-
-# The tables that get rows at each output step. data/step_index/<table>
-# has one row per output step, empty steps included: time, first row,
-# number of rows. The radii and p0s tables, which have no time column,
-# have no row at the initial output.
-STEP_TABLES = (
-    "static",
-    "dynamic",
-    "velocities",
-    "radii",
-    "p0s",
-    "cf",
-    "cf_info",
-    "cf_work",
-    "cf_internal_variables",
-    "energy_work",
-    "domain",
-    "solv",
-)
 
 
 #
@@ -207,42 +185,21 @@ class MechanicsHdf5:
 
         self._output_backup = False
         self._mode = mode
-        self._radii_data = None
-        self._p0s_data = None
-        self._static_data = None
-        self._velocities_data = None
-        self._dynamic_data = None
-        self._cf_data = None
-        self._cf_info = None
-        self._cf_work = None
-        self._cf_internal_variables = None
-        self._enery_work = None
-        self._domain_data = None
-        self._solv_data = None
         self._run_options = None
-        self._log_data = None
-        self._input = None
-        self._nslaws_data = None
         self._nslaws = {}
+        self._format_adaptor = None
         self._out = None
         self._data = None
-        self._ref = None
-        self._permanent_interactions = None
-        self._joints = None
-        self._boundary_conditions = None
-        self._plugins = None
-        self._external_functions = None
         self._number_of_shapes = 0
         self._number_of_permanent_interactions = 0
         self._number_of_dynamic_objects = 0
         self._number_of_static_objects = 0
         self._use_compression = use_compression
         self._should_output_domains = output_domains
-        self._verbose = verbose
-        self._fem_dof_mappings = {}
-        # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
         self._write_step_index = False
         self._step_rows_before = None
+        self._verbose = verbose
+        self._fem_dof_mappings = {}  # ds_id -> {'dof_indices': array, 'spatial_order': array, 'coords': array}
 
     def __enter__(self):
         """Reminder: this function will be called when a 'with'
@@ -252,226 +209,39 @@ class MechanicsHdf5:
         Warning : it means that this class must be called inside
         a with statement to be properly initialized!
         """
-        # -- Creates the Open the hdf5 object --
-        self._out = h5py.File(self._io_filename, self._mode)
-        # -- And read its content --
-        # Important : since the mode might be write or read, most
-        # of the attributes and fields
-        # must have a default value to tackle the 'write' case.
-        self._dimension = self._out.attrs.get("dimension", 3)
-        self._data = group(self._out, "data")
-        self._ref = group(self._data, "ref")
-        self._permanent_interactions = group(
-            self._data, "permanent_interactions", must_exist=False
+        # -- Opens the hdf5 file and its content, as described by the format --
+        # created if missing (write modes); in read mode, a missing entry is None
+        # if the format says it is optional, else the reading fails.
+        # domain is only created when the domains are output, script when its source is
+        # written (no warning when an older file has none).
+        self._format_adaptor = format_hdf5.FormatAdaptor(
+            self._io_filename, self._mode, compression=self._use_compression
         )
-        self._joints = group(self._data, "joints", must_exist=False)
-        self._plugins = group(self._data, "plugins", must_exist=False)
-        self._external_functions = group(
-            self._data, "external_functions", must_exist=False
+        self._format_adaptor.open(
+            exclude=("script",) if self._should_output_domains else ("domain", "script")
         )
-        try:
-            self._boundary_conditions = group(
-                self._data, "boundary_conditions", must_exist=(self._mode == "w")
-            )
-        except (ValueError, OSError) as e:
-            print("Warning -  group(self._data, boundary_conditions ) : ", e)
-
-        try:
-            self._radii_data = data(
-                self._data, "radii", 2, use_compression=self._use_compression
-            )
-        except (ValueError, OSError, TypeError) as e:
-            print("Warning -  data(self._data, radii ) : ", e)
-
-        try:
-            self._p0s_data = data(
-                self._data, "p0s", 4, use_compression=self._use_compression
-            )
-        except (ValueError, OSError, TypeError) as e:
-            print("Warning -  data(self._data, p0s ) : ", e)
-            self._p0s_data = None
-
-        self._static_data = data(
-            self._data, "static", 9, use_compression=self._use_compression
+        self._out, self._data, self._dimension = (
+            self._format_adaptor.hdf5,
+            self._format_adaptor.data,
+            self._format_adaptor.dimension,
         )
-
-        self._velocities_data = data(
-            self._data, "velocities", 8, use_compression=self._use_compression
-        )
-        if self._mode == "w":
-            self._velocities_data.attrs["info"] = "time,  ds id  ,"
-            self._velocities_data.attrs["info"] += "translational velocities ,"
-            self._velocities_data.attrs["info"] += "angular velocities"
-
-        self._dynamic_data = data(
-            self._data, "dynamic", 9, use_compression=self._use_compression
-        )
-        if self._mode == "w":
-            self._dynamic_data.attrs["info"] = "time,  ds id  ,  translation ,"
-            self._dynamic_data.attrs["info"] += "orientation"
-
-        verbose_old = self._verbose
-        self._verbose = True
-
-        try:
-            self._cf_data = data(
-                self._data, "cf", 26, use_compression=self._use_compression
+        # the script that writes the file, kept once (the one that created it)
+        script = os.path.abspath(sys.argv[0]) if sys.argv and sys.argv[0] else ""
+        if (
+            self._format_adaptor.writable
+            and script.endswith(".py")
+            and os.path.isfile(script)
+        ):
+            self._format_adaptor.add_into_group(
+                "script",
+                "source",
+                data=siconos.io.tools.str_of_file(script),
+                filename=script,
             )
-            if self._mode == "w":
-                self._cf_data.attrs["info"] = (
-                    "[0] : time,\n [1] : mu,\n [2:4] : contact point A,\n"
-                )
-                self._cf_data.attrs["info"] += (
-                    " [5:7] : contact point B,\n [8:10] : contact normal,\n"
-                )
-                self._cf_data.attrs["info"] += (
-                    " [11:13] : reaction impulse (global frame),\n"
-                )
-                self._cf_data.attrs["info"] += (
-                    " [14:16] : relative gap,\n [17:19] : reaction velocity,\n"
-                )
-                self._cf_data.attrs["info"] += (
-                    " [20:22] : reaction impulse (local frame),\n"
-                )
-                self._cf_data.attrs["info"] += "[23] : interaction id,\n"
-                self._cf_data.attrs["info"] += (
-                    " [24] : ds 1 number,\n [25] : ds 2 number"
-                )
-        except (ValueError, OSError, TypeError) as e:
-            self.print_io_mechanics("Warning -  cf_data in the hdf5 file")
-            self.print_io_mechanics("        -  group(self._cf_data, log ) : ", e)
-
-        try:
-            self._cf_info = data(
-                self._data, "cf_info", 5, use_compression=self._use_compression
-            )
-            if self._mode == "w":
-                self._cf_info.attrs["info"] = (
-                    "[0] : time [0],\n [1] : interaction id,\n"
-                )
-                self._cf_info.attrs["info"] += (
-                    " [1] : ds 1 number,\n [3] : ds 2 number,\n"
-                )
-                self._cf_info.attrs["info"] += " [4] : static body number"
-        except (ValueError, OSError, TypeError) as e:
-            self.print_io_mechanics("Warning -  cf_info in the hdf5 file")
-            self.print_io_mechanics("        -  group(self._cf_info, log ) : ", e)
-        try:
-            self._cf_work = data(
-                self._data, "cf_work", 8, use_compression=self._use_compression
-            )
-
-            if self._mode == "w":
-                self._cf_work.attrs["info"] = "[0] : time,\n [1] : interaction id,\n"
-                self._cf_work.attrs["info"] += (
-                    " [2] : normal contact work,\n [3] : tangent contact work,\n"
-                )
-                self._cf_work.attrs["info"] += (
-                    " [4] : normal contact work theta average,\n"
-                )
-
-                self._cf_work.attrs["info"] += (
-                    " [5] : tangent contact work theta average,\n"
-                )
-                self._cf_work.attrs["info"] += (
-                    " [6] : contact status,\n [7] : positive norma contact work,\n"
-                )
-        except (ValueError, OSError, TypeError) as e:
-            self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
-            self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
-
-        try:
-            self._cf_internal_variables = data(
-                self._data,
-                "cf_internal_variables",
-                41,
-                use_compression=self._use_compression,
-            )
-            if self._mode == "w":
-                self._cf_internal_variables.attrs["info"] = (
-                    "[0] : time,\n [1] : interaction id,\n"
-                )
-                self._cf_internal_variables.attrs["info"] += " ,\n"
-        except (ValueError, OSError, TypeError) as e:
-            self.print_io_mechanics("Warning -  cf_internal_variables in the hdf5 file")
-            self.print_io_mechanics(
-                "        -  group(self._cf_internal_variables, log ) : ", e
-            )
-
-        try:
-            self._energy_work = data(
-                self._data, "energy_work", 9, use_compression=self._use_compression
-            )
-
-            if self._mode == "w":
-                self._energy_work.attrs["info"] = (
-                    "[0] : time,\n [1] : kinetic energy,\n"
-                )
-                self._energy_work.attrs["info"] += " [2] : force work, \n"
-                self._energy_work.attrs["info"] += (
-                    " [3] : normal contact work,\n [4] : tangent contact work,\n"
-                )
-                self._energy_work.attrs["info"] += (
-                    " [5] : normal contact work theta average,\n"
-                )
-
-                self._energy_work.attrs["info"] += (
-                    " [6] tangent contact work theta average \n"
-                )
-
-                self._energy_work.attrs["info"] += "[7,8] only negative part "
-        except (ValueError, OSError, TypeError) as e:
-            self.print_io_mechanics("Warning -  cf_work in the hdf5 file")
-            self.print_io_mechanics("        -  group(self._cf_work, log ) : ", e)
-
-        if self._should_output_domains or "domain" in self._data:
-            self._domain_data = data(
-                self._data, "domain", 3, use_compression=self._use_compression
-            )
-        self._solv_data = data(
-            self._data, "solv", 4, use_compression=self._use_compression
-        )
-
-        try:
-            self._run_options_data = data(
-                self._data,
-                "siconos_mechanics_run_options",
-                1,
-                use_compression=self._use_compression,
-            )
-        except (ValueError, OSError, TypeError) as e:
-            self.print_io_mechanics(
-                "Warning -  _data siconos_mechanics_run_options in the hdf5 file"
-            )
-            self.print_io_mechanics(
-                "        -  data(self._data, siconos_mechanics_run_options, ...) : ", e
-            )
-
-        # self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
-        #                               use_compression=self._use_compression)
-
-        self._verbose = verbose_old
-
-        try:
-            self._log_data = group(self._data, "log")
-        except (ValueError, OSError) as e:
-            self.print_io_mechanics("Warning -  _data in the hdf5 file")
-            self.print_io_mechanics("        -  group(self._data, log ) : ", e)
-
-        self._input = group(self._data, "input")
-
-        # # if the hdf5 file contains already some objects, we correcly initialize
-        # # the object counter
-        # if len(self._input) >= 0:
-        #     type_obj = [obj.attrs['type'] for  obj in self._input.values()]
-        #     self._number_of_dynamic_objects = type_obj.count('dynamic')
-        #     self._number_of_static_objects = type_obj.count('static')
-
-        self._nslaws_data = group(self._data, "nslaws")
         return self
 
     def __exit__(self, type_, value, traceback):
-        self._out.close()
+        self._format_adaptor.close()
 
     def print_verbose(self, *args, **kwargs):
         if self._verbose:
@@ -492,37 +262,37 @@ class MechanicsHdf5:
         Shapes : parameterized primitives or user defined
                  (convex set or meshes)
         """
-        return self._ref
+        return self._format_adaptor["ref"]
 
     def permanent_interactions(self):
         """
         Permanent interactions.
         """
-        return self._permanent_interactions
+        return self._format_adaptor["permanent_interactions"]
 
     def radii_data(self):
         """
         Radii of objects
         """
-        return self._radii_data
+        return self._format_adaptor["radii"]
 
     def p0s_data(self):
         """
         Vector p0 for each object
         """
-        return self._p0s_data
+        return self._format_adaptor["p0s"]
 
     def static_data(self):
         """
         Coordinates and orientations of static objects.
         """
-        return self._static_data
+        return self._format_adaptor["static"]
 
     def dynamic_data(self):
         """
         Coordinates and orientations of dynamic objects.
         """
-        return self._dynamic_data
+        return self._format_adaptor["dynamic"]
 
     def displacement_data(self, fem_id):
         """
@@ -537,113 +307,98 @@ class MechanicsHdf5:
         """
         Velocities of dynamic objects
         """
-        return self._velocities_data
+        return self._format_adaptor["velocities"]
 
     def contact_forces_data(self):
         """
         Contact points information.
         """
-        return self._cf_data
+        return self._format_adaptor["cf"]
 
     def contact_internal_variable_data(self):
         """
         Contact internal variables information.
         """
-        return self._cf_internal_variables
+        return self._format_adaptor["cf_internal_variables"]
 
     def contact_info_data(self):
         """
         Contact points information.
         """
-        return self._cf_info
+        return self._format_adaptor["cf_info"]
 
     def contact_work_data(self):
         """
         Contact points information.
         """
-        return self._cf_work
+        return self._format_adaptor["cf_work"]
 
     def domains_data(self):
         """
         Contact point domain information.
         """
-        return self._domain_data
+        return self._format_adaptor["domain"]
 
     def solver_data(self):
         """
         Solver output
         """
-        return self._solv_data
+        return self._format_adaptor["solv"]
 
     def log_data(self):
         """
         log output
         """
-        return self._log_data
+        return self._format_adaptor["log"]
 
     def instances(self):
         """
         Scene objects.
         """
-        return self._input
+        return self._format_adaptor["input"]
 
     def nonsmooth_laws(self):
         """
         Non smooth laws between group of contactors.
         """
-        return self._nslaws_data
+        return self._format_adaptor["nslaws"]
 
     def joints(self):
         """
         Joints between dynamic objects or between an object and the scenery.
         """
-        return self._joints
+        return self._format_adaptor["joints"]
 
     def boundary_conditions(self):
         """
         Boundary conditions applied to  dynamic objects
         """
-        return self._boundary_conditions
+        return self._format_adaptor["boundary_conditions"]
 
     def init_step_index(self):
-        """Record the rows of each output step in data/step_index.
+        """Record the rows of each output step in the index of the tables (data/step_index).
 
         A file whose tables were written without an index is left
         without one: the index would only cover the last steps.
         """
-        if "step_index" in self._data:
-            self._write_step_index = True
-            return
-        if any(self._table_rows(name) > 0 for name in STEP_TABLES):
+        self._write_step_index = self._format_adaptor.init_index()
+        if not self._write_step_index:
             self.print_verbose(
                 "[warning] outputs without step index in the file, "
                 "the step index is not written"
             )
-            return
-        index = self._data.create_group("step_index")
-        index.attrs["info"] = "[0] : time,\n [1] : first row,\n [2] : number of rows"
-        for name in STEP_TABLES:
-            index.create_dataset(
-                name, (0, 3), maxshape=(None, 3), chunks=(256, 3), dtype="f8"
-            )
-        self._write_step_index = True
-
-    def _table_rows(self, name):
-        table = self._data.get(name)
-        return 0 if table is None else table.shape[0]
 
     def begin_output_step(self):
         if self._write_step_index:
             self._step_rows_before = {
-                name: self._table_rows(name) for name in STEP_TABLES
+                name: self._format_adaptor.table_rows(name)
+                for name in self._format_adaptor.indexed_tables()
             }
 
     def end_output_step(self, time):
         if not self._write_step_index:
             return
-        index = self._data["step_index"]
-        for name, first in self._step_rows_before.items():
-            add_line(index[name], [time, first, self._table_rows(name) - first])
+        self._format_adaptor.index_rows(self._step_rows_before, time)
         self._step_rows_before = None
 
     def step_rows(self, name, nonempty=False):
@@ -655,25 +410,7 @@ class MechanicsHdf5:
 
         nonempty: keep only the steps with rows.
         """
-        table = self._data.get(name)
-        index = self._data.get("step_index")
-        if index is not None and name in index:
-            rows = index[name][:]
-            times = rows[:, 0]
-            starts = rows[:, 1].astype(np.int64)
-            ends = starts + rows[:, 2].astype(np.int64)
-            if nonempty:
-                keep = ends > starts
-                times, starts, ends = times[keep], starts[keep], ends[keep]
-            return times, starts, ends
-        if name in ("radii", "p0s"):
-            return None
-        if table is None or table.shape[0] == 0:
-            empty = np.empty(0, dtype=np.int64)
-            return np.empty(0), empty, empty
-        times, starts = np.unique(table[:, 0], return_index=True)
-        ends = np.append(starts[1:], table.shape[0])
-        return times, starts.astype(np.int64), ends.astype(np.int64)
+        return self._format_adaptor.rows(name, nonempty)
 
     def _indexed_step(self, name, step):
         """Rows of a radii-like table at output step, from the index.
@@ -690,7 +427,7 @@ class MechanicsHdf5:
 
     def p0s(self, step):
         """Get p0 data for a specific time step (fixed-dof systems only)."""
-        if self._p0s_data is None:
+        if self._format_adaptor["p0s"] is None:
             return None
         if self.step_rows("p0s") is not None:
             return self._indexed_step("p0s", step)
@@ -704,17 +441,10 @@ class MechanicsHdf5:
         unique_times, indices = np.unique(step_times, return_index=True)
         if step >= len(indices):
             return None
-        # start_idx = indices[step]
-        # if step + 1 < len(indices):
-        #     end_idx = indices[step + 1]
-        # else:
-        #     end_idx = len(dyn_data)
-        # Count dynamic objects at this step
-        # n_dyn = end_idx - start_idx
         # p0s_data is appended per step, so calculate offset
         # This assumes constant number of fixed-dof objects per step
         # Better: store count per step, but for now assume fixed
-        p0s_all = self._p0s_data[:]
+        p0s_all = self._format_adaptor["p0s"][:]
         if len(p0s_all) == 0:
             return None
         # Estimate entries per step
@@ -725,11 +455,11 @@ class MechanicsHdf5:
 
     def radii(self, step):
         """Get radii for a specific time step (fixed-dof systems only)."""
-        if self._radii_data is None:
+        if self._format_adaptor["radii"] is None:
             return None
         if self.step_rows("radii") is not None:
             return self._indexed_step("radii", step)
-        radii_all = self._radii_data[:]
+        radii_all = self._format_adaptor["radii"][:]
         if len(radii_all) == 0:
             return None
         dyn_data = self.dynamic_data()
@@ -741,39 +471,49 @@ class MechanicsHdf5:
         r_end = min(r_start + entries_per_step, len(radii_all))
         return radii_all[r_start:r_end]
 
+    def _add_shape(self, name, data, **attrs):
+        """Add a shape to ref with the next shape id (nothing if it exists)."""
+        if name not in self._format_adaptor["ref"]:
+            self._format_adaptor.add_into_group(
+                "ref", name, data=data, id=self._number_of_shapes, **attrs
+            )
+            self._number_of_shapes += 1
+
     def add_plugin_source(self, name, filename):
         """
         Add C source plugin
         """
-
-        if name not in self._plugins:
-            plugin_src = self._plugins.create_dataset(
-                name, (1,), dtype=h5py_vlen_dtype(str)
+        if name not in self._format_adaptor["plugins"]:
+            self._format_adaptor.add_into_group(
+                "plugins",
+                name,
+                filename=filename,
+                data=text_data(siconos.io.tools.str_of_file(filename)),
             )
-            plugin_src[:] = siconos.io.tools.str_of_file(filename)
-            plugin_src.attrs["filename"] = filename
 
     def add_external_function(
         self, name, body_name, function_name, plugin_name, plugin_function_name
     ):
-
-        if name not in self._external_functions:
-            ext_fun = group(self._external_functions, name)
-            ext_fun.attrs["body_name"] = body_name
-            ext_fun.attrs["function_name"] = function_name
-            ext_fun.attrs["plugin_name"] = plugin_name
-            ext_fun.attrs["plugin_function_name"] = plugin_function_name
+        self._format_adaptor.add_into_group(
+            "external_functions",
+            name,
+            body_name=body_name,
+            function_name=function_name,
+            plugin_name=plugin_name,
+            plugin_function_name=plugin_function_name,
+        )
 
     def add_external_bc_function(
         self, name, body_name, bc_indices, plugin_name, plugin_function_name
     ):
-
-        if name not in self._external_functions:
-            ext_fun = group(self._external_functions, name)
-            ext_fun.attrs["body_name"] = body_name
-            ext_fun.attrs["plugin_name"] = plugin_name
-            ext_fun.attrs["plugin_function_name"] = plugin_function_name
-            ext_fun.attrs["bc_indices"] = bc_indices
+        self._format_adaptor.add_into_group(
+            "external_functions",
+            name,
+            body_name=body_name,
+            bc_indices=bc_indices,
+            plugin_name=plugin_name,
+            plugin_function_name=plugin_function_name,
+        )
 
     def add_mesh_from_string(
         self, name, shape_data, scale=None, insideMargin=None, outsideMargin=None
@@ -782,19 +522,14 @@ class MechanicsHdf5:
         Add a mesh shape from a string.
         Accepted format : mesh encoded in VTK .vtp format
         """
-
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-            shape[:] = shape_data
-            shape.attrs["id"] = self._number_of_shapes
-            shape.attrs["type"] = "vtp"
-            if scale is not None:
-                shape.attrs["scale"] = scale
-            if insideMargin is not None:
-                shape.attrs["insideMargin"] = insideMargin
-            if outsideMargin is not None:
-                shape.attrs["outsideMargin"] = outsideMargin
-            self._number_of_shapes += 1
+        self._add_shape(
+            name,
+            text_data(shape_data),
+            type="vtp",
+            scale=scale,
+            insideMargin=insideMargin,
+            outsideMargin=outsideMargin,
+        )
 
     def add_mesh_from_file(
         self, name, filename, scale=None, insideMargin=None, outsideMargin=None
@@ -809,7 +544,7 @@ class MechanicsHdf5:
             filename = os.path.join(
                 os.path.split(os.path.abspath(sys.argv[0]))[0], filename
             )
-        if name not in self._ref:
+        if name not in self._format_adaptor["ref"]:
             if os.path.splitext(filename)[-1][1:] == "stl":
                 reader = vtk.vtkSTLReader()
                 reader.SetFileName(filename)
@@ -847,41 +582,25 @@ class MechanicsHdf5:
         """
         assert heightmap.shape[0] >= 2
         assert heightmap.shape[1] >= 2
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, data=heightmap)
-            shape.attrs["id"] = self._number_of_shapes
-            shape.attrs["type"] = "heightmap"
-
-            # measurements of the heightfield, i.e. length of sides of
-            # the rectangle where heightmap will be placed -- height
-            # is represented by heightmap values
-            assert len(rectangle) == 2
-            shape.attrs["rect"] = rectangle  # tuple (length x, length y)
-
-            if insideMargin is not None:
-                shape.attrs["insideMargin"] = insideMargin
-            if outsideMargin is not None:
-                shape.attrs["outsideMargin"] = outsideMargin
-            self._number_of_shapes += 1
+        # rect: lengths (x, y) of the rectangle where the heightmap is placed
+        self._add_shape(
+            name,
+            heightmap,
+            type="heightmap",
+            rect=rectangle,
+            insideMargin=insideMargin,
+            outsideMargin=outsideMargin,
+        )
 
     def add_brep_from_string(self, name, shape_data):
         """
         Add a brep contained in a string.
         """
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-            if type(shape_data) is str:
-                # raw str
-                shape[:] = shape_data
-            else:
-                # __getstate__ as with pythonocc
-                shape[:] = shape_data[0]
-                shape.attrs["occ_indx"] = shape_data[1]
-
-            shape.attrs["id"] = self._number_of_shapes
-            shape.attrs["type"] = "brep"
-
-            self._number_of_shapes += 1
+        # raw str, or __getstate__ as with pythonocc
+        text, occ_indx = (
+            (shape_data, None) if type(shape_data) is str else shape_data[:2]
+        )
+        self._add_shape(name, text_data(text), type="brep", occ_indx=occ_indx)
 
     def add_occ_shape(self, name, occ_shape):
         """
@@ -902,7 +621,7 @@ class MechanicsHdf5:
             The OpenCascade shape to be added, expected to be an instance
             of the `TopoDS_Shape` class.
         """
-        if name in self._ref:
+        if name in self._format_adaptor["ref"]:
             return
 
         from OCC.Core.STEPControl import STEPControl_AsIs, STEPControl_Writer
@@ -918,26 +637,18 @@ class MechanicsHdf5:
 
             tmpf.fid.flush()
             shape_data = siconos.io.tools.str_of_file(tmpf.name)
-            shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-            shape[:] = shape_data
-            shape.attrs["id"] = self._number_of_shapes
-            shape.attrs["type"] = "step"
-            self._number_of_shapes += 1
+        self._add_shape(name, text_data(shape_data), type="step")
 
     def add_shape_data_from_file(self, name, filename):
         """
         Add shape data from a file.
         """
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-            shape[:] = siconos.io.tools.str_of_file(filename)
-            shape.attrs["id"] = self._number_of_shapes
-            try:
-                shape.attrs["type"] = os.path.splitext(filename)[1][1:]
-            except OSError:
-                shape.attrs["type"] = "unknown"
-
-            self._number_of_shapes += 1
+        if name not in self._format_adaptor["ref"]:
+            self._add_shape(
+                name,
+                text_data(siconos.io.tools.str_of_file(filename)),
+                type=os.path.splitext(filename)[1][1:].lower() or "unknown",
+            )
 
     def add_interaction(
         self,
@@ -953,22 +664,20 @@ class MechanicsHdf5:
         """
         Add permanent interactions between two objects contactors.
         """
-        if name not in self.permanent_interactions():
-            pinter = self.permanent_interactions().create_dataset(
-                name, (1,), dtype=h5py_vlen_dtype(str)
+        if name not in self._format_adaptor["permanent_interactions"]:
+            self._format_adaptor.add_into_group(
+                "permanent_interactions",
+                name,
+                id=self._number_of_permanent_interactions,
+                type="permanent_interaction",
+                body1_name=body1_name,
+                body2_name=body2_name,
+                contactor1_name=contactor1_name,
+                contactor2_name=contactor2_name,
+                distance_calculator=distance_calculator,
+                offset1=offset1,
+                offset2=offset2,
             )
-            pinter.attrs["id"] = self._number_of_permanent_interactions
-            pinter.attrs["type"] = "permanent_interaction"
-            pinter.attrs["body1_name"] = body1_name
-            pinter.attrs["body2_name"] = body2_name
-            if contactor1_name is not None:
-                pinter.attrs["contactor1_name"] = contactor1_name
-            if contactor2_name is not None:
-                pinter.attrs["contactor2_name"] = contactor2_name
-            pinter.attrs["distance_calculator"] = distance_calculator
-            pinter.attrs["offset1"] = offset1
-            pinter.attrs["offset2"] = offset2
-
             self._number_of_permanent_interactions += 1
 
     def add_convex_shape(
@@ -1005,20 +714,14 @@ class MechanicsHdf5:
             self._dimension = 3
         self._out.attrs["dimension"] = self._dimension
 
-        if name not in self._ref:
-            shape = self._ref.create_dataset(
-                name, (np.shape(points)[0], np.shape(points)[1])
-            )
-            if insideMargin is not None:
-                shape.attrs["insideMargin"] = insideMargin
-            if outsideMargin is not None:
-                shape.attrs["outsideMargin"] = outsideMargin
-            shape[:] = points[:]
-            shape.attrs["type"] = "convex"
-            shape.attrs["id"] = self._number_of_shapes
-            if avoid_internal_edge_contact:
-                shape.attrs["avoid_internal_edge_contact"] = True
-            self._number_of_shapes += 1
+        self._add_shape(
+            name,
+            np.asarray(points, dtype="f4"),
+            type="convex",
+            insideMargin=insideMargin,
+            outsideMargin=outsideMargin,
+            avoid_internal_edge_contact=True if avoid_internal_edge_contact else None,
+        )
 
     def add_primitive_shape(
         self, name, primitive, params, insideMargin=None, outsideMargin=None
@@ -1046,17 +749,14 @@ class MechanicsHdf5:
             self._dimension = 3
         self._out.attrs["dimension"] = self._dimension
 
-        if name not in self._ref:
-            shape = self._ref.create_dataset(name, (1, len(params)))
-            shape.attrs["id"] = self._number_of_shapes
-            shape.attrs["type"] = "primitive"
-            shape.attrs["primitive"] = primitive
-            if insideMargin is not None:
-                shape.attrs["insideMargin"] = insideMargin
-            if outsideMargin is not None:
-                shape.attrs["outsideMargin"] = outsideMargin
-            shape[:] = params
-            self._number_of_shapes += 1
+        self._add_shape(
+            name,
+            np.asarray([params], dtype="f4"),
+            type="primitive",
+            primitive=primitive,
+            insideMargin=insideMargin,
+            outsideMargin=outsideMargin,
+        )
 
     def add_object(
         self,
@@ -1147,7 +847,7 @@ class MechanicsHdf5:
         """
 
         # Does nothing if an object of the same name is already registered.
-        if name in self._input:
+        if name in self._format_adaptor["input"]:
             return
 
         # Ensure all input parameters have proper values
@@ -1191,9 +891,8 @@ class MechanicsHdf5:
 
         is_center_of_mass_computed = False
 
-        # - we need to compute mass or inertia
-        # - and a Volume is present in the shapes list
-        # - and occ is available
+        # if we need to compute mass or inertia and a Volume is present in the shapes
+        # list (occ is then required)
         if (inertia is None or mass is None) and any(
             isinstance(s, smct.Volume) for s in shapes
         ):
@@ -1238,92 +937,70 @@ class MechanicsHdf5:
             if inertia is None:
                 inertia = computed_inertia_matrix
 
-        obj = group(self._input, name)
-
         if use_volume_centroid_as_initial_translation and is_center_of_mass_computed:
             translation = com
             for s in shapes:
                 s.translation = s.translation - com
 
-        if time_of_birth >= 0:
-            obj.attrs["time_of_birth"] = time_of_birth
-        if time_of_death >= 0:
-            obj.attrs["time_of_death"] = time_of_death
+        if mass is not None and np.isscalar(mass) and mass <= 0.0:
+            self.print_verbose(
+                "The use of a mass equal to zero"
+                " to define a static object is deprecated."
+            )
+            self.print_verbose("Set mass=None to define a static object")
 
-        if material is not None:
-            obj.attrs["material"] = np.asarray(material, dtype=np.float64)
-            obj.attrs["type"] = "dynamic"
+        static = (mass is None or mass == 0) and material is None
+        obj = self._format_adaptor.add_into_group(
+            "input",
+            name,
+            id=-(self._number_of_static_objects + 1)
+            if static
+            else self._number_of_dynamic_objects + 1,
+            type="dynamic" if mass is not None else "static",
+            time_of_birth=time_of_birth if time_of_birth >= 0 else None,
+            time_of_death=time_of_death if time_of_death >= 0 else None,
+            material=None
+            if material is None
+            else np.asarray(material, dtype=np.float64),
+            boundary_conditions=None
+            if boundary_conditions is None
+            else np.asarray(boundary_conditions, dtype=np.int32),
+            nodal_forces=None
+            if nodal_forces is None
+            else np.asarray(nodal_forces, dtype=np.float64),
+            mass=mass,
+            translation=translation,
+            orientation=ori,
+            velocity=np.asarray(velocity, dtype=np.float64),
+            center_of_mass=np.asarray(center_of_mass, dtype=np.float64),
+            inertia=inertia,
+            fext=None if fext is None else np.asarray(fext, dtype=np.float64),
+            allow_self_collide=allow_self_collide,
+        )
 
-        if boundary_conditions is not None:
-            obj.attrs["boundary_conditions"] = np.asarray(
-                boundary_conditions, dtype=np.int32
+        for num, ctor in enumerate(shapes):
+            # default name for a contactor
+            instance_name = ctor.instance_name or f"{ctor.shape_name}-{num}"
+            parameters = getattr(ctor, "parameters", None)
+            self._format_adaptor.add_into_group(
+                "input/" + name,
+                instance_name,
+                instance_name=instance_name,
+                shape_name=ctor.shape_name,
+                group=ctor.collision_group if hasattr(ctor, "group") else None,
+                # np.void to write the pickled parameters, see http://docs.h5py.org/en/latest/strings.html
+                parameters=None
+                if parameters is None
+                else np.void(pickle.dumps(parameters)),
+                type=getattr(ctor, "contact_type", None),
+                contact_index=getattr(ctor, "contact_index", None),
+                translation=ctor.translation,
+                orientation=quaternion_get(ctor.orientation),
             )
 
-        if nodal_forces is not None:
-            obj.attrs["nodal_forces"] = np.asarray(nodal_forces, dtype=np.float64)
-
-        if mass is not None:
-            obj.attrs["mass"] = mass
-            obj.attrs["type"] = "dynamic"
-            if np.isscalar(mass) and mass <= 0.0:
-                self.print_verbose(
-                    "The use of a mass equal to zero"
-                    " to define a static object is deprecated."
-                )
-                self.print_verbose("Set mass=None to define a static object")
-        else:
-            obj.attrs["type"] = "static"
-        obj.attrs["translation"] = translation
-        obj.attrs["orientation"] = ori
-        obj.attrs["velocity"] = np.asarray(velocity, dtype=np.float64)
-        obj.attrs["center_of_mass"] = np.asarray(center_of_mass, dtype=np.float64)
-
-        if inertia is not None:
-            obj.attrs["inertia"] = inertia
-
-        if fext is not None:
-            obj.attrs["fext"] = np.asarray(fext, dtype=np.float64)
-
-        if allow_self_collide is not None:
-            obj.attrs["allow_self_collide"] = allow_self_collide
-
-        contactors = shapes
-
-        for num, ctor in enumerate(contactors):
-            if ctor.instance_name is not None:
-                # a specified name
-                instance_name = ctor.instance_name
-            else:
-                # the default name for contactor
-                instance_name = f"{ctor.shape_name}-{num}"
-
-            dat = data(obj, instance_name, 0, use_compression=self._use_compression)
-
-            dat.attrs["instance_name"] = instance_name
-            dat.attrs["shape_name"] = ctor.shape_name
-            if hasattr(ctor, "group"):
-                dat.attrs["group"] = ctor.collision_group
-
-            if hasattr(ctor, "parameters") and ctor.parameters is not None:
-                # we add np.void to manage writing string in hdf5 files
-                # see http://docs.h5py.org/en/latest/strings.html
-                dat.attrs["parameters"] = np.void(pickle.dumps(ctor.parameters))
-
-            if hasattr(ctor, "contact_type") and ctor.contact_type is not None:
-                dat.attrs["type"] = ctor.contact_type
-
-            if hasattr(ctor, "contact_index") and ctor.contact_index is not None:
-                dat.attrs["contact_index"] = ctor.contact_index
-
-            dat.attrs["translation"] = ctor.translation
-            dat.attrs["orientation"] = quaternion_get(ctor.orientation)
-
-        if (mass is None or mass == 0) and material is None:
-            obj.attrs["id"] = -(self._number_of_static_objects + 1)
+        if static:
             self._number_of_static_objects += 1
-
         else:
-            obj.attrs["id"] = self._number_of_dynamic_objects + 1
             self._number_of_dynamic_objects += 1
 
         return obj
@@ -1385,7 +1062,7 @@ class MechanicsHdf5:
             The index in ``shapes`` of the shape of each grain. Required
             with more than one shape.
         """
-        if name in self._input:
+        if name in self._format_adaptor["input"]:
             return
 
         # check before anything is written to the file
@@ -1416,53 +1093,6 @@ class MechanicsHdf5:
             ):
                 raise ValueError("shape_indices must index shapes")
 
-        obj = group(self._input, name)
-
-        # Store as aggregate type
-        if mass is not None or density is not None:
-            obj.attrs["type"] = "dynamic_aggregate"
-            obj.attrs["id"] = self._number_of_dynamic_objects + 1
-            self._number_of_dynamic_objects += len(translations)
-        else:
-            obj.attrs["type"] = "static_aggregate"
-            obj.attrs["id"] = -(self._number_of_static_objects + 1)
-            self._number_of_static_objects += len(translations)
-
-        # the first shape is also the one of the format with a single shape
-        shape_info = shapes[0]
-
-        obj.attrs["shape_name"] = shape_info.shape_name
-        if shape_indices is not None:
-            obj.create_dataset(
-                "shape_names",
-                data=[s.shape_name for s in shapes],
-                dtype=h5py.string_dtype(),
-            )
-            obj.create_dataset(
-                "shape_indices",
-                data=shape_indices.astype(np.int64),
-                compression="gzip" if self._use_compression else None,
-            )
-        if hasattr(shape_info, "group"):
-            obj.attrs["group"] = shape_info.group
-        if hasattr(shape_info, "collision_group"):
-            obj.attrs["group"] = shape_info.collision_group
-
-        if mass is not None:
-            if mass.ndim == 0:
-                obj.attrs["mass"] = float(mass)
-            else:
-                obj.create_dataset(
-                    "masses",
-                    data=mass,
-                    compression="gzip" if self._use_compression else None,
-                )
-        if density is not None:
-            obj.attrs["density"] = float(density)
-        if inertia is not None:
-            obj.attrs["inertia"] = np.asarray(inertia, dtype=np.float64)
-
-        # Store arrays
         translations = np.asarray(translations, dtype=np.float64)
         if self._dimension == 2 and translations.shape[-1] != 2:
             raise ValueError(
@@ -1473,63 +1103,102 @@ class MechanicsHdf5:
                 f"Expected Nx3 translations for 3D, got {translations.shape}"
             )
 
-        obj.create_dataset(
-            "translations",
-            data=translations,
-            compression="gzip" if self._use_compression else None,
-        )
-        obj.attrs["count"] = len(translations)
-
-        # A shared radius is an attribute, per-grain radii a dataset.
-        if radii is not None:
-            if radii.ndim == 0:
-                obj.attrs["radius"] = float(radii)
-            else:
-                obj.create_dataset(
-                    "radii",
-                    data=radii,
-                    compression="gzip" if self._use_compression else None,
-                )
-
-        # Handle orientations
         if orientations is None:
             if self._dimension == 2:
-                orientations = np.zeros((len(translations), 1), dtype=np.float64)
+                orientations = np.zeros((n, 1), dtype=np.float64)
             else:
                 orientations = np.tile(
-                    np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64),
-                    (len(translations), 1),
+                    np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64), (n, 1)
                 )
         else:
             orientations = np.asarray(orientations, dtype=np.float64)
             if self._dimension == 2 and orientations.ndim == 1:
                 orientations = orientations.reshape(-1, 1)
-        obj.create_dataset(
-            "orientations",
-            data=orientations,
-            compression="gzip" if self._use_compression else None,
-        )
 
-        # Handle velocities
         if velocities is None:
-            if self._dimension == 2:
-                velocities = np.zeros((len(translations), 3), dtype=np.float64)
-            else:
-                velocities = np.zeros((len(translations), 6), dtype=np.float64)
+            velocities = np.zeros(
+                (n, 3 if self._dimension == 2 else 6), dtype=np.float64
+            )
         else:
             velocities = np.asarray(velocities, dtype=np.float64)
-        obj.create_dataset(
-            "velocities",
-            data=velocities,
-            compression="gzip" if self._use_compression else None,
-        )
 
-        if time_of_birth >= 0:
-            obj.attrs["time_of_birth"] = time_of_birth
-        if time_of_death >= 0:
-            obj.attrs["time_of_death"] = time_of_death
+        # the first shape is also the one of the format with a single shape
+        shape_info = shapes[0]
+        dynamic = mass is not None or density is not None
+        obj = self._format_adaptor.add_into_group(
+            "input",
+            name,
+            type="dynamic_aggregate" if dynamic else "static_aggregate",
+            id=self._number_of_dynamic_objects + 1
+            if dynamic
+            else -(self._number_of_static_objects + 1),
+            shape_name=shape_info.shape_name,
+            group=getattr(
+                shape_info, "collision_group", getattr(shape_info, "group", None)
+            ),
+            mass=float(mass) if mass is not None and mass.ndim == 0 else None,
+            density=None if density is None else float(density),
+            # a shared radius is an attribute, per-grain radii a dataset
+            radius=float(radii) if radii is not None and radii.ndim == 0 else None,
+            inertia=None if inertia is None else np.asarray(inertia, dtype=np.float64),
+            count=n,
+            time_of_birth=time_of_birth if time_of_birth >= 0 else None,
+            time_of_death=time_of_death if time_of_death >= 0 else None,
+        )
+        if shape_indices is not None:
+            self._format_adaptor.add_into_group(
+                "input/" + name,
+                "shape_names",
+                data=np.array(
+                    [s.shape_name for s in shapes], dtype=format_hdf5.vlen_dtype
+                ),
+            )
+        datasets = (
+            (
+                "shape_indices",
+                None if shape_indices is None else shape_indices.astype(np.int64),
+            ),
+            ("masses", mass if mass is not None and mass.ndim > 0 else None),
+            ("translations", translations),
+            ("radii", radii if radii is not None and radii.ndim > 0 else None),
+            ("orientations", orientations),
+            ("velocities", velocities),
+        )
+        for key, values in datasets:
+            if values is not None:
+                self._format_adaptor.add_into_group(
+                    "input/" + name, key, data=values, compression=self._use_compression
+                )
+
+        if dynamic:
+            self._number_of_dynamic_objects += n
+        else:
+            self._number_of_static_objects += n
 
         return obj
+
+    def _add_nslaw(self, name, nslaw_type, **attrs):
+        """Add a nonsmooth law, or update the parameters of the existing one."""
+        if (
+            name in self._format_adaptor["nslaws"]
+            and self._format_adaptor["nslaws"][name].attrs["type"] != nslaw_type
+        ):
+            self.print_verbose(
+                "[warning] a nslaw is already existing with the same name ",
+                name,
+                " but not the same type",
+            )
+        if (
+            name in self._format_adaptor["nslaws"]
+        ):  # update the parameters (the type is kept), checked against the format
+            spec = self._format_adaptor._spec("nslaws/" + name)["attrs"]
+            for k, v in attrs.items():
+                format_hdf5.check_datatype(v, spec[k], self._format_adaptor.symbols)
+            self._format_adaptor["nslaws"][name].attrs.update(attrs)
+        else:
+            self._format_adaptor.add_into_group(
+                "nslaws", name, type=nslaw_type, **attrs
+            )
 
     def add_Newton_impact_rolling_friction_nsl(
         self, name, mu, mu_r, e=0, collision_group1=0, collision_group2=0
@@ -1543,23 +1212,15 @@ class MechanicsHdf5:
         gid1 and gid2 define the group identifiants.
 
         """
-        if name not in self._nslaws_data:
-            nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs["type"] = "NewtonImpactRollingFrictionNSL"
-        else:
-            nslaw = self._nslaws_data[name]
-            if nslaw.attrs["type"] != "NewtonImpactRollingFrictionNSL":
-                self.print_verbose(
-                    "[warning] a nslaw is already existing with the same name ",
-                    name,
-                    " but not the same type",
-                )
-
-        nslaw.attrs["mu"] = mu
-        nslaw.attrs["mu_r"] = mu_r
-        nslaw.attrs["e"] = e
-        nslaw.attrs["gid1"] = collision_group1
-        nslaw.attrs["gid2"] = collision_group2
+        self._add_nslaw(
+            name,
+            "NewtonImpactRollingFrictionNSL",
+            mu=mu,
+            mu_r=mu_r,
+            e=e,
+            gid1=collision_group1,
+            gid2=collision_group2,
+        )
 
     def add_binary_cohesive_nsl(
         self,
@@ -1582,16 +1243,18 @@ class MechanicsHdf5:
         gid1 and gid2 define the group identifiants.
 
         """
-        if name not in self._nslaws_data:
-            nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs["type"] = "BinaryCohesiveNSL"
-            nslaw.attrs["mu"] = mu
-            nslaw.attrs["e"] = e
-            nslaw.attrs["sigma_c"] = sigma_c
-            nslaw.attrs["delta_c"] = delta_c
-            nslaw.attrs["gamma"] = gamma
-            nslaw.attrs["gid1"] = collision_group1
-            nslaw.attrs["gid2"] = collision_group2
+        self._format_adaptor.add_into_group(
+            "nslaws",
+            name,
+            type="BinaryCohesiveNSL",
+            mu=mu,
+            e=e,
+            sigma_c=sigma_c,
+            delta_c=delta_c,
+            gamma=gamma,
+            gid1=collision_group1,
+            gid2=collision_group2,
+        )
 
     def add_Fremond_impact_friction_nsl(
         self, name, mu, e=0, collision_group1=0, collision_group2=0
@@ -1605,22 +1268,14 @@ class MechanicsHdf5:
         gid1 and gid2 define the group identifiants.
 
         """
-        if name not in self._nslaws_data:
-            nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs["type"] = "FremondImpactFrictionNSL"
-        else:
-            nslaw = self._nslaws_data[name]
-            if nslaw.attrs["type"] != "FremondImpactFrictionNSL":
-                self.print_verbose(
-                    "[warning] a nslaw is already existing with the same name ",
-                    name,
-                    " but not the same type",
-                )
-
-        nslaw.attrs["mu"] = mu
-        nslaw.attrs["e"] = e
-        nslaw.attrs["gid1"] = collision_group1
-        nslaw.attrs["gid2"] = collision_group2
+        self._add_nslaw(
+            name,
+            "FremondImpactFrictionNSL",
+            mu=mu,
+            e=e,
+            gid1=collision_group1,
+            gid2=collision_group2,
+        )
 
     def add_Newton_impact_friction_nsl(
         self, name, mu, e=0, collision_group1=0, collision_group2=0
@@ -1634,22 +1289,14 @@ class MechanicsHdf5:
         gid1 and gid2 define the group identifiants.
 
         """
-        if name not in self._nslaws_data:
-            nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs["type"] = "NewtonImpactFrictionNSL"
-        else:
-            nslaw = self._nslaws_data[name]
-            if nslaw.attrs["type"] != "NewtonImpactFrictionNSL":
-                self.print_verbose(
-                    "[warning] a nslaw is already existing with the same name ",
-                    name,
-                    " but not the same type",
-                )
-
-        nslaw.attrs["mu"] = mu
-        nslaw.attrs["e"] = e
-        nslaw.attrs["gid1"] = collision_group1
-        nslaw.attrs["gid2"] = collision_group2
+        self._add_nslaw(
+            name,
+            "NewtonImpactFrictionNSL",
+            mu=mu,
+            e=e,
+            gid1=collision_group1,
+            gid2=collision_group2,
+        )
 
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
@@ -1668,21 +1315,9 @@ class MechanicsHdf5:
         -1, making the NSL unassociated with point contacts.  It can
         by used for joint stops however.
         """
-        if name not in self._nslaws_data:
-            nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs["type"] = "NewtonImpactNSL"
-        else:
-            nslaw = self._nslaws_data[name]
-            if nslaw.attrs["type"] != "NewtonImpactNSL":
-                self.print_verbose(
-                    "[warning] a nslaw is already existing with the same name ",
-                    name,
-                    " but not the same type",
-                )
-
-        nslaw.attrs["e"] = e
-        nslaw.attrs["gid1"] = collision_group1
-        nslaw.attrs["gid2"] = collision_group2
+        self._add_nslaw(
+            name, "NewtonImpactNSL", e=e, gid1=collision_group1, gid2=collision_group2
+        )
 
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
@@ -1701,31 +1336,23 @@ class MechanicsHdf5:
         -1, making the NSL unassociated with point contacts.  It can
         by used for joint stops however.
         """
-        if name not in self._nslaws_data:
-            nslaw = self._nslaws_data.create_dataset(name, (0,))
-            nslaw.attrs["type"] = "RelayNSL"
-        else:
-            nslaw = self._nslaws_data[name]
-            if nslaw.attrs["type"] != "RelayNSL":
-                self.print_verbose(
-                    "[warning] a nslaw is already existing with the same name",
-                    name,
-                    " but not the same type",
-                )
-
-        nslaw.attrs["size"] = size
-        nslaw.attrs["lb"] = lb
-        nslaw.attrs["ub"] = ub
-        nslaw.attrs["gid1"] = collision_group1
-        nslaw.attrs["gid2"] = collision_group2
+        self._add_nslaw(
+            name,
+            "RelayNSL",
+            size=size,
+            lb=lb,
+            ub=ub,
+            gid1=collision_group1,
+            gid2=collision_group2,
+        )
 
     def add_joint(
         self,
         name,
         object1,
         object2=None,
-        points=None,
-        axes=None,
+        points=((0, 0, 0),),
+        axes=((0, 1, 0),),
         joint_class="PivotJointR",
         absolute=None,
         allow_self_collide=None,
@@ -1738,46 +1365,44 @@ class MechanicsHdf5:
         """
         add a joint between two objects
         """
-        if axes is None:
-            axes = [[0, 1, 0]]
-        if points is None:
-            points = [[0, 0, 0]]
-        if name in self.joints():
-            raise ValueError(f"Joint {name} already in simulation!")
+        check_points_axes(name, joint_class, points, axes)
+        if coupled is not None:
+            # must be a list of tuples of two integers (DoF indexes) and a float (ratio)
+            for c in coupled:
+                assert len(c) == 3
+        if references is not None:
+            # must be a list of two joint names and one DS name
+            assert len(references) == 2 or len(references) == 3
+        attrs = {
+            "object1": object1,
+            "object2": object2,
+            "type": joint_class,
+            "points": points,
+            "axes": axes,
+            "absolute": absolute if absolute in [True, False] else None,
+            "allow_self_collide": allow_self_collide
+            if allow_self_collide in [True, False]
+            else None,
+            # nslaws: name of one nslaw, or a list of names same length as stops
+            "nslaws": None if nslaws is None else np.array(nslaws, dtype="S"),
+            "stops": stops,  # table of [[axis, pos, dir]..]
+            # friction: an NSL name (e.g. RelayNSL), or list of same
+            "friction": None if friction is None else np.array(friction, dtype="S"),
+            "coupled": None if coupled is None else np.array(coupled),
+            "references": None
+            if references is None
+            else np.array(references, dtype="S"),
+        }
+        if (
+            name in self._format_adaptor["joints"]
+        ):  # update the existing joint, checked against the format
+            spec = self._format_adaptor._spec("joints/" + name)["attrs"]
+            attrs = {k: v for k, v in attrs.items() if v is not None}
+            for k, v in attrs.items():
+                format_hdf5.check_datatype(v, spec[k], self._format_adaptor.symbols)
+            self._format_adaptor["joints"][name].attrs.update(attrs)
         else:
-            joint = self.joints().create_dataset(name, (0,))
-            joint.attrs["object1"] = object1
-            if object2 is not None:
-                joint.attrs["object2"] = object2
-            joint.attrs["type"] = joint_class
-            check_points_axes(name, joint_class, points, axes)
-            if points is not None:
-                joint.attrs["points"] = points
-            if axes is not None:
-                joint.attrs["axes"] = axes
-            if absolute in [True, False]:
-                joint.attrs["absolute"] = absolute
-
-            if allow_self_collide in [True, False]:
-                joint.attrs["allow_self_collide"] = allow_self_collide
-            if nslaws is not None:
-                # either name of one nslaw, or a list of names same length as stops
-                joint.attrs["nslaws"] = np.array(nslaws, dtype="S")
-            if stops is not None:
-                joint.attrs["stops"] = stops  # must be a table of [[axis,pos,dir]..]
-            if friction is not None:
-                # must be an NSL name (e.g.  RelayNSL), or list of same
-                joint.attrs["friction"] = np.array(friction, dtype="S")
-            if coupled is not None:
-                # must be a list of tuples of two integers (DoF
-                # indexes) and a float (ratio)
-                for c in coupled:
-                    assert len(c) == 3
-                joint.attrs["coupled"] = np.array(coupled)
-            if references is not None:
-                # must be a list of two joint names and one DS name
-                assert len(references) == 2 or len(references) == 3
-                joint.attrs["references"] = np.array(references, dtype="S")
+            self._format_adaptor.add_into_group("joints", name, **attrs)
 
     def add_boundary_condition(
         self,
@@ -1797,19 +1422,17 @@ class MechanicsHdf5:
         implementation only works for HarmonicBC for the moment
         """
         if name not in self.boundary_conditions():
-            boundary_condition = self.boundary_conditions().create_dataset(name, (0,))
-            boundary_condition.attrs["object1"] = object1
-            boundary_condition.attrs["indices"] = indices
-            boundary_condition.attrs["type"] = bc_class
             if bc_class == "HarmonicBC":
-                boundary_condition.attrs["a"] = a
-                boundary_condition.attrs["b"] = b
-                boundary_condition.attrs["omega"] = omega
-                boundary_condition.attrs["phi"] = phi
+                params = {"a": a, "b": b, "omega": omega, "phi": phi}
             elif bc_class == "BoundaryCondition":
-                if v is not None:
-                    boundary_condition.attrs["v"] = (
-                        v  # Might be None for "fixed"(val=0) BC
-                    )
+                params = {"v": v}  # v might be None for "fixed" (val=0) BC
             else:
                 raise NotImplementedError
+            self._format_adaptor.add_into_group(
+                "boundary_conditions",
+                name,
+                object1=object1,
+                indices=indices,
+                type=bc_class,
+                **params,
+            )

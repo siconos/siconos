@@ -28,3 +28,4 @@ python_requires = >=3.6
 where = .
 [options.package_data]
 * =
+siconos.io = *.json
