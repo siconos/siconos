@@ -10,9 +10,12 @@
 
 #include <initializer_list>
 #include <print>
+#include <stdexcept>
+#include <vector>
 
 #include "siconos/config/config_builder.hpp"
 #include "siconos/siconos.hpp"
+#include "siconos/storage/permute.hpp"
 
 namespace siconos::config {
 struct ball : model::lagrangian_ds {};
@@ -54,6 +57,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(RegistryRemoveTest);
   CPPUNIT_TEST(testRegistryRemove);
   CPPUNIT_TEST(testReadCreatesNoEntry);
+  CPPUNIT_TEST(testRemovePastTheEnd);
+  CPPUNIT_TEST(testPermuteChecks);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -132,6 +137,45 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
     const auto& read0 = storage::read_prop<"bc_velocities_0", config::topo>(ball0);
     CPPUNIT_ASSERT_MESSAGE("ball 0 reads its BC set", read0.size() == 1 && read0[0] == 7);
     CPPUNIT_ASSERT_MESSAGE("still one BC set", bcs.size() == 1);
+  }
+
+  // a handle kept across a removal may hold an index past the end (swap and
+  // pop): its removal throws instead of moving columns out of bounds
+  void testRemovePastTheEnd() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::data_t data;
+
+    auto ball0 = storage::add<config::ball>(data);
+    auto ball1 = storage::add<config::ball>(data);
+    auto stale = ball1;
+    storage::remove(data, ball1);
+
+    CPPUNIT_ASSERT_THROW(storage::remove(data, stale), std::out_of_range);
+    CPPUNIT_ASSERT_MESSAGE("ball 0 still there",
+                           std::size(storage::attr_values<config::ball, "q">(data, 0)) == 1);
+    storage::remove(data, ball0);
+  }
+
+  // storage::permute takes a permutation of the items
+  void testPermuteChecks() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::data_t data;
+
+    auto ball0 = storage::add<config::ball>(data);
+    auto ball1 = storage::add<config::ball>(data);
+    ball0.q() = {0., 0., 0.};
+    ball1.q() = {1., 0., 0.};
+
+    CPPUNIT_ASSERT_THROW(storage::permute<config::ball>(data, {0}), std::invalid_argument);
+    CPPUNIT_ASSERT_THROW(storage::permute<config::ball>(data, {0, 5}), std::invalid_argument);
+
+    storage::permute<config::ball>(data, {1, 0});
+    auto& qs = storage::attr_values<config::ball, "q">(data, 0);
+    CPPUNIT_ASSERT_MESSAGE("swapped", qs[0](0) == 1. && qs[1](0) == 0.);
   }
 };
 

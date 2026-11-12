@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <any>
 #include <atomic>
+#include <cassert>
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
@@ -302,25 +303,46 @@ struct registry {
     return index;
   }
 
-  /// storage::remove: item i of Item goes away, the last one takes index i
+  /// the number of items of Item, or column_base::no_index when no column
+  /// of Item counts items
   template <typename Item>
-  void remove_item(std::size_t i) {
-    const auto& columns = registered_kind<Item>();
-    std::size_t count = column_base::no_index;
-    for (std::size_t id : columns) {
-      if (std::size_t c = slots[id]->item_count(); c != column_base::no_index) {
-        count = c;
-        break;
-      }
+  std::size_t item_count() const {
+    for (std::size_t id : registered_kind<Item>()) {
+      if (std::size_t c = slots[id]->item_count(); c != column_base::no_index) return c;
     }
-    if (count == column_base::no_index || count == 0) return;  // nothing stored
-    for (std::size_t id : columns) slots[id]->move_back(i, count - 1);
+    return column_base::no_index;
   }
 
-  /// storage::permute: item k of Item becomes the item perm[k]
+  /// storage::remove: item i of Item goes away, the last one takes index i.
+  /// An index past the end (a stale index kept outside the storage) throws:
+  /// a removal is rare, the check is always on
+  template <typename Item>
+  void remove_item(std::size_t i) {
+    const std::size_t count = item_count<Item>();
+    if (count == column_base::no_index || count == 0) return;  // nothing stored
+    if (i >= count) [[unlikely]] {
+      throw std::out_of_range("storage::remove: index " + std::to_string(i) +
+                              " past the end (" + std::to_string(count) + " items)");
+    }
+    for (std::size_t id : registered_kind<Item>()) slots[id]->move_back(i, count - 1);
+  }
+
+  /// storage::permute: item k of Item becomes the item perm[k]. perm must be
+  /// a permutation of the items: its size is checked, its bijectivity in a
+  /// debug build only
   template <typename Item>
   void permute_item(const std::vector<std::size_t>& perm,
                     const std::vector<std::size_t>& inverse) {
+    const std::size_t count = item_count<Item>();
+    if (count != column_base::no_index && perm.size() != count) [[unlikely]] {
+      throw std::invalid_argument("storage::permute: " + std::to_string(perm.size()) +
+                                  " indices for " + std::to_string(count) + " items");
+    }
+#ifndef NDEBUG
+    for (std::size_t k = 0; k < perm.size(); ++k) {
+      assert(perm[k] < perm.size() && inverse[perm[k]] == k && "not a permutation");
+    }
+#endif
     for (std::size_t id : registered_kind<Item>()) slots[id]->permute(perm, inverse);
   }
 

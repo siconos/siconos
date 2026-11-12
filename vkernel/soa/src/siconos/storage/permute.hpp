@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -55,6 +56,9 @@ template <typename Item>
 void permute(auto& data, const std::vector<std::size_t>& perm) {
   std::vector<std::size_t> inverse(std::size(perm));
   for (std::size_t k = 0; k < std::size(perm); ++k) {
+    if (perm[k] >= std::size(perm)) [[unlikely]] {
+      throw std::invalid_argument("storage::permute: index out of the permutation");
+    }
     inverse[perm[k]] = k;
   }
 
