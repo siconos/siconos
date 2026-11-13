@@ -233,6 +233,38 @@ struct space_filter : item {
 
     // void __init__() { create_relations(); }
 
+    /* the relations Rel of a segment about to be removed, and the
+       interactions bound to them: left in the store, the relations would
+       hold an invalid segment ref once the segment is removed, read by the
+       next update through their interactions. The proximity maps are
+       rebuilt at each update, the relation sets follow storage::remove. */
+    template <typename Rel>
+    void remove_segment_relations(auto segment_handle) {
+      auto& data = self()->data();
+      const auto segment = segment_handle.index().value();
+
+      std::vector<std::size_t> relations;
+      for (auto rel : storage::handles<Rel>(data)) {
+        if (rel.segment().index().value() == segment) {
+          relations.push_back(rel.index().value());
+        }
+      }
+      if (relations.empty()) return;
+
+      std::vector<std::size_t> interactions;
+      for (auto inter : storage::handles<finteraction>(data, 0)) {
+        siconos::variant::visit(data, inter.relation(), [&](auto rel) {
+          if constexpr (match::handle<decltype(rel), Rel>) {
+            if (std::ranges::find(relations, rel.index().value()) != relations.end()) {
+              interactions.push_back(inter.index().value());
+            }
+          }
+        });
+      }
+      storage::remove_many<finteraction>(data, std::move(interactions));
+      storage::remove_many<Rel>(data, std::move(relations));
+    }
+
     void remove_static_item(auto step, auto item_handle) {
       using item_t = typename std::decay_t<decltype(item_handle)>::type;
       using point_t = collision::point<empty_item, item_t>;
@@ -251,8 +283,8 @@ struct space_filter : item {
       //   mp::equal.to(collision::point<item_t>));
 
       // the relations of the removed segment go out of the maps, so that no
-      // new interaction binds them; the interactions that use them are not
-      // activated anymore (no point left) and go at the next update
+      // new interaction binds them; the relation items and their
+      // interactions go now, before the segment
       if constexpr (std::derived_from<item_t, collision::shape::segment>) {
         const auto x1 = item_handle.x1();
         const auto x2 = item_handle.x2();
@@ -263,6 +295,8 @@ struct space_filter : item {
           const auto& k = kv.first;
           return k[0] == x1 && k[1] == x2 && k[2] == y1 && k[3] == y2;
         });
+        remove_segment_relations<diskfsegment_r>(item_handle);
+        remove_segment_relations<polytopefsegment_r<Topology>>(item_handle);
       }
 
       // storage::remove moves the last item to the index of the removed one
@@ -513,6 +547,22 @@ struct space_filter : item {
                                      });
     }
 
+    // the proximity key of a ds-fsegment relation: the segment and the
+    // manifold point index. The relation of a removed segment holds an
+    // invalid ref (storage::remap_refs), reading it would be out of bounds
+    auto segment_key(auto rel) {
+      auto segment = rel.segment();
+      if (!segment.index().valid()) [[unlikely]] {
+        throw std::runtime_error("space_filter: an interaction is bound to a removed segment");
+      }
+      using scalar = std::decay_t<decltype(segment.x1())>;
+      scalar point_index = 0;
+      if constexpr (requires { rel.point_index(); }) {
+        point_index = static_cast<scalar>(rel.point_index());
+      }
+      return std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(), point_index};
+    }
+
     void build_proximity_maps(auto& ds_ds_prox, auto& ds_segment_prox, auto& ds_fdisk_prox,
                               const auto& ds1s, const auto& ds2s, const auto& interactions) {
       auto& data = self()->data();
@@ -529,21 +579,13 @@ struct space_filter : item {
                   // capture by value ok with handles
                   [&, ds1 = ds1, inter = inter]<match::handle<diskfsegment_r> DiskSegmentR>(
                       DiskSegmentR rel) {
-                    auto segment = rel.segment();
-                    auto coefs =
-                        std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(),
-                                   std::decay_t<decltype(segment.x1())>{0}};
-                    ds_segment_prox[mp::make_pair(ds1.value(), coefs)] = inter;
+                    ds_segment_prox[mp::make_pair(ds1.value(), segment_key(rel))] = inter;
                   },
                   [&, ds1 = ds1,
                    inter =
                        inter]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
                       PolytopeFsegmentR rel) {
-                    auto segment = rel.segment();
-                    auto coefs = std::array{
-                        segment.x1(), segment.x2(), segment.y1(), segment.y2(),
-                        static_cast<std::decay_t<decltype(segment.x1())>>(rel.point_index())};
-                    ds_segment_prox[mp::make_pair(ds1.value(), coefs)] = inter;
+                    ds_segment_prox[mp::make_pair(ds1.value(), segment_key(rel))] = inter;
                   },
                   [&, ds1 = ds1,
                    inter = inter]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
@@ -978,12 +1020,8 @@ struct space_filter : item {
                 data, inter.relation(),
                 mp::overload(
                     [&]<match::handle<diskfsegment_r> DiskSegmentR>(DiskSegmentR rel) {
-                      auto segment = rel.segment();
-                      auto coefs =
-                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(),
-                                     std::decay_t<decltype(segment.x1())>{0}};
-                      auto finter = ds_segment_prox.find(
-                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      auto finter = ds_segment_prox.find(mp::make_pair(
+                          storage::prop<"ds1", Topology>(inter).value(), segment_key(rel)));
                       if (finter == ds_segment_prox.end()) {
                         throw std::runtime_error(
                             "space_filter::remove_interactions: no proximity map "
@@ -993,13 +1031,8 @@ struct space_filter : item {
                     },
                     [&]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
                         PolytopeFsegmentR rel) {
-                      auto segment = rel.segment();
-                      auto coefs =
-                          std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(),
-                                     static_cast<std::decay_t<decltype(segment.x1())>>(
-                                         rel.point_index())};
-                      auto finter = ds_segment_prox.find(
-                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      auto finter = ds_segment_prox.find(mp::make_pair(
+                          storage::prop<"ds1", Topology>(inter).value(), segment_key(rel)));
                       if (finter == ds_segment_prox.end()) {
                         throw std::runtime_error(
                             "space_filter::remove_interactions: no proximity map "
