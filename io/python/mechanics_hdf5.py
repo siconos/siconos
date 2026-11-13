@@ -855,7 +855,8 @@ class MechanicsHdf5:
 
         rigid = material is None  # material only for the elastic case
 
-        translation = np.asarray(translation, dtype=np.float64)
+        if translation is not None:
+            translation = np.asarray(translation, dtype=np.float64)
 
         if center_of_mass is None:
             center_of_mass = np.zeros(3, dtype=np.float64)
@@ -879,15 +880,19 @@ class MechanicsHdf5:
             ori = np.asarray(orientation, dtype=np.float64)
 
         if not rigid:
+            # a finite element body is placed by its mesh: by default no
+            # translation, no rotation, at rest, in the shapes of the format
             if orientation is None:
-                orientation = 0.0
+                orientation = (
+                    np.zeros(1) if self._dimension == 2 else np.array([1.0, 0, 0, 0])
+                )
             if velocity is None:
-                velocity = 0.0
+                velocity = np.zeros(3 if self._dimension == 2 else 6)
             if translation is None:
-                translation = 0.0
-            ori = np.atleast_1d(np.asarray(orientation, dtype=np.float64))
-            translation = np.atleast_1d(np.asarray(translation, dtype=np.float64))
-            velocity = np.atleast_1d(np.asarray(velocity, dtype=np.float64))
+                translation = np.zeros(self._dimension)
+            ori = np.asarray(orientation, dtype=np.float64)
+            translation = np.asarray(translation, dtype=np.float64)
+            velocity = np.asarray(velocity, dtype=np.float64)
 
         is_center_of_mass_computed = False
 
@@ -1146,7 +1151,9 @@ class MechanicsHdf5:
             # a shared radius is an attribute, per-grain radii a dataset
             radius=float(radii) if radii is not None and radii.ndim == 0 else None,
             # a shared inertia is an attribute, per-grain inertias a dataset
-            inertia=float(inertia) if inertia is not None and inertia.ndim == 0 else None,
+            inertia=float(inertia)
+            if inertia is not None and inertia.ndim == 0
+            else None,
             count=n,
             time_of_birth=time_of_birth if time_of_birth >= 0 else None,
             time_of_death=time_of_death if time_of_death >= 0 else None,
