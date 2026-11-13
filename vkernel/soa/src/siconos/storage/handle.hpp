@@ -216,14 +216,6 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
     static_assert(mp::size(tpl) >= mp::size_c<1>, "attached storage not found");
 
     using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
-#ifdef VKERNEL_CHECK_DECLARER
-    if constexpr (world_fully_known<D>) {
-      constexpr auto world_tpl =
-          mp::filter(declared_properties_t<world_declared, D>{}, matching);
-      static_assert(std::is_same_v<attached_storage_t, std::decay_t<decltype(world_tpl[0_c])>>,
-                    "the declarer's attached storage differs from the world's");
-    }
-#endif
     return memory(step, mp::get<attached_storage_t>(data().store()))[this->index().value()];
   }
 

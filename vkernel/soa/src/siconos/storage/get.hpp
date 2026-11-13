@@ -1,7 +1,5 @@
 #pragma once
 
-#include <any>
-
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/memory.hpp"
 #include "siconos/storage/mp/mp.hpp"
@@ -57,17 +55,12 @@ static auto param =
  * Where an attached storage is declared: the optional last template argument
  * of prop_values, prop and handle::property.
  *
- * - world_declared (the default): search every property of the world, as
- *   before;
- * - config_declared: declared in the configuration (with_properties<...>);
- *   searches the world for now, and the configuration once a world no longer
- *   carries its item closure;
- * - an item type: search only that item's own properties list, without the
- *   world.  This is what lets item code look up the attached storages it
- *   declares (topology, system_kind, io, ...) without the world.
- *
- * Compile with VKERNEL_CHECK_DECLARER to check, at every call site, that the
- * declarer's list gives the same storage as the world search.
+ * - world_declared (the default): search the properties the world's handles
+ *   know, i.e. its configuration (with_properties<...>);
+ * - config_declared: the same;
+ * - an item type: search only that item's own properties list.  This is how
+ *   item code looks up the attached storages it declares (topology,
+ *   system_kind, io, ...).
  */
 struct world_declared {};
 struct config_declared {};
@@ -136,23 +129,10 @@ struct declared_attached_storage {
   using type = decltype(first());
 };
 
-/// The world search covers every property: with a storage::make database,
-/// not with a registry world, whose handles only know the configuration.
-template <typename Data>
-static constexpr bool world_fully_known = requires { typename get_info_t<Data>::all_items_t; };
-
 template <match::item I, string_literal S, typename Decl = world_declared>
 static auto prop_memory = [](auto& data) constexpr -> decltype(auto) {
   using data_t = std::decay_t<decltype(data)>;
   using attached_storage_t = typename declared_attached_storage<I, S, Decl, data_t>::type;
-#ifdef VKERNEL_CHECK_DECLARER
-  if constexpr (!std::is_same_v<Decl, world_declared> && world_fully_known<data_t>) {
-    static_assert(
-        std::is_same_v<attached_storage_t,
-                       typename declared_attached_storage<I, S, world_declared, data_t>::type>,
-        "the declarer's attached storage differs from the world's");
-  }
-#endif
   return mp::get<attached_storage_t>(data.store());
 };
 
@@ -201,55 +181,18 @@ static constexpr auto is_dynamic_storage_with_tag = mp::is_a_model<[]<typename T
          requires { typename T::dynamic_storage_t; } && tagged_exactly<T, Tag>;
 }>;
 
-// Runtime lookup: get or create the sparse_set for a dynamic property.
-// The sparse_set is stored in the database-level _dynamic_properties map.
-// storage::make database: the sparse set lives in a map keyed by the
-// property type
-template <typename prop_t, typename env_t, typename indice>
-static decltype(auto) prop_dynamic_map(auto& data) {
-  using attr_t = typename prop_t::type;
-  using value_t = typename traits::config<env_t>::template convert<attr_t>::type;
-
-  // a unique key for this (Item, tag, type) property
-  std::string key = std::string(typeid(prop_t).name());
-
-  auto& map = data.store()._dynamic_properties;
-  auto it = map.find(key);
-  if (it == map.end()) {
-    storage::sparse_set<indice, value_t> set;
-    auto [new_it, _] = map.emplace(key, std::move(set));
-    return std::any_cast<storage::sparse_set<indice, value_t>&>(new_it->second);
-  }
-  return std::any_cast<storage::sparse_set<indice, value_t>&>(it->second);
-};
-
 template <match::item I, string_literal S, typename Decl = world_declared>
 static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
   using data_t = std::decay_t<decltype(data)>;
-  using info_t = get_info_t<data_t>;
-  using env_t = typename info_t::template env<I>;
-  using indice = typename env_t::indice;
 
   // Find the property to get its attribute type (Value)
   constexpr auto tpl =
       mp::filter(declared_properties_t<Decl, data_t>{}, is_dynamic_storage_tagged<I, S>);
   static_assert(mp::size(tpl) >= mp::size_c<1_c>, "dynamic property not found in topology");
   using prop_t = std::decay_t<decltype(tpl[0_c])>;
-#ifdef VKERNEL_CHECK_DECLARER
-  if constexpr (world_fully_known<data_t>) {
-    constexpr auto world_tpl = mp::filter(declared_properties_t<world_declared, data_t>{},
-                                          is_dynamic_storage_tagged<I, S>);
-    static_assert(std::is_same_v<prop_t, std::decay_t<decltype(world_tpl[0_c])>>,
-                  "the declarer's dynamic property differs from the world's");
-  }
-#endif
-  if constexpr (requires { data.store()._registry; }) {
-    // registry world: the sparse column of the property, created at
-    // registration and kept consistent by storage::remove
-    return mp::get<prop_t>(data.store());
-  } else {
-    return prop_dynamic_map<prop_t, env_t, indice>(data);
-  }
+  // the sparse column of the property, created at registration and kept
+  // consistent by storage::remove
+  return mp::get<prop_t>(data.store());
 };
 
 /// prop_dynamic_memory for the dynamic property of I tagged by a type Tag
@@ -257,19 +200,12 @@ static auto prop_dynamic_memory = [](auto& data) -> decltype(auto) {
 template <match::item I, typename Tag, typename Decl = world_declared>
 static auto prop_dynamic_memory_tagged = [](auto& data) -> decltype(auto) {
   using data_t = std::decay_t<decltype(data)>;
-  using info_t = get_info_t<data_t>;
-  using env_t = typename info_t::template env<I>;
-  using indice = typename env_t::indice;
 
   constexpr auto tpl =
       mp::filter(declared_properties_t<Decl, data_t>{}, is_dynamic_storage_with_tag<I, Tag>);
   static_assert(mp::size(tpl) >= mp::size_c<1_c>, "dynamic property not found in declarer");
   using prop_t = std::decay_t<decltype(tpl[0_c])>;
-  if constexpr (requires { data.store()._registry; }) {
-    return mp::get<prop_t>(data.store());
-  } else {
-    return prop_dynamic_map<prop_t, env_t, indice>(data);
-  }
+  return mp::get<prop_t>(data.store());
 };
 
 template <match::item I, string_literal S, typename Decl = world_declared>

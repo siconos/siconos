@@ -72,7 +72,7 @@ struct env : standard_environment<T> {
 /* No simulation and no one_step_integrator: the world holds only what the
    narrowphase stage touches. */
 struct data_t
-    : storage::make<
+    : storage::make_runtime_database<
           env, topo, polytope, polytope_shape, diskdisk_r, nslaw, interaction,
           polytopepolytope_r, cxd_narrowphase,
           storage::with_properties<

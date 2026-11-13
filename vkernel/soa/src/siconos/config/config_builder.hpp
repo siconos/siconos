@@ -97,28 +97,6 @@ class config_builder {
         ParamsMap{}, []<typename... Pairs>(Pairs... pairs) { return mp::map<Pairs...>{}; }));
   };
 
-  // build_compile_time_database: the compile-time typed database
-  // (storage::make_compile_time_database).  Slowest compile (the whole
-  // database type is built and carried by every handle), fastest runtime
-  // access.  For the registry-backed runtime database that compiles much
-  // faster at a small runtime cost, use build_runtime_database().
-  auto build_compile_time_database() const {
-    return mp::unpack(
-        mp::concat(mp::concat(mp::tuple<>{}, ItemsList{}),
-                   mp::unpack(PropertiesList{},
-                              []<typename... Props>(Props...) {
-                                return mp::tuple<storage::with_properties<Props...>>{};
-                              })),
-        []<typename... Ts>(Ts... ts) {
-          return storage::make_compile_time_database<env, Ts...>{};
-        });
-  }
-
-  // previous names of build_compile_time_database, kept so existing call
-  // sites compile
-  auto build_database() const { return build_compile_time_database(); }
-  auto build() const { return build_database(); }
-
   // the runtime (registry-backed) database type (storage/registry.hpp),
   // computed without constructing one
   using world_type = typename decltype(mp::unpack(

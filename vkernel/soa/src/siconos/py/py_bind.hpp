@@ -18,17 +18,7 @@ inline data_t make_storage() { return data_t(); };
 // The bindings are assembly code: they enumerate the whole world (items,
 // attached storages, bind names), so they use its full description.  Handles
 // of a registry world only carry its configuration (see storage::world_config).
-template <typename D>
-struct world_info_of {
-  using type = siconos::storage::get_info_t<D>;  // storage::make database
-};
-template <typename D>
-  requires requires { typename D::world_info_t; }
-struct world_info_of<D> {
-  using type = typename D::world_info_t;  // registry world
-};
-
-using disks_info_t = typename world_info_of<idata_t>::type;
+using disks_info_t = typename idata_t::world_info_t;
 
 using indice_t = typename disks_info_t::template env<config::body>::indice;
 

@@ -383,9 +383,7 @@ static constexpr std::size_t key_index() {
 // Keep the FIRST occurrence of each key, as hana::to_map did (hana::insert is
 // a no-op on an existing key), so key_index below agrees with the old lookup.
 //
-// make_compile_time_database no longer emits duplicates (item_storage_info
-// makes all_properties_t unique, see make.hpp), so there this is a no-op;
-// merge_databases still relies on it, the two databases sharing columns.
+// merge_databases relies on it, the two databases sharing columns.
 template <typename... Pairs>
 struct unique_keys {
   static constexpr std::size_t n = sizeof...(Pairs);

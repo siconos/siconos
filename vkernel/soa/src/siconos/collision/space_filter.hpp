@@ -334,9 +334,8 @@ struct space_filter : item {
       using data_t = std::decay_t<decltype(data)>;
       // the handles of a registry world only know the configuration: search
       // every property of the world, as io is not known here
-      using decl_t = std::conditional_t<requires { typename data_t::world_info_t; },
-                                        world_properties_of<data_t>, storage::world_declared>;
-      auto& idents = storage::prop_values<item_t, "ident", decl_t>(data, step);
+      auto& idents =
+          storage::prop_values<item_t, "ident", world_properties_of<data_t>>(data, step);
       auto found = std::ranges::find(idents, ident);
       if (found == idents.end()) {
         throw std::runtime_error(std::format("no static segment of ident {}", ident));
@@ -1209,7 +1208,7 @@ struct space_filter : item {
       build_proximity_maps(ds_ds_prox, ds_segment_prox, ds_fdisk_prox, ds1s, ds2s,
                            interactions);
 
-      // no column is attached to empty_item (see storage::item_storage)
+      // no column is attached to empty_item (see world::register_columns)
       if constexpr (!std::derived_from<dfinteraction, empty_item>) {
         auto& dds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, step);
         auto& dds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, step);

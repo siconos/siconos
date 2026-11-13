@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <any>
 #include <atomic>
 #include <cassert>
 #include <cstddef>
@@ -9,7 +8,6 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "siconos/storage/info.hpp"
@@ -145,7 +143,7 @@ struct column final : column_base {
         value.emplace(static_cast<key_t>(i), std::move(moved));
       }
     } else {
-      // as storage::remove does for the static database (move_back)
+      // swap and pop, at every time level
       for (auto& storage : value) {
         using storage_t = std::decay_t<decltype(storage)>;
         if constexpr (match::push_back<storage_t>) {
@@ -236,7 +234,7 @@ struct registry {
   registry(registry&&) = default;
   registry& operator=(registry&&) = default;
 
-  // deep copy, as the storage::make_compile_time_database it replaces is copyable
+  // deep copy: a world is copyable data
   registry(const registry& other)
       : slots(other.slots.size()),
         kinds(other.kinds),
@@ -416,9 +414,8 @@ struct registry {
  * @brief Compile-time description of a world, without its storage.
  *
  * Only what the access sites ask for through get_info_t: the item closure,
- * the gathered properties and the per-item environment. Unlike
- * item_storage_info it does not gather all attributes, and unlike
- * item_storage it builds no unit storage for any of them.
+ * the gathered properties and the per-item environment. It gathers no
+ * attribute and builds no storage for any of them.
  */
 template <template <typename> typename Env, match::item... Items>
 struct world_info {
@@ -494,7 +491,7 @@ using configuration_properties_t = decltype(mp::concat_all(
 /**
  * @brief Concrete column type of one attribute key.
  *
- * build_detail::column_storage (shared with make_compile_time_database),
+ * build_detail::column_storage (make.hpp),
  * applied to a single key. It is a class template, so it is computed once
  * per key however many access sites ask for it.
  */
@@ -548,8 +545,8 @@ static constexpr auto is_attached_dynamic = mp::is_a_model<[]<typename T>() cons
  * @brief A world: a registry plus the compile-time Info to type its columns.
  *
  * It is its own store, so every existing access site, which goes through
- * mp::get<A>(data.store()), works unchanged. Handles carry world<Info>
- * instead of the database type of make_compile_time_database.  Info is a
+ * mp::get<A>(data.store()), works unchanged. Handles carry world<Info>,
+ * not the item closure.  Info is a
  * world_config (make_runtime_database): the environment and the
  * configuration's properties, not the item closure, which only the
  * constructor of make_runtime_database uses.
@@ -557,7 +554,6 @@ static constexpr auto is_attached_dynamic = mp::is_a_model<[]<typename T>() cons
 template <typename Info>
 struct world {
   registry _registry;
-  std::unordered_map<std::string, std::any> _dynamic_properties;
 
   world& store() { return *this; }
 
@@ -574,8 +570,7 @@ struct world {
 
   /// Create every column of the world up front, with its depth: the
   /// attributes of every item and the static attached storages declared for
-  /// it, as storage::make_compile_time_database enumerates them.  Afterwards every access
-  /// takes the fast path of registry::column.
+  /// it.  Afterwards every access takes the fast path of registry::column.
   ///
   /// WorldInfo is the full world_info (item closure, all properties): only
   /// here, where the world is built, are the time_levels<> depths and the item lists
@@ -608,14 +603,12 @@ struct world {
   }
 };
 
-/// make_compile_time_database counterpart that builds a runtime
-/// (registry-backed) database: its columns are compile-time typed per key
-/// (same refine -> wrapper -> time_levels<> pipeline as its counterpart, see
+/// The database of a world (registry-backed): its columns are compile-time
+/// typed per key (refine -> wrapper -> time_levels<> pipeline, see
 /// column_of), but materialised (registered) at run time, at construction.
-/// Much faster to compile than make_compile_time_database (no database type:
-/// no per-TU instantiation, see SiconosVkernelRegistryWorld), at the cost of
-/// a small runtime column lookup (+1 to +4% measured, less with
-/// -DVKERNEL_UNCHECKED_LOOKUP).  Handles of it carry
+/// No database type is instantiated per TU (see SiconosVkernelRegistryWorld);
+/// the column lookup costs nothing measurable at run time (1M disks on the
+/// GPU, 2026-11-13).  Handles of it carry
 /// world<world_config<...>>: the configuration, not the item closure.
 template <template <typename> typename Env, match::item... Items>
 struct make_runtime_database : world<world_config<Env, configuration_properties_t<Items...>>> {
