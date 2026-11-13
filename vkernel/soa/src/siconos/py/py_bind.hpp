@@ -24,15 +24,32 @@ using indice_t = typename disks_info_t::template env<config::body>::indice;
 
 using disks_properties_t = typename disks_info_t::all_properties_t;
 
-/// declarer for the lookups of the bindings: every property of the world
-struct disks_world_properties : pattern::item {
-  using properties = disks_properties_t;
-};
-
 /// the attached storages of Item (static and dynamic) among all the world's
 template <typename Item>
 static constexpr auto is_attached_to =
     mp::is_a_model<[]<typename T>() constexpr { return match::attached_storage<T, Item>; }>;
+
+/// the value of the attached storage S of h, for a write (a dynamic property
+/// is created for an item without it). S is the property itself: no lookup of
+/// its name among all the world's properties, as storage::prop does
+template <typename S, typename Handle>
+static decltype(auto) attached_ref(Handle& h) {
+  if constexpr (requires { typename S::dynamic_storage_t; }) {
+    return mp::get<S>(h.data().store()).get_or_create(h.index().value());
+  } else {
+    return storage::memory(0, mp::get<S>(h.data().store()))[h.index().value()];
+  }
+}
+
+/// the same for a read: a dynamic property is not created
+template <typename S, typename Handle>
+static decltype(auto) attached_read(Handle& h) {
+  if constexpr (requires { typename S::dynamic_storage_t; }) {
+    return std::as_const(mp::get<S>(h.data().store()))[h.index().value()];
+  } else {
+    return attached_ref<S>(h);
+  }
+}
 
 /// the value returned by the getter of the attached storage S: for a static
 /// one, a reference into the storage; a dynamic one is read without creating
@@ -41,7 +58,7 @@ static constexpr auto is_attached_to =
 template <storage::pattern::string_literal Name, typename S, typename Handle>
 static decltype(auto) getter_value(Handle& h) {
   if constexpr (requires { typename S::dynamic_storage_t; }) {
-    decltype(auto) value = storage::read_prop<Name, disks_world_properties>(h);
+    decltype(auto) value = attached_read<S>(h);
     using value_t = std::decay_t<decltype(value)>;
     if constexpr (match::matrix<value_t> && !match::diagonal_matrix<value_t>) {
       return value_t(value);
@@ -49,7 +66,7 @@ static decltype(auto) getter_value(Handle& h) {
       return out_formatter(h, value);
     }
   } else {
-    return out_formatter(h, storage::prop<Name, disks_world_properties>(h));
+    return out_formatter(h, attached_ref<S>(h));
   }
 }
 
@@ -125,8 +142,7 @@ void bind_item(py::module_& disks) {
           if constexpr (!match::without_binding<S>) {
             static constexpr auto astor_name = storage::attached_storage_name(s);
             using target_type = std::decay_t<decltype(out_formatter(
-                handle_t{},
-                storage::prop<astor_name.str, disks_world_properties>(handle_t{})))>;
+                handle_t{}, attached_ref<S>(std::declval<handle_t&>())))>;
 
             return dc
                 .def(
@@ -138,9 +154,7 @@ void bind_item(py::module_& disks) {
                 .def(
                     std::format("set_{}", astor_name.str.value).c_str(),
                     +[](handle_t& h, target_type val) {
-                      in_formatter(h,
-                                   storage::prop<astor_name.str, disks_world_properties>(h)) =
-                          in_formatter(h, val);
+                      in_formatter(h, attached_ref<S>(h)) = in_formatter(h, val);
                     });
           } else {
             return dc;
@@ -160,8 +174,7 @@ void bind_item(py::module_& disks) {
           } else {
             static constexpr auto astor_name = storage::attached_storage_name(s);
             using target_type = std::decay_t<decltype(out_formatter(
-                handle_t{},
-                storage::prop<astor_name.str, disks_world_properties>(handle_t{})))>;
+                handle_t{}, attached_ref<S>(std::declval<handle_t&>())))>;
 
             return hw
                 .def(
@@ -178,9 +191,7 @@ void bind_item(py::module_& disks) {
                     std::format("set_{}", astor_name.str.value).c_str(),
                     +[](handles_wrap<std::vector<handle_t>>& h_multiple, target_type val) {
                       std::ranges::for_each(h_multiple.handles, [&val](auto&& h) {
-                        in_formatter(
-                            h, storage::prop<astor_name.str, disks_world_properties>(h)) =
-                            in_formatter(h, val);
+                        in_formatter(h, attached_ref<S>(h)) = in_formatter(h, val);
                       });
                     })
                 .def(
@@ -191,9 +202,7 @@ void bind_item(py::module_& disks) {
                           view::zip(vals, h_multiple.handles), [](auto&& pair) {
                             auto& val = std::get<0>(pair);
                             auto& h = std::get<1>(pair);
-                            in_formatter(
-                                h, storage::prop<astor_name.str, disks_world_properties>(h)) =
-                                in_formatter(h, val);
+                            in_formatter(h, attached_ref<S>(h)) = in_formatter(h, val);
                           });
                     });
           }
