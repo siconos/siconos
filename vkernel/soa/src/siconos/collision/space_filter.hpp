@@ -234,8 +234,6 @@ struct space_filter : item {
     // void __init__() { create_relations(); }
 
     void remove_static_item(auto step, auto item_handle) {
-      using env_t = decltype(self()->env());
-      using indice = typename env_t::indice;
       using item_t = typename std::decay_t<decltype(item_handle)>::type;
       using point_t = collision::point<empty_item, item_t>;
       using points_t = typename neighborhood::points_t;
@@ -252,11 +250,6 @@ struct space_filter : item {
       //   points_t{},
       //   mp::equal.to(collision::point<item_t>));
 
-      // storage::remove moves the last item to the index of the removed one:
-      // what refers to the last item by its index must follow
-      const auto removed = item_handle.index().value();
-      const auto last = storage::handles<item_t>(data).size() - 1;
-
       // the relations of the removed segment go out of the maps, so that no
       // new interaction binds them; the interactions that use them are not
       // activated anymore (no point left) and go at the next update
@@ -272,50 +265,19 @@ struct space_filter : item {
         });
       }
 
-      // first remove item
+      // storage::remove moves the last item to the index of the removed one
+      // and rewrites the refs held in the store (storage::remap_refs): the
+      // points of the removed item now hold an invalid ref, those of the
+      // moved one (and the segment refs of its relations) follow it
       storage::remove(data, item_handle);
 
-      // find all associated points
-      for (auto [flag] : view::zip(points_flags)) {
-        flag = false;
+      // remove the points of the removed item
+      std::vector<std::size_t> removed_points;
+      for (std::size_t k = 0; k < std::size(points_items); ++k) {
+        points_flags[k] = false;
+        if (!points_items[k].valid()) removed_points.push_back(k);
       }
-
-      for (auto [flag, pitem] : view::zip(points_flags, points_items)) {
-        if (removed == pitem.value()) {
-          flag = true;
-        } else if (pitem.value() == last) {
-          // a point of the moved item
-          pitem = item_handle;
-        }
-      }
-
-      // the relations of the moved segment
-      if constexpr (std::derived_from<item_t, collision::shape::segment>) {
-        auto follow = [&](auto& relmap) {
-          for (auto& [key, rel_ref] : relmap) {
-            auto rel = storage::make_handle(data, rel_ref);
-            if (rel.segment().index().value() == last) {
-              rel.segment() = item_handle;
-            }
-          }
-        };
-        follow(self()->diskfsegments());
-        follow(self()->polytopefsegments());
-      }
-      // XX check with one loop : flag = (item_handle.get() == pitem.get())
-      // remove points
-      auto ff = std::ranges::find(points_flags, true);
-
-      while (ff != points_flags.end()) {
-        auto ff_index = ff - points_flags.begin();
-        auto point = storage::make_handle(data, storage::index<point_t, indice>(ff_index));
-        storage::remove(data, point);
-
-        auto remaining_points_flags = std::ranges::subrange(ff, points_flags.end());
-        auto rff = std::ranges::find(remaining_points_flags, true);
-
-        ff = ff + (rff - remaining_points_flags.begin());
-      };
+      storage::remove_many<point_t>(data, std::move(removed_points));
 
       neighborhood().instance()->resize_point_set(ps_indx, points_coords.front().data(),
                                                   points_coords.size());

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <limits>
 #include <utility>
 
 #include "siconos/storage/get.hpp"
@@ -41,8 +42,14 @@ struct index {
   /// The value type stored in the index
   using value_t = R;
 
+  /// The index of no item: a ref to a removed item (see storage::remap_refs)
+  static constexpr value_t invalid = std::numeric_limits<value_t>::max();
+
   /// The actual index value
   value_t _value = {};
+
+  /// @brief Whether the index refers to an item (not invalid)
+  bool valid() const noexcept { return _value != invalid; }
 
   /// @brief Get mutable reference to the index value
   /// @return Reference to the stored value

@@ -94,6 +94,9 @@ if(WITH_TESTING)
   new_test(NAME vkernel_fremond_rigid SOURCES fremond_rigid.cpp ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
+  # the same on the compile time database
+  new_test(NAME vkernel_registry_remove_static_db SOURCES registry_remove.cpp
+           ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS BB_DATABASE)
   new_test(NAME vkernel_nslaws_multi_group SOURCES nslaws_multi_group.cpp
            ${SIMPLE_TEST_MAIN} DEPS "${COMPACTNSEARCH}")
   new_test(NAME vkernel_polydisperse_disks SOURCES polydisperse_disks.cpp
@@ -204,6 +207,7 @@ if(WITH_TESTING)
       vkernel_bouncing_disks
       vkernel_fixed_disks
       vkernel_registry_remove
+      vkernel_registry_remove_static_db
       vkernel_nslaws_multi_group
       vkernel_polydisperse_disks
       vkernel_cxd_batch_smoke

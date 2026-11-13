@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -9,6 +10,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
+#include "siconos/storage/remap_refs.hpp"
 
 namespace siconos::storage {
 
@@ -49,9 +51,9 @@ static auto rekey = [](const std::vector<std::size_t>& inverse, auto& set) {
     index perm[k] before the call, in every attribute, every attached storage
     and every dynamic property (re-keyed), in every kept step.
 
-    perm is a permutation of [0, number of items). The handles and the refs
-    on the items of Item held elsewhere are not updated: no item may hold a
-    ref on an Item across the call. */
+    perm is a permutation of [0, number of items). The refs to the items of
+    Item held in the store follow them (see remap_refs); the handles and the
+    refs held outside the store do not. */
 template <typename Item>
 void permute(auto& data, const std::vector<std::size_t>& perm) {
   std::vector<std::size_t> inverse(std::size(perm));
@@ -81,6 +83,18 @@ void permute(auto& data, const std::vector<std::size_t>& perm) {
                               return requires { typename T::dynamic_storage_t; };
                             }>));
 
+    if constexpr (mp::size(attrs) > mp::size_c<0>) {
+      using first_t = std::decay_t<decltype(attrs[0_c])>;
+      const auto& first_storage = memory(0, mp::get<first_t>(data.store()));
+      if constexpr (match::push_back<std::decay_t<decltype(first_storage)>>) {
+        if (std::size(first_storage) != std::size(perm)) [[unlikely]] {
+          throw std::invalid_argument("storage::permute: " + std::to_string(std::size(perm)) +
+                                      " indices for " +
+                                      std::to_string(std::size(first_storage)) + " items");
+        }
+      }
+    }
+
     mp::for_each(dynamic_attrs_t{}, [&data, &inverse]<typename P>(P) {
       permute_detail::rekey(inverse, prop_dynamic_map<P, env_t, indice>(data));
     });
@@ -91,6 +105,10 @@ void permute(auto& data, const std::vector<std::size_t>& perm) {
             permute_detail::gather(perm, memory(step, mp::get<A>(data.store())));
           });
     });
+
+    // the refs to the moved items follow them (the registry does it in
+    // permute_item)
+    remap_refs<Item>(data, ref_remap::table(inverse));
   }
 }
 

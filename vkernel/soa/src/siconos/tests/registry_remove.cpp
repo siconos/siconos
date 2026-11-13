@@ -9,13 +9,18 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <initializer_list>
+#include <map>
 #include <print>
 #include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <variant>
 #include <vector>
 
 #include "siconos/config/config_builder.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/permute.hpp"
+#include "siconos/storage/refs.hpp"
 
 namespace siconos::config {
 struct ball : model::lagrangian_ds {};
@@ -59,6 +64,10 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testReadCreatesNoEntry);
   CPPUNIT_TEST(testRemovePastTheEnd);
   CPPUNIT_TEST(testPermuteChecks);
+  CPPUNIT_TEST(testRemoveRemapsRefs);
+  CPPUNIT_TEST(testPermuteRemapsRefs);
+  CPPUNIT_TEST(testRemoveManyRemapsRefs);
+  CPPUNIT_TEST(testRemapWalker);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -176,6 +185,135 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
     storage::permute<config::ball>(data, {1, 0});
     auto& qs = storage::attr_values<config::ball, "q">(data, 0);
     CPPUNIT_ASSERT_MESSAGE("swapped", qs[0](0) == 1. && qs[1](0) == 0.);
+  }
+
+  // interactions between balls: inter k links balls a[k] and b[k]
+  template <typename Data, typename Balls>
+  static auto link(Data& data, Balls& balls,
+                   std::initializer_list<std::pair<int, int>> pairs) {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+    std::vector<decltype(storage::add<config::interaction>(data))> inters;
+    for (auto [a, b] : pairs) {
+      auto inter = storage::add<config::interaction>(data);
+      storage::prop<"ds1", config::topo>(inter) = balls[a];
+      storage::prop<"ds2", config::topo>(inter) = balls[b];
+      inters.push_back(inter);
+    }
+    return inters;
+  }
+
+  using ends_t = std::pair<std::size_t, std::size_t>;
+
+  template <typename Data>
+  static ends_t ends(Data& data, std::size_t k) {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+    auto& ds1s = storage::prop_values<config::interaction, "ds1", config::topo>(data, 0);
+    auto& ds2s = storage::prop_values<config::interaction, "ds2", config::topo>(data, 0);
+    return {ds1s[k].value(), ds2s[k].value()};
+  }
+
+  static constexpr std::size_t dead = siconos::storage::ref_remap::invalid;
+
+  // storage::remove rewrites the refs to the removed item (invalid) and to
+  // the moved one (its new index) held in the other columns
+  void testRemoveRemapsRefs() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::data_t data;
+    std::vector balls{storage::add<config::ball>(data), storage::add<config::ball>(data),
+                      storage::add<config::ball>(data)};
+    link(data, balls, {{0, 2}, {1, 2}});
+
+    storage::remove(data, balls[0]);  // ball 2 moves to index 0
+
+    CPPUNIT_ASSERT_MESSAGE("inter 0: ball 0 gone, ball 2 at 0",
+                           ends(data, 0) == ends_t(dead, 0));
+    CPPUNIT_ASSERT_MESSAGE("inter 1: ball 1 kept, ball 2 at 0", ends(data, 1) == ends_t(1, 0));
+  }
+
+  // storage::permute: the refs follow the moved items
+  void testPermuteRemapsRefs() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::data_t data;
+    std::vector balls{storage::add<config::ball>(data), storage::add<config::ball>(data),
+                      storage::add<config::ball>(data)};
+    link(data, balls, {{0, 1}, {1, 2}});
+
+    // new 0 = old 2, new 1 = old 0, new 2 = old 1
+    storage::permute<config::ball>(data, {2, 0, 1});
+
+    CPPUNIT_ASSERT_MESSAGE("inter 0: (0, 1) -> (1, 2)", ends(data, 0) == ends_t(1, 2));
+    CPPUNIT_ASSERT_MESSAGE("inter 1: (1, 2) -> (2, 0)", ends(data, 1) == ends_t(2, 0));
+  }
+
+  // storage::remove_many: several swaps and pops, the refs rewritten once
+  void testRemoveManyRemapsRefs() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::data_t data;
+    std::vector balls{storage::add<config::ball>(data), storage::add<config::ball>(data),
+                      storage::add<config::ball>(data), storage::add<config::ball>(data),
+                      storage::add<config::ball>(data)};
+    for (std::size_t k = 0; k < balls.size(); ++k) balls[k].q() = {double(k), 0., 0.};
+    link(data, balls, {{0, 1}, {2, 3}, {3, 4}});
+
+    storage::remove_many<config::ball>(data, {1, 3, 1});
+
+    auto& qs = storage::attr_values<config::ball, "q">(data, 0);
+    CPPUNIT_ASSERT_MESSAGE("three balls left", std::size(qs) == 3);
+    // where the old balls 0, 2, 4 are now
+    std::size_t where[5] = {dead, dead, dead, dead, dead};
+    for (std::size_t k = 0; k < std::size(qs); ++k) where[std::size_t(qs[k](0))] = k;
+    CPPUNIT_ASSERT_MESSAGE("balls 0, 2, 4 kept",
+                           where[0] != dead && where[2] != dead && where[4] != dead);
+    CPPUNIT_ASSERT_MESSAGE("inter (0, 1)", ends(data, 0) == ends_t(where[0], dead));
+    CPPUNIT_ASSERT_MESSAGE("inter (2, 3)", ends(data, 1) == ends_t(where[2], dead));
+    CPPUNIT_ASSERT_MESSAGE("inter (3, 4)", ends(data, 2) == ends_t(dead, where[4]));
+  }
+
+  // the walker on the shapes a column may take: only the refs of the moved
+  // kind change, whatever the container
+  void testRemapWalker() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+    using ball_ref = storage::index<config::ball, std::size_t>;
+    using inter_ref = storage::index<config::interaction, std::size_t>;
+
+    static_assert(storage::refers_to_v<std::vector<std::variant<ball_ref, inter_ref>>,
+                                       config::interaction>);
+    static_assert(!storage::holds_refs_v<std::vector<double>>);
+
+    const auto kind = storage::kind_id<config::ball>::get();
+    const auto r = storage::ref_remap::swap_and_pop(0, 2);  // 0 dies, 2 -> 0
+
+    std::vector<std::variant<ball_ref, inter_ref>> poly{ball_ref(2), inter_ref(2),
+                                                        ball_ref(0)};
+    storage::refs_detail::remap<storage::kind_id>(poly, kind, r);
+    CPPUNIT_ASSERT_MESSAGE("variant: ball ref 2 -> 0", std::get<0>(poly[0]).value() == 0);
+    CPPUNIT_ASSERT_MESSAGE("variant: interaction ref 2 untouched",
+                           std::get<1>(poly[1]).value() == 2);
+    CPPUNIT_ASSERT_MESSAGE("variant: ball ref 0 dead", !std::get<0>(poly[2]).valid());
+
+    std::map<int, ball_ref> m{{7, ball_ref(2)}, {8, ball_ref(1)}};
+    storage::refs_detail::remap<storage::kind_id>(m, kind, r);
+    CPPUNIT_ASSERT_MESSAGE("map values", m[7].value() == 0 && m[8].value() == 1);
+
+    std::tuple<ball_ref, std::vector<ball_ref>> t{ball_ref(2), {ball_ref(0), ball_ref(2)}};
+    storage::refs_detail::remap<storage::kind_id>(t, kind, r);
+    CPPUNIT_ASSERT_MESSAGE("tuple and vector", std::get<0>(t).value() == 0 &&
+                                                   !std::get<1>(t)[0].valid() &&
+                                                   std::get<1>(t)[1].value() == 0);
+
+    storage::sparse_set<std::size_t, ball_ref> set;
+    set.emplace(5, ball_ref(2));
+    storage::refs_detail::remap<storage::kind_id>(set, kind, r);
+    CPPUNIT_ASSERT_MESSAGE("sparse set values", set.at(5).value() == 0);
   }
 };
 

@@ -1,11 +1,20 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "siconos/storage/get.hpp"
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
+#include "siconos/storage/refs.hpp"
+#include "siconos/storage/remap_refs.hpp"
 
 namespace siconos::storage {
 
@@ -53,6 +62,21 @@ static auto remove = [](auto& data, auto&& h) {
                               return requires { typename T::dynamic_storage_t; };
                             }>));
 
+    // the number of items before the removal, for the refs to them
+    std::size_t count = ref_remap::invalid;
+    if constexpr (mp::size(attrs) > mp::size_c<0>) {
+      using first_t = std::decay_t<decltype(attrs[0_c])>;
+      const auto& first_storage = memory(0, mp::get<first_t>(data.store()));
+      if constexpr (match::push_back<std::decay_t<decltype(first_storage)>>) {
+        count = std::size(first_storage);
+      }
+    }
+
+    if (count != ref_remap::invalid && h.index().value() >= count) [[unlikely]] {
+      throw std::out_of_range("storage::remove: index " + std::to_string(h.index().value()) +
+                              " past the end (" + std::to_string(count) + " items)");
+    }
+
     // call handle delete function if present
     auto h1 = h;  // clang 19
     if constexpr (has_del(h1)) {
@@ -90,7 +114,43 @@ static auto remove = [](auto& data, auto&& h) {
             });
       });
     }
+
+    // the refs to the removed item become invalid, those to the last one
+    // follow it (the registry does it in remove_item)
+    if (count != ref_remap::invalid && count > 0) {
+      remap_refs<item_t>(data, ref_remap::swap_and_pop(h.index().value(), count - 1));
+    }
   }
 };
+
+/**
+ * Remove the items of Item of the given indices: as many swaps and pops,
+ * with the refs to them rewritten once (registry world) instead of once per
+ * removal. The indices are those before the call; duplicates are ignored.
+ */
+template <typename Item>
+void remove_many(auto& data, std::vector<std::size_t> indices) {
+  static_assert(
+      !match::not_removable<Item>,
+      "storage::remove_many: this item lives as long as the store (removable = false)");
+  std::sort(indices.begin(), indices.end(), std::greater<>{});
+  indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
+  using indice = typename get_info_t<std::decay_t<decltype(data)>>::template env<Item>::indice;
+  if constexpr (requires { data.store()._registry; }) {
+    using handle_t = decltype(make_handle(data, index<Item, indice>{}));
+    if constexpr (decltype(has_del(std::declval<handle_t&>()))::value) {
+      for (auto i : indices) {
+        auto h = make_handle(data, index<Item, indice>(static_cast<indice>(i)));
+        h.__del__();
+      }
+    }
+    data.store()._registry.template remove_items<Item>(std::move(indices));
+  } else {
+    // from the largest index down: the last item is never one to remove
+    for (auto i : indices) {
+      remove(data, make_handle(data, index<Item, indice>(static_cast<indice>(i))));
+    }
+  }
+}
 
 }  // namespace siconos::storage

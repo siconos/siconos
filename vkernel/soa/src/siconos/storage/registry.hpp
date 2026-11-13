@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -17,6 +18,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/properties.hpp"
+#include "siconos/storage/refs.hpp"
 #include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
@@ -54,6 +56,13 @@ struct column_base {
 
   /// number of items stored, or no_index for columns that do not number them
   virtual std::size_t item_count() const = 0;
+
+  /// the kinds of the items its values refer to (see storage/refs.hpp)
+  virtual std::vector<std::size_t> referenced_kinds() const = 0;
+
+  /// the rows of the items of kind moved as r says: rewrite the refs to them,
+  /// in every kept step
+  virtual void remap_refs(std::size_t kind, const ref_remap& r) = 0;
 };
 
 namespace registry_detail {
@@ -102,6 +111,14 @@ struct column final : column_base {
       }
       return index;
     }
+  }
+
+  std::vector<std::size_t> referenced_kinds() const override {
+    return refs_detail::kinds_of<kind_id>(ref_targets_t<Memory>{});
+  }
+
+  void remap_refs(std::size_t kind, const ref_remap& r) override {
+    refs_detail::remap<kind_id>(value, kind, r);
   }
 
   std::size_t item_count() const override {
@@ -179,22 +196,7 @@ namespace registry_detail {
 [[noreturn, gnu::noinline, gnu::cold]] inline void column_not_registered() {
   throw std::logic_error("storage::registry: column accessed before registration");
 }
-
-inline std::size_t next_slot() {
-  // atomic: two threads may meet two new keys for the first time at once
-  static std::atomic<std::size_t> n = 0;
-  return n.fetch_add(1, std::memory_order_relaxed);
-}
 }  // namespace registry_detail
-
-/// Dense process-wide id of a column key, assigned on first use (entt's
-/// type_index pattern). Shared by every translation unit, so a registry filled
-/// in one TU is readable from another.
-template <typename Key>
-std::size_t slot_id() {
-  static const std::size_t id = registry_detail::next_slot();
-  return id;
-}
 
 namespace registry_detail {
 /// slot_id<Key>() + 1, read on the hot path without the guard of slot_id's
@@ -222,8 +224,13 @@ struct registry {
   std::vector<std::vector<std::size_t>> kinds;
   std::vector<bool> kind_registered;
 
+  /// for each item kind, the slots of the columns whose values may refer to
+  /// items of that kind (filled by create_column): remove and permute rewrite
+  /// these refs, a kind referred to by nothing costs one lookup
+  std::vector<std::vector<std::size_t>> referrers;
+
   template <typename Item>
-  struct kind {};
+  using kind = item_kind<Item>;
 
   registry() = default;
   registry(registry&&) = default;
@@ -231,7 +238,10 @@ struct registry {
 
   // deep copy, as the storage::make_compile_time_database it replaces is copyable
   registry(const registry& other)
-      : slots(other.slots.size()), kinds(other.kinds), kind_registered(other.kind_registered) {
+      : slots(other.slots.size()),
+        kinds(other.kinds),
+        kind_registered(other.kind_registered),
+        referrers(other.referrers) {
     for (std::size_t i = 0; i < slots.size(); ++i) {
       if (other.slots[i]) slots[i] = other.slots[i]->clone();
     }
@@ -275,7 +285,13 @@ struct registry {
     const std::size_t id = slot_id<Key>();
     if (id >= slots.size()) slots.resize(id + 1);
     auto& slot = slots[id];
-    if (!slot) slot = std::make_unique<storage::column<Memory>>(depth);
+    if (!slot) {
+      slot = std::make_unique<storage::column<Memory>>(depth);
+      for (std::size_t k : slot->referenced_kinds()) {
+        if (k >= referrers.size()) referrers.resize(k + 1);
+        referrers[k].push_back(id);
+      }
+    }
     auto& columns = kind_columns<Item>();
     if (std::find(columns.begin(), columns.end(), id) == columns.end()) columns.push_back(id);
     return static_cast<storage::column<Memory>&>(*slot).value;
@@ -325,6 +341,44 @@ struct registry {
                               " past the end (" + std::to_string(count) + " items)");
     }
     for (std::size_t id : registered_kind<Item>()) slots[id]->move_back(i, count - 1);
+    remap_refs<Item>(ref_remap::swap_and_pop(i, count - 1));
+  }
+
+  /// storage::remove_many: the items of the given indices go away, as many
+  /// swaps and pops, the refs to them are rewritten in one pass
+  template <typename Item>
+  void remove_items(std::vector<std::size_t> indices) {
+    const std::size_t count = item_count<Item>();
+    if (count == column_base::no_index || count == 0 || indices.empty()) return;
+    std::sort(indices.begin(), indices.end(), std::greater<>{});
+    indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
+    if (indices.front() >= count) [[unlikely]] {
+      throw std::out_of_range("storage::remove_many: index " +
+                              std::to_string(indices.front()) + " past the end (" +
+                              std::to_string(count) + " items)");
+    }
+    // from the largest index down, the last item is never one to remove
+    std::vector<std::size_t> current_to_old(count);
+    for (std::size_t k = 0; k < count; ++k) current_to_old[k] = k;
+    std::vector<std::size_t> old_to_new(count, ref_remap::invalid);
+    std::size_t size = count;
+    const auto& columns = registered_kind<Item>();
+    for (std::size_t i : indices) {
+      for (std::size_t id : columns) slots[id]->move_back(i, size - 1);
+      current_to_old[i] = current_to_old[size - 1];
+      --size;
+    }
+    for (std::size_t k = 0; k < size; ++k) old_to_new[current_to_old[k]] = k;
+    remap_refs<Item>(ref_remap::table(old_to_new));
+  }
+
+  /// the refs to the items of Item, in every column that may hold one
+  template <typename Item>
+  void remap_refs(const ref_remap& r) {
+    const std::size_t k = slot_id<kind<Item>>();
+    if (k < referrers.size()) {
+      for (std::size_t id : referrers[k]) slots[id]->remap_refs(k, r);
+    }
   }
 
   /// storage::permute: item k of Item becomes the item perm[k]. perm must be
@@ -344,6 +398,7 @@ struct registry {
     }
 #endif
     for (std::size_t id : registered_kind<Item>()) slots[id]->permute(perm, inverse);
+    remap_refs<Item>(ref_remap::table(inverse));
   }
 
  private:
