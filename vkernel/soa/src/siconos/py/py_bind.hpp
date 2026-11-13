@@ -131,15 +131,17 @@ void bind_item(py::module_& disks) {
             return dc
                 .def(
                     std::format("{}", astor_name.str.value).c_str(),
-                    [](handle_t& h)->getter_t<astor_name.str, S, handle_t> {
+                    +[](handle_t& h)->getter_t<astor_name.str, S, handle_t> {
                       return getter_value<astor_name.str, S>(h);
                     },
                     py::return_value_policy::reference)
-                .def(std::format("set_{}", astor_name.str.value).c_str(), [](handle_t& h,
-                                                                             target_type val) {
-                  in_formatter(h, storage::prop<astor_name.str, disks_world_properties>(h)) =
-                      in_formatter(h, val);
-                });
+                .def(
+                    std::format("set_{}", astor_name.str.value).c_str(),
+                    +[](handle_t& h, target_type val) {
+                      in_formatter(h,
+                                   storage::prop<astor_name.str, disks_world_properties>(h)) =
+                          in_formatter(h, val);
+                    });
           } else {
             return dc;
           }
@@ -164,7 +166,7 @@ void bind_item(py::module_& disks) {
             return hw
                 .def(
                     std::format("multiple_{}", astor_name.str.value).c_str(),
-                    [](handles_wrap<std::vector<handle_t>>& h_multiple) {
+                    +[](handles_wrap<std::vector<handle_t>>& h_multiple) {
                       return std::ranges::to<std::vector>(
                           h_multiple.handles | view::transform([](auto&& h) {
                             return getter_t<astor_name.str, S, handle_t>(
@@ -172,26 +174,28 @@ void bind_item(py::module_& disks) {
                           }));
                     },
                     py::return_value_policy::reference)
-                .def(std::format("set_{}", astor_name.str.value).c_str(),
-                     [](handles_wrap<std::vector<handle_t>>& h_multiple, target_type val) {
-                       std::ranges::for_each(h_multiple.handles, [&val](auto&& h) {
-                         in_formatter(
-                             h, storage::prop<astor_name.str, disks_world_properties>(h)) =
-                             in_formatter(h, val);
-                       });
-                     })
-                .def(std::format("multiple_set_{}", astor_name.str.value).c_str(),
-                     [](handles_wrap<std::vector<handle_t>>& h_multiple,
+                .def(
+                    std::format("set_{}", astor_name.str.value).c_str(),
+                    +[](handles_wrap<std::vector<handle_t>>& h_multiple, target_type val) {
+                      std::ranges::for_each(h_multiple.handles, [&val](auto&& h) {
+                        in_formatter(
+                            h, storage::prop<astor_name.str, disks_world_properties>(h)) =
+                            in_formatter(h, val);
+                      });
+                    })
+                .def(
+                    std::format("multiple_set_{}", astor_name.str.value).c_str(),
+                    +[](handles_wrap<std::vector<handle_t>>& h_multiple,
                         std::vector<target_type> vals) {
-                       std::ranges::for_each(
-                           view::zip(vals, h_multiple.handles), [](auto&& pair) {
-                             auto& val = std::get<0>(pair);
-                             auto& h = std::get<1>(pair);
-                             in_formatter(
-                                 h, storage::prop<astor_name.str, disks_world_properties>(h)) =
-                                 in_formatter(h, val);
-                           });
-                     });
+                      std::ranges::for_each(
+                          view::zip(vals, h_multiple.handles), [](auto&& pair) {
+                            auto& val = std::get<0>(pair);
+                            auto& h = std::get<1>(pair);
+                            in_formatter(
+                                h, storage::prop<astor_name.str, disks_world_properties>(h)) =
+                                in_formatter(h, val);
+                          });
+                    });
           }
         });
   }
@@ -206,25 +210,27 @@ void bind_item(py::module_& disks) {
           return dc
               .def(
                   std::format("{}", pattern::attribute_name(a)).c_str(),
-                  [](handle_t& h) -> attr_value_t {
+                  +[](handle_t& h) -> attr_value_t {
                     return out_formatter(h, storage::get<A>(h.data(), h));
                   },
                   py::return_value_policy::reference)
               .def(
                   std::format("{}_at_step", pattern::attribute_name(a)).c_str(),
-                  [](handle_t& h, indice_t step) -> attr_value_t {
+                  +[](handle_t& h, indice_t step) -> attr_value_t {
                     return out_formatter(h, storage::get<A>(h.data(), step, h));
                   },
                   py::return_value_policy::reference)
 
-              .def(std::format("set_{}", pattern::attribute_name(a)).c_str(),
-                   [](handle_t& h, attr_value_t v) {
-                     in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, v);
-                   })
-              .def(std::format("set_{}_at_step", pattern::attribute_name(a)).c_str(),
-                   [](handle_t& h, attr_value_t v, indice_t step) {
-                     in_formatter(h, storage::get<A>(h.data(), step, h)) = in_formatter(h, v);
-                   });
+              .def(
+                  std::format("set_{}", pattern::attribute_name(a)).c_str(),
+                  +[](handle_t& h, attr_value_t v) {
+                    in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, v);
+                  })
+              .def(
+                  std::format("set_{}_at_step", pattern::attribute_name(a)).c_str(),
+                  +[](handle_t& h, attr_value_t v, indice_t step) {
+                    in_formatter(h, storage::get<A>(h.data(), step, h)) = in_formatter(h, v);
+                  });
         });
   }
 
@@ -236,34 +242,37 @@ void bind_item(py::module_& disks) {
           using attr_value_t = std::decay_t<decltype(out_formatter(
               handle_t{}, storage::get<A>(std::declval<idata_t&>(), 0, handle_t{})))>;
           return dc
-              .def("get",
-                   [](handles_wrap<std::vector<handle_t>>& h_multiple) {
-                     return h_multiple.handles;
-                   })
+              .def(
+                  "get",
+                  +[](handles_wrap<std::vector<handle_t>>& h_multiple) {
+                    return h_multiple.handles;
+                  })
               .def(
                   std::format("multipe_{}", pattern::attribute_name(a)).c_str(),
-                  [](handles_wrap<std::vector<handle_t>>& h_multiple) {
+                  +[](handles_wrap<std::vector<handle_t>>& h_multiple) {
                     return std::ranges::to<std::vector>(
                         h_multiple.handles | view::transform([](auto&& h) {
                           return out_formatter(h, storage::get<A>(h.data(), h));
                         }));
                   },
                   py::return_value_policy::reference)
-              .def(std::format("set_{}", pattern::attribute_name(a)).c_str(),
-                   [](handles_wrap<std::vector<handle_t>>& h_multiple, attr_value_t val) {
-                     std::ranges::for_each(h_multiple.handles, [&val](auto&& h) {
-                       in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, val);
-                     });
-                   })
-              .def(std::format("multiple_set_{}", pattern::attribute_name(a)).c_str(),
-                   [](handles_wrap<std::vector<handle_t>>& h_multiple,
+              .def(
+                  std::format("set_{}", pattern::attribute_name(a)).c_str(),
+                  +[](handles_wrap<std::vector<handle_t>>& h_multiple, attr_value_t val) {
+                    std::ranges::for_each(h_multiple.handles, [&val](auto&& h) {
+                      in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, val);
+                    });
+                  })
+              .def(
+                  std::format("multiple_set_{}", pattern::attribute_name(a)).c_str(),
+                  +[](handles_wrap<std::vector<handle_t>>& h_multiple,
                       std::vector<attr_value_t> vs) {
-                     std::ranges::for_each(view::zip(vs, h_multiple.handles), [](auto&& pair) {
-                       auto& v = std::get<0>(pair);
-                       auto& h = std::get<1>(pair);
-                       in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, v);
-                     });
-                   });
+                    std::ranges::for_each(view::zip(vs, h_multiple.handles), [](auto&& pair) {
+                      auto& v = std::get<0>(pair);
+                      auto& h = std::get<1>(pair);
+                      in_formatter(h, storage::get<A>(h.data(), h)) = in_formatter(h, v);
+                    });
+                  });
         });
   }
 
