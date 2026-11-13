@@ -186,7 +186,7 @@ def test_add_objects_polytopes(tmp_path):
 
     # the same without the mixed aggregate, in a new storage
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
-        del io._input["mixed"]
+        del io._format_adaptor["input"]["mixed"]
     config = RunnerConfig("vnative")
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
         io.run(run_options)
@@ -203,3 +203,60 @@ def test_add_objects_polytopes(tmp_path):
 
         check(range(1, 5), shape_indices, density * area[shape_indices])
         check(range(5, 9), [0] * 4, [2.0] * 4)
+
+
+def test_add_objects_inertia(tmp_path):
+    """The given inertia of the grains, shared (an attribute) or one per
+    grain (the inertias dataset of format_v1.json), rather than the one of
+    their shape."""
+    import h5py
+
+    filename = str(tmp_path / "add_objects_inertia.hdf5")
+    config = RunnerConfig("vnative")
+    inertias = np.array([0.1, 0.2, 0.3])
+
+    with MechanicsHdf5Runner(config=config, io_filename=filename) as io:
+        io.add_primitive_shape("Disk", "Disk", [SHAPE_RADIUS])
+        io.add_Newton_impact_friction_nsl("contact", mu=0.3, e=0)
+        # ids 1-3: shared inertia; ids 4-6: one per grain
+        io.add_objects(
+            "shared", [Contactor("Disk")], grid(3, 0.0), mass=1.0, inertia=0.7
+        )
+        io.add_objects(
+            "per_grain", [Contactor("Disk")], grid(3, 10.0), mass=2.0, inertia=inertias
+        )
+        with pytest.raises(ValueError):
+            io.add_objects(
+                "bad",
+                [Contactor("Disk")],
+                grid(3, 20.0),
+                mass=1.0,
+                inertia=inertias[:2],
+            )
+
+    with h5py.File(filename, "r") as f:
+        assert float(f["data/input/shared"].attrs["inertia"]) == pytest.approx(0.7)
+        assert "inertias" not in f["data/input/shared"]
+        assert list(f["data/input/per_grain/inertias"][:]) == pytest.approx(inertias)
+
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+    vnative_options = nonos.bridge.SpaceFilterOptions()
+    vnative_options.neighborhood_radius = NEIGHBORHOOD_RADIUS
+    vnative_options.min_radius = 0.5 * SHAPE_RADIUS
+
+    run_options = MechanicsHdf5Runner_run_options()
+    run_options["t0"] = 0
+    run_options["T"] = 0.01
+    run_options["h"] = 0.005
+    run_options["solver_options"] = options
+    run_options["vnative_options"] = vnative_options
+    run_options["verbose"] = False
+
+    with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
+        io.run(run_options)
+        for i in range(1, 4):
+            body = io._nsds.dynamicalSystem(i)._bdy
+            assert list(body.mass_matrix()) == pytest.approx([1.0, 1.0, 0.7])
+        for i, j in zip(range(4, 7), inertias):
+            body = io._nsds.dynamicalSystem(i)._bdy
+            assert list(body.mass_matrix()) == pytest.approx([2.0, 2.0, j])
