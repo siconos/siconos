@@ -76,5 +76,8 @@ def test_contact_work(tmp_path):
     # e = 0 and no contact separating before the step: no work of the
     # impact law
     assert np.all(work[:, 7] == 0)
-    # a dissipative impact
-    assert work[:, 2].sum() < 0
+    # the energy balance along x, where no force acts: the plastic impact
+    # of one grain at 1 m/s on three leaves the four at 1/4 m/s, the
+    # contact work is the kinetic energy change 4 * 1/2 * (1/4)^2 - 1/2
+    # (the work of the velocity after the solve, not of the free one)
+    assert work[:, 2].sum() + work[:, 3].sum() == pytest.approx(-0.375, abs=1e-6)

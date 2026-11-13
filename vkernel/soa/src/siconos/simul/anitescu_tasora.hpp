@@ -504,7 +504,7 @@ using time_step_schedule = sequence<
          at::check,
          for_systems<at::update_positions>,
          at::setup_impulses,
-         for_interactions<at::assemble_contact_impulses>>>;
+         for_interactions<at::assemble_contact_impulses, co::update_output_velocities>>>;
 
 namespace mj = moreau_jean::stages;
 
@@ -524,7 +524,8 @@ using apgd_time_step_schedule = sequence<
          at::check,
          mj::apply_velocity_correction,
          for_interactions<co::keep_multipliers>,
-         for_systems<mj::update_contact_state>>>;
+         for_systems<mj::update_contact_state>,
+         for_interactions<co::update_output_velocities>>>;
 
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;

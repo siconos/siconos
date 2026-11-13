@@ -174,7 +174,8 @@ using time_step_schedule = sequence<
          for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix>,
          de::assemble_iteration_matrix,
          mj::apply_velocity_correction,
-         for_systems<mj::update_contact_state>>>;
+         for_systems<mj::update_contact_state>,
+         for_interactions<co::update_output_velocities>>>;
 
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;

@@ -416,6 +416,10 @@ struct interaction_kind : item {
       run<contacts::compute_output>(step, contacts::at_step{step});
     }
 
+    void compute_output_velocity(auto step) {
+      run<contacts::compute_output_velocity>(step, contacts::at_step{step});
+    }
+
     // the active set: the active interactions, their rank among the active
     // interactions of this kind, the systems they involve; the number of
     // active interactions

@@ -27,7 +27,9 @@ using namespace kernels;
 // the storage of the contacts on the interactions of a kind (the properties
 // of the kind, see kinds.hpp): y and ydot at two time levels, the outputs at
 // step and the free outputs at step + 1 (the active set reads y, ydot at
-// step after the free outputs, the impact law ydot at step and step + 1)
+// step after the free outputs, the impact law ydot at step and step + 1);
+// after the velocity update ydot at step + 1 is H v(step + 1), for io
+// (contact_work, contact_points)
 template <typename Interaction>
 using interaction_storage = gather<storage::time_levels<attr_t<Interaction, "y">, 2>,
                                    storage::time_levels<attr_t<Interaction, "ydot">, 2>>;
@@ -182,6 +184,39 @@ struct compute_jacobians
   }
 };
 
+// ydot = H v of an interaction, from the velocities of its systems at step
+void compute_output_velocity_at(auto step, auto& rel, auto nds, auto ds1, auto ds2,
+                                const auto& h1, const auto& h2, auto& ydot) {
+  using rel_t = std::decay_t<decltype(rel)>;
+
+  // the first that matches wins (as mp::overload)
+  if constexpr (match::linear_relation<rel_t>) {
+    ydot = h1 * storage::attr<"velocity">(ds1, step);
+    if (nds == 2) {
+      ydot += h2 * storage::attr<"velocity">(ds2, step);
+    }
+  } else if constexpr (match::handle<rel_t, collision::mesh_relation>) {
+    using env = decltype(ds2.env());
+    using indice = typename env::indice;
+    using vector_4d = typename env::template vector<typename env::scalar, 4>;
+
+    // the nodes of the contact segment
+    indice k = 4 * rel.contact_index();
+    const auto& nodes = rel.mesh().global_indices();
+    const auto& v2 = storage::attr<"velocity">(ds2, step);
+    vector_4d local_velocity = {v2[nodes[k]], v2[nodes[k + 1]], v2[nodes[k + 2]],
+                                v2[nodes[k + 3]]};
+
+    ydot = h1 * storage::attr<"velocity">(ds1, step);
+    ydot += h2 * local_velocity;
+  } else if constexpr (match::relation1<rel_t>) {
+    ydot = h1 * storage::attr<"velocity">(ds1, step);
+  } else if constexpr (match::relation2<rel_t>) {
+    ydot = h1 * storage::attr<"velocity">(ds1, step);
+    ydot += h2 * storage::attr<"velocity">(ds2, step);
+  }
+}
+
 // y and ydot of an interaction from the state of its systems
 struct compute_output : kernel<relations<interactions>, relation, in<"nds", by_topology>,
                                referenced<"ds1", by_topology>, referenced<"ds2", by_topology>,
@@ -201,35 +236,31 @@ struct compute_output : kernel<relations<interactions>, relation, in<"nds", by_t
     // the first that matches wins (as mp::overload)
     if constexpr (match::linear_relation<rel_t>) {
       y = h1 * storage::attr<"q">(ds1, step) + rel.b();
-      ydot = h1 * storage::attr<"velocity">(ds1, step);
       if (nds == 2) {
         y += h2 * storage::attr<"q">(ds2, step);
-        ydot += h2 * storage::attr<"velocity">(ds2, step);
       }
     } else if constexpr (match::handle<rel_t, collision::mesh_relation>) {
-      using env = decltype(ds2.env());
-      using indice = typename env::indice;
-      using vector_4d = typename env::template vector<typename env::scalar, 4>;
-
       y[0] = rel.compute_h(step, ds1, ds2);
-
-      // the nodes of the contact segment
-      indice k = 4 * rel.contact_index();
-      const auto& nodes = rel.mesh().global_indices();
-      const auto& v2 = storage::attr<"velocity">(ds2, step);
-      vector_4d local_velocity = {v2[nodes[k]], v2[nodes[k + 1]], v2[nodes[k + 2]],
-                                  v2[nodes[k + 3]]};
-
-      ydot = h1 * storage::attr<"velocity">(ds1, step);
-      ydot += h2 * local_velocity;
     } else if constexpr (match::relation1<rel_t>) {
       y[0] = rel.compute_h(step, ds1);
-      ydot = h1 * storage::attr<"velocity">(ds1, step);
     } else if constexpr (match::relation2<rel_t>) {
       y[0] = rel.compute_h(step, ds1, ds2);
-      ydot = h1 * storage::attr<"velocity">(ds1, step);
-      ydot += h2 * storage::attr<"velocity">(ds2, step);
     }
+    compute_output_velocity_at(step, rel, nds, ds1, ds2, h1, h2, ydot);
+  }
+};
+
+// ydot = H v of an interaction only, with the jacobians H of the step: after
+// the velocity update, the output derivative at step + 1 that the contact
+// work and the contact points read, instead of the free one
+struct compute_output_velocity
+    : kernel<relations<interactions>, relation, in<"nds", by_topology>,
+             referenced<"ds1", by_topology>, referenced<"ds2", by_topology>, in<"h_matrix1">,
+             in<"h_matrix2">, out<"ydot">>,
+      host_only {
+  static void apply(const auto& p, auto& rel, auto nds, auto ds1, auto ds2, const auto& h1,
+                    const auto& h2, auto& ydot) {
+    compute_output_velocity_at(p.step, rel, nds, ds1, ds2, h1, h2, ydot);
   }
 };
 
@@ -428,6 +459,13 @@ struct compute_outputs : stage<"Compute the outputs y, ydot at step"> {
 
 struct compute_free_outputs : stage<"Compute the free outputs y, ydot at step + 1"> {
   static void run(auto& c) { c.kind.compute_output(c.step + 1); }
+};
+
+// the free ydot at step + 1 is no longer that of v(step + 1) once the
+// contacts are solved
+struct update_output_velocities
+    : stage<"Update ydot = H v at step + 1 after the velocity update"> {
+  static void run(auto& c) { c.kind.compute_output_velocity(c.step + 1); }
 };
 
 // jacobians for the assembly: already up to date at this step if the

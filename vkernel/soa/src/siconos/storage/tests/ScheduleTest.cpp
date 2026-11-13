@@ -180,7 +180,9 @@ class ScheduleTest : public CppUnit::TestFixture {
             "    for each kind of interactions:\n"
             "      Keep lambda of the active interactions from the solution\n"
             "    for each kind of systems:\n"
-            "      Update v, q at step + 1 of the involved systems\n"),
+            "      Update v, q at step + 1 of the involved systems\n"
+            "    for each kind of interactions:\n"
+            "      Update ydot = H v at step + 1 after the velocity update\n"),
         text);
   }
 
@@ -217,7 +219,8 @@ class ScheduleTest : public CppUnit::TestFixture {
             "      Update q at step + 1 of the involved systems\n"
             "    Set up the impulses: the offsets of the involved systems, p0 is zero\n"
             "    for each kind of interactions:\n"
-            "      Assemble p0 = H^T lambda, the contact impulses (outputs)\n"),
+            "      Assemble p0 = H^T lambda, the contact impulses (outputs)\n"
+            "      Update ydot = H v at step + 1 after the velocity update\n"),
         text);
   }
 
@@ -257,7 +260,9 @@ class ScheduleTest : public CppUnit::TestFixture {
             "    for each kind of interactions:\n"
             "      Keep lambda of the active interactions from the solution\n"
             "    for each kind of systems:\n"
-            "      Update v, q at step + 1 of the involved systems\n"),
+            "      Update v, q at step + 1 of the involved systems\n"
+            "    for each kind of interactions:\n"
+            "      Update ydot = H v at step + 1 after the velocity update\n"),
         text);
   }
 
@@ -292,7 +297,9 @@ class ScheduleTest : public CppUnit::TestFixture {
             "    Assemble A = M + h^2 theta^2 K, if FEM systems are in contact\n"
             "    Apply the velocity correction M^-1 H^T lambda\n"
             "    for each kind of systems:\n"
-            "      Update v, q at step + 1 of the involved systems\n"),
+            "      Update v, q at step + 1 of the involved systems\n"
+            "    for each kind of interactions:\n"
+            "      Update ydot = H v at step + 1 after the velocity update\n"),
         text);
   }
 };

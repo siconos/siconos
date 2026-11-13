@@ -275,7 +275,8 @@ using time_step_schedule_with = sequence<
          mj::solve,
          mj::apply_velocity_correction,
          for_interactions<co::keep_multipliers>,
-         for_systems<mj::update_contact_state>>>;
+         for_systems<mj::update_contact_state>,
+         for_interactions<co::update_output_velocities>>>;
 
 // the Moreau-Jean time step: the impact law of the interactions
 using time_step_schedule = time_step_schedule_with<"Moreau-Jean time step", mj::apply_impact_law>;

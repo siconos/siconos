@@ -181,7 +181,8 @@ using time_step_schedule = sequence<
          for_systems<co::assemble_mass_matrix, co::assemble_stiffness_matrix, gosi::assemble_free_velocities>,
          gosi::solve_global_problem,
          for_interactions<co::keep_multipliers>,
-         for_systems<gosi::update_solved_state>>>;
+         for_systems<gosi::update_solved_state>,
+         for_interactions<co::update_output_velocities>>>;
 
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;
