@@ -540,18 +540,24 @@ struct io : item {
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
+      auto& activations =
+          storage::prop_values<interaction, "activation", topology>(data, step);
 
       attr<"work_info">(*self()).clear();
 
-      for (auto [ydot, ydot_k, lambda, index_nslaw] :
-           view::zip(ydots, ydot_ks, lambdas, nslaws)) {
+      // active interactions only (index set 1), numbered as in contact_info
+      scalar k = 0;
+      for (auto [ydot, ydot_k, lambda, index_nslaw, activation] :
+           view::zip(ydots, ydot_ks, lambdas, nslaws, activations)) {
+        if (!activation) continue;
         handle nslaw = storage::make_handle(data, index_nslaw);
 
         scalar e = nslaw.e();
         scalar mu = nslaw.mu();
 
-        // answer(0) is not set in the version of MechanicsIO.cpp
-        scalar answer_0 = 0.;
+        // index of the interaction in index set 1: column 0 of contact_info
+        // gives the body ids
+        scalar answer_0 = k++;
 
         // Compute normal contact work
         scalar vn_minus = ydot_k(0);
@@ -593,7 +599,7 @@ struct io : item {
          */
 
         scalar answer_5;
-        scalar answer_6;
+        scalar answer_6 = 0.;  // work of the impact law, 0 without impact
 
         scalar norm_pt = sqrt(pt_1 * pt_1);
         scalar norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
