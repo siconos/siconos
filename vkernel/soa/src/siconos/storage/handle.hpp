@@ -426,16 +426,17 @@ auto make_ref_handle(D& data, index<T, R>&& indx) = delete;
  * @return Range of handles
  */
 template <match::item I>
-static auto handles = [](auto& data, std::size_t step = 0) constexpr -> decltype(auto) {
+static auto handles =
+    [](auto& data, [[maybe_unused]] std::size_t step = 0) constexpr -> decltype(auto) {
   using info_t = get_info_t<decltype(data)>;
   using env = typename info_t::template env<I>;
   using indice = typename env::indice;
 
-  using attributes_t = std::decay_t<decltype(attributes(I{}))>;
-  // Get the number of items from the first attribute's storage
-  // This assumes at least one attribute exists, which may not hold for some
-  // relation types
-  indice num = std::size(attr_values<nth_t<0, attributes_t>>(data, step));
+  // the number of items, from any column of I (attribute or attached
+  // storage), the same at every step; an item without any column counts none
+  const std::size_t count = data.store()._registry.template item_count<I>();
+  const indice num =
+      count == static_cast<std::size_t>(-1) ? indice{0} : static_cast<indice>(count);
   return view::iota((indice)0, num) | view::transform([&data](indice i) {
            return handle<handle_base, I, indice, std::decay_t<decltype(data)>>(
                data, index<I, indice>(i));
@@ -454,15 +455,6 @@ static constexpr auto has_del = mp::is_valid([](auto&& x) -> decltype(x.__del__(
  */
 template <typename B>
 static constexpr auto handle_derive_from = mp::is_a_model<[]<typename T>() consteval {
-  return std::derived_from<typename T::type, B>;
-}>;
-
-/**
- * @brief Concept for checking if a handle's item type does not derive from B
- * @tparam B Base type to check against
- */
-template <typename B>
-static constexpr auto not_handle_derive_from = mp::is_a_model<[]<typename T>() consteval {
   return std::derived_from<typename T::type, B>;
 }>;
 

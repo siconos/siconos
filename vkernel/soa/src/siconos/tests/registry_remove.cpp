@@ -43,6 +43,18 @@ struct data_t : decltype(storage()
                              .build_runtime_database()){};
 }  // namespace siconos::config
 
+// items without attributes: one counted through its attached storage, one
+// without any column
+namespace siconos::config {
+struct marker : storage::pattern::item {};
+struct bare : storage::pattern::item {};
+struct markers_t
+    : storage::make_runtime_database<
+          standard_environment, marker, bare,
+          storage::with_properties<storage::attached<
+              marker, storage::pattern::symbol<"weight">, storage::some::scalar>>> {};
+}  // namespace siconos::config
+
 // the simulation and its integrator live as long as the store: storage::remove
 // refuses them at compile time; a ball may go
 namespace match = siconos::storage::pattern::match;
@@ -63,6 +75,7 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testPermuteRemapsRefs);
   CPPUNIT_TEST(testRemoveManyRemapsRefs);
   CPPUNIT_TEST(testRemapWalker);
+  CPPUNIT_TEST(testHandlesWithoutAttributes);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -270,6 +283,23 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
     CPPUNIT_ASSERT_MESSAGE("inter (0, 1)", ends(data, 0) == ends_t(where[0], dead));
     CPPUNIT_ASSERT_MESSAGE("inter (2, 3)", ends(data, 1) == ends_t(where[2], dead));
     CPPUNIT_ASSERT_MESSAGE("inter (3, 4)", ends(data, 2) == ends_t(dead, where[4]));
+  }
+
+  // storage::handles counts the items from any of their columns, not only
+  // from a first attribute: an item may have none
+  void testHandlesWithoutAttributes() {
+    namespace storage = siconos::storage;
+    namespace config = siconos::config;
+
+    config::markers_t data;
+    for (int k = 0; k < 3; ++k) storage::add<config::marker>(data);
+    CPPUNIT_ASSERT_MESSAGE("three markers",
+                           std::ranges::distance(storage::handles<config::marker>(data)) == 3);
+    storage::remove(data, *storage::handles<config::marker>(data).begin());
+    CPPUNIT_ASSERT_MESSAGE("two markers after a removal",
+                           std::ranges::distance(storage::handles<config::marker>(data)) == 2);
+    CPPUNIT_ASSERT_MESSAGE("an item without any column has no handle",
+                           std::ranges::distance(storage::handles<config::bare>(data)) == 0);
   }
 
   // the walker on the shapes a column may take: only the refs of the moved
