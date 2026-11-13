@@ -629,9 +629,4 @@ struct make_runtime_database : world<world_config<Env, configuration_properties_
   make_runtime_database() { this->template register_columns<world_info_t>(); }
 };
 
-/// previous name of make_runtime_database, kept so existing call sites
-/// compile
-template <template <typename> typename Env, match::item... Items>
-using make_world = make_runtime_database<Env, Items...>;
-
 }  // namespace siconos::storage

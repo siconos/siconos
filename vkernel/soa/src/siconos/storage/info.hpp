@@ -11,13 +11,7 @@ struct info {};
 
 template <typename D>
 auto get_info(D&& data) {
-  if constexpr (match::store<std::decay_t<D>>) {
-    // database case
-    return mp::get<info>(data.store());
-  } else {
-    // pre-map case
-    return mp::second(mp::at(data, mp::size_c<0>));
-  }
+  return mp::get<info>(data.store());
 }
 
 template <typename D>

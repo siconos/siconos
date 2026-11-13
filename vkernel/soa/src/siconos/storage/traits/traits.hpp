@@ -106,9 +106,6 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E, T) {
         typename E::template sparse_set<decltype(translate(E{}, (typename T::types{})[0_c])),
                                         decltype(translate(E{},
                                                            (typename T::types{})[1_c]))>{};
-  } else if constexpr (std::derived_from<T, some::undefined_dynamic_properties>) {
-    return typename E::template dynamic_properties<decltype(translate(E{},
-                                                                      typename T::type{}))>{};
   } else if constexpr (std::derived_from<T, some::undefined_graph>) {
     return typename E::template graph<decltype(translate(E{}, (typename T::types{}[0_c]))),
                                       decltype(translate(E{}, (typename T::types{}[1_c])))>{};

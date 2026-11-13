@@ -211,11 +211,6 @@ struct undefined_sparse_set : attribute<> {};
 template <typename Key, typename Value>
 struct sparse_set : undefined_sparse_set, with_types<Key, Value> {};
 
-struct undefined_dynamic_properties : attribute<> {};
-
-template <typename Key = std::string>
-struct dynamic_properties : undefined_dynamic_properties, with_type<Key> {};
-
 struct dynamic_storage : property {};
 
 }  // namespace siconos::storage::some
