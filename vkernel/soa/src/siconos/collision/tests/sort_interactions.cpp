@@ -9,8 +9,7 @@
    - with the relation sets, the set of each relation type holds exactly the
      interactions of this type, in order.
 
-   Registry backend, or the compile time database with -DSORT_STATIC_DB. The
-   output (interactions and a hash of the disks per step) is compared
+   The output (interactions and a hash of the disks per step) is compared
    without and with the sets by the oracle test. */
 
 #include <cppunit/TestAssert.h>
@@ -73,13 +72,8 @@ using properties = storage::with_properties<
     storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
     storage::assembled_diagonal<storage::pattern::attr_t<osi, "mass_matrix_assembled">>>;
 
-#ifdef SORT_STATIC_DB
-struct data_t : storage::make_compile_time_database<env, simulation, interaction_manager,
-                                                    segment_shape, disk_shape, properties> {};
-#else
 struct data_t : storage::make_runtime_database<env, simulation, interaction_manager,
                                                segment_shape, disk_shape, properties> {};
-#endif
 }  // namespace siconos::config
 
 namespace {

@@ -35,7 +35,7 @@
   struct env : standard_environment<T> {                                             \
     using params = config::map<config::iparam<"dof", 3>>;                            \
   };                                                                                 \
-  struct data_t : storage::make_compile_time_database<                               \
+  struct data_t : storage::make_runtime_database<                                    \
                       env, simulation, disk_shape,                                   \
                       storage::with_properties<                                      \
                           storage::attached<disk, storage::pattern::symbol<"shape">, \

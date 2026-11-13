@@ -30,7 +30,7 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make_compile_time_database<
+    : storage::make_runtime_database<
           env, simulation, disk_shape,
           storage::with_properties<
               storage::attached<disk, storage::pattern::symbol<"shape">,

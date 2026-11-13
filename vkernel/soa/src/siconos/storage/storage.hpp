@@ -7,8 +7,11 @@
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/make.hpp"
 #include "siconos/storage/memory.hpp"
+#include "siconos/storage/permute.hpp"
 #include "siconos/storage/properties.hpp"
+#include "siconos/storage/registry.hpp"
 #include "siconos/storage/remove.hpp"
+#include "siconos/storage/sparse_set.hpp"
 
 namespace siconos::storage {
 

@@ -34,7 +34,7 @@ struct env : standard_environment<T> {
 };
 
 struct make
-    : storage::make_compile_time_database<
+    : storage::make_runtime_database<
           config::env, fem_ds, simulation,
           storage::with_properties<
               storage::time_invariant<storage::attr_t<ball, "fext">>,

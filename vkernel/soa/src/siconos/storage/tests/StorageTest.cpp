@@ -11,6 +11,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/properties.hpp"
+#include "siconos/storage/registry.hpp"
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
@@ -55,7 +56,7 @@ struct env {
 
 struct params {};
 
-struct make : storage::make_compile_time_database<
+struct make : storage::make_runtime_database<
                   env, item_a, item_b,
                   with_properties<wrapped<item_a, some::unbounded_collection>,
                                   wrapped<item_b, some::unbounded_collection>>> {};

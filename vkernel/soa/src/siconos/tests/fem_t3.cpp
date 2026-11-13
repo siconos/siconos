@@ -45,7 +45,7 @@ struct env : standard_environment<T> {
   using params = map<iparam<"dof", 1>>;
 };
 struct make
-    : storage::make_compile_time_database<
+    : storage::make_runtime_database<
           env, fem_ds, simulation,
           storage::with_properties<
               storage::wrapped<config::interaction, storage::some::unbounded_collection>,
@@ -205,7 +205,7 @@ int main(int args, char* argv[]) {
   auto mesh = femodel->mesh();
   siconos::mechanics::fem::writeDisplacementforPython(*mesh, *femodel, q, filename);
 
-  auto ds_index = storage::prop<"index">(fe_solid);
+  auto ds_index = storage::prop<"index", config::topo>(fe_solid);
 
   // --- Time loop ---
   std::cout << "====> Start computation ... \n";

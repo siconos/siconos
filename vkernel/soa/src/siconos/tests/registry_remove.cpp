@@ -40,12 +40,7 @@ struct data_t : decltype(storage()
                              .with_time_invariant<ball, "fext">()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
-#ifdef BB_DATABASE
-                             .build_compile_time_database()
-#else
-                             .build_runtime_database()
-#endif
-                ){};
+                             .build_runtime_database()){};
 }  // namespace siconos::config
 
 // the simulation and its integrator live as long as the store: storage::remove

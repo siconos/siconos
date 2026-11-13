@@ -26,7 +26,7 @@ struct env : standard_environment<T> {
 };
 
 struct data_t
-    : storage::make_compile_time_database<
+    : storage::make_runtime_database<
           env, simulation,
           storage::with_properties<
               storage::time_invariant<storage::attr_t<ball, "fext">>,

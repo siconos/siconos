@@ -26,7 +26,7 @@ struct data_t : decltype(storage()
                              .with_time_invariant<ball, "fext">()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
-                             .build_compile_time_database()){};
+                             .build_runtime_database()){};
 }  // namespace siconos::config
 
 namespace {

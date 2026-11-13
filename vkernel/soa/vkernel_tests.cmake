@@ -38,14 +38,6 @@ if(WITH_TESTING)
     bouncing_ball.ref)
   new_test(
     NAME
-    vkernel_bouncing_ball_registry
-    SOURCES
-    bouncing_ball_registry.cpp
-    ${SIMPLE_TEST_MAIN}
-    DATA
-    bouncing_ball_registry.ref)
-  new_test(
-    NAME
     vkernel_bouncing_ball_split
     SOURCES
     bouncing_ball_split.cpp
@@ -94,9 +86,6 @@ if(WITH_TESTING)
   new_test(NAME vkernel_fremond_rigid SOURCES fremond_rigid.cpp ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
-  # the same on the compile time database
-  new_test(NAME vkernel_registry_remove_static_db SOURCES registry_remove.cpp
-           ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS BB_DATABASE)
   new_test(NAME vkernel_nslaws_multi_group SOURCES nslaws_multi_group.cpp
            ${SIMPLE_TEST_MAIN} DEPS "${COMPACTNSEARCH}")
   new_test(NAME vkernel_polydisperse_disks SOURCES polydisperse_disks.cpp
@@ -176,27 +165,17 @@ if(WITH_TESTING)
   set_property(TEST vkernel_reproducible_disks APPEND PROPERTY ENVIRONMENT
                                                            OMP_NUM_THREADS=4)
 
-  # topology::sort_interactions (storage::permute) on both storage backends: the
-  # registry, and the compile time database (_static_db). The neighbor search
+  # topology::sort_interactions (storage::permute). The neighbor search
   # order, hence the interactions, must be reproducible (the neighbor lists are
   # sorted, whatever the number of threads), and the assertions of the library
   # headers must stay enabled in a Release build.
-  new_test(NAME vkernel_sort_interactions_registry SOURCES
-           sort_interactions.cpp ${SIMPLE_TEST_MAIN})
-  new_test(
-    NAME
-    vkernel_sort_interactions_static_db
-    SOURCES
-    sort_interactions.cpp
-    ${SIMPLE_TEST_MAIN}
-    COMPILE_DEFINITIONS
-    SORT_STATIC_DB)
+  new_test(NAME vkernel_sort_interactions SOURCES sort_interactions.cpp
+           ${SIMPLE_TEST_MAIN})
 
   # the tests were written against the vkernel/soa flags, which include the
   # C++23 standard they need for std::print
   set(vkernel_ref_tests
       vkernel_bouncing_ball
-      vkernel_bouncing_ball_registry
       vkernel_bouncing_ball_split
       vkernel_unbounded_bouncing_ball
       vkernel_bouncing_balls
@@ -207,7 +186,6 @@ if(WITH_TESTING)
       vkernel_bouncing_disks
       vkernel_fixed_disks
       vkernel_registry_remove
-      vkernel_registry_remove_static_db
       vkernel_nslaws_multi_group
       vkernel_polydisperse_disks
       vkernel_cxd_batch_smoke
@@ -226,14 +204,12 @@ if(WITH_TESTING)
       vkernel_io_contact_points
       vkernel_nscd_cases
       vkernel_nscd_cases_dem
-      vkernel_sort_interactions_registry
-      vkernel_sort_interactions_static_db)
+      vkernel_sort_interactions)
   foreach(t IN LISTS vkernel_ref_tests)
     set_target_properties(${t} PROPERTIES COMPILE_FLAGS "${flags}")
   endforeach()
-  set_target_properties(
-    vkernel_sort_interactions_registry vkernel_sort_interactions_static_db
-    PROPERTIES COMPILE_FLAGS "${flags} -UNDEBUG")
+  set_target_properties(vkernel_sort_interactions PROPERTIES COMPILE_FLAGS
+                                                             "${flags} -UNDEBUG")
 
   set_target_properties(RtOsiTest PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "-Wall --std=c++23")
