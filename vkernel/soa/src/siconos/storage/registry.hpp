@@ -438,6 +438,10 @@ struct world_info {
                                    !requires { typename T::dynamic_storage_t; };
                           }>));
 
+  /// the time_levels<> of the world, filtered once for the column depths
+  using time_levels_t =
+      decltype(mp::filter(all_properties_t{}, mp::derive_from<property::time_levels>));
+
   /// the dynamic properties of the world (dynamic_storage<attached<...>>)
   using dynamic_attached_t =
       decltype(mp::filter(all_properties_t{}, mp::is_a_model<[]<typename T>() {
@@ -575,20 +579,26 @@ struct world {
   /// WorldInfo is the full world_info (item closure, all properties): only
   /// here, where the world is built, are the time_levels<> depths and the item lists
   /// needed.  The column types are those the access sites compute from Info
-  /// alone, checked against the full computation.
+  /// alone; VKERNEL_CHECK_COLUMN_TYPES checks them against the full
+  /// computation (a second column type per key: about a third of the
+  /// registration's compile time).
   template <typename WorldInfo>
   void register_columns() {
     using static_attached_t = typename WorldInfo::static_attached_t;
     using dynamic_all_t = typename WorldInfo::dynamic_attached_t;
+    using time_levels_t = typename WorldInfo::time_levels_t;
     mp::for_each(typename WorldInfo::all_items_t{}, [this]<typename Item>(Item) {
       // the static attached storages of Item
       using attached_t = decltype(mp::filter(static_attached_t{}, is_attached_storage<Item>));
       mp::for_each(concat(attributes(Item{}), attached_t{}), [this]<typename A>(A) {
         using access_t = typename column_of<Info, A>::type;
+#ifdef VKERNEL_CHECK_COLUMN_TYPES
         static_assert(std::is_same_v<access_t, typename column_of<WorldInfo, A>::type>,
                       "the column type of an access site differs from the world's");
+        static_assert(column_of<WorldInfo, A>::depth == memory_size<A, time_levels_t>());
+#endif
         (void)_registry.template create_column<Item, A, access_t>(
-            column_of<WorldInfo, A>::depth);
+            memory_size<A, time_levels_t>());
       });
       // its dynamic properties: sparse columns, kept consistent by remove
       using dynamic_t = decltype(mp::filter(dynamic_all_t{}, is_attached_dynamic<Item>));

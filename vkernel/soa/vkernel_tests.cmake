@@ -168,9 +168,10 @@ if(WITH_TESTING)
   # topology::sort_interactions (storage::permute). The neighbor search
   # order, hence the interactions, must be reproducible (the neighbor lists are
   # sorted, whatever the number of threads), and the assertions of the library
-  # headers must stay enabled in a Release build.
+  # headers must stay enabled in a Release build. It also checks the column
+  # types of the access sites against the world's (VKERNEL_CHECK_COLUMN_TYPES).
   new_test(NAME vkernel_sort_interactions SOURCES sort_interactions.cpp
-           ${SIMPLE_TEST_MAIN})
+           ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS VKERNEL_CHECK_COLUMN_TYPES)
 
   # the tests were written against the vkernel/soa flags, which include the
   # C++23 standard they need for std::print
