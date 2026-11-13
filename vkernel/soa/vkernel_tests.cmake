@@ -86,6 +86,21 @@ if(WITH_TESTING)
   new_test(NAME vkernel_fremond_rigid SOURCES fremond_rigid.cpp ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
+  # a FEM square falling on the ground (rt_rt interactions). square_200.msh and
+  # T3_square_200.ref come from siconos-tutorials (859e5563),
+  # examples/mechanics/FEM/native: the mesh and the AOS kernel's T3.cpp output
+  new_test(
+    NAME
+    vkernel_fem_t3
+    SOURCES
+    fem_t3.cpp
+    ${SIMPLE_TEST_MAIN}
+    DATA
+    square_200.msh
+    T3_square_200.ref
+    fem_t3.ref
+    DEPS
+    "kernel;mechanics")
   new_test(NAME vkernel_nslaws_multi_group SOURCES nslaws_multi_group.cpp
            ${SIMPLE_TEST_MAIN} DEPS "${COMPACTNSEARCH}")
   new_test(NAME vkernel_polydisperse_disks SOURCES polydisperse_disks.cpp
@@ -184,6 +199,7 @@ if(WITH_TESTING)
       vkernel_bouncing_disk_line
       vkernel_fremond_disk
       vkernel_fremond_rigid
+      vkernel_fem_t3
       vkernel_bouncing_disks
       vkernel_fixed_disks
       vkernel_registry_remove
