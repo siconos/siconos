@@ -108,10 +108,11 @@ endif()
 
 # install(TARGETS _nothing DESTINATION nothing)
 
-# The bindings are spread over NONOS_BIND_PARTS translation units, each one
-# binding every NONOS_BIND_PARTS-th item (see src/siconos/py/py_bind_part.hpp),
+# The bindings are spread over NONOS_BIND_PARTS translation units (at least
+# 2): the simulation alone in the first one, as it instantiates the time step,
+# the other items dealt over the others (see part_of in src/siconos/py/py_bind.hpp),
 # so that they compile in parallel and with less memory each.
-set(NONOS_BIND_PARTS 4 CACHE STRING "number of translation units for the _nonos bindings")
+set(NONOS_BIND_PARTS 6 CACHE STRING "number of translation units for the _nonos bindings")
 set(nonos_bind_sources)
 math(EXPR nonos_last_part "${NONOS_BIND_PARTS} - 1")
 foreach(part RANGE ${nonos_last_part})

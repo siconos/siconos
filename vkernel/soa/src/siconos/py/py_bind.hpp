@@ -297,15 +297,30 @@ void bind_item(py::module_& disks) {
   }
 }
 
+/// The part of the Idx-th named item, out of Parts: the simulation alone in
+/// part 0, as its methods instantiate the time step (the scheme and all its
+/// kernels, the heaviest item by far); the others round-robin over the
+/// other parts.
+template <std::size_t Idx, std::size_t Parts>
+constexpr std::size_t part_of() {
+  static_assert(Parts >= 2, "NONOS_BIND_PARTS: the simulation has a part of its own");
+  using item_t = std::decay_t<decltype(boost::hana::at_c<Idx>(named_disks_items_t{}))>;
+  if constexpr (std::is_same_v<item_t, config::simulation>) {
+    return 0;
+  } else {
+    return 1 + Idx % (Parts - 1);
+  }
+}
+
 /// Bind the Idx-th named item if it falls in part Part out of Parts.
 template <std::size_t Idx, std::size_t Part, std::size_t Parts>
 void bind_item_in_part(py::module_& disks) {
-  if constexpr (Idx % Parts == Part) {
+  if constexpr (part_of<Idx, Parts>() == Part) {
     bind_item<std::decay_t<decltype(boost::hana::at_c<Idx>(named_disks_items_t{}))>>(disks);
   }
 }
 
-/// Bind the named items of part Part: items are dealt round-robin over Parts.
+/// Bind the named items of part Part (see part_of).
 template <std::size_t Part, std::size_t Parts>
 void bind_items(py::module_& disks) {
   constexpr std::size_t n = decltype(mp::size(named_disks_items_t{}))::value;
