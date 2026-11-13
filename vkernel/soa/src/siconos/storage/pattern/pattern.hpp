@@ -245,21 +245,23 @@ static auto is_a_ref =
 static auto is_a_poly_ref =
     mp::is_a_model<[]<typename T>() consteval { return match::polymorphic_type<T>; }>;
 
-static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
-  using type_t = std::decay_t<decltype(root_item)>;
-
-  auto items_ref = [&root_item]() {
-    if constexpr (match::attributes<type_t>) {
-      return transform(mp::filter(attributes(root_item), is_a_ref),
+namespace detail {
+/// the items Item refers to directly: its item refs, then its items (or, without
+/// items, the alternatives of its polymorphic refs)
+template <match::item Item>
+constexpr auto item_children() {
+  auto items_ref = []() {
+    if constexpr (match::attributes<Item>) {
+      return transform(mp::filter(attributes(Item{}), is_a_ref),
                        []<typename T>(T) { return typename T::type{}; });
     } else {
       return gather<>{};
     }
   };
 
-  auto poly_ref = [&root_item]() {
-    if constexpr (match::attributes<type_t>) {
-      return transform(flatten(transform(mp::filter(attributes(root_item), is_a_poly_ref),
+  auto poly_ref = []() {
+    if constexpr (match::attributes<Item>) {
+      return transform(flatten(transform(mp::filter(attributes(Item{}), is_a_poly_ref),
                                          []<typename T>(T) { return typename T::type{}; })),
                        []<typename T>(T) { return typename T::type{}; });
     } else {
@@ -267,13 +269,29 @@ static auto all_items = rec([](auto&& all_items, match::item auto root_item) {
     }
   };
 
-  if constexpr (match::items<type_t>) {
-    return cons(root_item,
-                flatten(transform(concat(items_ref(), typename type_t::items{}), all_items)));
+  if constexpr (match::items<Item>) {
+    return concat(items_ref(), typename Item::items{});
   } else {
-    return cons(root_item, flatten(transform(concat(items_ref(), poly_ref()), all_items)));
+    return concat(items_ref(), poly_ref());
   }
-});
+}
+
+/// Item and the items it reaches, depth first, each one at its first
+/// occurrence.  A class template: the closure of an item is computed once,
+/// however many items reach it, and never holds a duplicate (the item graph
+/// is a DAG with much sharing: a tree walk would list every path).
+template <match::item Item>
+struct item_closure {
+  using type = decltype([]<typename... Cs>(mp::tuple<Cs...>) {
+    return mp::tuple_unique(
+        mp::concat_all(gather<Item>{}, typename item_closure<std::decay_t<Cs>>::type{}...));
+  }(item_children<Item>()));
+};
+}  // namespace detail
+
+static auto all_items = []<match::item Item>(Item) constexpr {
+  return typename detail::item_closure<Item>::type{};
+};
 
 static auto all_attributes = []<match::item Item>(Item) constexpr {
   return mp::tuple_unique(mp::concat_all(transform(all_items(Item{}), attributes)));
