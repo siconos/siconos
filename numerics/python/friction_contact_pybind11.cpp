@@ -126,13 +126,8 @@ struct FrictionContactProblemWrapper {
 
   ~FrictionContactProblemWrapper() {
     if (problem_) {
-      if (problem_->M) {
-        if (problem_->M->sparse) {
-          delete problem_->M->sparse->csc;
-          delete problem_->M->sparse;
-        }
-        delete problem_->M;
-      }
+      free_wrapped_matrix(problem_->M, mem_for_Msparse.get(), mem_for_Mdense.get());
+      problem_->M = nullptr;
       delete problem_;
     }
   }
@@ -262,13 +257,8 @@ struct RollingFrictionContactProblemWrapper {
 
   ~RollingFrictionContactProblemWrapper() {
     if (problem) {
-      if (problem->M) {
-        if (problem->M->sparse) {
-          delete problem->M->sparse->csc;
-          delete problem->M->sparse;
-        }
-        delete problem->M;
-      }
+      free_wrapped_matrix(problem->M, mem_for_Msparse.get(), mem_for_Mdense.get());
+      problem->M = nullptr;
       delete problem;
     }
   }
@@ -400,20 +390,10 @@ struct GlobalFrictionContactProblemWrapper {
         free(problem->b);
         problem->b = nullptr;
       }
-      if (problem->M) {
-        if (problem->M->sparse) {
-          delete problem->M->sparse->csc;
-          delete problem->M->sparse;
-        }
-        delete problem->M;
-      }
-      if (problem->H) {
-        if (problem->H->sparse) {
-          delete problem->H->sparse->csc;
-          delete problem->H->sparse;
-        }
-        delete problem->H;
-      }
+      free_wrapped_matrix(problem->M, mem_for_Msparse.get(), mem_for_Mdense.get());
+      problem->M = nullptr;
+      free_wrapped_matrix(problem->H, mem_for_Hsparse.get(), mem_for_Hdense.get());
+      problem->H = nullptr;
       delete problem;
     }
   }
@@ -653,20 +633,10 @@ struct GlobalRollingFrictionContactProblemWrapper {
 
   ~GlobalRollingFrictionContactProblemWrapper() {
     if (problem) {
-      if (problem->M) {
-        if (problem->M->sparse) {
-          delete problem->M->sparse->csc;
-          delete problem->M->sparse;
-        }
-        delete problem->M;
-      }
-      if (problem->H) {
-        if (problem->H->sparse) {
-          delete problem->H->sparse->csc;
-          delete problem->H->sparse;
-        }
-        delete problem->H;
-      }
+      free_wrapped_matrix(problem->M, mem_for_Msparse.get(), mem_for_Mdense.get());
+      problem->M = nullptr;
+      free_wrapped_matrix(problem->H, mem_for_Hsparse.get(), mem_for_Hdense.get());
+      problem->H = nullptr;
       delete problem;
     }
   }

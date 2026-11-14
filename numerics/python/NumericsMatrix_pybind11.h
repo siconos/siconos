@@ -235,6 +235,7 @@ struct DenseMatrixMemoryOwner {
 struct SparseMatrixMemoryOwner {
   py::object scipy_ref;
   py::array data, indices, indptr;
+  CSparseMatrix* csc_view{nullptr};  // csc header (new-allocated) over the borrowed arrays
 };
 
 /** Wrap the transfer from a numpy matrix to a XXpb matrix (e.g. M for FrictionContactProblem)
@@ -298,6 +299,7 @@ NumericsMatrix* set_matrix_sparse_new(T& self, py::object scipy_matrix,
   csc->p = static_cast<int64_t*>(mem->indptr.mutable_data());
   csc->nzmax = mem->data.shape(0);
   csc->nz = -1;
+  mem->csc_view = csc;
 
   auto* nsm = NSM_new();
   nsm->csc = csc;
@@ -306,6 +308,28 @@ NumericsMatrix* set_matrix_sparse_new(T& self, py::object scipy_matrix,
   auto* nm = NM_create_with_data(NM_SPARSE, csc->m, csc->n, nsm);
 
   return nm;
+}
+
+/** Free a NumericsMatrix built by set_matrix_dense_new or set_matrix_sparse_new.
+
+    The numerical arrays are borrowed from numpy/scipy (kept alive by the memory owners), so
+    they are detached first. Everything else is released by NM_free, including the storages and
+    data the solvers attach to the matrix (triplet, transposed csc, LU factors, internal
+    workspace, preserved copy, linear solver parameters...).
+
+    \param nm the matrix (may be NULL)
+    \param sparse_mem memory owner given to set_matrix_sparse_new (may be NULL)
+    \param dense_mem memory owner given to set_matrix_dense_new (may be NULL)
+ */
+inline void free_wrapped_matrix(NumericsMatrix* nm, const SparseMatrixMemoryOwner* sparse_mem,
+                                const DenseMatrixMemoryOwner* dense_mem) {
+  if (!nm) return;
+  if (dense_mem && nm->dense == dense_mem->data.data()) nm->dense = nullptr;
+  if (sparse_mem && nm->sparse && nm->sparse->csc == sparse_mem->csc_view) {
+    delete nm->sparse->csc;
+    nm->sparse->csc = nullptr;
+  }
+  NM_free(nm);
 }
 
 template <typename T>
