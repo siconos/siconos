@@ -266,7 +266,15 @@ bool CSparseMatrix_lu_factorization(CS_INT order, const cs* A, double tol,
   cs_lu_A->S = S;
   cs_lu_A->N = cs_lu(A, S, tol);
 
-  return (S && cs_lu_A->N);
+  if (!(S && cs_lu_A->N)) {
+    /* release the partial factors so that the caller has nothing left to free */
+    cs_sfree(cs_lu_A->S);
+    cs_lu_A->S = NULL;
+    cs_nfree(cs_lu_A->N);
+    cs_lu_A->N = NULL;
+    return false;
+  }
+  return true;
 }
 bool CSparseMatrix_chol_factorization(CS_INT order, const cs* A,
                                       CSparseMatrix_factors* cs_chol_A) {
@@ -276,7 +284,15 @@ bool CSparseMatrix_chol_factorization(CS_INT order, const cs* A,
   cs_chol_A->S = S;
   cs_chol_A->N = cs_chol(A, S);
 
-  return (S && cs_chol_A->N);
+  if (!(S && cs_chol_A->N)) {
+    /* release the partial factors so that the caller has nothing left to free */
+    cs_sfree(cs_chol_A->S);
+    cs_chol_A->S = NULL;
+    cs_nfree(cs_chol_A->N);
+    cs_chol_A->N = NULL;
+    return false;
+  }
+  return true;
 }
 bool CSparseMatrix_ldlt_factorization(CS_INT order, const cs* A,
                                       CSparseMatrix_factors* cs_ldlt_A) {
