@@ -27,7 +27,7 @@
 #include "siconos/simul/theta_method.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::dem {
+namespace siconos::vkernel::simul::dem {
 
 /* The explicit DEM scheme (Cundall & Strack 1979), here for the
    comparisons with Moreau-Jean: the contacts are penalty springs, their forces explicit (at
@@ -209,4 +209,4 @@ struct scheme {
   using interaction_storage = dem::interaction_storage<Interaction>;
 };
 
-}  // namespace siconos::simul::dem
+}  // namespace siconos::vkernel::simul::dem

@@ -44,7 +44,7 @@
  * handles, the maps of the user code, the indices kept as plain integers) do
  * not follow.
  */
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 template <typename... Ts>
 struct type_list {};
@@ -281,4 +281,4 @@ std::vector<std::size_t> kinds_of(type_list<Ts...>) {
 }
 
 }  // namespace refs_detail
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

@@ -20,7 +20,7 @@
 
 #include "collision_head.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* 2D */
 decltype(auto) distance_sq(match::vector auto& q1, match::vector auto& q2) {
@@ -33,4 +33,4 @@ decltype(auto) distance(match::vector auto& q1, match::vector auto& q2) {
   return sqrt(distance_sq(q1, q2));
 }
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

@@ -25,9 +25,9 @@
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
-namespace match = siconos::storage::pattern::match;
+namespace match = siconos::vkernel::storage::pattern::match;
 
 /**
  * @brief Applies a wrapper to a storage type based on the item type and
@@ -128,4 +128,4 @@ struct column_storage {
 
 }  // namespace build_detail
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

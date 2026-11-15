@@ -65,8 +65,8 @@
 #include "siconos/collision/polytopepolytope_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 
 struct polytope : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
@@ -102,11 +102,11 @@ struct data_t
                                 storage::some::item_ref<polytope_shape>>,
               storage::time_invariant<storage::pattern::attr_t<polytope, "fext">>,
               storage::diagonal<storage::pattern::attr_t<polytope, "mass_matrix">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
-using namespace siconos;
+using namespace siconos::vkernel;
 using namespace storage;
 
 /* assert() is compiled out under Release: an explicit throwing check keeps
@@ -258,7 +258,7 @@ auto make_poly_vertices(std::size_t n) {
 }
 
 auto make_shape(config::data_t& data, std::size_t nverts) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using namespace storage;
 
   auto shape = storage::add<config::polytope_shape>(data);
@@ -274,7 +274,7 @@ auto make_shape(config::data_t& data, std::size_t nverts) {
    test pins, run here on its own world so that the benchmark fails loudly
    instead of printing meaningless timings. */
 void self_check() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using namespace storage;
 
   config::data_t data;
@@ -348,7 +348,7 @@ struct measurement {
 
 measurement run_scale(std::size_t n, std::size_t n_steps, double spacing_factor,
                       double jitter_factor, std::size_t n_verts) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using namespace storage;
 
   config::data_t data;
@@ -474,7 +474,7 @@ measurement run_scale(std::size_t n, std::size_t n_steps, double spacing_factor,
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
 
   std::size_t n_bodies = 0;  // 0 -> sweep
   std::size_t n_steps = 20;

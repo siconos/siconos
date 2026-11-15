@@ -28,7 +28,7 @@
 #include "siconos/collision/shape/polytope.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* The collision shape of a dynamical system, declared in one of two ways:
 
@@ -209,4 +209,4 @@ auto disk_radius(DS& ds) {
   }
 }
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

@@ -18,7 +18,7 @@
 
 #include "siconos/algebra/numerics.hpp"
 
-namespace siconos::algebra {
+namespace siconos::vkernel::algebra {
 static_assert(vec<vector<int, 2>>::vncols == 1);
 }
 int main() {};

@@ -38,8 +38,8 @@
 #include "siconos/collision/polytopepolytope_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct polytope_ds : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
 using polytope_shape = collision::shape::polytope;
@@ -68,12 +68,12 @@ struct data_t : storage::make_runtime_database<
                         storage::wrapped<interaction, some::unbounded_collection>,
                         storage::attached<polytope_ds, storage::pattern::symbol<"shape">,
                                           storage::some::item_ref<polytope_shape>>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 #include <stdexcept>
 
 /* ---- Task 3: narrowphase batch engine (exact pin values) ---- */
-int test_polytope_item(siconos::config::data_t& data);
+int test_polytope_item(siconos::vkernel::config::data_t& data);
 
 namespace {
 
@@ -99,10 +99,10 @@ auto near = [](std::array<double, 2> a, std::array<double, 2> e, double tol = 1e
 };
 auto nears = [](double a, double e, double tol = 1e-9) { return std::abs(a - e) <= tol; };
 
-siconos::collision::narrowphase_input<double> make_input(
+siconos::vkernel::collision::narrowphase_input<double> make_input(
     std::vector<std::vector<std::array<double, 2>>> shapes,
     std::vector<std::array<std::uint32_t, 2>> pairs_in) {
-  siconos::collision::narrowphase_input<double> in;
+  siconos::vkernel::collision::narrowphase_input<double> in;
   for (auto& s : shapes) {
     in.entries.push_back({static_cast<std::uint32_t>(in.vertices.size()),
                           static_cast<std::uint32_t>(s.size())});
@@ -117,18 +117,18 @@ siconos::collision::narrowphase_input<double> make_input(
 }
 }  // namespace
 
-int test_polytope_item(siconos::config::data_t& data) {
-  using siconos::storage::add;
+int test_polytope_item(siconos::vkernel::config::data_t& data) {
+  using siconos::vkernel::storage::add;
   // side-2 axis-aligned square, CCW; CppUnit assertions are not compiled out
   // in a Release build
-  auto sh = add<siconos::config::polytope_shape>(data);
+  auto sh = add<siconos::vkernel::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   for (int i = 0; i < 4; ++i) sh.vertices()[i] = {sq[i][0], sq[i][1]};
   sh.nvertices() = 4;
   CPPUNIT_ASSERT_MESSAGE("rmax == sqrt(2)", std::abs(sh.rmax() - std::sqrt(2.0)) < 1e-12);
 
   // non-convex polygon rejected by check_convex
-  auto sh2 = add<siconos::config::polytope_shape>(data);
+  auto sh2 = add<siconos::vkernel::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 5> arrow = {{{0, 0}, {2, 0}, {1, 1}, {2, 2}, {0, 2}}};
   for (int i = 0; i < 5; ++i) sh2.vertices()[i] = {arrow[i][0], arrow[i][1]};
   sh2.nvertices() = 5;
@@ -144,7 +144,7 @@ int test_polytope_item(siconos::config::data_t& data) {
 
   // the vertex column is a fixed 16-slot array; check_convex must reject a
   // larger count instead of indexing past the column
-  auto sh3 = add<siconos::config::polytope_shape>(data);
+  auto sh3 = add<siconos::vkernel::config::polytope_shape>(data);
   sh3.nvertices() = 17;
   {
     bool threw = false;
@@ -161,8 +161,8 @@ int test_polytope_item(siconos::config::data_t& data) {
 }
 
 /* shape::polytope::set_vertices: validation and counter-clockwise storage */
-void test_set_vertices(siconos::config::data_t& data) {
-  auto sh = siconos::storage::add<siconos::config::polytope_shape>(data);
+void test_set_vertices(siconos::vkernel::config::data_t& data) {
+  auto sh = siconos::vkernel::storage::add<siconos::vkernel::config::polytope_shape>(data);
   auto throws = [&](Eigen::MatrixXd m) {
     try {
       sh.set_vertices(m);
@@ -206,7 +206,7 @@ void test_batch_engine() {
   // {0,0} square x {3,0} square: separated
   {
     auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("one pair out", out.size() == 1);
     CPPUNIT_ASSERT_MESSAGE("s(0,0)-s(3,0) separated", out[0].status == 0 /* separated */);
     CPPUNIT_ASSERT_MESSAGE("h == 1", nears(out[0].h, 1.0));
@@ -217,7 +217,7 @@ void test_batch_engine() {
   // {0,0} square x {3,3} square: separated on the diagonal
   {
     auto in = make_input({square_at(0, 0), square_at(3, 3)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("h == sqrt(2)", nears(out[0].h, std::sqrt(2.0)));
     CPPUNIT_ASSERT_MESSAGE("cp1 == (1,1)", near(out[0].cp1, {1, 1}));
     CPPUNIT_ASSERT_MESSAGE("cp2 == (2,2)", near(out[0].cp2, {2, 2}));
@@ -227,7 +227,7 @@ void test_batch_engine() {
   // diamond x square(3,0): separated, vertex-edge closest pair
   {
     auto in = make_input({diamond_at_origin(), square_at(3, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("diamond-square separated", out[0].status == 0);
     CPPUNIT_ASSERT_MESSAGE("h == 2-sqrt(2)", nears(out[0].h, 2 - 1.4142135623730951, 1e-9));
     CPPUNIT_ASSERT_MESSAGE("cp1 == diamond east", near(out[0].cp1, {1.4142135623730951, 0}));
@@ -237,7 +237,7 @@ void test_batch_engine() {
   // {0,0} square x {1.9,0} square: enclosed, overlap depth 0.1
   {
     auto in = make_input({square_at(0, 0), square_at(1.9, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("h == -0.1", std::abs(out[0].h + 0.1) <= 1e-6);
     CPPUNIT_ASSERT_MESSAGE("cp1 == (1,0)", near(out[0].cp1, {1, 0}, 1e-6));
     CPPUNIT_ASSERT_MESSAGE("cp2 == (0.9,0)", near(out[0].cp2, {0.9, 0}, 1e-6));
@@ -248,7 +248,7 @@ void test_batch_engine() {
   // square, 2) -- EPA answers it, so the h is -2
   {
     auto in = make_input({square_at(0, 0), square_at(0, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("identical squares enclosed", out[0].status == 1);
     CPPUNIT_ASSERT_MESSAGE("h == -2", std::abs(out[0].h + 2.0) <= 1e-6);
     for (double x : {out[0].h, out[0].normal[0], out[0].normal[1], out[0].cp1[0],
@@ -259,7 +259,7 @@ void test_batch_engine() {
   {
     auto in =
         make_input({square_at(0, 0), square_at(3, 0), square_at(1.9, 0)}, {{0, 1}, {0, 2}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("two pairs out", out.size() == 2);
     CPPUNIT_ASSERT_MESSAGE("statuses preserved", out[0].status == 0 && out[1].status == 1);
     CPPUNIT_ASSERT_MESSAGE("second pair h == -0.1", nears(out[1].h, -0.1, 1e-6));
@@ -281,7 +281,7 @@ void test_witnesses_off_axis() {
   // facing the square's west face x = 2
   {
     auto in = make_input({diamond_at(0, 0.5), square_at(3, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("vertex-face separated", out[0].status == 0);
     CPPUNIT_ASSERT_MESSAGE("vertex-face h == 2-sqrt(2)", nears(out[0].h, 2 - r));
     CPPUNIT_ASSERT_MESSAGE("vertex-face cp1 == diamond east vertex",
@@ -293,7 +293,7 @@ void test_witnesses_off_axis() {
   // vertex (2, 0.5)
   {
     auto in = make_input({square_at(0, 0), diamond_at(2 + r, 0.5)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("face-vertex separated", out[0].status == 0);
     CPPUNIT_ASSERT_MESSAGE("face-vertex h == 1", nears(out[0].h, 1));
     CPPUNIT_ASSERT_MESSAGE("face-vertex cp1 == foot of the vertex",
@@ -304,7 +304,7 @@ void test_witnesses_off_axis() {
   // vertex of A into the face of B, enclosed by 0.1
   {
     auto in = make_input({diamond_at(2.1 - r, 0.5), square_at(3, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("vertex-face enclosed", out[0].status == 1);
     CPPUNIT_ASSERT_MESSAGE("vertex-face h == -0.1", nears(out[0].h, -0.1, 1e-6));
     CPPUNIT_ASSERT_MESSAGE("enclosed cp1 == diamond east vertex",
@@ -317,7 +317,7 @@ void test_witnesses_off_axis() {
 /* the contact manifold: reference / incident face clipping, one gap per
    point, at most two points */
 void test_manifold() {
-  using siconos::collision::narrowphase_batch;
+  using siconos::vkernel::collision::narrowphase_batch;
   // parallel faces, separated by 0.5, partial overlap x in [-0.5, 1]
   {
     auto in = make_input({square_at(0, 0), square_at(0.5, 2.5)}, {{0, 1}});
@@ -390,7 +390,7 @@ void test_manifold() {
 }
 
 void test_batch_engine_float() {
-  using siconos::collision::narrowphase_input;
+  using siconos::vkernel::collision::narrowphase_input;
   narrowphase_input<float> in;
   auto add_square = [&](float cx, float cy) {
     in.entries.push_back({static_cast<std::uint32_t>(in.vertices.size()), 4u});
@@ -404,7 +404,7 @@ void test_batch_engine_float() {
   in.ids_b.push_back(1);
   in.init_dirs.push_back({1, 0});
 
-  auto out = siconos::collision::narrowphase_batch(std::move(in));
+  auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
   CPPUNIT_ASSERT_MESSAGE("float: one pair out", out.size() == 1);
   CPPUNIT_ASSERT_MESSAGE("float: separated", out[0].status == 0 /* separated */);
   CPPUNIT_ASSERT_MESSAGE("float: h == 1", std::abs(out[0].h - 1.0f) <= 1e-4f);
@@ -423,7 +423,7 @@ void test_failed_subdistance_status() {
   // the sub-distance GJK given no budget: the separating axis answers
   {
     auto in = make_input({square_at(0, 0), square_at(3, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in), 0);
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in), 0);
     CPPUNIT_ASSERT_MESSAGE("failed sub-distance: separated by the separating axis",
                            out[0].status == 0);
     CPPUNIT_ASSERT_MESSAGE("failed sub-distance: h == 1", nears(out[0].h, 1.0));
@@ -435,7 +435,7 @@ void test_failed_subdistance_status() {
   // exactly touching squares: a usable normal and h == 0
   {
     auto in = make_input({square_at(0, 0), square_at(2, 0)}, {{0, 1}});
-    auto out = siconos::collision::narrowphase_batch(std::move(in));
+    auto out = siconos::vkernel::collision::narrowphase_batch(std::move(in));
     CPPUNIT_ASSERT_MESSAGE("touching squares answered",
                            out[0].status == 0 || out[0].status == 1);
     CPPUNIT_ASSERT_MESSAGE("touching squares: h == 0", nears(out[0].h, 0.0, 1e-9));
@@ -448,17 +448,17 @@ void test_failed_subdistance_status() {
 /* ---- Task 4: polytopepolytope_r relation, exact G pins ----
    Standalone world: no narrowphase stage item exists, the relation's cached
    h/normal/cps are set manually and ensure() must no-op (ledger ruling). */
-void test_polytopepolytope_relation(siconos::config::data_t& data) {
-  using siconos::storage::add;
+void test_polytopepolytope_relation(siconos::vkernel::config::data_t& data) {
+  using siconos::vkernel::storage::add;
 
   // body 1 center (0,0), body 2 center (0,1.9): flush vertical overlap of
   // 0.1 -> n = (0,1), cp1 = (0,1), cp2 = (0,0.9)
-  auto ds1 = add<siconos::config::polytope_ds>(data);
-  auto ds2 = add<siconos::config::polytope_ds>(data);
+  auto ds1 = add<siconos::vkernel::config::polytope_ds>(data);
+  auto ds2 = add<siconos::vkernel::config::polytope_ds>(data);
   ds1.q() = {0, 0, 0};
   ds2.q() = {0, 1.9, 0};
 
-  auto rel = add<siconos::config::polytopepolytope_r>(data);
+  auto rel = add<siconos::vkernel::config::polytopepolytope_r>(data);
   // manual cache (the narrowphase ref stays unbound)
   rel.status() = 1;
   rel.h() = -0.1;
@@ -494,8 +494,8 @@ void test_polytopepolytope_relation(siconos::config::data_t& data) {
    the relation's compute_jachq fed with the batch normal and contact points.
    Separated generic configuration (one vertex against one face), so the
    contact features do not switch under the perturbation. */
-void test_jacobian_finite_differences(siconos::config::data_t& data) {
-  using siconos::storage::add;
+void test_jacobian_finite_differences(siconos::vkernel::config::data_t& data) {
+  using siconos::vkernel::storage::add;
   const std::array<std::array<double, 2>, 4> local = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   auto world = [&](const std::array<double, 3>& q) {
     std::vector<std::array<double, 2>> w;
@@ -506,18 +506,18 @@ void test_jacobian_finite_differences(siconos::config::data_t& data) {
   };
   auto batch = [&](const std::array<double, 3>& q1, const std::array<double, 3>& q2) {
     auto in = make_input({world(q1), world(q2)}, {{0, 1}});
-    return siconos::collision::narrowphase_batch(std::move(in))[0];
+    return siconos::vkernel::collision::narrowphase_batch(std::move(in))[0];
   };
 
   const std::array<double, 3> q1 = {0., 0., 0.3}, q2 = {2.9, 0.7, -0.2};
   const auto c0 = batch(q1, q2);
   CPPUNIT_ASSERT_MESSAGE("FD configuration is separated", c0.status == 0);
 
-  auto ds1 = add<siconos::config::polytope_ds>(data);
-  auto ds2 = add<siconos::config::polytope_ds>(data);
+  auto ds1 = add<siconos::vkernel::config::polytope_ds>(data);
+  auto ds2 = add<siconos::vkernel::config::polytope_ds>(data);
   ds1.q() = {q1[0], q1[1], q1[2]};
   ds2.q() = {q2[0], q2[1], q2[2]};
-  auto rel = add<siconos::config::polytopepolytope_r>(data);
+  auto rel = add<siconos::vkernel::config::polytopepolytope_r>(data);
   rel.status() = c0.status;
   rel.h() = c0.h;
   rel.normal() = {c0.normal[0], c0.normal[1]};
@@ -543,35 +543,35 @@ void test_jacobian_finite_differences(siconos::config::data_t& data) {
 }
 
 /* ---- Task 5: cxd_narrowphase stage — rebind + batch + write-back + cache ---- */
-void test_narrowphase_stage(siconos::config::data_t& data) {
-  using siconos::storage::add;
+void test_narrowphase_stage(siconos::vkernel::config::data_t& data) {
+  using siconos::vkernel::storage::add;
 
   // body1: axis-aligned square, body2: diamond r=1 (CCW locals)
-  auto sh1 = add<siconos::config::polytope_shape>(data);
+  auto sh1 = add<siconos::vkernel::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   for (int i = 0; i < 4; ++i) sh1.vertices()[i] = {sq[i][0], sq[i][1]};
   sh1.nvertices() = 4;
-  auto sh2 = add<siconos::config::polytope_shape>(data);
+  auto sh2 = add<siconos::vkernel::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 4> dm = {{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}};
   for (int i = 0; i < 4; ++i) sh2.vertices()[i] = {dm[i][0], dm[i][1]};
   sh2.nvertices() = 4;
 
   // body1 center (0,0), body2 center (0,1.9): overlap 0.1 along y
-  auto ds1 = add<siconos::config::polytope_ds>(data);
+  auto ds1 = add<siconos::vkernel::config::polytope_ds>(data);
   ds1.q() = {0, 0, 0};
-  siconos::storage::prop<"shape">(ds1) = sh1;
-  auto ds2 = add<siconos::config::polytope_ds>(data);
+  siconos::vkernel::storage::prop<"shape">(ds1) = sh1;
+  auto ds2 = add<siconos::vkernel::config::polytope_ds>(data);
   ds2.q() = {0, 1.9, 0};
-  siconos::storage::prop<"shape">(ds2) = sh2;
+  siconos::vkernel::storage::prop<"shape">(ds2) = sh2;
 
   // generic space_filter-style binding: topo.link + generic diskdisk_r
-  auto topo_h = add<siconos::config::topo>(data);
-  auto dsds = add<siconos::config::diskdisk_r>(data);
+  auto topo_h = add<siconos::vkernel::config::topo>(data);
+  auto dsds = add<siconos::vkernel::config::diskdisk_r>(data);
   auto inter = topo_h.link(ds1, ds2);
   topo_h.bind(inter, dsds);
 
   // the narrowphase stage
-  auto np = add<siconos::config::cxd_narrowphase>(data);
+  auto np = add<siconos::vkernel::config::cxd_narrowphase>(data);
   np.topology() = topo_h;
   np.dsds_r() = dsds;
 
@@ -580,11 +580,13 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
   // the interaction's relation is now a polytopepolytope_r with the exact
   // cached pair (square x diamond, flush y-overlap 0.1)
   using poly_r_index =
-      siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
+      siconos::vkernel::storage::index<siconos::vkernel::config::polytopepolytope_r,
+                                       std::size_t>;
   auto check_rebound = [&]() {
     CPPUNIT_ASSERT_MESSAGE("relation rebound to polytopepolytope_r",
                            std::holds_alternative<poly_r_index>(inter.relation()));
-    return siconos::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
+    return siconos::vkernel::storage::make_handle(data,
+                                                  std::get<poly_r_index>(inter.relation()));
   };
   {
     auto rel = check_rebound();
@@ -632,30 +634,31 @@ void test_narrowphase_stage(siconos::config::data_t& data) {
    pair (1,3) at the SAME step tag changes no ds geometry and no ds index
    seen set, so a geometry-only checksum leaves the cache stale and the new
    relation keeps the fresh h=0. The gap must be computed. */
-void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
-  using siconos::storage::add;
+void test_narrowphase_pair_set_cache(siconos::vkernel::config::data_t& data) {
+  using siconos::vkernel::storage::add;
   using poly_r_index =
-      siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
+      siconos::vkernel::storage::index<siconos::vkernel::config::polytopepolytope_r,
+                                       std::size_t>;
 
   // one side-2 square shape shared by the three bodies
-  auto sh = add<siconos::config::polytope_shape>(data);
+  auto sh = add<siconos::vkernel::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   for (int i = 0; i < 4; ++i) sh.vertices()[i] = {sq[i][0], sq[i][1]};
   sh.nvertices() = 4;
 
   auto mk = [&](double x, double y) {
-    auto ds = add<siconos::config::polytope_ds>(data);
+    auto ds = add<siconos::vkernel::config::polytope_ds>(data);
     ds.q() = {x, y, 0};
-    siconos::storage::prop<"shape">(ds) = sh;
+    siconos::vkernel::storage::prop<"shape">(ds) = sh;
     return ds;
   };
   auto ds1 = mk(0, 0);
   auto ds2 = mk(3, 0);
   auto ds3 = mk(0, 3);
 
-  auto topo_h = add<siconos::config::topo>(data);
-  auto dsds = add<siconos::config::diskdisk_r>(data);
-  auto np = add<siconos::config::cxd_narrowphase>(data);
+  auto topo_h = add<siconos::vkernel::config::topo>(data);
+  auto dsds = add<siconos::vkernel::config::diskdisk_r>(data);
+  auto np = add<siconos::vkernel::config::cxd_narrowphase>(data);
   np.topology() = topo_h;
   np.dsds_r() = dsds;
 
@@ -674,7 +677,8 @@ void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
 
   CPPUNIT_ASSERT_MESSAGE("third pair rebound to polytopepolytope_r",
                          std::holds_alternative<poly_r_index>(i13.relation()));
-  auto rel13 = siconos::storage::make_handle(data, std::get<poly_r_index>(i13.relation()));
+  auto rel13 =
+      siconos::vkernel::storage::make_handle(data, std::get<poly_r_index>(i13.relation()));
   CPPUNIT_ASSERT_MESSAGE(
       "new pair between cached bodies gets its gap (pair set in the cache key)",
       std::abs(rel13.h() - 1.0) <= 1e-6);
@@ -686,20 +690,21 @@ void test_narrowphase_pair_set_cache(siconos::config::data_t& data) {
    If every call re-runs rebind+checksum over all interactions, a step costs
    O(n^2). The stage keeps a per-pair signature: once the pair is fresh, a
    relation read is O(1) and the stage scan counter does not move. */
-void test_narrowphase_scan_once(siconos::config::data_t& data) {
-  using siconos::storage::add;
+void test_narrowphase_scan_once(siconos::vkernel::config::data_t& data) {
+  using siconos::vkernel::storage::add;
   using poly_r_index =
-      siconos::storage::index<siconos::config::polytopepolytope_r, std::size_t>;
+      siconos::vkernel::storage::index<siconos::vkernel::config::polytopepolytope_r,
+                                       std::size_t>;
 
-  auto sh = add<siconos::config::polytope_shape>(data);
+  auto sh = add<siconos::vkernel::config::polytope_shape>(data);
   std::array<std::array<double, 2>, 4> sq = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   for (int i = 0; i < 4; ++i) sh.vertices()[i] = {sq[i][0], sq[i][1]};
   sh.nvertices() = 4;
 
   auto mk = [&](double x) {
-    auto ds = add<siconos::config::polytope_ds>(data);
+    auto ds = add<siconos::vkernel::config::polytope_ds>(data);
     ds.q() = {x, 0, 0};
-    siconos::storage::prop<"shape">(ds) = sh;
+    siconos::vkernel::storage::prop<"shape">(ds) = sh;
     return ds;
   };
   auto ds1 = mk(0);
@@ -707,9 +712,9 @@ void test_narrowphase_scan_once(siconos::config::data_t& data) {
   auto ds3 = mk(6);
   auto ds4 = mk(9);
 
-  auto topo_h = add<siconos::config::topo>(data);
-  auto dsds = add<siconos::config::diskdisk_r>(data);
-  auto np = add<siconos::config::cxd_narrowphase>(data);
+  auto topo_h = add<siconos::vkernel::config::topo>(data);
+  auto dsds = add<siconos::vkernel::config::diskdisk_r>(data);
+  auto np = add<siconos::vkernel::config::cxd_narrowphase>(data);
   np.topology() = topo_h;
   np.dsds_r() = dsds;
 
@@ -725,11 +730,12 @@ void test_narrowphase_scan_once(siconos::config::data_t& data) {
   np.ensure(0);
   const auto scans = np.cache_scan_count();
   for (auto inter : {i12, i23, i34}) {
-    auto rel = siconos::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
-    auto d1 = siconos::storage::make_handle(
-        data, siconos::storage::prop<"ds1", siconos::config::topo>(inter));
-    auto d2 = siconos::storage::make_handle(
-        data, siconos::storage::prop<"ds2", siconos::config::topo>(inter));
+    auto rel =
+        siconos::vkernel::storage::make_handle(data, std::get<poly_r_index>(inter.relation()));
+    auto d1 = siconos::vkernel::storage::make_handle(
+        data, siconos::vkernel::storage::prop<"ds1", siconos::vkernel::config::topo>(inter));
+    auto d2 = siconos::vkernel::storage::make_handle(
+        data, siconos::vkernel::storage::prop<"ds2", siconos::vkernel::config::topo>(inter));
     rel.ensure(0, d1, d2);
     CPPUNIT_ASSERT_MESSAGE("scan test: pair gap is 1", std::abs(rel.h() - 1.0) <= 1e-6);
   }
@@ -739,12 +745,14 @@ void test_narrowphase_scan_once(siconos::config::data_t& data) {
   // moving body 2 changes pairs (1,2) and (2,3). The first read pays ONE
   // scan; the run re-stamps both pairs, so the second read is O(1).
   ds2.q() = {2.5, 0, 0};
-  auto rel12 = siconos::storage::make_handle(data, std::get<poly_r_index>(i12.relation()));
+  auto rel12 =
+      siconos::vkernel::storage::make_handle(data, std::get<poly_r_index>(i12.relation()));
   rel12.ensure(0, ds1, ds2);
   CPPUNIT_ASSERT_MESSAGE("changed pair h == 0.5", std::abs(rel12.h() - 0.5) <= 1e-6);
   const auto after_move = np.cache_scan_count();
   CPPUNIT_ASSERT_MESSAGE("changed pair triggers exactly one scan", after_move == scans + 1);
-  auto rel23 = siconos::storage::make_handle(data, std::get<poly_r_index>(i23.relation()));
+  auto rel23 =
+      siconos::vkernel::storage::make_handle(data, std::get<poly_r_index>(i23.relation()));
   rel23.ensure(0, ds2, ds3);
   CPPUNIT_ASSERT_MESSAGE("stamped pair h == 1.5", std::abs(rel23.h() - 1.5) <= 1e-6);
   CPPUNIT_ASSERT_MESSAGE("stamped pair does not rescan", np.cache_scan_count() == after_move);
@@ -760,7 +768,7 @@ class PolytopeCxdTest : public CppUnit::TestFixture {
 
  public:
   void testPolytopeCxd() {
-    siconos::config::data_t data;
+    siconos::vkernel::config::data_t data;
     test_polytope_item(data);
     test_set_vertices(data);
     test_batch_engine();

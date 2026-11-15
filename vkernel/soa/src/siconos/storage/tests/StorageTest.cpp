@@ -32,10 +32,10 @@
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 
-using namespace siconos::storage;
-using namespace siconos::storage::pattern;
+using namespace siconos::vkernel::storage;
+using namespace siconos::vkernel::storage::pattern;
 
 struct item_a : item {
   using attributes = gather<attribute<"value", some::scalar>>;
@@ -78,10 +78,10 @@ struct make : storage::make_runtime_database<
                   with_properties<wrapped<item_a, some::unbounded_collection>,
                                   wrapped<item_b, some::unbounded_collection>>> {};
 
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
-namespace config = siconos::config;
-namespace store = siconos::storage;
+namespace config = siconos::vkernel::config;
+namespace store = siconos::vkernel::storage;
 namespace ct = store::mp;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(StorageTest);
@@ -92,7 +92,7 @@ void StorageTest::tearDown() {}
 
 // Tests on index and handle
 void StorageTest::testStorage0() {
-  auto data = siconos::config::make();
+  auto data = siconos::vkernel::config::make();
 
   auto a1 = store::add<config::item_a>(data);
   auto a2 = store::add<config::item_a>(data);

@@ -43,8 +43,8 @@
 #endif
 using fmt::print;
 
-using namespace siconos;
-using env = siconos::standard_environment;
+using namespace siconos::vkernel;
+using env = siconos::vkernel::standard_environment;
 
 using namespace boost::hana::literals;
 int main() {
@@ -58,11 +58,11 @@ int main() {
   using td = time_discretization<>;
   using topo = topology<ball, interaction>;
   using simulation = time_stepping<td, osi, osnspb, topo>;
-  using siconos::get;
+  using siconos::vkernel::get;
 
   struct zz {};
 
-  auto data = siconos::make_storage<
+  auto data = siconos::vkernel::make_storage<
       env, simulation, wrap<some::unbounded_collection, relation>,
       wrap<some::unbounded_collection, ball>, wrap<some::unbounded_collection, interaction>,
       with_properties<time_levels<ball::q, 10>, diagonal<ball::mass_matrix>,
@@ -115,16 +115,16 @@ int main() {
 
   auto dsimul = add<simulation>(data);
 
-  // siconos::set<interaction::nonsmooth_law>(inter1);
+  // siconos::vkernel::set<interaction::nonsmooth_law>(inter1);
   interaction::nonsmooth_law::at(inter1) = nslaw2;
   get<interaction::nonsmooth_law>(inter1, data) = nslaw2;
 
-  auto& e = siconos::get_memory<attr_t<nslaw, "e">>(data);
+  auto& e = siconos::vkernel::get_memory<attr_t<nslaw, "e">>(data);
   e[0][nslaw2.get()] = 0.7;
 
   nslaw2.e() = 0.6;
 
-  print("{}\n", siconos::get_memory<attr_t<nslaw, "e">>(data));
+  print("{}\n", siconos::vkernel::get_memory<attr_t<nslaw, "e">>(data));
 
   auto inter2 = add<interaction>(data);
   auto nslaw3 = add<nslaw>(data);
@@ -198,9 +198,9 @@ int main() {
   hosi.update_velocity_for_involved_ds();
   hosi.update_all_velocities(0);
   hosi.update_positions(0, 0.01);
-  //   auto& q = siconos::get_memory<ball::q>(data);
+  //   auto& q = siconos::vkernel::get_memory<ball::q>(data);
   //   print("q={}\n", q);
-  //   print("v={}\n", siconos::get_memory<ball::velocity>(data));
+  //   print("v={}\n", siconos::vkernel::get_memory<ball::velocity>(data));
 
   auto hsim = make_full_handle<simulation>(0, data);
 }

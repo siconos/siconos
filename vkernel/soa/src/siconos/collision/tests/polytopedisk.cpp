@@ -49,8 +49,8 @@
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 using storage::pattern::symbol;
 
 struct body : model::lagrangian_ds {};
@@ -111,7 +111,7 @@ struct data_t
               storage::diagonal<storage::pattern::attr_t<body, "mass_matrix">>,
               storage::assembled_diagonal<
                   storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 bool near(double a, double b, double tol = 1e-9) { return std::abs(a - b) <= tol; }
@@ -119,8 +119,8 @@ bool near2(const auto& a, double x, double y, double tol = 1e-9) {
   return near(a[0], x, tol) && near(a[1], y, tol);
 }
 
-auto add_disk(siconos::config::data_t& data, double r, double x, double y) {
-  using namespace siconos;
+auto add_disk(siconos::vkernel::config::data_t& data, double r, double x, double y) {
+  using namespace siconos::vkernel;
   auto sh = storage::add<config::disk_shape>(data);
   sh.radius() = r;
   auto b = storage::add<config::body>(data);
@@ -132,8 +132,9 @@ auto add_disk(siconos::config::data_t& data, double r, double x, double y) {
   return b;
 }
 
-auto add_square(siconos::config::data_t& data, double a, double x, double y, double theta) {
-  using namespace siconos;
+auto add_square(siconos::vkernel::config::data_t& data, double a, double x, double y,
+                double theta) {
+  using namespace siconos::vkernel;
   auto sh = storage::add<config::polytope_shape>(data);
   const std::array<std::array<double, 2>, 4> v = {{{-a, -a}, {a, -a}, {a, a}, {-a, a}}};
   for (int i = 0; i < 4; ++i) sh.vertices()[i] = {v[i][0], v[i][1]};
@@ -148,7 +149,7 @@ auto add_square(siconos::config::data_t& data, double a, double x, double y, dou
 }
 
 void test_contact() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   config::data_t data;
   auto sq = add_square(data, 1, 0, 0, 0);
   auto rel = storage::add<config::polytopedisk_r>(data);
@@ -170,7 +171,7 @@ void test_contact() {
 }
 
 void test_jacobian_finite_differences() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   for (double dx : {2.4, 0.6}) {  // separated, then centre inside
     config::data_t data;
     auto d = add_disk(data, 0.5, dx, 0.3);
@@ -199,18 +200,20 @@ void test_jacobian_finite_differences() {
 }
 
 struct world {
-  siconos::config::data_t data;
-  decltype(siconos::storage::add<siconos::config::simulation>(data)) simulation;
-  decltype(siconos::storage::add<siconos::config::space_filter>(data)) spacef;
-  decltype(siconos::storage::add<siconos::config::neighborhood>(data)) ngbh;
-  decltype(siconos::storage::add<siconos::config::cxd_narrowphase>(data)) np;
+  siconos::vkernel::config::data_t data;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::simulation>(
+      data)) simulation;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::space_filter>(
+      data)) spacef;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::neighborhood>(data)) ngbh;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::cxd_narrowphase>(data)) np;
 
   world()
-      : simulation(siconos::storage::add<siconos::config::simulation>(data)),
-        spacef(siconos::storage::add<siconos::config::space_filter>(data)),
-        ngbh(siconos::storage::add<siconos::config::neighborhood>(data)),
-        np(siconos::storage::add<siconos::config::cxd_narrowphase>(data)) {
-    using namespace siconos;
+      : simulation(siconos::vkernel::storage::add<siconos::vkernel::config::simulation>(data)),
+        spacef(siconos::vkernel::storage::add<siconos::vkernel::config::space_filter>(data)),
+        ngbh(siconos::vkernel::storage::add<siconos::vkernel::config::neighborhood>(data)),
+        np(siconos::vkernel::storage::add<siconos::vkernel::config::cxd_narrowphase>(data)) {
+    using namespace siconos::vkernel;
     auto nslaw = storage::add<config::nslaw>(data);
     nslaw.e() = 0.;
     nslaw.mu() = 0.5;
@@ -260,11 +263,12 @@ struct world {
   }
 };
 
-using pd_index = siconos::storage::index<siconos::config::polytopedisk_r, std::size_t>;
+using pd_index =
+    siconos::vkernel::storage::index<siconos::vkernel::config::polytopedisk_r, std::size_t>;
 
 /* the polytopedisk_r interactions at step s; each must link the disk first */
 std::vector<std::size_t> mixed_relations(world& w, std::size_t s) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   std::vector<std::size_t> rels;
   for (auto inter : storage::handles<config::interaction>(w.data, s)) {
     if (!std::holds_alternative<pd_index>(inter.relation())) continue;
@@ -279,7 +283,7 @@ std::vector<std::size_t> mixed_relations(world& w, std::size_t s) {
 }
 
 void test_disk_on_square(bool square_first) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w;
   auto make = [&] {
     if (square_first) {
@@ -323,7 +327,7 @@ void test_disk_on_square(bool square_first) {
 }
 
 void test_mixed_churn() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w;
   auto sq = add_square(w.data, 0.5, 0, 0.5, 0);
   auto d = add_disk(w.data, 0.5, 0, 1.2);

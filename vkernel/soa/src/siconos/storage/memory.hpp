@@ -23,7 +23,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 using namespace pattern;
 
@@ -76,4 +76,4 @@ static constexpr std::size_t memory_size() {
   return memory_detail::time_levels_size<Attr, std::decay_t<TimeLevels>>::value;
 };
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

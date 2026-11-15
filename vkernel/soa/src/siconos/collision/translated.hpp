@@ -22,7 +22,7 @@
 #include "collision.hpp"
 #include "collision_head.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 template <match::item Item>
 struct translated : item {
@@ -66,4 +66,4 @@ struct translated : item {
     decltype(auto) collision_group() { return storage::attr<"collision_group">(*self()); }
   };
 };
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

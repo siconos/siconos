@@ -26,7 +26,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* Polytope x fixed-segment contact relation (2D convex polygon vs a fixed
    segment). The segment is treated as a 2-vertex polytope with STATIC world
@@ -116,4 +116,4 @@ struct polytopefsegment_r : item, model::relation1, model::any_lagrangian_relati
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

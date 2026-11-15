@@ -29,7 +29,7 @@
 #include "siconos/collision/translated.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 struct empty_shape : empty_item {
   using empty_shape_t = void;
@@ -184,4 +184,4 @@ struct point<Item, Shape> {
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

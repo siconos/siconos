@@ -34,7 +34,7 @@ namespace CompactNSearch = cuNSearch;
 #include "CompactNSearch/CompactNSearch.h"
 #endif
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* the neighborhood engine */
 template <typename... Points>
@@ -145,4 +145,4 @@ struct neighborhood : storage::data_holder<CompactNSearch::NeighborhoodSearch> {
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

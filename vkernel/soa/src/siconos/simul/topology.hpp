@@ -38,7 +38,7 @@
 #define VKERNEL_INDEX_SETS 1
 #endif
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
           typename DynamicDofDynamicalSystem = empty_item,
@@ -284,4 +284,4 @@ struct topology : item {
     }
   };
 };
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

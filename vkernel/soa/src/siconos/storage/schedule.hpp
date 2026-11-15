@@ -30,7 +30,7 @@
 #include "siconos/storage/kernels.hpp"
 #include "siconos/storage/pattern/base.hpp"
 
-namespace siconos::storage::schedule {
+namespace siconos::vkernel::storage::schedule {
 
 /* Schedules: the stages of a computation as a type that reads like the
    algorithm.
@@ -332,4 +332,4 @@ std::string describe(std::size_t depth = 0) {
   return text;
 }
 
-}  // namespace siconos::storage::schedule
+}  // namespace siconos::vkernel::storage::schedule

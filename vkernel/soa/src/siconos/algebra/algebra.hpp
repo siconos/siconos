@@ -22,6 +22,6 @@
 #include <siconos/algebra/eigen.hpp>
 #include <siconos/algebra/numerics.hpp>
 
-namespace siconos::algebra {
+namespace siconos::vkernel::algebra {
 using std::hypot;
 }

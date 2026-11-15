@@ -28,7 +28,7 @@
 #include "siconos/storage/permute.hpp"
 #include "siconos/storage/sparse_set.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 /* Per relation type sets of interactions (ECS tags).
 
@@ -185,4 +185,4 @@ void for_each_relation(auto& data, F&& f) {
   });
 }
 
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

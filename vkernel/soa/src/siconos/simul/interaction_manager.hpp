@@ -20,7 +20,7 @@
 
 #include "siconos/simul/simul_head.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 template <typename SpaceFilter>
 struct interaction_manager : item {
@@ -68,4 +68,4 @@ struct interaction_manager : item {
     }
   };
 };
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

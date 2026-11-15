@@ -20,7 +20,7 @@
 
 #include "siconos/simul/simul_head.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 template <typename... Params>
 struct time_discretization : item {
@@ -41,4 +41,4 @@ struct time_discretization : item {
     decltype(auto) step() { return attr<"step">(*self()); };
   };
 };
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

@@ -20,7 +20,7 @@
 
 #include "siconos/simul/simul_head.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 /* compile time interaction */
 template <match::item Nslaw, match::item... Relations>
@@ -130,4 +130,4 @@ struct rt_rt_interaction : item {
   };
 };
 
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

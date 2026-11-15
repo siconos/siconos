@@ -22,7 +22,7 @@
 #include <tuple>
 #include <variant>
 
-namespace siconos::variant {
+namespace siconos::vkernel::variant {
 
 template <typename D, typename V, typename F>
 decltype(auto) visit(D& data, V&& var, F&& fun) {
@@ -33,4 +33,4 @@ decltype(auto) visit(D& data, V&& var, F&& fun) {
       },
       static_cast<V&&>(var));
 }
-}  // namespace siconos::variant
+}  // namespace siconos::vkernel::variant

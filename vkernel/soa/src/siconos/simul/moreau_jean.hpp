@@ -26,7 +26,7 @@
 #include "siconos/simul/theta_method.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::moreau_jean {
+namespace siconos::vkernel::simul::moreau_jean {
 
 /* The Moreau-Jean scheme (Jean 1999, Acary & Brogliato 2008): the
    theta-method on the smooth dynamics (see theta_method.hpp), the Newton
@@ -321,4 +321,4 @@ struct scheme {
   using interaction_storage = contacts::interaction_storage<Interaction>;
 };
 
-}  // namespace siconos::simul::moreau_jean
+}  // namespace siconos::vkernel::simul::moreau_jean

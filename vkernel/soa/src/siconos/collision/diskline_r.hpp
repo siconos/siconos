@@ -23,7 +23,7 @@
 #include "siconos/collision/shape_of.hpp"
 // #include "siconos/model/model.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
   struct attributes {
@@ -66,4 +66,4 @@ struct diskline_r : item, model::relation1, model::any_lagrangian_relation {
     }
   };
 };
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

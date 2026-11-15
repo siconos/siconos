@@ -24,7 +24,7 @@
 #include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/sparse_set.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 /* The active interactions and the involved systems of a step as sets (ECS
    tags).
@@ -112,4 +112,4 @@ void for_each_involved(auto& data, auto step, F&& f) {
   }
 }
 
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

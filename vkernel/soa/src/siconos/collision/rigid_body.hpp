@@ -27,7 +27,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* A rigid body whose shape kind is per body: declare it with the per-kind
    sets of shape_of.hpp,
@@ -68,4 +68,4 @@ struct rigid_body : model::lagrangian_ds {
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

@@ -22,10 +22,10 @@
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 using namespace storage;
 using namespace storage::pattern;
 
 using storage::mp::concat;
 
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

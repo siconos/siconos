@@ -23,7 +23,7 @@
 #include "siconos/collision/shape_of.hpp"
 // #include "siconos/model/model.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 // disk fixed segment
 
@@ -90,4 +90,4 @@ struct diskfsegment_r : item, model::relation1, model::any_lagrangian_relation {
     }
   };
 };
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

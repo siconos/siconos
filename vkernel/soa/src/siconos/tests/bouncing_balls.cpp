@@ -27,8 +27,8 @@
 #include "ref_check.hpp"
 #include "siconos/siconos.hpp"
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct ball : model::lagrangian_ds {};
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
@@ -55,7 +55,7 @@ struct data_t
               storage::time_invariant<storage::attr_t<ball, "fext">>,
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
               storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -66,7 +66,7 @@ class BouncingBallsTest : public CppUnit::TestFixture {
 
  public:
   void testBouncingBalls() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
 
     config::data_t data;
 
@@ -232,8 +232,8 @@ class BouncingBallsTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_balls.dat"), "bouncing_balls.ref",
-                       1e-8);
+    CPPUNIT_ASSERT_REF(siconos::vkernel::test::read_ref("bouncing_balls.dat"),
+                       "bouncing_balls.ref", 1e-8);
   }
 };
 

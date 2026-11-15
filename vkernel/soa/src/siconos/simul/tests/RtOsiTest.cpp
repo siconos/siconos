@@ -31,7 +31,7 @@
 #include "siconos/simul/topology.hpp"
 #include "siconos/storage/mp/mp.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct fem_ds : model::lagrangian_ds {};
 struct ball : model::lagrangian_ds {};
 using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
@@ -58,12 +58,12 @@ struct make
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
               storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
-namespace config = siconos::config;
-namespace store = siconos::storage;
+namespace config = siconos::vkernel::config;
+namespace store = siconos::vkernel::storage;
 namespace mp = store::mp;
-using siconos::algebra::vector;
+using siconos::vkernel::algebra::vector;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(RtOsiTest);
 
@@ -74,7 +74,7 @@ void RtOsiTest::tearDown() {}
 // check that the kinds of the integrator exist and that their offsets can be
 // modified
 void RtOsiTest::testOsi0() {
-  auto data = siconos::config::make();
+  auto data = siconos::vkernel::config::make();
 
   auto osi = store::add<config::osi>(data);
 

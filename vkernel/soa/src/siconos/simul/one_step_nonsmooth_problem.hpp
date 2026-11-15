@@ -36,7 +36,7 @@
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"
 
-namespace siconos {
+namespace siconos::vkernel {
 
 namespace simul {
 
@@ -290,4 +290,4 @@ struct one_step_nonsmooth_problem : item {
   };
 };
 }  // namespace simul
-}  // namespace siconos
+}  // namespace siconos::vkernel

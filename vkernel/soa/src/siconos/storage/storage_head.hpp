@@ -25,6 +25,6 @@
 #include "siconos/storage/traits/traits.hpp"
 #include "siconos/utils/range.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 using namespace pattern;
 }

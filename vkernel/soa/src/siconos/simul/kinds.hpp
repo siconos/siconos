@@ -31,7 +31,7 @@
 #include "siconos/storage/schedule.hpp"
 #include "siconos/utils/variant.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 /* The kinds of an integrator: a kind of systems (rigid with a fixed number
    of dofs, FEM with a dynamic one) or a kind of interactions (between rigid
@@ -568,4 +568,4 @@ struct for_interactions {
   }
 };
 
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

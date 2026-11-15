@@ -28,7 +28,7 @@
 #include "siconos/simul/theta_method.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::moreau_jean_gosi {
+namespace siconos::vkernel::simul::moreau_jean_gosi {
 
 /* The Moreau-Jean scheme on the global problem (MoreauJeanGOSI in the
    Siconos kernel): the same theta-method and Newton impact law as
@@ -216,4 +216,4 @@ struct scheme {
   using interaction_storage = contacts::interaction_storage<Interaction>;
 };
 
-}  // namespace siconos::simul::moreau_jean_gosi
+}  // namespace siconos::vkernel::simul::moreau_jean_gosi

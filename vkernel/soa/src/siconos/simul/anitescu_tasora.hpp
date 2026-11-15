@@ -33,7 +33,7 @@
 #include "siconos/simul/theta_method.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::anitescu_tasora {
+namespace siconos::vkernel::simul::anitescu_tasora {
 
 /* The Anitescu-Tasora scheme (Anitescu & Tasora 2010, Tasora & Anitescu
    2011), here for the comparisons with Moreau-Jean: the Coulomb law is
@@ -563,4 +563,4 @@ struct apgd_scheme : scheme {
   using time_step_schedule = anitescu_tasora::apgd_time_step_schedule;
 };
 
-}  // namespace siconos::simul::anitescu_tasora
+}  // namespace siconos::vkernel::simul::anitescu_tasora

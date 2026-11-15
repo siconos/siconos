@@ -27,7 +27,7 @@
 #include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 using namespace pattern;
 
@@ -56,13 +56,13 @@ struct access {
       []<typename Data, typename U = T,
          match::handle<decltype(item_attribute<U>(typename get_info_t<Data>::all_items_t{}))>
              Handle>(Handle h, Data& data) -> decltype(auto) {
-        return siconos::storage::get<U>(h, data);
+        return siconos::vkernel::storage::get<U>(h, data);
       },
       []<typename U = T, typename FullHandle>(FullHandle h) -> decltype(auto) {
-        return siconos::storage::get<U>(h.data(), h);
+        return siconos::vkernel::storage::get<U>(h.data(), h);
       },
       []<typename U = T, typename FullHandle>(FullHandle h, typename FullHandle::indice step)
-          -> decltype(auto) { return siconos::storage::get<U>(h.data(), step, h); });
+          -> decltype(auto) { return siconos::vkernel::storage::get<U>(h.data(), step, h); });
 };
 
 template <string_literal S>
@@ -281,4 +281,4 @@ static auto constexpr convert_storage_type(System, Data&& data, Attribute) {
       Attribute>::type{};
 }
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

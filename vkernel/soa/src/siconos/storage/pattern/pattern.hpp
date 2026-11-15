@@ -30,7 +30,7 @@
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/some/some.hpp"
 
-namespace siconos::storage::pattern {
+namespace siconos::vkernel::storage::pattern {
 
 using mp::append;
 using mp::concat;
@@ -326,11 +326,13 @@ concept index = requires { typename I::index_t; };
 template <typename H, typename A>
 concept handle_attribute =
     attribute<A> && item<typename H::type> &&
-    must::contains<A, decltype(siconos::storage::pattern::attributes(typename H::type{}))>;
+    must::contains<A, decltype(siconos::vkernel::storage::pattern::attributes(
+                          typename H::type{}))>;
 
 template <typename T, typename I>
-concept attribute_of = attribute<T> && item<I> &&
-                       must::contains<T, decltype(siconos::storage::pattern::attributes(I{}))>;
+concept attribute_of =
+    attribute<T> && item<I> &&
+    must::contains<T, decltype(siconos::vkernel::storage::pattern::attributes(I{}))>;
 }  // namespace match
 
 template <string_literal S>
@@ -457,4 +459,4 @@ template <match::item Item, string_literal S>
   requires match::with_attribute<Item, symbol<S>>
 using checked_attr_t = attr_t<Item, S>;
 
-}  // namespace siconos::storage::pattern
+}  // namespace siconos::vkernel::storage::pattern

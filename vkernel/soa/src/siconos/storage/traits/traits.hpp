@@ -24,12 +24,12 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/some/some.hpp"
 
-namespace siconos::storage::traits {
+namespace siconos::vkernel::storage::traits {
 
-using siconos::storage::pattern::nth_t;
-using siconos::storage::pattern::param;
-using siconos::storage::pattern::rec;
-namespace match = siconos::storage::pattern::match;
+using siconos::vkernel::storage::pattern::nth_t;
+using siconos::vkernel::storage::pattern::param;
+using siconos::vkernel::storage::pattern::rec;
+namespace match = siconos::vkernel::storage::pattern::match;
 
 static auto translate = rec([]<typename E, typename T>(auto&& translate, E, T) {
   if constexpr (match::type_t<T>) {
@@ -152,4 +152,4 @@ struct config {
 template <typename T>
 using value_type = typename T::value_type;  // eigen ok.
 
-}  // namespace siconos::storage::traits
+}  // namespace siconos::vkernel::storage::traits

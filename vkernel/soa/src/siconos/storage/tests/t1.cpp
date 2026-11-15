@@ -25,7 +25,7 @@
 #include "siconos/siconos.hpp"
 #include "siconos/storage/pattern/base.hpp"
 
-using namespace siconos;
+using namespace siconos::vkernel;
 
 #include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/point.hpp"
@@ -37,18 +37,18 @@ using namespace siconos;
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 using params = map<assoc<param<"dof">, param_val<3>>>;
 }
 
-using namespace siconos;
+using namespace siconos::vkernel;
 
 template <typename T>
 struct env : standard_environment<T> {
   using params = config::map<config::iparam<"dof", 3>, config::iparam<"ncgroups", 1>>;
 };
 
-namespace siconos {
+namespace siconos::vkernel {
 
 namespace some = storage::some;
 namespace traits = storage::traits;
@@ -59,10 +59,10 @@ struct aaa {
   int v = 1;
 };
 struct bbb : item {
-  struct attr : some::specific<pointer<aaa>>, siconos::access<attr> {};
+  struct attr : some::specific<pointer<aaa>>, siconos::vkernel::access<attr> {};
   using attributes = gather<attr>;
   template <typename H>
-  struct interface : siconos::default_interface<H> {
+  struct interface : siconos::vkernel::default_interface<H> {
     constexpr int hello() { return 36; };
 
     auto methods() { return collect(method(symbol<"hello">{}, &interface<H>::hello)); };
@@ -88,20 +88,22 @@ struct item0 : item {
       "attr0", some::matrix<some::scalar, some::indice_value<1>, some::indice_value<1>>>>;
 };
 
-static_assert(boost::hana::is_convertible<
-              siconos::storage::pattern::paired<
-                  siconos::item0, siconos::storage::pattern::attribute<
-                                      "attr0", siconos::storage::some::matrix<
-                                                   siconos::storage::some::scalar,
-                                                   siconos::storage::some::indice_value<1>,
-                                                   siconos::storage::some::indice_value<1>>>>,
-              siconos::storage::pattern::paired<
-                  siconos::item0,
-                  siconos::storage::pattern::attribute<
-                      "attr0", siconos::storage::some::matrix<
-                                   siconos::storage::some::scalar,
-                                   siconos::storage::some::indice_value<1>,
-                                   siconos::storage::some::indice_value<1>>>>>::value);
+static_assert(
+    boost::hana::is_convertible<
+        siconos::vkernel::storage::pattern::paired<
+            siconos::vkernel::item0,
+            siconos::vkernel::storage::pattern::attribute<
+                "attr0", siconos::vkernel::storage::some::matrix<
+                             siconos::vkernel::storage::some::scalar,
+                             siconos::vkernel::storage::some::indice_value<1>,
+                             siconos::vkernel::storage::some::indice_value<1>>>>,
+        siconos::vkernel::storage::pattern::paired<
+            siconos::vkernel::item0,
+            siconos::vkernel::storage::pattern::attribute<
+                "attr0", siconos::vkernel::storage::some::matrix<
+                             siconos::vkernel::storage::some::scalar,
+                             siconos::vkernel::storage::some::indice_value<1>,
+                             siconos::vkernel::storage::some::indice_value<1>>>>>::value);
 
 static_assert(std::is_same_v<
               decltype(storage::pattern::attributes(item0{})),
@@ -116,12 +118,13 @@ static_assert(
                 standard_environment, item0,
                 storage::with_properties<storage::diagonal<attr_t<item0, "attr0">>>>()
                 .store()))>::all_properties_t,
-        gather<siconos::storage::diagonal<siconos::storage::pattern::paired<
-            siconos::item0, siconos::storage::pattern::attribute<
-                                "attr0", siconos::storage::some::matrix<
-                                             siconos::storage::some::scalar,
-                                             siconos::storage::some::indice_value<1>,
-                                             siconos::storage::some::indice_value<1>>>>>>>);
+        gather<siconos::vkernel::storage::diagonal<siconos::vkernel::storage::pattern::paired<
+            siconos::vkernel::item0,
+            siconos::vkernel::storage::pattern::attribute<
+                "attr0", siconos::vkernel::storage::some::matrix<
+                             siconos::vkernel::storage::some::scalar,
+                             siconos::vkernel::storage::some::indice_value<1>,
+                             siconos::vkernel::storage::some::indice_value<1>>>>>>>);
 
 // static_assert(mp::filter(
 //     mp::transform(
@@ -130,13 +133,13 @@ static_assert(
 //                           storage::with_properties<storage::diagonal<attr_t<
 //                               item0, "attr0">>>>()))>::all_properties_t{},
 //         []<typename P>(P) { return typename P::type{}; }),
-//     mp::is_parent<siconos::storage::pattern::paired<
-//         siconos::item0,
-//         siconos::storage::pattern::attribute<
-//             "attr0", siconos::storage::some::matrix<
-//                          siconos::storage::some::scalar,
-//                          siconos::storage::some::indice_value<1>,
-//                          siconos::storage::some::indice_value<1>>>>>));
+//     mp::is_parent<siconos::vkernel::storage::pattern::paired<
+//         siconos::vkernel::item0,
+//         siconos::vkernel::storage::pattern::attribute<
+//             "attr0", siconos::vkernel::storage::some::matrix<
+//                          siconos::vkernel::storage::some::scalar,
+//                          siconos::vkernel::storage::some::indice_value<1>,
+//                          siconos::vkernel::storage::some::indice_value<1>>>>>));
 
 // mp::filter(typename info_t::all_properties_t{},
 //                      mp::is_a_model<[]<typename T>() constexpr {
@@ -154,9 +157,9 @@ static_assert(
             storage::mp::is_a_model<[]<typename T>() constexpr {
               return match::attached_storage<T, item0>;
             }>)),
-        storage::mp::tuple<
-            siconos::storage::attached<siconos::item0, siconos::storage::pattern::symbol<"zz">,
-                                       siconos::storage::some::scalar>>>);
+        storage::mp::tuple<siconos::vkernel::storage::attached<
+            siconos::vkernel::item0, siconos::vkernel::storage::pattern::symbol<"zz">,
+            siconos::vkernel::storage::some::scalar>>>);
 
 static_assert(
     match::diagonal_matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
@@ -228,7 +231,7 @@ static_assert(
 //                       storage::with_properties<storage::bind<
 //                           collision::shape::disk, "disk_shape">>>()));
 
-}  // namespace siconos
+}  // namespace siconos::vkernel
 
 using namespace boost::hana::literals;
 
@@ -310,8 +313,8 @@ static_assert(match::relation1<
                               decltype(storage::make_runtime_database<env, relation>())>>);
 
 //  {
-static_assert(
-    std::is_same_v<decltype(all_items(nslaw{})), gather<siconos::model::newton_impact>>);
+static_assert(std::is_same_v<decltype(all_items(nslaw{})),
+                             gather<siconos::vkernel::model::newton_impact>>);
 
 static_assert(std::derived_from<
               std::decay_t<decltype(storage::mp::filter(
@@ -338,13 +341,14 @@ static_assert(match::attribute_of<attr_t<td, "step">, td>);
 // static_assert(std::is_same_v<td,
 // decltype(item_attribute<td::step>(all_items(simulation{})))>);
 
-static_assert(std::is_same_v<typename siconos::traits::config<env<int>>::convert<
-                                 attr_t<siconos::simul::time_discretization<>, "step">>::type,
-                             typename env<int>::indice>);
-
 static_assert(
-    std::is_same_v<typename siconos::traits::config<env<int>>::convert<some::scalar>::type,
-                   typename env<int>::scalar>);
+    std::is_same_v<typename siconos::vkernel::traits::config<env<int>>::convert<
+                       attr_t<siconos::vkernel::simul::time_discretization<>, "step">>::type,
+                   typename env<int>::indice>);
+
+static_assert(std::is_same_v<
+              typename siconos::vkernel::traits::config<env<int>>::convert<some::scalar>::type,
+              typename env<int>::scalar>);
 
 struct zz {};
 
@@ -373,7 +377,8 @@ static_assert(traits::translatable<int, env<void>>);
 
 static_assert(std::is_same_v<traits::config<env<void>>::convert<int>::type, int>);
 
-static_assert(traits::translatable<siconos::some::unbounded_collection<char[3]>, env<void>>);
+static_assert(
+    traits::translatable<siconos::vkernel::some::unbounded_collection<char[3]>, env<void>>);
 
 static_assert(
     storage::mp::filter(gather<char, int, double>{},
@@ -402,9 +407,10 @@ static_assert(
 
 static_assert(
     model::runtime_dof<decltype(storage::add<ball>(
-        storage::make_runtime_database<env, ball,
-                                       storage::with_properties<storage::unbounded<
-                                           siconos::storage::attr_t<ball, "q">>>>()))>());
+        storage::make_runtime_database<
+            env, ball,
+            storage::with_properties<
+                storage::unbounded<siconos::vkernel::storage::attr_t<ball, "q">>>>()))>());
 
 // The checks above are compile-time static_asserts. Their compilation
 // succeeding is the assertion; this fixture registers them in the cppunit

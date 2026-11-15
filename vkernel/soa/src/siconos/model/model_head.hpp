@@ -23,7 +23,7 @@
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::model {
+namespace siconos::vkernel::model {
 using namespace storage;
 using namespace storage::pattern;
 
@@ -32,4 +32,4 @@ struct relation1 {};
 struct relation2 {};
 struct any_lagrangian_relation {};
 
-}  // namespace siconos::model
+}  // namespace siconos::vkernel::model

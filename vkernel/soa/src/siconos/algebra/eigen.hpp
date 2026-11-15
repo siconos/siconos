@@ -25,7 +25,7 @@
 #include "siconos/algebra/linear_algebra.hpp"
 
 // concepts
-namespace siconos::storage::pattern::match {
+namespace siconos::vkernel::storage::pattern::match {
 
 template <typename T>
 concept matrix = requires(T m) { m(0, 0); };
@@ -104,10 +104,10 @@ concept variable_size_vector = vector<T> && !fixed_size_matrix<T>;
 template <typename T>
 concept unbounded = variable_size_vector<T> || variable_size_matrix<T>;
 
-}  // namespace siconos::storage::pattern::match
+}  // namespace siconos::vkernel::storage::pattern::match
 
-namespace siconos::algebra {
-namespace match = siconos::storage::pattern::match;
+namespace siconos::vkernel::algebra {
+namespace match = siconos::vkernel::storage::pattern::match;
 
 template <typename T, typename M>
 decltype(auto) cast(T, M&& m) {
@@ -178,7 +178,7 @@ using prod_t =
 
 template <typename T>
 static constexpr decltype(auto) nrows(T& value) {
-  namespace match = siconos::storage::pattern::match;
+  namespace match = siconos::vkernel::storage::pattern::match;
 
   if constexpr (match::any_matrix<T>) {
     return value.rows();  // specific to Eigen
@@ -189,7 +189,7 @@ static constexpr decltype(auto) nrows(T& value) {
 
 template <typename T>
 static constexpr decltype(auto) ncols(T& value) {
-  namespace match = siconos::storage::pattern::match;
+  namespace match = siconos::vkernel::storage::pattern::match;
 
   if constexpr (match::any_matrix<T>) {
     return value.cols();  // specific to Eigen
@@ -233,4 +233,4 @@ auto cols(auto& m) { return m.cols(); };
 auto norm(auto& m) { return m.norm(); };
 
 void clear(auto& m) { m.resize(0); };
-}  // namespace siconos::algebra
+}  // namespace siconos::vkernel::algebra

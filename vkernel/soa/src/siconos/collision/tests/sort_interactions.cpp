@@ -45,8 +45,8 @@
 #include "siconos/siconos.hpp"
 #include "siconos/storage/registry.hpp"
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct disk : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
 using diskdisk_r = collision::diskdisk_r;
@@ -92,7 +92,7 @@ using properties = storage::with_properties<
 
 struct data_t : storage::make_runtime_database<env, simulation, interaction_manager,
                                                segment_shape, disk_shape, properties> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -107,7 +107,7 @@ void fnv(std::uint64_t& h, const void* p, std::size_t n) {
 // (relation type, ds1, ds2, relation item, lambda, y) of each interaction,
 // in the order of the interactions
 auto snapshot(auto& data, auto step) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using entry_t = std::tuple<std::size_t, std::size_t, std::size_t, std::size_t, double,
                              double, double, double>;
   std::vector<entry_t> out;
@@ -123,7 +123,7 @@ auto snapshot(auto& data, auto step) {
 }
 
 void check_sort(auto& data, auto topo, auto step) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const auto before = snapshot(data, step);
   topo.sort_interactions(step);
   const auto after = snapshot(data, step);
@@ -170,7 +170,7 @@ class SortInteractionsTest : public CppUnit::TestFixture {
 
  public:
   void testSortInteractions() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     using namespace storage;
 
     config::data_t data;

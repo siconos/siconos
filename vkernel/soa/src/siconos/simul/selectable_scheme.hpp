@@ -26,7 +26,7 @@
 #include "siconos/simul/moreau_jean_gosi.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::selectable_scheme {
+namespace siconos::vkernel::simul::selectable_scheme {
 
 /* The scheme chosen when the simulation is set up, not when it is compiled:
    the scheme attribute of the integrator (see one_step_integrator.hpp),
@@ -116,4 +116,4 @@ struct scheme {
                                    gather<simul::dem::tangential_spring<Interaction>>{}));
 };
 
-}  // namespace siconos::simul::selectable_scheme
+}  // namespace siconos::vkernel::simul::selectable_scheme

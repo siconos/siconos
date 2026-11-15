@@ -19,7 +19,7 @@
 #pragma once
 #include <numbers>
 
-namespace siconos::collision::shape {
+namespace siconos::vkernel::collision::shape {
 struct disk : item {
   struct attributes {
     some::scalar radius;
@@ -55,4 +55,4 @@ struct disk : item {
     }
   };
 };
-}  // namespace siconos::collision::shape
+}  // namespace siconos::vkernel::collision::shape

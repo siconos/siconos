@@ -53,8 +53,8 @@
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 using storage::pattern::symbol;
 
 struct disk : model::lagrangian_ds {};
@@ -105,7 +105,7 @@ struct data_t : storage::make_runtime_database<
                         storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
                         storage::assembled_diagonal<
                             storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 using clock_t_ = std::chrono::steady_clock;
@@ -122,7 +122,7 @@ void fnv(std::uint64_t& h, const void* p, std::size_t n) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const int ncols = argc > 1 ? std::atoi(argv[1]) : 50;
   const int nrows = argc > 2 ? std::atoi(argv[2]) : 50;
   const int nsteps = argc > 3 ? std::atoi(argv[3]) : 100;

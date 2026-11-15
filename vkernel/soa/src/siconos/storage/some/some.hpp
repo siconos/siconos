@@ -20,9 +20,9 @@
 
 #include "siconos/storage/pattern/base.hpp"
 
-namespace siconos::storage::some {
+namespace siconos::vkernel::storage::some {
 
-using namespace siconos::storage::pattern;
+using namespace siconos::vkernel::storage::pattern;
 
 template <typename... Args>
 struct attribute {
@@ -231,4 +231,4 @@ struct sparse_set : undefined_sparse_set, with_types<Key, Value> {};
 
 struct dynamic_storage : property {};
 
-}  // namespace siconos::storage::some
+}  // namespace siconos::vkernel::storage::some

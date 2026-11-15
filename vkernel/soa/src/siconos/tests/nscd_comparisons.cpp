@@ -118,7 +118,7 @@ void step(world& w, cost& c) {
   w.step();
   ++c.steps;
   auto osnspb = w.simulation.one_step_nonsmooth_problem();
-  c.iterations += siconos::storage::attr<"number_of_iterations">(osnspb);
+  c.iterations += siconos::vkernel::storage::attr<"number_of_iterations">(osnspb);
 }
 
 // a column of n disks on the ground, gap between them and above the ground
@@ -131,7 +131,7 @@ struct column_result {
 };
 
 column_result column(const scheme_t& s, std::size_t n, double h, double tmax, double gap) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w(scene_for(s, 0.3, h, tmax));
   std::vector<decltype(w.add_disk(0., 0.))> disks;
   for (std::size_t i = 0; i < n; ++i)
@@ -212,7 +212,7 @@ auto square_at_rest(world& w, const scheme_t& s, double alpha, double vx = 0.) {
 }
 
 void incline_stick(const std::filesystem::path& dir) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   auto f = open_csv(dir, "incline_stick", "scheme,h,t,x,y");
   const double alpha = 20 * deg;
   for (const auto& s : all_schemes) {
@@ -247,7 +247,7 @@ struct square_result {
 square_result square(const scheme_t& s, double mu, double h, double tmax, double alpha,
                      double vx,
                      std::function<void(double, double, double, double)> path = {}) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w(scene_for(s, mu, h, tmax, alpha));
   auto [p, y0] = square_at_rest(w, s, alpha, vx);
   w.finalize();
@@ -327,7 +327,7 @@ void incline_slide(const std::filesystem::path& dir) {
    then ahead of the Coulomb motion (a t) by dv = x_eq w sin(w t_c) - a t_c,
    and stays so: at T, x is ahead by dv (T - t_c) + x_c - a t_c^2 / 2. */
 void dem_incline(const std::filesystem::path& dir) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   auto f = open_csv(dir, "dem_incline", "rotation,kt,x_end,x_exact,excess,loading_estimate");
   const double alpha = 30 * deg, mu = 0.3, tmax = 1., h = 1e-4;
   const double a = g * (std::sin(alpha) - mu * std::cos(alpha));
@@ -363,7 +363,7 @@ void dem_incline(const std::filesystem::path& dir) {
    by a large horizontal mass (1e4), its rotation locked by a large moment of
    inertia. */
 void shear(const std::filesystem::path& dir) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   auto f = open_csv(dir, "shear", "scheme,mu,h,t,x,y,y_geometric");
   auto summary = open_csv(dir, "shear_summary",
                           "scheme,mu,h,steps,wall_s,iterations,max_above,max_below");

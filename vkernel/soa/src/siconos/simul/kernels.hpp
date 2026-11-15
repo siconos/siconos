@@ -23,7 +23,7 @@
 #include "siconos/storage/kernels.hpp"
 #include "siconos/utils/variant.hpp"
 
-namespace siconos::simul::kernels {
+namespace siconos::vkernel::simul::kernels {
 
 /* The kernels of the simulation (see storage/kernels.hpp): the placeholders
    resolved by the kind that runs a kernel (see kinds.hpp), and the iteration
@@ -102,10 +102,11 @@ struct relations {
     } else {
       auto& relations = storage::attr_values<inter_t, "relation">(data, step);
       for (std::size_t i = 0; i < std::size(relations); ++i) {
-        siconos::variant::visit(data, relations[i], [&f, i](auto& rel) { f(i, rel); });
+        siconos::vkernel::variant::visit(data, relations[i],
+                                         [&f, i](auto& rel) { f(i, rel); });
       }
     }
   }
 };
 
-}  // namespace siconos::simul::kernels
+}  // namespace siconos::vkernel::simul::kernels

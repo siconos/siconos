@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-namespace siconos::test {
+namespace siconos::vkernel::test {
 
 namespace detail {
 
@@ -124,7 +124,7 @@ inline RefError relative_error(const Eigen::MatrixXd& dat, const Eigen::MatrixXd
   return error;
 }
 
-}  // namespace siconos::test
+}  // namespace siconos::vkernel::test
 
 /// Asserts that the matrix `dat` matches the reference file `ref_file` within a
 /// relative Frobenius tolerance `tol`. A dimension mismatch is an explicit
@@ -134,7 +134,7 @@ inline RefError relative_error(const Eigen::MatrixXd& dat, const Eigen::MatrixXd
 #define CPPUNIT_ASSERT_REF(dat, ref_file, tol)                                               \
   do {                                                                                       \
     const Eigen::MatrixXd& ref_check_dat = (dat);                                            \
-    const Eigen::MatrixXd ref_check_ref = ::siconos::test::read_ref(ref_file);               \
+    const Eigen::MatrixXd ref_check_ref = ::siconos::vkernel::test::read_ref(ref_file);      \
     {                                                                                        \
       std::ostringstream ref_check_msg;                                                      \
       ref_check_msg << ref_file << ": computed " << ref_check_dat.rows() << "x"              \
@@ -145,7 +145,7 @@ inline RefError relative_error(const Eigen::MatrixXd& dat, const Eigen::MatrixXd
                                  ref_check_dat.cols() == ref_check_ref.cols());              \
     }                                                                                        \
     const auto ref_check_error =                                                             \
-        ::siconos::test::relative_error(ref_check_dat, ref_check_ref);                       \
+        ::siconos::vkernel::test::relative_error(ref_check_dat, ref_check_ref);              \
     if (!(ref_check_error.relative <= (tol))) { /* NaN fails too */                          \
       std::ostringstream ref_check_msg;                                                      \
       ref_check_msg << ref_file << ": relative Frobenius error " << ref_check_error.relative \

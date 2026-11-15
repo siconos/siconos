@@ -54,7 +54,7 @@
 
 namespace py = pybind11;
 
-namespace siconos::config::disks {
+namespace siconos::vkernel::config::disks {
 
 // one rigid body type for disks and polytopes: the shape kind is per body
 // (per-kind sets, collision/shape_of.hpp)
@@ -102,21 +102,21 @@ struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
 struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
-struct io : siconos::io::io<osi, segment_shape, translated_disk_shape> {};
+struct io : siconos::vkernel::io::io<osi, segment_shape, translated_disk_shape> {};
 template <typename T>
 struct env : standard_environment<T> {
   using params = map<iparam<"dof", 3>, iparam<"ncgroups", 100>>;
 };
-}  // namespace siconos::config::disks
+}  // namespace siconos::vkernel::config::disks
 
-using namespace siconos;
-namespace some = siconos::storage::some;
+using namespace siconos::vkernel;
+namespace some = siconos::vkernel::storage::some;
 
-namespace pattern = siconos::storage::pattern;
+namespace pattern = siconos::vkernel::storage::pattern;
 
-namespace siconos::python::disks {
+namespace siconos::vkernel::python::disks {
 
-namespace config = siconos::config::disks;
+namespace config = siconos::vkernel::config::disks;
 
 // runtime (registry-backed) database (storage/registry.hpp)
 template <template <typename> typename Env, typename... Items>
@@ -210,10 +210,10 @@ struct data_t {
   idata_t _data;
 };
 
-}  // namespace siconos::python::disks
+}  // namespace siconos::vkernel::python::disks
 
-namespace ground = siconos::storage::mp;
-namespace match = siconos::storage::pattern::match;
+namespace ground = siconos::vkernel::storage::mp;
+namespace match = siconos::vkernel::storage::pattern::match;
 template <typename H, typename T>
 static decltype(auto) out_formatter(H h, T&& out_value) {
   using out_t = std::decay_t<T>;
@@ -223,8 +223,9 @@ static decltype(auto) out_formatter(H h, T&& out_value) {
       return algebra::matrix_ref<out_t>(static_cast<T&&>(out_value));
     } else if constexpr (match::index<out_t>) {
       auto ret_val =
-          siconos::storage::handle<siconos::storage::handle_base, typename out_t::type,
-                                   typename out_t::value_t, siconos::python::disks::idata_t>(
+          siconos::vkernel::storage::handle<siconos::vkernel::storage::handle_base,
+                                            typename out_t::type, typename out_t::value_t,
+                                            siconos::vkernel::python::disks::idata_t>(
               h.data(), out_value);
       return ret_val;
     } else {

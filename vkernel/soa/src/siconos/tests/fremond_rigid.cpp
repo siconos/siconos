@@ -51,7 +51,7 @@
 // those of mj.py.
 
 #define SICONOS_FREMOND_RIGID_CONFIG(NS, LAW)                                               \
-  namespace siconos::NS {                                                                   \
+  namespace siconos::vkernel::NS {                                                          \
   struct body : model::lagrangian_ds {};                                                    \
   struct nslaw : model::LAW {};                                                             \
   using polytope_shape = collision::shape::polytope;                                        \
@@ -87,14 +87,14 @@
                               storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {}; \
   /* the types of the config, as one template argument */                                   \
   struct types {                                                                            \
-    using data_t = siconos::NS::data_t;                                                     \
-    using body = siconos::NS::body;                                                         \
-    using nslaw = siconos::NS::nslaw;                                                       \
-    using polytope_shape = siconos::NS::polytope_shape;                                     \
-    using segment_shape = siconos::NS::segment_shape;                                       \
-    using polytopefsegment_r = siconos::NS::polytopefsegment_r;                             \
-    using fc2d = siconos::NS::fc2d;                                                         \
-    using simulation = siconos::NS::simulation;                                             \
+    using data_t = siconos::vkernel::NS::data_t;                                            \
+    using body = siconos::vkernel::NS::body;                                                \
+    using nslaw = siconos::vkernel::NS::nslaw;                                              \
+    using polytope_shape = siconos::vkernel::NS::polytope_shape;                            \
+    using segment_shape = siconos::vkernel::NS::segment_shape;                              \
+    using polytopefsegment_r = siconos::vkernel::NS::polytopefsegment_r;                    \
+    using fc2d = siconos::vkernel::NS::fc2d;                                                \
+    using simulation = siconos::vkernel::NS::simulation;                                    \
   };                                                                                        \
   }
 
@@ -149,7 +149,7 @@ struct history {
 
 template <typename Config>
 history run(const scene& s, double theta, double e = 1.) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using namespace storage;
 
   typename Config::data_t data;
@@ -305,7 +305,7 @@ class FremondRigidTest : public CppUnit::TestFixture {
  public:
   // first impact, step 604: friction works +7.07e-4, E(0.2) - E(0) > 0
   void testStickNewtonCreatesEnergy() {
-    auto r = run<siconos::newton_rigid::types>(stick(), 0.5);
+    auto r = run<siconos::vkernel::newton_rigid::types>(stick(), 0.5);
     print("stick, Newton", r);
     CPPUNIT_ASSERT_EQUAL(2, r.active_steps);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(7.070361e-4, r.de[603], 1e-9);
@@ -315,7 +315,7 @@ class FremondRigidTest : public CppUnit::TestFixture {
 
   // the tangential work is never positive, E(0.2) - E(0) = -1.303e-3
   void testStickFremondDissipates() {
-    auto r = run<siconos::fremond_rigid::types>(stick(), 0.5);
+    auto r = run<siconos::vkernel::fremond_rigid::types>(stick(), 0.5);
     print("stick, Frémond", r);
     CPPUNIT_ASSERT_EQUAL(2, r.active_steps);
     CPPUNIT_ASSERT(*std::ranges::max_element(r.de) <= eps);
@@ -326,8 +326,8 @@ class FremondRigidTest : public CppUnit::TestFixture {
   // second impact, step 1610, right corner: Newton +0.0552, Frémond -0.0183;
   // Frémond never creates energy
   void testBlockSecondImpact() {
-    auto n = run<siconos::newton_rigid::types>(block(), 0.5);
-    auto f = run<siconos::fremond_rigid::types>(block(), 0.5);
+    auto n = run<siconos::vkernel::newton_rigid::types>(block(), 0.5);
+    auto f = run<siconos::vkernel::fremond_rigid::types>(block(), 0.5);
     print("block, Newton", n);
     print("block, Frémond", f);
     // first impact, step 892: the slip does not reverse, the laws agree
@@ -342,10 +342,10 @@ class FremondRigidTest : public CppUnit::TestFixture {
   // E(k + 1) - E(k) = u(k + theta)^T p(k + 1): lambda is the impulse p(k + 1)
   // with both laws, and the normal work is zero for e = 1, theta = 1/2
   void testEnergyBalance() {
-    for (auto r : {run<siconos::newton_rigid::types>(block(0.5), 0.5),
-                   run<siconos::fremond_rigid::types>(block(0.5), 0.5),
-                   run<siconos::newton_rigid::types>(stick(), 0.5),
-                   run<siconos::fremond_rigid::types>(stick(), 0.5)}) {
+    for (auto r : {run<siconos::vkernel::newton_rigid::types>(block(0.5), 0.5),
+                   run<siconos::vkernel::fremond_rigid::types>(block(0.5), 0.5),
+                   run<siconos::vkernel::newton_rigid::types>(stick(), 0.5),
+                   run<siconos::vkernel::fremond_rigid::types>(stick(), 0.5)}) {
       std::print("balance defect {:.3e}, max |normal work| {:.3e}\n", balance_defect(r),
                  max_normal_work(r));
       CPPUNIT_ASSERT(balance_defect(r) <= eps);
@@ -355,8 +355,8 @@ class FremondRigidTest : public CppUnit::TestFixture {
 
   // two coupled contacts: theta = 1 Frémond is Newton, bit for bit
   void testBlockThetaOneIsNewton() {
-    auto n = run<siconos::newton_rigid::types>(block(0.5), 1., 0.5);
-    auto f = run<siconos::fremond_rigid::types>(block(0.5), 1., 0.5);
+    auto n = run<siconos::vkernel::newton_rigid::types>(block(0.5), 1., 0.5);
+    auto f = run<siconos::vkernel::fremond_rigid::types>(block(0.5), 1., 0.5);
     print("block theta 1, Newton", n);
     print("block theta 1, Frémond", f);
     CPPUNIT_ASSERT(n.active_steps > 0);

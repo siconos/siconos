@@ -34,7 +34,7 @@
 #include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos {
+namespace siconos::vkernel {
 
 template <typename Item>
 struct standard_environment {
@@ -105,4 +105,4 @@ struct standard_environment {
   // column would only ever hold a single item.
   using default_storage = boost::container::small_vector<T, 1>;
 };
-}  // namespace siconos
+}  // namespace siconos::vkernel

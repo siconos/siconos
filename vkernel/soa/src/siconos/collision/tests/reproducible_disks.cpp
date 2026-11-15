@@ -49,8 +49,8 @@ namespace CompactNSearch = cuNSearch;
    - the same granular flow (a grid of disks with friction sliding on a slope,
      in a box) run twice gives bitwise identical states. */
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct disk : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
 using diskdisk_r = collision::diskdisk_r;
@@ -95,7 +95,7 @@ struct data_t : storage::make_runtime_database<
                         storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
                         storage::assembled_diagonal<
                             storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -108,7 +108,7 @@ struct run_result {
 };
 
 run_result run_deposit(bool with_dataflow = false) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using namespace storage;
 
   config::data_t data;

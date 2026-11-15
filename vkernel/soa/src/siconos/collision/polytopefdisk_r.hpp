@@ -30,7 +30,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* Signed distance from a point c to the boundary of a convex polygon of n
    vertices, of either orientation: dist > 0 outside, dist < 0 inside (minus
@@ -213,4 +213,4 @@ struct polytopefdisk_r : item, model::relation1, model::any_lagrangian_relation 
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

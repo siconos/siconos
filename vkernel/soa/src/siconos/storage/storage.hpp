@@ -31,7 +31,7 @@
 #include "siconos/storage/remove.hpp"
 #include "siconos/storage/sparse_set.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 // template <match::item T>
 // static constexpr void for_each_attribute(T)
@@ -42,4 +42,4 @@ namespace siconos::storage {
 using pattern::attr_t;
 using pattern::wrap;
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

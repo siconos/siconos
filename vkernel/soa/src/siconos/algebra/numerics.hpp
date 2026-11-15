@@ -36,7 +36,7 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
-namespace siconos::storage::pattern::match {
+namespace siconos::vkernel::storage::pattern::match {
 template <typename T>
 concept vec = requires { typename std::decay_t<T>::vec_t; };
 
@@ -49,11 +49,11 @@ concept mat = any_mat<T> && requires { typename std::decay_t<T>::mat_t; };
 template <typename T>
 concept diag_mat = any_mat<T> && requires { typename std::decay_t<T>::diag_mat_t; };
 
-}  // namespace siconos::storage::pattern::match
+}  // namespace siconos::vkernel::storage::pattern::match
 
-namespace siconos::algebra {
+namespace siconos::vkernel::algebra {
 
-namespace match = siconos::storage::pattern::match;
+namespace match = siconos::vkernel::storage::pattern::match;
 
 using indice_t = std::size_t;
 
@@ -861,4 +861,4 @@ void display(match::any_mat auto& a) { NM_display(a._m); }
 
 void display(match::vec auto& v) { NM_display(v._v); }
 
-}  // namespace siconos::algebra
+}  // namespace siconos::vkernel::algebra

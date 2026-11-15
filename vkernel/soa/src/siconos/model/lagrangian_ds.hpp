@@ -21,7 +21,7 @@
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/model/model_head.hpp"
 
-namespace siconos::model {
+namespace siconos::vkernel::model {
 /**
  * @brief Represents a Lagrangian dynamical system with fixed-size attributes
  *
@@ -120,4 +120,4 @@ static constexpr bool runtime_dof() {
 static_assert(has_k_matrix(elastic_lagrangian_ds{}));
 static_assert(!has_k_matrix(lagrangian_ds{}));
 
-}  // namespace siconos::model
+}  // namespace siconos::vkernel::model

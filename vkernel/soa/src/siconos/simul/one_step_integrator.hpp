@@ -30,7 +30,7 @@
 #include "siconos/utils/range.hpp"
 #include "siconos/utils/variant.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 // the item types of a tuple of item_ref that are not empty items
 template <typename... Refs>
@@ -389,4 +389,4 @@ struct one_step_integrator {
   // selectable_scheme.hpp)
   struct selectable : integrator<simul::selectable_scheme::scheme> {};
 };
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

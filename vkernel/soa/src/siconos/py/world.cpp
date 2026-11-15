@@ -21,6 +21,6 @@
 // the binding parts (see data_t in py_head.hpp).
 #include "py_head.hpp"
 
-namespace siconos::python::disks {
+namespace siconos::vkernel::python::disks {
 data_t::data_t() : _data(idata_t{}) {}
-}  // namespace siconos::python::disks
+}  // namespace siconos::vkernel::python::disks

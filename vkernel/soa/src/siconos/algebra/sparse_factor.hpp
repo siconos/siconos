@@ -34,7 +34,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace siconos::algebra {
+namespace siconos::vkernel::algebra {
 
 class sparse_factor {
  public:
@@ -165,4 +165,4 @@ struct factored_block {
   sparse_factor* factor;
 };
 
-}  // namespace siconos::algebra
+}  // namespace siconos::vkernel::algebra

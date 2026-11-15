@@ -22,7 +22,7 @@
 
 #include "siconos/storage/refs.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 /**
  * The rows of the items of Item moved as r says (see ref_remap): rewrite the
@@ -36,4 +36,4 @@ void remap_refs(auto& data, const ref_remap& r) {
   data.store()._registry.template remap_refs<Item>(r);
 }
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

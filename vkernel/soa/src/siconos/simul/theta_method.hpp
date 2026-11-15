@@ -23,7 +23,7 @@
 #include "siconos/simul/kernels.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::theta_method {
+namespace siconos::vkernel::simul::theta_method {
 
 /* The theta-method on the smooth dynamics M dv = (f - K q) dt, the part of
    the Moreau-Jean schemes (local and global) without contacts. With A = M +
@@ -228,4 +228,4 @@ struct compute_free_state
 
 }  // namespace stages
 
-}  // namespace siconos::simul::theta_method
+}  // namespace siconos::vkernel::simul::theta_method

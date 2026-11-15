@@ -26,7 +26,7 @@
 #include "siconos/config/config_builder.hpp"
 #include "siconos/siconos.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct ball : model::lagrangian_ds {};
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
@@ -45,7 +45,7 @@ struct data_t : decltype(storage()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
                              .build_runtime_database()){};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -56,10 +56,10 @@ class BouncingBallTest : public CppUnit::TestFixture {
 
  public:
   void testBouncingBall() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
-    using siconos::storage::handle;
-    using siconos::storage::pattern::param_val;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+    using siconos::vkernel::storage::handle;
+    using siconos::vkernel::storage::pattern::param_val;
 
     config::data_t data;
 
@@ -120,7 +120,7 @@ class BouncingBallTest : public CppUnit::TestFixture {
     osnspb.problem() = lcp;
 
     // -- set the options --
-    handle so = storage::add<siconos::simul::solver_options>(data);
+    handle so = storage::add<siconos::vkernel::simul::solver_options>(data);
     so.create();
     osnspb.options() = so;
 
@@ -168,8 +168,8 @@ class BouncingBallTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_ball.dat"), "bouncing_ball.ref",
-                       1e-8);
+    CPPUNIT_ASSERT_REF(siconos::vkernel::test::read_ref("bouncing_ball.dat"),
+                       "bouncing_ball.ref", 1e-8);
   }
 };
 

@@ -45,8 +45,8 @@
 #include "siconos/collision/polytopefdisk_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 using storage::pattern::symbol;
 
 struct polytope_ds : model::lagrangian_ds {};
@@ -97,7 +97,7 @@ struct data_t
               storage::diagonal<storage::pattern::attr_t<polytope_ds, "mass_matrix">>,
               storage::assembled_diagonal<
                   storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 bool near(double a, double b, double tol = 1e-9) { return std::abs(a - b) <= tol; }
@@ -108,7 +108,7 @@ bool near2(const auto& a, double x, double y, double tol = 1e-9) {
 const std::array<std::array<double, 2>, 4> square_ccw = {{{1, -1}, {1, 1}, {-1, 1}, {-1, -1}}};
 
 void test_distance() {
-  using siconos::collision::point_polytope_distance;
+  using siconos::vkernel::collision::point_polytope_distance;
   using square_t = std::array<std::array<double, 2>, 4>;
   square_t square_cw;
   for (int i = 0; i < 4; ++i) square_cw[i] = square_ccw[3 - i];
@@ -130,8 +130,8 @@ void test_distance() {
   }
 }
 
-auto add_square(siconos::config::data_t& data, double x, double y, double theta) {
-  using namespace siconos;
+auto add_square(siconos::vkernel::config::data_t& data, double x, double y, double theta) {
+  using namespace siconos::vkernel;
   auto sh = storage::add<config::polytope_shape>(data);
   for (int i = 0; i < 4; ++i) sh.vertices()[i] = {square_ccw[i][0], square_ccw[i][1]};
   sh.nvertices() = 4;
@@ -144,8 +144,8 @@ auto add_square(siconos::config::data_t& data, double x, double y, double theta)
   return ds;
 }
 
-auto add_fixed_disk(siconos::config::data_t& data, double x, double y, double r) {
-  using namespace siconos;
+auto add_fixed_disk(siconos::vkernel::config::data_t& data, double x, double y, double r) {
+  using namespace siconos::vkernel;
   auto dsh = storage::add<config::disk_shape>(data);
   dsh.radius() = r;
   dsh.maxpoints() = 64;
@@ -156,7 +156,7 @@ auto add_fixed_disk(siconos::config::data_t& data, double x, double y, double r)
 }
 
 void test_relation() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   config::data_t data;
   auto ds = add_square(data, 0, 0, 0);
   auto rel = storage::add<config::polytopefdisk_r>(data);
@@ -178,7 +178,7 @@ void test_relation() {
 }
 
 void test_jacobian_finite_differences() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   for (double dx : {2.4, 0.6}) {  // separated, then centre inside
     config::data_t data;
     const std::array<double, 3> q0 = {0.1, -0.2, 0.3};
@@ -203,7 +203,7 @@ void test_jacobian_finite_differences() {
 }
 
 void test_fall_on_fixed_disk() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   config::data_t data;
   auto ds = add_square(data, 0, 2.3, 0);
   ds.fext() = {0., -9.81, 0.};

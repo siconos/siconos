@@ -20,7 +20,7 @@
 
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 template <typename... Cfs>
 using map = storage::mp::map<Cfs...>;
 
@@ -36,4 +36,4 @@ using iparam = assoc<param<S>, param_val<N>>;
 
 template <storage::pattern::string_literal S, typename T>
 using tparam = assoc<param<S>, param_type<T>>;
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config

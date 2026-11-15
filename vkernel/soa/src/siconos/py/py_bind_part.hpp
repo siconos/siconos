@@ -28,7 +28,7 @@
 #error "NONOS_PART and NONOS_PARTS must be defined"
 #endif
 
-namespace siconos::python::disks {
+namespace siconos::vkernel::python::disks {
 
 template <std::size_t Part>
 void bind_part(py::module_& disks) {
@@ -47,4 +47,4 @@ void bind_part(py::module_& disks) {
 // the one part of this translation unit; main.cpp calls them all
 template void bind_part<NONOS_PART>(py::module_& disks);
 
-}  // namespace siconos::python::disks
+}  // namespace siconos::vkernel::python::disks

@@ -21,7 +21,7 @@
 #include "siconos/storage/mp/mp.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 using namespace pattern;
 // the storage info key
@@ -35,4 +35,4 @@ auto get_info(D&& data) {
 template <typename D>
 using get_info_t = decltype(get_info(std::decay_t<D>{}));
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

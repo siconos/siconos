@@ -20,6 +20,6 @@
 
 #include <ranges>
 
-namespace siconos {
+namespace siconos::vkernel {
 namespace view = std::ranges::views;
 }

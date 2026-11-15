@@ -22,7 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 template <typename Key, typename T>
 struct sparse_set {
@@ -230,4 +230,4 @@ void for_each_entry(C& c, F&& f) {
   }
 }
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

@@ -77,7 +77,7 @@ using namespace nscd;
    partial step (the block sticks inside it) differs from the analytic motion,
    by at most v h with v < mu g h. */
 void sliding_square(double h) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double v0 = 2.;
   const double mu = 0.3;
   const double t_stop = v0 / (mu * g);
@@ -125,7 +125,7 @@ void sliding_square(double h) {
    a = g (sin alpha - mu cos alpha), exactly at every step (the same
    argument as for the sliding square) */
 void incline(double alpha, double mu, double h, std::size_t scheme = schemes::local_problem) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double tmax = 1.;
   const bool sticks = std::tan(alpha) < mu;
   const double a = sticks ? 0. : g * (std::sin(alpha) - mu * std::cos(alpha));
@@ -199,7 +199,7 @@ const char* name(regime rg) {
 }
 
 void basic_problem(double mu, double vx, double vy, regime expected) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double phi = 30 * deg;
   const double h = 1e-3;
   const double c = std::cos(phi), s = std::sin(phi);
@@ -266,7 +266,7 @@ void basic_problem(double mu, double vx, double vy, regime expected) {
    every disk is cancelled at the velocity level, so no contact ever closes
    further, at any depth of the column */
 void column(std::size_t n, double h) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w({.mu = 0.3, .h = h, .tmax = 1.});
   std::vector<decltype(w.add_disk(0., 0.))> disks;
   for (std::size_t i = 0; i < n; ++i) disks.push_back(w.add_disk(0., r + 2 * r * i));
@@ -301,7 +301,7 @@ const char* name(std::size_t scheme) {
    dropped with gaps of 0.1 (impacts at different times, then at rest), the
    two schemes step by step: their difference is the solvers' tolerance */
 void frictionless_column(std::size_t n, std::size_t scheme) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   auto run = [n](std::size_t scheme) {
     world w({.mu = 0., .h = 5e-3, .tmax = 1., .scheme = scheme});
     std::vector<decltype(w.add_disk(0., 0.))> disks;
@@ -338,7 +338,7 @@ void frictionless_column(std::size_t n, std::size_t scheme) {
    of 0: vy = mu vx with the normal impulse P = (g h + mu v0) / (1 + mu^2),
    the block lifts off (Moreau-Jean: vy = 0, see sliding_square) */
 void separation_when_sliding(std::size_t scheme) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double v0 = 2.;
   const double mu = 0.3;
   const double h = 5e-3;
@@ -375,7 +375,7 @@ void separation_when_sliding(std::size_t scheme) {
    corrects. 20 disks: PGS 10332 sweeps cold, at most 337 warm; APGD 404
    iterations cold, at most 42 warm */
 void warm_started_column(std::size_t n, std::size_t scheme) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w({.mu = 0.3, .h = 5e-3, .tmax = 0.5, .scheme = scheme});
   std::vector<decltype(w.add_disk(0., 0.))> disks;
   for (std::size_t i = 0; i < n; ++i) disks.push_back(w.add_disk(0., r + 2 * r * i));
@@ -428,7 +428,7 @@ scene dem_scene(double mu, double h, double tmax, double alpha = 0., double damp
    contact from the bottom (n - i) m g / k_n: the weight above it over the
    stiffness (Moreau-Jean: none, see column) */
 void dem_column(std::size_t n) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   world w(dem_scene(0.3, 1e-4, 0.5));
   std::vector<decltype(w.add_disk(0., 0.))> disks;
   for (std::size_t i = 0; i < n; ++i) disks.push_back(w.add_disk(0., r + 2 * r * i));
@@ -456,7 +456,7 @@ void dem_column(std::size_t n) {
    oscillates in the overlap [0, 2 m g / k_n] and stays on the ground;
    above, each contact gives energy and it bounces away */
 void dem_stability() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double h_crit = 2 * std::sqrt(m / kn);
   auto run = [](double h) {
     world w(dem_scene(0., h, 0.5, 0., 0.));
@@ -490,7 +490,7 @@ void dem_stability() {
    springs hold the Coulomb force: the stopping distance v0^2 / (2 mu g),
    up to the elastic offset of the springs and the normal vibrations */
 void dem_sliding_square() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double v0 = 0.5;
   const double mu = 0.3;
   const double d_exact = v0 * v0 / (2 * mu * g);
@@ -521,7 +521,7 @@ void dem_sliding_square() {
    square rests at x_eq plus the slip: 1.67e-4 for x_eq = 5.9e-5
    (Moreau-Jean: x = 0, see incline) */
 void dem_incline_sticks() {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   const double alpha = 20 * deg;
   world w(dem_scene(0.5, 1e-4, 0.6, alpha));
   auto p = w.add_square(0., r - m * g * std::cos(alpha) / (2 * kn));

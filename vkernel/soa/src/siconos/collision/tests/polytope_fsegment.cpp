@@ -42,8 +42,8 @@
 #include "siconos/collision/polytopefsegment_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct polytope_ds : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
 using polytope_shape = collision::shape::polytope;
@@ -74,7 +74,7 @@ struct data_t : storage::make_runtime_database<
                         storage::wrapped<interaction, some::unbounded_collection>,
                         storage::attached<polytope_ds, storage::pattern::symbol<"shape">,
                                           storage::some::item_ref<polytope_shape>>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 #include <stdexcept>
 
@@ -91,7 +91,7 @@ class PolytopeFsegmentTest : public CppUnit::TestFixture {
 
  public:
   void testPolytopeFsegment() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     config::data_t data;
 
     /* polytope: side-2 square centered at origin, vertices CCW */

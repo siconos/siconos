@@ -64,7 +64,7 @@
 #include "siconos/simul/topology.hpp"
 #include "siconos/storage/handle.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct fem_ds : model::elastic_lagrangian_ds {};
 using ball = model::lagrangian_ds;
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
@@ -104,7 +104,7 @@ struct make
                   config::fem_ds, storage::pattern::symbol<"bc_velocities_0">,
                   storage::some::unbounded_collection<storage::some::indice>>>>> {};
 
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -146,11 +146,11 @@ class FemT3Test : public CppUnit::TestFixture {
     initial_gap << gap;
     std::vector<siconos::algebra::SiconosDenseMatrix> Hv;
 
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
     using storage::handle;
 
-    auto data = siconos::config::make();
+    auto data = siconos::vkernel::config::make();
     handle fe_solid = storage::add<config::fem_ds>(data);
     handle nslaw = storage::add<config::nslaw>(data);
     nslaw.e() = e;
@@ -171,7 +171,7 @@ class FemT3Test : public CppUnit::TestFixture {
     handle osnspb = simul.one_step_nonsmooth_problem();
     osnspb.problem() = lcp;
 
-    handle so = storage::add<siconos::simul::solver_options>(data);
+    handle so = storage::add<siconos::vkernel::simul::solver_options>(data);
     so.create(SICONOS_LCP_LEMKE);
     osnspb.options() = so;
 
@@ -248,14 +248,14 @@ class FemT3Test : public CppUnit::TestFixture {
     }
     result_file.close();
 
-    const auto dat = siconos::test::read_ref("fem_t3.dat");
+    const auto dat = siconos::vkernel::test::read_ref("fem_t3.dat");
     CPPUNIT_ASSERT_EQUAL_MESSAGE("1000 steps", Eigen::Index{1001}, dat.rows());
     CPPUNIT_ASSERT_MESSAGE("a finite trajectory", finite);
 
     // the AOS kernel, before the impact: the same model, another code
-    const auto aos = siconos::test::read_ref("T3_square_200.ref");
+    const auto aos = siconos::vkernel::test::read_ref("T3_square_200.ref");
     const auto early =
-        siconos::test::relative_error(dat.topRows(aos_rows), aos.topRows(aos_rows));
+        siconos::vkernel::test::relative_error(dat.topRows(aos_rows), aos.topRows(aos_rows));
     std::print("first {} rows against the AOS reference: relative error {:.3e}\n", aos_rows,
                early.relative);
     CPPUNIT_ASSERT_MESSAGE("the AOS reference on the first steps",

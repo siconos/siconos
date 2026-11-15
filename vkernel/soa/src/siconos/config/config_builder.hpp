@@ -25,7 +25,7 @@
 #include "siconos/storage/properties.hpp"
 #include "siconos/storage/registry.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 
 using storage::pattern::string_literal;
 using storage::pattern::string_view_to_fixed_string;
@@ -148,4 +148,4 @@ class config_builder {
 // Factory function
 inline auto storage() { return config_builder<>{}; }
 
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config

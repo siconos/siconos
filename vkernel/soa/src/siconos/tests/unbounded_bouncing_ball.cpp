@@ -25,7 +25,7 @@
 #include "ref_check.hpp"
 #include "siconos/siconos.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct ball : model::lagrangian_ds {};
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
@@ -52,7 +52,7 @@ struct data_t
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
               storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -63,7 +63,7 @@ class UnboundedBouncingBallTest : public CppUnit::TestFixture {
 
  public:
   void testUnboundedBouncingBall() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     config::data_t data;
 
     // unsigned int nDof = 3;         // degrees of freedom for the ball
@@ -175,7 +175,7 @@ class UnboundedBouncingBallTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("unbounded_bouncing_ball.dat"),
+    CPPUNIT_ASSERT_REF(siconos::vkernel::test::read_ref("unbounded_bouncing_ball.dat"),
                        "unbounded_bouncing_ball.ref", 1e-8);
   }
 };

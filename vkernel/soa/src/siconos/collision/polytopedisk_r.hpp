@@ -29,7 +29,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* Disk x polytope contact relation: two dynamical systems, ds1 the disk, ds2
    the convex polygon (the space filter links a mixed pair in that order).
@@ -135,4 +135,4 @@ struct polytopedisk_r : item, model::relation2, model::any_lagrangian_relation {
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

@@ -25,7 +25,7 @@
 #include "siconos/storage/data_holder.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul {
+namespace siconos::vkernel::simul {
 
 // the timings of the stages of the time steps (see storage::schedule::timings)
 struct schedule_timings : storage::data_holder<storage::schedule::timings> {};
@@ -196,4 +196,4 @@ struct time_stepping : item {
     }
   };
 };
-}  // namespace siconos::simul
+}  // namespace siconos::vkernel::simul

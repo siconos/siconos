@@ -50,14 +50,14 @@
 #if defined(__clang__)
 #endif
 
-namespace siconos {
-using siconos::storage::access;
-using siconos::storage::default_interface;
-using siconos::storage::prop;
+namespace siconos::vkernel {
+using siconos::vkernel::storage::access;
+using siconos::vkernel::storage::default_interface;
+using siconos::vkernel::storage::prop;
 
-using siconos::storage::pattern::collect;
-using siconos::storage::pattern::method;
+using siconos::vkernel::storage::pattern::collect;
+using siconos::vkernel::storage::pattern::method;
 
 using namespace boost::hana::literals;
 
-}  // namespace siconos
+}  // namespace siconos::vkernel

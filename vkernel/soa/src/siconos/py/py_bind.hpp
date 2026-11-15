@@ -26,10 +26,10 @@
 
 #include "py_head.hpp"
 
-namespace siconos::python::disks {
+namespace siconos::vkernel::python::disks {
 
 using namespace boost::hana::literals;
-namespace mp = siconos::storage::mp;
+namespace mp = siconos::vkernel::storage::mp;
 
 inline data_t make_storage() { return data_t(); };
 
@@ -314,7 +314,7 @@ void bind_item(py::module_& disks) {
 
   disks.def(
       std::format("add_{}", item_name).c_str(),
-      [](data_t& data) { return siconos::storage::add<item_t>(data()); },
+      [](data_t& data) { return siconos::vkernel::storage::add<item_t>(data()); },
       py::return_value_policy::reference, R"pbdoc(
         Add
     )pbdoc");
@@ -323,7 +323,7 @@ void bind_item(py::module_& disks) {
     disks.def(
         std::format("multiple_add_{}", item_name).c_str(),
         [](data_t& data, indice_t count) {
-          auto r = siconos::storage::add<item_t>(data(), count);
+          auto r = siconos::vkernel::storage::add<item_t>(data(), count);
           return handles_wrap<std::vector<handle_t>>{
               std::ranges::to<std::vector<handle_t>>(r)};
         },
@@ -365,4 +365,4 @@ void bind_items(py::module_& disks) {
   }(std::make_index_sequence<n>{});
 }
 
-}  // namespace siconos::python::disks
+}  // namespace siconos::vkernel::python::disks

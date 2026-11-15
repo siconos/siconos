@@ -47,8 +47,8 @@
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 using storage::pattern::symbol;
 
 struct body : model::lagrangian_ds {};
@@ -123,7 +123,7 @@ struct data_t
               storage::diagonal<storage::pattern::attr_t<body, "mass_matrix">>,
               storage::assembled_diagonal<
                   storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace nscd {
 
@@ -132,7 +132,7 @@ constexpr double g = 9.81;
 constexpr double r = 0.5;  // disk radius, square half side
 constexpr double deg = std::numbers::pi / 180.;
 
-namespace schemes = siconos::simul::selectable_scheme;
+namespace schemes = siconos::vkernel::simul::selectable_scheme;
 
 struct scene {
   double mu = 0.;
@@ -156,24 +156,26 @@ struct scene {
 };
 
 struct world {
-  siconos::config::data_t data;
-  decltype(siconos::storage::add<siconos::config::simulation>(data)) simulation;
-  decltype(siconos::storage::add<siconos::config::space_filter>(data)) spacef;
-  decltype(siconos::storage::add<siconos::config::neighborhood>(data)) ngbh;
-  decltype(siconos::storage::add<siconos::config::cxd_narrowphase>(data)) np;
-  decltype(siconos::storage::add<siconos::config::disk_shape>(data)) dsh;
-  decltype(siconos::storage::add<siconos::config::polytope_shape>(data)) psh;
+  siconos::vkernel::config::data_t data;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::simulation>(
+      data)) simulation;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::space_filter>(
+      data)) spacef;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::neighborhood>(data)) ngbh;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::cxd_narrowphase>(data)) np;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::disk_shape>(data)) dsh;
+  decltype(siconos::vkernel::storage::add<siconos::vkernel::config::polytope_shape>(data)) psh;
   scene sc;
 
   explicit world(scene sc_)
-      : simulation(siconos::storage::add<siconos::config::simulation>(data)),
-        spacef(siconos::storage::add<siconos::config::space_filter>(data)),
-        ngbh(siconos::storage::add<siconos::config::neighborhood>(data)),
-        np(siconos::storage::add<siconos::config::cxd_narrowphase>(data)),
-        dsh(siconos::storage::add<siconos::config::disk_shape>(data)),
-        psh(siconos::storage::add<siconos::config::polytope_shape>(data)),
+      : simulation(siconos::vkernel::storage::add<siconos::vkernel::config::simulation>(data)),
+        spacef(siconos::vkernel::storage::add<siconos::vkernel::config::space_filter>(data)),
+        ngbh(siconos::vkernel::storage::add<siconos::vkernel::config::neighborhood>(data)),
+        np(siconos::vkernel::storage::add<siconos::vkernel::config::cxd_narrowphase>(data)),
+        dsh(siconos::vkernel::storage::add<siconos::vkernel::config::disk_shape>(data)),
+        psh(siconos::vkernel::storage::add<siconos::vkernel::config::polytope_shape>(data)),
         sc(sc_) {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     dsh.radius() = r;
     const std::array<std::array<double, 2>, 4> square = {{{-r, -r}, {r, -r}, {r, r}, {-r, r}}};
     for (int i = 0; i < 4; ++i) psh.vertices()[i] = {square[i][0], square[i][1]};
@@ -225,7 +227,7 @@ struct world {
   }
 
   auto add_body(auto shape, double x, double y, double vx, double inertia) {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     auto b = storage::add<config::body>(data);
     b.q() = {x, y, 0};
     b.velocity() = {vx, 0, 0};
@@ -238,7 +240,7 @@ struct world {
   // a fixed disk of radius r at (x, y): an obstacle without dofs, its points
   // for the neighborhood sampled on its circle
   void add_fixed_disk(double x, double y) {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     auto shape = storage::add<config::disk_shape>(data);
     shape.radius() = r;
     shape.maxpoints() = 8;

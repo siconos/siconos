@@ -20,7 +20,7 @@
 
 #include "siconos/model/model_head.hpp"
 
-namespace siconos::model {
+namespace siconos::vkernel::model {
 
 /// Represents an equality condition constraint (placeholder)
 struct equality_condition {};
@@ -97,4 +97,4 @@ struct newton_impact : item {
   };
 };
 
-}  // namespace siconos::model
+}  // namespace siconos::vkernel::model

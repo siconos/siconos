@@ -25,7 +25,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace siconos::storage::pattern::match {
+namespace siconos::vkernel::storage::pattern::match {
 template <typename T>
 concept vec = requires { typename T::vec_t; };
 
@@ -38,11 +38,11 @@ concept mat = any_mat<T> && requires { typename T::mat_t; };
 template <typename T>
 concept diag_mat = any_mat<T> && requires { typename T::diag_mat_t; };
 
-}  // namespace siconos::storage::pattern::match
+}  // namespace siconos::vkernel::storage::pattern::match
 
-namespace siconos::algebra {
+namespace siconos::vkernel::algebra {
 
-namespace match = siconos::storage::pattern::match;
+namespace match = siconos::vkernel::storage::pattern::match;
 
 static constexpr auto zero_threshold = 1e-30;
 
@@ -314,4 +314,4 @@ void display(match::any_mat auto& a) { MatView(a._m, PETSC_VIEWER_STDOUT_SELF); 
 
 void display(match::vec auto& v) { VecView(v._v, PETSC_VIEWER_STDOUT_SELF); }
 
-}  // namespace siconos::algebra
+}  // namespace siconos::vkernel::algebra

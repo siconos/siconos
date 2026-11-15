@@ -50,8 +50,8 @@
 #include "siconos/collision/polytopepolytope_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 
 struct polytope : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
@@ -95,7 +95,7 @@ struct data_t : storage::make_runtime_database<
                         storage::diagonal<storage::pattern::attr_t<polytope, "mass_matrix">>,
                         storage::assembled_diagonal<
                             storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -106,7 +106,7 @@ class BouncingPolytopesTest : public CppUnit::TestFixture {
 
  public:
   void testBouncingPolytopes() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     using namespace storage;
 
     config::data_t data;

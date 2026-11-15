@@ -18,7 +18,7 @@
 
 #include "siconos/algebra/eigen.hpp"
 
-namespace siconos::algebra {
+namespace siconos::vkernel::algebra {
 static_assert(vector<int, 3>::SizeAtCompileTime != Eigen::Dynamic);
 static_assert(unbounded_vector<int>::SizeAtCompileTime == Eigen::Dynamic);
 static_assert(vector<int, 3>::ColsAtCompileTime == 1);
@@ -41,5 +41,5 @@ static_assert(std::is_same_v<prod_t<matrix<int, 1, 2>, matrix<int, 2, 1>>, matri
 static_assert(
     std::is_same_v<prod_t<matrix<int, 1, 2>, trans_t<matrix<int, 1, 2>>>, matrix<int, 1, 1>>);
 
-}  // namespace siconos::algebra
+}  // namespace siconos::vkernel::algebra
 int main() {};

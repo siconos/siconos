@@ -24,7 +24,7 @@
 
 #include "siconos/collision/collision_head.hpp"
 
-namespace siconos::collision::shape {
+namespace siconos::vkernel::collision::shape {
 
 struct line : item {
   // a*x + b*y + c = 0
@@ -79,4 +79,4 @@ struct line : item {
     auto methods() { return collect(method("initialize", &interface<Handle>::initialize)); }
   };
 };
-}  // namespace siconos::collision::shape
+}  // namespace siconos::vkernel::collision::shape

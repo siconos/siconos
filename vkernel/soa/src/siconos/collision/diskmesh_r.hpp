@@ -22,7 +22,7 @@
 #include "siconos/collision/shape/mesh.hpp"
 #include "siconos/collision/shape_of.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 struct mesh_relation {};
 
@@ -116,9 +116,9 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision
 
-namespace siconos::storage::pattern::match {
+namespace siconos::vkernel::storage::pattern::match {
 template <typename T>
 concept mesh_relation = std::derived_from<T, collision::mesh_relation>;
 }

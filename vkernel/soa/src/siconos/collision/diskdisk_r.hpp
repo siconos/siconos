@@ -29,7 +29,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
   using dof = some::indice_parameter<"dof">;
@@ -109,4 +109,4 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
   // cf
   // https://stackoverflow.com/questions/47906426/type-of-member-functions-arguments
 };
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

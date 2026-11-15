@@ -28,10 +28,10 @@
 #error "NONOS_PARTS must be defined"
 #endif
 
-namespace siconos::python::disks {
+namespace siconos::vkernel::python::disks {
 template <std::size_t Part>
 void bind_part(pybind11::module_& disks);
-}  // namespace siconos::python::disks
+}  // namespace siconos::vkernel::python::disks
 
 PYBIND11_MODULE(_nonos, m) {
   // sub module disks
@@ -51,7 +51,7 @@ PYBIND11_MODULE(_nonos, m) {
     )pbdoc";
 
   [&disks]<std::size_t... Part>(std::index_sequence<Part...>) {
-    (siconos::python::disks::bind_part<Part>(disks), ...);
+    (siconos::vkernel::python::disks::bind_part<Part>(disks), ...);
   }(std::make_index_sequence<NONOS_PARTS>{});
 
   disks.attr("__version__") = "dev";

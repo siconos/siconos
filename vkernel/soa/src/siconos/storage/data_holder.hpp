@@ -21,7 +21,7 @@
 #include "siconos/storage/default_interface.hpp"
 #include "siconos/storage/some/some.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 template <typename Struct>
 struct data_holder : item {
@@ -35,4 +35,4 @@ struct data_holder : item {
   };
 };
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

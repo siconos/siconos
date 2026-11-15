@@ -40,8 +40,8 @@
 #include "siconos/collision/polytopemesh_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct polytope_ds : model::lagrangian_ds {};
 struct mesh_ds : model::elastic_lagrangian_ds {};
 using polytope_shape = collision::shape::polytope;
@@ -59,7 +59,7 @@ struct data_t : storage::make_runtime_database<
                         storage::wrapped<mesh_ds, some::unbounded_collection>,
                         storage::attached<polytope_ds, storage::pattern::symbol<"shape">,
                                           storage::some::item_ref<polytope_shape>>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 #include <stdexcept>
 
@@ -76,7 +76,7 @@ class PolytopeMeshTest : public CppUnit::TestFixture {
 
  public:
   void testPolytopeMesh() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     config::data_t data;
 
     /* polytope: side-2 square centered at origin, vertices CCW */

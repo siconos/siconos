@@ -40,7 +40,7 @@
 #include "siconos/storage/permute.hpp"
 #include "siconos/storage/refs.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct ball : model::lagrangian_ds {};
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
@@ -59,11 +59,11 @@ struct data_t : decltype(storage()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
                              .build_runtime_database()){};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 // items without attributes: one counted through its attached storage, one
 // without any column
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct marker : storage::pattern::item {};
 struct bare : storage::pattern::item {};
 struct markers_t
@@ -71,15 +71,15 @@ struct markers_t
           standard_environment, marker, bare,
           storage::with_properties<storage::attached<
               marker, storage::pattern::symbol<"weight">, storage::some::scalar>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 // the simulation and its integrator live as long as the store: storage::remove
 // refuses them at compile time; a ball may go
-namespace match = siconos::storage::pattern::match;
-static_assert(match::not_removable<siconos::config::simulation>);
-static_assert(match::not_removable<siconos::config::osi>);
-static_assert(!match::not_removable<siconos::config::ball>);
-static_assert(!match::not_removable<siconos::config::interaction>);
+namespace match = siconos::vkernel::storage::pattern::match;
+static_assert(match::not_removable<siconos::vkernel::config::simulation>);
+static_assert(match::not_removable<siconos::vkernel::config::osi>);
+static_assert(!match::not_removable<siconos::vkernel::config::ball>);
+static_assert(!match::not_removable<siconos::vkernel::config::interaction>);
 
 namespace {
 
@@ -98,8 +98,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
  public:
   void testRegistryRemove() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
 
@@ -149,8 +149,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   // would change which items the loops over the entries visit, and what is
   // serialized
   void testReadCreatesNoEntry() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
 
@@ -177,8 +177,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   // a handle kept across a removal may hold an index past the end (swap and
   // pop): its removal throws instead of moving columns out of bounds
   void testRemovePastTheEnd() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
 
@@ -195,8 +195,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
   // storage::permute takes a permutation of the items
   void testPermuteChecks() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
 
@@ -217,8 +217,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   template <typename Data, typename Balls>
   static auto link(Data& data, Balls& balls,
                    std::initializer_list<std::pair<int, int>> pairs) {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
     std::vector<decltype(storage::add<config::interaction>(data))> inters;
     for (auto [a, b] : pairs) {
       auto inter = storage::add<config::interaction>(data);
@@ -233,20 +233,20 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
   template <typename Data>
   static ends_t ends(Data& data, std::size_t k) {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
     auto& ds1s = storage::prop_values<config::interaction, "ds1", config::topo>(data, 0);
     auto& ds2s = storage::prop_values<config::interaction, "ds2", config::topo>(data, 0);
     return {ds1s[k].value(), ds2s[k].value()};
   }
 
-  static constexpr std::size_t dead = siconos::storage::ref_remap::invalid;
+  static constexpr std::size_t dead = siconos::vkernel::storage::ref_remap::invalid;
 
   // storage::remove rewrites the refs to the removed item (invalid) and to
   // the moved one (its new index) held in the other columns
   void testRemoveRemapsRefs() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
     std::vector balls{storage::add<config::ball>(data), storage::add<config::ball>(data),
@@ -262,8 +262,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
   // storage::permute: the refs follow the moved items
   void testPermuteRemapsRefs() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
     std::vector balls{storage::add<config::ball>(data), storage::add<config::ball>(data),
@@ -279,8 +279,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
   // storage::remove_many: several swaps and pops, the refs rewritten once
   void testRemoveManyRemapsRefs() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::data_t data;
     std::vector balls{storage::add<config::ball>(data), storage::add<config::ball>(data),
@@ -306,8 +306,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   // storage::handles counts the items from any of their columns, not only
   // from a first attribute: an item may have none
   void testHandlesWithoutAttributes() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
 
     config::markers_t data;
     for (int k = 0; k < 3; ++k) storage::add<config::marker>(data);
@@ -323,8 +323,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   // the walker on the shapes a column may take: only the refs of the moved
   // kind change, whatever the container
   void testRemapWalker() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
     using ball_ref = storage::index<config::ball, std::size_t>;
     using inter_ref = storage::index<config::interaction, std::size_t>;
 

@@ -42,7 +42,7 @@
 #include "siconos/storage/storage.hpp"
 #include "siconos/utils/variant.hpp"
 
-namespace siconos::io {
+namespace siconos::vkernel::io {
 using namespace storage;
 using namespace storage::pattern;
 
@@ -689,4 +689,4 @@ struct io : item {
     }
   };
 };
-}  // namespace siconos::io
+}  // namespace siconos::vkernel::io

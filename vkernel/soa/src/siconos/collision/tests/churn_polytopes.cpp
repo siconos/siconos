@@ -71,8 +71,8 @@
 #include "siconos/collision/polytopefsegment_r.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 
 struct polytope : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
@@ -124,12 +124,12 @@ struct data_t
               storage::diagonal<storage::pattern::attr_t<polytope, "mass_matrix">>,
               storage::assembled_diagonal<
                   storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
-auto add_square_shape(siconos::config::data_t& data) {
-  auto shape = siconos::storage::add<siconos::config::polytope_shape>(data);
+auto add_square_shape(siconos::vkernel::config::data_t& data) {
+  auto shape = siconos::vkernel::storage::add<siconos::vkernel::config::polytope_shape>(data);
   const std::array<std::array<double, 2>, 4> square = {{{-1, -1}, {1, -1}, {1, 1}, {-1, 1}}};
   for (int i = 0; i < 4; ++i) shape.vertices()[i] = {square[i][0], square[i][1]};
   shape.nvertices() = 4;
@@ -138,8 +138,8 @@ auto add_square_shape(siconos::config::data_t& data) {
 
 /* body1 at (0,0); body2 at (0, y2pos): the analytic axis-aligned gap
    between side-2 squares is y2pos - 2. */
-auto add_two_bodies(siconos::config::data_t& data, double y2pos) {
-  using namespace siconos;
+auto add_two_bodies(siconos::vkernel::config::data_t& data, double y2pos) {
+  using namespace siconos::vkernel;
   auto shape = add_square_shape(data);
 
   auto ds1 = storage::add<config::polytope>(data);
@@ -166,8 +166,9 @@ auto add_two_bodies(siconos::config::data_t& data, double y2pos) {
    ds-ds pair loop at all (one point set never enters it).
    Call finalize_world AFTER the bodies are added: make_points needs the
    ds rows to build the ds point set. */
-auto setup_world(siconos::config::data_t& data, double radius, double ground_y = -1000.) {
-  using namespace siconos;
+auto setup_world(siconos::vkernel::config::data_t& data, double radius,
+                 double ground_y = -1000.) {
+  using namespace siconos::vkernel;
   using namespace storage;
 
   auto nslaw = storage::add<config::nslaw>(data);
@@ -219,15 +220,16 @@ auto setup_world(siconos::config::data_t& data, double radius, double ground_y =
 /* make_points + add_point_sets + initialize once the ds rows exist
    (bouncing_disks order: bodies first, then spacef.make_points();
    ngbh.add_point_sets(0); then simulation.initialize()). */
-auto finalize_world(siconos::config::data_t& data, auto spacef, auto ngbh, auto simulation) {
+auto finalize_world(siconos::vkernel::config::data_t& data, auto spacef, auto ngbh,
+                    auto simulation) {
   spacef.make_points();
   ngbh.add_point_sets(0);
   simulation.initialize();
 }
 
 /* ---- 1: the churn gate ---- */
-void test_space_filter_churn(siconos::config::data_t& data) {
-  using namespace siconos;
+void test_space_filter_churn(siconos::vkernel::config::data_t& data) {
+  using namespace siconos::vkernel;
   using namespace storage;
   using poly_r_index = storage::index<config::polytopepolytope_r, std::size_t>;
 
@@ -290,8 +292,8 @@ void test_space_filter_churn(siconos::config::data_t& data) {
 }
 
 /* ---- 2: duplicate ds pairs must fail loudly, not deref end() ---- */
-void test_duplicate_pair_removal_throws(siconos::config::data_t& data) {
-  using namespace siconos;
+void test_duplicate_pair_removal_throws(siconos::vkernel::config::data_t& data) {
+  using namespace siconos::vkernel;
   using namespace storage;
 
   auto [simulation, spacef, ngbh, dsds] = setup_world(data, 2.0 /* tiny: pair inactive */);
@@ -325,8 +327,8 @@ void test_duplicate_pair_removal_throws(siconos::config::data_t& data) {
 }
 
 /* ---- 3: unhandled relation on a self interaction must fail loudly ---- */
-void test_unknown_relation_throws(siconos::config::data_t& data) {
-  using namespace siconos;
+void test_unknown_relation_throws(siconos::vkernel::config::data_t& data) {
+  using namespace siconos::vkernel;
   using namespace storage;
 
   auto [simulation, spacef, ngbh, dsds] = setup_world(data, 2.0);
@@ -357,8 +359,8 @@ void test_unknown_relation_throws(siconos::config::data_t& data) {
   std::print("remove_interactions: unhandled relation fails loudly\n");
 }
 /* ---- 4: a polytope near a fixed segment must fail loudly ---- */
-void test_polytope_against_fixed_segment_throws(siconos::config::data_t& data) {
-  using namespace siconos;
+void test_polytope_against_fixed_segment_throws(siconos::vkernel::config::data_t& data) {
+  using namespace siconos::vkernel;
   using namespace storage;
 
   // the ground sits at y = -2, inside the 5.5 radius of the body at the
@@ -397,19 +399,19 @@ class ChurnPolytopesTest : public CppUnit::TestFixture {
  public:
   void testChurnPolytopes() {
     {
-      siconos::config::data_t data;
+      siconos::vkernel::config::data_t data;
       test_space_filter_churn(data);
     }
     {
-      siconos::config::data_t data;
+      siconos::vkernel::config::data_t data;
       test_duplicate_pair_removal_throws(data);
     }
     {
-      siconos::config::data_t data;
+      siconos::vkernel::config::data_t data;
       test_unknown_relation_throws(data);
     }
     {
-      siconos::config::data_t data;
+      siconos::vkernel::config::data_t data;
       test_polytope_against_fixed_segment_throws(data);
     }
     std::print("churn_polytopes: all groups pass\n");

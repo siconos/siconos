@@ -35,10 +35,10 @@ class BouncingBallSplitTest : public CppUnit::TestFixture {
 
  public:
   void testBouncingBallSplit() {
-    namespace storage = siconos::storage;
-    namespace config = siconos::config;
-    using siconos::storage::handle;
-    using siconos::storage::pattern::param_val;
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+    using siconos::vkernel::storage::handle;
+    using siconos::vkernel::storage::pattern::param_val;
 
     config::data_t data;
 
@@ -99,7 +99,7 @@ class BouncingBallSplitTest : public CppUnit::TestFixture {
     osnspb.problem() = lcp;
 
     // -- set the options --
-    handle so = storage::add<siconos::simul::solver_options>(data);
+    handle so = storage::add<siconos::vkernel::simul::solver_options>(data);
     so.create();
     osnspb.options() = so;
 
@@ -147,7 +147,7 @@ class BouncingBallSplitTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_ball_split.dat"),
+    CPPUNIT_ASSERT_REF(siconos::vkernel::test::read_ref("bouncing_ball_split.dat"),
                        "bouncing_ball_split.ref", 1e-8);
   }
 };

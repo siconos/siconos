@@ -27,7 +27,7 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/remap_refs.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 /** Reorder the items of type Item: the item of index k becomes the item of
     index perm[k] before the call, in every attribute, every attached storage
@@ -51,4 +51,4 @@ void permute(auto& data, const std::vector<std::size_t>& perm) {
   data.store()._registry.template permute_item<Item>(perm, inverse);
 }
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

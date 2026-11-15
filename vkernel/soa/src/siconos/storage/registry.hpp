@@ -38,9 +38,9 @@
 #include "siconos/storage/sparse_set.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
-namespace match = siconos::storage::pattern::match;
+namespace match = siconos::vkernel::storage::pattern::match;
 
 /**
  * @brief Type-erased column slot.
@@ -647,4 +647,4 @@ struct make_runtime_database : world<world_config<Env, configuration_properties_
   make_runtime_database() { this->template register_columns<world_info_t>(); }
 };
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

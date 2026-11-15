@@ -56,8 +56,8 @@
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 using storage::pattern::symbol;
 
 struct body : model::lagrangian_ds {};
@@ -127,7 +127,7 @@ struct data_t
               storage::diagonal<storage::pattern::attr_t<body, "mass_matrix">>,
               storage::assembled_diagonal<
                   storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -144,7 +144,7 @@ struct result {
    and the simulation; body(...) runs the scenario */
 template <typename F>
 auto with_fem_world(bool square, F&& body) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   config::data_t data;
 
   /* rigid body above the middle of the top edge */
@@ -242,7 +242,7 @@ auto with_fem_world(bool square, F&& body) {
 result run(bool square) {
   return with_fem_world(
       square, [&](auto& data, auto& b, auto& f, auto& simulation, auto& ngbh, auto& spacef) {
-        using namespace siconos;
+        using namespace siconos::vkernel;
         const int n = 8;
         result res{};
         std::size_t& n_mesh_contacts = res.n_mesh_contacts;
@@ -267,39 +267,39 @@ result run(bool square) {
 /* the filter removes the ds-mesh interactions of a body that leaves the
    edge, and creates them again (same relation items) when it comes back */
 void test_mesh_churn(bool square) {
-  with_fem_world(
-      square, [&](auto& data, auto& b, auto& f, auto& simulation, auto& ngbh, auto& spacef) {
-        using namespace siconos;
-        const std::size_t npoints = square ? 2 : 1;
-        // body above the edge, far away, back: scripted, no dynamics in between
-        const std::array<double, 3> y_by_step = {1.15, 10., 1.15};
-        const std::array<std::size_t, 3> n_by_step = {npoints, 0, npoints};
-        std::vector<std::size_t> rels0;
-        for (std::size_t k = 0; k < y_by_step.size(); ++k) {
-          const auto s = simulation.current_step();
-          storage::attr<"q">(b, s)(1) = y_by_step[k];
-          storage::attr<"velocity">(b, s).setZero();
-          ngbh.update(s);
-          ngbh.search();
-          spacef.update_index_set0(s);
-          auto inters = storage::handles<config::rt_interaction>(data, s);
-          CPPUNIT_ASSERT_MESSAGE(std::string(square ? "square" : "disk") +
-                                     ": mesh interaction count at step " + std::to_string(k),
-                                 std::size(inters) == n_by_step[k]);
-          std::vector<std::size_t> rels;
-          for (auto inter : inters)
-            rels.push_back(siconos::variant::visit(data, inter.relation(), [](auto rrel) {
-              return static_cast<std::size_t>(rrel.index().value());
-            }));
-          std::ranges::sort(rels);
-          if (k == 0) rels0 = rels;
-          if (k == 2)
-            CPPUNIT_ASSERT_MESSAGE("the relation items are reused when the body is back",
-                                   rels == rels0);
-          simulation.compute_one_step();
-        }
-        return 0;
-      });
+  with_fem_world(square, [&](auto& data, auto& b, auto& f, auto& simulation, auto& ngbh,
+                             auto& spacef) {
+    using namespace siconos::vkernel;
+    const std::size_t npoints = square ? 2 : 1;
+    // body above the edge, far away, back: scripted, no dynamics in between
+    const std::array<double, 3> y_by_step = {1.15, 10., 1.15};
+    const std::array<std::size_t, 3> n_by_step = {npoints, 0, npoints};
+    std::vector<std::size_t> rels0;
+    for (std::size_t k = 0; k < y_by_step.size(); ++k) {
+      const auto s = simulation.current_step();
+      storage::attr<"q">(b, s)(1) = y_by_step[k];
+      storage::attr<"velocity">(b, s).setZero();
+      ngbh.update(s);
+      ngbh.search();
+      spacef.update_index_set0(s);
+      auto inters = storage::handles<config::rt_interaction>(data, s);
+      CPPUNIT_ASSERT_MESSAGE(std::string(square ? "square" : "disk") +
+                                 ": mesh interaction count at step " + std::to_string(k),
+                             std::size(inters) == n_by_step[k]);
+      std::vector<std::size_t> rels;
+      for (auto inter : inters)
+        rels.push_back(siconos::vkernel::variant::visit(data, inter.relation(), [](auto rrel) {
+          return static_cast<std::size_t>(rrel.index().value());
+        }));
+      std::ranges::sort(rels);
+      if (k == 0) rels0 = rels;
+      if (k == 2)
+        CPPUNIT_ASSERT_MESSAGE("the relation items are reused when the body is back",
+                               rels == rels0);
+      simulation.compute_one_step();
+    }
+    return 0;
+  });
 }
 }  // namespace
 

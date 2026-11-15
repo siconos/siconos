@@ -26,7 +26,7 @@
 #include "siconos/config/config_builder.hpp"
 #include "siconos/siconos.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 struct ball : model::lagrangian_ds {};
 struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
@@ -45,9 +45,10 @@ struct data_t : decltype(storage()
                              .with_diagonal<ball, "mass_matrix">()
                              .with_assembled_diagonal<osi, "mass_matrix_assembled">()
                              .build_runtime_database()){};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 // defined in bouncing_ball_split_sim.cpp
-void simulation_initialize(siconos::config::data_t& data, std::size_t simulation);
-unsigned simulation_compute_one_step(siconos::config::data_t& data, std::size_t simulation);
-bool simulation_has_next_event(siconos::config::data_t& data, std::size_t simulation);
+void simulation_initialize(siconos::vkernel::config::data_t& data, std::size_t simulation);
+unsigned simulation_compute_one_step(siconos::vkernel::config::data_t& data,
+                                     std::size_t simulation);
+bool simulation_has_next_event(siconos::vkernel::config::data_t& data, std::size_t simulation);

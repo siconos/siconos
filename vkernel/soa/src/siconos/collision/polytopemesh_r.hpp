@@ -25,7 +25,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* Polytope x mesh-edge contact relation (2D convex polygon vs one mesh
    segment, per (mesh, contact_index)). The mesh edge is treated as a 2-vertex
@@ -153,4 +153,4 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

@@ -23,7 +23,7 @@
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/mp/mp.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 template <typename Handle>
 struct default_interface {
@@ -47,4 +47,4 @@ struct default_interface {
   auto make_handle(auto& index) { return storage::make_handle(self()->data(), index); }
 };
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

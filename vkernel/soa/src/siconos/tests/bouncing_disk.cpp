@@ -25,7 +25,7 @@
 #include "ref_check.hpp"
 #include "siconos/siconos.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 
 struct disk : model::lagrangian_ds {};
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
@@ -56,7 +56,7 @@ struct data_t
               storage::time_invariant<storage::attr_t<disk, "fext">>,
               storage::diagonal<storage::attr_t<disk, "mass_matrix">>,
               storage::assembled_diagonal<storage::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -67,7 +67,7 @@ class BouncingDiskTest : public CppUnit::TestFixture {
 
  public:
   void testBouncingDisk() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     using storage::pattern::wrap;
     using namespace storage;
 
@@ -196,8 +196,8 @@ class BouncingDiskTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("bouncing_disk.dat"), "bouncing_disk.ref",
-                       1e-8);
+    CPPUNIT_ASSERT_REF(siconos::vkernel::test::read_ref("bouncing_disk.dat"),
+                       "bouncing_disk.ref", 1e-8);
   }
 };
 

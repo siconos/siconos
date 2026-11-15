@@ -31,7 +31,7 @@
 #include "siconos/simul/kernels.hpp"
 #include "siconos/storage/schedule.hpp"
 
-namespace siconos::simul::contacts {
+namespace siconos::vkernel::simul::contacts {
 
 /* The contacts of a time step, whatever the scheme: the relations (the
    jacobians H, the outputs y and ydot), the active set (the interactions
@@ -552,4 +552,4 @@ struct setup_assembly
 
 }  // namespace stages
 
-}  // namespace siconos::simul::contacts
+}  // namespace siconos::vkernel::simul::contacts

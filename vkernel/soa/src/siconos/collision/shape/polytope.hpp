@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <stdexcept>
 
-namespace siconos::collision::shape {
+namespace siconos::vkernel::collision::shape {
 
 struct polytope : item {
   struct attributes {
@@ -129,4 +129,4 @@ struct polytope : item {
   };
 };
 
-}  // namespace siconos::collision::shape
+}  // namespace siconos::vkernel::collision::shape

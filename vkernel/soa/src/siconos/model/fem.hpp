@@ -25,11 +25,11 @@
 #include "siconos/model/model_head.hpp"
 #include "siconos/storage/data_holder.hpp"
 
-namespace siconos::model {
+namespace siconos::vkernel::model {
 
 using finite_element_linear_tids =
     storage::data_holder<mechanics::fem::FiniteElementLinearTIDS>;
 
 using material = storage::data_holder<mechanics::fem::Material>;
 
-}  // namespace siconos::model
+}  // namespace siconos::vkernel::model

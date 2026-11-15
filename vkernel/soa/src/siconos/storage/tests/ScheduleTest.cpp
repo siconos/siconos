@@ -30,7 +30,7 @@
 
 namespace {
 
-using namespace siconos::storage::schedule;
+using namespace siconos::vkernel::storage::schedule;
 
 // a toy computation: its stages write their names
 struct toy_context {
@@ -166,7 +166,7 @@ class ScheduleTest : public CppUnit::TestFixture {
   // the Moreau-Jean time step, as the simulations run it: a change of the
   // algorithm changes this text
   void testMoreauJean() {
-    const auto text = describe<siconos::simul::moreau_jean::time_step_schedule>();
+    const auto text = describe<siconos::vkernel::simul::moreau_jean::time_step_schedule>();
     std::fputs(text.c_str(), stdout);
     CPPUNIT_ASSERT_EQUAL(
         std::string(
@@ -205,7 +205,7 @@ class ScheduleTest : public CppUnit::TestFixture {
   }
 
   void testAnitescuTasora() {
-    const auto text = describe<siconos::simul::anitescu_tasora::time_step_schedule>();
+    const auto text = describe<siconos::vkernel::simul::anitescu_tasora::time_step_schedule>();
     std::fputs(text.c_str(), stdout);
     CPPUNIT_ASSERT_EQUAL(
         std::string(
@@ -244,7 +244,8 @@ class ScheduleTest : public CppUnit::TestFixture {
 
   // the same CCP by APGD: the assembly and the impulse of Moreau-Jean
   void testAnitescuTasoraApgd() {
-    const auto text = describe<siconos::simul::anitescu_tasora::apgd_time_step_schedule>();
+    const auto text =
+        describe<siconos::vkernel::simul::anitescu_tasora::apgd_time_step_schedule>();
     std::fputs(text.c_str(), stdout);
     CPPUNIT_ASSERT_EQUAL(
         std::string(
@@ -286,7 +287,7 @@ class ScheduleTest : public CppUnit::TestFixture {
 
   // the explicit DEM: the assembly and the impulse of Moreau-Jean, no solve
   void testDem() {
-    const auto text = describe<siconos::simul::dem::time_step_schedule>();
+    const auto text = describe<siconos::vkernel::simul::dem::time_step_schedule>();
     std::fputs(text.c_str(), stdout);
     CPPUNIT_ASSERT_EQUAL(
         std::string(

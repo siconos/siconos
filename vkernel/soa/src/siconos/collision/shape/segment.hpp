@@ -24,7 +24,7 @@
 #include "siconos/collision/collision.hpp"
 #include "siconos/collision/collision_head.hpp"
 
-namespace siconos::collision::shape {
+namespace siconos::vkernel::collision::shape {
 
 struct segment : item {
   using indice_t = std::size_t;
@@ -143,4 +143,4 @@ struct segment : item {
   };
 };
 
-}  // namespace siconos::collision::shape
+}  // namespace siconos::vkernel::collision::shape

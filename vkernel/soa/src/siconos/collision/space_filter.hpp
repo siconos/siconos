@@ -54,24 +54,25 @@
 
 namespace std {
 
-// siconos::storage::mp::pair
+// siconos::vkernel::storage::mp::pair
 template <typename First, typename Second>
-struct hash<siconos::storage::mp::pair<First, Second>> {
-  size_t operator()(const siconos::storage::mp::pair<First, Second>& p) const noexcept {
-    size_t h1 = std::hash<First>{}(siconos::storage::mp::first(p));
-    size_t h2 = std::hash<Second>{}(siconos::storage::mp::second(p));
+struct hash<siconos::vkernel::storage::mp::pair<First, Second>> {
+  size_t operator()(
+      const siconos::vkernel::storage::mp::pair<First, Second>& p) const noexcept {
+    size_t h1 = std::hash<First>{}(siconos::vkernel::storage::mp::first(p));
+    size_t h2 = std::hash<Second>{}(siconos::vkernel::storage::mp::second(p));
     return h1 ^ (h2 + 0x9e3779b97f4a7c15 + (h1 << 6) + (h1 >> 2));
   }
 };
 
-// siconos::storage::mp::tuple<First, Second, Third>
+// siconos::vkernel::storage::mp::tuple<First, Second, Third>
 template <typename First, typename Second, typename Third>
-struct hash<siconos::storage::mp::tuple<First, Second, Third>> {
+struct hash<siconos::vkernel::storage::mp::tuple<First, Second, Third>> {
   size_t operator()(
-      const siconos::storage::mp::tuple<First, Second, Third>& p) const noexcept {
-    size_t h1 = std::hash<First>{}(siconos::storage::mp::tuple_first(p));
-    size_t h2 = std::hash<Second>{}(siconos::storage::mp::tuple_second(p));
-    size_t h3 = std::hash<Third>{}(siconos::storage::mp::tuple_third(p));
+      const siconos::vkernel::storage::mp::tuple<First, Second, Third>& p) const noexcept {
+    size_t h1 = std::hash<First>{}(siconos::vkernel::storage::mp::tuple_first(p));
+    size_t h2 = std::hash<Second>{}(siconos::vkernel::storage::mp::tuple_second(p));
+    size_t h3 = std::hash<Third>{}(siconos::vkernel::storage::mp::tuple_third(p));
     size_t seed = 0;
     seed ^= h1 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
     seed ^= h2 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
@@ -81,7 +82,7 @@ struct hash<siconos::storage::mp::tuple<First, Second, Third>> {
 };
 }  // namespace std
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /// declarer of every property of the world of a registry Data (see
 /// storage::world_declared), as disks_world_properties of the bindings
@@ -271,7 +272,7 @@ struct space_filter : item {
 
       std::vector<std::size_t> interactions;
       for (auto inter : storage::handles<finteraction>(data, 0)) {
-        siconos::variant::visit(data, inter.relation(), [&](auto rel) {
+        siconos::vkernel::variant::visit(data, inter.relation(), [&](auto rel) {
           if constexpr (match::handle<decltype(rel), Rel>) {
             if (std::ranges::find(relations, rel.index().value()) != relations.end()) {
               interactions.push_back(inter.index().value());
@@ -554,14 +555,14 @@ struct space_filter : item {
     }
 
     std::size_t point_of(auto inter) {
-      return siconos::variant::visit(self()->data(), inter.relation(),
-                                     [](auto rrel) -> std::size_t {
-                                       if constexpr (requires { rrel.point_index(); }) {
-                                         return rrel.point_index();
-                                       } else {
-                                         return 0;
-                                       }
-                                     });
+      return siconos::vkernel::variant::visit(
+          self()->data(), inter.relation(), [](auto rrel) -> std::size_t {
+            if constexpr (requires { rrel.point_index(); }) {
+              return rrel.point_index();
+            } else {
+              return 0;
+            }
+          });
     }
 
     // the proximity key of a ds-fsegment relation: the segment and the
@@ -589,7 +590,7 @@ struct space_filter : item {
         if (ds1 != ds2) {
           ds_ds_prox[make_ikey(ds1, ds2, point_of(inter))] = inter;
         } else {
-          siconos::variant::visit(
+          siconos::vkernel::variant::visit(
               data, inter.relation(),
               mp::overload(
                   // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
@@ -1033,7 +1034,7 @@ struct space_filter : item {
             //                  storage::prop<"ds1", Topology>(inter).get(),
             //                  storage::prop<"ds2", Topology>(inter).get());
           } else {
-            siconos::variant::visit(
+            siconos::vkernel::variant::visit(
                 data, inter.relation(),
                 mp::overload(
                     [&]<match::handle<diskfsegment_r> DiskSegmentR>(DiskSegmentR rel) {
@@ -1397,4 +1398,4 @@ struct space_filter : item {
     }
   };
 };
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

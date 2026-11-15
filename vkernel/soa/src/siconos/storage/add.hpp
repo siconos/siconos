@@ -27,9 +27,9 @@
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
-using namespace siconos::storage::pattern;
+using namespace siconos::vkernel::storage::pattern;
 
 template <match::item Item>
 decltype(auto) add(auto&& data) {
@@ -52,4 +52,4 @@ decltype(auto) add(auto&& data, std::size_t count) {
          view::transform([&data](auto&&) { return add<Item>(data); });
 }
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

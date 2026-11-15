@@ -25,7 +25,7 @@
 
 #include "siconos/storage/mp/mp.hpp"
 
-namespace siconos::storage::pattern {
+namespace siconos::vkernel::storage::pattern {
 using size_t = std::size_t;
 
 template <typename... Ts>
@@ -110,4 +110,4 @@ template <typename T>
 concept wrap = item<T> && requires { typename T::wrap_t; };
 
 }  // namespace match
-}  // namespace siconos::storage::pattern
+}  // namespace siconos::vkernel::storage::pattern

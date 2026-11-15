@@ -31,7 +31,7 @@
 #include "siconos/storage/handle.hpp"
 #include "siconos/storage/sparse_set.hpp"
 
-namespace siconos::storage::kernels {
+namespace siconos::vkernel::storage::kernels {
 
 /* Kernels: the functions that run over the items of a storage (the systems
    of an entity component system, the items being the entities and their
@@ -523,4 +523,4 @@ void run(auto& data, auto step, auto&& p) {
   }
 }
 
-}  // namespace siconos::storage::kernels
+}  // namespace siconos::vkernel::storage::kernels

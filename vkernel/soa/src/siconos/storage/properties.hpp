@@ -23,7 +23,7 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/some/some.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 using namespace pattern;
 
 template <match::item I, typename Tag, match::attribute DataSpec>
@@ -310,4 +310,4 @@ static constexpr auto is_attached_storage = mp::is_a_model<[]<typename T>() cons
   return match::attached_storage<T, Item> && !requires { typename T::dynamic_storage_t; };
 }>;
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

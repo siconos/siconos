@@ -18,8 +18,8 @@
 
 #include <siconos/storage/mp/mp.hpp>
 
-using namespace siconos::storage;
-using namespace siconos::storage::mp;
+using namespace siconos::vkernel::storage;
+using namespace siconos::vkernel::storage::mp;
 
 struct A {
   using a_t = void;

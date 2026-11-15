@@ -22,7 +22,7 @@
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/chained_segment.hpp"
 
-namespace siconos::collision::shape {
+namespace siconos::vkernel::collision::shape {
 
 struct mesh : item {
   using items = gather<chained_segment>;
@@ -78,4 +78,4 @@ struct mesh : item {
   };
 };
 
-}  // namespace siconos::collision::shape
+}  // namespace siconos::vkernel::collision::shape

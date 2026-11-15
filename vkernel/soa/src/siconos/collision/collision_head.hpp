@@ -22,11 +22,11 @@
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 using namespace storage;
 using namespace storage::pattern;
 
 template <typename...>
 constexpr bool always_false = false;
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

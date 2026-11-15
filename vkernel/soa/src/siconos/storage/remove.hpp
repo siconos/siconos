@@ -34,7 +34,7 @@
 #include "siconos/storage/refs.hpp"
 #include "siconos/storage/remap_refs.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 static auto remove = [](auto& data, auto&& h) {
   using item_t = typename std::decay_t<decltype(h)>::type;
@@ -73,4 +73,4 @@ void remove_many(auto& data, std::vector<std::size_t> indices) {
   data.store()._registry.template remove_items<Item>(std::move(indices));
 }
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage

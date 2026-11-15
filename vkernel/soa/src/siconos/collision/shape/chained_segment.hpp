@@ -23,7 +23,7 @@
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/shape/segment.hpp"
 
-namespace siconos::collision::shape {
+namespace siconos::vkernel::collision::shape {
 
 struct chained_segment : item {
   using indice_t = std::size_t;
@@ -146,4 +146,4 @@ struct chained_segment : item {
   };
 };
 
-}  // namespace siconos::collision::shape
+}  // namespace siconos::vkernel::collision::shape

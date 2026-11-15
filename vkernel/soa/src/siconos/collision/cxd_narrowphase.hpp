@@ -73,7 +73,7 @@
 #include "cxd_batch.hpp"
 // clang-format on
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* The batch engine is scalar-generic: the stage instantiates it with the
    environment's scalar (some::scalar cannot be written in a non-item
@@ -765,7 +765,7 @@ narrowphase_contact<Scalar> manifold_point(const narrowphase_contact<Scalar>& c,
   return r;
 }
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision
 
 #include "siconos/collision/array_hash.hpp"
 #include "siconos/collision/collision_head.hpp"
@@ -773,7 +773,7 @@ narrowphase_contact<Scalar> manifold_point(const narrowphase_contact<Scalar>& c,
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/simul/topology.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 template <typename Topo>
 struct polytopepolytope_r;  // polytopepolytope_r.hpp (Task 4)
@@ -1332,4 +1332,4 @@ struct cxd_narrowphase : item {
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

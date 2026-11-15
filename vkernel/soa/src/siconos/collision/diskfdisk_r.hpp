@@ -24,7 +24,7 @@
 #include "siconos/collision/translated.hpp"
 // #include "siconos/model/model.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 // disk fixed disk
 
@@ -83,4 +83,4 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
     }
   };
 };
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

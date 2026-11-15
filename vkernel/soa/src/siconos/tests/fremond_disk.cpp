@@ -36,7 +36,7 @@
 // for e = 1, and the Newton value with theta = 1. vy+ = e in both.
 
 #define SICONOS_FREMOND_DISK_CONFIG(NS, LAW, OSI)                                    \
-  namespace siconos::NS {                                                            \
+  namespace siconos::vkernel::NS {                                                   \
   struct disk : model::lagrangian_ds {};                                             \
   struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};                 \
   struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};                        \
@@ -64,12 +64,12 @@
                               storage::attr_t<osi, "mass_matrix_assembled">>>> {};   \
   /* the types of the config, as one template argument */                            \
   struct types {                                                                     \
-    using data_t = siconos::NS::data_t;                                              \
-    using disk = siconos::NS::disk;                                                  \
-    using nslaw = siconos::NS::nslaw;                                                \
-    using fc2d = siconos::NS::fc2d;                                                  \
-    using simulation = siconos::NS::simulation;                                      \
-    using diskfsegment_r = siconos::NS::diskfsegment_r;                              \
+    using data_t = siconos::vkernel::NS::data_t;                                     \
+    using disk = siconos::vkernel::NS::disk;                                         \
+    using nslaw = siconos::vkernel::NS::nslaw;                                       \
+    using fc2d = siconos::vkernel::NS::fc2d;                                         \
+    using simulation = siconos::vkernel::NS::simulation;                             \
+    using diskfsegment_r = siconos::vkernel::NS::diskfsegment_r;                     \
   };                                                                                 \
   }
 
@@ -88,7 +88,7 @@ struct outcome {
 // scheme: the scheme of a selectable integrator (see selectable_scheme.hpp)
 template <typename Config>
 outcome oblique_impact(double theta, double e, double mu, std::size_t scheme = 0) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using namespace storage;
 
   typename Config::data_t data;
@@ -179,7 +179,7 @@ class FremondDiskTest : public CppUnit::TestFixture {
 
  public:
   void testNewtonSticks() {
-    auto r = oblique_impact<siconos::newton_config::types>(0.5, 1., 1.);
+    auto r = oblique_impact<siconos::vkernel::newton_config::types>(0.5, 1., 1.);
     CPPUNIT_ASSERT_EQUAL(1, r.impacts);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(5. / 7., r.vx, tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1., r.vy, tol);
@@ -187,7 +187,7 @@ class FremondDiskTest : public CppUnit::TestFixture {
 
   // u_T reverses: the kinetic energy is conserved (e = 1, theta = 1/2)
   void testFremondSticksOnAverage() {
-    auto r = oblique_impact<siconos::fremond_config::types>(0.5, 1., 1.);
+    auto r = oblique_impact<siconos::vkernel::fremond_config::types>(0.5, 1., 1.);
     CPPUNIT_ASSERT_EQUAL(1, r.impacts);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(3. / 7., r.vx, tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1., r.vy, tol);
@@ -195,8 +195,8 @@ class FremondDiskTest : public CppUnit::TestFixture {
   }
 
   void testFremondThetaOneIsNewton() {
-    auto n = oblique_impact<siconos::newton_config::types>(1., 0.5, 1.);
-    auto f = oblique_impact<siconos::fremond_config::types>(1., 0.5, 1.);
+    auto n = oblique_impact<siconos::vkernel::newton_config::types>(1., 0.5, 1.);
+    auto f = oblique_impact<siconos::vkernel::fremond_config::types>(1., 0.5, 1.);
     CPPUNIT_ASSERT_EQUAL(n.vx, f.vx);
     CPPUNIT_ASSERT_EQUAL(n.vy, f.vy);
     CPPUNIT_ASSERT_EQUAL(n.omega, f.omega);
@@ -207,7 +207,7 @@ class FremondDiskTest : public CppUnit::TestFixture {
   // small mu: the contact slides, |p_T| = mu p_N = 2 mu, vx+ = 1 - 2 mu,
   // and friction dissipates
   void testFremondSlidingDissipates() {
-    auto r = oblique_impact<siconos::fremond_config::types>(0.5, 1., 0.1);
+    auto r = oblique_impact<siconos::vkernel::fremond_config::types>(0.5, 1., 0.1);
     CPPUNIT_ASSERT_EQUAL(1, r.impacts);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.8, r.vx, tol);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1., r.vy, tol);
@@ -217,13 +217,13 @@ class FremondDiskTest : public CppUnit::TestFixture {
   // the scheme chosen at run time on the Newton law: Moreau-Jean is the
   // Newton scheme, Moreau-Jean-Frémond the Frémond one, bit for bit
   void testSelectableScheme() {
-    namespace schemes = siconos::simul::selectable_scheme;
+    namespace schemes = siconos::vkernel::simul::selectable_scheme;
     for (double mu : {1., 0.1}) {
-      auto n = oblique_impact<siconos::newton_config::types>(0.5, 1., mu);
-      auto f = oblique_impact<siconos::fremond_config::types>(0.5, 1., mu);
-      auto sn = oblique_impact<siconos::selectable_config::types>(0.5, 1., mu,
-                                                                  schemes::local_problem);
-      auto sf = oblique_impact<siconos::selectable_config::types>(
+      auto n = oblique_impact<siconos::vkernel::newton_config::types>(0.5, 1., mu);
+      auto f = oblique_impact<siconos::vkernel::fremond_config::types>(0.5, 1., mu);
+      auto sn = oblique_impact<siconos::vkernel::selectable_config::types>(
+          0.5, 1., mu, schemes::local_problem);
+      auto sf = oblique_impact<siconos::vkernel::selectable_config::types>(
           0.5, 1., mu, schemes::local_problem_fremond);
       CPPUNIT_ASSERT_EQUAL(1, sf.impacts);
       CPPUNIT_ASSERT_EQUAL(n.vx, sn.vx);

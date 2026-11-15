@@ -43,8 +43,8 @@
 #include "siconos/collision/shape_of.hpp"
 // clang-format on
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 using storage::pattern::symbol;
 
 using disk_shape = collision::shape::disk;
@@ -78,7 +78,7 @@ struct sdata_t
               storage::wrapped<disk_ds, some::unbounded_collection>,
               storage::wrapped<disk_shape, some::unbounded_collection>,
               storage::attached<disk_ds, symbol<"shape">, some::item_ref<disk_shape>>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 template <typename F>
@@ -102,7 +102,7 @@ class RigidShapesTest : public CppUnit::TestFixture {
   void tearDown() override {}
 
   void testRigidShapes() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     using collision::shape::disk;
     using collision::shape::polytope;
 

@@ -28,7 +28,7 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/utils/range.hpp"
 
-namespace siconos::storage {
+namespace siconos::vkernel::storage {
 
 using namespace pattern;
 
@@ -476,13 +476,13 @@ static constexpr auto handle_derive_from = mp::is_a_model<[]<typename T>() const
   return std::derived_from<typename T::type, B>;
 }>;
 
-}  // namespace siconos::storage
+}  // namespace siconos::vkernel::storage
 
 namespace std {
 
-template <siconos::storage::pattern::match::item Item, typename R>
-struct hash<siconos::storage::index<Item, R>> {
-  std::size_t operator()(const siconos::storage::index<Item, R>& idx) const noexcept {
+template <siconos::vkernel::storage::pattern::match::item Item, typename R>
+struct hash<siconos::vkernel::storage::index<Item, R>> {
+  std::size_t operator()(const siconos::vkernel::storage::index<Item, R>& idx) const noexcept {
     return std::hash<R>{}(idx.value());
   }
 };

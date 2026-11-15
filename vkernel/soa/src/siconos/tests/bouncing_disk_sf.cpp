@@ -22,7 +22,7 @@
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 
-namespace siconos::config {
+namespace siconos::vkernel::config {
 
 using disk = model::lagrangian_ds;
 using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
@@ -44,10 +44,10 @@ using neighborhood = collision::neighborhood<pointd, pointl>;
 using space_filter = collision::space_filter<topo, neighborhood>;
 
 using params = map<iparam<"dof", 3>>;
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 int main(int argc, char* argv[]) {
-  using namespace siconos;
+  using namespace siconos::vkernel;
   using storage::pattern::wrap;
   using namespace storage;
 

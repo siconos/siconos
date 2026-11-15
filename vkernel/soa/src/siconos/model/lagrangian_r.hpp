@@ -24,7 +24,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/model/model_head.hpp"
 
-namespace siconos::storage::pattern::match {
+namespace siconos::vkernel::storage::pattern::match {
 
 /**
  * @brief Concept for linear relation handles
@@ -58,9 +58,9 @@ concept relation1 = match::handle<T, model::relation1>;
 template <typename T>
 concept relation2 = match::handle<T, model::relation2>;
 
-}  // namespace siconos::storage::pattern::match
+}  // namespace siconos::vkernel::storage::pattern::match
 
-namespace siconos::model {
+namespace siconos::vkernel::model {
 
 /**
  * @brief Lagrangian relation for non-smooth laws with compile-time constraint
@@ -314,4 +314,4 @@ struct rt_lagrangian_r : item, model::linear, model::relation1 {
   };
 };
 
-}  // namespace siconos::model
+}  // namespace siconos::vkernel::model

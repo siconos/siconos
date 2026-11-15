@@ -52,7 +52,7 @@
 
 using namespace boost::hana::literals;
 
-namespace siconos::storage::mp {
+namespace siconos::vkernel::storage::mp {
 
 // debug (see_below for clang, gcc above...)
 #if defined(__clang__)
@@ -406,4 +406,4 @@ constexpr std::size_t index_of(const std::tuple<Ts...>&) {
   return found ? count - 1 : count;
 }
 
-}  // namespace siconos::storage::mp
+}  // namespace siconos::vkernel::storage::mp

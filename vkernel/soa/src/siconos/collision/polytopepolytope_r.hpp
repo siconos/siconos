@@ -24,7 +24,7 @@
 #include "siconos/model/lagrangian_ds.hpp"
 #include "siconos/storage/storage.hpp"
 
-namespace siconos::collision {
+namespace siconos::vkernel::collision {
 
 /* Polytope x polytope contact relation (2D convex polygons, dof 3).
 
@@ -174,4 +174,4 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
   };
 };
 
-}  // namespace siconos::collision
+}  // namespace siconos::vkernel::collision

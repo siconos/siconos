@@ -27,8 +27,8 @@
 #include "siconos/siconos.hpp"
 #include "siconos/storage/registry.hpp"
 
-namespace siconos::config {
-namespace some = siconos::storage::some;
+namespace siconos::vkernel::config {
+namespace some = siconos::vkernel::storage::some;
 struct disk : model::lagrangian_ds {};
 struct nslaw : model::newton_impact_friction {};
 using diskdisk_r = collision::diskdisk_r;
@@ -52,7 +52,7 @@ struct neighborhood : collision::neighborhood<pointd, pointl, pointtds> {};
 struct space_filter : collision::space_filter<topo, neighborhood> {};
 struct interaction_manager : simul::interaction_manager<space_filter> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
-struct io : siconos::io::io<osi> {};
+struct io : siconos::vkernel::io::io<osi> {};
 
 template <typename T>
 struct env : standard_environment<T> {
@@ -82,7 +82,7 @@ struct data_t : storage::make_runtime_database<
                         storage::diagonal<storage::pattern::attr_t<disk, "mass_matrix">>,
                         storage::assembled_diagonal<
                             storage::pattern::attr_t<osi, "mass_matrix_assembled">>>> {};
-}  // namespace siconos::config
+}  // namespace siconos::vkernel::config
 
 namespace {
 
@@ -93,7 +93,7 @@ class FixedDisksTest : public CppUnit::TestFixture {
 
  public:
   void testFixedDisks() {
-    using namespace siconos;
+    using namespace siconos::vkernel;
     using storage::pattern::wrap;
     using namespace storage;
 
@@ -252,7 +252,8 @@ class FixedDisksTest : public CppUnit::TestFixture {
     //  io::close(fd);
 
     result_file.close();
-    CPPUNIT_ASSERT_REF(siconos::test::read_ref("fixed_disks.dat"), "fixed_disks.ref", 1e-8);
+    CPPUNIT_ASSERT_REF(siconos::vkernel::test::read_ref("fixed_disks.dat"), "fixed_disks.ref",
+                       1e-8);
   }
 };
 
