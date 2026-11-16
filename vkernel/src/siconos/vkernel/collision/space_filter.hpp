@@ -1,0 +1,1401 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <algorithm>
+#include <cmath>
+#include <concepts>
+#include <format>
+#include <limits>
+#include <numbers>
+#include <print>
+#include <stdexcept>
+#include <vector>
+
+#include "siconos/vkernel/algebra/algebra.hpp"
+#include "siconos/vkernel/collision/array_hash.hpp"
+#include "siconos/vkernel/collision/collision_head.hpp"
+#include "siconos/vkernel/collision/diskdisk_r.hpp"
+#include "siconos/vkernel/collision/diskfdisk_r.hpp"
+#include "siconos/vkernel/collision/diskfsegment_r.hpp"
+#include "siconos/vkernel/collision/diskmesh_r.hpp"
+#include "siconos/vkernel/collision/point.hpp"
+#include "siconos/vkernel/collision/polytopedisk_r.hpp"
+#include "siconos/vkernel/collision/polytopefdisk_r.hpp"
+#include "siconos/vkernel/collision/polytopefsegment_r.hpp"
+#include "siconos/vkernel/collision/polytopemesh_r.hpp"
+#include "siconos/vkernel/collision/shape/chained_segment.hpp"
+#include "siconos/vkernel/collision/shape/disk.hpp"
+#include "siconos/vkernel/collision/shape/mesh.hpp"
+#include "siconos/vkernel/collision/shape/segment.hpp"
+#include "siconos/vkernel/collision/shape_of.hpp"
+#include "siconos/vkernel/collision/translated.hpp"
+#include "siconos/vkernel/simul/relation_sets.hpp"
+#include "siconos/vkernel/storage/pattern/base.hpp"
+#include "siconos/vkernel/storage/storage.hpp"
+#include "siconos/vkernel/utils/range.hpp"
+#include "siconos/vkernel/utils/variant.hpp"
+
+namespace std {
+
+// siconos::vkernel::storage::mp::pair
+template <typename First, typename Second>
+struct hash<siconos::vkernel::storage::mp::pair<First, Second>> {
+  size_t operator()(
+      const siconos::vkernel::storage::mp::pair<First, Second>& p) const noexcept {
+    size_t h1 = std::hash<First>{}(siconos::vkernel::storage::mp::first(p));
+    size_t h2 = std::hash<Second>{}(siconos::vkernel::storage::mp::second(p));
+    return h1 ^ (h2 + 0x9e3779b97f4a7c15 + (h1 << 6) + (h1 >> 2));
+  }
+};
+
+// siconos::vkernel::storage::mp::tuple<First, Second, Third>
+template <typename First, typename Second, typename Third>
+struct hash<siconos::vkernel::storage::mp::tuple<First, Second, Third>> {
+  size_t operator()(
+      const siconos::vkernel::storage::mp::tuple<First, Second, Third>& p) const noexcept {
+    size_t h1 = std::hash<First>{}(siconos::vkernel::storage::mp::tuple_first(p));
+    size_t h2 = std::hash<Second>{}(siconos::vkernel::storage::mp::tuple_second(p));
+    size_t h3 = std::hash<Third>{}(siconos::vkernel::storage::mp::tuple_third(p));
+    size_t seed = 0;
+    seed ^= h1 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    seed ^= h2 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    seed ^= h3 + 0x9e3779b97f4a7c15 + (seed << 6) + (seed >> 2);
+    return seed;
+  }
+};
+}  // namespace std
+
+namespace siconos::vkernel::collision {
+
+/// declarer of every property of the world of a registry Data (see
+/// storage::world_declared), as disks_world_properties of the bindings
+template <typename Data>
+struct world_properties_of : storage::pattern::item {
+  using properties = typename Data::world_info_t::all_properties_t;
+};
+
+template <typename Topology, typename Neighborhood>
+struct space_filter : item {
+  using items = gather<Topology, Neighborhood>;
+  using topology = Topology;
+  using dynamical_system = typename topology::fixed_dof_system;
+  using finteraction = typename topology::finteraction;
+  using dfinteraction = typename topology::dfinteraction;
+  using nslaw = typename finteraction::nslaw;
+  using neighborhood = Neighborhood;
+  struct attributes {
+    some::item_ref<Topology> topology;
+    some::item_ref<Neighborhood> neighborhood;
+    some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<nslaw>> nslaws;
+    some::item_ref<collision::diskdisk_r> diskdisk_r;
+    some::map<some::array<some::indice, some::indice_value<2>>, some::item_ref<diskmesh_r>>
+        diskmeshes;
+    some::map<some::array<some::scalar, some::indice_value<4>>, some::item_ref<diskfsegment_r>>
+        diskfsegments;
+    // keyed by (segment x1 x2 y1 y2, manifold point index)
+    some::map<some::array<some::scalar, some::indice_value<5>>,
+              some::item_ref<polytopefsegment_r<Topology>>>
+        polytopefsegments;
+    some::map<some::array<some::scalar, some::indice_value<2>>,
+              some::item_ref<collision::polytopefdisk_r<Topology>>>
+        polytopefdisks;
+    // keyed by (mesh, edge, manifold point index)
+    some::map<some::array<some::indice, some::indice_value<3>>,
+              some::item_ref<polytopemesh_r<Topology>>>
+        polytopemeshes;
+    some::map<some::array<some::scalar, some::indice_value<2>>, some::item_ref<diskfdisk_r>>
+        diskfdisks;
+    // the disk x polytope relation is stateless: one item, under key 0,
+    // serves every mixed pair
+    some::map<some::indice, some::item_ref<polytopedisk_r<Topology>>> polytopedisks;
+    // a body pair found by the neighborhood search gets an interaction only
+    // when its bounding circles are closer than contact_margin; <= 0: every
+    // pair found gets one
+    some::scalar contact_margin;
+  };
+
+  template <typename Handle>
+  struct interface : default_interface<Handle> {
+    using default_interface<Handle>::self;
+
+    decltype(auto) nslaws() { return storage::attr<"nslaws">(*self()); }
+    decltype(auto) insert_nonsmooth_law(auto nslaw, auto gid1, auto gid2) {
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      nslaws[{static_cast<std::size_t>(gid1), static_cast<std::size_t>(gid2)}] = nslaw;
+      nslaws[{static_cast<std::size_t>(gid2), static_cast<std::size_t>(gid1)}] = nslaw;
+      return *self();
+    }
+    // the law of the collision groups of two bodies (or body and static shape)
+    decltype(auto) nonsmooth_law(auto& body1, auto& body2) {
+      auto gid1 = static_cast<std::size_t>(body1.collision_group());
+      auto gid2 = static_cast<std::size_t>(body2.collision_group());
+      auto& nslaws = storage::attr<"nslaws">(*self());
+      auto search = nslaws.find({gid1, gid2});
+      if (search == nslaws.end()) {
+        throw std::runtime_error(
+            "space_filter: no nonsmooth law registered for collision groups (" +
+            std::to_string(gid1) + ", " + std::to_string(gid2) + ")");
+      }
+      return storage::make_handle(self()->data(), search->second);
+    }
+    decltype(auto) topology() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"topology">(*self()));
+    }
+
+    decltype(auto) neighborhood() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"neighborhood">(*self()));
+    }
+
+    decltype(auto) diskdisk_r() {
+      return storage::make_ref_handle(self()->data(), storage::attr<"diskdisk_r">(*self()));
+    }
+
+    decltype(auto) diskmeshes() { return storage::attr<"diskmeshes">(*self()); }
+
+    decltype(auto) diskfsegments() { return storage::attr<"diskfsegments">(*self()); }
+
+    decltype(auto) polytopefsegments() { return storage::attr<"polytopefsegments">(*self()); }
+
+    decltype(auto) polytopefdisks() { return storage::attr<"polytopefdisks">(*self()); }
+
+    decltype(auto) polytopemeshes() { return storage::attr<"polytopemeshes">(*self()); }
+
+    decltype(auto) diskfdisks() { return storage::attr<"diskfdisks">(*self()); }
+    decltype(auto) polytopedisks() { return storage::attr<"polytopedisks">(*self()); }
+    decltype(auto) contact_margin() { return storage::attr<"contact_margin">(*self()); }
+
+    // radius of a circle centred on the body that contains its shape: the
+    // disk radius, the polytope circumradius; infinity (never culled) for a
+    // body with neither
+    static double bounding_radius(auto& ds) {
+      using ds_t = std::decay_t<decltype(ds)>;
+      if constexpr (collision::may_have_shape<collision::shape::disk, ds_t>()) {
+        if (collision::has_shape<collision::shape::disk>(ds)) {
+          return collision::shape_of<collision::shape::disk>(ds).radius();
+        }
+      }
+      if constexpr (collision::may_have_shape<collision::shape::polytope, ds_t>()) {
+        if (collision::has_shape<collision::shape::polytope>(ds)) {
+          return collision::shape_of<collision::shape::polytope>(ds).rmax();
+        }
+      }
+      return std::numeric_limits<double>::infinity();
+    }
+
+    // the neighborhood search is run with one radius: two points it finds
+    // may be much farther apart than their bodies can touch, when the radius
+    // is sized for the largest bodies. Too far apart: no interaction.
+    static bool beyond_margin(auto& hp1, auto& hp2, double margin) {
+      if (margin <= 0) return false;
+      const double dx = hp2.center()[0] - hp1.center()[0];
+      const double dy = hp2.center()[1] - hp1.center()[1];
+      const double reach = hp1.bound() + hp2.bound() + margin;
+      return dx * dx + dy * dy > reach * reach;
+    }
+
+    // void create_relations()
+    // {
+    //   using env_t = decltype(self()->env());
+    //   using indice = typename env_t::indice;
+
+    //   using points_t = typename decltype(self()->neighborhood())::points_t;
+
+    //   auto& data = self()->data();
+
+    //   mp::for_each(points_t{}, []<typename Point>(Point) {
+    //     using item_t = typename Point::item_t;
+    //     auto& item_handles = storage::handles<item_t>(data);
+
+    //     if constexpr (std::derived_from<item_t, shape::segment>) {
+    //       for (auto segment_handle : item_handles) {
+    //         auto rel = storage::add<diskfsegment_r>(data);
+    //         rel.shape() = segment_handle;
+    //       }
+    //     }
+    //     else if constexpr (std::derived_from<item_t,
+    //                                          translated<shape::disk>>) {
+    //       for (auto fdisk_handle : item_handles) {
+    //         auto rel = storage::add<diskfdisk_r>(data);
+    //         rel.shape() = fdisk_handle;
+    //       }
+    //     }
+    //     else if constexpr (std::derived_from<item_t,
+    //                                          shape::chained_segment>) {
+    //       for (auto mesh_handle : item_handles) {
+    //         indice nbsegments = std::size(mesh_handle.points()) / 2;
+    //         for (indice i = 0; i < nbsegments; ++i) {
+    //           auto rel = storage::add<diskmesh_r>(data);
+    //           rel.shape() = mesh_handle;
+    //           rel.contact_index() = i;
+    //         }
+    //       }
+    //     }
+    //   });
+    // }
+
+    // void __init__() { create_relations(); }
+
+    /* the relations Rel of a segment about to be removed, and the
+       interactions bound to them: left in the store, the relations would
+       hold an invalid segment ref once the segment is removed, read by the
+       next update through their interactions. The proximity maps are
+       rebuilt at each update, the relation sets follow storage::remove. */
+    template <typename Rel>
+    void remove_segment_relations(auto segment_handle) {
+      auto& data = self()->data();
+      const auto segment = segment_handle.index().value();
+
+      std::vector<std::size_t> relations;
+      for (auto rel : storage::handles<Rel>(data)) {
+        if (rel.segment().index().value() == segment) {
+          relations.push_back(rel.index().value());
+        }
+      }
+      if (relations.empty()) return;
+
+      std::vector<std::size_t> interactions;
+      for (auto inter : storage::handles<finteraction>(data, 0)) {
+        siconos::vkernel::variant::visit(data, inter.relation(), [&](auto rel) {
+          if constexpr (match::handle<decltype(rel), Rel>) {
+            if (std::ranges::find(relations, rel.index().value()) != relations.end()) {
+              interactions.push_back(inter.index().value());
+            }
+          }
+        });
+      }
+      storage::remove_many<finteraction>(data, std::move(interactions));
+      storage::remove_many<Rel>(data, std::move(relations));
+    }
+
+    void remove_static_item(auto step, auto item_handle) {
+      using item_t = typename std::decay_t<decltype(item_handle)>::type;
+      using point_t = collision::point<empty_item, item_t>;
+      using points_t = typename neighborhood::points_t;
+
+      auto& data = self()->data();
+
+      auto& points_flags = storage::attr_values<point_t, "flag">(data, step);
+      auto& points_items = storage::attr_values<point_t, "item">(data, step);
+      auto& points_coords = storage::attr_values<point_t, "coord">(data, step);
+
+      auto ps_indx = mp::index_of<point_t>(mp::std_tuple(points_t{}));
+
+      // mp::index_if(
+      //   points_t{},
+      //   mp::equal.to(collision::point<item_t>));
+
+      // the relations of the removed segment go out of the maps, so that no
+      // new interaction binds them; the relation items and their
+      // interactions go now, before the segment
+      if constexpr (std::derived_from<item_t, collision::shape::segment>) {
+        const auto x1 = item_handle.x1();
+        const auto x2 = item_handle.x2();
+        const auto y1 = item_handle.y1();
+        const auto y2 = item_handle.y2();
+        self()->diskfsegments().erase({x1, x2, y1, y2});
+        std::erase_if(self()->polytopefsegments(), [&](const auto& kv) {
+          const auto& k = kv.first;
+          return k[0] == x1 && k[1] == x2 && k[2] == y1 && k[3] == y2;
+        });
+        remove_segment_relations<diskfsegment_r>(item_handle);
+        remove_segment_relations<polytopefsegment_r<Topology>>(item_handle);
+      }
+
+      // storage::remove moves the last item to the index of the removed one
+      // and rewrites the refs held in the store (storage::remap_refs): the
+      // points of the removed item now hold an invalid ref, those of the
+      // moved one (and the segment refs of its relations) follow it
+      storage::remove(data, item_handle);
+
+      // remove the points of the removed item
+      std::vector<std::size_t> removed_points;
+      for (std::size_t k = 0; k < std::size(points_items); ++k) {
+        points_flags[k] = false;
+        if (!points_items[k].valid()) removed_points.push_back(k);
+      }
+      storage::remove_many<point_t>(data, std::move(removed_points));
+
+      neighborhood().instance()->resize_point_set(ps_indx, points_coords.front().data(),
+                                                  points_coords.size());
+
+      // The points moved into the slots of the removed ones keep the cell
+      // keys of these slots: a fixed point set is not dynamic, CompactNSearch
+      // never recomputes its keys, and these points are not found where they
+      // are. The next search rebuilds the hash table from the coordinates.
+      neighborhood().instance()->reset();
+    }
+
+    // remove the static segment of the given ident (the "ident" attached by
+    // io): an index held outside the storage goes stale on any removal, as
+    // storage::remove moves the last segment into the freed slot
+    template <typename Step, typename SegmentHandle, typename Ident>
+    void remove_static_segment(Step step, Ident ident) {
+      using indice = typename decltype(self()->env())::indice;
+      using item_t = typename SegmentHandle::type;
+      auto& data = self()->data();
+      using data_t = std::decay_t<decltype(data)>;
+      // the handles of a registry world only know the configuration: search
+      // every property of the world, as io is not known here
+      auto& idents =
+          storage::prop_values<item_t, "ident", world_properties_of<data_t>>(data, step);
+      auto found = std::ranges::find(idents, ident);
+      if (found == idents.end()) {
+        throw std::runtime_error(std::format("no static segment of ident {}", ident));
+      }
+      remove_static_item(
+          step, storage::make_handle(
+                    data, storage::index<item_t, indice>(indice(found - idents.begin()))));
+    }
+
+    void insert_diskfsegment_r(auto hdl) {
+      storage::attr<"diskfsegments">(*self())[{hdl.segment().x1(), hdl.segment().x2(),
+                                               hdl.segment().y1(), hdl.segment().y2()}] = hdl;
+
+      // for (auto hds : storage::handles<dynamical_system>(self()->data())) {
+      //   auto inter = self()->topology().link(hds);
+      //   inter.relation() = dl;
+      //   inter.nslaw() = nslaw();
+      // }
+    }
+
+    void insert_polytopefsegment_r(auto hdl) {
+      using scalar = std::decay_t<decltype(hdl.segment().x1())>;
+      storage::attr<"polytopefsegments">(
+          *self())[{hdl.segment().x1(), hdl.segment().x2(), hdl.segment().y1(),
+                    hdl.segment().y2(), static_cast<scalar>(hdl.point_index())}] = hdl;
+    }
+
+    void insert_polytopemesh_r(auto hdl) {
+      storage::attr<"polytopemeshes">(
+          *self())[{hdl.mesh().index().value(), hdl.contact_index(), hdl.point_index()}] = hdl;
+    }
+
+    void insert_diskfdisk_r(auto tds) {
+      auto htds = tds.translated_disk_shape();
+      storage::attr<"diskfdisks">(*self())[{htds.translation()[0], htds.translation()[1]}] =
+          tds;
+
+      // for (auto hds : storage::handles<dynamical_system>(self()->data())) {
+      //   auto inter = self()->topology().link(hds);
+      //   inter.relation() = dl;
+      //   inter.nslaw() = nslaw();
+      // }
+    }
+
+    void make_points() {
+      auto& data = self()->data();
+      using env = decltype(self()->env());
+      using indice = typename env::indice;
+
+      using points_t = typename neighborhood::points_t;
+
+      mp::for_each(points_t{}, [&]<typename Point>(Point) {
+        using item_t = typename Point::item_t;
+
+        if constexpr (std::derived_from<item_t, model::lagrangian_ds> ||
+                      std::derived_from<item_t, model::elastic_lagrangian_ds>) {
+          auto all_ds = storage::handles<item_t>(data);
+          for (auto ds : all_ds) {
+            //            print("add disk point : {}\n", ds.get());
+            if constexpr (collision::always_shape<collision::shape::mesh, decltype(ds)>()) {
+              auto shape_handle = collision::shape_of<collision::shape::mesh>(ds);
+
+              auto nbsegments = std::size(shape_handle.segments().nodes()) - 1;
+              // multiple points are associated to the system
+              for (std::size_t index = 0; index < nbsegments; ++index) {
+                for (auto [i, point_coord] :
+                     shape_handle.segments().points_coords(index) | view::enumerate) {
+                  auto new_point = storage::add<Point>(data);
+                  new_point.item() = ds;
+                  // the mesh of this system: a contact on this point is on
+                  // one of its edges
+                  new_point.shape() = shape_handle;
+                  new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
+                  new_point.seg_index() = index;
+                  new_point.point_index() = i;
+                }
+              }
+            } else {
+              // With one point at its center, a pair of bodies is seen by
+              // the neighborhood search iff r1 + r2 <= search radius, so a
+              // single point is only enough for 2 r <= search radius. A
+              // bigger body gets points on its boundary, spaced by at most
+              // half the search radius: any contact point is then within a
+              // quarter of the search radius of one of them. The points of
+              // a disk are on its circle, those of a polytope on its edges,
+              // in the body frame.
+              const auto search_radius = neighborhood().instance()->radius();
+              const auto bound = bounding_radius(ds);
+              const auto spacing = search_radius / 2;
+              std::vector<std::array<float, 2>> offsets{{0.f, 0.f}};
+              bool body_frame = false;
+              if (2 * bound > search_radius) {
+                if constexpr (collision::may_have_shape<collision::shape::disk,
+                                                        decltype(ds)>()) {
+                  if (collision::has_shape<collision::shape::disk>(ds)) {
+                    const auto n = static_cast<std::size_t>(
+                        std::ceil(2 * std::numbers::pi * bound / spacing));
+                    offsets.clear();
+                    for (std::size_t i = 0; i < n; ++i) {
+                      const auto t = 2 * std::numbers::pi * i / n;
+                      offsets.push_back({static_cast<float>(bound * std::cos(t)),
+                                         static_cast<float>(bound * std::sin(t))});
+                    }
+                  }
+                }
+                if constexpr (collision::may_have_shape<collision::shape::polytope,
+                                                        decltype(ds)>()) {
+                  if (collision::has_shape<collision::shape::polytope>(ds)) {
+                    auto poly = collision::shape_of<collision::shape::polytope>(ds);
+                    const std::size_t nv = poly.nvertices();
+                    offsets.clear();
+                    body_frame = true;
+                    for (std::size_t k = 0; k < nv; ++k) {
+                      const auto& a = poly.vertices()[k];
+                      const auto& b = poly.vertices()[(k + 1) % nv];
+                      const auto n = std::max<std::size_t>(
+                          1, static_cast<std::size_t>(
+                                 std::ceil(std::hypot(b[0] - a[0], b[1] - a[1]) / spacing)));
+                      for (std::size_t i = 0; i < n; ++i) {
+                        const double t = static_cast<double>(i) / n;
+                        offsets.push_back({static_cast<float>(a[0] + t * (b[0] - a[0])),
+                                           static_cast<float>(a[1] + t * (b[1] - a[1]))});
+                      }
+                    }
+                  }
+                }
+              }
+              for (const auto& offset : offsets) {
+                auto new_point = storage::add<Point>(data);
+                new_point.item() = ds;
+                new_point.bound() = bound;
+                new_point.body_frame() = body_frame;
+                new_point.offset() = {offset[0], offset[1]};
+                new_point.update(0);
+              }
+            }
+          }
+        }
+        // fixed segment
+        else if constexpr (std::derived_from<item_t, collision::shape::segment>) {
+          auto all_segments = storage::handles<item_t>(data);
+          for (auto segment : all_segments) {
+            for (auto [i, point_coord] : segment.points_coords() | view::enumerate) {
+              auto new_point = storage::add<Point>(data);
+              new_point.item() = segment;
+              new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
+              new_point.point_index() = i;
+            }
+          }
+        }
+        // fixed disk
+        else if constexpr (std::derived_from<item_t,
+                                             collision::translated<collision::shape::disk>>) {
+          auto all_fdisks = storage::handles<item_t>(data);
+          for (auto fdisk : all_fdisks) {
+            for (auto [i, point_coord] : fdisk.points_coords() | view::enumerate) {
+              auto new_point = storage::add<Point>(data);
+              new_point.item() = fdisk;
+              new_point.coord() = algebra::cast(mp::type_c<float>, point_coord);
+              new_point.point_index() = (indice)i;
+            }
+          }
+        };
+      });
+    }
+
+    template <typename Index1, typename Index2>
+    decltype(auto) make_ipair(Index1 ids1, Index2 ids2) {
+      auto i1 = ids1.value();
+      auto i2 = ids2.value();
+
+      if constexpr (std::is_same_v<Index1, Index2>)
+      // same type of indices, relation is the same with permutation
+      {
+        if (i1 < i2) {
+          return mp::make_pair(i1, i2);
+        } else {
+          return mp::make_pair(i2, i1);
+        }
+      } else {
+        // not same type of indices: no permutation!
+        return mp::make_pair(i1, i2);
+      }
+    }
+
+    /* key of a ds-ds interaction: the ds pair (ordered as make_ipair) and
+       the manifold point the interaction stands for. Polytope relations
+       carry a point_index (a polytope pair has one interaction per point of
+       its contact manifold); the others stand for the whole pair: 0. */
+    template <typename Index1, typename Index2>
+    auto make_ikey(Index1 ids1, Index2 ids2, std::size_t pi) {
+      auto i1 = ids1.value();
+      auto i2 = ids2.value();
+      if constexpr (std::is_same_v<Index1, Index2>) {
+        if (i2 < i1) std::swap(i1, i2);
+      }
+      return mp::make_tuple(i1, i2, static_cast<decltype(i1)>(pi));
+    }
+
+    std::size_t point_of(auto inter) {
+      return siconos::vkernel::variant::visit(
+          self()->data(), inter.relation(), [](auto rrel) -> std::size_t {
+            if constexpr (requires { rrel.point_index(); }) {
+              return rrel.point_index();
+            } else {
+              return 0;
+            }
+          });
+    }
+
+    // the proximity key of a ds-fsegment relation: the segment and the
+    // manifold point index. The relation of a removed segment holds an
+    // invalid ref (storage::remap_refs), reading it would be out of bounds
+    auto segment_key(auto rel) {
+      auto segment = rel.segment();
+      if (!segment.index().valid()) [[unlikely]] {
+        throw std::runtime_error("space_filter: an interaction is bound to a removed segment");
+      }
+      using scalar = std::decay_t<decltype(segment.x1())>;
+      scalar point_index = 0;
+      if constexpr (requires { rel.point_index(); }) {
+        point_index = static_cast<scalar>(rel.point_index());
+      }
+      return std::array{segment.x1(), segment.x2(), segment.y1(), segment.y2(), point_index};
+    }
+
+    void build_proximity_maps(auto& ds_ds_prox, auto& ds_segment_prox, auto& ds_fdisk_prox,
+                              const auto& ds1s, const auto& ds2s, const auto& interactions) {
+      auto& data = self()->data();
+
+      // build (ds ds -> inter) & (ds segment -> inter) maps
+      for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, interactions)) {
+        if (ds1 != ds2) {
+          ds_ds_prox[make_ikey(ds1, ds2, point_of(inter))] = inter;
+        } else {
+          siconos::vkernel::variant::visit(
+              data, inter.relation(),
+              mp::overload(
+                  // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+                  // capture by value ok with handles
+                  [&, ds1 = ds1, inter = inter]<match::handle<diskfsegment_r> DiskSegmentR>(
+                      DiskSegmentR rel) {
+                    ds_segment_prox[mp::make_pair(ds1.value(), segment_key(rel))] = inter;
+                  },
+                  [&, ds1 = ds1,
+                   inter =
+                       inter]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
+                      PolytopeFsegmentR rel) {
+                    ds_segment_prox[mp::make_pair(ds1.value(), segment_key(rel))] = inter;
+                  },
+                  [&, ds1 = ds1,
+                   inter = inter]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
+                    auto fdisk = rel.translated_disk_shape();
+                    auto& translat = fdisk.translation();
+                    auto coefs = std::array{translat[0], translat[1]};
+                    ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] = inter;
+                  },
+                  [&, ds1 = ds1,
+                   inter = inter]<match::handle<polytopefdisk_r<Topology>> PolytopeFdiskR>(
+                      PolytopeFdiskR rel) {
+                    auto& translat = rel.translated_disk_shape().translation();
+                    auto coefs = std::array{translat[0], translat[1]};
+                    ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] = inter;
+                  },
+                  []<bool flag = false>(auto) {
+                    // hardening: this used to be a silent no-op in release
+                    // (assert compiled out); a self interaction must bind a
+                    // fixed-object relation
+                    throw std::runtime_error(
+                        "space_filter::build_proximity_maps: unhandled relation "
+                        "for a self interaction (ds1 == ds2); only "
+                        "diskfsegment_r, diskfdisk_r, polytopefsegment_r and polytopefdisk_r "
+                        "are supported");
+                  }));
+        }
+      }
+    }
+
+    /* third slot of a ds-mesh proximity key: the mesh edge and the manifold
+       point of the interaction on it (a polytope has one interaction per
+       point, two in 2D; a disk has one, point 0) */
+    static auto edge_point_slot(auto edge, std::size_t pi) {
+      return static_cast<decltype(edge)>(2 * edge + pi);
+    }
+
+    void build_dproximity_maps(auto& ds_dds_prox, const auto& ds1s, const auto& ds2s,
+                               const auto& dinteractions) {
+      auto& data = self()->data();
+
+      // build (ds ds -> inter) & (ds segment -> inter) maps
+      for (auto [ds1, ds2, inter] : view::zip(ds1s, ds2s, dinteractions)) {
+        auto contact_index = variant::visit(data, inter.relation(),
+                                            [](auto& rrel) { return rrel.contact_index(); });
+        ds_dds_prox[mp::make_tuple(ds1.value(), ds2.value(),
+                                   edge_point_slot(contact_index, point_of(inter)))] = inter;
+      }
+    }
+
+    void dsds_activation(auto& ds1, auto& ds2, auto& fmap, auto hp1, auto hp2) {
+      // two points of the same big disk are neighbors of each other
+      if constexpr (std::is_same_v<std::decay_t<decltype(ds1)>, std::decay_t<decltype(ds2)>>) {
+        if (ds1.index() == ds2.index()) return;
+      }
+      // not activated: an interaction of this pair, if any, goes
+      if (beyond_margin(hp1, hp2, self()->contact_margin())) return;
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto diskdisk_r = self()->diskdisk_r();
+
+      const bool polytope1 = collision::has_shape<collision::shape::polytope>(ds1);
+      const bool polytope2 = collision::has_shape<collision::shape::polytope>(ds2);
+
+      // one edge per disk pair; one per manifold point (two in 2D) for a
+      // polytope pair, which the cxd stage rebinds to polytopepolytope_r
+      const std::size_t npoints = polytope1 && polytope2 ? 2 : 1;
+      for (std::size_t pi = 0; pi < npoints; ++pi) {
+        auto find_inter = fmap.find(make_ikey(ds1.index(), ds2.index(), pi));
+        if (find_inter != fmap.end()) {
+          // keep this edge
+          auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+          storage::prop<"activation", Topology>(inter) = true;
+          continue;
+        }
+        if (polytope1 != polytope2) {
+          // disk x polytope: linked disk first, as polytopedisk_r expects
+          using ds_t = std::decay_t<decltype(ds1)>;
+          using pd_index_t = storage::index<collision::polytopedisk_r<Topology>, std::size_t>;
+          using inter_t = decltype(topo.link(ds1, ds2));
+          if constexpr (collision::may_have_shape<collision::shape::polytope, ds_t>() &&
+                        collision::may_have_shape<collision::shape::disk, ds_t>()) {
+            if constexpr (requires(
+                              std::decay_t<decltype(std::declval<inter_t&>().relation())> v,
+                              pd_index_t i) { v = i; }) {
+              auto inter = polytope1 ? topo.link(ds2, ds1) : topo.link(ds1, ds2);
+              inter.nslaw() = nonsmooth_law(ds1, ds2);
+              storage::prop<"activation", Topology>(inter) = true;
+              auto& rmap = self()->polytopedisks();
+              if (auto search = rmap.find(0); search != rmap.end()) {
+                simul::bind_relation<Topology>(data, inter, search->second);
+              } else {
+                auto rel = storage::add<collision::polytopedisk_r<Topology>>(data);
+                simul::bind_relation<Topology>(data, inter, rel);
+                rmap[0] = rel;
+              }
+              fmap[make_ikey(ds1.index(), ds2.index(), pi)] = inter;
+            } else {
+              throw std::runtime_error(
+                  "space_filter: a disk and a polytope are neighbors, but the interaction "
+                  "relations of this world do not include polytopedisk_r");
+            }
+          }
+          continue;
+        }
+
+        // the generic binder serves disk x disk, and polytope x polytope
+        // until the cxd stage rebinds it
+        // create the edge
+        auto inter = topo.link(ds1, ds2);
+        inter.nslaw() = nonsmooth_law(ds1, ds2);
+
+        storage::prop<"activation", Topology>(inter) = true;
+
+        simul::bind_relation<Topology>(data, inter, diskdisk_r);
+        fmap[make_ikey(ds1.index(), ds2.index(), pi)] = inter;
+      }
+    }
+
+    void dsdds_activation(auto& ds1, auto& ds2, auto& dmap, auto hp1, auto hp2) {
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto& diskmeshes = self()->diskmeshes();
+      auto& polytopemeshes = self()->polytopemeshes();
+
+      auto mesh = hp2.shape();
+      auto contact_index = hp2.seg_index();
+
+      // the shape kind decides the relation: compile time for a static shape
+      // declaration, a set membership for per-kind shapes. Decided before
+      // the edge exists, so a refused pair leaves no interaction behind.
+      using ds1_t = std::decay_t<decltype(ds1)>;
+      const bool polytope1 = collision::has_shape<collision::shape::polytope>(ds1);
+      const bool disk1 = collision::has_shape<collision::shape::disk>(ds1);
+      if (!polytope1 && !disk1) {
+        throw std::runtime_error(
+            "diskmesh_r/polytopemesh_r requires a disk- or polytope-shaped ds; "
+            "no narrowphase relation exists for this shape pair");
+      }
+
+      // one edge per (ds, mesh edge) for a disk, one per manifold point (two
+      // in 2D) for a polytope
+      const std::size_t npoints = polytope1 ? 2 : 1;
+      for (std::size_t pi = 0; pi < npoints; ++pi) {
+        const auto key = mp::make_tuple(ds1.index().value(), ds2.index().value(),
+                                        edge_point_slot(contact_index, pi));
+        if (auto find_inter = dmap.find(key); find_inter != dmap.end()) {
+          // keep this edge
+          auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+          storage::prop<"activation", Topology>(inter) = true;
+          continue;
+        }
+
+        // create the edge
+        auto inter = topo.link(ds1, ds2);
+        inter.nslaw() = nonsmooth_law(ds1, ds2);
+        storage::prop<"activation", Topology>(inter) = true;
+
+        if constexpr (collision::may_have_shape<collision::shape::polytope, ds1_t>()) {
+          if (polytope1) {
+            // polytope x mesh edge, manifold point pi
+            using indice = std::decay_t<decltype(mesh.index().value())>;
+            const std::array<indice, 3> rkey{mesh.index().value(),
+                                             static_cast<indice>(contact_index),
+                                             static_cast<indice>(pi)};
+            if (auto search = polytopemeshes.find(rkey); search != polytopemeshes.end()) {
+              simul::bind_relation<Topology>(data, inter, search->second);
+            } else {
+              auto rel = storage::add<collision::polytopemesh_r<Topology>>(data);
+              rel.mesh() = mesh;
+              rel.contact_index() = contact_index;
+              rel.point_index() = pi;
+              simul::bind_relation<Topology>(data, inter, rel);
+              polytopemeshes[rkey] = rel;
+            }
+          }
+        }
+        if constexpr (collision::may_have_shape<collision::shape::disk, ds1_t>()) {
+          if (disk1) {
+            // disk x mesh edge
+            if (auto search = diskmeshes.find({mesh.index().value(), contact_index});
+                search != diskmeshes.end()) {
+              simul::bind_relation<Topology>(data, inter, search->second);
+            } else {
+              auto rel = storage::add<collision::diskmesh_r>(data);
+              rel.mesh() = mesh;
+              rel.contact_index() = contact_index;
+              simul::bind_relation<Topology>(data, inter, rel);
+              diskmeshes[{mesh.index().value(), contact_index}] = rel;
+            }
+          }
+        }
+        dmap[key] = inter;
+      }
+    }
+
+    void diskfsegment_activation(auto& body1, auto& body2, auto& intermap) {
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto& relmap = self()->diskfsegments();
+
+      // diskfsegment_r reads shape.radius() on the body, which is correct only
+      // for a disk: a polytope exposes radius() as its circumradius.
+      if (!collision::has_shape<collision::shape::disk>(body1)) {
+        throw std::runtime_error(
+            "diskfsegment_r requires a disk-shaped ds; no narrowphase relation "
+            "exists for this shape pair");
+      }
+
+      auto segment = body2;
+      auto x1 = segment.x1();
+      auto x2 = segment.x2();
+      auto y1 = segment.y1();
+      auto y2 = segment.y2();
+
+      auto& ds1 = body1;
+
+      auto find_inter = intermap.find(mp::make_pair(
+          ds1.index().value(), std::array{x1, x2, y1, y2, std::decay_t<decltype(x1)>{0}}));
+
+      if (find_inter != intermap.end()) {
+        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+        // keep this interaction
+        storage::prop<"activation", Topology>(inter) = true;
+
+        // print("interaction FOUND for
+        // {},{},{}\n", a, b,
+        //       c);
+      } else {
+        // print("interaction NOT FOUND for
+        // {},{},{}\n", a,
+        //       b, c);
+        // create the edge
+        auto inter = topo.link(body1);
+        inter.nslaw() = nonsmooth_law(body1, body2);
+
+        if (auto search = relmap.find({x1, x2, y1, y2}); search != relmap.end()) {
+          simul::bind_relation<Topology>(data, inter, search->second);
+        } else {
+          auto dl = storage::add<diskfsegment_r>(data);
+
+          // set segment pointer toward body2
+          dl.segment() = segment;
+
+          simul::bind_relation<Topology>(data, inter, dl);
+          relmap[{x1, x2, y1, y2}] = dl;
+        }
+        storage::prop<"activation", Topology>(inter) = true;
+        intermap[mp::make_pair(ds1.index().value(),
+                               std::array{x1, x2, y1, y2, std::decay_t<decltype(x1)>{0}})] =
+            inter;
+      }
+    }
+
+    void polytopefsegment_activation(auto& body1, auto& body2, auto& intermap) {
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto& relmap = self()->polytopefsegments();
+
+      if (!collision::has_shape<collision::shape::polytope>(body1)) {
+        throw std::runtime_error(
+            "polytopefsegment_r requires a polytope-shaped ds; no narrowphase "
+            "relation exists for this shape pair");
+      }
+
+      auto segment = body2;
+      auto x1 = segment.x1();
+      auto x2 = segment.x2();
+      auto y1 = segment.y1();
+      auto y2 = segment.y2();
+      using scalar = std::decay_t<decltype(x1)>;
+
+      auto& ds1 = body1;
+
+      // one interaction per point of the contact manifold (at most two in
+      // 2D); a point the manifold does not have keeps an inactive gap
+      using poly_fs_t = collision::polytopefsegment_r<Topology>;
+      for (std::size_t pi = 0; pi < 2; ++pi) {
+        const std::array key{x1, x2, y1, y2, static_cast<scalar>(pi)};
+        auto find_inter = intermap.find(mp::make_pair(ds1.index().value(), key));
+
+        if (find_inter != intermap.end()) {
+          auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+          storage::prop<"activation", Topology>(inter) = true;
+        } else {
+          auto inter = topo.link(body1);
+          inter.nslaw() = nonsmooth_law(body1, body2);
+
+          if (auto search = relmap.find(key); search != relmap.end()) {
+            simul::bind_relation<Topology>(data, inter, search->second);
+          } else {
+            auto dl = storage::add<poly_fs_t>(data);
+            dl.segment() = segment;
+            dl.point_index() = pi;
+            simul::bind_relation<Topology>(data, inter, dl);
+            relmap[key] = dl;
+          }
+          storage::prop<"activation", Topology>(inter) = true;
+          intermap[mp::make_pair(ds1.index().value(), key)] = inter;
+        }
+      }
+    }
+
+    void polytopefdisk_activation(auto& body1, auto& body2, auto& intermap) {
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto& relmap = self()->polytopefdisks();
+
+      if (!collision::has_shape<collision::shape::polytope>(body1)) {
+        throw std::runtime_error(
+            "polytopefdisk_r requires a polytope-shaped ds; no narrowphase "
+            "relation exists for this shape pair");
+      }
+
+      auto fdisk = body2;
+      auto& translat = fdisk.translation();
+      auto coefs = std::array{translat[0], translat[1]};
+
+      auto& ds1 = body1;
+
+      auto find_inter = intermap.find(mp::make_pair(ds1.index().value(), coefs));
+
+      if (find_inter != intermap.end()) {
+        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+        storage::prop<"activation", Topology>(inter) = true;
+      } else {
+        auto inter = topo.link(body1);
+        inter.nslaw() = nonsmooth_law(body1, body2);
+
+        using poly_fd_t = collision::polytopefdisk_r<Topology>;
+        if (auto search = relmap.find(coefs); search != relmap.end()) {
+          simul::bind_relation<Topology>(data, inter, search->second);
+        } else {
+          auto dl = storage::add<poly_fd_t>(data);
+          dl.translated_disk_shape() = fdisk;
+          simul::bind_relation<Topology>(data, inter, dl);
+          relmap[coefs] = dl;
+        }
+        storage::prop<"activation", Topology>(inter) = true;
+        intermap[mp::make_pair(ds1.index().value(), coefs)] = inter;
+      }
+    }
+
+    void diskfdisk_activation(auto& body1, auto& body2, auto& ds_fdisk_prox) {
+      auto& data = self()->data();
+      auto topo = self()->topology();
+      auto& diskfdisks = self()->diskfdisks();
+
+      auto fdisk = body2;
+      auto& translat = fdisk.translation();
+      auto coefs = std::array{translat[0], translat[1]};
+
+      // diskfdisk_r reads shape.radius() on the body, which is correct only for
+      // a disk: a polytope exposes radius() as its circumradius.
+      if (!collision::has_shape<collision::shape::disk>(body1)) {
+        throw std::runtime_error(
+            "diskfdisk_r requires a disk-shaped ds; no narrowphase relation "
+            "exists for this shape pair");
+      }
+
+      auto& ds1 = body1;
+
+      auto find_inter = ds_fdisk_prox.find(mp::make_pair(ds1.index().value(), coefs));
+
+      if (find_inter != ds_fdisk_prox.end()) {
+        auto inter = storage::make_handle(data, std::get<1>(*find_inter));
+        storage::prop<"activation", Topology>(inter) = true;
+      } else {
+        auto inter = topo.link(body1);
+        inter.nslaw() = nonsmooth_law(body1, body2);
+
+        if (auto search = diskfdisks.find(coefs); search != diskfdisks.end()) {
+          simul::bind_relation<Topology>(data, inter, search->second);
+        } else {
+          auto dfd = storage::add<diskfdisk_r>(data);
+
+          // set disk pointer toward body2
+          dfd.translated_disk_shape() = fdisk;
+
+          simul::bind_relation<Topology>(data, inter, dfd);
+          diskfdisks[coefs] = dfd;
+        }
+        storage::prop<"activation", Topology>(inter) = true;
+        ds_fdisk_prox[mp::make_pair(ds1.index().value(), coefs)] = inter;
+      }
+    }
+
+    template <typename Interaction>
+    void remove_interactions(auto& ds_ds_prox, auto& ds_segment_prox, auto& ds_fdisk_prox) {
+      using env = decltype(self()->env());
+      using indice = typename env::indice;
+
+      auto& data = self()->data();
+
+      auto& activations = storage::prop_values<Interaction, "activation", Topology>(data, 0);
+
+      auto interactions = storage::handles<Interaction>(data, 0);
+
+      //      print("BEFORE REMOVAL: size of indexset0: {}\n",
+      //      activations.size());
+      for (auto [activation, inter] : view::zip(activations, interactions)) {
+        if (!activation) {
+          //          print("START REMOVE interaction {}\n", inter.get());
+
+          if (storage::prop<"ds1", Topology>(inter) != storage::prop<"ds2", Topology>(inter)) {
+            auto finter = ds_ds_prox.find(make_ikey(storage::prop<"ds1", Topology>(inter),
+                                                    storage::prop<"ds2", Topology>(inter),
+                                                    point_of(inter)));
+
+            // hardening: duplicate ds pairs (the proximity map keeps only
+            // the last interaction per pair) or a map rebuilt out of sync
+            // would leave this find empty; the assert is compiled out in a
+            // release build, so this used to dereference an end iterator
+            if (finter == ds_ds_prox.end()) {
+              throw std::runtime_error(
+                  "space_filter::remove_interactions: no proximity map entry for "
+                  "this ds-ds interaction (stale filter state or duplicate ds "
+                  "pair)");
+            }
+            if (inter.index().value() != std::get<1>(*finter).value()) {
+              throw std::runtime_error(
+                  "space_filter::remove_interactions: two interactions share the "
+                  "same ds pair; this one is stale");
+            }
+
+            ds_ds_prox.erase(finter);
+            //            print("  REMOVE ds ds interaction between {}
+            //            {}\n",
+            //                  storage::prop<"ds1", Topology>(inter).get(),
+            //                  storage::prop<"ds2", Topology>(inter).get());
+          } else {
+            siconos::vkernel::variant::visit(
+                data, inter.relation(),
+                mp::overload(
+                    [&]<match::handle<diskfsegment_r> DiskSegmentR>(DiskSegmentR rel) {
+                      auto finter = ds_segment_prox.find(mp::make_pair(
+                          storage::prop<"ds1", Topology>(inter).value(), segment_key(rel)));
+                      if (finter == ds_segment_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this ds-fsegment interaction");
+                      }
+                      ds_segment_prox.erase(finter);
+                    },
+                    [&]<match::handle<polytopefsegment_r<Topology>> PolytopeFsegmentR>(
+                        PolytopeFsegmentR rel) {
+                      auto finter = ds_segment_prox.find(mp::make_pair(
+                          storage::prop<"ds1", Topology>(inter).value(), segment_key(rel)));
+                      if (finter == ds_segment_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this polytope-fsegment interaction");
+                      }
+                      ds_segment_prox.erase(finter);
+                    },
+                    [&]<match::handle<diskfdisk_r> DiskFdiskR>(DiskFdiskR rel) {
+                      auto& translat = rel.translated_disk_shape().translation();
+                      auto coefs = std::array{translat[0], translat[1]};
+                      auto finter = ds_fdisk_prox.find(
+                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      if (finter == ds_fdisk_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this ds-fdisk interaction");
+                      }
+                      ds_fdisk_prox.erase(finter);
+                    },
+                    [&]<match::handle<polytopefdisk_r<Topology>> PolytopeFdiskR>(
+                        PolytopeFdiskR rel) {
+                      auto& translat = rel.translated_disk_shape().translation();
+                      auto coefs = std::array{translat[0], translat[1]};
+                      auto finter = ds_fdisk_prox.find(
+                          mp::make_pair(storage::prop<"ds1", Topology>(inter).value(), coefs));
+                      if (finter == ds_fdisk_prox.end()) {
+                        throw std::runtime_error(
+                            "space_filter::remove_interactions: no proximity map "
+                            "entry for this polytope-fdisk interaction");
+                      }
+                      ds_fdisk_prox.erase(finter);
+                    },
+                    []<bool flag = false>(auto) {
+                      // hardening: this used to be a silent no-op in release
+                      // (assert compiled out), leaking the interaction
+                      throw std::runtime_error(
+                          "space_filter::remove_interactions: unhandled relation "
+                          "for a self interaction (ds1 == ds2); only "
+                          "diskfsegment_r, diskfdisk_r, polytopefsegment_r and "
+                          "polytopefdisk_r "
+                          "are supported");
+                    }));
+            //            print("  REMOVE ds segment interaction between {}
+            //            {},{},{})\n",
+            //                  storage::prop<"ds1", Topology>(inter).get(),
+            //                  segmentcoefs[0], segmentcoefs[1],
+            //                  segmentcoefs[2], segmentcoefs[3]);
+
+            ;
+          }
+        }
+      }
+
+      auto fact = std::ranges::find(activations, false);
+
+      //      print("  START REMOVE interactions\n");
+
+      while (fact != activations.end()) {
+        auto fact_index = fact - activations.begin();
+        //        print("  activation of {} is false\n", fact_index);
+        auto inter =
+            storage::make_handle(data, storage::index<Interaction, indice>(fact_index));
+
+        // with move_back : order is modified
+
+        //        print("  remove interaction {}\n", inter.get());
+        storage::remove(data, inter);
+
+        // XXX remove from ds_ds_prox or ds_segment_prox
+
+        // activations has been modified, search first false element
+        // starting at current position
+        auto remaining_activations = std::ranges::subrange(fact, activations.end());
+
+        auto ifact = std::ranges::find(remaining_activations, false);
+
+        fact = fact + (ifact - remaining_activations.begin());
+        // fact = std::ranges::find(activations, false);
+
+        //        print("  find new false at : {}\n", fact -
+        //        activations.begin());
+      }
+
+      //      print("AFTER REMOVAL: size of indexset0: {}\n",
+      //      activations.size()); print("END of interactions removal\n");
+      //      print("size of ds ds map: {}\n", ds_ds_prox.size());
+      //      print("size of ds segment map: {}\n", ds_segment_prox.size());
+    }
+
+    /* remove the ds-mesh interactions the filter did not re-activate this
+       step (bodies that left the edge's neighborhood); same move_back
+       removal as remove_interactions, the proximity entry goes too */
+    void remove_dinteractions(auto& ds_dds_prox) {
+      using env = decltype(self()->env());
+      using indice = typename env::indice;
+      auto& data = self()->data();
+
+      auto& activations = storage::prop_values<dfinteraction, "activation", Topology>(data, 0);
+      auto& ds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, 0);
+      auto& ds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, 0);
+
+      for (auto [activation, ds1, ds2, inter] :
+           view::zip(activations, ds1s, ds2s, storage::handles<dfinteraction>(data, 0))) {
+        if (activation) continue;
+        auto contact_index = variant::visit(data, inter.relation(),
+                                            [](auto& rrel) { return rrel.contact_index(); });
+        auto finter = ds_dds_prox.find(mp::make_tuple(
+            ds1.value(), ds2.value(), edge_point_slot(contact_index, point_of(inter))));
+        if (finter == ds_dds_prox.end() ||
+            std::get<1>(*finter).value() != inter.index().value()) {
+          throw std::runtime_error(
+              "space_filter::remove_dinteractions: no proximity map entry for this "
+              "ds-mesh interaction (stale filter state or duplicate key)");
+        }
+        ds_dds_prox.erase(finter);
+      }
+
+      // with move_back the last interaction takes the removed index: search
+      // again from the same position
+      auto fact = std::ranges::find(activations, false);
+      while (fact != activations.end()) {
+        const auto fact_index = fact - activations.begin();
+        storage::remove(data, storage::make_handle(
+                                  data, storage::index<dfinteraction, indice>(fact_index)));
+        auto remaining = std::ranges::subrange(fact, activations.end());
+        fact = fact + (std::ranges::find(remaining, false) - remaining.begin());
+      }
+    }
+
+    void update_index_set0(auto step) {
+      using env = decltype(self()->env());
+      using indice = typename env::indice;
+      using scalar = typename env::scalar;
+
+      using map_ds_ds_prox_t =
+          typename env::template map<mp::tuple<indice, indice, indice>,
+                                     storage::index<finteraction, indice>>;
+
+      using map_ds_dds_prox_t =
+          typename env::template map<mp::tuple<indice, indice, indice>,
+                                     storage::index<dfinteraction, indice>>;
+
+      using map_ds_segment_prox_t =
+          typename env::template map<mp::pair<indice, std::array<scalar, 5>>,
+                                     storage::index<finteraction, indice>>;
+
+      using map_ds_fdisk_prox_t =
+          typename env::template map<mp::pair<indice, std::array<scalar, 2>>,
+                                     storage::index<finteraction, indice>>;
+
+      auto& data = self()->data();
+
+      auto ngbh = self()->neighborhood();
+      using ngbh_t = typename std::decay_t<decltype(ngbh)>::type;
+      using points_t = typename ngbh_t::points_t;
+
+      auto ds_ds_prox = map_ds_ds_prox_t();
+      auto ds_dds_prox = map_ds_dds_prox_t();
+
+      auto ds_segment_prox = map_ds_segment_prox_t();
+
+      auto ds_fdisk_prox = map_ds_fdisk_prox_t();
+
+      const auto n_inter = storage::handles<finteraction>(data, step).size();
+      ds_ds_prox.reserve(n_inter * 2);
+      ds_segment_prox.reserve(n_inter * 2);
+      ds_fdisk_prox.reserve(n_inter * 2);
+
+      auto& ds1s = storage::prop_values<finteraction, "ds1", Topology>(data, step);
+      auto& ds2s = storage::prop_values<finteraction, "ds2", Topology>(data, step);
+
+      auto interactions = storage::handles<finteraction>(data, step);
+
+      build_proximity_maps(ds_ds_prox, ds_segment_prox, ds_fdisk_prox, ds1s, ds2s,
+                           interactions);
+
+      // no column is attached to empty_item (see world::register_columns)
+      if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        auto& dds1s = storage::prop_values<dfinteraction, "ds1", Topology>(data, step);
+        auto& dds2s = storage::prop_values<dfinteraction, "ds2", Topology>(data, step);
+        auto dinteractions = storage::handles<dfinteraction>(data, step);
+        build_dproximity_maps(ds_dds_prox, dds1s, dds2s, dinteractions);
+      }
+
+      auto& activations = storage::prop_values<finteraction, "activation", Topology>(data, 0);
+
+      int activations_size = activations.size();
+      if (activations_size > 0) {
+        for (auto [activation] : view::zip(activations)) {
+          activation = false;
+        }
+      }
+
+      if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        auto& dactivations =
+            storage::prop_values<dfinteraction, "activation", Topology>(data, 0);
+        if (dactivations.size() > 0) {
+          for (auto [activation] : view::zip(dactivations)) {
+            activation = false;
+          }
+        }
+      }
+
+      constexpr auto npointsets = mp::size(points_t{});
+      mp::for_each(mp::range<npointsets - mp::size_c<1_c>>, [&](auto ip1) {
+        auto p1 = points_t{}[mp::size_c<ip1>];
+        using p1_t = decltype(p1);
+        auto psid1 = ngbh.point_set_id()[ip1];
+
+        mp::for_each(mp::range_c<std::size_t, ip1, npointsets>, [&](auto ip2) {
+          auto p2 = points_t{}[mp::size_c<ip2>];
+          using p2_t = decltype(p2);
+          auto psid2 = ngbh.point_set_id()[ip2];
+
+          auto& ps1 = ngbh.instance()->point_set(psid1);
+          //              auto& ps2 =
+          //              ngbh.instance()->point_set(psid2);
+
+          if (ngbh.is_active(ip1, ip2)) {
+            for (size_t i = 0; i < ps1.n_points(); ++i) {
+              auto pid1 = i;
+              auto index_point1 = storage::index<p1_t, size_t>(pid1);
+              auto handle_point1 = storage::make_handle(data, index_point1);
+              auto body1 = handle_point1.item();
+
+              for (size_t j = 0; j < ps1.n_neighbors(psid2, i); ++j) {
+                const unsigned int pid2 = ps1.neighbor(psid2, i, j);
+
+                // print("pid2 : {}\n", pid2);
+                auto index_point2 = storage::index<p2_t, size_t>(pid2);
+                auto handle_point2 = storage::make_handle(data, index_point2);
+                auto body2 = handle_point2.item();
+                using system1_t = typename p1_t::item_t;
+                using system2_t = typename p2_t::item_t;
+
+                // print("point1 {},{},{}\n",
+                //       mp::type_name<system1_t>(),
+                //       handle_point1.coord()(0),
+                //       handle_point1.coord()(1));
+                // print("point2 {},{},{}\n",
+                //       mp::type_name<system2_t>(),
+                //       handle_point2.coord()(0),
+                //       handle_point2.coord()(1));
+
+                if constexpr (std::derived_from<system1_t, model::lagrangian_ds>) {
+                  // proximity with another disk, only disks are
+                  // dynamics check if interaction already exists
+
+                  if constexpr (std::derived_from<system2_t, model::lagrangian_ds>) {
+                    dsds_activation(body1, body2, ds_ds_prox, handle_point1, handle_point2);
+                  } else {
+                    if constexpr (std::derived_from<system2_t, model::elastic_lagrangian_ds>) {
+                      dsdds_activation(body1, body2, ds_dds_prox, handle_point1,
+                                       handle_point2);
+                    } else if constexpr (std::derived_from<system1_t, model::lagrangian_ds>) {
+                      if constexpr (std::derived_from<system2_t, collision::shape::segment>) {
+                        // body2 is a static segment
+                        using body1_t = std::decay_t<decltype(body1)>;
+                        if constexpr (collision::always_shape<collision::shape::polytope,
+                                                              body1_t>()) {
+                          polytopefsegment_activation(body1, body2, ds_segment_prox);
+                        } else if constexpr (collision::may_have_shape<
+                                                 collision::shape::polytope, body1_t>()) {
+                          if (collision::has_shape<collision::shape::polytope>(body1)) {
+                            polytopefsegment_activation(body1, body2, ds_segment_prox);
+                          } else {
+                            diskfsegment_activation(body1, body2, ds_segment_prox);
+                          }
+                        } else {
+                          diskfsegment_activation(body1, body2, ds_segment_prox);
+                        }
+                      } else if constexpr (std::derived_from<system2_t,
+                                                             collision::translated<
+                                                                 collision::shape::disk>>) {
+                        // body2 is a fixed disk
+                        using body1_t = std::decay_t<decltype(body1)>;
+                        if constexpr (collision::always_shape<collision::shape::polytope,
+                                                              body1_t>()) {
+                          polytopefdisk_activation(body1, body2, ds_fdisk_prox);
+                        } else if constexpr (collision::may_have_shape<
+                                                 collision::shape::polytope, body1_t>()) {
+                          if (collision::has_shape<collision::shape::polytope>(body1)) {
+                            polytopefdisk_activation(body1, body2, ds_fdisk_prox);
+                          } else {
+                            diskfdisk_activation(body1, body2, ds_fdisk_prox);
+                          }
+                        } else {
+                          diskfdisk_activation(body1, body2, ds_fdisk_prox);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          };
+        });
+      });
+      remove_interactions<finteraction>(ds_ds_prox, ds_segment_prox, ds_fdisk_prox);
+      if constexpr (!std::derived_from<dfinteraction, empty_item>) {
+        remove_dinteractions(ds_dds_prox);
+      }
+    }
+
+    auto methods() {
+      // types only: methods() is called on a bare interface object, without a
+      // world (see storage::methods), so nothing here may be evaluated
+      using data_t = std::decay_t<decltype(self()->data())>;
+      using env_t = decltype(self()->env());
+      using indice = typename env_t::indice;
+      using integer = typename env_t::integer;
+      // using scalar = typename env_t::scalar;
+      using diskfsegment_r_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(), storage::index<collision::diskfsegment_r, indice>{}))>;
+      using diskfdisk_r_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(), storage::index<collision::diskfdisk_r, indice>{}))>;
+      using polytopefsegment_r_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(),
+          storage::index<collision::polytopefsegment_r<Topology>, indice>{}))>;
+      using polytopemesh_r_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(),
+          storage::index<collision::polytopemesh_r<Topology>, indice>{}))>;
+      using segment_handle_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(), storage::index<collision::shape::segment, indice>{}))>;
+      // a handle, not an index: python passes handles, and pybind would
+      // reinterpret a handle (data reference first) as an index
+      using ref_nslaw_t = std::decay_t<decltype(storage::make_handle(
+          std::declval<data_t&>(), storage::index<nslaw, indice>{}))>;
+
+      return collect(
+          method("make_points", &interface<Handle>::make_points),
+          method("update_index_set0", &interface<Handle>::update_index_set0<indice>),
+          method("insert_diskfsegment_r",
+                 &interface<Handle>::insert_diskfsegment_r<diskfsegment_r_t>),
+          method("insert_polytopefsegment_r",
+                 &interface<Handle>::insert_polytopefsegment_r<polytopefsegment_r_t>),
+          method("insert_polytopemesh_r",
+                 &interface<Handle>::insert_polytopemesh_r<polytopemesh_r_t>),
+          method("insert_diskfdisk_r", &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
+          method("insert_nonsmooth_law",
+                 &interface<Handle>::insert_nonsmooth_law<ref_nslaw_t, indice, indice>),
+          method("remove_static_segment",
+                 &interface<Handle>::template remove_static_segment<indice, segment_handle_t,
+                                                                    integer>));
+    }
+  };
+};
+}  // namespace siconos::vkernel::collision

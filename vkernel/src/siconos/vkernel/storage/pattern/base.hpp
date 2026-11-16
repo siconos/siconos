@@ -1,0 +1,113 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <cstddef>
+#include <memory>
+#include <tuple>
+#include <type_traits>
+
+#include "siconos/vkernel/storage/mp/mp.hpp"
+
+namespace siconos::vkernel::storage::pattern {
+using size_t = std::size_t;
+
+template <typename... Ts>
+using pointer = std::shared_ptr<Ts...>;
+
+template <size_t N, typename tpl>
+using nth_t = std::decay_t<decltype(tpl{}[mp::size_c<N>])>;
+
+template <typename... Args>
+using gather = mp::tuple<Args...>;
+
+// https://ctrpeach.io/posts/cpp20-string-literal-template-parameters/
+// https://stackoverflow.com/questions/62266052/c20-string-literal-template-argument-working-example
+// https://www.cppstories.com/2021/constexpr-vecstr-cpp20/
+
+template <std::size_t N>
+struct string_literal {
+  constexpr string_literal(const char (&str)[N]) { std::copy_n(str, N, value); }
+  char value[N];
+};
+
+template <string_literal Text>
+struct text {
+  static constexpr auto str = Text;
+};
+
+struct any_symbol {};
+template <string_literal Symbol>
+struct symbol : text<Symbol>, any_symbol {};
+
+namespace match {
+template <typename T>
+concept scalar = std::is_scalar_v<T>;
+
+template <typename T>
+concept indice = std::is_scalar_v<T> && requires(T i) { std::array<double, 1>{}[i]; };
+
+template <typename T>
+concept symbol = std::derived_from<T, any_symbol>;
+
+template <typename T>
+concept attributes = requires { typename T::attributes; };
+
+template <typename T>
+concept item = requires { typename T::item_t; };
+
+template <typename T>
+concept items = item<T> && requires { typename T::items; };
+
+/* an item whose lifetime is the store's (static constexpr bool removable =
+   false): storage::remove refuses it at compile time. Its removal would
+   swap and pop it, and the item_ref of the other items to the moved one
+   would be stale (see storage/remove.hpp) */
+template <typename T>
+concept not_removable = item<T> && requires { requires !T::removable; };
+
+template <typename T>
+concept properties = item<T> && requires { typename T::properties; };
+
+template <typename T>
+concept polymorphic_type = requires { typename T::polymorphic; };
+
+template <typename T>
+concept size = requires(T a) {
+  { std::size(a) };
+};
+
+template <typename T>
+concept push_back = requires(T a) {
+  { a.push_back(typename T::value_type{}) };
+};
+
+template <typename T>
+concept static_capacity = requires(T a) {
+  { a.static_capacity };
+};
+
+template <typename T, typename I>
+concept handle = std::derived_from<typename T::type, I> && requires { typename T::handle_t; };
+
+template <typename T>
+concept wrap = item<T> && requires { typename T::wrap_t; };
+
+}  // namespace match
+}  // namespace siconos::vkernel::storage::pattern
