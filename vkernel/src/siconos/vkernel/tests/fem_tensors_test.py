@@ -75,9 +75,9 @@ _SICONOS_LIBRARY_PATHS = [
         "kernel",
         "io",
         "externals",
-        "vkernel/soa",
+        "vkernel",
         "control",
-        "vkernel/soa/extern/CompactNSearch",
+        "externals/CompactNSearch",
     )
 ]
 
@@ -111,8 +111,8 @@ _PYTHON = os.environ.get("SICONOS_PYTHON", sys.executable)
 def _run_fem_simulation(tmp_path, mesh_path: str) -> None:
     """Run ``fem.py`` in an isolated temp directory.
 
-    The script writes ``fem.hdf5`` in its current working directory, so we
-    cd into ``tmp_path`` beforehand to avoid polluting the source tree. A
+    The script writes ``fem.hdf5`` in its current working directory, so it
+    runs in ``tmp_path`` to avoid polluting the source tree. A
     few steps are enough for the datasets: T = 0.05.
     """
     # Run in tmp_path so fem.hdf5 is created there.

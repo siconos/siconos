@@ -263,7 +263,7 @@ Two notes on this case:
 
 ## 5. Reproduce
 
-`nscd_comparisons` (`vkernel/soa/src/siconos/tests/nscd_comparisons.cpp`)
+`nscd_comparisons` (`vkernel/src/siconos/vkernel/tests/nscd_comparisons.cpp`)
 is built with the vkernel tests (`WITH_vkernel_TESTING`). It writes one
 CSV per case, and all the cases take about 1.5 min. The plot script,
 `time-integrators-mj-at-dem/scripts/nscd_comparisons_plot.py`, makes
@@ -275,7 +275,7 @@ motion, what each scheme does) next to the data. The target runs both:
 cmake --build <build> --target vkernel_study_time_integrators
 ```
 
-The outputs go to `<build>/vkernel/soa/notes/time-integrators-mj-at-dem/`.
+The outputs go to `<build>/vkernel/notes/time-integrators-mj-at-dem/`.
 The PNGs need matplotlib, which is in the development environment of
 `guix.scm` (`guix shell -D -f guix.scm`). Without matplotlib the target
 writes `tables.md` only.

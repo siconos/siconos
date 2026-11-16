@@ -6,7 +6,7 @@ if(WITH_vkernel_TESTING)
   endif()
 
   # The ctest tests of this directory are registered in
-  # vkernel/soa/vkernel_tests.cmake (begin_tests/new_test). This file only
+  # vkernel/vkernel_tests.cmake (begin_tests/new_test). This file only
   # keeps the targets that are not ctest tests: the relation/index sets
   # oracles, which build the same test twice and compare their output.
 

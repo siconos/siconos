@@ -23,9 +23,9 @@ LIBRARY_DIRS = [
     "kernel",
     "mechanics",
     "numerics",
-    "vkernel/soa",
-    "vkernel/soa/extern/CompactNSearch",
-    "vkernel/soa/extern/cuNSearch",
+    "externals/CompactNSearch",
+    "externals/cuNSearch",
+    "vkernel",
 ]
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -55,20 +55,18 @@ build = os.path.abspath(args.build_dir)
 out = os.path.abspath(args.out)
 nonos = (
     args.nonos_module
-    or (glob.glob(os.path.join(build, "vkernel/soa/_nonos*.so")) or [None])[0]
+    or (glob.glob(os.path.join(build, "vkernel/_nonos*.so")) or [None])[0]
 )
 if nonos is None:
-    sys.exit(f"no _nonos module in {build}/vkernel/soa: build the target _nonos")
+    sys.exit(f"no _nonos module in {build}/vkernel: build the target _nonos")
 
 # the nonos package as the vnative runner imports it: the python sources
 # and the extension module of the build
 pkg = os.path.join(out, "pkg", "nonos")
 os.makedirs(pkg, exist_ok=True)
-for f in (
-    os.path.join(src, "vkernel/soa/src/siconos/py/nonos/__init__.py"),
-    os.path.join(src, "vkernel/soa/src/siconos/py/nonos/bridge.py"),
-    os.path.abspath(nonos),
-):
+for f in sorted(
+    glob.glob(os.path.join(src, "vkernel/src/siconos/vkernel/py/nonos/*.py"))
+) + [os.path.abspath(nonos)]:
     link = os.path.join(pkg, os.path.basename(f))
     if os.path.lexists(link):
         os.remove(link)
