@@ -10,9 +10,9 @@ K="${2:-20}"
 PY="${PYTHON:-python3.11}"
 
 # The narrowphase is serial. CompactNSearch runs its hash and query loops in
-# OpenMP regions: at N=30 the 24-thread fork/join costs more than it saves
-# (search 0.20 ms vs 0.06 ms with one thread). Bullet runs with one thread
-# too, so both backends are compared single-threaded.
+# OpenMP regions: at small N the multi-thread fork/join costs more than it
+# saves. Bullet runs with one thread too, so both backends are compared
+# single-threaded.
 export OMP_NUM_THREADS=1
 
 dump="settled-${N}.npz"

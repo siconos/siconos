@@ -22,8 +22,8 @@ the other segments must still hold the disks.
 The removed segment is the last one added, so the first one imported (the
 static ids are negative): its points come first, and storage::remove moves
 the points of the floor into their slots. Without the z-order sort, the
-neighborhood search did not see the moved points where they are, and the
-disks fell through the floor.
+neighborhood search must still see the moved points where they are, or the
+disks fall through the floor.
 
 Run with pytest, nonos and siconos.io in the PYTHONPATH.
 """
@@ -73,7 +73,7 @@ def test_remove_static_segment(tmp_path):
     vnative_options = nonos.bridge.SpaceFilterOptions()
     vnative_options.neighborhood_radius = 2.5 * RADIUS
     vnative_options.min_radius = 0.5 * RADIUS
-    # the sort rebuilds the hash table and hid the bug
+    # the sort rebuilds the hash table and would hide a stale one
     vnative_options.sort_frequency = 0
 
     run_options = MechanicsHdf5Runner_run_options()

@@ -34,10 +34,9 @@
 #include "siconos/vkernel/collision/polytopefsegment_r.hpp"
 // clang-format on
 
-// The two rigid examples of Acary & Collins-Craft (JTCAM 2025), section 5,
-// as run in the fremond-for-dummies companion (scripts/mj.py, h = 1e-4,
-// theta = 1/2, e = 1, g = 10, m = 1): a polytope under gravity on a fixed
-// ground segment, with Newton and with Frémond.
+// The two rigid examples of Acary & Collins-Craft (JTCAM 2025), section 5
+// (h = 1e-4, theta = 1/2, e = 1, g = 10, m = 1): a polytope under gravity
+// on a fixed ground segment, with Newton and with Frémond.
 //
 // - the impacting stick (l = 1, I = 1/12, mu = 0.01, contact at its lower
 //   end): at the first impact the slip reverses, and Coulomb on u(k + 1)
@@ -47,8 +46,8 @@
 //
 // With theta = 1/2, K = C = 0 and gravity in E, the discrete energy balance
 // of the scheme is E(k + 1) - E(k) = u(k + theta)^T p(k + 1), the contact
-// work, and its normal part is zero for e = 1. The reference values are
-// those of mj.py.
+// work, and its normal part is zero for e = 1. The reference values come
+// from the same scheme with an exact local solver.
 
 #define SICONOS_FREMOND_RIGID_CONFIG(NS, LAW)                                               \
   namespace siconos::vkernel::NS {                                                          \
@@ -298,8 +297,9 @@ class FremondRigidTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testBlockThetaOneIsNewton);
   CPPUNIT_TEST_SUITE_END();
 
-  // round-off. The reference values of mj.py (the same scheme, the same
-  // activation, an exact local solver instead of NSGS) are given to 7 digits
+  // the energy identities hold to round-off; the reference values (the same
+  // scheme, the same activation, an exact local solver instead of NSGS) are
+  // given to 7 digits, hence the 1e-9 and 1e-8 tolerances
   static constexpr double eps = 1e-12;
 
  public:

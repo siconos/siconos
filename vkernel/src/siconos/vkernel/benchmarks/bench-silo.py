@@ -238,7 +238,7 @@ solver = sn.solver_ids.SICONOS_FRICTION_2D_NSGS
 options = sn.SolverOptions(solver)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = itermax
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
-# legacy FC2D error measure: the default became Euclidean scaling upstream
+# legacy FC2D error measure (no scaling), not the default Euclidean scaling
 options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
     sn.params.SICONOS_FRICTION_2D_SCALING_NO
 )

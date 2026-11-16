@@ -620,9 +620,8 @@ struct space_filter : item {
                     ds_fdisk_prox[mp::make_pair(ds1.value(), coefs)] = inter;
                   },
                   []<bool flag = false>(auto) {
-                    // hardening: this used to be a silent no-op in release
-                    // (assert compiled out); a self interaction must bind a
-                    // fixed-object relation
+                    // a throw, not an assert (compiled out in release): a self
+                    // interaction must bind a fixed-object relation
                     throw std::runtime_error(
                         "space_filter::build_proximity_maps: unhandled relation "
                         "for a self interaction (ds1 == ds2); only "
@@ -1012,10 +1011,10 @@ struct space_filter : item {
                                                     storage::prop<"ds2", Topology>(inter),
                                                     point_of(inter)));
 
-            // hardening: duplicate ds pairs (the proximity map keeps only
-            // the last interaction per pair) or a map rebuilt out of sync
-            // would leave this find empty; the assert is compiled out in a
-            // release build, so this used to dereference an end iterator
+            // duplicate ds pairs (the proximity map keeps only the last
+            // interaction per pair) or a map rebuilt out of sync would leave
+            // this find empty; a throw, not an assert (compiled out in a
+            // release build), so that no end iterator is dereferenced
             if (finter == ds_ds_prox.end()) {
               throw std::runtime_error(
                   "space_filter::remove_interactions: no proximity map entry for "
@@ -1084,8 +1083,8 @@ struct space_filter : item {
                       ds_fdisk_prox.erase(finter);
                     },
                     []<bool flag = false>(auto) {
-                      // hardening: this used to be a silent no-op in release
-                      // (assert compiled out), leaking the interaction
+                      // a throw, not an assert (compiled out in release),
+                      // which would leak the interaction
                       throw std::runtime_error(
                           "space_filter::remove_interactions: unhandled relation "
                           "for a self interaction (ds1 == ds2); only "

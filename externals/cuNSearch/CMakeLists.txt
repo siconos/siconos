@@ -4,7 +4,6 @@
 #project(cuNSearch LANGUAGES CXX CUDA)
 # Visual studio solution directories.
 enable_language(CUDA)
-#set(CUDA_NVCC_EXECUTABLE /usr/local/cuda-13.0/bin/nvcc)
 set_property(GLOBAL PROPERTY USE_FOLDERS on)
 
 

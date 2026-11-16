@@ -123,7 +123,7 @@ class BouncingDisksTest : public CppUnit::TestFixture {
 
     /* storage::add(data, count) returns a LAZY view that calls add() again on
        every walk; materialise the handles once so the world gets exactly
-       ndisks disks instead of growing on each walk (see roam note d5c5481a)
+       ndisks disks instead of growing on each walk
      */
     using disk_handle_t = decltype(storage::add<config::disk>(data));
     std::vector<disk_handle_t> disks;

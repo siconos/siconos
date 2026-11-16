@@ -20,7 +20,7 @@ scheme.
 ## Build and run
 
 Install Siconos first, then, with `<prefix>` the directory it was configured
-with (in this worktree `<workdir>/install-clang`):
+with:
 
 ```bash
 cmake -S vkernel/examples/bouncing_ball -B /tmp/vk-example \

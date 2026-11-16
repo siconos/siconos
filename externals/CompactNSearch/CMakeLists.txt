@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # OpenMP is linked PRIVATE below (local change): the headers do not use it,
-# and a public OpenMP::OpenMP_CXX gave -fopenmp to every consumer of
+# and a public OpenMP::OpenMP_CXX would give -fopenmp to every consumer of
 # Siconos::vkernel, kernel-only programs included.
 find_package(OpenMP REQUIRED)
 

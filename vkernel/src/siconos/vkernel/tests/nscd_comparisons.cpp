@@ -18,7 +18,7 @@
 
 /* The comparisons of the NSCD scheme (Moreau-Jean) with the Anitescu-Tasora
    (projected Gauss-Seidel and APGD) and explicit DEM schemes, on the cases
-   of the design note ("Plan: where NSCD wins"), with the scenes of
+   of vkernel/docs/notes/time-integrators-mj-at-dem.md, with the scenes of
    collision/tests/nscd_world.hpp. One CSV file per case in the output
    directory; the plot script of the study makes the tables and the plots
    (vkernel/docs/notes/time-integrators-mj-at-dem/scripts/

@@ -194,8 +194,8 @@ struct maker
               storage::bind<config::osnspb, "osnspb">, storage::bind<config::fc2d, "fc2d">,
               storage::bind<config::io, "io">>> {};
 
-// no static instance: it was only there to name the type, and every TU
-// including this header constructed (and, with the registry, registered) one
+// no static instance: every TU including this header would construct (and
+// register) one
 struct idata_t : maker {};
 
 // just hide idata_t to pybind11

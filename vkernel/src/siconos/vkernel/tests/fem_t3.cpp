@@ -24,8 +24,7 @@
 //
 // The two trajectories agree to rounding before the impact and then
 // decorrelate: 8 nodes hit the ground at once with e = 0, which amplifies a
-// rounding difference exponentially (org-roam note
-// SiconosVkernelFemSelfContactAosVsSoaDivergenceIsChaosNotABug).  So the AOS
+// rounding difference exponentially (a chaotic divergence, not an error).  So the AOS
 // reference is checked on the first steps only, the whole run on physical
 // bounds, and fem_t3.ref locks the current trajectory against regression: a
 // change of the floating point operations may require regenerating it, it does

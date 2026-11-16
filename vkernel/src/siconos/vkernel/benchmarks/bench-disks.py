@@ -122,7 +122,7 @@ run_options["gravity_scale"] = 1 / N
 run_options["bullet_options"] = bullet_options
 run_options["solver_options"] = options
 
-# ignored by vnative until a007b2693: the reference outputs are without it
+# left out: the reference outputs are computed without it
 # run_options["constraint_activation_threshold"] = 1e-05
 print(dir(sim))
 run_options["Newton_options"] = sim.LINEAR
@@ -145,7 +145,7 @@ run_options["output_frequency"] = 1
 run_options["with_timer"] = True
 run_options["time_stepping"] = None
 run_options["output_contact_info"] = True
-run_options["output_contact_work"] = False  # failure for bullet/features-eigen2
+run_options["output_contact_work"] = False  # fails with the bullet backend
 
 with MechanicsHdf5Runner(
     io_filename=io_filename, mode="r+", config=runner_config

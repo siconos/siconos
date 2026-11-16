@@ -257,7 +257,7 @@ void resize(match::vec auto& v, match::indice auto nrows) {
   // dense vector
   assert(nrows * v.vnrows >= 1);
   assert(v.vncols == 1);
-  // NM_create no longer allocates dense values
+  // NM_create does not allocate dense values
   int size = nrows * v.vnrows;
   v._v = NM_create_with_data(NM_DENSE, size, v.vncols, calloc(size, sizeof(double)));
 }

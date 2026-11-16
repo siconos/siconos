@@ -31,7 +31,7 @@ namespace siconos::vkernel::collision {
    Structural reference: diskdisk_r (item + model::relation2 +
    any_lagrangian_relation, G-matrix writing into M& args). The relation is
    batch-BACKED: it carries no compute of its own, the cxd_narrowphase
-   stage item (Node template below; its own stage in Task 5) fills the
+   stage item (Node template below) fills the
    cached status/h/normal/cp1/cp2 in one batch per step, and the two
    compute methods below read the cache/make sure the cache is fresh. An
    unbound narrowphase ref (standalone hand-cached world) no-ops.
@@ -81,10 +81,10 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
 
     /* ensure the stage cache is fresh for this step. The stage ref is bound
        once at rebind (the stage item writes rel.narrowphase() = itself);
-       the standalone hand-cached case (Task 4 world) keeps the attribute
+       the standalone hand-cached case (no stage item) keeps the attribute
        defaulted and must no-op. Bound test: the ref value must index an
        EXISTING stage item in the world, so a legit stage at index 0 counts
-       as bound (ledger ruling, refined at Task 5). */
+       as bound. */
     void ensure(auto step) {
       auto& data = self()->data();
       auto& ref = storage::attr<"narrowphase">(*self());
@@ -122,7 +122,7 @@ struct polytopepolytope_r : item, model::relation2, model::any_lagrangian_relati
     }
 
     /* G layout mirrors diskdisk_r (rows: normal / tangent, columns x y
-       theta), hand-derived in the plan Task 4 pins:
+       theta), hand-derived:
 
        t = z^n (ccw perpendicular); arm_i = cp_i - c(q_i); z^arm = (-ay, ax)
 

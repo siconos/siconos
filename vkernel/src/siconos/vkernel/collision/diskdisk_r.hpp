@@ -48,7 +48,8 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
     // instantiates every relation alternative of an interaction, so in a
     // polytope world diskdisk_r is a legitimate placeholder that the cxd
     // narrowphase stage rebinds before any gap is computed. Reaching the throw
-    // means the placeholder was never rebound: the silent circumradius bug.
+    // means the placeholder was never rebound (the gap would silently use the
+    // circumradius).
     template <match::handle<model::lagrangian_ds> DS1, match::handle<model::lagrangian_ds> DS2>
     [[gnu::always_inline]] decltype(auto) compute_h(auto step, DS1& ds1, DS2& ds2) {
       auto& q1 = storage::attr<"q">(ds1, step);

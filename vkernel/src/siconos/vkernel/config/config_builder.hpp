@@ -135,8 +135,7 @@ class config_builder {
   // that.
   world_type build_runtime_database() const { return world_type{}; }
 
-  // previous name of build_runtime_database, kept so existing call sites
-  // compile
+  // alias of build_runtime_database
   world_type build_world() const { return build_runtime_database(); }
 
   // Type aliases for merging

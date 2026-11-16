@@ -82,7 +82,7 @@ p.add_argument("--mu-rock", type=float, default=0.6)
 # the densities relative to water (specific gravities): the liquid disks are
 # water, the rocks granite or quartz, the usual 2.65 of rock and sediment
 # grains. Only their ratio matters: the masses are density * area in disk
-# radii. --density sets both, as before they were separate.
+# radii. --density sets both.
 p.add_argument("--density-liquid", type=float, default=1.0)
 p.add_argument("--density-rock", type=float, default=2.65)
 p.add_argument("--density", type=float, default=None)

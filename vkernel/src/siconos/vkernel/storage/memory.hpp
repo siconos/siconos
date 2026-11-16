@@ -52,7 +52,7 @@ namespace memory_detail {
 // the largest N of the time_levels<Attr, N> on Attr, 1 if none (several
 // schemes may declare the levels they need, see simul/selectable_scheme.hpp):
 // a constant-folded scan with __is_same builtins (a hana filter per attribute
-// instantiated one filter per column, over the whole list).  The leading
+// would instantiate one filter per column, over the whole list).  The leading
 // dummy entry covers an empty list.
 template <typename Attr, typename TimeLevels>
 struct time_levels_size;

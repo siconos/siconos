@@ -112,7 +112,7 @@ struct column final : column_base {
     if constexpr (registry_detail::is_sparse_set<Memory>) {
       return no_index;  // absent means empty
     } else {
-      // as storage::add does for the static database
+      // one default value per kept step
       std::size_t index = 0;
       for (auto& storage : value) {
         using storage_t = std::decay_t<decltype(storage)>;
@@ -175,7 +175,7 @@ struct column final : column_base {
   void permute(const std::vector<std::size_t>& perm,
                const std::vector<std::size_t>& inverse) override {
     if constexpr (registry_detail::is_sparse_set<Memory>) {
-      // as storage::permute does for the static database (rekey)
+      // rekey: the entry of item k goes to key inverse[k]
       using key_t = typename Memory::key_type;
       Memory out;
       out.reserve(value.size());
@@ -186,8 +186,7 @@ struct column final : column_base {
       }
       value = std::move(out);
     } else {
-      // as storage::permute does for the static database (gather): in
-      // place, the buffer is kept
+      // gather, in place: the buffer is kept
       for (auto& storage : value) {
         using storage_t = std::decay_t<decltype(storage)>;
         if constexpr (match::push_back<storage_t>) {
@@ -269,8 +268,8 @@ struct registry {
   }
 
   // Hot path, small enough to be inlined at every access: the column exists.
-  // Profiling bench-disks (900 disks) showed the former single function,
-  // creation included, called out of line at each access: 3.7% of the run.
+  // Column creation stays out of it: an out-of-line call at each access is a
+  // visible cost in the kernels.
   template <typename Key, typename Memory>
   Memory& column() {
     // the slot id without the guard of slot_id's static (see slot_plus_one);
@@ -488,7 +487,7 @@ struct configuration_properties_of<T> {
 /**
  * @brief What handles of a registry world know about it: the per-item
  * environment and the configuration's own properties, without the item
- * closure (step (a) P4).
+ * closure.
  *
  * all_properties_t holds ONLY the configuration's properties (the
  * with_properties<...> given to make_runtime_database): the user refinements, wrappers
@@ -547,8 +546,7 @@ struct column_of
 
 /**
  * @brief Column type of a dynamic property P (dynamic_storage<attached<...>>):
- * a sparse set from the item index to the value, as prop_dynamic_memory uses
- * for the storage::make database (there, in a map keyed by name).
+ * a sparse set from the item index to the value (see prop_dynamic_memory).
  */
 template <typename Info, typename P>
 struct dynamic_column_of {
@@ -634,9 +632,8 @@ struct world {
 /// The database of a world (registry-backed): its columns are compile-time
 /// typed per key (refine -> wrapper -> time_levels<> pipeline, see
 /// column_of), but materialised (registered) at run time, at construction.
-/// No database type is instantiated per TU (see SiconosVkernelRegistryWorld);
-/// the column lookup costs nothing measurable at run time (1M disks on the
-/// GPU, 2026-11-13).  Handles of it carry
+/// No database type is instantiated per TU; the column lookup is one slot
+/// access at run time.  Handles of it carry
 /// world<world_config<...>>: the configuration, not the item closure.
 template <template <typename> typename Env, match::item... Items>
 struct make_runtime_database : world<world_config<Env, configuration_properties_t<Items...>>> {

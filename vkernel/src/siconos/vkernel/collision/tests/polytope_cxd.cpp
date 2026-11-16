@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-/* Unit tests for the cxd-backed polytope narrowphase (Tasks 2..6).
-   Task 2: shape::polytope item — vertices, nvertices, rmax, convexity check. */
+/* Unit tests for the cxd-backed polytope narrowphase: the shape::polytope
+   item (vertices, nvertices, rmax, convexity check), the batch engine, the
+   polytopepolytope_r relation and the cxd_narrowphase stage. */
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -45,7 +46,7 @@ struct nslaw : model::newton_impact_friction {};
 using polytope_shape = collision::shape::polytope;
 using diskdisk_r = collision::diskdisk_r;
 /* topo is fwd-declared as the ACYCLIC marker for the poly_r/narrowphase
-   refs; defined right after interaction (Task 5 sim config, modeled on
+   refs; defined right after interaction (simulation config modeled on
    bouncing_disks) */
 struct topo;
 using polytopepolytope_r = collision::polytopepolytope_r<topo>;
@@ -72,7 +73,7 @@ struct data_t : storage::make_runtime_database<
 
 #include <stdexcept>
 
-/* ---- Task 3: narrowphase batch engine (exact pin values) ---- */
+/* ---- narrowphase batch engine (exact pin values) ---- */
 int test_polytope_item(siconos::vkernel::config::data_t& data);
 
 namespace {
@@ -267,7 +268,7 @@ void test_batch_engine() {
   std::print("narrowphase_batch engine: all exact cases pass\n");
 }
 
-/* ---- Task 3a: the engine follows the environment scalar ----
+/* ---- the engine follows the environment scalar ----
    A float instantiation must build and run: the pool point is
    std::array<float,2>, the pair record is float, and the tolerance is
    raised above the float epsilon instead of staying at 1e-10 (which no
@@ -412,7 +413,7 @@ void test_batch_engine_float() {
   std::print("narrowphase_batch engine: float instantiation passes\n");
 }
 
-/* ---- Task 3b: a failed separation sub-distance is a FAILURE status ----
+/* ---- a failed separation sub-distance ----
    If the siconos-side distance GJK cannot certify separation, the pair must
    not come back as "separated, h=0": the stage would then overwrite the
    relation's cached h with 0. A zero budget makes the sub-distance give up. */
@@ -445,9 +446,9 @@ void test_failed_subdistance_status() {
   std::print("narrowphase_batch engine: unanswered pairs fall back to the separating axis\n");
 }
 
-/* ---- Task 4: polytopepolytope_r relation, exact G pins ----
+/* ---- polytopepolytope_r relation, exact G pins ----
    Standalone world: no narrowphase stage item exists, the relation's cached
-   h/normal/cps are set manually and ensure() must no-op (ledger ruling). */
+   h/normal/cps are set manually and ensure() must no-op. */
 void test_polytopepolytope_relation(siconos::vkernel::config::data_t& data) {
   using siconos::vkernel::storage::add;
 
@@ -470,11 +471,10 @@ void test_polytopepolytope_relation(siconos::vkernel::config::data_t& data) {
   CPPUNIT_ASSERT_MESSAGE("compute_h == -0.1",
                          std::abs(rel.compute_h(0, ds1, ds2) + 0.1) <= 1e-12);
 
-  /* hand-derived (plan Task 4, with one corrected pin): n = (0,1),
+  /* hand-derived: n = (0,1),
      t = z^n = (-1,0); arm1 = cp1 - c1 = (0,1) -> z^arm1 = (-1,0);
-     arm2 = cp2 - c2 = (0,0.9) - (0,1.9) = (0,-1.0) -> z^arm2 = (1.0,0).
-     (the plan text pins arm2 = (0,-1.1): arithmetic slip, 0.9 - 1.9 = -1.0;
-     the structural rule arm_i = cp_i - c(q_i) is unchanged — ledger) */
+     arm2 = cp2 - c2 = (0,0.9) - (0,1.9) = (0,-1.0) -> z^arm2 = (1.0,0),
+     with arm_i = cp_i - c(q_i) */
   Eigen::Matrix<double, 2, 3> g1 = Eigen::Matrix<double, 2, 3>::Zero();
   Eigen::Matrix<double, 2, 3> g2 = Eigen::Matrix<double, 2, 3>::Zero();
   rel.compute_jachq(0, ds1, ds2, g1, g2);
@@ -542,7 +542,7 @@ void test_jacobian_finite_differences(siconos::vkernel::config::data_t& data) {
   std::print("polytopepolytope_r: G normal row matches finite differences\n");
 }
 
-/* ---- Task 5: cxd_narrowphase stage — rebind + batch + write-back + cache ---- */
+/* ---- cxd_narrowphase stage — rebind + batch + write-back + cache ---- */
 void test_narrowphase_stage(siconos::vkernel::config::data_t& data) {
   using siconos::vkernel::storage::add;
 
@@ -629,7 +629,7 @@ void test_narrowphase_stage(siconos::vkernel::config::data_t& data) {
   std::print("cxd_narrowphase stage: rebound, cached exact pair, checksum re-runs\n");
 }
 
-/* ---- Task 5b: the cache key must include the pair set ----
+/* ---- the cache key must include the pair set ----
    Two pairs (1,2) and (2,3) put all three ds in the checksum. Adding the
    pair (1,3) at the SAME step tag changes no ds geometry and no ds index
    seen set, so a geometry-only checksum leaves the cache stale and the new
@@ -685,7 +685,7 @@ void test_narrowphase_pair_set_cache(siconos::vkernel::config::data_t& data) {
   std::print("cxd_narrowphase stage: pair-set change re-runs the batch\n");
 }
 
-/* ---- Task 5c: per-relation reads must not rescan the whole world ----
+/* ---- per-relation reads must not rescan the whole world ----
    Moreau-Jean calls compute_h/compute_jachq once per interaction per step.
    If every call re-runs rebind+checksum over all interactions, a step costs
    O(n^2). The stage keeps a per-pair signature: once the pair is fresh, a

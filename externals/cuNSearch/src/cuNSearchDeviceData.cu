@@ -152,7 +152,7 @@ namespace cuNSearch
 		// siconos: the rank of a particle in its cell (kCountingSortIndices)
 		// comes from an atomicAdd, in the order of the GPU scheduling, and
 		// sort_field reorders the bodies with the sort indices: the contacts,
-		// hence the solution, changed from a run to another. A stable sort by
+		// hence the solution, would vary from run to run. A stable sort by
 		// cell gives the same cells in the same order, the particles of a cell
 		// by index: the z-order sort is reproducible, as CompactNSearch::z_sort
 		d_TempSortIndices.assign(

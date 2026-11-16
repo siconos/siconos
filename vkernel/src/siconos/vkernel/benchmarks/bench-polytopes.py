@@ -23,7 +23,7 @@
 # run through a backend (vnative or bullet).
 #
 # Modes:
-#   default            : settle the grains (full sim), original behaviour.
+#   default            : settle the grains (full sim).
 #   --dump PATH        : after the run, dump the final body positions + shape
 #                        vertices to PATH (npz). Use the vnative run to produce a
 #                        settled static configuration.
@@ -62,7 +62,7 @@ runner_config = RunnerConfig(backend)
 
 N = int(sys.argv[2])
 
-# Parse our own optional flags (ignored by siconos internals).
+# Parse the script's own optional flags (ignored by siconos internals).
 rest = sys.argv[3:]
 p = argparse.ArgumentParser(add_help=False)
 p.add_argument("--dump", metavar="PATH")
@@ -238,12 +238,11 @@ run_options["t0"] = 0
 # without it the runner keeps its default h = 0.0005 and T = K * args.h runs
 # 10 K steps
 run_options["h"] = args.h
-# Stabilization gravity. The original density-scaling gravity_scale=1/N is far
-# too weak for the tall ramp scene: at N=30 gravity ~0.33 and grains starting
-# at y~300 never reach the floor within T=10, so the dumped "rest" config is
-# still in free fall and the comparison times near-vacuum motion instead of
-# contact resolution. Use full gravity for the settle run so grains come to
-# rest on the ramp, then dump that genuinely static configuration.
+# Stabilization gravity. A density-scaling gravity_scale=1/N is far too weak
+# for the tall ramp scene: the grains do not reach the floor within T=10, the
+# dumped "rest" config is still in free fall and the comparison times
+# near-vacuum motion instead of contact resolution. Full gravity for the
+# settle run brings the grains to rest on the ramp before the dump.
 if args.compare_steps > 0:
     run_options["T"] = args.compare_steps * args.h
     run_options["gravity_scale"] = 1.0
@@ -252,14 +251,14 @@ else:
     run_options["gravity_scale"] = 1.0
 
 run_options["solver_options"] = options
-# ignored by vnative until a007b2693: the reference outputs are without it
+# left out: the reference outputs are computed without it
 # run_options["constraint_activation_threshold"] = 1e-05
 
 # Bullet backend: configure collision options for convex polytopes (without
 # this the default gives missed contacts and blocks fall through the ramp).
-# NOTE: bullet_options MUST be instantiated before its fields are set; an earlier
-# version referenced bullet_options before assignment, raising NameError, which
-# the bare except swallowed so the run fell back to SiconosBulletOptions defaults.
+# NOTE: bullet_options MUST be instantiated before its fields are set: a
+# NameError would be swallowed by the bare except and the run would fall back
+# to the SiconosBulletOptions defaults.
 try:
     import siconos.mechanics.collision.bullet as sb
 

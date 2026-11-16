@@ -17,7 +17,7 @@
 #
 
 # Benchmark: N disks stacked above a FEM square (unit square), on a ground segment.
-# Models the reported slow configuration: many disks + FEM in contact.
+# Models a costly configuration: many disks + FEM in contact.
 # Timings: the io.mechanics timer lines (computeOneStep, updateInteractions...).
 #
 # usage: python3 bench_fem_disks.py <mesh.msh> <ndisks> [hdf5_output]
@@ -120,7 +120,7 @@ else:
     options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
     options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
     options.dparam[sn.params.SICONOS_DPARAM_TOL] = tolerance
-    # legacy FC2D error measure: the default became Euclidean scaling upstream
+    # legacy FC2D error measure (no scaling), not the default Euclidean scaling
     options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
         sn.params.SICONOS_FRICTION_2D_SCALING_NO
     )

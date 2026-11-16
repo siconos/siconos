@@ -66,7 +66,7 @@ SCHEMES = {
     "DEM": SCHEME_EXPLICIT_PENALTY,
     "MoreauJeanFremond": SCHEME_LOCAL_PROBLEM_FREMOND,
 }
-# the short names of the first version, still accepted
+# short aliases of the scheme names, also accepted
 SCHEME_ALIASES = {
     "mj": "MoreauJean",
     "gosi": "MoreauJeanGOSI",
@@ -157,7 +157,7 @@ def apply(options):
     # handled above and does not need nonos.bridge
     others = {k: v for k, v in vnative.items() if k != "resume"}
     if others["scheme"] is not None:
-        # the short names of the first version are still accepted
+        # the short aliases are also accepted
         others["scheme"] = SCHEME_ALIASES.get(others["scheme"], others["scheme"])
         if others["scheme"] not in SCHEMES:
             _error(f"unknown scheme {others['scheme']}, one of " + ", ".join(SCHEMES))

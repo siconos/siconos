@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-/* Unit test for polytopemesh_r (item 2: polytope x mesh edge).
+/* Unit test for polytopemesh_r (polytope x mesh edge).
 
    Builds a side-2 square polytope at the origin and a single mesh segment
    from (0,3) to (0,5): the gap is exactly 2 (square top edge y=1 to segment

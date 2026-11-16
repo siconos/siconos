@@ -27,7 +27,7 @@ namespace siconos::vkernel::collision::shape {
 
 struct polytope : item {
   struct attributes {
-    // capacity-16 local vertices (v1); variable count via nvertices
+    // capacity-16 local vertices; variable count via nvertices
     some::array<some::vector<some::scalar, some::indice_value<2>>, some::indice_value<16>>
         vertices;
     some::indice nvertices;

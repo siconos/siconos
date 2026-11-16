@@ -18,8 +18,7 @@
 
 /* Analytic test cases of the NSCD scheme (Moreau-Jean, velocity level,
    Coulomb friction), the numbers for the comparisons with the
-   Anitescu-Tasora and explicit DEM schemes (design note, "Plan: where NSCD
-   wins").
+   Anitescu-Tasora and explicit DEM schemes.
 
    Rigid bodies on a ground segment y = 0, the space filter, the cxd
    narrowphase stage, Moreau-Jean theta = 0.5, the 2D friction problem
@@ -292,7 +291,7 @@ void column(std::size_t n, double h) {
   CPPUNIT_ASSERT_MESSAGE("the column stays at rest", max_v <= 1e-10);
 }
 
-// the Anitescu-Tasora solvers, in the measured lines
+// the Anitescu-Tasora solvers, in the printed lines
 const char* name(std::size_t scheme) {
   return scheme == schemes::cone_complementarity_apgd ? "AT (APGD)" : "AT (PGS)";
 }

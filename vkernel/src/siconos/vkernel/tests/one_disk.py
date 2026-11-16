@@ -69,7 +69,7 @@ bullet_options.minimumPointsPerturbationThreshold = 1
 options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
 options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
 options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-2
-# legacy FC2D error measure: the default became Euclidean scaling upstream
+# legacy FC2D error measure (no scaling), not the default Euclidean scaling
 options.iparam[sn.params.SICONOS_FRICTION_2D_SCALING_NORM] = (
     sn.params.SICONOS_FRICTION_2D_SCALING_NO
 )
@@ -104,7 +104,7 @@ run_options["output_frequency"] = 1
 run_options["with_timer"] = True
 # run_options['time_stepping']=None
 # run_options['output_contact_info']=True
-# run_options['output_contact_work']=False # failure for bullet/features-eigen2
+# run_options['output_contact_work']=False # fails with the bullet backend
 
 # options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_LEMKE)
 

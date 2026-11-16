@@ -1,6 +1,6 @@
 # The studies of the notes of vkernel/docs/notes: one target each, not
 # part of all, writing their outputs (data, tables, figures) under
-# <build>/vkernel/soa/notes/<study>. The figures of the documents are
+# <build>/vkernel/notes/<study>. The figures of the documents are
 # copies of these outputs.
 #
 #   cmake --build <build> --target vkernel_study_polytope_contact_manifolds

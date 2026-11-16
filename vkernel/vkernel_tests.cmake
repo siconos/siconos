@@ -188,8 +188,8 @@ if(WITH_TESTING)
   new_test(NAME vkernel_sort_interactions SOURCES sort_interactions.cpp
            ${SIMPLE_TEST_MAIN} COMPILE_DEFINITIONS VKERNEL_CHECK_COLUMN_TYPES)
 
-  # the tests were written against the vkernel/soa flags, which include the
-  # C++23 standard they need for std::print
+  # the tests use the vkernel flags, which include the C++23 standard they
+  # need for std::print
   set(vkernel_ref_tests
       vkernel_bouncing_ball
       vkernel_bouncing_ball_split

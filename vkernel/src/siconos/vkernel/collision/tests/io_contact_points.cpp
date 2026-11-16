@@ -28,16 +28,16 @@
 #include "siconos/vkernel/collision/space_filter.hpp"
 #include "siconos/vkernel/storage/registry.hpp"
 
-// Regression for the uninitialized-output column 15 of io::contact_points
-// (interaction.y[1], the tangential gap row).
+// Column 15 of io::contact_points (interaction.y[1], the tangential gap row)
+// must be initialized.
 //
 // compute_output in kinds.hpp writes y[0] only on the nonlinear
-// relation branches; y[1] used to be read uninitialized (NaN or 0 depending
-// on the allocator) and contact_points exposed that in HDF5 column 15. The
-// fix zeros y before the branch, so every row must now read y[1] == 0 and
-// finite, on both the relation1 (diskfsegment_r) and relation2 (diskdisk_r)
-// branches. This test drives a disks-and-ground-segment world through a real
-// stepper and checks y[1] on the active interactions each step.
+// relation branches; without initialization y[1] would be read uninitialized
+// (NaN or 0 depending on the allocator) and exposed in HDF5 column 15.
+// compute_output zeros y before the branch, so every row must read y[1] == 0
+// and finite, on both the relation1 (diskfsegment_r) and relation2
+// (diskdisk_r) branches. This test drives a disks-and-ground-segment world
+// through a real stepper and checks y[1] on the active interactions each step.
 
 namespace siconos::vkernel::config {
 namespace some = siconos::vkernel::storage::some;

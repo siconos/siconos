@@ -71,7 +71,7 @@ set(flags "${flags} -Wall --std=c++23")
 # Registry worlds (storage/registry.hpp) check every column lookup, which costs
 # about 1% of runtime on bench-disks at 900 disks.  This option drops the
 # checks: an access to a column that was never registered becomes undefined
-# behaviour instead of an exception.  The storage::make database is unaffected.
+# behaviour instead of an exception.
 option(VKERNEL_UNCHECKED_LOOKUP "registry column lookups without checks" OFF)
 if(VKERNEL_UNCHECKED_LOOKUP)
   add_compile_definitions(VKERNEL_UNCHECKED_LOOKUP)

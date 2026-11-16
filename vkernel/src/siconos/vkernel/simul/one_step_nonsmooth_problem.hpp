@@ -251,7 +251,7 @@ struct one_step_nonsmooth_problem : item {
     }
     // the global frictional contact problem (numerics convention, H being
     // n x m there): M v = q + H r, u = H^T v + b, (u, r) in the Coulomb
-    // complementarity, with the options of this problem. h_mat is our H (m x
+    // complementarity, with the options of this problem. h_mat is the vkernel H (m x
     // n, the rows of the interactions). r, u, v: in as a starting point, out
     // as the solution.
     void solve_global(GlobalFrictionContactProblem& problem, auto& m_mat, auto& h_mat,

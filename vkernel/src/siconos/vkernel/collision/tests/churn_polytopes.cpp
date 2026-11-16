@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-/* Space-filter churn for the polytope family (the granular gate) plus
-   hardening tests for space_filter::remove_interactions.
+/* Space-filter churn for the polytope family plus error-path tests for
+   space_filter::remove_interactions.
 
    1. churn: three scripted phases with no dynamics (velocities 0, fext 0,
       the positions are re-written at the current step):
@@ -31,7 +31,7 @@
       (c) the second body pulled back in -- a NEW interaction is created
           and the recycled relation item (same storage index) is reused
           from rel_map, the batch re-runs with the exact gap.
-      This is the first test that drives the polytope world through
+      This test drives the polytope world through
       space_filter::update_index_set0 itself (bouncing_polytopes
       hand-creates the interaction and never calls it).
 
@@ -42,13 +42,13 @@
 
    3. unknown relation on a self interaction (topo.link(ds), so
       ds1 == ds2): only diskfsegment_r/diskfdisk_r are handled in the
-      ds1 == ds2 paths; anything else must fail loudly (the old code
-      hit an assert(false) no-op lambda, a silent leak in release).
+      ds1 == ds2 paths; anything else must fail loudly (an assert would
+      be compiled out in release, a silent leak).
 
    4. shape guard: a polytope body inside the neighborhood radius of a
-      fixed segment used to bind diskfsegment_r, which reads
-      shape.radius() -- the circumradius for a polytope -- and returned
-      a plausible but wrong gap. It must throw instead. */
+      fixed segment binds polytopefsegment_r, not diskfsegment_r, which
+      reads shape.radius() -- the circumradius for a polytope -- and would
+      return a plausible but wrong gap. */
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -227,7 +227,7 @@ auto finalize_world(siconos::vkernel::config::data_t& data, auto spacef, auto ng
   simulation.initialize();
 }
 
-/* ---- 1: the churn gate ---- */
+/* ---- 1: the churn ---- */
 void test_space_filter_churn(siconos::vkernel::config::data_t& data) {
   using namespace siconos::vkernel;
   using namespace storage;
@@ -358,13 +358,13 @@ void test_unknown_relation_throws(siconos::vkernel::config::data_t& data) {
   CPPUNIT_ASSERT_MESSAGE("unhandled relation in the ds1 == ds2 paths must throw", threw);
   std::print("remove_interactions: unhandled relation fails loudly\n");
 }
-/* ---- 4: a polytope near a fixed segment must fail loudly ---- */
+/* ---- 4: a polytope near a fixed segment binds polytopefsegment_r ---- */
 void test_polytope_against_fixed_segment_throws(siconos::vkernel::config::data_t& data) {
   using namespace siconos::vkernel;
   using namespace storage;
 
   // the ground sits at y = -2, inside the 5.5 radius of the body at the
-  // origin: the filter will try to bind diskfsegment_r to a polytope body.
+  // origin: the filter binds a fixed-segment relation to a polytope body.
   auto [simulation, spacef, ngbh, dsds] = setup_world(data, 5.5, -2.);
   add_two_bodies(data, 100.0);  // bodies exist; the ds-ds pair is far apart
   finalize_world(data, spacef, ngbh, simulation);
@@ -372,8 +372,8 @@ void test_polytope_against_fixed_segment_throws(siconos::vkernel::config::data_t
   ngbh.update(0);
   ngbh.search();
 
-  // With polytope x fixed-segment support wired, this no longer throws:
-  // a polytope body near a fixed segment binds polytopefsegment_r.
+  // a polytope body near a fixed segment binds polytopefsegment_r, not
+  // diskfsegment_r: no throw.
   bool threw = false;
   try {
     spacef.update_index_set0(0);

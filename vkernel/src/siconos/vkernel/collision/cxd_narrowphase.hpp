@@ -20,7 +20,7 @@
 
 /* cxd-backed narrowphase batch engine (pure functions, no vkernel item).
 
-   Semantics (spec §4, exact-value tests in tests/polytope_cxd.cpp):
+   Semantics (exact-value tests in tests/polytope_cxd.cpp):
    - h follows the siconos gap convention: +distance when separated,
      -depth when penetrating.
    - the contact normal points 1 -> 2; equivalently it is the exterior
@@ -43,7 +43,7 @@
    GJK over the pool, using cxd's own support primitives (shape_view +
    cxd::diff_support). cxd's batch deliberately leaves the seed EMPTY on
    separated statuses ("misses keep every slot untouched"), so the
-   seed-projection sub-distance of the spec has to travel with the engine.
+   seed-projection sub-distance has to travel with the engine.
 
    max_iterations / invalid_input: h = 0 placeholder + status flag; the
    CALLER (the stage) keeps the relation's previous cached row (status, h,
@@ -222,7 +222,7 @@ inline auto subdistance_gjk(const Pool& pool, std::uint32_t id_a, std::uint32_t 
   };
 
   // float environments need a tolerance above their epsilon; double keeps
-  // the spec's 1e-10
+  // 1e-10
   const scalar tol =
       std::max(scalar{1e-10}, scalar{8} * std::numeric_limits<scalar>::epsilon());
 
@@ -546,7 +546,7 @@ inline std::size_t clip_manifold(const Pool& pool, std::uint32_t id_a, std::uint
   return nq;
 }
 
-/* spec §5 tolerance/budget: tight tolerance, default iteration budget.
+/* tolerance/budget: tight tolerance, default iteration budget.
    cxd's gjk_options carries the tolerance as a double; keep the float case
    above epsilon so the GJK can terminate. */
 template <typename Scalar>
@@ -621,7 +621,7 @@ inline narrowphase_contact<Scalar> narrowphase_pair(const Pool& pool,
           std::hypot(epa_normal[0], epa_normal[1]) > Scalar{0.5}) {
         const V nrm{epa_normal[0], epa_normal[1]};
         // the witnesses are the supporting faces along EPA's normal; h is
-        // EPA's depth (the spec's mapping: enclosed = -depth)
+        // EPA's depth (enclosed = -depth)
         const auto [cp1, cp2] = face_witnesses(pool, id_a, id_b, nrm);
         c.normal = nrm;
         c.cp1 = cp1;
@@ -776,9 +776,9 @@ narrowphase_contact<Scalar> manifold_point(const narrowphase_contact<Scalar>& c,
 namespace siconos::vkernel::collision {
 
 template <typename Topo>
-struct polytopepolytope_r;  // polytopepolytope_r.hpp (Task 4)
+struct polytopepolytope_r;  // polytopepolytope_r.hpp
 
-/* ---- the narrowphase stage item (Task 5) ----
+/* ---- the narrowphase stage item ----
    Owns the world's polytope interactions: rebinds generic ds-ds relations
    to polytopepolytope_r items, packs world-vertex data once per call,
    runs the batch engine, writes statuses back and caches the step tag +
@@ -792,11 +792,10 @@ struct cxd_narrowphase : item {
   struct attributes {
     some::item_ref<Topo> topology;
     some::item_ref<collision::diskdisk_r> dsds_r;  // generic binder to detect
-    // the plan's poly_dsds_r ref (cxd_narrowphase -> polytopepolytope_r) is
-    // DISABLED on purpose: the mutual item_refs with poly_r's narrowphase
-    // ref make storage::make's all_items walker recurse forever (found by
-    // bisection, see ledger); polytope relations are identified by dispatch
-    // type in rebind/pack, so the back-ref is not needed
+    // no item_ref cxd_narrowphase -> polytopepolytope_r on purpose: together
+    // with poly_r's narrowphase ref, mutual item_refs make storage::make's
+    // all_items walker recurse forever; polytope relations are identified by
+    // dispatch type in rebind/pack, so the back-ref is not needed
     some::indice cache_step;
     // FNV-1a over the pair set and the world vertices: a hash, not a scalar
     some::indice cache_checksum;
@@ -939,7 +938,7 @@ struct cxd_narrowphase : item {
           auto rel = storage::add<poly_r_t>(data);
           // fresh vector attrs are uninitialized storage (Eigen default);
           // give the first batch a well-defined direction: the engine maps
-          // a zero init_dir to {1, 0} (spec §5). status/h define the
+          // a zero init_dir to {1, 0}. status/h define the
           // keep-previous baseline: no valid result yet.
           rel.point_index() = pi;
           rel.status() = static_cast<std::size_t>(cxd::status::invalid_input);
@@ -973,10 +972,10 @@ struct cxd_narrowphase : item {
       };
       thread_local static ck_cache_t ck_cache;
       // seen dedups ds within ONE checksum() call (a body in several
-      // interactions is hashed once). Clear it every call: keying the
-      // call-scoped dedup on (stage, step) made a same-step ensure(step)
-      // re-run skip bodies already hashed on a prior call, hiding a
-      // configuration mutation from the world checksum.
+      // interactions is hashed once). Clear it every call: keyed on
+      // (stage, step), a same-step ensure(step) re-run would skip bodies
+      // already hashed on a prior call, hiding a configuration mutation from
+      // the world checksum.
       ck_cache.seen.clear();
       auto& seen = ck_cache.seen;
       for (auto inter : storage::handles<finteraction>(data, step)) {

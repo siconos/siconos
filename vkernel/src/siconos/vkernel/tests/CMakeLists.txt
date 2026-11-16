@@ -6,7 +6,7 @@ if(WITH_vkernel_TESTING)
   endif()
 
   # The ctest tests of this directory are registered in
-  # vkernel/soa/vkernel_tests.cmake (begin_tests/new_test). This file only
+  # vkernel/vkernel_tests.cmake (begin_tests/new_test). This file only
   # keeps the targets that are not ctest tests.
 
   # the comparisons of Moreau-Jean with Anitescu-Tasora and DEM: CSV tables,
@@ -16,5 +16,5 @@ if(WITH_vkernel_TESTING)
   set_target_properties(nscd_comparisons PROPERTIES COMPILE_FLAGS "${flags}")
   target_link_libraries(nscd_comparisons vkernel numerics Eigen3::Eigen pthread ${COMPACTNSEARCH})
 
-  # bouncing_disk_sf and tnonos are not built today.
+  # bouncing_disk_sf and tnonos are not built.
 endif()

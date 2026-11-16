@@ -185,7 +185,7 @@ class NslawsMultiGroupTest : public CppUnit::TestFixture {
 
     // ============================================================
     // Part B: a colliding pair with NO registered law must fail
-    // loudly (Issue 4). Disk in group 0 and disk in group 2 overlap;
+    // loudly. Disk in group 0 and disk in group 2 overlap;
     // no law for (0,2) or (2,0) is inserted, so update_index_set0
     // throws std::runtime_error from the space filter path.
     // ============================================================
