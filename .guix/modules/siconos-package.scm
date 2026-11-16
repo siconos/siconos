@@ -35,10 +35,10 @@
   #:use-module (guix-science-nonfree packages cuda))
 
 
-;(define vcs-file?
-;  ;; Renvoie vrai lorsque le fichier donné est sous contrôle de version.
-;  (or (git-predicate (dirname (dirname (current-source-directory))))
-;      (const #t)))                                ; pas dans un dépôt Git
+(define vcs-file?
+  ;; Renvoie vrai lorsque le fichier donné est sous contrôle de version.
+  (or (git-predicate (dirname (dirname (current-source-directory))))
+      (const #t)))                                ; pas dans un dépôt Git
 (define-public fclib-devel
   (package
     (name "fclib-devel")
@@ -74,8 +74,7 @@ problems.")
     (source
      (local-file "../.." "siconos-checkout"
                  #:recursive? #t
-     ;            #:select? vcs-file?
-     ))
+                 #:select? vcs-file?))
 
     (build-system cmake-build-system)
     (arguments
