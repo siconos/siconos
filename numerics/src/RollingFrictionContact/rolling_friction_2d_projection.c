@@ -20,7 +20,6 @@
 
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
-#include <openblas_config.h>
 #include <stdlib.h>  // for calloc, realloc, free
 #include <string.h>  // for memcpy, NULL
 

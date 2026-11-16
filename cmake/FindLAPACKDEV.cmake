@@ -57,7 +57,7 @@ Usage :
 
 .. code-block:: cmake
 
-    set(BLA_VENDOR OpenBlas)
+    set(BLA_VENDOR OpenBLAS)
     # or
     set(BLAS_ROOT /home/username/some_local_install/)
     # or
@@ -115,26 +115,49 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     # No need to find headers : we will use -qmkl compilation option
     set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include)
   else()
+    # Search next to the libraries first and never in macOS frameworks
+    # (see FindBLASDEV).
+    blas_include_hints_from_libraries(_LAPACK_INC_HINTS ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+    set(_SAVED_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+    set(CMAKE_FIND_FRAMEWORK NEVER)
     find_path(LAPACK_INCLUDE_DIR
       NAMES ${LAPACK_HEADER}
+      HINTS ${_LAPACK_INC_HINTS}
       ${_SEARCH_OPTS}
       PATH_SUFFIXES include ${BLAS_INCLUDE_SUFFIXES}
       )
+    set(CMAKE_FIND_FRAMEWORK ${_SAVED_CMAKE_FIND_FRAMEWORK})
+    unset(_SAVED_CMAKE_FIND_FRAMEWORK)
   endif()
 
   # SiconosConfig.h setup
-  if(BLAS_NAME STREQUAL "mkl")
-    set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
-    set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
-  elseif(BLAS_NAME STREQUAL "OpenBlas")
-    set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")
-  elseif(BLAS_NAME STREQUAL "Accelerate")
-    set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
-  elseif(BLAS_NAME STREQUAL "Matlab")
-    set(HAS_MATLAB_LAPACK 1 CACHE BOOL "Blas/Lapack come from MATLAB ")
-  elseif(BLAS_NAME STREQUAL "ATLAS")
+  # All flags are (re)set at each configure, so that only the one
+  # matching the implementation actually found is ON.
+  if(BLAS_NAME STREQUAL "ATLAS")
     message(FATAL_ERROR "Found Atlas for blas implementation. Not compatible with Siconos.")
   endif()
+  set(_is_mkl OFF)
+  set(_is_openblas OFF)
+  set(_is_accelerate OFF)
+  set(_is_matlab OFF)
+  if(BLAS_NAME STREQUAL "mkl")
+    set(_is_mkl ON)
+  elseif(BLAS_NAME STREQUAL "OpenBlas")
+    set(_is_openblas ON)
+  elseif(BLAS_NAME STREQUAL "Accelerate")
+    set(_is_accelerate ON)
+  elseif(BLAS_NAME STREQUAL "Matlab")
+    set(_is_matlab ON)
+  endif()
+  set(HAS_MKL_CBLAS ${_is_mkl} CACHE BOOL "Blas comes from Intel MKL." FORCE)
+  set(HAS_MKL_LAPACKE ${_is_mkl} CACHE BOOL "Lapack comes from Intel MKL." FORCE)
+  set(HAS_OpenBLAS ${_is_openblas} CACHE BOOL "Blas comes from OpenBLAS." FORCE)
+  set(HAS_ACCELERATE ${_is_accelerate} CACHE BOOL "Blas/Lapack come from Accelerate framework " FORCE)
+  set(HAS_MATLAB_LAPACK ${_is_matlab} CACHE BOOL "Blas/Lapack come from MATLAB " FORCE)
+  unset(_is_mkl)
+  unset(_is_openblas)
+  unset(_is_accelerate)
+  unset(_is_matlab)
 
   #if(MSVC AND HAS_LAPACKE)
     #SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE")

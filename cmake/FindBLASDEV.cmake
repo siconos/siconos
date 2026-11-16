@@ -32,7 +32,9 @@ Input Variables
 ``BLA_VENDOR``
   As for the module provided by cmake.
   If set, checks only the specified vendor, if not set checks all the
-  possibilities.  List of vendors valid for Siconos:
+  possibilities. Defaults to Apple on macOS (Accelerate framework), empty
+  (all vendors) elsewhere. Changing it in an existing build directory resets
+  all cached Blas/Lapack results. List of vendors valid for Siconos:
 
   * OpenBLAS
   * Matlab
@@ -61,7 +63,7 @@ Usage :
 
 .. code-block:: cmake
 
-    set(BLA_VENDOR OpenBLAS
+    set(BLA_VENDOR OpenBLAS)
     find_package(BLASDEV)
 
     target_link_libraries(numerics PRIVATE BLAS::BLAS)
@@ -96,6 +98,48 @@ if(BLAS_ROOT)
   set(CMAKE_FIND_ROOT_PATH ${BLAS_ROOT})
 endif()
 
+# -- Vendor selection --
+# When BLA_VENDOR is not set, cmake FindBLAS tries vendors in a fixed order
+# where OpenBLAS comes before Apple: on macOS, any OpenBLAS available in
+# the search paths (conda, homebrew ...) silently wins over Accelerate.
+# => default to Apple Accelerate on macOS. Use -DBLA_VENDOR=OpenBLAS
+# (or All, Intel10_64lp ...) to override.
+if(NOT DEFINED BLA_VENDOR AND NOT DEFINED ENV{BLA_VENDOR})
+  if(APPLE)
+    set(_BLA_VENDOR_DEFAULT Apple)
+  else()
+    set(_BLA_VENDOR_DEFAULT "")
+  endif()
+  set(BLA_VENDOR "${_BLA_VENDOR_DEFAULT}" CACHE STRING
+    "Blas/Lapack vendor (see cmake FindBLAS doc). E.g. Apple, OpenBLAS, Intel10_64lp, Generic, All. Empty means all.")
+  unset(_BLA_VENDOR_DEFAULT)
+endif()
+if(NOT DEFINED BLA_VENDOR AND DEFINED ENV{BLA_VENDOR})
+  set(BLA_VENDOR $ENV{BLA_VENDOR})
+endif()
+
+# If the vendor changed since the last configure, forget everything
+# cached by previous Blas/Lapack searches (libraries, headers,
+# symbol checks, HAS_xxx flags), else results get mixed between vendors.
+# (A cached BLAS_INCLUDE_DIR without _SICONOS_BLA_VENDOR_USED means a build
+# dir configured before this mechanism existed: reset it as well.)
+if(NOT "${_SICONOS_BLA_VENDOR_USED}" STREQUAL "${BLA_VENDOR}"
+    AND (DEFINED _SICONOS_BLA_VENDOR_USED OR DEFINED CACHE{BLAS_INCLUDE_DIR}))
+  message(STATUS "BLA_VENDOR changed ('${_SICONOS_BLA_VENDOR_USED}' -> '${BLA_VENDOR}'), resetting Blas/Lapack cache entries.")
+  get_property(_cache_vars DIRECTORY PROPERTY CACHE_VARIABLES)
+  foreach(_var IN LISTS _cache_vars)
+    if(_var MATCHES "^C?(BLAS|LAPACK)_" AND NOT _var MATCHES "_ROOT$")
+      unset(${_var} CACHE)
+    elseif(_var MATCHES "^HAS_(BLAS|LAPACK)_"
+        OR _var MATCHES "^HAS_(OpenBLAS|ACCELERATE|MKL_CBLAS|MKL_LAPACKE|MATLAB_LAPACK)$")
+      unset(${_var} CACHE)
+    endif()
+  endforeach()
+  unset(_cache_vars)
+  unset(_var)
+endif()
+set(_SICONOS_BLA_VENDOR_USED "${BLA_VENDOR}" CACHE INTERNAL "BLA_VENDOR used for the last Blas/Lapack search.")
+
 # First : search for BLAS and use the find process provided by cmake.
 # This will only found libraries, no header, no c-interface.
 if(BLASDEV_FIND_REQUIRED)
@@ -122,11 +166,20 @@ elseif(BLAS_NAME STREQUAL "mkl")
   # No need to find headers : we will use -qmkl compilation option
   set(BLAS_INCLUDE_DIR $ENV{MKLROOT}/include)
 else()
+  # Look for headers next to the library first, and never in macOS
+  # frameworks (Accelerate also ships a cblas.h, which must not be
+  # mixed with another Blas implementation).
+  blas_include_hints_from_libraries(_BLAS_INC_HINTS ${BLAS_LIBRARIES})
+  set(_SAVED_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+  set(CMAKE_FIND_FRAMEWORK NEVER)
   find_path(BLAS_INCLUDE_DIR
     NAMES ${BLAS_HEADER}
+    HINTS ${_BLAS_INC_HINTS}
     ${_BLAS_SEARCH_OPTS}
     PATH_SUFFIXES include ${BLAS_INCLUDE_SUFFIXES}
     )
+  set(CMAKE_FIND_FRAMEWORK ${_SAVED_CMAKE_FIND_FRAMEWORK})
+  unset(_SAVED_CMAKE_FIND_FRAMEWORK)
 endif()
 if(NOT BLAS_INCLUDE_DIR)
   if(BLASDEV_FIND_REQUIRED AND NOT BLASDEV_FIND_QUIETLY)

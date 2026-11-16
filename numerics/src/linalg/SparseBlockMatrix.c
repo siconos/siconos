@@ -20,7 +20,6 @@
 
 #include <assert.h>  // for assert
 #include <math.h>    // for fabs, NAN
-#include <openblas_config.h>
 #include <stdint.h>  // for SIZE_MAX
 #include <stdio.h>   // for size_t, fprintf, printf, fscanf, NULL
 #include <stdlib.h>  // for malloc, free, exit, realloc, calloc

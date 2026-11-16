@@ -29,7 +29,6 @@
 #include <assert.h>
 #include <cs.h>  // For CS_INT
 #include <limits.h>
-#include <openblas_config.h>
 #include <stddef.h>
 
 #include "SiconosBlas.h"  // For BLASINT_MAX

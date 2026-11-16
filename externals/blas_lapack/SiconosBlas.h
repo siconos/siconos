@@ -39,6 +39,21 @@ extern "C" {
 #define restrict __restrict
 #endif
 
+// blasint: integer type of the cblas interface.
+// OpenBLAS defines it (openblas_config.h, included by its cblas.h).
+// Define it for the other implementations (Accelerate, MKL, reference cblas ...).
+#if !defined(OPENBLAS_CONFIG_H)
+#if defined(HAS_MKL_CBLAS)
+typedef MKL_INT blasint;
+#elif defined(CBLAS_INT)
+typedef CBLAS_INT blasint;
+#elif SIZEOF_BLASINT == 8
+typedef long long blasint;
+#else
+typedef int blasint;
+#endif
+#endif
+
 // BLASINT_SIZE set by cmake
 #if SIZEOF_BLASINT == 8
 #define BLASINT_MAX LLONG_MAX
