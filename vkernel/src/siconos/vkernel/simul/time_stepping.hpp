@@ -110,7 +110,6 @@ struct time_stepping : item {
 
       current_step() += 1;
 
-      std::print("step {}\n", current_step());
       return ctx.involved;
     }
 
