@@ -189,9 +189,43 @@ OPTION(BUILD_AS_SHARED_LIBS "Build all the libraries as shared" ON)
 
 
 
-#set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
-#  ${${COMPONENT}_DIRS} # All .hpp are installed
-#  )
+# Every public header: the include tree minus py/, tests/, benchmarks/.  The
+# trailing slash on src/siconos/ copies the *contents* of that directory, so a
+# single statement emits both include/siconos/vkernel/... and
+# include/siconos/vkernel.hpp.  Not <component>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES:
+# siconos_component_install_setup globs one level and installs flat, which
+# would flatten storage/ and simul/ onto one another (both have kernels.hpp).
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/
+        DESTINATION include/siconos
+        FILES_MATCHING PATTERN "*.hpp"
+                       PATTERN "tests" EXCLUDE
+                       PATTERN "benchmarks" EXCLUDE
+                       PATTERN "py" EXCLUDE)
+
+# The cxd narrowphase (externals/cxd) is vendored but part of the public API:
+# collision/cxd_narrowphase.hpp includes its headers, and those include each
+# other flat ("cxd_std.hpp") plus a small boost/hana extension they ship
+# themselves.  So the directory itself must be on the include path and the
+# subtree must be installed with the structure it has in the source tree.
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/externals/cxd/src/
+        DESTINATION include/siconos/vkernel/cxd
+        FILES_MATCHING PATTERN "*.hpp")
+
+# Build root and install root are both "the directory containing siconos/".
+# The public headers include Eigen (algebra/eigen.hpp) and several
+# Siconos/Numerics headers (CSparseMatrix.h, NumericsMatrix.h, SolverOptions.h,
+# SiconosConfig.h, fclib_interface.h), so the component must export both:
+# numerics does not re-export Eigen3, and without it the installed headers do
+# not compile.  Boost is deliberately not named here: the headers reach it
+# through the profile include directory that numerics already exports, while
+# siconos-config.cmake does no find_dependency(Boost), so naming Boost::boost
+# would break consumers instead of helping them.
+target_include_directories(vkernel INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/cxd/src>
+  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/siconos/vkernel/cxd>)
+target_link_libraries(vkernel INTERFACE numerics Eigen3::Eigen)
 
 siconos_component_install_setup(${COMPONENT})
 target_compile_features(vkernel PUBLIC cxx_std_20)
