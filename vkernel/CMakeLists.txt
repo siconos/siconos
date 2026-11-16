@@ -228,12 +228,11 @@ target_include_directories(vkernel INTERFACE
 target_link_libraries(vkernel INTERFACE numerics mechanics Eigen3::Eigen)
 # the broad phase is part of the public surface: collision/neighborhood.hpp
 # includes <CompactNSearch.h> and the symbols live in the library, so a
-# consumer using a relation must link it.  On the GPU path cuNSearch is linked
-# in the build tree only: its install rule puts the library in the python
-# directory, which is not a place to send a C++ consumer to.
-if(WITH_GPU)
-  target_link_libraries(vkernel INTERFACE $<BUILD_INTERFACE:cuNSearch>)
-else()
+# consumer using a relation must link it.  cuNSearch (WITH_GPU) is not linked
+# here: it is in no export set, and even $<BUILD_INTERFACE:cuNSearch> fails the
+# build-tree export(EXPORT siconosTargets); its install rule puts the library
+# in the python directory.  In-tree targets link it themselves.
+if(NOT WITH_GPU)
   target_link_libraries(vkernel INTERFACE CompactNSearch)
 endif()
 
