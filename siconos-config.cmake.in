@@ -92,8 +92,8 @@ find_dependency(Eigen3 CONFIG REQUIRED)
 # and Siconos::vkernel links mechanics (model/fem.hpp).  Without this the
 # exported target is unusable at generate time.
 find_dependency(Boost REQUIRED)
-# Siconos::CompactNSearch, linked by Siconos::vkernel, carries OpenMP in its
-# link interface (externals/CompactNSearch/CMakeLists.txt: link_libraries).
+# Siconos::CompactNSearch links OpenMP PRIVATE; a static build still exports it
+# as $<LINK_ONLY:OpenMP::OpenMP_CXX>, which needs the target.
 find_dependency(OpenMP)
 
 # include siconos project targets

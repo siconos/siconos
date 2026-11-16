@@ -8,14 +8,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS on)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# OpenMP is linked PRIVATE below (local change): the headers do not use it,
+# and a public OpenMP::OpenMP_CXX gave -fopenmp to every consumer of
+# Siconos::vkernel, kernel-only programs included.
 find_package(OpenMP REQUIRED)
-if (OPENMP_FOUND)
-	if (CMAKE_VERSION VERSION_GREATER "3.8")
-		link_libraries(OpenMP::OpenMP_CXX)
-	else()
-		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-	endif()
-endif(OPENMP_FOUND)
 
 OPTION(BUILD_AS_SHARED_LIBS "Build all the libraries as shared" OFF)
 if (BUILD_AS_SHARED_LIBS)
@@ -44,6 +40,7 @@ else()
 		src/CompactNSearch.cpp
 )
 endif ()
+target_link_libraries(CompactNSearch PRIVATE OpenMP::OpenMP_CXX)
 
 # BUILD/INSTALL_INTERFACE: the target is exported (siconosTargets) so that
 # Siconos::vkernel can link it; a bare relative path cannot be exported.
