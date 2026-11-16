@@ -88,6 +88,13 @@ if(@SICONOS_HAS_JSON@)
 endif()
 
 find_dependency(Eigen3 CONFIG REQUIRED)
+# Siconos::kernel and Siconos::mechanics name Boost::boost in their interface,
+# and Siconos::vkernel links mechanics (model/fem.hpp).  Without this the
+# exported target is unusable at generate time.
+find_dependency(Boost REQUIRED)
+# Siconos::CompactNSearch, linked by Siconos::vkernel, carries OpenMP in its
+# link interface (externals/CompactNSearch/CMakeLists.txt: link_libraries).
+find_dependency(OpenMP)
 
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")

@@ -40,6 +40,13 @@ with a finite, non-zero `q`.
 `LD_LIBRARY_PATH` is needed because this executable is not installed and has
 no RPATH.
 
+In the guix environment, add `-DHDF5_DIR=$GUIX_ENVIRONMENT/lib/cmake` to the
+first command, as the Siconos build itself does: guix installs
+`hdf5-config.cmake` directly in `lib/cmake/`, where `find_package` does not
+look, and the `h5cc` fallback of FindHDF5 does not report `hdf5_hl`, which
+fclib's package config requires (`Could NOT find HDF5 (missing:
+HDF5_HL_LIBRARIES)`).
+
 ## Two things that do not work, and why
 
 - `find_package(Siconos COMPONENTS vkernel)` fails: nothing sets

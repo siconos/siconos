@@ -225,10 +225,21 @@ target_include_directories(vkernel INTERFACE
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/cxd/src>
   $<INSTALL_INTERFACE:include>
   $<INSTALL_INTERFACE:include/siconos/vkernel/cxd>)
-target_link_libraries(vkernel INTERFACE numerics Eigen3::Eigen)
+target_link_libraries(vkernel INTERFACE numerics mechanics Eigen3::Eigen)
+# the broad phase is part of the public surface: collision/neighborhood.hpp
+# includes <CompactNSearch.h> and the symbols live in the library, so a
+# consumer using a relation must link it.  On the GPU path cuNSearch is linked
+# in the build tree only: its install rule puts the library in the python
+# directory, which is not a place to send a C++ consumer to.
+if(WITH_GPU)
+  target_link_libraries(vkernel INTERFACE $<BUILD_INTERFACE:cuNSearch>)
+else()
+  target_link_libraries(vkernel INTERFACE CompactNSearch)
+endif()
 
 siconos_component_install_setup(${COMPONENT})
-target_compile_features(vkernel PUBLIC cxx_std_20)
+# the public headers use std::ranges::views::zip and <print>: C++23, not 20.
+target_compile_features(vkernel PUBLIC cxx_std_23)
 
 include(vkernel_tests.cmake)
 

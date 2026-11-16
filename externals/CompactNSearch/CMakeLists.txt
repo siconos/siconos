@@ -45,12 +45,21 @@ else()
 )
 endif ()
 
-target_include_directories(CompactNSearch PUBLIC include)
+# BUILD/INSTALL_INTERFACE: the target is exported (siconosTargets) so that
+# Siconos::vkernel can link it; a bare relative path cannot be exported.
+# The headers are installed flat into include/ (see the install rule below).
+target_include_directories(CompactNSearch PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>)
 
 install(FILES "include/CompactNSearch" ${HEADER_FILES}
 	DESTINATION include/)
 
+# EXPORT siconosTargets: the vkernel component links this library and exports
+# it (Siconos::CompactNSearch), so that a consumer of Siconos::vkernel gets
+# the broad phase without naming the library itself.  Local addition.
 install(TARGETS CompactNSearch
+	EXPORT siconosTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
