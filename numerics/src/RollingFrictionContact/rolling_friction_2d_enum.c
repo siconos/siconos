@@ -81,6 +81,10 @@ static double closed_case(const double* W, const double* q, double mu, double mu
   } else if (!boundary_case_reaction(W, q, mu, mur, st, sr, r)) {
     return DBL_MAX;
   }
+  /* solve_3x3_gepp does not test its last pivot: a block without rolling
+     row (zero third row and column, mu_r = 0) gives a reaction that is not
+     finite, which fmax below would not see */
+  if (!(isfinite(r[0]) && isfinite(r[1]) && isfinite(r[2]))) return DBL_MAX;
 
   double u[3], wr = 0.;
   for (int i = 0; i < 3; ++i) {
