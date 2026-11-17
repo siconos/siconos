@@ -277,6 +277,7 @@ if(WITH_TESTING)
     endfunction()
 
     new_python_test(NAME vkernel_python_fremond_oblique_disk SCRIPT fremond_oblique_disk.py)
+    new_python_test(NAME vkernel_python_rolling_friction SCRIPT rolling_friction.py)
     new_python_test(NAME vkernel_python_sliding_square_schemes SCRIPT sliding_square_schemes.py)
     new_python_test(NAME vkernel_python_add_objects SCRIPT test_add_objects.py PYTEST)
     new_python_test(NAME vkernel_python_contact_work SCRIPT test_contact_work.py PYTEST)

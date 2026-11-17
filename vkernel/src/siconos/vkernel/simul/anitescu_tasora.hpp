@@ -8,6 +8,7 @@
 #pragma once
 
 #include <SolverOptions.h>
+#include <projectionOnRollingCone.h>
 
 #include <algorithm>
 #include <cmath>
@@ -68,7 +69,15 @@ namespace siconos::vkernel::simul::anitescu_tasora {
    1 / L by backtracking on the Lipschitz estimate L, the adaptive restart;
    warm started from lambda at the previous step; it stops when the natural
    map residual ||lambda - P_K(lambda - (W lambda + q))|| / (1 + ||q||) is
-   below the tolerance of the solver options. */
+   below the tolerance of the solver options.
+
+   With rolling resistance (model::newton_impact_rolling_friction) the cone
+   of a contact that resists rolling is K = {|lambda_T| <= mu lambda_N,
+   |lambda_R| <= mu_r lambda_N} on its three rows (normal, tangent,
+   rolling), projected on as in numerics (projectionOn2DRollingCone); the
+   other contacts keep the 2D cone on their first two rows. APGD: one
+   problem has one contact dimension, three rows per contact if one of them
+   resists rolling. */
 
 using namespace kernels;
 
@@ -88,6 +97,16 @@ void project_on_cone(auto& lambda, auto mu) {
   const auto n_proj = (n + mu * t) / (1 + mu * mu);
   lambda(1) = std::copysign(mu * n_proj, lambda(1));
   lambda(0) = n_proj;
+}
+
+// the projection on the 2D cone with rolling resistance mu_r (normal,
+// tangent, rolling)
+void project_on_rolling_cone(auto& lambda, double mu, double mu_r) {
+  double r[3] = {lambda(0), lambda(1), lambda(2)};
+  projectionOn2DRollingCone(r, mu, mu_r);
+  lambda(0) = r[0];
+  lambda(1) = r[1];
+  lambda(2) = r[2];
 }
 
 // the parameters of a sweep: its largest change of lambda and largest lambda
@@ -137,6 +156,91 @@ struct apply_warm_start
   }
 };
 
+// the first Rows rows of a vector: itself if it has Rows rows
+template <int Rows>
+decltype(auto) first_rows(auto& v) {
+  if constexpr (std::decay_t<decltype(v)>::RowsAtCompileTime == Rows) {
+    return (v);
+  } else {
+    return v.template head<Rows>();
+  }
+}
+
+// one projected Gauss-Seidel step on the first Rows rows of an active
+// interaction between rigid systems (Rows = 2: normal and tangent, the 2D
+// cone; 3: and rolling, the cone with rolling resistance mu_r), the other
+// rows of lambda zero
+template <int Rows>
+void projected_gauss_seidel_step(auto& p, auto nds, const auto& h1, const auto& h2,
+                                 const auto& ydot, const auto& e, const auto& mu,
+                                 const auto& mu_r, auto& m1, auto& m2, const auto& blocked1,
+                                 const auto& blocked2, auto& full_lambda, auto& v1, auto& v2) {
+  using vector = std::decay_t<decltype(v1)>;
+  const bool two = nds == 2;
+
+  // the jacobians without the columns of the blocked velocity components
+  auto g1 = h1;
+  auto g2 = h2;
+  for (auto k : blocked1) g1.col(k).setZero();
+  for (auto k : blocked2) g2.col(k).setZero();
+
+  // M^-1 G^T, row by row of G
+  auto minv_gt = [](auto& m, const auto& g, auto r) {
+    vector w = g.row(r).transpose();
+    algebra::solve_in_place(m, w);
+    return w;
+  };
+  const vector a1n = minv_gt(m1, g1, 0), a1t = minv_gt(m1, g1, 1);
+  const vector a2n = two ? minv_gt(m2, g2, 0) : vector::Zero();
+  const vector a2t = two ? minv_gt(m2, g2, 1) : vector::Zero();
+  vector a1r = vector::Zero(), a2r = vector::Zero();
+  if constexpr (Rows == 3) {
+    a1r = minv_gt(m1, g1, 2);
+    if (two) a2r = minv_gt(m2, g2, 2);
+  }
+
+  // trace(H M^-1 H^T)
+  auto trace = g1.row(0).dot(a1n) + g1.row(1).dot(a1t);
+  if (two) trace += g2.row(0).dot(a2n) + g2.row(1).dot(a2t);
+  if constexpr (Rows == 3) {
+    trace += g1.row(2).dot(a1r);
+    if (two) trace += g2.row(2).dot(a2r);
+  }
+  if (trace == 0) {
+    return;  // every velocity component it acts on is blocked
+  }
+
+  // u = H v + e ydot_N(k), no tangential restitution, none on the rolling row
+  auto u = (g1 * v1).eval();
+  if (two) u += g2 * v2;
+  u(0) += e * ydot(0);
+
+  if constexpr (std::decay_t<decltype(full_lambda)>::RowsAtCompileTime > Rows) {
+    full_lambda.template tail<std::decay_t<decltype(full_lambda)>::RowsAtCompileTime - Rows>()
+        .setZero();
+  }
+  auto&& lambda = first_rows<Rows>(full_lambda);
+  auto previous = lambda.eval();
+  lambda -= (2 / trace) * first_rows<Rows>(u);
+  if constexpr (Rows == 3) {
+    project_on_rolling_cone(lambda, mu, mu_r);
+  } else {
+    project_on_cone(lambda, mu);
+  }
+  const auto d = (lambda - previous).eval();
+
+  if constexpr (Rows == 3) {
+    v1 += d(0) * a1n + d(1) * a1t + d(2) * a1r;
+    if (two) v2 += d(0) * a2n + d(1) * a2t + d(2) * a2r;
+  } else {
+    v1 += d(0) * a1n + d(1) * a1t;
+    if (two) v2 += d(0) * a2n + d(1) * a2t;
+  }
+
+  p.change = std::max(p.change, d.template lpNorm<Eigen::Infinity>());
+  p.largest = std::max(p.largest, lambda.template lpNorm<Eigen::Infinity>());
+}
+
 // one projected Gauss-Seidel step on an active interaction between rigid
 // systems: its multiplier, and the velocities of its systems by accumulation
 // (add_through). A one system interaction (nds == 1) has ds1 == ds2 and its
@@ -154,47 +258,37 @@ struct apply_projected_gauss_seidel
   static void apply(auto& p, auto nds, const auto& h1, const auto& h2, const auto& ydot,
                     const auto& e, const auto& mu, auto& m1, auto& m2, const auto& blocked1,
                     const auto& blocked2, auto& lambda, auto& v1, auto& v2) {
-    using vector = std::decay_t<decltype(v1)>;
-    const bool two = nds == 2;
+    projected_gauss_seidel_step<2>(p, nds, h1, h2, ydot, e, mu, 0., m1, m2, blocked1, blocked2,
+                                   lambda, v1, v2);
+  }
+};
 
-    // the jacobians without the columns of the blocked velocity components
-    auto g1 = h1;
-    auto g2 = h2;
-    for (auto k : blocked1) g1.col(k).setZero();
-    for (auto k : blocked2) g2.col(k).setZero();
-
-    // M^-1 G^T, row by row of G
-    auto minv_gt = [](auto& m, const auto& g, auto r) {
-      vector w = g.row(r).transpose();
-      algebra::solve_in_place(m, w);
-      return w;
-    };
-    const vector a1n = minv_gt(m1, g1, 0), a1t = minv_gt(m1, g1, 1);
-    const vector a2n = two ? minv_gt(m2, g2, 0) : vector::Zero();
-    const vector a2t = two ? minv_gt(m2, g2, 1) : vector::Zero();
-
-    // trace(H M^-1 H^T)
-    auto trace = g1.row(0).dot(a1n) + g1.row(1).dot(a1t);
-    if (two) trace += g2.row(0).dot(a2n) + g2.row(1).dot(a2t);
-    if (trace == 0) {
-      return;  // every velocity component it acts on is blocked
+// the same with rolling resistance: the cone with rolling resistance for a
+// contact that resists rolling (rolling rows, mu_r > 0), the 2D cone for the
+// others
+struct apply_projected_gauss_seidel_with_rolling
+    : kernel<active<interactions>, in<"nds", by_topology>, in<"h_matrix1">, in<"h_matrix2">,
+             in<"ydot">, through<"nslaw", "e">, through<"nslaw", "mu">,
+             through<"nslaw", "mu_r">, through<"ds1", "mass_matrix", by_topology>,
+             through<"ds2", "mass_matrix", by_topology>,
+             through<"ds1", "bc_velocities_0", by_topology>,
+             through<"ds2", "bc_velocities_0", by_topology>, inout<"lambda">,
+             add_through<"ds1", "velocity", by_topology, next>,
+             add_through<"ds2", "velocity", by_topology, next>>,
+      ordered {
+  static void apply(auto& p, auto nds, const auto& h1, const auto& h2, const auto& ydot,
+                    const auto& e, const auto& mu, const auto& mu_r, auto& m1, auto& m2,
+                    const auto& blocked1, const auto& blocked2, auto& lambda, auto& v1,
+                    auto& v2) {
+    if (mu_r > 0 &&
+        contacts::with_rolling_rows<model::newton_impact_rolling_friction::rolling_size>(h1,
+                                                                                         h2)) {
+      projected_gauss_seidel_step<3>(p, nds, h1, h2, ydot, e, mu, mu_r, m1, m2, blocked1,
+                                     blocked2, lambda, v1, v2);
+    } else {
+      projected_gauss_seidel_step<2>(p, nds, h1, h2, ydot, e, mu, 0., m1, m2, blocked1,
+                                     blocked2, lambda, v1, v2);
     }
-
-    // u = H v + e ydot_N(k), no tangential restitution
-    auto u = (g1 * v1).eval();
-    if (two) u += g2 * v2;
-    u(0) += e * ydot(0);
-
-    auto previous = lambda;
-    lambda -= (2 / trace) * u;
-    project_on_cone(lambda, mu);
-    const auto d = (lambda - previous).eval();
-
-    v1 += d(0) * a1n + d(1) * a1t;
-    if (two) v2 += d(0) * a2n + d(1) * a2t;
-
-    p.change = std::max(p.change, d.template lpNorm<Eigen::Infinity>());
-    p.largest = std::max(p.largest, lambda.template lpNorm<Eigen::Infinity>());
   }
 };
 
@@ -228,15 +322,16 @@ struct assemble_contact_impulse
 };
 
 // the solution of the CCP (W, q, mu) by APGD: lambda, from its initial
-// value; n rows, d = 2 (normal, tangent) per contact, or 1 without friction
+// value; n rows, d = 2 (normal, tangent) per contact, 1 without friction, 3
+// with rolling resistance mu_r (normal, tangent, rolling)
 struct apgd_result {
   std::size_t iterations = 0;
   double residual = 0;
 };
 
-inline apgd_result apgd(NumericsMatrix* w, const double* q, const double* mu, double* lambda,
-                        std::size_t n, std::size_t d, double tolerance,
-                        std::size_t max_iterations) {
+inline apgd_result apgd(NumericsMatrix* w, const double* q, const double* mu,
+                        const double* mu_r, double* lambda, std::size_t n, std::size_t d,
+                        double tolerance, std::size_t max_iterations) {
   using vector = std::vector<double>;
   auto dot = [n](const vector& a, const vector& b) {
     double s = 0;
@@ -245,7 +340,9 @@ inline apgd_result apgd(NumericsMatrix* w, const double* q, const double* mu, do
   };
   auto project = [&](vector& x) {
     for (std::size_t c = 0; c < n / d; ++c) {
-      if (d == 2) {
+      if (d == 3) {
+        projectionOn2DRollingCone(&x[3 * c], mu[c], mu_r[c]);
+      } else if (d == 2) {
         Eigen::Map<Eigen::Vector2d> contact(&x[2 * c]);
         project_on_cone(contact, mu[c]);
       } else {
@@ -363,7 +460,11 @@ struct sweep : stage<
     } else if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
       using scalar = typename decltype(c.kind.env())::scalar;
       sweep_state<scalar> p;
-      c.kind.template run<apply_projected_gauss_seidel>(c.step, p);
+      if constexpr (std::decay_t<decltype(c.kind)>::rolling_rows() > 0) {
+        c.kind.template run<apply_projected_gauss_seidel_with_rolling>(c.step, p);
+      } else {
+        c.kind.template run<apply_projected_gauss_seidel>(c.step, p);
+      }
       // the largest over the kinds, relative to the largest lambda
       c.change = std::max(c.change, p.change / std::max(p.largest, scalar(1e-300)));
     } else if (c.kind.number_of_interactions() > 0) {
@@ -468,13 +569,20 @@ struct solve_apgd : stage<"Solve the cone complementarity problem (W, q, mu) by 
     auto& lambda = osi.lambda_vector_assembled();
     const std::size_t n = lambda._v->size0;
     const double* mu = nullptr;
+    const double* mu_r = nullptr;
     std::size_t d = 1;
     if constexpr (osi.with_friction()) {
       mu = osi.mu_vector_assembled()._v->dense;
       d = 2;
     }
+    if constexpr (osi.with_rolling_friction()) {
+      if (osi.rolling_contacts()) {
+        mu_r = osi.mu_r_vector_assembled()._v->dense;
+        d = 3;
+      }
+    }
     const auto result =
-        apgd(osi.w_matrix_assembled()._m, osi.q_nsp_vector_assembled()._v->dense, mu,
+        apgd(osi.w_matrix_assembled()._m, osi.q_nsp_vector_assembled()._v->dense, mu, mu_r,
              lambda._v->dense, n, d, tolerance(c), max_iterations(c));
     c.iterations = result.iterations;
     c.change = result.residual;

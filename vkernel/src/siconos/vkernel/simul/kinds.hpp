@@ -334,6 +334,35 @@ struct interaction_kind : item {
       return std::derived_from<nslaw, model::newton_impact_friction>;
     }
 
+    // the rolling rows, rolling resistance mu_r (see
+    // model::newton_impact_rolling_friction)
+    static constexpr auto nslaw_with_rolling_friction() {
+      return std::derived_from<nslaw, model::newton_impact_rolling_friction>;
+    }
+
+    static constexpr int rolling_rows() {
+      if constexpr (nslaw_with_rolling_friction()) {
+        return nslaw::rolling_size;
+      } else {
+        return 0;
+      }
+    }
+
+    // f(rows), rows (a std::integral_constant) the rows of a contact of this
+    // kind in the assembled problem: those of the law, or those of the
+    // frictional contact problem when no active contact resists rolling
+    // (rolling false), the rolling rows left out
+    static void with_assembled_rows(bool rolling, auto&& f) {
+      constexpr int size = nslaw_size_t::value;
+      if constexpr (rolling_rows() > 0) {
+        if (!rolling) {
+          f(std::integral_constant<int, size - rolling_rows()>{});
+          return;
+        }
+      }
+      f(std::integral_constant<int, size>{});
+    }
+
     // Coulomb friction on u(k + theta), see model::fremond_impact_friction
     static constexpr auto nslaw_is_fremond() {
       return std::derived_from<nslaw, model::fremond_impact_friction>;
@@ -359,43 +388,82 @@ struct interaction_kind : item {
       };
     }
 
-    // the rows of the interactions in the assembled matrices and vectors
-    decltype(auto) h_matrix_view(auto& assembled, auto ds_offset) {
-      auto storage = get_storage_type(self()->data(), h_matrix2{});
-      return algebra::mat_view(storage, assembled, inter_offset(), ds_offset);
+    // the rows of the interactions in the assembled matrices and vectors,
+    // Rows rows per interaction (see with_assembled_rows)
+
+    // the jacobians of Rows rows (H for a lazy instantiation: the jacobian of
+    // a FEM self contact has no fixed number of columns)
+    template <int Rows, typename H = h_matrix1>
+    using rows_of_h_matrix =
+        some::matrix<some::scalar, some::indice_value<Rows>, nth_t<1, typename H::sizes>>;
+
+    template <int Rows = nslaw_size_t::value>
+    decltype(auto) h_matrix_view(auto& assembled, auto ds_offset,
+                                 std::integral_constant<int, Rows> = {}) {
+      if constexpr (Rows == nslaw_size_t::value) {
+        auto storage = get_storage_type(self()->data(), h_matrix1{});
+        return algebra::mat_view(storage, assembled, inter_offset(), ds_offset);
+      } else {
+        auto storage = convert_storage_type(typename systems1::system{}, self()->data(),
+                                            rows_of_h_matrix<Rows>{});
+        return algebra::mat_view(storage, assembled, inter_offset(), ds_offset);
+      }
     }
 
-    decltype(auto) w_matrix_view(auto& assembled) {
-      auto storage =
-          convert_storage_type(typename systems1::system{}, self()->data(),
-                               some::matrix<some::scalar, nth_t<0, typename h_matrix1::sizes>,
-                                            nth_t<0, typename h_matrix1::sizes>>{});
+    template <int Rows = nslaw_size_t::value>
+    decltype(auto) w_matrix_view(auto& assembled, std::integral_constant<int, Rows> = {}) {
+      auto storage = convert_storage_type(
+          typename systems1::system{}, self()->data(),
+          some::matrix<some::scalar, some::indice_value<Rows>, some::indice_value<Rows>>{});
       return algebra::mat_view(storage, assembled, inter_offset(), inter_offset());
     }
 
     // an assembled matrix for the transposed jacobians, xxx properties on
     // h_matrix1, if any, are lost here
-    auto transposed_h_matrix() {
+    template <int Rows = nslaw_size_t::value>
+    auto transposed_h_matrix(std::integral_constant<int, Rows> = {}) {
       using env = decltype(self()->env());
-      return typename traits::config<env>::template convert<
-          some::assembled_matrix<some::transposed_matrix<h_matrix1>>>::type{};
+      if constexpr (Rows == nslaw_size_t::value) {
+        return typename traits::config<env>::template convert<
+            some::assembled_matrix<some::transposed_matrix<h_matrix1>>>::type{};
+      } else {
+        return typename traits::config<env>::template convert<
+            some::assembled_matrix<some::transposed_matrix<rows_of_h_matrix<Rows>>>>::type{};
+      }
     }
 
-    decltype(auto) lambda_view(auto& assembled) {
-      auto storage = get_storage_type(self()->data(), lambda{});
-      return algebra::vec_view(storage, assembled, inter_offset());
+    // the multipliers, the output derivatives (and the free ones, the impact
+    // terms) of Rows rows
+    template <int Rows = nslaw_size_t::value>
+    decltype(auto) lambda_view(auto& assembled, std::integral_constant<int, Rows> = {}) {
+      if constexpr (Rows == nslaw_size_t::value) {
+        auto storage = get_storage_type(self()->data(), lambda{});
+        return algebra::vec_view(storage, assembled, inter_offset());
+      } else {
+        using env_t = decltype(self()->env());
+        using vec_t = traits::config<env_t>::template convert<
+            some::vector<some::scalar, some::indice_value<Rows>>>::type;
+        return algebra::vec_view<vec_t>(assembled, inter_offset());
+      }
     }
 
-    decltype(auto) ydot_view(auto& assembled) {
-      auto storage = get_storage_type(self()->data(), ydot{});
-      return algebra::vec_view(storage, assembled, inter_offset());
+    template <int Rows = nslaw_size_t::value>
+    decltype(auto) ydot_view(auto& assembled, std::integral_constant<int, Rows> rows = {}) {
+      if constexpr (Rows == nslaw_size_t::value) {
+        auto storage = get_storage_type(self()->data(), ydot{});
+        return algebra::vec_view(storage, assembled, inter_offset());
+      } else {
+        return lambda_view(assembled, rows);
+      }
     }
 
-    decltype(auto) mu_view(auto& assembled) {
+    // a coefficient per interaction: mu, mu_r
+    template <int Rows = nslaw_size_t::value>
+    decltype(auto) mu_view(auto& assembled, std::integral_constant<int, Rows> = {}) {
       using env_t = decltype(self()->env());
       using vec_mu_t = traits::config<env_t>::template convert<
           some::vector<some::scalar, some::indice_value<1>>>::type;
-      return algebra::vec_view<vec_mu_t>(assembled, inter_offset() / 2);
+      return algebra::vec_view<vec_mu_t>(assembled, inter_offset() / Rows);
     }
 
     static constexpr bool relation_sets() {
@@ -411,7 +479,8 @@ struct interaction_kind : item {
     }
 
     void compute_h_matrices(auto step) {
-      run<contacts::compute_jacobians>(step, contacts::at_step{step});
+      run<contacts::compute_jacobians>(
+          step, contacts::at_step<decltype(step), rolling_rows()>{step});
     }
 
     static constexpr bool time_invariant_h_matrices() {
@@ -451,50 +520,72 @@ struct interaction_kind : item {
       return rows.back();
     }
 
+    // does an active interaction resist rolling (see
+    // contacts::mark_rolling_resistance)
+    bool resists_rolling(auto step) {
+      if constexpr (rolling_rows() > 0) {
+        contacts::rolling_resistances<rolling_rows()> p;
+        run<contacts::mark_rolling_resistance>(step, p);
+        return p.found;
+      } else {
+        return false;
+      }
+    }
+
     // the blocks of H of the active interactions, the systems being at the
     // columns of their kinds
-    void assemble_h_matrix(auto step, auto& assembled, auto ds1_systems, auto ds2_systems) {
+    template <int Rows>
+    void assemble_h_matrix(auto step, auto& assembled, auto ds1_systems, auto ds2_systems,
+                           std::integral_constant<int, Rows> rows) {
       using env_t = decltype(self()->env());
       using matrix_1x1_t = typename env_t::template matrix<typename env_t::scalar, 1, 1>;
 
       if constexpr (between_rigid_systems()) {
         // between rigid systems (i.e disk/disk)
-        run<contacts::assemble_h_blocks>(
-            step, contacts::block_matrix{h_matrix_view(assembled, ds2_systems.ds_offset())});
+        run<contacts::assemble_h_blocks>(step, contacts::block_matrix{h_matrix_view(
+                                                   assembled, ds2_systems.ds_offset(), rows)});
       } else if constexpr (std::same_as<systems1, systems2>) {
         // self contact of a FEM system
         auto fem_matrix = algebra::mat_view<matrix_1x1_t>(assembled, inter_offset(),
                                                           ds2_systems.ds_offset());
         run<contacts::assemble_fem_self_h_block>(
-            step, contacts::fem_block_matrix{fem_matrix, ds2_systems.sum_dofs()});
+            step, contacts::fem_block_matrix{fem_matrix, ds2_systems.sum_dofs(), rows});
       } else {
         // a rigid system (ds1) and a FEM one (ds2) (i.e disk/fem)
         auto fem_matrix = algebra::mat_view<matrix_1x1_t>(assembled, inter_offset(),
                                                           ds2_systems.ds_offset());
-        auto rigid_storage = get_storage_type(self()->data(), h_matrix1{});
-        auto rigid_matrix = algebra::mat_view(rigid_storage, assembled, inter_offset(),
-                                              ds1_systems.ds_offset());
+        auto rigid_matrix = h_matrix_view(assembled, ds1_systems.ds_offset(), rows);
         run<contacts::assemble_fem_h_blocks>(
             step, contacts::fem_h_matrix{self()->data(), fem_matrix, rigid_matrix,
-                                         ds2_systems.sum_dofs(),
-                                         static_cast<std::size_t>(nslaw_size())});
+                                         ds2_systems.sum_dofs()});
       }
     }
 
-    void assemble_vectors(auto step, auto& lambdas, auto& ydots, auto& mus) {
+    // lambda, ydot, mu, and mu_r if the rolling rows are assembled
+    template <int Rows>
+    void assemble_vectors(auto step, auto& lambdas, auto& ydots, auto& mus, auto& mu_rs,
+                          std::integral_constant<int, Rows> rows) {
       if constexpr (nslaw_with_friction()) {
         run<kernels::fused<contacts::assemble_multipliers, contacts::assemble_friction>>(
-            step, contacts::multipliers{part(), lambda_view(lambdas), ydot_view(ydots),
-                                        mu_view(mus)});
+            step, contacts::multipliers{part(), lambda_view(lambdas, rows),
+                                        ydot_view(ydots, rows), mu_view(mus, rows)});
       } else {
         run<contacts::assemble_multipliers>(
-            step, contacts::multipliers{part(), lambda_view(lambdas), ydot_view(ydots)});
+            step,
+            contacts::multipliers{part(), lambda_view(lambdas, rows), ydot_view(ydots, rows)});
+      }
+      if constexpr (rolling_rows() > 0 && Rows == nslaw_size_t::value) {
+        run<contacts::assemble_rolling_resistance>(
+            step,
+            contacts::rolling_resistances<rolling_rows(), decltype(mu_view(mu_rs, rows))>{
+                mu_view(mu_rs, rows)});
       }
     }
 
-    void keep_lambdas(auto step, auto& lambdas) {
-      run<contacts::keep_multipliers>(step,
-                                      contacts::multipliers{part(), lambda_view(lambdas)});
+    template <int Rows>
+    void keep_lambdas(auto step, auto& lambdas, std::integral_constant<int, Rows> rows) {
+      run<contacts::keep_multipliers>(
+          step, contacts::multipliers{part(), lambda_view(lambdas, rows)});
     }
   };
 };

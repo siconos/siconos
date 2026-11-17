@@ -92,6 +92,12 @@ struct diskdisk_r : item, model::relation2, model::any_lagrangian_relation {
       g2(1, 1) = dxsd;
       g2(0, 2) = 0.;
       g2(1, 2) = -r2;
+
+      // the rolling row of a law with rolling resistance: omega1 - omega2
+      if constexpr (std::decay_t<decltype(g1)>::RowsAtCompileTime > 2) {
+        g1(2, 2) = 1.;
+        g2(2, 2) = -1.;
+      }
     }
   };
 

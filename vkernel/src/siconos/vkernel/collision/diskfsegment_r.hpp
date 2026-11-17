@@ -76,6 +76,12 @@ struct diskfsegment_r : item, model::relation1, model::any_lagrangian_relation {
       h_matrix1(1, 1) = h_matrix1(0, 0);
       h_matrix1(0, 2) = 0;
       h_matrix1(1, 2) = -r;
+
+      // the rolling row of a law with rolling resistance: omega1, the
+      // fixed segment does not turn
+      if constexpr (std::decay_t<decltype(h_matrix1)>::RowsAtCompileTime > 2) {
+        h_matrix1(2, 2) = 1.;
+      }
     }
   };
 };

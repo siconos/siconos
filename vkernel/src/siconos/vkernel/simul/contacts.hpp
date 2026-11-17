@@ -9,6 +9,8 @@
 
 #include <cassert>
 #include <cstddef>
+#include <stdexcept>
+#include <string>
 #include <type_traits>
 
 #include "siconos/vkernel/algebra/eigen.hpp"
@@ -43,11 +45,13 @@ using interaction_storage = gather<storage::time_levels<attr_t<Interaction, "y">
 
 // the parameters of the kernels
 
-// an assembled matrix of FEM systems and the dof offsets of the involved ones
-template <typename Matrix, typename Offsets>
+// an assembled matrix of FEM systems and the dof offsets of the involved
+// ones, the rows of a contact in it
+template <typename Matrix, typename Offsets, typename Rows>
 struct fem_block_matrix {
   Matrix matrix;
   Offsets& sum_dofs;
+  Rows rows;
 };
 
 // the active set: gamma for the gap at the middle of the step, the
@@ -69,22 +73,22 @@ struct ranks {
 };
 
 // the H matrix of the FEM systems in contact with rigid ones: its columns of
-// the FEM systems (matrix), of the rigid systems (rigid_matrix), the dof
-// offsets of the involved FEM systems
-template <typename Data, typename Matrix, typename RigidMatrix, typename Offsets,
-          typename Indice>
+// the FEM systems (matrix), of the rigid systems (rigid_matrix, whose blocks
+// have the rows of a contact), the dof offsets of the involved FEM systems
+template <typename Data, typename Matrix, typename RigidMatrix, typename Offsets>
 struct fem_h_matrix {
   Data& data;
   Matrix matrix;
   RigidMatrix rigid_matrix;
   Offsets& sum_dofs;
-  Indice nslaw_size;
 };
 
-// the step of the relations
-template <typename Step>
+// the step of the relations; RollingRows, the rolling rows of the law (see
+// model::newton_impact_rolling_friction), the last rows of the jacobians
+template <typename Step, int RollingRows = 0>
 struct at_step {
   Step step;
+  static constexpr int rolling_rows = RollingRows;
 };
 
 // the assembled vectors of the multipliers, of the output derivatives and of
@@ -96,6 +100,16 @@ struct multipliers {
   Lambdas lambdas;
   Ydots ydots = nullptr;
   Mus mus = nullptr;
+};
+
+// the rolling rows of a law (see model::newton_impact_rolling_friction), and
+// the assembled vector of the rolling resistances, or whether an active
+// interaction resists rolling
+template <int RollingRows, typename MuRs = std::nullptr_t>
+struct rolling_resistances {
+  static constexpr int rolling_rows = RollingRows;
+  MuRs mu_rs = nullptr;
+  bool found = false;
 };
 
 // an assembled block matrix
@@ -117,6 +131,38 @@ template <typename Offsets>
 struct dof_offsets {
   Offsets& sum_dofs;
 };
+
+// the rows of a contact in the assembled problem (see
+// interaction_kind::with_assembled_rows)
+
+// the first rows of a block, the rows of a contact in an assembled matrix or
+// vector of Rows rows per contact: the block itself if it has Rows rows
+template <int Rows>
+decltype(auto) assembled_rows(const auto& block) {
+  using block_t = std::decay_t<decltype(block)>;
+  if constexpr (block_t::RowsAtCompileTime == Rows) {
+    return (block);
+  } else if constexpr (block_t::ColsAtCompileTime == 1) {
+    return block.template head<Rows>().eval();
+  } else {
+    return block.template topRows<Rows>().eval();
+  }
+}
+
+// the rows of a contact in an assembled vector
+template <typename Vector>
+constexpr int rows_of() {
+  return std::decay_t<Vector>::vnrows;
+}
+
+// a contact of a law with rolling resistance resists rolling if its relation
+// writes the rolling rows of its jacobians (the relations of the disks):
+// the others (polytopes, FEM meshes) have none, a rolling resistance there
+// would be a multiplier without effect
+template <int RollingRows>
+bool with_rolling_rows(const auto& h1, const auto& h2) {
+  return !(h1.bottomRows(RollingRows).isZero(0) && h2.bottomRows(RollingRows).isZero(0));
+}
 
 // the kernels
 
@@ -150,8 +196,9 @@ struct zero_multipliers
 struct assemble_multipliers : kernel<active<interactions>, rank, in<"lambda">, in<"ydot">>,
                               assembles {
   static void apply(auto& p, auto index, const auto& lambda, const auto& ydot) {
-    set_value(p.lambdas, index, lambda);
-    set_value(p.ydots, index, ydot);
+    constexpr auto rows = rows_of<decltype(p.lambdas)>();
+    set_value(p.lambdas, index, assembled_rows<rows>(lambda));
+    set_value(p.ydots, index, assembled_rows<rows>(ydot));
   }
 };
 
@@ -160,10 +207,40 @@ struct assemble_friction : kernel<active<interactions>, rank, through<"nslaw", "
   static void apply(auto& p, auto index, const auto& mu) { set_value(p.mus, index, mu); }
 };
 
-// the multipliers of an active interaction from the solution
+// the rolling resistance of an active interaction, zero without rolling rows
+struct assemble_rolling_resistance : kernel<active<interactions>, rank, in<"h_matrix1">,
+                                            in<"h_matrix2">, through<"nslaw", "mu_r">>,
+                                     assembles {
+  static void apply(auto& p, auto index, const auto& h1, const auto& h2, const auto& mu_r) {
+    constexpr int rolling_rows = std::decay_t<decltype(p)>::rolling_rows;
+    set_value(p.mu_rs, index, with_rolling_rows<rolling_rows>(h1, h2) ? mu_r : 0.);
+  }
+};
+
+// is there an active interaction that resists rolling: rolling rows and a
+// positive rolling resistance (several interactions may write true)
+struct mark_rolling_resistance : kernel<active<interactions>, in<"h_matrix1">, in<"h_matrix2">,
+                                        through<"nslaw", "mu_r">> {
+  static void apply(auto& p, const auto& h1, const auto& h2, const auto& mu_r) {
+    constexpr int rolling_rows = std::decay_t<decltype(p)>::rolling_rows;
+    if (mu_r > 0 && with_rolling_rows<rolling_rows>(h1, h2)) {
+      p.found = true;
+    }
+  }
+};
+
+// the multipliers of an active interaction from the solution, zero on the
+// rows that are not assembled
 struct keep_multipliers : kernel<active<interactions>, rank, out<"lambda">> {
   static void apply(auto& p, auto index, auto& lambda) {
-    lambda = p.part(p.lambdas, index, lambda);
+    constexpr auto rows = rows_of<decltype(p.lambdas)>();
+    if constexpr (std::decay_t<decltype(lambda)>::RowsAtCompileTime == rows) {
+      lambda = p.part(p.lambdas, index, lambda);
+    } else {
+      lambda.template head<rows>() = p.part(p.lambdas, index, lambda);
+      lambda.template tail<std::decay_t<decltype(lambda)>::RowsAtCompileTime - rows>()
+          .setZero();
+    }
   }
 };
 
@@ -179,6 +256,12 @@ struct compute_jacobians
       host_only {
   static void apply(const auto& p, auto& rel, auto ds1, auto ds2, auto& h1, auto& h2) {
     using rel_t = std::decay_t<decltype(rel)>;
+    // the rolling rows are zero but for the relations that write them
+    constexpr int rolling_rows = std::decay_t<decltype(p)>::rolling_rows;
+    if constexpr (rolling_rows > 0) {
+      h1.bottomRows(rolling_rows).setZero();
+      h2.bottomRows(rolling_rows).setZero();
+    }
     // the first of relation1, relation2 wins: a linear relation that is a
     // relation1 (lagrangian_r) gets the one ds jacobian whatever its nds
     if constexpr (match::relation1<rel_t>) {
@@ -349,8 +432,9 @@ struct assemble_h_blocks
       assembles {
   static void apply(auto& p, auto row, const auto& h1, const auto& h2, auto j1, auto j2,
                     const auto& blocked1, const auto& blocked2) {
-    auto h1_mod = h1;
-    auto h2_mod = h2;
+    constexpr auto rows = std::decay_t<decltype(p.matrix)>::vnrows;
+    auto h1_mod = assembled_rows<rows>(h1);
+    auto h2_mod = assembled_rows<rows>(h2);
     for (auto k : blocked1) {
       h1_mod.col(k).setZero();
     }
@@ -380,9 +464,10 @@ struct assemble_fem_h_blocks
   static void apply(auto& p, auto row, const auto& h1, const auto& h2, const auto& rel,
                     auto j1, auto i2, const auto& blocked1, const auto& blocked2) {
     const auto j2 = p.sum_dofs[i2];
-    const auto rows = row * p.nslaw_size;
+    constexpr auto nrows = std::decay_t<decltype(p.rigid_matrix)>::vnrows;
+    const auto rows = row * nrows;
 
-    auto h1_mod = h1;
+    auto h1_mod = assembled_rows<nrows>(h1);
     for (auto k : blocked1) {
       h1_mod.col(k).setZero();
     }
@@ -393,7 +478,7 @@ struct assemble_fem_h_blocks
                        [&](match::handle<collision::mesh_relation> auto rrel) {
                          const auto& nodes = rrel.mesh().global_indices();
                          const auto base = 4 * rrel.contact_index();
-                         for (auto i = 0; i < algebra::nrows(h2); ++i) {
+                         for (auto i = 0; i < nrows; ++i) {
                            for (auto c = 0; c < 4; ++c) {
                              set_value(p.matrix, i + rows, nodes[base + c] + j2, h2(i, c));
                            }
@@ -402,7 +487,7 @@ struct assemble_fem_h_blocks
                        [](auto) {}));
 
     // the blocked velocity components of ds2
-    for (auto i = 0; i < algebra::nrows(h2); ++i) {
+    for (auto i = 0; i < nrows; ++i) {
       for (auto k : blocked2) {
         set_value(p.matrix, i + rows, j2 + k, 0.);
       }
@@ -421,7 +506,7 @@ struct assemble_fem_self_h_block
     // only ds1 == ds2 (nds == 1) is supported (rt_lagrangian_r is a relation1)
     assert(nds == 1);
     const auto j2 = p.sum_dofs[i2];
-    auto h1_mod = h1;
+    auto h1_mod = assembled_rows<decltype(p.rows)::value>(h1);
     for (auto k : blocked2) {
       h1_mod.col(k).setZero();
     }
@@ -486,21 +571,45 @@ struct compute_time_invariant_jacobians
   }
 };
 
+// the rows of a contact of the kind in the assembled problem (see
+// interaction_kind::with_assembled_rows)
+void with_assembled_rows(auto& c, auto&& f) {
+  c.kind.with_assembled_rows(c.integrator.rolling_contacts(), f);
+}
+
+// for the schemes without rolling resistance: an error if an active contact
+// resists rolling (the integrator knows it once the assembly is set up)
+void refuse_rolling_resistance(auto& c, const std::string& scheme) {
+  auto osi = c.integrator;
+  if constexpr (osi.with_rolling_friction()) {
+    if (osi.rolling_contacts()) {
+      throw std::runtime_error(scheme + ": rolling resistance (mu_r > 0) is not supported");
+    }
+  }
+}
+
 struct assemble_h_matrix : stage<"Assemble H of the active interactions"> {
-  static void run(auto& c) { c.integrator.assemble_h_matrix(c.step, c.kind); }
+  static void run(auto& c) {
+    with_assembled_rows(
+        c, [&](auto rows) { c.integrator.assemble_h_matrix(c.step, c.kind, rows); });
+  }
 };
 
 struct assemble_multipliers : stage<"Assemble lambda, ydot, mu of the active interactions"> {
   static void run(auto& c) {
-    c.kind.assemble_vectors(c.step, c.integrator.lambda_vector_assembled(),
-                            c.integrator.ydot_vector_assembled(),
-                            c.integrator.mu_vector_assembled());
+    with_assembled_rows(c, [&](auto rows) {
+      c.kind.assemble_vectors(
+          c.step, c.integrator.lambda_vector_assembled(), c.integrator.ydot_vector_assembled(),
+          c.integrator.mu_vector_assembled(), c.integrator.mu_r_vector_assembled(), rows);
+    });
   }
 };
 
 struct keep_multipliers : stage<"Keep lambda of the active interactions from the solution"> {
   static void run(auto& c) {
-    c.kind.keep_lambdas(c.step, c.integrator.lambda_vector_assembled());
+    with_assembled_rows(c, [&](auto rows) {
+      c.kind.keep_lambdas(c.step, c.integrator.lambda_vector_assembled(), rows);
+    });
   }
 };
 

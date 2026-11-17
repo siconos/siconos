@@ -13,6 +13,8 @@
 #include <LinearComplementarityProblem.h>
 #include <NonSmoothDrivers.h>
 #include <NumericsVerbose.h>
+#include <RollingFrictionContactProblem.h>
+#include <RollingFrictionContact_options.h>
 #include <SiconosConfig.h>  // WITH_FCLIB
 #include <SolverOptions.h>
 #include <fclib_interface.h>
@@ -20,6 +22,7 @@
 
 #include <chrono>
 #include <format>
+#include <memory>
 #include <print>
 
 #include "siconos/vkernel/algebra/algebra.hpp"
@@ -238,6 +241,52 @@ struct one_step_nonsmooth_problem : item {
         }
       }
     }
+    // the frictional contact problem with rolling resistance (W, q, mu,
+    // mu_r), three rows per contact (normal, tangent, rolling), by the 2D
+    // rolling NSGS of numerics with the exact one-contact solver (ENUM). The
+    // tolerance and the maximum number of iterations are those of the
+    // solver options, whatever their solver (a 2D friction one, used when
+    // no contact resists rolling, see interaction_kind::with_assembled_rows)
+    template <match::matrix W, match::vector V>
+    void solve_rolling(algebra::mat<W>& w_mat, algebra::vec<V>& q_vec, algebra::vec<V>& z_vec,
+                       algebra::vec<V>& w_vec, algebra::vec<V>& mu_vec,
+                       algebra::vec<V>& mu_r_vec) {
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
+      numerics_set_verbose(storage::attr<"verbose">(*self()));
+
+      RollingFrictionContactProblem problem{};
+      problem.dimension = 3;
+      problem.numberOfContacts = size0(w_mat) / problem.dimension;
+      problem.M = w_mat._m;
+      problem.q = q_vec._v->dense;
+      problem.mu = mu_vec._v->dense;
+      problem.mu_r = mu_r_vec._v->dense;
+
+      attr<"number_of_contacts">(*self()) = problem.numberOfContacts;
+
+      auto& so = *options().instance();
+      std::unique_ptr<SolverOptions, decltype(&solver_options_delete)> rolling_options{
+          solver_options_create(SICONOS_ROLLING_FRICTION_2D_NSGS), solver_options_delete};
+      rolling_options->iparam[SICONOS_IPARAM_MAX_ITER] = so.iparam[SICONOS_IPARAM_MAX_ITER];
+      rolling_options->dparam[SICONOS_DPARAM_TOL] = so.dparam[SICONOS_DPARAM_TOL];
+      solver_options_update_internal(rolling_options.get(), 0,
+                                     SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM);
+
+      const auto start_time{std::chrono::steady_clock::now()};
+      const int info = rolling_friction_2d_driver(&problem, z_vec._v->dense, w_vec._v->dense,
+                                                  rolling_options.get());
+      const std::chrono::duration<scalar> elapsed_seconds{std::chrono::steady_clock::now() -
+                                                          start_time};
+      attr<"solver_duration_seconds">(*self()) = elapsed_seconds.count();
+
+      // the result in the solver options of the problem, as for the others
+      so.iparam[SICONOS_IPARAM_ITER_DONE] = rolling_options->iparam[SICONOS_IPARAM_ITER_DONE];
+      so.dparam[SICONOS_DPARAM_RESIDU] = rolling_options->dparam[SICONOS_DPARAM_RESIDU];
+      check(info);
+    }
+
     // the global frictional contact problem (numerics convention, H being
     // n x m there): M v = q + H r, u = H^T v + b, (u, r) in the Coulomb
     // complementarity, with the options of this problem. h_mat is the vkernel H (m x

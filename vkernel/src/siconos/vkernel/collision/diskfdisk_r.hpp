@@ -69,6 +69,12 @@ struct diskfdisk_r : item, model::relation1, model::any_lagrangian_relation {
       g1(1, 1) = -dxsd;
       g1(0, 2) = 0.;
       g1(1, 2) = -r1;
+
+      // the rolling row of a law with rolling resistance: omega1, the
+      // fixed disk does not turn
+      if constexpr (std::decay_t<decltype(g1)>::RowsAtCompileTime > 2) {
+        g1(2, 2) = 1.;
+      }
     }
   };
 };

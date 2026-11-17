@@ -101,6 +101,13 @@ struct diskmesh_r : item, mesh_relation, model::relation2, model::any_lagrangian
       h_matrix2(0, 3) = -t * dty;
       h_matrix2(1, 2) = -h_matrix2(0, 3);
       h_matrix2(1, 3) = h_matrix2(0, 2);
+
+      // the rolling row of a law with rolling resistance: the angular
+      // velocity of the disk only, the nodes of a mesh have no rotational
+      // dof
+      if constexpr (std::decay_t<decltype(h_matrix1)>::RowsAtCompileTime > 2) {
+        h_matrix1(2, 2) = 1.;
+      }
     }
   };
 };

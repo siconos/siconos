@@ -1436,16 +1436,22 @@ _CF = {
     "interaction": 22,
     "ds1": 23,
     "ds2": 24,
+    # with rolling resistance
+    "rolling_velocity": slice(25, 28),
+    "reaction_rolling": slice(28, 31),
 }
 
 
 def contacts_point_data(rows):
     """Points and point arrays of the contacts.
 
-    rows : (N, 25) the rows of the cf table without the time column. A
-    contact is drawn at the middle of its points A and B.
+    rows : (N, 25) the rows of the cf table without the time column, or (N,
+    31) with the rolling columns (rolling resistance), drawn as the arrays
+    rolling_velocity and reaction_rolling. A contact is drawn at the middle
+    of its points A and B.
     """
-    rows = np.asarray(rows, dtype=np.float64).reshape(-1, 25)
+    rows = np.asarray(rows, dtype=np.float64)
+    rows = rows.reshape(-1, rows.shape[-1] if rows.ndim == 2 else 25)
     points = 0.5 * (rows[:, _CF["point_a"]] + rows[:, _CF["point_b"]])
     local = rows[:, _CF["reaction_local"]]
     point_data = {
@@ -1459,6 +1465,9 @@ def contacts_point_data(rows):
     }
     for name in ("interaction", "ds1", "ds2"):
         point_data[name] = rows[:, _CF[name]].astype(np.int64)
+    if rows.shape[1] == 31:
+        point_data["rolling_velocity"] = rows[:, _CF["rolling_velocity"]]
+        point_data["reaction_rolling"] = rows[:, _CF["reaction_rolling"]]
     return points, point_data
 
 

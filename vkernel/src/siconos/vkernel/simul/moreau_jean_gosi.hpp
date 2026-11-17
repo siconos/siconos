@@ -53,7 +53,8 @@ struct assemble_impact_term
   static void apply(auto& p, auto row, const auto& ydot, const auto& e) {
     std::decay_t<decltype(ydot)> b = std::decay_t<decltype(ydot)>::Zero();
     b(0) = e * ydot(0);
-    set_value(p.vector, row, b);
+    set_value(p.vector, row,
+              contacts::assembled_rows<contacts::rows_of<decltype(p.vector)>()>(b));
   }
 };
 
@@ -95,8 +96,10 @@ struct assemble_impact_terms : stage<"Assemble b = e ydot at step, the impact te
         throw std::runtime_error("moreau_jean_gosi: the Frémond impact law is not supported");
       }
     }
-    c.kind.template run<moreau_jean_gosi::assemble_impact_term>(
-        c.step, block_vector{c.kind.lambda_view(c.integrator.b_vector_assembled())});
+    contacts::stages::with_assembled_rows(c, [&](auto rows) {
+      c.kind.template run<moreau_jean_gosi::assemble_impact_term>(
+          c.step, block_vector{c.kind.lambda_view(c.integrator.b_vector_assembled(), rows)});
+    });
   }
 };
 
@@ -145,6 +148,8 @@ struct solve_global_problem
           "Solve the global frictional contact problem (A, H^T, A v_free, b, mu): v, lambda">,
       host_code {
   static void run(auto& c) {
+    // no global 2D rolling friction solver in numerics
+    contacts::stages::refuse_rolling_resistance(c, "moreau_jean_gosi");
     auto osi = c.integrator;
     auto osnsp = c.time_stepping.one_step_nonsmooth_problem();
     if constexpr (osi.with_k_matrix()) {

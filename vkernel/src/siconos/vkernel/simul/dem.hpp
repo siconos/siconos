@@ -127,6 +127,7 @@ struct zero_released : stage<"Zero the force and the tangential spring without o
 struct apply_contact_forces
     : stage<"Apply the penalty forces at step, the tangential springs: lambda = h F"> {
   static void run(auto& c) {
+    contacts::stages::refuse_rolling_resistance(c, "dem");
     using scalar = typename decltype(c.kind.env())::scalar;
     auto osi = c.integrator;
     c.kind.template run<apply_contact_force>(

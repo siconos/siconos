@@ -31,6 +31,7 @@ class Stored:
         BodyBase.shapes().clear()
         # no law of a previous storage
         NewtonImpactFrictionNSL.laws.clear()
+        NewtonImpactFrictionNSL.rolling_resistance = False
 
     @classmethod
     def data(cls):
@@ -206,16 +207,34 @@ class SpaceFilter(Stored):
 
 
 class NewtonImpactFrictionNSL(Stored):
-    # the class names of the laws of the storage: the scheme of the
-    # integrator depends on them (see Simulation.insertIntegrator)
+    # the class names of the laws of the storage, and whether one of them
+    # resists rolling: the scheme of the integrator depends on them (see
+    # Simulation.insertIntegrator)
     laws = set()
+    rolling_resistance = False
 
     def __init__(self, e, not_used, mu, dimension):
         self._handle = vkernel.disks.add_nslaw(self.data())
         self._handle.set_e(e)
         self._handle.set_mu(mu)
+        # the law of the vkernel has a rolling resistance, none here
+        self._handle.set_mu_r(0.0)
         # self._handle.set_dimension(dimension)
         NewtonImpactFrictionNSL.laws.add(type(self).__name__)
+
+
+class NewtonImpactRollingFrictionNSL(NewtonImpactFrictionNSL):
+    """The Newton impact law with Coulomb friction and rolling resistance
+    mu_r, a length (model::newton_impact_rolling_friction): the signature of
+    the AOS kernel law (en, et, mu, mu_r, size), et and size not used (no
+    tangential restitution, size 3 in 2D). Only the contacts of disks
+    resist rolling; with mu_r = 0 it is NewtonImpactFrictionNSL."""
+
+    def __init__(self, e, not_used, mu, mu_r, size=3):
+        super().__init__(e, not_used, mu, size)
+        self._handle.set_mu_r(mu_r)
+        if mu_r > 0:
+            NewtonImpactFrictionNSL.rolling_resistance = True
 
 
 class FremondImpactFrictionNSL(NewtonImpactFrictionNSL):
@@ -344,7 +363,7 @@ class Simulation(Stored):
         # Moreau-Jean on the local problem implements it
         laws = NewtonImpactFrictionNSL.laws
         if "FremondImpactFrictionNSL" in laws:
-            if "NewtonImpactFrictionNSL" in laws:
+            if laws & {"NewtonImpactFrictionNSL", "NewtonImpactRollingFrictionNSL"}:
                 raise ValueError(
                     "vnative: the Frémond and the Newton impact laws cannot be mixed"
                 )
@@ -354,6 +373,16 @@ class Simulation(Stored):
                     f"the osi is a {type(osi).__name__}"
                 )
             scheme = SCHEME_LOCAL_PROBLEM_FREMOND
+        # rolling resistance: no 2D global rolling friction solver, no
+        # rolling spring in the DEM scheme
+        if NewtonImpactFrictionNSL.rolling_resistance and scheme in (
+            SCHEME_GLOBAL_PROBLEM,
+            SCHEME_EXPLICIT_PENALTY,
+        ):
+            raise ValueError(
+                f"vnative: rolling resistance (mu_r > 0) is not supported "
+                f"with a {type(osi).__name__}"
+            )
         self.handle().one_step_integrator().set_scheme(scheme)
 
     def insertNonSmoothProblem(self, osnspb):
@@ -725,11 +754,29 @@ class TraceParams(Stored):
         self.handle().set_math_info(tp_args._mathInfo)
 
 
+# the 2D rolling friction solvers of numerics (RollingFrictionContact_options.h)
+_ROLLING_FRICTION_2D_IDS = range(4000, 4100)
+
+
 class OSNSPB(Stored):
     def __init__(self, dim, solvopts):
         self._so = vkernel.disks.add_solver_options(self.data())
 
-        if solvopts is not None:
+        if solvopts is not None and solvopts.solverId in _ROLLING_FRICTION_2D_IDS:
+            # the options of a 2D rolling friction solver: the 2D friction
+            # NSGS with their tolerance and maximum number of iterations. The
+            # problem with rolling resistance is solved by the 2D rolling
+            # NSGS with these two (one_step_nonsmooth_problem::solve_rolling)
+            self._so.create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+            self._so.set_iparam(
+                sn.params.SICONOS_IPARAM_MAX_ITER,
+                solvopts.iparam[sn.params.SICONOS_IPARAM_MAX_ITER],
+            )
+            self._so.set_dparam(
+                sn.params.SICONOS_DPARAM_TOL,
+                solvopts.dparam[sn.params.SICONOS_DPARAM_TOL],
+            )
+        elif solvopts is not None:
             self._so.create(solvopts.solverId)
             for i, v in enumerate(solvopts.iparam):
                 self._so.set_iparam(i, v)
@@ -829,8 +876,12 @@ class ExplicitDEMOSI(siconos_integrators.MoreauJeanOSI):
 TimeSteppingDirectProjection = Unimplemented
 
 FrictionContact = OSNSPB
+# the same: the problem with rolling resistance is solved when a contact
+# resists rolling (one_step_nonsmooth_problem::solve_rolling)
+RollingFrictionContact = OSNSPB
 # the same: the problem itself is chosen by the scheme of the integrator
 GlobalFrictionContact = OSNSPB
+GlobalRollingFrictionContact = OSNSPB
 
 
 class MechanicsIO(Stored):
@@ -863,7 +914,16 @@ class MechanicsIO(Stored):
         return self.handle().velocities(self._simulation.handle().current_step())
 
     def contactPoints(self, nsds, output_contact_index_set):
-        return self.handle().contact_points(self._simulation.handle().current_step())
+        points = self.handle().contact_points(self._simulation.handle().current_step())
+        # the rolling columns only if a law resists rolling: the cf table of
+        # the other runs is unchanged
+        return points[:, : self.contactPointsColumns()]
+
+    def contactPointsColumns(self):
+        """the columns of contactPoints: 25, 31 with rolling resistance (the
+        rolling rows of the relative velocity and of the reaction, two
+        3-vectors, see io::contact_points)"""
+        return 31 if NewtonImpactFrictionNSL.rolling_resistance else 25
 
     def contactInfo(self, nsds, output_contact_index_set):
         return self.handle().contact_info(self._simulation.handle().current_step())

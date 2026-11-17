@@ -52,7 +52,9 @@ struct fem : model::elastic_lagrangian_ds {
   using without_batch_bindings = void;
 };
 
-struct nslaw : model::newton_impact_friction {};
+// the law of every interaction, with rolling resistance (mu_r = 0: Coulomb
+// friction, the rolling rows are then left out of the problem)
+struct nslaw : model::newton_impact_rolling_friction {};
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
 using diskfsegment_r = collision::diskfsegment_r;

@@ -175,7 +175,7 @@
     "cf": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 26], "layout": ["t", "mu", "point_a[3]", "point_b[3]", "normal[3]", "reaction_global[3]",
                       "gap[3]", "relative_velocity[3]", "reaction_local[3]", "interaction_id",
                       "ds1", "ds2"],
-           "note": "variable width: MechanicsIO::contactPoints follows the data size"},
+           "note": "variable width: MechanicsIO::contactPoints follows the data size; 32 columns with rolling resistance (vnative): rolling_velocity[3], reaction_rolling[3] appended, the rolling rows of the relative velocity and of reaction_local, the second and third components zero in 2D"},
     "cf_info": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 5], "layout": ["t", "interaction_id", "ds1", "ds2", "static_body"]},
     "cf_work": {"opt": true, "dtype": "f4", "by": "step_index", "shape": [null, 8], "layout": ["t", "interaction_id", "w_n", "w_t", "w_n_theta", "w_t_theta",
                            "status", "w_n_pos"]},

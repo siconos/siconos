@@ -151,6 +151,16 @@ struct time_stepping : item {
       //      resize(osi.lambda_vector_assembled(), ninter);
       //      resize(osi.ydot_vector_assembled(), ninter);
 
+      // with the rolling rows: the problem with rolling resistance
+      if constexpr (osi.with_rolling_friction()) {
+        if (osi.rolling_contacts()) {
+          self()->one_step_nonsmooth_problem().solve_rolling(
+              osi.w_matrix_assembled(), osi.q_nsp_vector_assembled(),
+              osi.lambda_vector_assembled(), osi.ydot_vector_assembled(),
+              osi.mu_vector_assembled(), osi.mu_r_vector_assembled());
+          return;
+        }
+      }
       self()->one_step_nonsmooth_problem().template solve<Formulation>(
           osi.w_matrix_assembled(),       // M
           osi.q_nsp_vector_assembled(),   // q

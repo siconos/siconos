@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <array>
 #include <functional>
 #include <map>
 #include <stdexcept>
@@ -50,6 +51,14 @@ struct io : item {
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
+  // the columns of a contact (contact_points): 25, and with a law with
+  // rolling resistance two 3-vectors more, the rolling rows of ydot and
+  // lambda (the relative angular velocity and the rolling moment), the
+  // second and third components zero in 2D
+  static constexpr bool with_rolling_rows =
+      std::derived_from<typename interaction::nslaw, model::newton_impact_rolling_friction>;
+  static constexpr int contact_columns = with_rolling_rows ? 31 : 25;
+
   using attributes = gather<
       attribute<"osi", some::item_ref<osi>>,
       attribute<"disp_info", some::map<some::indice, some::unbounded_vector<some::scalar>>>,
@@ -61,8 +70,8 @@ struct io : item {
                 some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
       attribute<"vel_info",
                 some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
-      attribute<"cp_info", some::unbounded_collection<
-                               some::vector<some::scalar, some::indice_value<25>>>>,
+      attribute<"cp_info", some::unbounded_collection<some::vector<
+                               some::scalar, some::indice_value<contact_columns>>>>,
       attribute<"co_info",
                 some::unbounded_collection<some::vector<some::scalar, some::indice_value<4>>>>,
       attribute<"work_info", some::unbounded_collection<
@@ -215,6 +224,23 @@ struct io : item {
           attr<"vel_info">(*self()).data()->size());
     }
 
+    // a row of contact_points: its 25 columns, then the rolling rows of ydot
+    // and lambda with a law with rolling resistance
+    void add_contact_point(const auto& columns, const auto& ydot, const auto& lambda) {
+      auto& rows = attr<"cp_info">(*self());
+      rows.emplace_back();
+      auto& row = rows.back();
+      for (std::size_t i = 0; i < columns.size(); ++i) row[i] = columns[i];
+      if constexpr (with_rolling_rows) {
+        row[25] = ydot[2];
+        row[26] = 0.;
+        row[27] = 0.;
+        row[28] = lambda[2];
+        row[29] = 0.;
+        row[30] = 0.;
+      }
+    }
+
     decltype(auto) contact_points(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
@@ -343,31 +369,32 @@ struct io : item {
           auto id_ds2 = storage::prop<"id", topology>(hds2);
 
           /* disk / segment */
-          attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
-                                              cb[0],
-                                              cb[1],
-                                              0. /* 2D */,
-                                              ca[0],
-                                              ca[1],
-                                              0. /* 2D */,
-                                              -cn[0],
-                                              -cn[1],
-                                              0. /* 2D */,
-                                              p0[0],
-                                              p0[1],
-                                              0. /* 2D */,
-                                              y[0],
-                                              y[1],
-                                              0. /* 2D */,
-                                              ydot[0],
-                                              ydot[1],
-                                              0. /* 2D */,
-                                              lambda[0],
-                                              lambda[1],
-                                              0. /* 2D */,
-                                              (scalar)k,
-                                              (scalar)id_ds1,
-                                              (scalar)id_ds2});
+          add_contact_point(std::array<scalar, 25>{storage::make_handle(data, nslaw).mu(),
+                                                   cb[0],
+                                                   cb[1],
+                                                   0. /* 2D */,
+                                                   ca[0],
+                                                   ca[1],
+                                                   0. /* 2D */,
+                                                   -cn[0],
+                                                   -cn[1],
+                                                   0. /* 2D */,
+                                                   p0[0],
+                                                   p0[1],
+                                                   0. /* 2D */,
+                                                   y[0],
+                                                   y[1],
+                                                   0. /* 2D */,
+                                                   ydot[0],
+                                                   ydot[1],
+                                                   0. /* 2D */,
+                                                   lambda[0],
+                                                   lambda[1],
+                                                   0. /* 2D */,
+                                                   (scalar)k,
+                                                   (scalar)id_ds1,
+                                                   (scalar)id_ds2},
+                            ydot, lambda);
           k++;
         }
       }
@@ -435,37 +462,38 @@ struct io : item {
             auto id_ds1 = storage::prop<"id", topology>(hds1);
             auto id_ds2 = storage::prop<"id", topology>(hds2);
 
-            attr<"cp_info">(*self()).push_back({storage::make_handle(data, nslaw).mu(),
-                                                cb[0],
-                                                cb[1],
-                                                0. /* 2D */,
-                                                ca[0],
-                                                ca[1],
-                                                0. /* 2D */,
-                                                -cn[0],
-                                                -cn[1],
-                                                0. /* 2D */,
-                                                p0[0],
-                                                p0[1],
-                                                0. /* 2D */,
-                                                y[0],
-                                                y[1],
-                                                0. /* 2D */,
-                                                ydot[0],
-                                                ydot[1],
-                                                0. /* 2D */,
-                                                lambda[0],
-                                                lambda[1],
-                                                0. /* 2D */,
-                                                (scalar)k,
-                                                (scalar)id_ds1,
-                                                (scalar)id_ds2});
+            add_contact_point(std::array<scalar, 25>{storage::make_handle(data, nslaw).mu(),
+                                                     cb[0],
+                                                     cb[1],
+                                                     0. /* 2D */,
+                                                     ca[0],
+                                                     ca[1],
+                                                     0. /* 2D */,
+                                                     -cn[0],
+                                                     -cn[1],
+                                                     0. /* 2D */,
+                                                     p0[0],
+                                                     p0[1],
+                                                     0. /* 2D */,
+                                                     y[0],
+                                                     y[1],
+                                                     0. /* 2D */,
+                                                     ydot[0],
+                                                     ydot[1],
+                                                     0. /* 2D */,
+                                                     lambda[0],
+                                                     lambda[1],
+                                                     0. /* 2D */,
+                                                     (scalar)k,
+                                                     (scalar)id_ds1,
+                                                     (scalar)id_ds2},
+                              ydot, lambda);
             k++;
           }
         }
       }
 
-      return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 25>>(
+      return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, contact_columns>>(
           attr<"cp_info">(*self()).data()->data(), attr<"cp_info">(*self()).size(),
           attr<"cp_info">(*self()).data()->size());
     }

@@ -2967,15 +2967,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if initial and self._vtkhdf_contacts_writer is not None:
                 self._vtkhdf_contacts_writer.write_step(
                     self.current_time(),
-                    *siconos.io.vtkhdf.contacts_point_data(np.zeros((0, 25))),
+                    *siconos.io.vtkhdf.contacts_point_data(
+                        np.zeros((0, self._contact_points_columns()))
+                    ),
                 )
+
+    def _contact_points_columns(self):
+        """the columns of the contact points of the backend: 25, 31 with the
+        rolling columns (see "cf" in format_v1.json)"""
+        columns = getattr(self._io, "contactPointsColumns", None)
+        return columns() if columns is not None else 25
 
     def output_contact_forces(self):
         """
         Outputs contact forces
         _output_contact_index_set default value is 1.
         """
-        rows = np.zeros((0, 26))
+        rows = np.zeros((0, 1 + self._contact_points_columns()))
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
 
@@ -3026,6 +3034,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     rows = np.concatenate((times, new_contact_points), axis=1)
 
             if rows.shape[0] > 0 and self._output_format != "vtkhdf":
+                if self._format_adaptor["cf"].shape[1] != rows.shape[1]:
+                    # the rolling columns: the table is still empty
+                    self._format_adaptor.set_columns("cf", rows.shape[1])
                 current_line = self._format_adaptor["cf"].shape[0]
                 # Increase the number of lines in cf_data
                 # (h5 dataset with chunks)

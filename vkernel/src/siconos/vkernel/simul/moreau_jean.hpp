@@ -90,7 +90,8 @@ struct apply_fremond_impact_law
 // the free output derivative of an active interaction in q of the problem
 struct assemble_free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
   static void apply(auto& p, auto row, const auto& ydot_next) {
-    set_value(p.vector, row, ydot_next);
+    set_value(p.vector, row,
+              contacts::assembled_rows<contacts::rows_of<decltype(p.vector)>()>(ydot_next));
   }
 };
 
@@ -144,8 +145,11 @@ struct apply_newton_impact_law
 struct assemble_free_velocity_output
     : stage<"Assemble q = H v_free, the free output derivatives"> {
   static void run(auto& c) {
-    c.kind.template run<assemble_free_output>(
-        c.step, block_vector{c.kind.lambda_view(c.integrator.q_nsp_vector_assembled())});
+    contacts::stages::with_assembled_rows(c, [&](auto rows) {
+      c.kind.template run<assemble_free_output>(
+          c.step,
+          block_vector{c.kind.lambda_view(c.integrator.q_nsp_vector_assembled(), rows)});
+    });
   }
 };
 
@@ -174,19 +178,21 @@ void delassus_of_rigid_systems(auto osi) {
   auto rigid_systems = std::get<0>(osi.systems());
   auto rigid_interactions = std::get<0>(osi.interactions());
 
-  auto tmp_matrix = rigid_interactions.transposed_h_matrix();
-  auto h_mat =
-      rigid_interactions.h_matrix_view(osi.h_matrix_assembled(), rigid_systems.ds_offset());
-  auto m_mat = rigid_systems.mass_matrix_view(osi.mass_matrix_assembled());
-  auto w_mat = rigid_interactions.w_matrix_view(osi.w_matrix_assembled());
+  rigid_interactions.with_assembled_rows(osi.rolling_contacts(), [&](auto rows) {
+    auto tmp_matrix = rigid_interactions.transposed_h_matrix(rows);
+    auto h_mat = rigid_interactions.h_matrix_view(osi.h_matrix_assembled(),
+                                                  rigid_systems.ds_offset(), rows);
+    auto m_mat = rigid_systems.mass_matrix_view(osi.mass_matrix_assembled());
+    auto w_mat = rigid_interactions.w_matrix_view(osi.w_matrix_assembled(), rows);
 
-  resize(tmp_matrix, size1(h_mat), size0(h_mat));
-  if constexpr (osi.with_k_matrix()) {
-    solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat, tmp_matrix);
-  } else {
-    solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
-  }
-  prod(h_mat, tmp_matrix, w_mat);
+    resize(tmp_matrix, size1(h_mat), size0(h_mat));
+    if constexpr (osi.with_k_matrix()) {
+      solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat, tmp_matrix);
+    } else {
+      solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+    }
+    prod(h_mat, tmp_matrix, w_mat);
+  });
 }
 
 // W = H A^-1 H^T
