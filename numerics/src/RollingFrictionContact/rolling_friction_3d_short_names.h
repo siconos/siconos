@@ -53,6 +53,7 @@
 #define RFC2D_OC_PROJ SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone
 #define RFC2D_OC_PROJ_LI \
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration
+#define RFC2D_OC_ENUM SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM
 
 /* ===========================================================================
  * Global Rolling Friction Contact 3D Solvers (GRFC3D_*)

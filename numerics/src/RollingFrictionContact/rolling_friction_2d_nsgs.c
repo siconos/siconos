@@ -31,6 +31,7 @@
 #include "numerics_verbose.h"                         // for numerics_printf, numer...
 #include "rolling_fc_Solvers.h"                       // for RollingComputeErrorPtr
 #include "rolling_friction_2d_compute_error.h"        // for rolling_friction_3d_compute_e...
+#include "rolling_friction_2d_enum.h"                 // for rolling_friction_2d_enum_solve
 #include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_3d_local_pro...
 #include "rolling_friction_2d_projection.h"           // for rolling_friction_3d_projectio...
 #include "rolling_friction_3d_short_names.h"
@@ -97,6 +98,14 @@ int rolling_friction_2d_nsgs_initialize_local_solver(
       *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_friction_2d_projection_free;
       *computeError = &rolling_friction_2d_compute_error;
       rolling_friction_2d_projection_initialize(problem, localproblem);
+      break;
+    }
+    case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM: {
+      *solve = &rolling_friction_2d_enum_solve;
+      *update = &rolling_friction_2d_enum_update;
+      *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_friction_2d_enum_free;
+      *computeError = &rolling_friction_2d_compute_error;
+      rolling_friction_2d_enum_initialize(problem, localproblem, localsolver_options);
       break;
     }
     default: {

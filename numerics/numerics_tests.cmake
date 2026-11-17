@@ -359,6 +359,10 @@ if(WITH_TESTING)
   # ---------------------------------------------------
 
   begin_tests(src/RollingFrictionContact/test DEPS "SuiteSparse::CXSparse;externals")
+  # 2D: the projection on the cone, one contact (known answers, random), NSGS
+  new_test(NAME rfc2d_projection SOURCES test_rfc2d_projection.c)
+  new_test(NAME rfc2d_onecontact SOURCES test_rfc2d_onecontact.c)
+  new_test(NAME rfc2d_nsgs SOURCES test_rfc2d_nsgs.c)
   new_tests_collection(
     DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION
     EXTRA_SOURCES data_collection_rfc3d.c test_first_order_rfc3d_1.c )

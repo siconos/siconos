@@ -1143,6 +1143,9 @@ void wrap_friction_contact(py::module_& m, py::module_& params, py::module_& sol
              ROLLING_FRICTION_SOLVER::
                  SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration,
              "2D Rolling friction one contact Projection on Cone with local iteration")
+      .value("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM",
+             ROLLING_FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM,
+             "2D Rolling friction one contact enumeration of the cases (exact)")
 
       // Global Rolling Friction solvers for 3D problems
       .value("SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR",

@@ -89,6 +89,8 @@ enum ROLLING_FRICTION_SOLVER {
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone = 4001,
   /** Projection on cone with local iteration for 2D rolling friction */
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002,
+  /** Enumeration of the cases of one contact for 2D rolling friction (exact) */
+  SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM = 4003,
 
   /* -----------------------------------------------------------------------
    * Global Rolling Friction solvers (IDs 5000-5999)
