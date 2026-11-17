@@ -64,8 +64,10 @@ void siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(
   (*jacobianhOver_q_view_)(1, 2) = lever_arm.x() * tangent.y() - lever_arm.y() * tangent.x();
 
   jacobianhOver_q_view_->row(2).setZero();
+  (*jacobianhOver_q_view_)(2, 2) = 1.0;
 
   if (q.size() == 6) {
+    (*jacobianhOver_q_view_)(2, 5) = -1.0;
     lever_arm << contactPoint1_.x() - q(3), contactPoint1_.y() - q(4);
 
     jacobianhOver_q_view_->row(0).segment(3, 2) = -nc_;
