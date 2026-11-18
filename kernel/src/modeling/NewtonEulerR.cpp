@@ -127,17 +127,23 @@ void siconos::modeling::NewtonEulerR::setConstanteVector(
 
 void siconos::modeling::NewtonEulerR::setComputeH_NE_dotFunction(
     const siconos::modeling::func_prototypes::FunctionBVBV_M& func) {
-  // Ensure that memory is properly allocated for hmatrix_
-  hasH_NE_dot_ = true;
+  // H_NE_dot_ is allocated in initialize, or at first use if the function is set later.
   computeH_NE_dot_ = func;
+}
+
+void siconos::modeling::NewtonEulerR::allocateH_NE_dot_() {
+  if (!H_NE_dot_) {
+    assert(H_NE_view_ && "NewtonEulerR: H_NE must be allocated before H_NE_dot");
+    H_NE_dot_ = std::make_shared<siconos::algebra::SiconosMatrix>(H_NE_view_->rows(),
+                                                                  H_NE_view_->cols());
+    H_NE_dot_->setZero();
+  }
 }
 
 void siconos::modeling::NewtonEulerR::computeH_NE_dot(
     const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
   if (computeH_NE_dot_) {
-    // in that case, internal_storage must have been allocated by
-    // setCompute... call
-    assert(H_NE_dot_);
+    allocateH_NE_dot_();
     computeH_NE_dot_(q, qdot, *H_NE_dot_);
   }
 }
@@ -275,59 +281,38 @@ void siconos::modeling::NewtonEulerR::computeJach(double time, Interaction& inte
 void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
     double time, Interaction& inter, std::shared_ptr<DynamicalSystem> ds1,
     std::shared_ptr<DynamicalSystem> ds2) {
-  DEBUG_PRINT(
-      "siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms\n");
+
+  if (!computeH_NE_dot_)
+    THROW_EXCEPTION(
+        "NewtonEulerR::computeSecondOrderTimeDerivativeTerms: no function to compute "
+        "H_NE_dot, call setComputeH_NE_dotFunction.");
 
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  // Compute the time derivative of the Jacobian
-  // and the product of the time derivative of the Jacobian with dotq
-  // we assume that dotq is up to date !
-  DEBUG_EXPR(siconos::algebra::print(*ds_vars[siconos::tools::enum_to_index(ds_var::dotq)]);)
-  assert(computeH_NE_dot_);
-  computeH_NE_dot_(*ds_vars[siconos::tools::enum_to_index(ds_var::q0)],
-                   *ds_vars[siconos::tools::enum_to_index(ds_var::dotq)], *H_NE_dot_);
+  const auto& q = *ds_vars[siconos::tools::enum_to_index(ds_var::q0)];
+  const auto& dotq = *ds_vars[siconos::tools::enum_to_index(ds_var::dotq)];
+  const auto& v = *ds_vars[siconos::tools::enum_to_index(ds_var::velocity)];
 
-  if (secondOrderTimeDerivativeTerms_.size() != H_NE_dot_->rows()) {
-    secondOrderTimeDerivativeTerms_.resize(H_NE_dot_->rows());
-  }
-
+  // Jdot * dotq (dotq is assumed to be up to date)
+  allocateH_NE_dot_();
+  computeH_NE_dot_(q, dotq, *H_NE_dot_);
   DEBUG_EXPR(siconos::algebra::print(*H_NE_dot_););
+  secondOrderTimeDerivativeTerms_.resize(H_NE_dot_->rows());
+  siconos::algebra::matrixBlockVector_prod(*H_NE_dot_, dotq, secondOrderTimeDerivativeTerms_,
+                                           true);
 
-  // secondOrderTimeDerivativeTerms_ = H_NE_dot * dotq
-  siconos::algebra::matrixBlockVector_prod(
-      *H_NE_dot_, *ds_vars[siconos::tools::enum_to_index(ds_var::dotq)],
-      secondOrderTimeDerivativeTerms_, true);
+  // + J * Tdot * v, body by body
+  auto addJTdotv = [&](DynamicalSystem& ds, Eigen::Index body) {
+    auto& neds = dynamic_cast<NewtonEulerDS&>(ds);
+    neds.computeTdot();
+    secondOrderTimeDerivativeTerms_.noalias() +=
+        H_NE_view_->middleCols(7 * body, 7) * (neds.Tdot() * *v.vector(body));
+  };
+  addJTdotv(*ds1, 0);
+  if (inter.has2Bodies()) addJTdotv(*ds2, 1);
 
-  DEBUG_EXPR(siconos::algebra::print(*_secondOrderTimeDerivativeTerms));
-
-  // Compute the product of H and Tdot --> jachqTdot
-
-  auto ySize = inter.dimension();
-  auto qSize = inter.getSizeOfDS();
-  auto auxBloc = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, 7);
-
-  std::vector<std::size_t> dimIndex(2);
-  std::vector<std::size_t> startIndex(4);
-
-  // Temp buffer to save H.Tdot
-  siconos::algebra::SiconosMatrix jacobianhOver_q_prod_Tdot{ySize, qSize};
-  auto neds = std::dynamic_pointer_cast<NewtonEulerDS>(ds1);
-  neds->computeTdot();
-  // H.Tdot(q)
-  jacobianhOver_q_prod_Tdot.leftCols(6) = H_NE_view_->leftCols(7) * neds->Tdot();
-  if (ds2) {  // For second ds, if it exists
-    neds = std::dynamic_pointer_cast<NewtonEulerDS>(ds2);
-    neds->computeTdot();
-    jacobianhOver_q_prod_Tdot.rightCols(6) = H_NE_view_->rightCols(7) * neds->Tdot();
-  }
-
-  // compute the product of jachqTdot and v
-  siconos::algebra::matrixBlockVector_prod(
-      jacobianhOver_q_prod_Tdot, *ds_vars[siconos::tools::enum_to_index(ds_var::velocity)],
-      secondOrderTimeDerivativeTerms_, false);
-
-  DEBUG_EXPR(siconos::algebra::print(_secondOrderTimeDerivativeTerms));
-  DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
+  DEBUG_EXPR(siconos::algebra::print(secondOrderTimeDerivativeTerms_););
+  DEBUG_END("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms\n");
 }
 
 void siconos::modeling::NewtonEulerR::allocate_read_dynamical_systems_var_vectors(

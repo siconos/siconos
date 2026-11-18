@@ -23,69 +23,64 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-// #define NERI_DEBUG
-
-// #define NEFC3D_DEBUG
 //  #define DEBUG_NOCOLOR
 //  #define DEBUG_STDOUT
 //  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
-/*
-See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter
-'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local
-velocities'
-*/
-void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1) {
-#ifdef NEFC3D_DEBUG
-  printf("contact normal:\n");
-  siconos::algebra::print(nc_);
-  printf("point de contact :\n");
-  siconos::algebra::print(contactPoint1_);
-  printf("center of masse :\n");
-  siconos::algebra::print(q1);
-#endif
-  rotationAbsoluteToContactFrame_ << nc_.x(), nc_.y(), nc_.z();
 
-  const auto v = q1.head<3>() - contactPoint1_.head<3>();
-  NPG_buffer_ << 0.0, -v.z(), v.y(), v.z(), 0.0, -v.x(), -v.y(), v.x(), 0.0;
+namespace {
+/** \return the skew-symmetric matrix \f$ [a]_\times \f$ such that
+ *  \f$ [a]_\times b = a \times b \f$ */
+siconos::algebra::SiconosMatrix33 skew(const Eigen::Ref<const Eigen::Vector3d>& a) {
+  siconos::algebra::SiconosMatrix33 m;
+  m << 0.0, -a.z(), a.y(), a.z(), 0.0, -a.x(), -a.y(), a.x(), 0.0;
+  return m;
+}
+}  // namespace
 
-  siconos::geometry::computeRotationMatrix(q1, rotationBodyToAbsoluteFrame_);
-  H_NE_prod_T_->row(0).segment(0, 3) = rotationAbsoluteToContactFrame_;
-  H_NE_prod_T_->row(0).segment(3, 3) =
-      rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
-
-#ifdef NEFC3D_DEBUG
-  printf("NewtonEuler1DR jhqt\n");
-  siconos::algebra::print(*H_NE_prod_T_);
-#endif
+/* See the class documentation and DevNotes, chapter 'NewtonEulerR: computation of
+ * \nabla_q H', subsection 'Case FC3D: using the local frame local velocities'. */
+void siconos::modeling::NewtonEuler1DR::computeContactFrame_(bool withTangents) {
+  if (!withTangents) {
+    contactFrame_.row(0) = nc_;
+    return;
+  }
+  assert(std::abs(nc_.norm() - 1.0) < 1e-6 &&
+         "NewtonEuler1DR::computeContactFrame_: the normal vector is not a unit vector");
+  siconos::algebra::SiconosVector3 n = nc_, t1, t2;
+  if (!siconos::geometry::orthoBaseFromVector(n, t1, t2))
+    THROW_EXCEPTION(
+        "NewtonEuler1DR::computeContactFrame_: cannot build the contact frame from a zero "
+        "normal vector");
+  contactFrame_.row(0) = n;
+  contactFrame_.row(1) = t1;
+  contactFrame_.row(2) = t2;
 }
 
-void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2) {
-  NIcomputeJachqTFromContacts(q1);
-
-  const auto v = q2.head<3>() - contactPoint1_.head<3>();
-  NPG_buffer_ << 0.0, -v.z(), v.y(), v.z(), 0.0, -v.x(), -v.y(), v.x(), 0.0;
-
-  siconos::geometry::computeRotationMatrix(q2, rotationBodyToAbsoluteFrame_);
-
-  H_NE_prod_T_->row(0).segment(6, 3) = -rotationAbsoluteToContactFrame_;
-  H_NE_prod_T_->row(0).segment(9, 3) =
-      -rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
+void siconos::modeling::NewtonEuler1DR::computeContactVelocityJacobian_(
+    const siconos::algebra::BlockVector& q0, Eigen::Index nRows) {
+  const auto Rc = contactFrame_.topRows(nRows);
+  siconos::algebra::SiconosMatrix33 R;
+  for (Eigen::Index body = 0; body < static_cast<Eigen::Index>(q0.numberOfBlocks()); ++body) {
+    const auto& q = *q0.vector(body);
+    // body 1 contributes +R_c [I, [G1 - P]x R1], body 2 contributes -R_c [I, [G2 - P]x R2]
+    const double sign = (body == 0) ? 1.0 : -1.0;
+    siconos::geometry::computeRotationMatrix(q, R);
+    H_NE_prod_T_->block(0, 6 * body, nRows, 3) = sign * Rc;
+    H_NE_prod_T_->block(0, 6 * body + 3, nRows, 3) =
+        sign * Rc * skew(q.head<3>() - contactPoint1_) * R;
+  }
+  DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
 }
 
 void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
-  // proj_with_q  jacobianhOver_q_Proj =
-  // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->rows(),jacobianhOver_q_->cols()));
   auto qSize = 7;
   if (inter.has2Bodies()) qSize *= 2;
 
-  // H_NE_internal_storage_ = std::make_unique<std::vector<double>>(qSize);
   H_NE_internal_storage_.resize(1, qSize);
   H_NE_view_ =
       std::make_shared<siconos::algebra::MapType>(H_NE_internal_storage_.data(), 1, qSize);
@@ -163,7 +158,7 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
     }
   }
 
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
+  DEBUG_EXPR(siconos::algebra::print(*H_NE_view_););
   DEBUG_END(
       "siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q(double time, Interaction& "
       "inter, "
@@ -176,11 +171,8 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(
       "siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n")
 
-  if (q0.numberOfBlocks() > 1) {
-    NIcomputeJachqTFromContacts(*q0.vector(0), *q0.vector(1));
-  } else {
-    NIcomputeJachqTFromContacts(*q0.vector(0));
-  }
+  computeContactFrame_(false);
+  computeContactVelocityJacobian_(q0, 1);
 
   DEBUG_END(
       "siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(Interaction& inter, "
@@ -194,7 +186,7 @@ double siconos::modeling::NewtonEuler1DR::distance() const {
 
 void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
     double time, const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.

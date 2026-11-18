@@ -16,147 +16,222 @@
  * limitations under the License.
  */
 /*! \file NewtonEuler1DR.hpp
-
+ *  \brief Contact relation between Newton-Euler bodies: normal relative velocity.
  */
-#ifndef NEWTONEULERIMPACT_H
-#define NEWTONEULERIMPACT_H
+#ifndef NEWTONEULER1DR_HPP
+#define NEWTONEULER1DR_HPP
 
 #include "NewtonEulerR.hpp"
 #include "SiconosVector.hpp"
 
 namespace siconos::modeling {
-/**
-   This class is an interface for a relation with impact.  It
-   implements the computation of the jacoboian of h from the points of
-   contacts and the normal.  Use this class consists in overloading
-   the method computeh, by setting the member pc1, pc2, nc and y.  The
-   matrix jachq is used both for the building of the OSNSP (with T)
-   and for the predictor of activation of deactivation of the Interaction.
+/** Unilateral contact between body 1 and body 2 (or body 1 and a fixed obstacle):
+  normal component of the relative velocity at the contact point.
 
+  This class is also the base of the contact relations NewtonEuler3DR (with friction)
+  and NewtonEulerVelocityAngularVelocityR (with friction and rolling resistance), which
+  share the geometry and the notation below. See NewtonEulerR for the notation of the
+  bodies (\f$ q_i, v_i, T \f$).
+
+  <b>Contact geometry.</b> The contact points \f$ P_1 \f$ (on body 1), \f$ P_2 \f$ (on
+  body 2) and the unit normal \f$ n \f$ are either set directly by a derived class
+  (contactPoint1_, contactPoint2_, nc_), or computed by computehFromRelativeContactPoints
+  from data attached to the bodies (setRelPc1, setRelPc2, setRelNc):
+  \f[
+    P_1 = x_{G_1} + R_1 P_1^{\mathrm{loc}}, \qquad
+    P_2 = x_{G_2} + R_2 P_2^{\mathrm{loc}}, \qquad
+    n = R_2\, n^{\mathrm{loc}},
+  \f]
+  where \f$ R_i = R(p_i) \f$ rotates body-frame vectors into the inertial frame. With a
+  single body, \f$ P_2 \f$ and \f$ n \f$ are given in the inertial frame. The normal
+  points from body 2 towards body 1, and the gap (distance()) is
+  \f[
+    g = \operatorname{sign}\bigl( n^\top (P_1 - P_2) \bigr)\, \| P_1 - P_2 \|,
+  \f]
+  positive when the bodies are separated.
+
+  <b>Relative velocity.</b> With \f$ \omega_i = R_i \Omega_i \f$ the angular velocities in
+  the inertial frame and \f$ P = P_1 \f$, the relative velocity of body 1 with respect to
+  body 2 at \f$ P \f$ is
+  \f[
+    u = v_{G_1} + \omega_1 \times (P - x_{G_1})
+      - v_{G_2} - \omega_2 \times (P - x_{G_2}).
+  \f]
+  Let \f$ [a]_\times \f$ be the skew-symmetric matrix such that
+  \f$ [a]_\times b = a \times b \f$, so that \f$ \omega \times (P - x_G) = [x_G - P]_\times\,
+  \omega \f$, and let \f$ R_c = [\, n \;\; t_1 \;\; t_2 \,]^\top \f$ be the rotation from the
+  inertial frame to the contact frame (\f$ t_1, t_2 \f$ from orthoBaseFromVector). Then
+  \f[
+    R_c\, u = \underbrace{R_c \begin{bmatrix}
+        I_3 & [x_{G_1} - P]_\times R_1 & -I_3 & -[x_{G_2} - P]_\times R_2
+      \end{bmatrix}}_{H_c(q)} v
+  \f]
+  (only the first two block columns with a single body).
+
+  <b>This relation</b> (\f$ m = 1 \f$):
+  \f[
+    y = g, \qquad \dot y = n^\top u = (H_c)_{1,:}\, v,
+  \f]
+  i.e. \f$ H \f$ (H_NE_prod_T) is the first row of \f$ H_c \f$, computed directly from the
+  geometry (computeH_NE_prod_T) rather than as \f$ J_h T \f$.
+
+  <b>Position Jacobian.</b> \f$ J_h \f$ (H_NE, used for the projection onto the constraints)
+  is computed by computeH_NE_ as
+  \f$ J_h = \nabla_q^\top \bigl[ n^\top (P_1(q_1) - P_2(q_2)) \bigr] \f$ with \f$ n \f$
+  held fixed. This is the exact gradient of \f$ g \f$ when \f$ P_1 - P_2 \f$ is parallel to
+  \f$ n \f$ (which is the case for points given by a contact detection), and then
+  \f$ J_h T v = n^\top u \f$. For the classes derived from NewtonEuler1DR, only the first
+  row of \f$ J_h \f$ is filled.
+
+  <b>Output.</b> computehFromRelativeContactPoints only updates the contact points and the
+  normal; the value of \f$ y \f$ itself (e.g. \f$ y_1 = g \f$) must be set by the derived
+  class, typically in computeh (see e.g. ContactR in mechanics).
+
+  \see DevNotes, chapter "NewtonEulerR: computation of \f$ \nabla_q H \f$".
 */
 class NewtonEuler1DR : public NewtonEulerR {
  protected:
   ACCEPT_SERIALIZATION(NewtonEuler1DR);
 
-  /** Current Contact Points, may be updated within Newton loop based
-   * on relPc1_, relPc2_. */
+  /** Contact point \f$ P_1 \f$ on body 1, in the inertial frame. Set by the derived class,
+   *  or computed from relPc1_ by computehFromRelativeContactPoints. */
   siconos::algebra::SiconosVector3 contactPoint1_ = siconos::algebra::SiconosVector3::Zero();
+
+  /** Contact point \f$ P_2 \f$ on body 2 (or on the obstacle), in the inertial frame. */
   siconos::algebra::SiconosVector3 contactPoint2_ = siconos::algebra::SiconosVector3::Zero();
 
-  /** Contact Points in coordinates relative to attached DS->q.  Set
-   * these if contactPoint1_/contactPoint2_ are not calculated within the Newton loop. */
+  /** \f$ P_1^{\mathrm{loc}} \f$: contact point 1 in the frame of body 1. */
   siconos::algebra::SiconosVector3 relPc1_ = siconos::algebra::SiconosVector3::Zero();
+
+  /** \f$ P_2^{\mathrm{loc}} \f$: contact point 2 in the frame of body 2 (in the inertial
+   *  frame if there is only one body). */
   siconos::algebra::SiconosVector3 relPc2_ = siconos::algebra::SiconosVector3::Zero();
 
-  /** Inward Normal at the contact.
-   *  \todo The meaning of "Inward" has to be explained carefully.
-   */
+  /** Unit normal \f$ n \f$ at the contact, in the inertial frame, pointing from body 2
+   *  (or the obstacle) towards body 1. */
   siconos::algebra::SiconosVector3 nc_ = siconos::algebra::SiconosVector3::Zero();
 
-  /** _Nc must be calculated relative to q2 */
+  /** \f$ n^{\mathrm{loc}} \f$: the normal in the frame of body 2 (in the inertial frame if
+   *  there is only one body). */
   siconos::algebra::SiconosVector3 relNc_ = siconos::algebra::SiconosVector3::Zero();
 
-  /** compute the jacobian of h w.r.t. q
+  /** Contact frame \f$ R_c \f$: rows \f$ n^\top, t_1^\top, t_2^\top \f$ (only the first row
+   *  is used by NewtonEuler1DR). Internal buffer. */
+  siconos::algebra::SiconosMatrix33 contactFrame_ = siconos::algebra::SiconosMatrix33::Zero();
+
+  /** compute \f$ J_h \f$ (first row): gradient of \f$ n^\top (P_1 - P_2) \f$ with respect
+   *  to \f$ q \f$, \f$ n \f$ being held fixed.
    *
    *  \param time current time
    *  \param inter the interaction using this relation
-   *  \param q0  q states vectors of the related the dynamical systems
+   *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                             const siconos::algebra::BlockVector& q0) override;
 
-  /** Cross product matrices that correspond the lever arm from
-   *  contact point to center of mass  - Internal buffer*/
-  siconos::algebra::SiconosMatrix33 NPG_buffer_ = siconos::algebra::SiconosMatrix33::Zero();
-
-  /** Matrix converting - Internal buffer*/
-  siconos::algebra::SiconosMatrix33 rotationBodyToAbsoluteFrame_ =
-      siconos::algebra::SiconosMatrix33::Zero();
-
- private:
-  /** Rotation matrix converting the absolute coordinate to the contact frame^
-   *  coordinate. This matrix contains the unit vector(s)of the contact frame in
-   *  row. Internal bufer.
+  /** compute the contact frame \f$ R_c \f$ (contactFrame_) from the normal \f$ n \f$.
+   *  Throws if \f$ n \f$ is zero.
+   *
+   *  \param withTangents if false, only the first row \f$ n^\top \f$ is set
    */
-  Eigen::RowVector3d rotationAbsoluteToContactFrame_ = Eigen::RowVector3d::Zero();
+  void computeContactFrame_(bool withTangents);
 
-  void NIcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1);
-  void NIcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
+  /** fill the first nRows rows of \f$ H \f$ (H_NE_prod_T_) with the first nRows rows of
+   *  \f$ H_c(q) = R_c [\, I_3 \;\; [x_{G_1} - P]_\times R_1 \;\; -I_3 \;\;
+   *  -[x_{G_2} - P]_\times R_2 \,] \f$, with \f$ P = P_1 \f$ and the current contactFrame_.
+   *
+   *  \param q0 coordinates \f$ q \f$ of the bodies of the interaction
+   *  \param nRows number of rows (1: normal, 3: normal and tangential)
+   */
+  void computeContactVelocityJacobian_(const siconos::algebra::BlockVector& q0,
+                                       Eigen::Index nRows);
 
  public:
   using NewtonEulerR::NewtonEulerR;
 
-  /** V.A. boolean _isOnCOntact ?? Why is it public members ?
-   *  seems parametrize the projection algorithm
-   *  the projection is done on the surface  \f$ y=0 \f$  or on  \f$ y \geq 0 \f$
-   */
+  /** Not used by the kernel (it was meant to select the projection onto
+   *  \f$ y = 0 \f$ or \f$ y \geq 0 \f$). Kept for compatibility. */
   bool _isOnContact = false;
 
   /** destructor
    */
   virtual ~NewtonEuler1DR() noexcept = default;
 
+  /** allocate \f$ J_h \f$ (1 row) and the operators of NewtonEulerR.
+   *
+   *  \param inter the interaction using this relation
+   */
   void initialize(Interaction& inter) override;
 
-  /** Default implementation consists in multiplying jachq and T (see
-   *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
-   *  contact point locations and the local frame at contact
+  /** compute \f$ H = n^\top [\, I_3 \;\; [x_{G_1} - P]_\times R_1 \;\; -I_3 \;\;
+   *  -[x_{G_2} - P]_\times R_2 \,] \f$ directly from the contact point and the normal
+   *  (instead of the product \f$ J_h T \f$).
    *
    *  \param inter interaction that owns the relation
-   *  \param q0 the block vector to the dynamical system position
+   *  \param q0 coordinates \f$ q \f$ of the bodies of the interaction
    */
   void computeH_NE_prod_T(const Interaction& inter,
                           const siconos::algebra::BlockVector& q0) override;
 
-  /**
-      to compute the output y = h(t,q,z) of the Relation
-      with the relative contact points
-      \param time current time value
-      \param[in] q1 generalized coordinates vector of the fist dynamical system involved
-      in the relation
-      \param[in] q2 generalized coordinates vector of the second dynamical system
-      involved in the relation
-      \param[in,out] y the resulting vector
+  /** update the contact points and the normal from the data attached to the bodies,
+   *  \f$ P_1 = x_{G_1} + R_1 P_1^{\mathrm{loc}} \f$, \f$ P_2 = x_{G_2} + R_2
+   *  P_2^{\mathrm{loc}} \f$, \f$ n = R_2 n^{\mathrm{loc}} \f$ (with one body, \f$ P_2 =
+   *  P_2^{\mathrm{loc}} \f$ and \f$ n = n^{\mathrm{loc}} \f$), then call
+   *  NewtonEulerR::computeh.
+   *
+   *  \warning NewtonEulerR::computeh computes \f$ y = J_h q + e \f$ with the current
+   *  \f$ J_h \f$; the caller must set the meaningful components of \f$ y \f$ (e.g.
+   *  \f$ y_1 = g \f$ with distance()).
+   *
+   *  \param time current time
+   *  \param[in] q1 coordinates of body 1
+   *  \param[in] q2 coordinates of body 2 (std::nullopt if there is only one body)
+   *  \param[in,out] y the output vector
    */
   void computehFromRelativeContactPoints(
       double time, const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** Return the distance between pc1 and pc, with sign according to normal */
+  /** \return the gap \f$ g = \operatorname{sign}(n^\top (P_1 - P_2))\, \|P_1 - P_2\| \f$,
+   *  positive when the bodies are separated */
   double distance() const;
 
+  /** \return the contact point \f$ P_1 \f$ on body 1 (inertial frame) */
   inline auto pc1() const {
     return siconos::algebra::ConstMapVector3Type(contactPoint1_.data(), 3);
   }
 
+  /** \return the contact point \f$ P_2 \f$ on body 2 (inertial frame) */
   inline const siconos::algebra::SiconosVector3& pc2() const { return contactPoint2_; }
 
+  /** \return the unit normal \f$ n \f$ (inertial frame), from body 2 towards body 1 */
   inline const siconos::algebra::SiconosVector3& nc() const { return nc_; }
 
+  /** \return \f$ P_1^{\mathrm{loc}} \f$, contact point 1 in the frame of body 1 */
   inline const siconos::algebra::SiconosVector3& relPc1() const { return relPc1_; }
+  /** \return \f$ P_2^{\mathrm{loc}} \f$, contact point 2 in the frame of body 2 */
   inline const siconos::algebra::SiconosVector3& relPc2() const { return relPc2_; }
+  /** \return \f$ n^{\mathrm{loc}} \f$, the normal in the frame of body 2 */
   inline const siconos::algebra::SiconosVector3& relNc() const { return relNc_; }
 
-  /** Set the coordinates of first contact point in ds1 frame.
-   *  It will be used to compute contactPoint1_ during computeh().
+  /** Set \f$ P_1^{\mathrm{loc}} \f$, the contact point 1 in the frame of body 1.
+   *  Used by computehFromRelativeContactPoints.
    *
    *  \param npc new coordinates
    */
   void setRelPc1(const siconos::algebra::SiconosVector3& npc) { relPc1_ = npc; };
 
-  /** Set the coordinates of second contact point in ds2 frame
-   *  It will be used to compute contactPoint2_ during computeh().
+  /** Set \f$ P_2^{\mathrm{loc}} \f$, the contact point 2 in the frame of body 2 (in the
+   *  inertial frame if there is only one body). Used by computehFromRelativeContactPoints.
    *
    *  \param npc new coordinates
    */
   void setRelPc2(const siconos::algebra::SiconosVector3& npc) { relPc2_ = npc; };
 
-  /** Set the coordinates of inside normal vector at the contact point in ds2
-   *  frame. It will be used to compute _Nc during computeh().
+  /** Set \f$ n^{\mathrm{loc}} \f$, the unit normal (from body 2 towards body 1) in the
+   *  frame of body 2 (in the inertial frame if there is only one body). Used by
+   *  computehFromRelativeContactPoints.
    *
    *  \param nnc new coordinates
    */
@@ -190,4 +265,4 @@ class NewtonEuler1DR : public NewtonEulerR {
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
-#endif
+#endif  // NEWTONEULER1DR_HPP
