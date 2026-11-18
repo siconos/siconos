@@ -78,6 +78,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testReadCreatesNoEntry);
   CPPUNIT_TEST(testRemovePastTheEnd);
   CPPUNIT_TEST(testPermuteChecks);
+  CPPUNIT_TEST(testPermuteRejectsNonBijection);
+  CPPUNIT_TEST(testRefInvalidOfItsOwnType);
   CPPUNIT_TEST(testRemoveRemapsRefs);
   CPPUNIT_TEST(testPermuteRemapsRefs);
   CPPUNIT_TEST(testRemoveManyRemapsRefs);
@@ -200,6 +202,39 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
     storage::permute<config::ball>(data, {1, 0});
     auto& qs = storage::attr_values<config::ball, "q">(data, 0);
     CPPUNIT_ASSERT_MESSAGE("swapped", qs[0](0) == 1. && qs[1](0) == 0.);
+  }
+
+  // storage::permute takes a permutation of the items, in every build: a
+  // duplicated index must be refused, not silently applied
+  void testPermuteRejectsNonBijection() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::data_t data;
+    storage::add<config::ball>(data);
+    storage::add<config::ball>(data);
+
+    CPPUNIT_ASSERT_THROW(storage::permute<config::ball>(data, {0, 0}), std::invalid_argument);
+  }
+
+  // a ref to a removed row becomes the invalid of its own index type, not a
+  // truncation of ref_remap::invalid (SIZE_MAX): with an indice narrower than
+  // size_t, valid() must still say no item
+  void testRefInvalidOfItsOwnType() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+    using small_ref = storage::index<config::ball, int>;
+
+    const auto kind = storage::kind_id<config::ball>::get();
+    const auto r = storage::ref_remap::swap_and_pop(0, 1);  // 0 dies, 1 -> 0
+
+    std::vector<small_ref> refs{small_ref(0), small_ref(1)};
+    storage::refs_detail::remap<storage::kind_id>(refs, kind, r);
+
+    CPPUNIT_ASSERT_MESSAGE("the moved ref follows its row", refs[1].value() == 0);
+    CPPUNIT_ASSERT_MESSAGE("the removed ref is the index type's invalid",
+                           refs[0].value() == small_ref::invalid);
+    CPPUNIT_ASSERT_MESSAGE("and valid() says it refers to no item", !refs[0].valid());
   }
 
   // interactions between balls: inter k links balls a[k] and b[k]

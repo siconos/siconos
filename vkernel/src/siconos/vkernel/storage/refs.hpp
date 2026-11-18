@@ -232,8 +232,19 @@ void remap(V& v, std::size_t kind, const ref_remap& r) {
   if constexpr (!holds_refs_v<v_t>) {
     return;
   } else if constexpr (index_like<v_t>) {
-    if (KindId<typename v_t::type>::get() == kind && v.value() != ref_remap::invalid) {
-      v.value() = static_cast<typename v_t::value_t>(r(v.value()));
+    if (KindId<typename v_t::type>::get() == kind) {
+      const std::size_t next = r(v.value());
+      if (next == ref_remap::invalid) {
+        // the invalid of the index's own value type, not a truncation of
+        // ref_remap::invalid: valid() must say no item for a narrow indice too
+        if constexpr (requires { v_t::invalid; }) {
+          v.value() = v_t::invalid;
+        } else {
+          v.value() = static_cast<typename v_t::value_t>(next);
+        }
+      } else {
+        v.value() = static_cast<typename v_t::value_t>(next);
+      }
     }
   } else if constexpr (is_variant<v_t>::value) {
     std::visit([&](auto& alt) { remap<KindId>(alt, kind, r); }, v);

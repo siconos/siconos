@@ -386,8 +386,9 @@ struct registry {
   }
 
   /// storage::permute: item k of Item becomes the item perm[k]. perm must be
-  /// a permutation of the items: its size is checked, its bijectivity in a
-  /// debug build only
+  /// a permutation of the items: its size and its bijectivity are checked in
+  /// every build (a wrong permutation would duplicate rows and rewrite the
+  /// refs with a non-bijective table)
   template <typename Item>
   void permute_item(const std::vector<std::size_t>& perm,
                     const std::vector<std::size_t>& inverse) {
@@ -396,11 +397,14 @@ struct registry {
       throw std::invalid_argument("storage::permute: " + std::to_string(perm.size()) +
                                   " indices for " + std::to_string(count) + " items");
     }
-#ifndef NDEBUG
-    for (std::size_t k = 0; k < perm.size(); ++k) {
-      assert(perm[k] < perm.size() && inverse[perm[k]] == k && "not a permutation");
+    if (inverse.size() != perm.size()) [[unlikely]] {
+      throw std::invalid_argument("storage::permute: the inverse is not of the same size");
     }
-#endif
+    for (std::size_t k = 0; k < perm.size(); ++k) {
+      if (perm[k] >= perm.size() || inverse[perm[k]] != k) [[unlikely]] {
+        throw std::invalid_argument("storage::permute: not a permutation");
+      }
+    }
     for (std::size_t id : registered_kind<Item>()) slots[id]->permute(perm, inverse);
     remap_refs<Item>(ref_remap::table(inverse));
   }
