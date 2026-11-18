@@ -87,7 +87,7 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
   rotationAbsoluteToContactFrame_.row(1) = t1;
   rotationAbsoluteToContactFrame_.row(2) = t2;
   DEBUG_PRINT("_rotationAbsoluteToContactFrame:\n");
-  DEBUG_EXPR(siconos::algebra::print(*_rotationAbsoluteToContactFrame););
+  DEBUG_EXPR(siconos::algebra::print(rotationAbsoluteToContactFrame_););
 
   // 3 - Construction of the lever arm matrix in  the absolute frame
   const auto v = q1.head<3>() - contactPoint1_.head<3>();
@@ -105,7 +105,7 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
 
   // 4 - Compute the rotation matrix from the body-fixed frame to the absolute frame
   siconos::geometry::computeRotationMatrix(q1, rotationBodyToAbsoluteFrame_);
-  DEBUG_EXPR(siconos::algebra::print(*_rotationBodyToAbsoluteFrame););
+  DEBUG_EXPR(siconos::algebra::print(rotationBodyToAbsoluteFrame_););
 
   // 5 - compose the body lever arm matrix with the rotation matrix, rotate the resulting
   // matrix in the contact frame and fill the Jacobian
@@ -116,7 +116,7 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
   H_NE_prod_T_->block(3, 3, 2, 3) =
       (rotationAbsoluteToContactFrame_ * rotationBodyToAbsoluteFrame_).bottomRows(2);
 
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
+  DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
   DEBUG_END(
       "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts("
       "std::shared_ptr<"
@@ -136,11 +136,11 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTF
   siconos::geometry::computeRotationMatrix(q2, rotationBodyToAbsoluteFrame_);
   H_NE_prod_T_->block(0, 6, 3, 3) = -rotationAbsoluteToContactFrame_;
   H_NE_prod_T_->block(0, 9, 3, 3) =
-      rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
-  H_NE_prod_T_->block(3, 3, 2, 3) =
+      -rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
+  H_NE_prod_T_->block(3, 9, 2, 3) =
       -(rotationAbsoluteToContactFrame_ * rotationBodyToAbsoluteFrame_).bottomRows(2);
 
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_T););
+  DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
 
   DEBUG_END(
       "siconos::modeling::NewtonEulerVelocityAngularVelocityR::RFC3DcomputeJachqTFromContacts("

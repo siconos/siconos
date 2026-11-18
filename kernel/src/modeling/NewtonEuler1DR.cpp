@@ -60,7 +60,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 
 #ifdef NEFC3D_DEBUG
   printf("NewtonEuler1DR jhqt\n");
-  siconos::algebra::print(*jacobianhOver_q_T);
+  siconos::algebra::print(*H_NE_prod_T_);
 #endif
 }
 
@@ -74,7 +74,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 
   siconos::geometry::computeRotationMatrix(q2, rotationBodyToAbsoluteFrame_);
 
-  H_NE_prod_T_->row(0).segment(6, 3) = rotationAbsoluteToContactFrame_;
+  H_NE_prod_T_->row(0).segment(6, 3) = -rotationAbsoluteToContactFrame_;
   H_NE_prod_T_->row(0).segment(9, 3) =
       -rotationAbsoluteToContactFrame_ * NPG_buffer_ * rotationBodyToAbsoluteFrame_;
 }
