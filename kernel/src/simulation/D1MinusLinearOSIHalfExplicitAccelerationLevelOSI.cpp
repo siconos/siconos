@@ -52,6 +52,13 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
   double h = sim->timeStep();               // time step length
   auto allOSNS = sim->oneStepNSProblems();  // all OSNSP
   auto topo = sim->nonSmoothDynamicalSystem()->topology();
+
+  // The index sets I^+_k must be computed with the state at the beginning of the step
+  // (q_k, v^+_k), i.e. after the impact of the previous step: the outputs y have been
+  // updated at the end of the previous step (update(1)), but the index sets were last
+  // updated before the impact (decision of the strategy, below). Without this, contacts
+  // that separate after an impact (g <= 0, dot g > 0) stay in I_2 and get a contact force.
+  if (!allOSNS->empty()) sim->updateIndexSets();
   auto indexSet2 = topo->indexSet(2);
 
   /**************************************************************************************************************
@@ -824,7 +831,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     /* Active for impulses calculations? Contacts that are closed */
     double y = (*(inter->y(0)))(0);  // current position
     DEBUG_PRINTF("y= %24.16e\n", y);
-    return (y <= DEFAULT_TOL_D1MINUS);
+    return (y <= _activeSetTolerance);
   } else if (i == 2) {
     DEBUG_PRINT(" level == 2\n");
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
@@ -836,9 +843,9 @@ bool siconos::integrators::D1MinusLinearOSI::
     auto yDot = (*(inter->y(1)))(0);  // current position
     DEBUG_PRINTF("y= %24.16e\n", y);
     DEBUG_PRINTF("yDot= %24.16e\n", yDot);
-    DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) << std::endl;);
-    DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) << std::endl;);
-    return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
+    DEBUG_EXPR(std::cout << std::boolalpha << (y <= _activeSetTolerance) << std::endl;);
+    DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= _activeSetTolerance) << std::endl;);
+    return (y <= _activeSetTolerance) && (yDot <= _activeSetTolerance);
   } else if (i == 3) {
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
@@ -852,7 +859,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     DEBUG_PRINTF("y_k= %24.16e\n", y_k);
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
-    return (y <= DEFAULT_TOL_D1MINUS && y_k > DEFAULT_TOL_D1MINUS);
+    return (y <= _activeSetTolerance && y_k > _activeSetTolerance);
   } else
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::"

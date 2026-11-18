@@ -21,6 +21,7 @@
 #include <cassert>
 #include <functional>
 
+#include "D1MinusLinearOSI.hpp"
 #include "EventsManager.hpp"
 #include "OneStepIntegrator.hpp"
 // #include "Topology.hpp"
@@ -212,7 +213,14 @@ void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   //   }
   // }
 
-  if (!_allNSProblems->empty())
+  // Solve the impact problem, unless all the OSI ask to skip it in this step
+  // (D1MinusLinearOSI::ImpactDetection::closing_contacts and no closing contact).
+  bool solveImpact = false;
+  for (auto osi : *_allOSI) {
+    auto d1minus = std::dynamic_pointer_cast<siconos::integrators::D1MinusLinearOSI>(osi);
+    if (!d1minus || d1minus->solveImpactProblem()) solveImpact = true;
+  }
+  if (!_allNSProblems->empty() && solveImpact)
     computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_VELOCITY);
 
   DEBUG_EXPR(if (nsds->topology()->indexSet(1)->size() > 0) siconos::algebra::print(
