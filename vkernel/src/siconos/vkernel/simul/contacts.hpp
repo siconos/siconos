@@ -156,9 +156,9 @@ constexpr int rows_of() {
 }
 
 // a contact of a law with rolling resistance resists rolling if its relation
-// writes the rolling rows of its jacobians (the relations of the disks):
-// the others (polytopes, FEM meshes) have none, a rolling resistance there
-// would be a multiplier without effect
+// writes the rolling rows of its jacobians (the relations of the disks and
+// of the polytopes): the others (FEM self contact) have none, a rolling
+// resistance there would be a multiplier without effect
 template <int RollingRows>
 bool with_rolling_rows(const auto& h1, const auto& h2) {
   return !(h1.bottomRows(RollingRows).isZero(0) && h2.bottomRows(RollingRows).isZero(0));

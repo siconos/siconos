@@ -120,6 +120,12 @@ struct polytopedisk_r : item, model::relation2, model::any_lagrangian_relation {
       g2(1, 0) = tx;
       g2(1, 1) = ty;
       g2(1, 2) = tx * za2x + ty * za2y;
+
+      // the rolling row of a law with rolling resistance: omega1 - omega2
+      if constexpr (std::decay_t<decltype(g1)>::RowsAtCompileTime > 2) {
+        g1(2, 2) = 1.;
+        g2(2, 2) = -1.;
+      }
     }
   };
 };

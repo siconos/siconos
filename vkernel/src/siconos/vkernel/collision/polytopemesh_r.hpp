@@ -138,6 +138,13 @@ struct polytopemesh_r : item, mesh_relation, model::relation2, model::any_lagran
       g2(1, 1) = (1 - t) * nx;
       g2(1, 2) = -t * ny;
       g2(1, 3) = t * nx;
+
+      // the rolling row of a law with rolling resistance: the angular
+      // velocity of the polytope only, the nodes of a mesh have no
+      // rotational dof
+      if constexpr (std::decay_t<decltype(g1)>::RowsAtCompileTime > 2) {
+        g1(2, 2) = 1.;
+      }
     }
   };
 };

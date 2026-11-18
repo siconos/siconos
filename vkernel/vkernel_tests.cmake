@@ -284,6 +284,13 @@ if(WITH_TESTING)
     target_link_libraries(disk_line_rolling_aos PRIVATE kernel numerics)
     new_python_test(NAME vkernel_python_rolling_friction_aos SCRIPT
                     rolling_friction_aos.py ARGS $<TARGET_FILE:disk_line_rolling_aos>)
+    # the AOS kernel reference of rolling_friction_polytope_aos.py
+    add_executable(polygon_line_rolling_aos
+                   src/siconos/vkernel/tests/polygon_line_rolling_aos.cpp)
+    target_link_libraries(polygon_line_rolling_aos PRIVATE kernel numerics)
+    new_python_test(NAME vkernel_python_rolling_friction_polytope_aos SCRIPT
+                    rolling_friction_polytope_aos.py ARGS
+                    $<TARGET_FILE:polygon_line_rolling_aos>)
     new_python_test(NAME vkernel_python_sliding_square_schemes SCRIPT sliding_square_schemes.py)
     new_python_test(NAME vkernel_python_add_objects SCRIPT test_add_objects.py PYTEST)
     new_python_test(NAME vkernel_python_contact_work SCRIPT test_contact_work.py PYTEST)

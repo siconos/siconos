@@ -101,6 +101,12 @@ struct polytopefsegment_r : item, model::relation1, model::any_lagrangian_relati
       g1(1, 0) = -tx;
       g1(1, 1) = -ty;
       g1(1, 2) = -(tx * za1x + ty * za1y);
+
+      // the rolling row of a law with rolling resistance: omega1, the
+      // fixed segment does not turn
+      if constexpr (std::decay_t<decltype(g1)>::RowsAtCompileTime > 2) {
+        g1(2, 2) = 1.;
+      }
     }
   };
 };
