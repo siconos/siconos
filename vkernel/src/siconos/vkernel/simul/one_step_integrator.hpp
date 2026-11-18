@@ -155,11 +155,18 @@ struct one_step_integrator {
       using default_interface<Handle>::self;
 
       void __init__() {
-        auto add = [&]<typename Kind>(Kind kind) {
-          kind = storage::add<typename Kind::type>(self()->data());
+        // through references: the kinds are stored in the integrator, a copy
+        // taken per element would leave their refs at their default value
+        auto add_kinds = [&]<typename Kinds>(Kinds& kinds) {
+          std::apply(
+              [&]<typename... Kind>(Kind&... kind) {
+                ((kind = storage::add<typename std::decay_t<Kind>::type>(self()->data())),
+                 ...);
+              },
+              kinds);
         };
-        mp::for_each(systems(), add);
-        mp::for_each(interactions(), add);
+        add_kinds(storage::attr<"systems">(*self()));
+        add_kinds(storage::attr<"interactions">(*self()));
 
         // the gap at the middle of the step for the active set
         gamma() = 0.5;
