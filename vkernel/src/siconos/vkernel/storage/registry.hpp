@@ -59,6 +59,11 @@ struct column_base {
   virtual void permute(const std::vector<std::size_t>& perm,
                        const std::vector<std::size_t>& inverse) = 0;
 
+  /// whether storage::add can append an item to this column: a per-item
+  /// storage that cannot grow would hold every item in the same slot, and a
+  /// column that numbers no item at all gives the item no row
+  virtual bool can_push_items() const = 0;
+
   /// number of items stored, or no_index for columns that do not number them
   virtual std::size_t item_count() const = 0;
 
@@ -126,6 +131,16 @@ struct column final : column_base {
     refs_detail::remap<kind_id>(value, kind, r);
   }
 
+  bool can_push_items() const override {
+    if constexpr (registry_detail::is_sparse_set<Memory>) {
+      return true;  // sparse: no row to append, and none to count
+    } else {
+      // a fixed-size per-item storage cannot hold more than the items it
+      // already has (see storage::add)
+      return match::push_back<typename Memory::value_type>;
+    }
+  }
+
   std::size_t item_count() const override {
     if constexpr (registry_detail::is_sparse_set<Memory>) {
       return no_index;
@@ -134,7 +149,7 @@ struct column final : column_base {
       if constexpr (match::push_back<storage_t>) {
         return value.empty() ? 0 : std::size(value[0]);
       } else {
-        return 1;
+        return no_index;  // a storage that cannot grow counts no item
       }
     }
   }
@@ -313,12 +328,35 @@ struct registry {
     return kinds[k];
   }
 
-  /// storage::add: a default value in every column of Item; the new index
+  /// storage::add: a default value in every column of Item; the new index.
+  /// A per-item storage that cannot grow is refused: it would hold every item
+  /// in the same row.  An item kind with columns but none that numbers its
+  /// items (dynamic properties only) is refused too: storage::remove would
+  /// leave its sparse entries behind.  A kind without any column is allowed:
+  /// it is a placeholder whose index is meaningless (an interaction's
+  /// relation, see collision/diskdisk_r.hpp), and remove is a no-op for it.
   template <typename Item>
   std::size_t push_item() {
+    const auto& columns = registered_kind<Item>();
+    for (std::size_t id : columns) {
+      if (!slots[id]->can_push_items()) [[unlikely]] {
+        throw std::logic_error(
+            "storage::add: a per-item storage of this item cannot grow (fixed-size "
+            "container)");
+      }
+    }
+    bool counted = false;
     std::size_t index = 0;
-    for (std::size_t id : registered_kind<Item>()) {
-      if (std::size_t i = slots[id]->push_default(); i != column_base::no_index) index = i;
+    for (std::size_t id : columns) {
+      if (std::size_t i = slots[id]->push_default(); i != column_base::no_index) {
+        index = i;
+        counted = true;
+      }
+    }
+    if (!counted && !columns.empty()) [[unlikely]] {
+      throw std::logic_error("storage::add: the item kind " +
+                             std::string(mp::type_name<Item>()) +
+                             " has only dynamic properties, none numbering its items");
     }
     return index;
   }

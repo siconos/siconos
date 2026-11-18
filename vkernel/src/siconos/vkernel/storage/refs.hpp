@@ -214,7 +214,9 @@ struct ref_remap {
 
   std::size_t operator()(std::size_t k) const {
     if (old_to_new) {
-      return k < old_to_new->size() ? (*old_to_new)[k] : k;
+      // the table covers the rows that existed before the removal: a ref past
+      // it (a stale index kept outside the storage) refers to no row
+      return k < old_to_new->size() ? (*old_to_new)[k] : invalid;
     }
     if (k == removed) return invalid;
     if (k == last) return removed;

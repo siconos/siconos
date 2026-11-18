@@ -50,6 +50,36 @@ struct data_t : decltype(storage()
                              .build_runtime_database()){};
 }  // namespace siconos::vkernel::config
 
+// a per-item storage that cannot grow (a fixed-size array), and an item with
+// no dense column at all (a dynamic property only): adding either invents an
+// item, so storage::add refuses them
+namespace siconos::vkernel::config {
+struct fixed_row : storage::pattern::item {
+  using attributes =
+      storage::pattern::gather<storage::pattern::attribute<"v", storage::some::scalar>>;
+};
+
+template <typename... Ts>
+struct one_array_helper;
+template <typename T>
+struct one_array_helper<T> {
+  using type = storage::some::array<T, storage::some::indice_value<1>>;
+};
+template <typename... Ts>
+using one_array = typename one_array_helper<Ts...>::type;
+
+struct fixed_rows_t : storage::make_runtime_database<
+                          standard_environment, fixed_row,
+                          storage::with_properties<storage::wrapped<fixed_row, one_array>>> {};
+
+struct sparse_row : storage::pattern::item {};
+struct sparse_rows_t
+    : storage::make_runtime_database<
+          standard_environment, sparse_row,
+          storage::with_properties<storage::dynamic_storage<storage::attached<
+              sparse_row, storage::pattern::symbol<"weight">, storage::some::scalar>>>> {};
+}  // namespace siconos::vkernel::config
+
 // items without attributes: one counted through its attached storage, one
 // without any column
 namespace siconos::vkernel::config {
@@ -80,11 +110,14 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testPermuteChecks);
   CPPUNIT_TEST(testPermuteRejectsNonBijection);
   CPPUNIT_TEST(testRefInvalidOfItsOwnType);
+  CPPUNIT_TEST(testTableRemapPastTheTable);
   CPPUNIT_TEST(testRemoveRemapsRefs);
   CPPUNIT_TEST(testPermuteRemapsRefs);
   CPPUNIT_TEST(testRemoveManyRemapsRefs);
   CPPUNIT_TEST(testRemapWalker);
   CPPUNIT_TEST(testHandlesWithoutAttributes);
+  CPPUNIT_TEST(testFixedSizePerItemStorageIsRefused);
+  CPPUNIT_TEST(testSparseOnlyItemIsRefused);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -253,6 +286,21 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
     return inters;
   }
 
+  // a table remap covers the rows that existed before the removal: a ref past
+  // the table refers to no row, it does not keep its value
+  void testTableRemapPastTheTable() {
+    namespace storage = siconos::vkernel::storage;
+
+    const std::vector<std::size_t> old_to_new{storage::ref_remap::invalid, 0};
+    const auto r = storage::ref_remap::table(old_to_new);
+
+    CPPUNIT_ASSERT_MESSAGE("a row of the table maps to its new row", r(1) == 0);
+    CPPUNIT_ASSERT_MESSAGE("a removed row maps to no row",
+                           r(0) == storage::ref_remap::invalid);
+    CPPUNIT_ASSERT_MESSAGE("a row past the table refers to no row",
+                           r(5) == storage::ref_remap::invalid);
+  }
+
   using ends_t = std::pair<std::size_t, std::size_t>;
 
   template <typename Data>
@@ -342,6 +390,33 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
                            std::ranges::distance(storage::handles<config::marker>(data)) == 2);
     CPPUNIT_ASSERT_MESSAGE("an item without any column has no handle",
                            std::ranges::distance(storage::handles<config::bare>(data)) == 0);
+    // a placeholder item (no column at all: an interaction's relation) may be
+    // added; its index is the meaningless 0, and removing it is a no-op
+    CPPUNIT_ASSERT_NO_THROW(storage::add<config::bare>(data));
+    storage::remove(data, *storage::handles<config::marker>(data).begin());
+  }
+
+  // a per-item storage that cannot grow would hold every item in slot 0:
+  // refuse the add instead of inventing one item
+  void testFixedSizePerItemStorageIsRefused() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::fixed_rows_t data;
+    CPPUNIT_ASSERT_THROW(storage::add<config::fixed_row>(data), std::logic_error);
+    CPPUNIT_ASSERT_MESSAGE(
+        "nothing was added",
+        std::ranges::distance(storage::handles<config::fixed_row>(data)) == 0);
+  }
+
+  // an item whose only column is a dynamic property has no row count: a
+  // removal could not follow it, so the add is refused
+  void testSparseOnlyItemIsRefused() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::sparse_rows_t data;
+    CPPUNIT_ASSERT_THROW(storage::add<config::sparse_row>(data), std::logic_error);
   }
 
   // the walker on the shapes a column may take: only the refs of the moved
