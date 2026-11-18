@@ -61,8 +61,9 @@ p = argparse.ArgumentParser(add_help=False)
 p.add_argument("--unit", type=float, default=0.005, help="disk radius, m")
 p.add_argument("--mu-liquid", type=float, default=0.1)
 # the rolling resistance of the contacts of the liquid disks, a length in disk
-# radii (NewtonImpactRollingFrictionNSL; 0: Coulomb friction only). The
-# rocks do not resist rolling: a polytope contact has no rolling row.
+# radii (NewtonImpactRollingFrictionNSL; 0: Coulomb friction only): the
+# liquid-liquid, liquid-rock and liquid-terrain contacts resist rolling, the
+# rock-rock and rock-terrain ones do not.
 p.add_argument("--mu-r", type=float, default=0.0)
 # the rocks: circumdiameters as multiples of the disk diameter, and the area
 # fraction of the material made of rocks. Each class gets the same total
