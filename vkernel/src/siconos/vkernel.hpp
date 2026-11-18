@@ -40,7 +40,6 @@
 #endif
 
 namespace siconos::vkernel {
-using siconos::vkernel::storage::access;
 using siconos::vkernel::storage::default_interface;
 using siconos::vkernel::storage::prop;
 

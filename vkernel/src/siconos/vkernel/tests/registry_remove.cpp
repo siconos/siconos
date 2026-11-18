@@ -132,7 +132,6 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testHandlesWithoutAttributes);
   CPPUNIT_TEST(testFixedSizePerItemStorageIsRefused);
   CPPUNIT_TEST(testSparseOnlyItemIsRefused);
-  CPPUNIT_TEST(testAccessAt);
   CPPUNIT_TEST(testConstAccess);
   CPPUNIT_TEST_SUITE_END();
 
@@ -433,27 +432,6 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
     config::sparse_rows_t data;
     CPPUNIT_ASSERT_THROW(storage::add<config::sparse_row>(data), std::logic_error);
-  }
-
-  // storage::access<T>::at: its three overloads read the same value, and the
-  // (handle, data) one passes the data first to get, as get expects
-  void testAccessAt() {
-    namespace storage = siconos::vkernel::storage;
-    namespace config = siconos::vkernel::config;
-
-    config::data_t data;
-    auto ball0 = storage::add<config::ball>(data);
-    ball0.q() = {1., 2., 3.};
-
-    // the paired attribute type, as pattern::attributes returns it
-    using ball_attrs_t = std::decay_t<decltype(storage::pattern::attributes(config::ball{}))>;
-    using q_t = std::decay_t<decltype(ball_attrs_t{}[0_c])>;
-
-    CPPUNIT_ASSERT_MESSAGE("at(handle) reads q", storage::access<q_t>::at(ball0)(0) == 1.);
-    CPPUNIT_ASSERT_MESSAGE("at(handle, data) reads q",
-                           storage::access<q_t>::at(ball0, data)(1) == 2.);
-    CPPUNIT_ASSERT_MESSAGE("at(handle, step) reads q",
-                           storage::access<q_t>::at(ball0, 0)(2) == 3.);
   }
 
   // a store that is only read can be const: the attribute and property

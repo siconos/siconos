@@ -475,9 +475,6 @@ static auto handles =
 // Concept check for __init__ member function presence
 static constexpr auto has_init = mp::is_valid([](auto&& x) -> decltype(x.__init__()) {});
 
-// Concept check for __del__ member function presence
-static constexpr auto has_del = mp::is_valid([](auto&& x) -> decltype(x.__del__()) {});
-
 /**
  * @brief Concept for checking if a handle's item type derives from B
  * @tparam B Base type to check against

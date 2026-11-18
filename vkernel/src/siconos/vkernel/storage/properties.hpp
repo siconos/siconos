@@ -195,16 +195,6 @@ static auto all_properties_as = []<typename D>(D& data) constexpr -> auto {
   return mp::filter(all_properties_t{}, mp::derive_from<K>);
 };
 
-template <match::attribute Attr>
-static auto attribute_properties = [](auto& data) constexpr -> auto {
-  using info_t = get_info_t<decltype(data)>;
-  using all_properties_t = typename info_t::all_properties_t;
-
-  return filter<
-      hold<decltype([]<typename T>(T) { return std::derived_from<typename T::type, Attr>; })>>(
-      all_properties_t{});
-};
-
 template <match::item Item, typename properties>
 static constexpr auto item_properties_from() {
   return mp::filter(properties{}, mp::is_a_model<[]<typename T>() consteval {
@@ -283,12 +273,6 @@ constexpr decltype(auto) attached_storages(Item, auto& data) {
       typename info_t::all_properties_t{},
       mp::is_a_model<[]<typename T>() { return match::attached_storage<T, item_t>; }>);
 };
-
-template <typename Item>
-constexpr decltype(auto) all_storages(Item, auto& data) {
-  using item_t = Item;
-  return mp::tuple_unique(concat(attributes(item_t{}), attached_storages(item_t{}, data)));
-}
 
 // Attached storage that lives in the static store, excluding
 // dynamic_storage-tagged properties (those have no static slot; see

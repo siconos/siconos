@@ -39,22 +39,6 @@ static auto get = mp::overload(
       return memory(0, mp::get<A>(data.store()))[handle.index().value()];
     });
 
-template <typename T>
-struct access {
-  static constexpr auto at =
-      mp::overload([]<match::store Data, typename U = T, typename Handle>(
-                       Handle h, Data& data) -> decltype(auto)
-                     requires match::handle_attribute<Handle, U>
-                   { return siconos::vkernel::storage::get<U>(data, h); },
-                   []<typename U = T, typename FullHandle>(FullHandle h) -> decltype(auto) {
-                     return siconos::vkernel::storage::get<U>(h.data(), h);
-                   },
-                   []<typename U = T, typename FullHandle>(
-                       FullHandle h, typename FullHandle::indice step) -> decltype(auto) {
-                     return siconos::vkernel::storage::get<U>(h.data(), step, h);
-                   });
-};
-
 template <string_literal S>
 static auto param =
     [](auto h) constexpr -> decltype(auto) { return h.template env_param<S>(); };

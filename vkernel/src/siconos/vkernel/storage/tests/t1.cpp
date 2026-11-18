@@ -48,7 +48,7 @@ struct aaa {
   int v = 1;
 };
 struct bbb : item {
-  struct attr : some::specific<pointer<aaa>>, siconos::vkernel::access<attr> {};
+  struct attr : some::specific<pointer<aaa>> {};
   using attributes = gather<attr>;
   template <typename H>
   struct interface : siconos::vkernel::default_interface<H> {
