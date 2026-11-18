@@ -212,16 +212,16 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
         indexSet.bundle(*vi)->relation());
     assert(rel);
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-        const_cast<double*>(rel->H_NE_prod_T().data());
+        const_cast<double*>(rel->H().data());
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-        const_cast<double*>(rel->H_NE_prod_T().data());
+        const_cast<double*>(rel->H().data());
   }
 
   _diagsize0->resize(involvedDS.size());
   _diagsize1->resize(involvedDS.size());
 
-  /* only NewtonEuler3DR */
+  /* only NewtonEulerVelocityR */
   unsigned int ac0, ac1;
   std::size_t index;
   for (index = 0, ac0 = 6, ac1 = 3; index < involvedDS.size(); ++index, ac0 += 6, ac1 += 3) {

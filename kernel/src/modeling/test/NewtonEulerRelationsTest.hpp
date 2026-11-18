@@ -22,8 +22,9 @@
 
 /** Checks the Jacobians of the Newton-Euler relations, with one and two bodies.
  *
- *  Contact relations (NewtonEuler1DR, NewtonEuler3DR, NewtonEulerVelocityAngularVelocityR):
- *  - H (H_NE_prod_T): for twists (v_i, Omega_i) (v_i absolute, Omega_i in the body frame),
+ *  Contact relations (NewtonEulerNormalVelocityR, NewtonEulerVelocityR,
+ * NewtonEulerVelocityAngularVelocityR):
+ *  - H (H): for twists (v_i, Omega_i) (v_i absolute, Omega_i in the body frame),
  *    H * [v1, Omega1, v2, Omega2] must be equal to the relative velocity at the contact
  *    point pc1, expressed in the contact frame [n, t1, t2]:
  *
@@ -31,7 +32,7 @@
  *
  *    followed, for NewtonEulerVelocityAngularVelocityR, by the tangential components of the
  *    relative angular velocity R1 Omega1 - R2 Omega2.
- *  - J_h (H_NE, first row): with pc1 - pc2 parallel to n, it must be equal to the gradient
+ *  - J_h (G, first row): with pc1 - pc2 parallel to n, it must be equal to the gradient
  *    of the gap (finite differences), and J_h T v must be equal to the first row of H v.
  *
  *  NewtonEulerR (linear relation, constant J_h): the second-order terms

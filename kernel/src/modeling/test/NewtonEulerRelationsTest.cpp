@@ -59,7 +59,7 @@ SiconosVector7 randomPose(std::mt19937& gen) {
 }
 
 /** Builds the relation and the interaction for one or two random bodies, computes
- *  H_NE_prod_T and returns || H_NE_prod_T * twists - y_ref ||.
+ *  H and returns || H * twists - y_ref ||.
  */
 template <class Rel>
 double jacobianError(std::shared_ptr<NonSmoothLaw> nslaw, bool twoBodies, std::mt19937& gen) {
@@ -91,8 +91,8 @@ double jacobianError(std::shared_ptr<NonSmoothLaw> nslaw, bool twoBodies, std::m
   BlockVector q0;
   q0.insertPtr(std::make_shared<SiconosVector>(q1));
   if (twoBodies) q0.insertPtr(std::make_shared<SiconosVector>(q2));
-  rel->computeH_NE_prod_T(inter, q0);
-  const SiconosMatrix H = rel->H_NE_prod_T();
+  rel->computeH(inter, q0);
+  const SiconosMatrix H = rel->H();
 
   // Twists: translational velocity (absolute frame), angular velocity (body frame)
   const SiconosVector6 twist1 = randomVector<SiconosVector6>(gen);
@@ -140,7 +140,7 @@ siconos::algebra::SiconosMatrix76 computeT(const SiconosVector7& q) {
   return T;
 }
 
-/** Builds a contact with pc1 - pc2 = g0 n, checks that the first row of J_h (H_NE) is the
+/** Builds a contact with pc1 - pc2 = g0 n, checks that the first row of J_h (G) is the
  *  gradient of the gap (central finite differences) and that J_h T v is equal to the first
  *  row of H v. Returns the largest of the two relative errors.
  */
@@ -202,8 +202,8 @@ double gapGradientError(std::shared_ptr<NonSmoothLaw> nslaw, bool twoBodies,
   // J_h and H at q
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.3, gap(q1, q2), 1e-12);
   rel->computeJach(0., inter);
-  const SiconosVector Jh = rel->H_NE().row(0).transpose();
-  const SiconosMatrix H = rel->H_NE_prod_T();
+  const SiconosVector Jh = rel->G().row(0).transpose();
+  const SiconosMatrix H = rel->H();
   const double errGrad = (Jh - gradFD).norm() / gradFD.norm();
 
   // J_h T v == (H v)_0
@@ -243,7 +243,7 @@ void checkJacobian(const std::string& name, std::shared_ptr<NonSmoothLaw> nslaw)
       const double err = jacobianError<Rel>(nslaw, twoBodies, gen);
       std::ostringstream msg;
       msg << name << " (" << (twoBodies ? "two bodies" : "one body") << ", trial " << trial
-          << "): || H_NE_prod_T * twist - u_ref || = " << err;
+          << "): || H * twist - u_ref || = " << err;
       CPPUNIT_ASSERT_MESSAGE(msg.str(), err < tol);
     }
   }
@@ -252,12 +252,13 @@ void checkJacobian(const std::string& name, std::shared_ptr<NonSmoothLaw> nslaw)
 }  // namespace
 
 void NewtonEulerRelationsTest::testNewtonEuler1DRJacobian() {
-  checkJacobian<NewtonEuler1DR>("NewtonEuler1DR", std::make_shared<NewtonImpactNSL>(0.));
+  checkJacobian<NewtonEulerNormalVelocityR>("NewtonEulerNormalVelocityR",
+                                            std::make_shared<NewtonImpactNSL>(0.));
 }
 
 void NewtonEulerRelationsTest::testNewtonEuler3DRJacobian() {
-  checkJacobian<NewtonEuler3DR>("NewtonEuler3DR",
-                                std::make_shared<NewtonImpactFrictionNSL>(0., 0., 0.5, 3));
+  checkJacobian<NewtonEulerVelocityR>(
+      "NewtonEulerVelocityR", std::make_shared<NewtonImpactFrictionNSL>(0., 0., 0.5, 3));
 }
 
 void NewtonEulerRelationsTest::testNewtonEulerVelocityAngularVelocityRJacobian() {
@@ -267,12 +268,13 @@ void NewtonEulerRelationsTest::testNewtonEulerVelocityAngularVelocityRJacobian()
 }
 
 void NewtonEulerRelationsTest::testNewtonEuler1DRGapGradient() {
-  checkGapGradient<NewtonEuler1DR>("NewtonEuler1DR", std::make_shared<NewtonImpactNSL>(0.));
+  checkGapGradient<NewtonEulerNormalVelocityR>("NewtonEulerNormalVelocityR",
+                                               std::make_shared<NewtonImpactNSL>(0.));
 }
 
 void NewtonEulerRelationsTest::testNewtonEuler3DRGapGradient() {
-  checkGapGradient<NewtonEuler3DR>("NewtonEuler3DR",
-                                   std::make_shared<NewtonImpactFrictionNSL>(0., 0., 0.5, 3));
+  checkGapGradient<NewtonEulerVelocityR>(
+      "NewtonEulerVelocityR", std::make_shared<NewtonImpactFrictionNSL>(0., 0., 0.5, 3));
 }
 
 void NewtonEulerRelationsTest::testNewtonEulerVelocityAngularVelocityRGapGradient() {
@@ -306,14 +308,14 @@ void NewtonEulerRelationsTest::testNewtonEulerRSecondOrderTerms() {
         J(i, j) = std::uniform_real_distribution<double>(-1., 1.)(gen);
         Jdot(i, j) = std::uniform_real_distribution<double>(-1., 1.)(gen);
       }
-    rel->setConstantH_NE(J);
+    rel->setConstantG(J);
     inter.initialize_read_access_to_ds_variables(*ds1, twoBodies ? *ds2 : *ds1);
 
     // Set after initialize: H_NE_dot must be allocated at first use.
-    rel->setComputeH_NE_dotFunction(
+    rel->setComputeGdotFunction(
         [&Jdot](const BlockVector&, const BlockVector&,
                 Eigen::Ref<siconos::algebra::MapType> r) { r = Jdot; });
-    rel->computeSecondOrderTimeDerivativeTerms(0., inter, ds1, twoBodies ? ds2 : ds1);
+    rel->computeHdotv(0., inter, ds1, twoBodies ? ds2 : ds1);
 
     // Reference: Jdot qdot + d/dt(J T(q)) v, T being linear in q (central differences are
     // exact up to round-off)
@@ -333,7 +335,7 @@ void NewtonEulerRelationsTest::testNewtonEulerRSecondOrderTerms() {
           (computeT(q + eps * dq) - computeT(q - eps * dq)) / (2 * eps);
       ref += J.middleCols(7 * body, 7) * (Tdot * v.segment<6>(6 * body));
     }
-    const double err = (SiconosVector(rel->secondOrderTimeDerivativeTerms()) - ref).norm();
+    const double err = (SiconosVector(rel->Hdotv()) - ref).norm();
     std::ostringstream msg;
     msg << "NewtonEulerR second-order terms (" << (twoBodies ? "two bodies" : "one body")
         << "): error = " << err;

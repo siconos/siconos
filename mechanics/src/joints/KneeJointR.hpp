@@ -50,14 +50,14 @@ class KneeJointR : public NewtonEulerJointR {
    */
   siconos::algebra::SiconosVector3 G2P0_ = siconos::algebra::SiconosVector3::Zero();
 
-  /** compute H_NE matrix
+  /** compute G matrix
    *
    *  \param time current time
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                            const siconos::algebra::BlockVector& q0) override;
+  virtual void computeG(double time, siconos::modeling::Interaction& inter,
+                        const siconos::algebra::BlockVector& q0) override;
 
  public:
   /** Default constructor

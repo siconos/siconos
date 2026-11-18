@@ -24,7 +24,7 @@
 
 siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::SphereNEDSPlanR(
     double r, double A, double B, double C, double D)
-    : siconos::modeling::NewtonEuler3DR{}, sphere_radius_{r}, plane_d_{D} {
+    : siconos::modeling::NewtonEulerVelocityR{}, sphere_radius_{r}, plane_d_{D} {
   plane_normal_ << A, B, C;
   double norm = plane_normal_.norm();
   if (norm < 1e-12) {

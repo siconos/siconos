@@ -408,7 +408,7 @@ void siconos::mechanisms::MBTB_JointBuild(
   lH->setZero();
   auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
 
-  mbtb::data::sJointRelations[numJ]->_jointR->setConstantH_NE(*lH);
+  mbtb::data::sJointRelations[numJ]->_jointR->setConstantG(*lH);
   //  mbtb::data::sInterJoints[numJ].reset(new Interaction(JointName,
   //  sAllDSByInter[numJ],
   //                                           numJ, lNbEq , lNSL,

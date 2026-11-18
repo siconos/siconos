@@ -99,8 +99,8 @@ We are looking for an operator named $CT$ such that:
 
 \[V_C=\left(\begin{array}{c} V_N \\ V_T \\ V_S \end{array}\right)_{R_{C}}=CT \left(\begin{array}{c} V_{G1}~_{R_{abs}} \\ \Omega_1~_{R_{obj1}} \\ V_{G2}~_{R_{abs}}\\ \Omega_2~_{R_{obj2}} \end{array}\right)\]
 
-\[V_c=V_{G1}~_{R_{abs}} + w_1 * G_1P~_{R_{abs}} -(V_{G2}~_{R_{abs}} + w_2 * G_1P~_{R_{abs}})\]
-where $w_1$ and $w_2$ are given in $R_{abs}$. We note $M_{R_{obj1}toR_{abs}}$ the matrice converting the object 1 coordinate to the absolute coordinate. We note $N_{GP}$ the matrice such that $w_1*G_1P~_{R_{abs}} = N_{GC} w_1$. Endly, we note $M_{R_{abs}toR_C}$ converting the absolute coordinate to the $R_C$ frame.
+\[V_c=V_{G1}~_{R_{abs}} + w_1 * G_1P~_{R_{abs}} -(V_{G2}~_{R_{abs}} + w_2 * G_2P~_{R_{abs}})\]
+where $P$ is the contact point on the first object ($P = P_{c1}$, also used for the second object), and $w_1$ and $w_2$ are given in $R_{abs}$. We note $M_{R_{obj1}toR_{abs}}$ the matrice converting the object 1 coordinate to the absolute coordinate. We note $N_{GP}$ the matrice such that $w_1*G_1P~_{R_{abs}} = N_{GC} w_1$. Endly, we note $M_{R_{abs}toR_C}$ converting the absolute coordinate to the $R_C$ frame.
 we get:
 \[CT= M_{R_{abs}toR_C}   \left(\begin{array}{cccc} I_3 & N_{G_1C}M_{R_{obj1}toR_{abs}} & -I_3 & -N_{G_2C}M_{R_{obj2}toR_{abs}} \end{array}\right)\]
 

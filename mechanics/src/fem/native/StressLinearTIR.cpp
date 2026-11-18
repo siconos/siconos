@@ -44,9 +44,8 @@ void siconos::mechanics::fem::StressLinearTIR::checkSize(
   auto sizeY = inter.dimension();
   const auto& ds_vars = inter.read_dynamical_systems_variables();
 
-  if (!(jacobianhOver_q_view_) ||
-      jacobianhOver_q_view_->cols() != ds_vars[tools::enum_to_index(ds_var::sigma)]->size() ||
-      jacobianhOver_q_view_->rows() != sizeY)
+  if (!(H_view_) || H_view_->cols() != ds_vars[tools::enum_to_index(ds_var::sigma)]->size() ||
+      H_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::mechanics::fem::StressLinearTIR::checkSize inconsistent sizes between H "
         "matrix and the interaction.");
@@ -66,8 +65,7 @@ void siconos::mechanics::fem::StressLinearTIR::computeOutput(
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   // y[i] = C * sigma_i (i=0 or 1)
   siconos::algebra::matrixBlockVector_prod(
-      *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::sigma) + derivativeNumber],
-      y);
+      *H_view_, *ds_vars[tools::enum_to_index(ds_var::sigma) + derivativeNumber], y);
   // y[0] = C * sigma_0 + e
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
@@ -85,8 +83,7 @@ void siconos::mechanics::fem::StressLinearTIR::computeInput(
 
   // computation of p = Ht lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_,
-      *ds_vars[tools::enum_to_index(ds_var::epsilon_p) + level], false);
+      lambda, *H_view_, *ds_vars[tools::enum_to_index(ds_var::epsilon_p) + level], false);
 }
 
 void siconos::mechanics::fem::StressLinearTIR::display() const {

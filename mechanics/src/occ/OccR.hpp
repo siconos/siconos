@@ -23,14 +23,14 @@
 #ifndef OccR_hpp
 #define OccR_hpp
 
-#include "Geometer.hpp"        // For  DistanceCalculator
-#include "NewtonEuler3DR.hpp"  // Base class
+#include "Geometer.hpp"              // For  DistanceCalculator
+#include "NewtonEulerVelocityR.hpp"  // Base class
 
 namespace siconos::mechanics::occ {
 
 struct ContactPoint;
 
-class OccR : public siconos::modeling::NewtonEuler3DR {
+class OccR : public siconos::modeling::NewtonEulerVelocityR {
  protected:
   const ContactPoint& _contact1;
   const ContactPoint& _contact2;

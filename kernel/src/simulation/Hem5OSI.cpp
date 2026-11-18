@@ -839,7 +839,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto lagr =
         std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
-    auto C = lagr->jacobianhOver_q();
+    auto C = lagr->H();
     assert(Xfree);
     siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
@@ -855,9 +855,9 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         auto rheoR = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
             inter->relation());
-        rheoR->computehdot(*ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)],
+        rheoR->computedhdt(*ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)],
                            simulation()->getTkp1());
-        osnsp_rhs += *ID * rheoR->hdot();
+        osnsp_rhs += *ID * rheoR->dhdt();
       } else
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::computeFreeOutput not implemented for "
@@ -868,8 +868,8 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
         auto scleR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
             inter->relation());
-        scleR->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
-        osnsp_rhs += *ID * scleR->jacobianhOver_q_dot_X_qdot();
+        scleR->computeHdotv(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scleR->Hdotv();
       }
     }
   } else

@@ -96,9 +96,8 @@ void siconos::joints::JointStopR::computeh(
   y = tmp_y.head(size_y) - pos_.head(size_y).cwiseProduct(dir_.head(size_y));
 }
 
-void siconos::joints::JointStopR::computeH_NE_(double time,
-                                               siconos::modeling::Interaction& inter,
-                                               const siconos::algebra::BlockVector& q0) {
+void siconos::joints::JointStopR::computeG(double time, siconos::modeling::Interaction& inter,
+                                           const siconos::algebra::BlockVector& q0) {
   auto n = siconos::algebra::to_index(axisMax_ - axisMin_ + 1);
 
   if (jacobian_buffer_.cols() != q0.size() || jacobian_buffer_.rows() != n) {
@@ -114,9 +113,9 @@ void siconos::joints::JointStopR::computeH_NE_(double time,
   }
 
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
-  for (siconos::algebra::Index i = 0; i < H_NE_view_->rows(); i++)
-    for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++)
-      H_NE_view_->setValue(
+  for (siconos::algebra::Index i = 0; i < G_view_->rows(); i++)
+    for (siconos::algebra::Index j = 0; j < G_view_->cols(); j++)
+      G_view_->setValue(
           i, j,
           (jacobian_buffer_)(axis_[siconos::algebra::to_unsigned<size_t>(i)] - axisMin_, j) *
               dir_(i));

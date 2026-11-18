@@ -29,13 +29,13 @@ namespace siconos::modeling {
 
     Lagrangian Relation with:
 
-    \f$ y= Cq + e \f$
+    \f$ y = H q + e \f$
 
-    \f$ p = C^t \lambda \f$
+    \f$ p = H^\top \lambda \f$
 
-    C is the only required input to built a LagrangianLinearTIR.
-    C storage is \f$ \nabla^\top_q h(q, ...)\f$ from
-    LagrangianR
+    with a constant contact configuration matrix \f$ H \f$ (H(), called C in the
+    constructors and formerly returned by CMatrix(), deprecated). \f$ H \f$ is the only
+    required input to build a LagrangianLinearTIR.
 
 */
 class LagrangianLinearTIR : public LagrangianR {
@@ -70,8 +70,8 @@ class LagrangianLinearTIR : public LagrangianR {
    */
   void checkSize(const Interaction& inter) const override;
 
-  /** \return a read-only view on the C matrix */
-  inline auto CMatrix() const { return jacobianhOver_q(); }
+  /** \deprecated use H() */
+  [[deprecated("use H()")]] inline auto CMatrix() const { return H(); }
 
   /** \return  a read-only view on e vector */
   inline auto eVector() const {

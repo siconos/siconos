@@ -705,7 +705,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
 
     assert(Xfree);
-    auto C = rel->jacobianhOver_q();
+    auto C = rel->H();
     siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
     DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
@@ -745,14 +745,14 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
             "siconos::integrators::D1MinusLinearOSI::computeFreeOutput. acceleration term "
             "involving Hessian matrix of Relation\n");
         DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
-        scler->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
-        osnsp_rhs += *ID * scler->jacobianhOver_q_dot_X_qdot();
+        scler->computeHdotv(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scler->Hdotv();
       }
       DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     }
   } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
                  inter->relation())) {
-    auto CT = ner->H_NE_prod_T();
+    auto CT = ner->H();
     DEBUG_EXPR(siconos::algebra::print(*CT));
     assert(Xfree);
     // creates a POINTER link between workX[ds] (xfree) and the
@@ -779,10 +779,10 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       auto ds1 = indexSet->properties(vertex_inter).source;
       auto ds2 = indexSet->properties(vertex_inter).target;
 
-      ner->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, ds1, ds2);
+      ner->computeHdotv(simulation()->getTkp1(), *inter, ds1, ds2);
 
-      DEBUG_EXPR(siconos::algebra::print(*ner->secondOrderTimeDerivativeTerms()));
-      osnsp_rhs += *ID * ner->secondOrderTimeDerivativeTerms();
+      DEBUG_EXPR(siconos::algebra::print(*ner->Hdotv()));
+      osnsp_rhs += *ID * ner->Hdotv();
 
       DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     }

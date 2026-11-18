@@ -87,7 +87,7 @@
   );
 
   // Use with a contact relation
-  auto relation = std::make_shared<NewtonEuler1DR>(...);
+  auto relation = std::make_shared<NewtonEulerNormalVelocityR>(...);
   auto inter = std::make_shared<Interaction>(nslaw, relation);
   \endcode
 
@@ -305,7 +305,7 @@ class BinaryCohesiveNSL : public siconos::modeling::CohesiveZoneModelNIFNSL {
    *
    * \param inter the Interaction to initialize variables for
    * \return shared pointer to the initialized internal variables vector
-   * \note This method requires the Interaction to have a NewtonEuler1DR relation
+   * \note This method requires the Interaction to have a NewtonEulerNormalVelocityR relation
    */
   std::shared_ptr<siconos::algebra::blocks::SharedVector3> initializeInternalVariables(
       siconos::modeling::Interaction& inter) override;

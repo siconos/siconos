@@ -19,12 +19,12 @@
 #ifndef Contact2dR_hpp
 #define Contact2dR_hpp
 
-#include "Lagrangian2d2DR.hpp"
+#include "Lagrangian2dVelocityR.hpp"
 
 namespace siconos::collision {
 class BodyShapeRecord;
 
-class Contact2dR : public siconos::modeling::Lagrangian2d2DR {
+class Contact2dR : public siconos::modeling::Lagrangian2dVelocityR {
  private:
   ACCEPT_SERIALIZATION(Contact2dR);
 

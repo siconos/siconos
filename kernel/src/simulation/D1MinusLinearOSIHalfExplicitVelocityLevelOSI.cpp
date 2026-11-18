@@ -670,7 +670,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   if (auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
           mainInteraction->relation())) {
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
-    auto C = lagr->jacobianhOver_q();
+    auto C = lagr->H();
 
     DEBUG_EXPR(siconos::algebra::print(*C););
     assert(Xfree);
@@ -699,7 +699,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   /*Newton-Euler */
   else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
                mainInteraction->relation())) {
-    auto CT = ner->H_NE_prod_T();
+    auto CT = ner->H();
     DEBUG_EXPR(siconos::algebra::print(*CT));
     assert(Xfree);
     // creates a POINTER link between workX[ds] (xfree) and the

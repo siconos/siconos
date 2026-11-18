@@ -29,41 +29,27 @@ namespace siconos::modeling {
 /**
  * @brief Lagrangian (2nd order) non linear relations, with y=h(q,t) (dense storage)
  *
- *
  * \f[
- *
- * y =  h(q,t) \\
- *
- * \dot y =  J^h_q(q,t)\dot q + \frac{\partial }{\partial t}h(q,t)
- *  \f]
- *
- *   and by duality
- *
- *   \f[
- *
- *        p = {J^h_q}^\top(q,t)\lambda
- *   \f]
- *
- *  where
- *
- * \f[
- * J^h_q(q,t)
- * =
- * \frac{\partial h}{\partial q}(q,t)
- * =
- * \left[
- * \frac{\partial h_i}{\partial q_j}
- * \right]_{1\le i\le m,\;1\le j\le n}.
+ * \begin{aligned}
+ *   y &= h(q,t), \\
+ *   \dot y &= H(q,t)\, \dot q + \frac{\partial h}{\partial t}(q,t), \qquad
+ *     H(q,t) = \nabla_q^\top h(q,t)
+ *     = \left[ \frac{\partial h_i}{\partial q_j} \right]_{1\le i\le m,\;1\le j\le n}, \\
+ *   p &= H(q,t)^\top \lambda.
+ * \end{aligned}
  * \f]
  *
- * is the Jacobian matrix of the relation.
+ * \f$ H \f$ is the contact configuration matrix (see LagrangianR). The following operators
+ * can be set by user-defined functions, or computed by overriding the virtual functions:
  *
- *   The following operators can be set by user-defined functions:
+ *   - \f$ h(q,t) \f$: setComputehFunction, or override computeh;
+ *   - \f$ H(q,t) \f$: setComputeHFunction, or override computeH;
+ *   - \f$ \frac{\partial h}{\partial t}(q,t) \f$: setComputedhdtFunction, or override
+ *     computedhdt.
  *
- *   - \f$ h(q,t) \f$
- *   - \f$ J^h_q(q,t) \f$
- *   - \f$  \frac{\partial h}{\partial t} \f$
- *
+ * <b>Former names</b> (deprecated, kept for one release): setComputeJacobianhOver_qFunction,
+ * computeJacobianhOver_q, hdot, setComputehdotFunction, computehdot (a class overriding
+ * computeJacobianhOver_q or computehdot is still called).
  */
 class LagrangianRheonomousR : public LagrangianR {
  protected:
@@ -72,17 +58,31 @@ class LagrangianRheonomousR : public LagrangianR {
   /** function wrapper used to compute \f$ h(q,t) \f$ */
   siconos::modeling::func_prototypes::FunctionBVS_V computeh_{nullptr};
 
-  /** function wrapper used to compute  \f$ J^h_q(q,t) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVS_M computejacobianhOver_q_{nullptr};
+  /** function wrapper used to compute \f$ H(q,t) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVS_M computeH_{nullptr};
 
-  /** \f$ \frac{\partial }{\partial t}h(q,t) \f$ */
-  std::shared_ptr<siconos::algebra::SiconosVector> hdot_{nullptr};
+  /** \f$ \frac{\partial h}{\partial t}(q,t) \f$ */
+  std::shared_ptr<siconos::algebra::SiconosVector> dhdt_{nullptr};
 
-  /** function wrapper used to compute \f$ \frac{\partial }{\partial t}h(q,t) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVS_V computehdot_{nullptr};
+  /** function wrapper used to compute \f$ \frac{\partial h}{\partial t}(q,t) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVS_V computedhdt_{nullptr};
 
-  /** True if \f$ \frac{\partial }{\partial t}h(q,t) \f$ is taken into account */
-  bool hashdot_{false};
+  /** True if \f$ \frac{\partial h}{\partial t} \f$ is taken into account */
+  bool hasdhdt_{false};
+
+  /** Deprecated names of the members above, kept for one release. */
+  [[deprecated("use computeH_")]] siconos::modeling::func_prototypes::FunctionBVS_M&
+      computejacobianhOver_q_{computeH_};
+  [[deprecated("use dhdt_")]] std::shared_ptr<siconos::algebra::SiconosVector>& hdot_{dhdt_};
+  [[deprecated(
+      "use computedhdt_")]] siconos::modeling::func_prototypes::FunctionBVS_V& computehdot_{
+      computedhdt_};
+  [[deprecated("use hasdhdt_")]] bool& hashdot_{hasdhdt_};
+
+ private:
+  /** flags of the dispatch to the deprecated virtual names (see RelationCompatibility.hpp) */
+  bool computeHLegacy_{false};
+  bool computedhdtLegacy_{false};
 
  public:
   /** default and only constructor */
@@ -112,41 +112,44 @@ class LagrangianRheonomousR : public LagrangianR {
   virtual void computeh(const siconos::algebra::BlockVector& q, double time,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** set a user-defined function to compute \f$ J^h_q(q, t) \f$
+  /** set a user-defined function to compute \f$ H(q, t) \f$
    *
-   *  @param fct the user-defined function (std::function, lambda ...)
+   *  @param fct the user-defined function (std::function, lambda ...), called as
+   *  fct(q, t, H)
    */
-  void setComputeJacobianhOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionBVS_M& fct);
+  void setComputeHFunction(const siconos::modeling::func_prototypes::FunctionBVS_M& fct);
 
-  /** Computes \f$ J^h_q(q, t) \f$
+  /** Computes \f$ H(q, t) \f$ (H_view_). The default calls the user-defined function, if
+   *  any. Override this function to compute \f$ H \f$ in a derived class.
+   *
    *  @param q coordinates of the dynamical systems involved in the relation
    *  @param time current time value
    */
-  virtual void computeJacobianhOver_q(const siconos::algebra::BlockVector& q, double time);
+  virtual void computeH(const siconos::algebra::BlockVector& q, double time);
 
-  /** @return  a read-only view on \f$ \frac{\partial }{\partial t}h(q,t) \f$  */
-  inline auto hdot() const {
-    return siconos::algebra::ConstMapVectorType(hdot_->data(), hdot_->size());
+  /** @return a read-only view on \f$ \frac{\partial h}{\partial t}(q,t) \f$ */
+  inline auto dhdt() const {
+    return siconos::algebra::ConstMapVectorType(dhdt_->data(), dhdt_->size());
   }
 
-  /** set a user-defined function to compute \f$ \frac{\partial }{\partial t}h(q,t) \f$
+  /** set a user-defined function to compute \f$ \frac{\partial h}{\partial t}(q,t) \f$
    *
    *  @param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputehdotFunction(const siconos::modeling::func_prototypes::FunctionBVS_V& fct);
+  void setComputedhdtFunction(const siconos::modeling::func_prototypes::FunctionBVS_V& fct);
 
-  /** Update \f$ \frac{\partial }{\partial t}h(q,t) \f$
+  /** Update \f$ \frac{\partial h}{\partial t}(q,t) \f$. The default calls the user-defined
+   *  function, if any. Override this function to compute it in a derived class.
+   *
    *  @param position 'list' of state vectors (for all ds involved in the interaction)
    *  @param time the current time
    */
-  virtual void computehdot(const siconos::algebra::BlockVector& position, double time);
+  virtual void computedhdt(const siconos::algebra::BlockVector& position, double time);
 
   /** compute all the jacobians of h
    *
    *  @param time double, current time
    *  @param inter interaction that owns the relation
-   *  @param interProp
    */
   void computeJach(double time, Interaction& inter) override;
 
@@ -170,6 +173,25 @@ class LagrangianRheonomousR : public LagrangianR {
                     siconos::algebra::blocks::size_type level = 0) override;
 
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
+
+  /** \name Deprecated names, kept for one release */
+  ///@{
+  [[deprecated("use setComputeHFunction")]] void setComputeJacobianhOver_qFunction(
+      const siconos::modeling::func_prototypes::FunctionBVS_M& fct) {
+    setComputeHFunction(fct);
+  }
+  /** \deprecated former name of computeH. Still called for classes that override it. */
+  [[deprecated("override/call computeH")]] virtual void computeJacobianhOver_q(
+      const siconos::algebra::BlockVector& q, double time);
+  [[deprecated("use dhdt()")]] auto hdot() const { return dhdt(); }
+  [[deprecated("use setComputedhdtFunction")]] void setComputehdotFunction(
+      const siconos::modeling::func_prototypes::FunctionBVS_V& fct) {
+    setComputedhdtFunction(fct);
+  }
+  /** \deprecated former name of computedhdt. Still called for classes that override it. */
+  [[deprecated("override/call computedhdt")]] virtual void computehdot(
+      const siconos::algebra::BlockVector& position, double time);
+  ///@}
 };
 }  // namespace siconos::modeling
 #endif

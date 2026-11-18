@@ -25,8 +25,8 @@
 #include "MBTB_JointR.hpp"
 #include "MBTB_PYTHON_API.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
-#include "NewtonEuler1DR.hpp"
 #include "NewtonEulerJointR.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 #include "OneStepNSProblem.hpp"
 #include "RotationQuaternion.hpp"
 #include "SolverOptions.h"  // for SolverOptions struct

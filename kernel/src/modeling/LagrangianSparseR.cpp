@@ -30,9 +30,9 @@
 void siconos::modeling::LagrangianSparseR::display() const {
   std::cout << "=====> Relation of type " << tools::enum_to_string(_relationType)
             << " and subtype " << tools::enum_to_string(_subType) << "\n";
-  if (hasJacobianhOver_q_) {
+  if (hasH_) {
     std::cout << "- jacobian of h over q\n";
-    useJacobianhOver_q([&](const auto& M) { siconos::algebra::print(M); });
+    useH([&](const auto& M) { siconos::algebra::print(M); });
     std::cout << "\n";
   }
 }

@@ -132,7 +132,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   //   siconos::modeling::Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) ==
   //  siconos::modeling::Type::NewtonImpactNSL){
-  //     auto ri = std::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
+  //     auto ri = std::static_pointer_cast<NewtonEulerNormalVelocityR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
   //     }else{

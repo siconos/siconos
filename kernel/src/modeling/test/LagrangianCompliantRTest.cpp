@@ -42,15 +42,13 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0() {
                               const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
                               Eigen::Ref<siconos::algebra::SiconosVector> y) {});
 
-  rel->setComputeJacobianhOver_qFunction(
-      [](const siconos::algebra::BlockVector& q,
-         const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
-         Eigen::Ref<siconos::algebra::MapType> result) {});
+  rel->setComputeHFunction([](const siconos::algebra::BlockVector& q,
+                              const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+                              Eigen::Ref<siconos::algebra::MapType> result) {});
 
-  rel->setComputeJacobianhOver_lambdaFunction(
-      [](const siconos::algebra::BlockVector& q,
-         const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
-         Eigen::Ref<siconos::algebra::MapType> result) {});
+  rel->setComputeDFunction([](const siconos::algebra::BlockVector& q,
+                              const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+                              Eigen::Ref<siconos::algebra::MapType> result) {});
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ",
                                rel->getType() == siconos::modeling::RelationType::Lagrangian,

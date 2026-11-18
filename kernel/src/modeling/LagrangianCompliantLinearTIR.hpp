@@ -28,24 +28,18 @@ namespace siconos::modeling {
 This class provides tools to describe Lagrangian (2nd order) linear relations, with:
 
 \f$
-y= Cq + e + D\lambda
+y = H q + e + D\lambda
 \f$
 
 \f$
-p = C^t \lambda
+p = H^\top \lambda
 \f$
 
-Minimal setup requires C and D matrices.
+Minimal setup requires the H (called C in the constructors) and D matrices.
 
-Note: considering the notations of LagrangianR or LagrangianCompliantR, we have
-
-    \f$
-    C = \nabla_q h(q,\lambda(t))
-    \f$
-and
-    \f$
-    D = \nabla_{\lambda}h(q,\lambda(t))
-    \f$
+With the notations of LagrangianR and LagrangianCompliantR,
+\f$ H = \nabla_q h(q,\lambda) \f$ (H()) and \f$ D = \nabla_{\lambda}h(q,\lambda) \f$
+(D()). CMatrix() and DMatrix() are the former (deprecated) names of H() and D().
 
 */
 class LagrangianCompliantLinearTIR : public LagrangianR {
@@ -53,7 +47,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
 
   /** D matrix */
-  std::shared_ptr<siconos::algebra::MapType> DMatrix_view_{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> D_view_{nullptr};
 
   /** e*/
   std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
@@ -88,18 +82,20 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    */
   void checkSize(const Interaction& inter) const override;
 
-  /** \return a read-only view on the C matrix */
-  inline auto CMatrix() const { return jacobianhOver_q(); }
+  /** \deprecated use H() */
+  [[deprecated("use H()")]] inline auto CMatrix() const { return H(); }
 
-  /** \return a read-only view on the D matrix */
-  inline auto DMatrix() const {
-    return siconos::algebra::ConstMapType(DMatrix_view_->data(), DMatrix_view_->rows(),
-                                          DMatrix_view_->cols());
+  /** \return a read-only view on \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$ */
+  inline auto D() const {
+    return siconos::algebra::ConstMapType(D_view_->data(), D_view_->rows(), D_view_->cols());
   }
 
-  /* \return a read-only view on the matrix \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$*/
+  /** \deprecated use D() */
+  [[deprecated("use D()")]] inline auto DMatrix() const { return D(); }
+
+  /** \return a read-only view on \f$ D \f$ (the Relation interface, same as D()) */
   inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
-    return DMatrix();
+    return D();
   }
 
   /** \return  a read-only view on e vector */
@@ -107,7 +103,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 
-  virtual bool hasJacobianhOver_lambda() const override { return DMatrix_view_ != nullptr; }
+  virtual bool hasJacobianhOver_lambda() const override { return D_view_ != nullptr; }
 
   /** True if e is defined */
   bool haseVector() const { return eVector_view_ != nullptr; }

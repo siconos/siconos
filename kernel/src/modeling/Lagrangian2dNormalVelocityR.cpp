@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "Lagrangian2d1DR.hpp"
+#include "Lagrangian2dNormalVelocityR.hpp"
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
@@ -28,37 +28,37 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-void siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter) {
+void siconos::modeling::Lagrangian2dNormalVelocityR::initialize(Interaction& inter) {
   // proj_with_q  jacobianhOver_q_Proj =
   // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->rows(),jacobianhOver_q_->cols()));
 
   if ((inter.getSizeOfDS() != 3) and (inter.getSizeOfDS() != 6)) {
     THROW_EXCEPTION(
-        "siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter). The size of ds "
+        "siconos::modeling::Lagrangian2dNormalVelocityR::initialize(Interaction& inter). The "
+        "size of ds "
         "must of size 3 or 6");
   }
 
   auto qSize = 3 * (inter.getSizeOfDS() / 3);
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(qSize);
+  if (!H_storage_) {
+    H_storage_ = std::make_unique<std::vector<double>>(qSize);
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), 1, qSize);
-  jacobianhOver_q_view_->setZero();
+  H_view_ = std::make_shared<siconos::algebra::MapType>(H_storage_->data(), 1, qSize);
+  H_view_->setZero();
 }
 
-void siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(
+void siconos::modeling::Lagrangian2dNormalVelocityR::computeH(
     const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dNormalVelocityR::computeH(Interaction& inter, "
       "siconos::algebra::BlockVector q0 \n");
 
   double G1x = q(0);
   double G1y = q(1);
 
-  jacobianhOver_q_view_->row(0).segment(0, 2) = nc_;
+  H_view_->row(0).segment(0, 2) = nc_;
 
-  (*jacobianhOver_q_view_)(0, 2) =
+  (*H_view_)(0, 2) =
       (G1y - contactPoint1_.y()) * nc_.x() - (G1x - contactPoint1_.x()) * nc_.y();
 
   if (q.size() == 6) {
@@ -66,35 +66,35 @@ void siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(
     double G2x = q(3);
     double G2y = q(4);
 
-    jacobianhOver_q_view_->row(0).segment(3, 2) = -nc_;
-    (*jacobianhOver_q_view_)(0, 5) =
+    H_view_->row(0).segment(3, 2) = -nc_;
+    (*H_view_)(0, 5) =
         (G2y - contactPoint1_.y()) * nc_.x() - (G2x - contactPoint1_.x()) * nc_.y();
   }
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
   DEBUG_END(
-      "siconos::modeling::Lagrangian2d1DR::computeJacobianhOver_q(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dNormalVelocityR::computeH(Interaction& inter, "
       "siconos::algebra::BlockVector q0) \n");
 }
 
-double siconos::modeling::Lagrangian2d1DR::distance() const {
-  DEBUG_BEGIN("siconos::modeling::Lagrangian2d1DR::distance(...)\n")
+double siconos::modeling::Lagrangian2dNormalVelocityR::distance() const {
+  DEBUG_BEGIN("siconos::modeling::Lagrangian2dNormalVelocityR::distance(...)\n")
   siconos::algebra::SiconosVector2 dpc = contactPoint2_ - contactPoint1_;
-  DEBUG_END("siconos::modeling::Lagrangian2d1DR::distance(...)\n")
+  DEBUG_END("siconos::modeling::Lagrangian2dNormalVelocityR::distance(...)\n")
   return dpc.norm() * (nc_.dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::modeling::Lagrangian2d1DR::computeh(
+void siconos::modeling::Lagrangian2dNormalVelocityR::computeh(
     const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  DEBUG_BEGIN("siconos::modeling::Lagrangian2d1DR::computeh(...)\n");
+  DEBUG_BEGIN("siconos::modeling::Lagrangian2dNormalVelocityR::computeh(...)\n");
   DEBUG_EXPR(siconos::algebra::print(q));
 
   LagrangianScleronomousR::computeh(q, y);
   y(0) = distance();
   DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(display(););
-  DEBUG_END("siconos::modeling::Lagrangian2d1DR::computeh(...)\n")
+  DEBUG_END("siconos::modeling::Lagrangian2dNormalVelocityR::computeh(...)\n")
 }
-void siconos::modeling::Lagrangian2d1DR::display() const {
+void siconos::modeling::Lagrangian2dNormalVelocityR::display() const {
   LagrangianR::display();
 
   std::cout << " _Pc1 :" << std::endl;

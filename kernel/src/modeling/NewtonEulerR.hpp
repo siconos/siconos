@@ -25,6 +25,7 @@
 #include <optional>
 
 #include "Relation.hpp"
+#include "RelationCompatibility.hpp"
 
 namespace siconos::modeling {
 
@@ -49,51 +50,63 @@ class DynamicalSystem;
   \f[
   \begin{aligned}
     y &= h(q) \in \mathbb{R}^m, \\
-    \dot y &= J_h(q)\, \dot q = J_h(q)\, T(q)\, v = H(q)\, v, \\
-    \ddot y &= H(q)\, \dot v + \bigl( \dot J_h(q)\, T(q) + J_h(q)\, \dot T(q) \bigr)\, v,
+    \dot y &= H(q)\, v, \\
+    \ddot y &= H(q)\, \dot v + \dot H(q)\, v,
   \end{aligned}
   \f]
-  with the two Jacobians
+  where \f$ H(q) \in \mathbb{R}^{m \times 6n} \f$ (H()) is the <em>contact configuration
+  matrix</em>: it maps the twists to the local (relative) velocities of the relation. For a
+  relation given by a function \f$ h(q) \f$, it is
   \f[
-    J_h(q) = \nabla_q^\top h(q) \in \mathbb{R}^{m \times 7n}
-    \quad (\text{stored as } H_{NE}), \qquad
-    H(q) = J_h(q)\, T(q) \in \mathbb{R}^{m \times 6n}
-    \quad (\text{stored as } H_{NE}T).
+    H(q) = G(q)\, T(q), \qquad G(q) = \nabla_q^\top h(q) \in \mathbb{R}^{m \times 7n}
+    \quad (\text{G()}),
   \f]
+  and \f$ \dot H v = (\dot G\, T + G\, \dot T)\, v = \dot G\, \dot q + G\, \dot T v \f$
+  (Hdotv()). For contact relations with friction or rolling resistance, the rows of
+  \f$ H \f$ beyond the normal one are not the Jacobian of a function: they also contain the
+  change to the local contact frame and the relative velocity between the bodies (see
+  NewtonEulerNormalVelocityR). \f$ G \f$ is then only meaningful for the normal row.
+
   The generalized forces (impulses) applied to the bodies are, for the input level
   \f$ k \f$,
   \f[
     p_k = H(q)^\top \lambda_k \quad (k = 1, 2), \qquad
-    p_0 = J_h(q)^\top \lambda_0 \quad \text{(projection onto the constraints)}.
+    p_0 = G(q)^\top \lambda_0 \quad \text{(projection onto the constraints)}.
   \f]
   Only scleronomic relations are handled: \f$ h \f$ does not depend explicitly on time.
 
   <b>Default implementation.</b> The relation is linear,
-  \f$ h(q) = J_h\, q + e \f$, with a constant \f$ J_h \f$ (setConstantH_NE) and an
-  optional constant \f$ e \f$ (setConstanteVector). \f$ H = J_h T(q) \f$ is recomputed
-  from \f$ T(q) \f$ in computeH_NE_prod_T.
+  \f$ h(q) = G\, q + e \f$, with a constant \f$ G \f$ (setConstantG) and an optional
+  constant \f$ e \f$ (setConstanteVector). \f$ H = G\, T(q) \f$ is recomputed from
+  \f$ T(q) \f$ in computeH.
 
   <b>Derived classes</b> override:
    - computeh() to compute \f$ y = h(q) \f$;
-   - computeH_NE_() to update \f$ J_h(q) \f$ (only used when the matrix is not constant);
-   - computeH_NE_prod_T() when \f$ H(q) \f$ is computed directly, without forming
-     \f$ J_h \f$ (e.g. contact relations written in a local frame, see NewtonEuler1DR).
+   - computeG() to update \f$ G(q) \f$ (only used when the matrix is not constant);
+   - computeH() when \f$ H(q) \f$ is computed directly, without forming \f$ G \f$ (e.g.
+     contact relations written in a local frame, see NewtonEulerNormalVelocityR).
 
-  \f$ \dot J_h \f$, needed for \f$ \ddot y \f$, can be given by a user-defined function
-  (setComputeH_NE_dotFunction).
+  \f$ \dot G \f$, needed for \f$ \ddot y \f$, can be given by a user-defined function
+  (setComputeGdotFunction).
 
   <b>Storage.</b>
-   - \f$ J_h \f$: a shared view on external memory after setConstantH_NE, internal
-     storage otherwise (allocated in initialize, or by the derived class).
-   - \f$ H \f$ (H_NE_prod_T_) and the buffer for \f$ T \f$: always allocated in initialize.
+   - \f$ G \f$: a shared view on external memory after setConstantG, internal storage
+     otherwise (allocated in initialize, or by the derived class).
+   - \f$ H \f$ (H_) and the buffer for \f$ T \f$: always allocated in initialize.
    - \f$ e \f$: a shared view on external memory, only after setConstanteVector.
-   - \f$ \dot J_h \f$: allocated in initialize if a function has been set, otherwise at the
-     first call of computeH_NE_dot or computeSecondOrderTimeDerivativeTerms.
+   - \f$ \dot G \f$: allocated in initialize if a function has been set, otherwise at the
+     first call of computeGdot or computeHdotv.
+
+  <b>Former names</b> (deprecated, kept for one release): H_NE() = G(),
+  H_NE_prod_T() = H(), setConstantH_NE = setConstantG, computeH_NE_ = computeG,
+  computeH_NE_prod_T = computeH, setComputeH_NE_dotFunction = setComputeGdotFunction,
+  computeH_NE_dot = computeGdot, secondOrderTimeDerivativeTerms() = Hdotv(),
+  computeSecondOrderTimeDerivativeTerms = computeHdotv. A derived class that still overrides
+  computeH_NE_ or computeH_NE_prod_T keeps being called.
 
   \see DevNotes, chapter "NewtonEuler Dynamical Systems", section "Mechanical systems
   with bilateral and unilateral constraints".
  */
-
 class NewtonEulerR : public Relation {
  public:
   /** Names and positions of the ds variables read in computeInput and computeOutput:
@@ -105,23 +118,22 @@ class NewtonEulerR : public Relation {
  protected:
   ACCEPT_SERIALIZATION(NewtonEulerR);
 
-  /** View onto \f$ J_h = \nabla_q^\top h \in \mathbb{R}^{m \times 7n} \f$ (either
-   *  H_NE_internal_storage_ or external memory, see setConstantH_NE) */
-  std::shared_ptr<siconos::algebra::MapType> H_NE_view_{nullptr};
+  /** View onto \f$ G = \nabla_q^\top h \in \mathbb{R}^{m \times 7n} \f$ (either
+   *  G_storage_ or external memory, see setConstantG) */
+  std::shared_ptr<siconos::algebra::MapType> G_view_{nullptr};
 
-  /** internal (optional) storage used for \f$ J_h \f$ */
-  siconos::algebra::SiconosMatrix H_NE_internal_storage_{0, 0};
+  /** internal (optional) storage used for \f$ G \f$ */
+  siconos::algebra::SiconosMatrix G_storage_{0, 0};
 
-  /** True if \f$ J_h \f$ is a constant matrix (set with setConstantH_NE) */
-  bool hasConstantH_NE_{false};
+  /** True if \f$ G \f$ is a constant matrix (set with setConstantG) */
+  bool hasConstantG_{false};
 
-  /** \f$ \dot J_h = \frac{d}{dt} J_h(q) \in \mathbb{R}^{m \times 7n} \f$, used to
-   *  compute the second-order time derivative of \f$ y \f$.
-   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> H_NE_dot_{nullptr};
+  /** \f$ \dot G = \frac{d}{dt} G(q) \in \mathbb{R}^{m \times 7n} \f$, used to compute
+   *  \f$ \dot H v \f$. */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> Gdot_{nullptr};
 
-  /** user-defined function computing \f$ \dot J_h(q, \dot q) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVBV_M computeH_NE_dot_{nullptr};
+  /** user-defined function computing \f$ \dot G(q, \dot q) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVBV_M computeGdot_{nullptr};
 
   /** View onto the constant vector \f$ e \f$ of the default linear relation */
   std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
@@ -134,32 +146,53 @@ class NewtonEulerR : public Relation {
    *  \f$ k = 1, 2 \f$. Useful for the end user. */
   siconos::algebra::SiconosVector contactForce_;
 
-  /** \f$ H = J_h T \in \mathbb{R}^{m \times 6n} \f$, the Jacobian with respect to the
-   *  twist: \f$ \dot y = H v \f$. Computed as the product \f$ J_h T \f$ by default, or
-   *  directly from the contact geometry by the contact relations. */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> H_NE_prod_T_{nullptr};
+  /** \f$ H \in \mathbb{R}^{m \times 6n} \f$, the contact configuration matrix:
+   *  \f$ \dot y = H v \f$. Computed as \f$ G T \f$ by default, or directly from the contact
+   *  geometry by the contact relations. */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> H_{nullptr};
 
   /** buffer for \f$ T(q_i) = \begin{bmatrix} I_3 & 0 \\ 0 & \Psi(p_i) \end{bmatrix} \f$
    *  of one body */
   siconos::algebra::SiconosMatrix76 T_buffer_;
 
-  /** The terms of \f$ \ddot y \f$ that do not depend on \f$ \dot v \f$:
-   *  \f$ \dot J_h\, \dot q + J_h\, \dot T v = (\dot J_h T + J_h \dot T)\, v \f$.
-   */
-  siconos::algebra::SiconosVector secondOrderTimeDerivativeTerms_;
+  /** \f$ \dot H v = \dot G\, \dot q + G\, \dot T v \f$: the terms of \f$ \ddot y \f$ that
+   *  do not depend on \f$ \dot v \f$. */
+  siconos::algebra::SiconosVector Hdotv_;
 
-  /** allocate \f$ \dot J_h \f$ (H_NE_dot_), with the size of \f$ J_h \f$, if not done */
-  void allocateH_NE_dot_();
+  /** Deprecated names of the members above, kept for one release. */
+  [[deprecated("use G_view_")]] std::shared_ptr<siconos::algebra::MapType>& H_NE_view_{
+      G_view_};
+  [[deprecated("use G_storage_")]] siconos::algebra::SiconosMatrix& H_NE_internal_storage_{
+      G_storage_};
+  [[deprecated("use Gdot_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>& H_NE_dot_{
+      Gdot_};
+  [[deprecated("use H_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>& H_NE_prod_T_{H_};
 
-  /** update \f$ J_h(q) \f$ (H_NE_view_). Called by computeJach unless the matrix is
-   *  constant. The default does nothing.
+  /** allocate \f$ \dot G \f$ (Gdot_), with the size of \f$ G \f$, if not done */
+  void allocateGdot_();
+
+  /** update \f$ G(q) \f$ (G_view_). Called by computeJach unless the matrix is constant.
+   *  The default does nothing (constant \f$ G \f$). Override this function.
    *
    *  \param time current time
    *  \param inter the interaction using this relation
    *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
-  virtual void computeH_NE_(double time, Interaction& inter,
-                            const siconos::algebra::BlockVector& q0) {}
+  virtual void computeG(double time, Interaction& inter,
+                        const siconos::algebra::BlockVector& q0);
+
+  /** \deprecated former name of computeG. Still called for classes that override it. */
+  [[deprecated("override computeG")]] virtual void computeH_NE_(
+      double time, Interaction& inter, const siconos::algebra::BlockVector& q0);
+
+  /** \f$ H = G T \f$, body by body: the default of computeH. */
+  void computeHFromG_(const siconos::algebra::BlockVector& q0);
+
+ private:
+  /** flags of the dispatch to the deprecated virtual names (see RelationCompatibility.hpp) */
+  bool computeGLegacy_{false};
+  bool computeHLegacy_{false};
+  bool computeGdotLegacy_{false};
 
  public:
   /** Default and only constructor */
@@ -180,20 +213,17 @@ class NewtonEulerR : public Relation {
    */
   virtual void checkSize(const Interaction& inter) const override;
 
-  /** \return a read-only view on \f$ J_h = \nabla_q^\top h \in \mathbb{R}^{m \times 7n}
-   *  \f$ */
-  inline auto H_NE() const {
-    return siconos::algebra::ConstMapType(H_NE_view_->data(), H_NE_view_->rows(),
-                                          H_NE_view_->cols());
+  /** \return a read-only view on \f$ G = \nabla_q^\top h \in \mathbb{R}^{m \times 7n} \f$ */
+  inline auto G() const {
+    return siconos::algebra::ConstMapType(G_view_->data(), G_view_->rows(), G_view_->cols());
   }
 
-  /** Set a constant \f$ J_h \f$ for the default linear relation
-   *  \f$ h(q) = J_h q + e \f$ (warning: shared memory, newValue must outlive the
-   *  relation).
+  /** Set a constant \f$ G \f$ for the default linear relation \f$ h(q) = G q + e \f$
+   *  (warning: shared memory, newValue must outlive the relation).
    *
-   *  \param newValue \f$ J_h \in \mathbb{R}^{m \times 7n} \f$
+   *  \param newValue \f$ G \in \mathbb{R}^{m \times 7n} \f$
    */
-  void setConstantH_NE(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantG(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** \return a read-only view on \f$ e \f$. Requires haseVector(). */
   inline auto eVector() const {
@@ -201,9 +231,8 @@ class NewtonEulerR : public Relation {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 
-  /** set a constant \f$ e \f$ for the default linear relation
-   *  \f$ h(q) = J_h q + e \f$ (warning: shared memory, neweVector must outlive the
-   *  relation).
+  /** set a constant \f$ e \f$ for the default linear relation \f$ h(q) = G q + e \f$
+   *  (warning: shared memory, neweVector must outlive the relation).
    *
    *  \param neweVector \f$ e \in \mathbb{R}^m \f$
    */
@@ -212,41 +241,36 @@ class NewtonEulerR : public Relation {
   /** True if \f$ e \f$ is taken into account */
   bool haseVector() const { return haseVector_; }
 
-  /** \return a read-only view on \f$ H = J_h T \in \mathbb{R}^{m \times 6n} \f$, so that
-   *  \f$ \dot y = H v \f$ */
-  inline auto H_NE_prod_T() const {
-    return siconos::algebra::ConstMapType(H_NE_prod_T_->data(), H_NE_prod_T_->rows(),
-                                          H_NE_prod_T_->cols());
+  /** \return a read-only view on the contact configuration matrix
+   *  \f$ H \in \mathbb{R}^{m \times 6n} \f$, \f$ \dot y = H v \f$ */
+  inline auto H() const {
+    return siconos::algebra::ConstMapType(H_->data(), H_->rows(), H_->cols());
   }
 
-  /** set a user-defined function computing \f$ \dot J_h(q, \dot q) \f$
+  /** set a user-defined function computing \f$ \dot G(q, \dot q) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...), called as
-   *  fct(q, qdot, Jdot)
+   *  fct(q, qdot, Gdot)
    */
-  void setComputeH_NE_dotFunction(
-      const siconos::modeling::func_prototypes::FunctionBVBV_M& fct);
+  void setComputeGdotFunction(const siconos::modeling::func_prototypes::FunctionBVBV_M& fct);
 
-  /** Update \f$ \dot J_h(q, \dot q) \f$ with the user-defined function, if any.
+  /** Update \f$ \dot G(q, \dot q) \f$ with the user-defined function, if any.
    *
    *  \param q coordinates \f$ q \f$ of the bodies of the interaction
    *  \param qdot time derivatives \f$ \dot q \f$ of the coordinates
    */
-  virtual void computeH_NE_dot(const siconos::algebra::BlockVector& q,
-                               const siconos::algebra::BlockVector& qdot);
+  virtual void computeGdot(const siconos::algebra::BlockVector& q,
+                           const siconos::algebra::BlockVector& qdot);
 
-  /** \return a read-only view on the terms of \f$ \ddot y \f$ that do not depend on
-   *  \f$ \dot v \f$, \f$ (\dot J_h T + J_h \dot T)\, v \f$
-   *  (see computeSecondOrderTimeDerivativeTerms)
+  /** \return a read-only view on \f$ \dot H v = (\dot G T + G \dot T)\, v \f$, the terms of
+   *  \f$ \ddot y \f$ that do not depend on \f$ \dot v \f$ (see computeHdotv)
    */
-  inline auto secondOrderTimeDerivativeTerms() const {
-    return siconos::algebra::ConstMapVectorType(secondOrderTimeDerivativeTerms_.data(),
-                                                secondOrderTimeDerivativeTerms_.size());
+  inline auto Hdotv() const {
+    return siconos::algebra::ConstMapVectorType(Hdotv_.data(), Hdotv_.size());
   }
 
-  /** Compute the terms of \f$ \ddot y \f$ that do not depend on \f$ \dot v \f$,
-   *  \f$ \dot J_h\, \dot q + J_h\, \dot T v \f$. Requires a function for
-   *  \f$ \dot J_h \f$ (setComputeH_NE_dotFunction) and up-to-date \f$ \dot q \f$.
+  /** Compute \f$ \dot H v = \dot G\, \dot q + G\, \dot T v \f$. Requires a function for
+   *  \f$ \dot G \f$ (setComputeGdotFunction) and up-to-date \f$ \dot q \f$.
    *
    *  \param time  current time
    *  \param inter interaction that owns the relation
@@ -254,9 +278,8 @@ class NewtonEulerR : public Relation {
    *  \param ds2 second body (a NewtonEulerDS); ignored if the interaction has one body,
    *  in which case ds1 may be passed twice
    */
-  void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter,
-                                             std::shared_ptr<DynamicalSystem> ds1,
-                                             std::shared_ptr<DynamicalSystem> ds2);
+  void computeHdotv(double time, Interaction& inter, std::shared_ptr<DynamicalSystem> ds1,
+                    std::shared_ptr<DynamicalSystem> ds2);
 
   /** \return a read-only view on the generalized forces \f$ H^\top \lambda_k \f$ applied
    *  to the bodies by this relation (updated by computeInput, levels 1 and 2)
@@ -266,7 +289,7 @@ class NewtonEulerR : public Relation {
   }
 
   /** compute the output \f$ y = h(q) \f$. The default implementation is the linear
-   *  relation \f$ y = J_h q + e \f$, using the current H_NE_view_.
+   *  relation \f$ y = G q + e \f$, using the current G_view_.
    *
    *  \param[in] q1 coordinates of the first body
    *  \param[in] q2 coordinates of the second body (std::nullopt if there is only one body)
@@ -277,17 +300,17 @@ class NewtonEulerR : public Relation {
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
       Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** compute \f$ H(q) \f$ (H_NE_prod_T_). The default implementation forms the product
-   *  \f$ J_h\, T(q) \f$ body by body, with \f$ T(q_i) \f$ computed from \f$ q_i \f$.
+  /** compute the contact configuration matrix \f$ H(q) \f$ (H_). The default implementation
+   *  forms the product \f$ G\, T(q) \f$ body by body. Override this function to compute
+   *  \f$ H \f$ directly.
    *
    *  \param inter interaction that owns the relation
    *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
-  virtual void computeH_NE_prod_T(const Interaction& inter,
-                                  const siconos::algebra::BlockVector& q0);
+  virtual void computeH(const Interaction& inter, const siconos::algebra::BlockVector& q0);
 
-  /** Update \f$ J_h \f$ (unless constant, computeH_NE_) and then \f$ H \f$
-   *  (computeH_NE_prod_T), at the current \f$ q \f$.
+  /** Update \f$ G \f$ (unless constant, computeG) and then \f$ H \f$ (computeH), at the
+   *  current \f$ q \f$.
    *
    *  \param time current time
    *  \param inter the interaction using this relation
@@ -306,7 +329,7 @@ class NewtonEulerR : public Relation {
       siconos::algebra::blocks::size_type derivativeNumber = 0) override;
 
   /** compute the input \f$ p_k = H^\top \lambda_k \f$ (level k = 1 or 2, also stored in
-   *  contactForce) or \f$ p_0 = J_h^\top \lambda_0 \f$ (level 0, projection onto the
+   *  contactForce) or \f$ p_0 = G^\top \lambda_0 \f$ (level 0, projection onto the
    *  constraints).
    *
    *  \param time current time
@@ -329,6 +352,32 @@ class NewtonEulerR : public Relation {
       modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const override;
 
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
+
+  /** \name Deprecated names, kept for one release */
+  ///@{
+  [[deprecated("use G()")]] auto H_NE() const { return G(); }
+  [[deprecated("use setConstantG")]] void setConstantH_NE(
+      Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    setConstantG(newValue);
+  }
+  [[deprecated("use H()")]] auto H_NE_prod_T() const { return H(); }
+  [[deprecated("use setComputeGdotFunction")]] void setComputeH_NE_dotFunction(
+      const siconos::modeling::func_prototypes::FunctionBVBV_M& fct) {
+    setComputeGdotFunction(fct);
+  }
+  [[deprecated("use Hdotv()")]] auto secondOrderTimeDerivativeTerms() const { return Hdotv(); }
+  [[deprecated("use computeHdotv")]] void computeSecondOrderTimeDerivativeTerms(
+      double time, Interaction& inter, std::shared_ptr<DynamicalSystem> ds1,
+      std::shared_ptr<DynamicalSystem> ds2) {
+    computeHdotv(time, inter, ds1, ds2);
+  }
+  /** \deprecated former name of computeH. Still called for classes that override it. */
+  [[deprecated("override/call computeH")]] virtual void computeH_NE_prod_T(
+      const Interaction& inter, const siconos::algebra::BlockVector& q0);
+  /** \deprecated former name of computeGdot. Still called for classes that override it. */
+  [[deprecated("override/call computeGdot")]] virtual void computeH_NE_dot(
+      const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot);
+  ///@}
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERR_HPP

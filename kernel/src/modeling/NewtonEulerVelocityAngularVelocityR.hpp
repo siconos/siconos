@@ -22,7 +22,7 @@
 #ifndef NEWTONEULERVELOCITYANGULARVELOCITYR_HPP
 #define NEWTONEULERVELOCITYANGULARVELOCITYR_HPP
 
-#include "NewtonEuler1DR.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 
 namespace siconos::modeling {
 
@@ -32,7 +32,7 @@ namespace siconos::modeling {
 
   The geometry (contact points \f$ P_1, P_2 \f$, normal \f$ n \f$, gap \f$ g \f$), the
   contact frame \f$ R_c = [\, n \;\; t_1 \;\; t_2 \,]^\top \f$ and the matrix \f$ H_c(q) \f$
-  are defined in NewtonEuler1DR. With \f$ \omega_i = R_i \Omega_i \f$ the angular
+  are defined in NewtonEulerNormalVelocityR. With \f$ \omega_i = R_i \Omega_i \f$ the angular
   velocities in the inertial frame, here \f$ m = 5 \f$ and
   \f[
     \dot y = \begin{bmatrix} R_c\, u \\ t_1^\top (\omega_1 - \omega_2) \\
@@ -49,13 +49,13 @@ namespace siconos::modeling {
   ContactVelocityAngularVelocityR in mechanics). The impulse applied to the bodies is
   \f$ H^\top \lambda \f$, for a NewtonImpactRollingFrictionNSL.
 
-  Only the first row of \f$ J_h \f$ (the gradient of the gap, see NewtonEuler1DR) is
+  Only the first row of \f$ G \f$ (the gradient of the gap, see NewtonEulerNormalVelocityR) is
   computed; the other rows are zero.
 
   \see DevNotes, chapter "NewtonEulerR: computation of \f$ \nabla_q H \f$", subsection
   "Case FC3D: using the local frame local velocities".
 */
-class NewtonEulerVelocityAngularVelocityR : public NewtonEuler1DR {
+class NewtonEulerVelocityAngularVelocityR : public NewtonEulerNormalVelocityR {
  private:
   ACCEPT_SERIALIZATION(NewtonEulerVelocityAngularVelocityR);
 
@@ -64,20 +64,19 @@ class NewtonEulerVelocityAngularVelocityR : public NewtonEuler1DR {
    */
   virtual ~NewtonEulerVelocityAngularVelocityR() noexcept = default;
 
-  /** allocate \f$ J_h \f$ (5 rows) and the operators of NewtonEulerR.
+  /** allocate \f$ G \f$ (5 rows) and the operators of NewtonEulerR.
    *
    *  \param inter the interaction using this relation
    */
   void initialize(Interaction& inter) override;
 
   /** compute \f$ H(q) \f$ directly from the contact point and the contact frame (instead of
-   *  the product \f$ J_h T \f$).
+   *  the product \f$ G T \f$).
    *
    *  \param inter interaction that owns the relation
    *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
-  void computeH_NE_prod_T(const Interaction& inter,
-                          const siconos::algebra::BlockVector& q0) override;
+  void computeH(const Interaction& inter, const siconos::algebra::BlockVector& q0) override;
 
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };

@@ -40,7 +40,7 @@ void siconos::collision::native::bodies::CircleCircleR::computeh(
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
 }
 
-void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
+void siconos::collision::native::bodies::CircleCircleR::computeH(
     const siconos::algebra::BlockVector& q) {
   double x1 = q(0);
   double y1 = q(1);
@@ -55,22 +55,21 @@ void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
   double dxsd = dx / d;
   double dysd = dy / d;
 
-  jacobianhOver_q_view_->setValue(0, 0, dxsd);
-  jacobianhOver_q_view_->setValue(1, 0, -dysd);
-  jacobianhOver_q_view_->setValue(0, 1, dysd);
-  jacobianhOver_q_view_->setValue(1, 1, dxsd);
-  jacobianhOver_q_view_->setValue(0, 2, 0.);
-  jacobianhOver_q_view_->setValue(1, 2, -_r1);
-  jacobianhOver_q_view_->setValue(0, 3, -dxsd);
-  jacobianhOver_q_view_->setValue(1, 3, dysd);
-  jacobianhOver_q_view_->setValue(0, 4, -dysd);
-  jacobianhOver_q_view_->setValue(1, 4, -dxsd);
-  jacobianhOver_q_view_->setValue(0, 5, 0.);
-  jacobianhOver_q_view_->setValue(1, 5, -_r2);
+  H_view_->setValue(0, 0, dxsd);
+  H_view_->setValue(1, 0, -dysd);
+  H_view_->setValue(0, 1, dysd);
+  H_view_->setValue(1, 1, dxsd);
+  H_view_->setValue(0, 2, 0.);
+  H_view_->setValue(1, 2, -_r1);
+  H_view_->setValue(0, 3, -dxsd);
+  H_view_->setValue(1, 3, dysd);
+  H_view_->setValue(0, 4, -dysd);
+  H_view_->setValue(1, 4, -dxsd);
+  H_view_->setValue(0, 5, 0.);
+  H_view_->setValue(1, 5, -_r2);
 }
 
 void siconos::collision::native::bodies::CircleCircleR::display() const {
   std::cout << "=====> Circle-Circle relation \n";
-  if (jacobianhOver_q_view_)
-    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
+  if (H_view_) std::cout << " jacobianhOver_q_ :\n" << *H_view_ << "\n";
 }

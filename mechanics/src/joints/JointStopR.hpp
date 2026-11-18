@@ -51,8 +51,8 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                            const siconos::algebra::BlockVector& q0) override;
+  virtual void computeG(double time, siconos::modeling::Interaction& inter,
+                        const siconos::algebra::BlockVector& q0) override;
 
  public:
   /** Initialize a joint stop for a common case: a single axis with a

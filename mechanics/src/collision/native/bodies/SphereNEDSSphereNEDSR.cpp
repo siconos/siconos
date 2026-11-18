@@ -22,7 +22,10 @@
 
 siconos::collision::native::bodies::SphereNEDSSphereNEDSR::SphereNEDSSphereNEDSR::
     SphereNEDSSphereNEDSR(double r, double rr)
-    : siconos::modeling::NewtonEuler3DR{}, radius1_{r}, radius2_{rr}, radius_sum{r + rr} {}
+    : siconos::modeling::NewtonEulerVelocityR{},
+      radius1_{r},
+      radius2_{rr},
+      radius_sum{r + rr} {}
 
 double siconos::collision::native::bodies::SphereNEDSSphereNEDSR::distance(
     double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2) {

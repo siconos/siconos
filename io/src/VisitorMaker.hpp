@@ -34,11 +34,11 @@ class DynamicalSystem;
 class LagrangianDS;
 class NewtonEulerDS;
 class LagrangianR;
-class Lagrangian2d2DR;
-class Lagrangian2d3DR;
+class Lagrangian2dVelocityR;
+class Lagrangian2dVelocityAngularVelocityR;
 class NewtonEulerR;
-class NewtonEuler1DR;
-class NewtonEuler3DR;
+class NewtonEulerNormalVelocityR;
+class NewtonEulerVelocityR;
 class NewtonEulerVelocityAngularVelocityR;
 
 }  // namespace siconos::modeling
@@ -144,15 +144,15 @@ struct GlobalRelationVisitor {
   using Make = typename VisitMaker<
       siconos::modeling::LagrangianR,
       VisitMaker<
-          siconos::modeling::Lagrangian2d2DR,
+          siconos::modeling::Lagrangian2dVelocityR,
           VisitMaker<
-              siconos::modeling::Lagrangian2d3DR,
+              siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
               VisitMaker<
                   siconos::modeling::NewtonEulerR,
                   VisitMaker<
-                      siconos::modeling::NewtonEuler1DR,
+                      siconos::modeling::NewtonEulerNormalVelocityR,
                       VisitMaker<
-                          siconos::modeling::NewtonEuler3DR,
+                          siconos::modeling::NewtonEulerVelocityR,
                           VisitMaker<
                               siconos::modeling::NewtonEulerVelocityAngularVelocityR,
                               VisitMaker<
@@ -216,15 +216,15 @@ struct GlobalRelationVisitor {
   using Make = typename VisitMaker<
       siconos::modeling::LagrangianR,
       VisitMaker<
-          siconos::modeling::Lagrangian2d2DR,
+          siconos::modeling::Lagrangian2dVelocityR,
           VisitMaker<
-              siconos::modeling::Lagrangian2d3DR,
+              siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
               VisitMaker<
                   siconos::modeling::NewtonEulerR,
                   VisitMaker<
-                      siconos::modeling::NewtonEuler1DR,
+                      siconos::modeling::NewtonEulerNormalVelocityR,
                       VisitMaker<
-                          siconos::modeling::NewtonEuler3DR,
+                          siconos::modeling::NewtonEulerVelocityR,
                           VisitMaker<
                               siconos::modeling::NewtonEulerVelocityAngularVelocityR,
                               VisitMaker<

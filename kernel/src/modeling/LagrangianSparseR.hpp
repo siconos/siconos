@@ -23,6 +23,7 @@
 #define LAGRANGIANSPARSERELATION_H
 
 #include "Relation.hpp"
+#include "RelationCompatibility.hpp"
 #include "StorageTools.hpp"
 
 namespace siconos::modeling {
@@ -41,7 +42,7 @@ namespace siconos::modeling {
   Notations:
 
   \f[
-    J^h_q(q, ...)
+    H(q, ...)
     = \frac{\partial h}{\partial q} \in \mathbb{R}^{M \times N}
     =
    \left[
@@ -56,7 +57,7 @@ namespace siconos::modeling {
   This Jacobians are mainly used for Newton linearization and to compute the time-derivative of
   the constraint, \f$ y = h(q,\ldots) \f$
 
-  that is  \f$ \dot y (t) = J^h_q(q, ...)\dot q +\ldots \f$
+  that is  \f$ \dot y (t) = H(q, ...)\dot q +\ldots \f$
 
   This object can also store more general linearized part of the gap function.
   If \f$ y=h(q) \f$ models a gap function, then the time derivative can be generically  written
@@ -84,16 +85,16 @@ class LagrangianSparseR : public Relation {
 
   /** The Jacobian of the constraints with respect to the generalized coordinates   \f$ q \f$
    */
-  siconos::algebra::SparseStorage jacobianhOver_q_storage_{std::monostate{}};
+  siconos::algebra::SparseStorage H_storage_{std::monostate{}};
 
-  /** true if jacobianhOver_q is not set or set and constant */
-  bool hasConstantJacobianhOver_q_{true};
+  /** true if H is not set or set and constant */
+  bool hasConstantH_{true};
 
-  /** True if jacobianhOver_q is required */
-  bool hasJacobianhOver_q_{false};
+  /** True if H is required */
+  bool hasH_{false};
 
   /**
-   * @brief Utility function providing uniform access to the  \f$ J^h_q \f$ matrix.
+   * @brief Utility function providing uniform access to the  \f$ H \f$ matrix.
    *
    * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
    * copy.
@@ -110,15 +111,13 @@ class LagrangianSparseR : public Relation {
    *       to the actual internal or external object.
    */
   template <typename F>
-  decltype(auto) useJacobianhOver_q(F&& f) const {
-    return siconos::algebra::visitStorage(jacobianhOver_q_storage_, std::forward<F>(f),
-                                          "jacobianhOver_q_storage_");
+  decltype(auto) useH(F&& f) const {
+    return siconos::algebra::visitStorage(H_storage_, std::forward<F>(f), "H_storage_");
   }
 
   template <typename F>
-  decltype(auto) useJacobianhOver_q(F&& f) {
-    return siconos::algebra::visitStorage(jacobianhOver_q_storage_, std::forward<F>(f),
-                                          "jacobianhOver_q_storage_");
+  decltype(auto) useH(F&& f) {
+    return siconos::algebra::visitStorage(H_storage_, std::forward<F>(f), "H_storage_");
   }
 
   /** @brief minimal (protected) constructor
@@ -145,26 +144,26 @@ class LagrangianSparseR : public Relation {
    */
   virtual void checkSize(const Interaction& inter) const override {};
 
-  /** @return a read-only reference on \f$ J^h_q \f$ matrix */
-  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianhOver_q() const {
-    return useJacobianhOver_q([](auto const& M) {
+  /** @return a read-only reference on \f$ H \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> H() const {
+    return useH([](auto const& M) {
       return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
     });
   }
 
-  /*  @return a reference to the \f$ J^h_q  \f$ matrix
+  /*  @return a reference to the \f$ H  \f$ matrix
    *
    *   pybind11 use only!
    */
-  const siconos::algebra::SiconosSparseMatrix& jacobianhOver_q_py() const {
+  const siconos::algebra::SiconosSparseMatrix& H_py() const {
     return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
-        jacobianhOver_q_storage_,
+        H_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
-        "jacobianhOver_q_storage_");
+        "H_storage_");
   }
 
-  /** @return True if  \f$ J^h_q \f$ matrix has been set */
-  bool hasJacobianhOver_q() const { return hasJacobianhOver_q_; }
+  /** @return True if  \f$ H \f$ matrix has been set */
+  bool hasH() const { return hasH_; }
 
   /** main relation members display */
   void display() const override;
@@ -181,6 +180,19 @@ class LagrangianSparseR : public Relation {
       modeling::DynamicalSystem& ds1, modeling::DynamicalSystem& ds2) const override;
 
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
+
+  /** \name Deprecated names, kept for one release */
+  ///@{
+  [[deprecated("use H()")]] inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>
+  jacobianhOver_q() const {
+    return H();
+  }
+  [[deprecated("use H_py()")]] const siconos::algebra::SiconosSparseMatrix&
+  jacobianhOver_q_py() const {
+    return H_py();
+  }
+  [[deprecated("use hasH()")]] bool hasJacobianhOver_q() const { return hasH(); }
+  ///@}
 };
 
 }  // namespace siconos::modeling

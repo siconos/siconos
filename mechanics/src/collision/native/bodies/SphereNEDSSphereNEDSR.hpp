@@ -23,10 +23,10 @@
 #ifndef SphereNEDSSphereNEDSR_h
 #define SphereNEDSSphereNEDSR_h
 
-#include "NewtonEuler3DR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 
 namespace siconos::collision::native::bodies {
-class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEuler3DR,
+class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEulerVelocityR,
                               public std::enable_shared_from_this<SphereNEDSSphereNEDSR> {
  private:
   ACCEPT_SERIALIZATION(SphereNEDSSphereNEDSR);

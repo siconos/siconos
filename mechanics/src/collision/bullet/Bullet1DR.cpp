@@ -23,7 +23,7 @@
 #include "SiconosVector.hpp"
 
 siconos::collision::bullet::Bullet1DR::Bullet1DR(std::shared_ptr<btManifoldPoint> point)
-    : siconos::modeling::NewtonEuler1DR{}, _contactPoints{point} {}
+    : siconos::modeling::NewtonEulerNormalVelocityR{}, _contactPoints{point} {}
 
 void siconos::collision::bullet::Bullet1DR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,

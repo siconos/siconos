@@ -39,12 +39,12 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2() {
   rel->setComputehFunction([](const siconos::algebra::BlockVector& q,
                               Eigen::Ref<siconos::algebra::SiconosVector> y) {});
 
-  rel->setComputeJacobianhOver_qFunction([](const siconos::algebra::BlockVector& q,
-                                            Eigen::Ref<siconos::algebra::MapType> result) {});
+  rel->setComputeHFunction([](const siconos::algebra::BlockVector& q,
+                              Eigen::Ref<siconos::algebra::MapType> result) {});
 
-  rel->setComputejacobianhOver_q_dotFunction(
-      [](const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot,
-         Eigen::Ref<siconos::algebra::MapType> result) {});
+  rel->setComputeHdotFunction([](const siconos::algebra::BlockVector& q,
+                                 const siconos::algebra::BlockVector& qdot,
+                                 Eigen::Ref<siconos::algebra::MapType> result) {});
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ",
                                rel->getType() == siconos::modeling::RelationType::Lagrangian,

@@ -31,41 +31,25 @@ namespace siconos::modeling {
 /**
  * @brief Lagrangian (2nd order) non linear relations, with y=h(q) (sparse storage)
  *
- *
  * \f[
- *
- * y =  h(q) \\
- *
- * \dot y =  J^h_q(q)\dot q
- *  \f]
- *
- *   and by duality
- *
- *   \f[
- *
- *        p = {J^h_q}^\top(q)\lambda
- *   \f]
- *
- *  where
- *
- * \f[
- * J^h_q(q)
- * =
- * \frac{\partial h}{\partial q}(q)
- * =
- * \left[
- * \frac{\partial h_i}{\partial q_j}
- * \right]_{1\le i\le m,\;1\le j\le n}.
+ * \begin{aligned}
+ *   y &= h(q), \\
+ *   \dot y &= H(q)\, \dot q, \qquad
+ *     H(q) = \nabla_q^\top h(q)
+ *     = \left[ \frac{\partial h_i}{\partial q_j} \right]_{1\le i\le m,\;1\le j\le n}, \\
+ *   p &= H(q)^\top \lambda.
+ * \end{aligned}
  * \f]
  *
- * is the Jacobian matrix of the relation.
+ * Sparse-storage counterpart of LagrangianScleronomousR (same notation, see LagrangianR).
+ * The following operators can be set by user-defined functions:
  *
- *   The following operators can be set by user-defined functions:
+ *   - \f$ h(q) \f$ (setComputehFunction);
+ *   - \f$ H(q) \f$ (setConstantH, setComputeHFunction);
+ *   - \f$ \dot H \f$ (setConstantHdot, setComputeHdotFunction).
  *
- *   - \f$ h(q) \f$
- *   - \f$ J^h_q(q) \f$
- *   - \f$  \frac{\partial}{\partial t}(J^h_q) \f$
- *
+ * Former names (deprecated, kept for one release): *JacobianhOver_q* = *H*,
+ * *JacobianhOver_q_dot* = *Hdot*, jacobianhOver_q_dot_X_qdot = Hdotv.
  */
 class LagrangianSparseScleronomousR : public LagrangianSparseR {
  protected:
@@ -74,25 +58,24 @@ class LagrangianSparseScleronomousR : public LagrangianSparseR {
   /** function wrapper used to compute \f$ h(q) \f$ */
   siconos::modeling::func_prototypes::FunctionBV_V computeh_{nullptr};
 
-  /** function wrapper used to compute  \f$ J^h_q(q,t) \f$ */
-  siconos::modeling::func_prototypes::FunctionBV_Ms computejacobianhOver_q_{nullptr};
-  siconos::modeling::func_prototypes::RFunctionBV_Ms computejacobianhOver_q_python_{nullptr};
+  /** function wrapper used to compute  \f$ H(q,t) \f$ */
+  siconos::modeling::func_prototypes::FunctionBV_Ms computeH_{nullptr};
+  siconos::modeling::func_prototypes::RFunctionBV_Ms computeH_python_{nullptr};
 
-  /** \f$ \frac{\partial}{\partial t}(J^h_q) \f$
+  /** \f$ \dot H \f$
    *  This value is useful to compute the second-order
    *  derivative of the constraints with respect to time.
    */
-  siconos::algebra::SparseStorage jacobianhOver_q_dot_storage_{std::monostate{}};
+  siconos::algebra::SparseStorage Hdot_storage_{std::monostate{}};
 
-  /** true if \f$ \frac{\partial}{\partial t}(J^h_q) \f$ is not set or set and constant */
-  bool hasConstantJacobianhOver_q_dot_{true};
+  /** true if \f$ \dot H \f$ is not set or set and constant */
+  bool hasConstantHdot_{true};
 
-  /** True if \f$ \frac{\partial}{\partial t}(J^h_q) \f$ is required */
-  bool hasJacobianhOver_q_dot_{false};
+  /** True if \f$ \dot H \f$ is required */
+  bool hasHdot_{false};
 
   /**
-   * @brief Utility function providing uniform access to the \f$ \frac{\partial}{\partial
-   * t}(J^h_q) \f$ matrix.
+   * @brief Utility function providing uniform access to the \f$ \dot H \f$ matrix.
    *
    * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
    * copy.
@@ -109,24 +92,21 @@ class LagrangianSparseScleronomousR : public LagrangianSparseR {
    *       to the actual internal or external object.
    */
   template <typename F>
-  decltype(auto) useJacobianhOver_q_dot(F&& f) const {
-    return siconos::algebra::visitStorage(jacobianhOver_q_dot_storage_, std::forward<F>(f),
-                                          "jacobianhOver_q_dot_storage_");
+  decltype(auto) useHdot(F&& f) const {
+    return siconos::algebra::visitStorage(Hdot_storage_, std::forward<F>(f), "Hdot_storage_");
   }
 
   template <typename F>
-  decltype(auto) useJacobianhOver_q_dot(F&& f) {
-    return siconos::algebra::visitStorage(jacobianhOver_q_dot_storage_, std::forward<F>(f),
-                                          "jacobianhOver_q_dot_storage_");
+  decltype(auto) useHdot(F&& f) {
+    return siconos::algebra::visitStorage(Hdot_storage_, std::forward<F>(f), "Hdot_storage_");
   }
 
-  /** function wrapper used to compute \f$ \frac{\partial}{\partial t}(J^h_q) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVBV_Ms computejacobianhOver_q_dot_{nullptr};
-  siconos::modeling::func_prototypes::RFunctionBVBV_Ms computejacobianhOver_q_dot_python_{
-      nullptr};
+  /** function wrapper used to compute \f$ \dot H \f$ */
+  siconos::modeling::func_prototypes::FunctionBVBV_Ms computeHdot_{nullptr};
+  siconos::modeling::func_prototypes::RFunctionBVBV_Ms computeHdot_python_{nullptr};
 
-  /** \f$ \frac{\partial}{\partial t}(J^h_q) .\dot q\f$ */
-  std::shared_ptr<siconos::algebra::SiconosVector> jacobianhOver_q_dot_X_qdot_{nullptr};
+  /** \f$ \dot H .\dot q\f$ */
+  std::shared_ptr<siconos::algebra::SiconosVector> Hdotv_{nullptr};
 
  public:
   /** basic constructor */
@@ -155,28 +135,28 @@ class LagrangianSparseScleronomousR : public LagrangianSparseR {
   virtual void computeh(const siconos::algebra::BlockVector& q,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** @brief Set a constant \f$ J^h_q \f$
+  /** @brief Set a constant \f$ H \f$
    *  The input matrix is copied.
    *
-   *  @param newValue jacobianhOver_q matrix
+   *  @param newValue H matrix
    *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   template <typename T>
-  void setConstantJacobianhOver_q(T&& newValue, siconos::algebra::CopyTag) {
+  void setConstantH(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
     // Warning: we can't check dimensions --> they depend on the interaction
-    jacobianhOver_q_storage_ =
+    H_storage_ =
         std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
-    hasJacobianhOver_q_ = true;
-    hasConstantJacobianhOver_q_ = true;
-    computejacobianhOver_q_ = nullptr;
-    computejacobianhOver_q_python_ = nullptr;
+    hasH_ = true;
+    hasConstantH_ = true;
+    computeH_ = nullptr;
+    computeH_python_ = nullptr;
   }
 
-  /** @brief set a constant \f$ J^h_q \f$
+  /** @brief set a constant \f$ H \f$
    *
    * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
    * pointing directly to the memory provided by the argument.
@@ -188,57 +168,57 @@ class LagrangianSparseScleronomousR : public LagrangianSparseR {
    * @param tag Pass siconos::algebra::alias_t to select this overload
    *        (rather than copy version)
    */
-  void setConstantJacobianhOver_q(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
-                                  siconos::algebra::AliasTag);
+  void setConstantH(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
+                    siconos::algebra::AliasTag);
 
-  /** set a user-defined function to compute \f$ J^h_q \f$
+  /** set a user-defined function to compute \f$ H \f$
    *
    *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
-  void setComputeJacobianhOver_qFunction(Func&& f) {
+  void setComputeHFunction(Func&& f) {
     using Ret = std::invoke_result_t<Func, const siconos::algebra::BlockVector&,
                                      siconos::algebra::SiconosSparseMatrix&>;
-    hasJacobianhOver_q_ = true;
-    hasConstantJacobianhOver_q_ = false;
+    hasH_ = true;
+    hasConstantH_ = false;
 
     if constexpr (std::is_same_v<Ret, void>) {
-      computejacobianhOver_q_ = std::forward<Func>(f);
-      computejacobianhOver_q_python_ = nullptr;
+      computeH_ = std::forward<Func>(f);
+      computeH_python_ = nullptr;
     } else {
-      computejacobianhOver_q_python_ = std::forward<Func>(f);
-      computejacobianhOver_q_ = nullptr;
+      computeH_python_ = std::forward<Func>(f);
+      computeH_ = nullptr;
     }
   }
 
-  /** to compute  \f$ J^h_q(q)  \f$
+  /** to compute  \f$ H(q)  \f$
    *  @param positions q vectors
    *  @param time the current time
    */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector& positions);
+  void computeH(const siconos::algebra::BlockVector& positions);
 
-  /** @brief Set a constant \f$ \frac{\partial}{\partial t}(J^h_q) \f$  \f$
+  /** @brief Set a constant \f$ \dot H \f$
    *  The input matrix is copied.
    *
-   *  @param newValue jacobianhOver_q matrix
+   *  @param newValue H matrix
    *  @param tag Pass siconos::algebra::copy_t to select this overload (rather than alias
    *
    */
   template <typename T>
-  void setConstantJacobianhOver_q_dot(T&& newValue, siconos::algebra::CopyTag) {
+  void setConstantHdot(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
     // Warning: we can't check dimensions --> they depend on the interaction
-    jacobianhOver_q_dot_storage_ =
+    Hdot_storage_ =
         std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
-    hasJacobianhOver_q_dot_ = true;
-    hasConstantJacobianhOver_q_dot_ = true;
-    computejacobianhOver_q_dot_ = nullptr;
-    computejacobianhOver_q_dot_python_ = nullptr;
+    hasHdot_ = true;
+    hasConstantHdot_ = true;
+    computeHdot_ = nullptr;
+    computeHdot_python_ = nullptr;
   }
 
-  /** @brief set a constant \f$ \frac{\partial}{\partial t}(J^h_q) \f$
+  /** @brief set a constant \f$ \dot H \f$
    *
    * Warning : This method does NOT copy the data. Instead, it creates an Eigen::Map
    * pointing directly to the memory provided by the argument.
@@ -250,71 +230,70 @@ class LagrangianSparseScleronomousR : public LagrangianSparseR {
    * @param tag Pass siconos::algebra::alias_t to select this overload
    *        (rather than copy version)
    */
-  void setConstantJacobianhOver_q_dot(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
-                                      siconos::algebra::AliasTag);
+  void setConstantHdot(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
+                       siconos::algebra::AliasTag);
 
-  /** set a user-defined function to compute \f$ \frac{\partial}{\partial t}(J^h_q) \f$
+  /** set a user-defined function to compute \f$ \dot H \f$
    *
    *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
-  void setComputeJacobianhOver_q_dotFunction(Func&& f) {
+  void setComputeHdotFunction(Func&& f) {
     using Ret = std::invoke_result_t<Func, const siconos::algebra::BlockVector&,
                                      const siconos::algebra::BlockVector&,
                                      siconos::algebra::SiconosSparseMatrix&>;
-    hasJacobianhOver_q_dot_ = true;
-    hasConstantJacobianhOver_q_dot_ = false;
+    hasHdot_ = true;
+    hasConstantHdot_ = false;
 
     if constexpr (std::is_same_v<Ret, void>) {
-      computejacobianhOver_q_dot_ = std::forward<Func>(f);
-      computejacobianhOver_q_dot_python_ = nullptr;
+      computeHdot_ = std::forward<Func>(f);
+      computeHdot_python_ = nullptr;
     } else {
-      computejacobianhOver_q_dot_python_ = std::forward<Func>(f);
-      computejacobianhOver_q_dot_ = nullptr;
+      computeHdot_python_ = std::forward<Func>(f);
+      computeHdot_ = nullptr;
     }
   }
 
-  /** to compute  \f$ \frac{\partial}{\partial t}(J^h_q) \f$
+  /** to compute  \f$ \dot H \f$
    *  @param positions q vectors
    *  @param qdot time derivatives of the state vector
    */
-  void computeJacobianhOver_q_dot(const siconos::algebra::BlockVector& positions,
-                                  const siconos::algebra::BlockVector& qdot);
+  void computeHdot(const siconos::algebra::BlockVector& positions,
+                   const siconos::algebra::BlockVector& qdot);
 
-  /** @return a read-only view on \f$ \frac{\partial}{\partial t}( J^h_q(q)).\dot q\f$
+  /** @return a read-only view on \f$ \dot H \dot q\f$
    * vector */
-  inline auto jacobianhOver_q_dot_X_qdot() const {
-    return siconos::algebra::ConstMapVectorType(jacobianhOver_q_dot_X_qdot_->data(),
-                                                jacobianhOver_q_dot_X_qdot_->size());
+  inline auto Hdotv() const {
+    return siconos::algebra::ConstMapVectorType(Hdotv_->data(), Hdotv_->size());
   }
 
-  /** @return a read-only reference on \f$ \frac{\partial}{\partial t}(J^h_q) \f$ matrix */
-  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianhOver_q_dot() const {
-    return useJacobianhOver_q_dot([](auto const& M) {
+  /** @return a read-only reference on \f$ \dot H \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> Hdot() const {
+    return useHdot([](auto const& M) {
       return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
     });
   }
 
-  /*  @return a reference to the \f$ \frac{\partial}{\partial t}(J^h_q) \f$ matrix
+  /*  @return a reference to the \f$ \dot H \f$ matrix
    *
    *   pybind11 use only!
    */
-  const siconos::algebra::SiconosSparseMatrix& jacobianhOver_q_dot_py() const {
+  const siconos::algebra::SiconosSparseMatrix& Hdot_py() const {
     return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
-        jacobianhOver_q_dot_storage_,
+        Hdot_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
-        "jacobianhOver_q_dot_storage_");
+        "Hdot_storage_");
   }
 
-  /** @return True if  \f$ \frac{\partial}{\partial t}(J^h_q) \f$ matrix has been set */
-  bool hasJacobianhOver_q_dot() const { return hasJacobianhOver_q_dot_; }
+  /** @return True if  \f$ \dot H \f$ matrix has been set */
+  bool hasHdot() const { return hasHdot_; }
 
-  /** to compute \f$ \frac{\partial}{\partial t}( J^h_q(q)).\dot q\f$
+  /** to compute \f$ \dot H \dot q\f$
    *
    *  @param time double, current time
    *  @param inter interaction
    */
-  void computeJacobianhOver_q_dot_X_qdot(double time, Interaction& inter);
+  void computeHdotv(double time, Interaction& inter);
 
   /** compute all the jacobians of h */
   void computeJach(double time, Interaction& inter) override;
@@ -337,6 +316,60 @@ class LagrangianSparseScleronomousR : public LagrangianSparseR {
    */
   void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
+
+  /** \name Deprecated names, kept for one release */
+  ///@{
+  template <typename T>
+  [[deprecated("use setConstantH")]] void setConstantJacobianhOver_q(
+      T&& newValue, siconos::algebra::CopyTag tag) {
+    setConstantH(std::forward<T>(newValue), tag);
+  }
+  [[deprecated("use setConstantH")]] void setConstantJacobianhOver_q(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac, siconos::algebra::AliasTag tag) {
+    setConstantH(jac, tag);
+  }
+  template <typename Func>
+  [[deprecated("use setComputeHFunction")]] void setComputeJacobianhOver_qFunction(Func&& f) {
+    setComputeHFunction(std::forward<Func>(f));
+  }
+  [[deprecated("use computeH")]] void computeJacobianhOver_q(
+      const siconos::algebra::BlockVector& positions) {
+    computeH(positions);
+  }
+  template <typename T>
+  [[deprecated("use setConstantHdot")]] void setConstantJacobianhOver_q_dot(
+      T&& newValue, siconos::algebra::CopyTag tag) {
+    setConstantHdot(std::forward<T>(newValue), tag);
+  }
+  [[deprecated("use setConstantHdot")]] void setConstantJacobianhOver_q_dot(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac, siconos::algebra::AliasTag tag) {
+    setConstantHdot(jac, tag);
+  }
+  template <typename Func>
+  [[deprecated("use setComputeHdotFunction")]] void setComputeJacobianhOver_q_dotFunction(
+      Func&& f) {
+    setComputeHdotFunction(std::forward<Func>(f));
+  }
+  [[deprecated("use computeHdot")]] void computeJacobianhOver_q_dot(
+      const siconos::algebra::BlockVector& positions,
+      const siconos::algebra::BlockVector& qdot) {
+    computeHdot(positions, qdot);
+  }
+  [[deprecated("use Hdotv()")]] auto jacobianhOver_q_dot_X_qdot() const { return Hdotv(); }
+  [[deprecated("use Hdot()")]] Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>
+  jacobianhOver_q_dot() const {
+    return Hdot();
+  }
+  [[deprecated("use Hdot_py()")]] const siconos::algebra::SiconosSparseMatrix&
+  jacobianhOver_q_dot_py() const {
+    return Hdot_py();
+  }
+  [[deprecated("use hasHdot()")]] bool hasJacobianhOver_q_dot() const { return hasHdot(); }
+  [[deprecated("use computeHdotv")]] void computeJacobianhOver_q_dot_X_qdot(
+      double time, Interaction& inter) {
+    computeHdotv(time, inter);
+  }
+  ///@}
 };
 }  // namespace siconos::modeling
 #endif

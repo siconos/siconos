@@ -346,7 +346,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
   assert(lagr && "MoreauJeanBilbaoOSI only implemented for Lagrangian systems.");
 
-  auto H = lagr->jacobianhOver_q();
+  auto H = lagr->H();
   siconos::algebra::matrixBlockVector_prod(H, x_free, osnsp_rhs, true);
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput{osnsp, inter,
                                                indexSet.properties(vertex_inter)};

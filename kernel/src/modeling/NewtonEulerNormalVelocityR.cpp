@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "NewtonEuler1DR.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 
 #include <boost/math/quaternion.hpp>
 
@@ -44,24 +44,26 @@ siconos::algebra::SiconosMatrix33 skew(const Eigen::Ref<const Eigen::Vector3d>& 
 
 /* See the class documentation and DevNotes, chapter 'NewtonEulerR: computation of
  * \nabla_q H', subsection 'Case FC3D: using the local frame local velocities'. */
-void siconos::modeling::NewtonEuler1DR::computeContactFrame_(bool withTangents) {
+void siconos::modeling::NewtonEulerNormalVelocityR::computeContactFrame_(bool withTangents) {
   if (!withTangents) {
     contactFrame_.row(0) = nc_;
     return;
   }
   assert(std::abs(nc_.norm() - 1.0) < 1e-6 &&
-         "NewtonEuler1DR::computeContactFrame_: the normal vector is not a unit vector");
+         "NewtonEulerNormalVelocityR::computeContactFrame_: the normal vector is not a unit "
+         "vector");
   siconos::algebra::SiconosVector3 n = nc_, t1, t2;
   if (!siconos::geometry::orthoBaseFromVector(n, t1, t2))
     THROW_EXCEPTION(
-        "NewtonEuler1DR::computeContactFrame_: cannot build the contact frame from a zero "
+        "NewtonEulerNormalVelocityR::computeContactFrame_: cannot build the contact frame "
+        "from a zero "
         "normal vector");
   contactFrame_.row(0) = n;
   contactFrame_.row(1) = t1;
   contactFrame_.row(2) = t2;
 }
 
-void siconos::modeling::NewtonEuler1DR::computeContactVelocityJacobian_(
+void siconos::modeling::NewtonEulerNormalVelocityR::computeContactVelocityJacobian_(
     const siconos::algebra::BlockVector& q0, Eigen::Index nRows) {
   const auto Rc = contactFrame_.topRows(nRows);
   siconos::algebra::SiconosMatrix33 R;
@@ -70,44 +72,43 @@ void siconos::modeling::NewtonEuler1DR::computeContactVelocityJacobian_(
     // body 1 contributes +R_c [I, [G1 - P]x R1], body 2 contributes -R_c [I, [G2 - P]x R2]
     const double sign = (body == 0) ? 1.0 : -1.0;
     siconos::geometry::computeRotationMatrix(q, R);
-    H_NE_prod_T_->block(0, 6 * body, nRows, 3) = sign * Rc;
-    H_NE_prod_T_->block(0, 6 * body + 3, nRows, 3) =
-        sign * Rc * skew(q.head<3>() - contactPoint1_) * R;
+    H_->block(0, 6 * body, nRows, 3) = sign * Rc;
+    H_->block(0, 6 * body + 3, nRows, 3) = sign * Rc * skew(q.head<3>() - contactPoint1_) * R;
   }
-  DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
+  DEBUG_EXPR(siconos::algebra::print(*H_););
 }
 
-void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
+void siconos::modeling::NewtonEulerNormalVelocityR::initialize(Interaction& inter) {
   auto qSize = 7;
   if (inter.has2Bodies()) qSize *= 2;
 
-  H_NE_internal_storage_.resize(1, qSize);
-  H_NE_view_ =
-      std::make_shared<siconos::algebra::MapType>(H_NE_internal_storage_.data(), 1, qSize);
-  H_NE_view_->setZero();
+  G_storage_.resize(1, qSize);
+  G_view_ = std::make_shared<siconos::algebra::MapType>(G_storage_.data(), 1, qSize);
+  G_view_->setZero();
   NewtonEulerR::initialize(inter);
   //  _isContact=1;
 }
 
-void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
-                                                     siconos::modeling::Interaction& inter,
-                                                     const siconos::algebra::BlockVector& q0) {
+void siconos::modeling::NewtonEulerNormalVelocityR::computeG(
+    double time, siconos::modeling::Interaction& inter,
+    const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q(double time, Interaction& "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(double time, Interaction& "
       "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
   DEBUG_PRINTF("with time =  %f\n", time);
   DEBUG_PRINTF("with inter =  %p\n", &inter);
 
-  H_NE_view_->row(0).leftCols(3) = nc_;
+  G_view_->row(0).leftCols(3) = nc_;
   if (inter.has2Bodies()) {
-    H_NE_view_->row(0).segment(7, 3) = -nc_;
+    G_view_->row(0).segment(7, 3) = -nc_;
   }
 
   for (unsigned int iDS = 0; iDS < q0.numberOfBlocks(); iDS++) {
     auto q = q0.vector(iDS);
     double sign = 1.0;
-    DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq : ds%d->q :", iDS);
+    DEBUG_PRINTF("siconos::modeling::NewtonEulerNormalVelocityR::computeJachq : ds%d->q :",
+                 iDS);
     DEBUG_EXPR_WE(siconos::algebra::print(*q));
 
     boost::math::quaternion<double> quatGP;
@@ -118,16 +119,18 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
       quatGP = quatAux;
     } else {
       sign = -1.0;
-      // cout<<"siconos::modeling::NewtonEuler1DR::computeJachq sign is -1 \n";
+      // cout<<"siconos::modeling::NewtonEulerNormalVelocityR::computeJachq sign is -1 \n";
       boost::math::quaternion<double> quatAux(0, contactPoint2_(0) - (*q)(0),
                                               contactPoint2_(1) - (*q)(1),
                                               contactPoint2_(2) - (*q)(2));
       quatGP = quatAux;
     }
-    DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq :GP :%lf, %lf, %lf\n",
-                 quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
-    DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq :Q :%e,%e, %e, %e\n",
-                 (*q)(3), (*q)(4), (*q)(5), (*q)(6));
+    DEBUG_PRINTF(
+        "siconos::modeling::NewtonEulerNormalVelocityR::computeJachq :GP :%lf, %lf, %lf\n",
+        quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
+    DEBUG_PRINTF(
+        "siconos::modeling::NewtonEulerNormalVelocityR::computeJachq :Q :%e,%e, %e, %e\n",
+        (*q)(3), (*q)(4), (*q)(5), (*q)(6));
     boost::math::quaternion<double> quatQ((*q)(3), (*q)(4), (*q)(5), (*q)(6));
     boost::math::quaternion<double> quatcQ((*q)(3), -(*q)(4), -(*q)(5), -(*q)(6));
     boost::math::quaternion<double> quatBuff;
@@ -136,14 +139,15 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
     _2qiquatGP *= 2 * ((*q)(3));
     quatBuff = (quatGP * quatQ) + (quatcQ * quatGP) - _2qiquatGP;
 
-    DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq :quattBuuf : %e,%e,%e \n",
-                 quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
+    DEBUG_PRINTF(
+        "siconos::modeling::NewtonEulerNormalVelocityR::computeJachq :quattBuuf : %e,%e,%e \n",
+        quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
-    H_NE_view_->setValue(
+    G_view_->setValue(
         0, 7 * iDS + 3,
         sign * (quatBuff.R_component_2() * nc_(0) + quatBuff.R_component_3() * nc_(1) +
                 quatBuff.R_component_4() * nc_(2)));
-    // cout<<"WARNING NewtonEuler1DR set jachq \n";
+    // cout<<"WARNING NewtonEulerNormalVelocityR set G \n";
     // jacobianhOver_q_->setValue(0,7*iDS+3,0);
     for (unsigned int i = 1; i < 4; i++) {
       boost::math::quaternion<double> quatei(0, (i == 1) ? 1 : 0, (i == 2) ? 1 : 0,
@@ -151,40 +155,40 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
       _2qiquatGP = quatGP;
       _2qiquatGP *= 2 * ((*q)(3 + i));
       quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;
-      H_NE_view_->setValue(
+      G_view_->setValue(
           0, 7 * iDS + 3 + i,
           sign * (quatBuff.R_component_2() * nc_(0) + quatBuff.R_component_3() * nc_(1) +
                   quatBuff.R_component_4() * nc_(2)));
     }
   }
 
-  DEBUG_EXPR(siconos::algebra::print(*H_NE_view_););
+  DEBUG_EXPR(siconos::algebra::print(*G_view_););
   DEBUG_END(
-      "siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q(double time, Interaction& "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(double time, Interaction& "
       "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n");
 }
 
-void siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(
+void siconos::modeling::NewtonEulerNormalVelocityR::computeH(
     const Interaction& inter, const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(Interaction& inter, "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n")
 
   computeContactFrame_(false);
   computeContactVelocityJacobian_(q0, 1);
 
   DEBUG_END(
-      "siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(Interaction& inter, "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 }
 
-double siconos::modeling::NewtonEuler1DR::distance() const {
+double siconos::modeling::NewtonEulerNormalVelocityR::distance() const {
   siconos::algebra::SiconosVector3 dpc = contactPoint2_ - contactPoint1_;
   return dpc.norm() * (nc_.dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
+void siconos::modeling::NewtonEulerNormalVelocityR::computehFromRelativeContactPoints(
     double time, const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
@@ -224,13 +228,15 @@ void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
   }
 }
 
-void siconos::modeling::NewtonEuler1DR::computeContactPointsFromRelativeContactPoints(
-    const siconos::algebra::BlockVector& q0, const siconos::algebra::SiconosVector3& r_pc1,
-    const siconos::algebra::SiconosVector3& r_pc2,
-    const siconos::algebra::SiconosVector3& r_nc, const siconos::algebra::SiconosVector3& r_t1,
-    const siconos::algebra::SiconosVector3& r_t2, siconos::algebra::SiconosVector3& pc1,
-    siconos::algebra::SiconosVector3& pc2, siconos::algebra::SiconosVector3& nc,
-    siconos::algebra::SiconosVector3& t1, siconos::algebra::SiconosVector3& t2) {
+void siconos::modeling::NewtonEulerNormalVelocityR::
+    computeContactPointsFromRelativeContactPoints(
+        const siconos::algebra::BlockVector& q0, const siconos::algebra::SiconosVector3& r_pc1,
+        const siconos::algebra::SiconosVector3& r_pc2,
+        const siconos::algebra::SiconosVector3& r_nc,
+        const siconos::algebra::SiconosVector3& r_t1,
+        const siconos::algebra::SiconosVector3& r_t2, siconos::algebra::SiconosVector3& pc1,
+        siconos::algebra::SiconosVector3& pc2, siconos::algebra::SiconosVector3& nc,
+        siconos::algebra::SiconosVector3& t1, siconos::algebra::SiconosVector3& t2) {
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
 

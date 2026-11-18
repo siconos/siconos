@@ -30,16 +30,15 @@
 
 void siconos::modeling::NewtonEulerVelocityAngularVelocityR::initialize(Interaction& inter) {
   const auto qSize = 7 * (inter.getSizeOfDS() / 6);
-  H_NE_internal_storage_.resize(5, qSize);
-  H_NE_view_ =
-      std::make_shared<siconos::algebra::MapType>(H_NE_internal_storage_.data(), 5, qSize);
-  H_NE_view_->setZero();
+  G_storage_.resize(5, qSize);
+  G_view_ = std::make_shared<siconos::algebra::MapType>(G_storage_.data(), 5, qSize);
+  G_view_->setZero();
   NewtonEulerR::initialize(inter);
 }
 
-void siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(
+void siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH(
     const Interaction& inter, const siconos::algebra::BlockVector& q0) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T\n");
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH\n");
 
   // Rows 0-2: relative velocity at the contact point, in the contact frame
   computeContactFrame_(true);
@@ -51,9 +50,9 @@ void siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T(
   for (Eigen::Index body = 0; body < static_cast<Eigen::Index>(q0.numberOfBlocks()); ++body) {
     const double sign = (body == 0) ? 1.0 : -1.0;
     siconos::geometry::computeRotationMatrix(*q0.vector(body), R);
-    H_NE_prod_T_->block(3, 6 * body + 3, 2, 3) = sign * contactFrame_.bottomRows(2) * R;
+    H_->block(3, 6 * body + 3, 2, 3) = sign * contactFrame_.bottomRows(2) * R;
   }
 
-  DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
-  DEBUG_END("siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH_NE_prod_T\n");
+  DEBUG_EXPR(siconos::algebra::print(*H_););
+  DEBUG_END("siconos::modeling::NewtonEulerVelocityAngularVelocityR::computeH\n");
 }

@@ -21,15 +21,15 @@
 
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
-#include "Lagrangian2d1DR.hpp"
-#include "Lagrangian2d2DR.hpp"
-#include "Lagrangian2d3DR.hpp"
+#include "Lagrangian2dNormalVelocityR.hpp"
+#include "Lagrangian2dVelocityAngularVelocityR.hpp"
+#include "Lagrangian2dVelocityR.hpp"
 #include "LagrangianLinearTIR.hpp"
 #include "LagrangianR.hpp"
 #include "LagrangianScleronomousR.hpp"
-#include "NewtonEuler3DR.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonEulerVelocityAngularVelocityR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 
 namespace py = pybind11;
 
@@ -59,18 +59,21 @@ void wrap_relations(py::module_& m) {
       py::class_<siconos::modeling::LagrangianScleronomousR, siconos::modeling::LagrangianR,
                  py::smart_holder>(m, "LagrangianScleronomousR");
 
-  py::class_<siconos::modeling::Lagrangian2d2DR, siconos::modeling::LagrangianScleronomousR,
-             py::smart_holder>(m, "Lagrangian2d2DR")
-      .def("distance", &siconos::modeling::Lagrangian2d2DR::distance,
+  py::class_<siconos::modeling::Lagrangian2dVelocityR,
+             siconos::modeling::LagrangianScleronomousR, py::smart_holder>(
+      m, "Lagrangian2dVelocityR")
+      .def("distance", &siconos::modeling::Lagrangian2dVelocityR::distance,
            "distance between contact points 1 and 2, with sign according to normal ");
 
-  py::class_<siconos::modeling::Lagrangian2d3DR, siconos::modeling::LagrangianScleronomousR,
-             py::smart_holder>(m, "Lagrangian2d3DR")
-      .def("distance", &siconos::modeling::Lagrangian2d3DR::distance,
+  py::class_<siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
+             siconos::modeling::LagrangianScleronomousR, py::smart_holder>(
+      m, "Lagrangian2dVelocityAngularVelocityR")
+      .def("distance", &siconos::modeling::Lagrangian2dVelocityAngularVelocityR::distance,
            "distance between contact points 1 and 2, with sign according to normal ");
-  py::class_<siconos::modeling::Lagrangian2d1DR, siconos::modeling::LagrangianScleronomousR,
-             py::smart_holder>(m, "Lagrangian2d1DR")
-      .def("distance", &siconos::modeling::Lagrangian2d1DR::distance,
+  py::class_<siconos::modeling::Lagrangian2dNormalVelocityR,
+             siconos::modeling::LagrangianScleronomousR, py::smart_holder>(
+      m, "Lagrangian2dNormalVelocityR")
+      .def("distance", &siconos::modeling::Lagrangian2dNormalVelocityR::distance,
            "distance between contact points 1 and 2, with sign according to normal ");
 
   // ============================ FirstOrderR CLASS ==============================
@@ -117,14 +120,22 @@ void wrap_relations(py::module_& m) {
       // })
       ;
 
-  py::class_<siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEulerR,
-             py::smart_holder>(m, "NewtonEuler1DR")
-      .def("distance", &siconos::modeling::NewtonEuler1DR::distance,
+  py::class_<siconos::modeling::NewtonEulerNormalVelocityR, siconos::modeling::NewtonEulerR,
+             py::smart_holder>(m, "NewtonEulerNormalVelocityR")
+      .def("distance", &siconos::modeling::NewtonEulerNormalVelocityR::distance,
            "distance between contact points 1 and 2, with sign according to normal ");
 
-  auto ne3dR = py::class_<siconos::modeling::NewtonEuler3DR, siconos::modeling::NewtonEuler1DR,
-                          py::smart_holder>(m, "NewtonEuler3DR");
+  auto ne3dR = py::class_<siconos::modeling::NewtonEulerVelocityR,
+                          siconos::modeling::NewtonEulerNormalVelocityR, py::smart_holder>(
+      m, "NewtonEulerVelocityR");
   auto ne5dR = py::class_<siconos::modeling::NewtonEulerVelocityAngularVelocityR,
-                          siconos::modeling::NewtonEuler1DR, py::smart_holder>(
+                          siconos::modeling::NewtonEulerNormalVelocityR, py::smart_holder>(
       m, "NewtonEulerVelocityAngularVelocityR");
+
+  // Former class names, kept for one release (deprecated).
+  m.attr("Lagrangian2d1DR") = m.attr("Lagrangian2dNormalVelocityR");
+  m.attr("Lagrangian2d2DR") = m.attr("Lagrangian2dVelocityR");
+  m.attr("Lagrangian2d3DR") = m.attr("Lagrangian2dVelocityAngularVelocityR");
+  m.attr("NewtonEuler1DR") = m.attr("NewtonEulerNormalVelocityR");
+  m.attr("NewtonEuler3DR") = m.attr("NewtonEulerVelocityR");
 }

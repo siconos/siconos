@@ -37,75 +37,84 @@ void siconos::modeling::LagrangianSparseRheonomousR::initialize(Interaction& int
   //  --> Always required
   // Case 1: user-defined function --> owned storage required and not set with
   // a call to setCompute...function
-  if (computejacobianhOver_q_) {
-    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(jacobianhOver_q_storage_)) {
+  if (computeH_) {
+    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(H_storage_)) {
       // not owned storage? --> allocate
-      jacobianhOver_q_storage_ =
-          std::make_unique<siconos::algebra::SiconosSparseMatrix>(sizeY, sizeDS);
+      H_storage_ = std::make_unique<siconos::algebra::SiconosSparseMatrix>(sizeY, sizeDS);
     } else {
       // storage done and owned --> check dimensions
       bool are_dim_complient = false;
-      useJacobianhOver_q([&are_dim_complient, sizeY, sizeDS](const auto& M) {
+      useH([&are_dim_complient, sizeY, sizeDS](const auto& M) {
         are_dim_complient = M.rows() != sizeY || M.cols() != sizeDS;
       });
       if (!are_dim_complient)
-        jacobianhOver_q_storage_ =
-            std::make_unique<siconos::algebra::SiconosSparseMatrix>(sizeY, sizeDS);
+        H_storage_ = std::make_unique<siconos::algebra::SiconosSparseMatrix>(sizeY, sizeDS);
     }
   } else {
     // Other cases:
-    // - previous call to setConstantJacobianhOver_q with alias or copy
+    // - previous call to setConstantH with alias or copy
     //   --> memory allocated in both cases (owned or not)
     //   --> just check if dimensions are compliant with the interaction
     // - no call to any set... --> error
 
     // Check if the variant is empty (i.e. monostate), if so error.
-    if (std::holds_alternative<std::monostate>(jacobianhOver_q_storage_)) {
+    if (std::holds_alternative<std::monostate>(H_storage_)) {
       // -> no previous call to setConstant or setCompute, this is not allowed
       THROW_EXCEPTION(
-          "You must call setConstantJacobianhOver_q or setComputeJacobianhOver_qFunction "
+          "You must call setConstantH or setComputeHFunction "
           "before "
           "initialize.")
     }
-    useJacobianhOver_q([&](const auto& M) {
+    useH([&](const auto& M) {
       assert(M.rows() == sizeY);
       assert(M.cols() == sizeDS);
     });
   }
 
-  if (computehdot_) {  // True only if setComputehdotFunction has been called
-    // Ensure that memory is properly allocated for hdot_
-    if (!hdot_) {
-      hdot_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+  if (computedhdt_) {  // True only if setComputedhdtFunction has been called
+    // Ensure that memory is properly allocated for dhdt_
+    if (!dhdt_) {
+      dhdt_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
     }
   }
 }
 
-void siconos::modeling::LagrangianSparseRheonomousR::setComputehdotFunction(
+void siconos::modeling::LagrangianSparseRheonomousR::setComputedhdtFunction(
     const siconos::modeling::func_prototypes::FunctionBVS_V& hdot_func) {
-  // Warning: we can't allocate hdot here, since we have no clue on the
+  // Warning: we can't allocate dhdt here, since we have no clue on the
   // required size
-  computehdot_ = hdot_func;
+  computedhdt_ = hdot_func;
 }
 
-void siconos::modeling::LagrangianSparseRheonomousR::setConstantJacobianhOver_q(
+void siconos::modeling::LagrangianSparseRheonomousR::setConstantH(
     Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue, siconos::algebra::AliasTag) {
-  jacobianhOver_q_storage_ =
-      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
+  H_storage_ = std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
 
   // Warning: we can't check dimensions. This will be done during initialize.
-  hasJacobianhOver_q_ = true;
-  hasConstantJacobianhOver_q_ = true;
-  computejacobianhOver_q_ = nullptr;
-  computejacobianhOver_q_python_ = nullptr;
+  hasH_ = true;
+  hasConstantH_ = true;
+  computeH_ = nullptr;
+  computeH_python_ = nullptr;
 }
 
 void siconos::modeling::LagrangianSparseRheonomousR::computehdot(
     const siconos::algebra::BlockVector& positions, double time) {
-  if (computehdot_)
+  computedhdt(positions, time);
+}
+
+void siconos::modeling::LagrangianSparseRheonomousR::computedhdt(
+    const siconos::algebra::BlockVector& positions, double time) {
+  if (!computedhdtLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computedhdtLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computehdot(positions, time);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  if (computedhdt_)
     // in that case, internal_storage must have been allocated by
     // setCompute... call
-    computehdot_(positions, time, *hdot_);
+    computedhdt_(positions, time, *dhdt_);
 }
 
 void siconos::modeling::LagrangianSparseRheonomousR::setComputehFunction(
@@ -120,12 +129,11 @@ void siconos::modeling::LagrangianSparseRheonomousR::computeh(
   if (computeh_) computeh_(positions, time, y);
 }
 
-void siconos::modeling::LagrangianSparseRheonomousR::computeJacobianhOver_q(
+void siconos::modeling::LagrangianSparseRheonomousR::computeH(
     const siconos::algebra::BlockVector& positions, double time) {
   // Warning: the jacobian must be allocated and of the right size before a call to this
   // function
-  siconos::algebra::computeSparse(jacobianhOver_q_storage_, computejacobianhOver_q_,
-                                  computejacobianhOver_q_python_, "jacobianhOver_q_storage_",
+  siconos::algebra::computeSparse(H_storage_, computeH_, computeH_python_, "H_storage_",
                                   positions, time);
   // Return value == false => means jacobian is constant, functions not set
 }
@@ -137,23 +145,23 @@ void siconos::modeling::LagrangianSparseRheonomousR::computeOutput(
   if (derivativeNumber == 0)
     computeh(*ds_vars[tools::enum_to_index(ds_var::q0)], time, y);
   else {
-    computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+    computeH(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
     if (derivativeNumber == 1) {
-      if (!hdot_) {
+      if (!dhdt_) {
         auto sizeY = inter.dimension();
-        hdot_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        dhdt_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
       }
       // Computation of the partial derivative w.r.t time of h(q,t)
-      computehdot(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+      computedhdt(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      useJacobianhOver_q([&](const auto& M) {
+      useH([&](const auto& M) {
         siconos::algebra::matrixBlockVector_prod(M, *ds_vars[tools::enum_to_index(ds_var::q1)],
                                                  y);
       });
       // Sum of the terms
-      y += *hdot_;
+      y += *dhdt_;
     } else if (derivativeNumber == 2) {
-      useJacobianhOver_q([&](const auto& M) {
+      useH([&](const auto& M) {
         siconos::algebra::matrixBlockVector_prod(M, *ds_vars[tools::enum_to_index(ds_var::q2)],
                                                  y);
       });
@@ -171,11 +179,11 @@ void siconos::modeling::LagrangianSparseRheonomousR::computeOutput(
 void siconos::modeling::LagrangianSparseRheonomousR::computeInput(
     double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+  computeH(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  useJacobianhOver_q([&](const auto& M) {
+  useH([&](const auto& M) {
     siconos::algebra::transposeMatrixVector_prod_toBlock(
         lambda, M, *ds_vars[tools::enum_to_index(ds_var::p0) + level], false);
   });
@@ -184,9 +192,9 @@ void siconos::modeling::LagrangianSparseRheonomousR::computeInput(
 void siconos::modeling::LagrangianSparseRheonomousR::computeJach(double time,
                                                                  Interaction& inter) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+  computeH(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
   // computeJachqDot(time, inter);
   //    computeDotJachq(time, q, z);
   // computeJachlambda(time, inter);
-  computehdot(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+  computedhdt(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
 }

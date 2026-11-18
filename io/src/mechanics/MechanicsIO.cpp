@@ -25,8 +25,8 @@
 #include "BulletR.hpp"
 #include "BulletVelocityAngularVelocityR.hpp"
 #else
-#include "NewtonEuler3DR.hpp"
 #include "NewtonEulerVelocityAngularVelocityR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "SpaceFilter.hpp"
 #endif
 // #include <concepts>
@@ -47,15 +47,15 @@
 #include "DynamicalSystem.hpp"
 #include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
-#include "Lagrangian2d2DR.hpp"
-#include "Lagrangian2d3DR.hpp"
+#include "Lagrangian2dVelocityAngularVelocityR.hpp"
+#include "Lagrangian2dVelocityR.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianSparseDS.hpp"
 #include "NSLVisitor.hpp"
-#include "NewtonEuler1DR.hpp"
-#include "NewtonEuler3DR.hpp"
 #include "NewtonEulerDS.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 #include "NewtonEulerVelocityAngularVelocityR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
@@ -154,7 +154,7 @@ struct siconos::io::ContactPointVisitor : public siconos::modeling::relations::V
 /* then specializations : */
 template <>
 void siconos::io::ContactPointVisitor::operator()(
-    const siconos::modeling::NewtonEuler3DR& rel) {
+    const siconos::modeling::NewtonEulerVelocityR& rel) {
   const auto& posa = rel.pc1();
   const auto& posb = rel.pc2();
   const auto& nc = rel.nc();
@@ -164,8 +164,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-  cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -206,8 +206,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-  cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -260,8 +260,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -325,8 +325,8 @@ void siconos::io::ContactPointVisitor::operator()(
   }
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -380,8 +380,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -411,7 +411,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
 template <>
 void siconos::io::ContactPointVisitor::operator()(
-    const siconos::modeling::Lagrangian2d2DR& rel) {
+    const siconos::modeling::Lagrangian2dVelocityR& rel) {
   const auto& posa = rel.pc1();
   const auto& posb = rel.pc2();
   const auto& nc = rel.nc();
@@ -420,8 +420,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -452,7 +452,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
 template <>
 void siconos::io::ContactPointVisitor::operator()(
-    const siconos::modeling::Lagrangian2d3DR& rel) {
+    const siconos::modeling::Lagrangian2dVelocityAngularVelocityR& rel) {
   const auto& posa = rel.pc1();
   const auto& posb = rel.pc2();
   const auto& nc = rel.nc();
@@ -461,8 +461,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.H().cols()};
+  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -501,7 +501,7 @@ struct siconos::io::ContactPointDomainVisitor : public siconos::modeling::relati
 
 template <>
 void siconos::io::ContactPointDomainVisitor::operator()(
-    const siconos::modeling::NewtonEuler3DR& rel) {
+    const siconos::modeling::NewtonEulerVelocityR& rel) {
   answer.resize(2);
 
   /*
@@ -528,8 +528,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::domains(
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
     using DomainInspector = siconos::internal::RelationVisitor<
-        siconos::internal::Classes<siconos::modeling::NewtonEuler1DR,
-                                   siconos::modeling::NewtonEuler3DR,
+        siconos::internal::Classes<siconos::modeling::NewtonEulerNormalVelocityR,
+                                   siconos::modeling::NewtonEulerVelocityR,
                                    siconos::joints::PrismaticJointR,
                                    siconos::joints::KneeJointR, siconos::joints::PivotJointR>,
         ContactPointDomainVisitor>::Make;
@@ -626,13 +626,14 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
 
     /* create a visitor for specified classes */
     using ContactPointInspector = siconos::internal::RelationVisitor<
-        siconos::internal::Classes<
-            siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
-            siconos::modeling::NewtonEulerVelocityAngularVelocityR,
-            siconos::modeling::Lagrangian2d2DR, siconos::modeling::Lagrangian2d3DR,
-            siconos::collision::native::bodies::CircleCircleR,
-            siconos::collision::native::bodies::DiskDiskR,
-            siconos::collision::native::bodies::DiskPlanR>,
+        siconos::internal::Classes<siconos::modeling::NewtonEulerNormalVelocityR,
+                                   siconos::modeling::NewtonEulerVelocityR,
+                                   siconos::modeling::NewtonEulerVelocityAngularVelocityR,
+                                   siconos::modeling::Lagrangian2dVelocityR,
+                                   siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
+                                   siconos::collision::native::bodies::CircleCircleR,
+                                   siconos::collision::native::bodies::DiskDiskR,
+                                   siconos::collision::native::bodies::DiskPlanR>,
         ContactPointVisitor>::Make;
 
     ContactPointInspector inspector;
@@ -679,7 +680,7 @@ struct ContactInfoVisitor : public siconos::modeling::relations::Visitor {
 
 /* then specializations : */
 template <>
-void ContactInfoVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel) {
+void ContactInfoVisitor::operator()(const siconos::modeling::NewtonEulerVelocityR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   answer.resize(10);
   // answer[0]= id;
@@ -763,7 +764,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
     /* create a visitor for specified classes */
     using ContactInfoInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
-            siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
+            siconos::modeling::NewtonEulerVelocityR, siconos::collision::ContactR,
             siconos::collision::ContactVelocityAngularVelocityR,
             siconos::collision::Contact2dR, siconos::collision::Contact2d3DR>,
         ContactInfoVisitor>::Make;
@@ -816,7 +817,8 @@ struct ContactContactWorkVisitor : public siconos::modeling::relations::Visitor 
 
 /* then specializations : */
 template <>
-void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel) {
+void ContactContactWorkVisitor::operator()(
+    const siconos::modeling::NewtonEulerVelocityR& rel) {
   answer.resize(7);
 }
 
@@ -1086,9 +1088,11 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     /* create a visitor for specified classes */
     using ContactContactWorkInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
-            siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
+            siconos::modeling::NewtonEulerNormalVelocityR,
+            siconos::modeling::NewtonEulerVelocityR,
             siconos::modeling::NewtonEulerVelocityAngularVelocityR,
-            siconos::modeling::Lagrangian2d2DR, siconos::modeling::Lagrangian2d3DR,
+            siconos::modeling::Lagrangian2dVelocityR,
+            siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
             siconos::collision::ContactR, siconos::collision::ContactVelocityAngularVelocityR,
             siconos::collision::Contact2dR, siconos::collision::Contact2d3DR,
             siconos::collision::native::bodies::CircleCircleR,
@@ -1136,7 +1140,7 @@ struct siconos::io::ContactInternalVariableVisitor
 /* then specializations : */
 template <>
 void siconos::io::ContactInternalVariableVisitor::operator()(
-    const siconos::modeling::NewtonEuler3DR& rel) {
+    const siconos::modeling::NewtonEulerVelocityR& rel) {
   const auto& posa = rel.pc1();
   const auto& posb = rel.pc2();
   const auto& nc = rel.nc();
@@ -1149,8 +1153,8 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
   auto internalVariables = inter->internalVariables();
 
   if (internalVariables) {
-    siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-    cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(0);
+    siconos::algebra::SiconosVector cf{rel.H().cols()};
+    cf.noalias() = rel.H().transpose() * *inter->lambda(0);
 
     // std::cout << " lambda_0 " ;
     // siconos::algebra::print(*inter->lambda(0));
@@ -1230,8 +1234,8 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactInternalVariabl
 
     /* create a visitor for specified classes */
     using ContactPointInspector = siconos::internal::RelationVisitor<
-        siconos::internal::Classes<siconos::modeling::NewtonEuler1DR,
-                                   siconos::modeling::NewtonEuler3DR,
+        siconos::internal::Classes<siconos::modeling::NewtonEulerNormalVelocityR,
+                                   siconos::modeling::NewtonEulerVelocityR,
                                    siconos::modeling::NewtonEulerVelocityAngularVelocityR>,
         ContactInternalVariableVisitor>::Make;
 

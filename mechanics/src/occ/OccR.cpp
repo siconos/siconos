@@ -29,7 +29,10 @@
 
 siconos::mechanics::occ::OccR::OccR(const ContactPoint& contact1, const ContactPoint& contact2,
                                     const DistanceCalculator& distance_calculator)
-    : NewtonEuler3DR(), _contact1{contact1}, _contact2{contact2}, dt{distance_calculator} {}
+    : NewtonEulerVelocityR(),
+      _contact1{contact1},
+      _contact2{contact2},
+      dt{distance_calculator} {}
 
 void siconos::mechanics::occ::OccR::computeh(
     const Eigen::Ref<const siconos::algebra::SiconosVector7>&,

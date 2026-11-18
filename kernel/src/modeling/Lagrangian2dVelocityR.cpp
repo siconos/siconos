@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Lagrangian2d2DR.hpp"
+#include "Lagrangian2dVelocityR.hpp"
 
 #include <iostream>
 
@@ -30,37 +30,37 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {
+void siconos::modeling::Lagrangian2dVelocityR::initialize(Interaction& inter) {
   // proj_with_q  jacobianhOver_q_Proj =
   // std::make_shared<siconos::algebra::siconos::algebra::SiconosMatrix>(jacobianhOver_q_->rows(),jacobianhOver_q_->cols()));
 
   if ((inter.getSizeOfDS() != 3) and (inter.getSizeOfDS() != 6)) {
     THROW_EXCEPTION(
-        "siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter). The ds must be "
+        "siconos::modeling::Lagrangian2dVelocityR::initialize(Interaction& inter). The ds "
+        "must be "
         "of size 3 or 6");
   }
   auto qSize = 3 * (inter.getSizeOfDS() / 3);
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(2 * qSize);
+  if (!H_storage_) {
+    H_storage_ = std::make_unique<std::vector<double>>(2 * qSize);
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), 2, qSize);
-  jacobianhOver_q_view_->setZero();
+  H_view_ = std::make_shared<siconos::algebra::MapType>(H_storage_->data(), 2, qSize);
+  H_view_->setZero();
 }
 
-double siconos::modeling::Lagrangian2d2DR::distance() const {
-  DEBUG_BEGIN("siconos::modeling::Lagrangian2d2DR::distance(...)\n")
+double siconos::modeling::Lagrangian2dVelocityR::distance() const {
+  DEBUG_BEGIN("siconos::modeling::Lagrangian2dVelocityR::distance(...)\n")
   siconos::algebra::SiconosVector dpc = contactPoint2_ - contactPoint1_;
   DEBUG_EXPR(siconos::algebra::print(contactPoint1_););
   DEBUG_EXPR(siconos::algebra::print(contactPoint2_););
   DEBUG_EXPR(siconos::algebra::print(dpc););
-  DEBUG_END("siconos::modeling::Lagrangian2d2DR::distance(...)\n")
+  DEBUG_END("siconos::modeling::Lagrangian2dVelocityR::distance(...)\n")
   return dpc.norm() * (nc_.dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::modeling::Lagrangian2d2DR::computeh(
+void siconos::modeling::Lagrangian2dVelocityR::computeh(
     const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  DEBUG_BEGIN("siconos::modeling::Lagrangian2d2DR::computeh(...)\n");
+  DEBUG_BEGIN("siconos::modeling::Lagrangian2dVelocityR::computeh(...)\n");
   DEBUG_EXPR(siconos::algebra::print(q));
 
   DEBUG_EXPR(siconos::algebra::print(contactPoint1_););
@@ -72,39 +72,39 @@ void siconos::modeling::Lagrangian2d2DR::computeh(
 
   DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(display(););
-  DEBUG_END("siconos::modeling::Lagrangian2d2DR::computeh(...)\n");
+  DEBUG_END("siconos::modeling::Lagrangian2dVelocityR::computeh(...)\n");
   // getchar();
 }
 
-void siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(
+void siconos::modeling::Lagrangian2dVelocityR::computeH(
     const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dVelocityR::computeH(Interaction& inter, "
       "Ssiconos::algebra::BlockVector q0 \n");
   siconos::algebra::SiconosVector2 lever_arm;
   lever_arm << contactPoint1_.x() - q(0), contactPoint1_.y() - q(1);
 
-  jacobianhOver_q_view_->row(0).segment(0, 2) = nc_;
-  (*jacobianhOver_q_view_)(0, 2) = lever_arm.x() * nc_.y() - lever_arm.y() * nc_.x();
-  jacobianhOver_q_view_->row(1).segment(0, 2) << -nc_.y(), nc_.x();  // tangent vector;
-  (*jacobianhOver_q_view_)(1, 2) = lever_arm.x() * nc_.x() + lever_arm.y() * nc_.y();
+  H_view_->row(0).segment(0, 2) = nc_;
+  (*H_view_)(0, 2) = lever_arm.x() * nc_.y() - lever_arm.y() * nc_.x();
+  H_view_->row(1).segment(0, 2) << -nc_.y(), nc_.x();  // tangent vector;
+  (*H_view_)(1, 2) = lever_arm.x() * nc_.x() + lever_arm.y() * nc_.y();
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
     lever_arm << contactPoint1_.x() - q(3), contactPoint1_.y() - q(4);
 
-    jacobianhOver_q_view_->row(0).segment(3, 2) = -nc_;
-    (*jacobianhOver_q_view_)(0, 5) = -lever_arm.x() * nc_.y() + lever_arm.y() * nc_.x();
-    jacobianhOver_q_view_->row(1).segment(3, 2) << nc_.y(), -nc_.x();  // tangent vector;
-    (*jacobianhOver_q_view_)(1, 5) = -lever_arm.x() * nc_.x() - lever_arm.y() * nc_.y();
+    H_view_->row(0).segment(3, 2) = -nc_;
+    (*H_view_)(0, 5) = -lever_arm.x() * nc_.y() + lever_arm.y() * nc_.x();
+    H_view_->row(1).segment(3, 2) << nc_.y(), -nc_.x();  // tangent vector;
+    (*H_view_)(1, 5) = -lever_arm.x() * nc_.x() - lever_arm.y() * nc_.y();
   }
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_view_););
+  DEBUG_EXPR(siconos::algebra::print(*H_view_););
   DEBUG_END(
-      "siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dVelocityR::computeH(Interaction& inter, "
       "siconos::algebra::BlockVector q0) \n");
 }
 
-void siconos::modeling::Lagrangian2d2DR::display() const {
+void siconos::modeling::Lagrangian2dVelocityR::display() const {
   LagrangianR::display();
 
   std::cout << " _Pc1 :" << std::endl;
@@ -117,12 +117,12 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
   siconos::algebra::print(nc_);
 }
 
-// void siconos::modeling::Lagrangian2d2DR::computeOutput(double time, Interaction& inter,
-// siconos::algebra::blocks::size_type derivativeNumber)
+// void siconos::modeling::Lagrangian2dVelocityR::computeOutput(double time, Interaction&
+// inter, siconos::algebra::blocks::size_type derivativeNumber)
 // {
 
-//   DEBUG_PRINTF("siconos::modeling::Lagrangian2d2DR::computeOutput(double time, Interaction&
-//   inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type
+//   DEBUG_PRINTF("siconos::modeling::Lagrangian2dVelocityR::computeOutput(double time,
+//   Interaction& inter, InteractionProperties& interProp, siconos::algebra::blocks::size_type
 //   derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
 //   std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& ds_vars =
 //   inter.read_dynamical_systems_variables(); siconos::algebra::SiconosVector& y =
@@ -133,7 +133,7 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //   }
 //   else
 //   {
-//     computeJacobianhOver_q(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)],
+//     computeH(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)],
 //     *ds_vars[LagrangianR::z]); if(derivativeNumber == 1)
 //     {
 //       assert(jacobianhOver_q_);
@@ -176,7 +176,7 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //       // }
 //     }
 //     else
-//       THROW_EXCEPTION("siconos::modeling::Lagrangian2d2DR::computeOutput(double time,
+//       THROW_EXCEPTION("siconos::modeling::Lagrangian2dVelocityR::computeOutput(double time,
 //       Interaction& inter, InteractionProperties& interProp,
 //       siconos::algebra::blocks::size_type derivativeNumber), index out of range");
 //   }
@@ -190,7 +190,7 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 
 //   DEBUG_PRINTF("level = %i\n", level);
 //   const auto& ds_vars = inter.read_dynamical_systems_variables();
-//   computeJacobianhOver_q(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)],
+//   computeH(*ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0)],
 //   *ds_vars[LagrangianR::z]);
 //   // get lambda of the concerned interaction
 //   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);

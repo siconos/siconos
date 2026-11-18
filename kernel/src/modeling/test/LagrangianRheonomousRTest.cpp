@@ -48,14 +48,14 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0() {
   auto jachq = [](const siconos::algebra::BlockVector& pos, double time,
                   Eigen::Ref<siconos::algebra::MapType> result) { result.setZero(); };
 
-  auto hdot = [](const siconos::algebra::BlockVector& pos, double time,
+  auto dhdt = [](const siconos::algebra::BlockVector& pos, double time,
                  Eigen::Ref<siconos::algebra::MapVectorType> result) { result.setZero(); };
 
   rel->setComputehFunction(hfunc);
 
-  rel->setComputeJacobianhOver_qFunction(jachq);
+  rel->setComputeHFunction(jachq);
 
-  rel->setComputehdotFunction(hdot);
+  rel->setComputedhdtFunction(dhdt);
 
   // For a complete test/example with initialize(inter), compute call and so on
   // see CamFollower-Rheonomous

@@ -470,7 +470,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             *currentInteractionBlock +=
                 std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
                     inter->relation())
-                    ->DMatrix() /
+                    ->D() /
                 simulation()->timeStep();
           }
         }
@@ -498,7 +498,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             *currentInteractionBlock +=
                 std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
                     inter->relation())
-                    ->DMatrix() /
+                    ->D() /
                 simulation()->timeStep();
           }
         }

@@ -26,7 +26,7 @@
 
 #include "ContactPoint.hpp"
 #include "Geometer.hpp"
-#include "NewtonEuler3DR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "OccBody.hpp"
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"

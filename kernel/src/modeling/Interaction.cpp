@@ -561,9 +561,9 @@ void siconos::modeling::Interaction::computeInput(double time,
 const siconos::algebra::ConstMapType siconos::modeling::Interaction::getLeftInteractionBlock()
     const {
   if (auto lagr = std::dynamic_pointer_cast<LagrangianR>(relation())) {
-    return lagr->jacobianhOver_q();
+    return lagr->H();
   } else if (auto ner = std::dynamic_pointer_cast<NewtonEulerR>(relation())) {
-    return ner->H_NE_prod_T();
+    return ner->H();
   } else if (auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation())) {
     return forel->jacobianhOver_state();
   } else {
@@ -589,12 +589,12 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(
       interactionBlock->setZero();
   } else if (relationType == RelationType::Lagrangian) {
     auto lagr = std::dynamic_pointer_cast<LagrangianR>(relation());
-    auto originalMatrix = lagr->jacobianhOver_q();
+    auto originalMatrix = lagr->H();
     *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
 
   } else if (relationType == RelationType::NewtonEuler) {
     auto newtonr = std::dynamic_pointer_cast<NewtonEulerR>(relation());
-    auto originalMatrix = newtonr->H_NE_prod_T();
+    auto originalMatrix = newtonr->H();
     *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
   } else
     THROW_EXCEPTION(
@@ -616,7 +616,7 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   auto neR = std::dynamic_pointer_cast<NewtonEulerR>(relation());
   assert(neR);
   // proj_with_q originalMatrix = r->jachqProj();
-  auto originalMatrix = neR->H_NE();
+  auto originalMatrix = neR->G();
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   *interactionBlock =

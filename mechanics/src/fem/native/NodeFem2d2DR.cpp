@@ -31,10 +31,10 @@
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::NodeFem2d2DR::initialize(modeling::Interaction& inter) {
-  setComputeJacobianhOver_qFunction([this](const siconos::algebra::BlockVector& q,
-                                           Eigen::Ref<siconos::algebra::MapType> result) {
+  setComputeHFunction([this](const siconos::algebra::BlockVector& q,
+                             Eigen::Ref<siconos::algebra::MapType> result) {
     DEBUG_BEGIN(
-        "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+        "NodeFem2d2DR::computeH(const siconos::algebra::BlockVector& q, "
         "siconos::algebra::BlockVector& z \n");
 
     result.setValue(0, node_->global_dof_index()[0], nc_.x());
@@ -49,7 +49,7 @@ void siconos::mechanics::fem::NodeFem2d2DR::initialize(modeling::Interaction& in
     }
     // DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
     DEBUG_END(
-        "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+        "NodeFem2d2DR::computeH(const siconos::algebra::BlockVector& q, "
         "siconos::algebra::BlockVector& z) \n");
   });
   LagrangianScleronomousR::initialize(inter);

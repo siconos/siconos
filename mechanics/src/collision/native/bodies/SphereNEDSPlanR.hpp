@@ -25,11 +25,11 @@
 #ifndef SphereNEDSPlanR_h
 #define SphereNEDSPlanR_h
 
-#include "NewtonEuler3DR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "SiconosVector.hpp"
 
 namespace siconos::collision::native::bodies {
-class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
+class SphereNEDSPlanR : public siconos::modeling::NewtonEulerVelocityR,
                         public std::enable_shared_from_this<SphereNEDSPlanR> {
  private:
   ACCEPT_SERIALIZATION(SphereNEDSPlanR);

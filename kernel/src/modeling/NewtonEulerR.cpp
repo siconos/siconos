@@ -39,33 +39,31 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   auto ySize = inter.dimension();
   auto Hcols = 7;  // 7 * number of DS in the interaction
   if (inter.has2Bodies()) Hcols *= 2;
-  // setHMatrix is the only way to set jacobianhOver_q. So if it's required, storage
+  // setHMatrix is the only way to set H. So if it's required, storage
   // is already allocated at this point.
 
   // No relation without H
-  // - either a shared view with an external object (if set with setConstantH_NE)
+  // - either a shared view with an external object (if set with setConstantG)
   // - or memory allocated in derived class (constructor or in initialize)
-  if (!H_NE_view_) {
-    // It means that setConstantH_NE has not been call and that internal storage is required.
-    H_NE_internal_storage_.resize(ySize, Hcols);
-    H_NE_view_ = std::make_shared<siconos::algebra::MapType>(H_NE_internal_storage_.data(),
-                                                             ySize, Hcols);
-    H_NE_view_->setZero();
+  if (!G_view_) {
+    // It means that setConstantG has not been call and that internal storage is required.
+    G_storage_.resize(ySize, Hcols);
+    G_view_ = std::make_shared<siconos::algebra::MapType>(G_storage_.data(), ySize, Hcols);
+    G_view_->setZero();
   }
 
   // JacobianhOver_q_dot is optional. Allocation only if a user-defined function has been set.
-  if (computeH_NE_dot_) {
-    // True only if setComputeJacobianhOver_q_dotFunction has been called
+  if (computeGdot_) {
+    // True only if setComputeHdotFunction has been called
     // Ensure that memory is properly allocated for H_dot
-    if (!H_NE_dot_) {
-      H_NE_dot_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, Hcols);
-      H_NE_dot_->setZero();
+    if (!Gdot_) {
+      Gdot_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, Hcols);
+      Gdot_->setZero();
     }
   }
   auto qSize = inter.getSizeOfDS();  // sum of considered DS sizes
-  if (!H_NE_prod_T_)
-    H_NE_prod_T_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
-  H_NE_prod_T_->setZero();
+  if (!H_) H_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
+  H_->setZero();
 
   // Allocate internal buffer, used to save T(q)
   T_buffer_.setZero();
@@ -87,32 +85,32 @@ void siconos::modeling::NewtonEulerR::checkSize(const Interaction& inter) const 
   [[maybe_unused]] auto qSize = inter.getSizeOfDS();  // sum of considered DS sizes
   [[maybe_unused]] auto Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
 
-  if (H_NE_view_) {
-    assert(H_NE_view_->rows() == ySize);
-    assert(H_NE_view_->cols() == Hcols);
+  if (G_view_) {
+    assert(G_view_->rows() == ySize);
+    assert(G_view_->cols() == Hcols);
   }
 
-  if (H_NE_dot_) {
-    assert(H_NE_dot_->rows() == ySize);
-    assert(H_NE_dot_->cols() == Hcols);
+  if (Gdot_) {
+    assert(Gdot_->rows() == ySize);
+    assert(Gdot_->cols() == Hcols);
   }
 
   if (haseVector_) assert(eVector_view_->size() == ySize);
 
-  if (H_NE_prod_T_) {
-    assert(H_NE_prod_T_->rows() == ySize);
-    assert(H_NE_prod_T_->cols() == qSize);
+  if (H_) {
+    assert(H_->rows() == ySize);
+    assert(H_->cols() == qSize);
   }
 }
 
-void siconos::modeling::NewtonEulerR::setConstantH_NE(
+void siconos::modeling::NewtonEulerR::setConstantG(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
   // Warning: mat. dims are not checked since we have no clue here regarding the size of the
   // Interaction.
 
-  H_NE_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), newValue.rows(),
-                                                           newValue.cols());
-  hasConstantH_NE_ = true;
+  G_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), newValue.rows(),
+                                                        newValue.cols());
+  hasConstantG_ = true;
 }
 
 void siconos::modeling::NewtonEulerR::setConstanteVector(
@@ -125,26 +123,33 @@ void siconos::modeling::NewtonEulerR::setConstanteVector(
   haseVector_ = true;
 }
 
-void siconos::modeling::NewtonEulerR::setComputeH_NE_dotFunction(
+void siconos::modeling::NewtonEulerR::setComputeGdotFunction(
     const siconos::modeling::func_prototypes::FunctionBVBV_M& func) {
-  // H_NE_dot_ is allocated in initialize, or at first use if the function is set later.
-  computeH_NE_dot_ = func;
+  // Gdot_ is allocated in initialize, or at first use if the function is set later.
+  computeGdot_ = func;
 }
 
-void siconos::modeling::NewtonEulerR::allocateH_NE_dot_() {
-  if (!H_NE_dot_) {
-    assert(H_NE_view_ && "NewtonEulerR: H_NE must be allocated before H_NE_dot");
-    H_NE_dot_ = std::make_shared<siconos::algebra::SiconosMatrix>(H_NE_view_->rows(),
-                                                                  H_NE_view_->cols());
-    H_NE_dot_->setZero();
+void siconos::modeling::NewtonEulerR::allocateGdot_() {
+  if (!Gdot_) {
+    assert(G_view_ && "NewtonEulerR: G must be allocated before Gdot");
+    Gdot_ =
+        std::make_shared<siconos::algebra::SiconosMatrix>(G_view_->rows(), G_view_->cols());
+    Gdot_->setZero();
   }
 }
 
-void siconos::modeling::NewtonEulerR::computeH_NE_dot(
-    const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
-  if (computeH_NE_dot_) {
-    allocateH_NE_dot_();
-    computeH_NE_dot_(q, qdot, *H_NE_dot_);
+void siconos::modeling::NewtonEulerR::computeGdot(const siconos::algebra::BlockVector& q,
+                                                  const siconos::algebra::BlockVector& qdot) {
+  if (!computeGdotLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computeGdotLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computeH_NE_dot(q, qdot);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  if (computeGdot_) {
+    allocateGdot_();
+    computeGdot_(q, qdot, *Gdot_);
   }
 }
 
@@ -153,9 +158,9 @@ void siconos::modeling::NewtonEulerR::computeh(
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Default implementation: convert to BlockVector and call existing method
-  y.noalias() = H_NE_view_->leftCols(7) * q1;
+  y.noalias() = G_view_->leftCols(7) * q1;
   if (q2) {
-    y.noalias() += H_NE_view_->rightCols(7) * *q2;
+    y.noalias() += G_view_->rightCols(7) * *q2;
   }
   if (haseVector_) y += *eVector_view_;
 }
@@ -176,19 +181,19 @@ void siconos::modeling::NewtonEulerR::computeOutput(
 
   } else {
     if (derivativeNumber == 1) {
-      assert(H_NE_prod_T_);
+      assert(H_);
       assert(ds_vars[siconos::tools::enum_to_index(ds_var::velocity)]);
-      DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
+      DEBUG_EXPR(siconos::algebra::print(*H_););
       DEBUG_EXPR(siconos::algebra::print(
           (*ds_vars[siconos::tools::enum_to_index(ds_var::velocity)])));
       ;
       /* \warning  V.A. 15/04/2016
        * We decide finally not to update the Jacobian there. To be discussed
        */
-      //      if (!hasConstantH_NE_) computeH_NE_(time, inter, q);
-      //      computeH_NE_prod_T(inter, q);
+      //      if (!hasConstantG_) computeG(time, inter, q);
+      //      computeH(inter, q);
       auto& vel = *ds_vars[siconos::tools::enum_to_index(ds_var::velocity)];
-      siconos::algebra::matrixBlockVector_prod(*H_NE_prod_T_, vel, y);
+      siconos::algebra::matrixBlockVector_prod(*H_, vel, y);
       DEBUG_EXPR(siconos::algebra::print(y););
     } else if (derivativeNumber == 2) {
       THROW_EXCEPTION(
@@ -219,20 +224,18 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   if (level == 1 ||
       level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-    contactForce_.noalias() = H_NE_prod_T_->transpose() * lambda;
+    contactForce_.noalias() = H_->transpose() * lambda;
     DEBUG_EXPR(siconos::algebra::print(contactForce_););
 
     siconos::algebra::transposeMatrixVector_prod_toBlock(
-        lambda, *H_NE_prod_T_, *ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level],
-        false);
+        lambda, *H_, *ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level], false);
 
-    DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
+    DEBUG_EXPR(siconos::algebra::print(*H_););
     DEBUG_EXPR(
         siconos::algebra::print(*ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level]););
   } else if (level == 0) {
     siconos::algebra::transposeMatrixVector_prod_toBlock(
-        lambda, *H_NE_view_, *ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level],
-        false);
+        lambda, *G_view_, *ds_vars[siconos::tools::enum_to_index(ds_var::p0) + level], false);
   } else
     THROW_EXCEPTION(
         "siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& inter, "
@@ -243,23 +246,51 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   DEBUG_END("siconos::modeling::NewtonEulerR::computeInput(...)\n");
 }
 
-void siconos::modeling::NewtonEulerR::computeH_NE_prod_T(
-    const Interaction& inter, const siconos::algebra::BlockVector& q) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeH_NE_prod_T(...) \n");
-  DEBUG_PRINTF("with inter =  %p\n", &inter);
-  DEBUG_EXPR(inter.display());
-  // For each qi from DS
-  // compute H.T(qi)
-
-  // H.T(q), first DS
-  siconos::modeling::newton_euler::computeT(*q.vector(0), T_buffer_);
-  H_NE_prod_T_->leftCols(6) = H_NE_view_->leftCols(7) * T_buffer_;
-  // H.T(q), second DS if it exists
-  if (inter.has2Bodies()) {
-    siconos::modeling::newton_euler::computeT(*q.vector(1), T_buffer_);
-    H_NE_prod_T_->rightCols(6) = H_NE_view_->rightCols(7) * T_buffer_;
+void siconos::modeling::NewtonEulerR::computeG(double time, Interaction& inter,
+                                               const siconos::algebra::BlockVector& q0) {
+  // Default: G is constant. Dispatch to a class overriding the deprecated name.
+  if (!computeGLegacy_) {
+    detail::LegacyCallGuard guard(computeGLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computeH_NE_(time, inter, q0);
+    SICONOS_IGNORE_DEPRECATED_END
   }
-  DEBUG_END("siconos::modeling::NewtonEulerR::computeH_NE_prod_T(...) \n");
+}
+
+void siconos::modeling::NewtonEulerR::computeH_NE_(double time, Interaction& inter,
+                                                   const siconos::algebra::BlockVector& q0) {
+  computeG(time, inter, q0);
+}
+
+void siconos::modeling::NewtonEulerR::computeH(const Interaction& inter,
+                                               const siconos::algebra::BlockVector& q0) {
+  if (!computeHLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computeHLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computeH_NE_prod_T(inter, q0);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  computeHFromG_(q0);
+}
+
+void siconos::modeling::NewtonEulerR::computeH_NE_prod_T(
+    const Interaction& inter, const siconos::algebra::BlockVector& q0) {
+  computeH(inter, q0);
+}
+
+void siconos::modeling::NewtonEulerR::computeH_NE_dot(
+    const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
+  computeGdot(q, qdot);
+}
+
+void siconos::modeling::NewtonEulerR::computeHFromG_(const siconos::algebra::BlockVector& q0) {
+  // H = G T(q), body by body
+  for (Eigen::Index body = 0; body < static_cast<Eigen::Index>(q0.numberOfBlocks()); ++body) {
+    siconos::modeling::newton_euler::computeT(*q0.vector(body), T_buffer_);
+    H_->middleCols(6 * body, 6) = G_view_->middleCols(7 * body, 7) * T_buffer_;
+  }
+  DEBUG_EXPR(siconos::algebra::print(*H_););
 }
 
 void siconos::modeling::NewtonEulerR::computeJach(double time, Interaction& inter) {
@@ -269,24 +300,24 @@ void siconos::modeling::NewtonEulerR::computeJach(double time, Interaction& inte
 
   const auto& ds_vars = inter.read_dynamical_systems_variables();
 
-  if (!hasConstantH_NE_)
-    computeH_NE_(time, inter, *ds_vars[siconos::tools::enum_to_index(ds_var::q0)]);
-  computeH_NE_prod_T(inter, *ds_vars[siconos::tools::enum_to_index(ds_var::q0)]);
+  if (!hasConstantG_)
+    computeG(time, inter, *ds_vars[siconos::tools::enum_to_index(ds_var::q0)]);
+  computeH(inter, *ds_vars[siconos::tools::enum_to_index(ds_var::q0)]);
 
   // computeJachqDot(time, inter); // This is not needed here
   // computeDotJachq(time, inter);
   DEBUG_END("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
 }
 
-void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
-    double time, Interaction& inter, std::shared_ptr<DynamicalSystem> ds1,
-    std::shared_ptr<DynamicalSystem> ds2) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms\n");
+void siconos::modeling::NewtonEulerR::computeHdotv(double time, Interaction& inter,
+                                                   std::shared_ptr<DynamicalSystem> ds1,
+                                                   std::shared_ptr<DynamicalSystem> ds2) {
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeHdotv\n");
 
-  if (!computeH_NE_dot_)
+  if (!computeGdot_)
     THROW_EXCEPTION(
-        "NewtonEulerR::computeSecondOrderTimeDerivativeTerms: no function to compute "
-        "H_NE_dot, call setComputeH_NE_dotFunction.");
+        "NewtonEulerR::computeHdotv: no function to compute "
+        "H_NE_dot, call setComputeGdotFunction.");
 
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   const auto& q = *ds_vars[siconos::tools::enum_to_index(ds_var::q0)];
@@ -294,25 +325,23 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   const auto& v = *ds_vars[siconos::tools::enum_to_index(ds_var::velocity)];
 
   // Jdot * dotq (dotq is assumed to be up to date)
-  allocateH_NE_dot_();
-  computeH_NE_dot_(q, dotq, *H_NE_dot_);
-  DEBUG_EXPR(siconos::algebra::print(*H_NE_dot_););
-  secondOrderTimeDerivativeTerms_.resize(H_NE_dot_->rows());
-  siconos::algebra::matrixBlockVector_prod(*H_NE_dot_, dotq, secondOrderTimeDerivativeTerms_,
-                                           true);
+  allocateGdot_();
+  computeGdot_(q, dotq, *Gdot_);
+  DEBUG_EXPR(siconos::algebra::print(*Gdot_););
+  Hdotv_.resize(Gdot_->rows());
+  siconos::algebra::matrixBlockVector_prod(*Gdot_, dotq, Hdotv_, true);
 
   // + J * Tdot * v, body by body
   auto addJTdotv = [&](DynamicalSystem& ds, Eigen::Index body) {
     auto& neds = dynamic_cast<NewtonEulerDS&>(ds);
     neds.computeTdot();
-    secondOrderTimeDerivativeTerms_.noalias() +=
-        H_NE_view_->middleCols(7 * body, 7) * (neds.Tdot() * *v.vector(body));
+    Hdotv_.noalias() += G_view_->middleCols(7 * body, 7) * (neds.Tdot() * *v.vector(body));
   };
   addJTdotv(*ds1, 0);
   if (inter.has2Bodies()) addJTdotv(*ds2, 1);
 
-  DEBUG_EXPR(siconos::algebra::print(secondOrderTimeDerivativeTerms_););
-  DEBUG_END("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms\n");
+  DEBUG_EXPR(siconos::algebra::print(Hdotv_););
+  DEBUG_END("siconos::modeling::NewtonEulerR::computeHdotv\n");
 }
 
 void siconos::modeling::NewtonEulerR::allocate_read_dynamical_systems_var_vectors(

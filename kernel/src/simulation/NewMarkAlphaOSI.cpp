@@ -271,7 +271,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
       auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
           inter->relation());
-      auto C = _SclerR->jacobianhOver_q();
+      auto C = _SclerR->H();
 
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() ==
           osnsp)  // LCP at acceleration level
@@ -279,8 +279,8 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
         siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, true);
         auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
         ID->setIdentity();
-        _SclerR->computeJacobianhOver_q_dot_X_qdot(t, *inter);
-        osnsp_rhs += *ID * _SclerR->jacobianhOver_q_dot_X_qdot();
+        _SclerR->computeHdotv(t, *inter);
+        osnsp_rhs += *ID * _SclerR->Hdotv();
         // y += NonLinearPart
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
                  osnsp)  // LCP at position level
@@ -308,11 +308,11 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
           siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
         } else if (auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
                        inter->relation())) {
-          auto C = lagr->jacobianhOver_q();
+          auto C = lagr->H();
           siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
         } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
                        inter->relation())) {
-          auto C = ner->H_NE_prod_T();
+          auto C = ner->H();
           siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
         }
 
