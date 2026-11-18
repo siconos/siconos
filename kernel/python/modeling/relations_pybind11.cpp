@@ -49,6 +49,10 @@ void wrap_relations(py::module_& m) {
   py::class_<siconos::modeling::LagrangianLinearTIR, siconos::modeling::LagrangianR,
              py::smart_holder>(m, "LagrangianLinearTIR")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>>(), py::keep_alive<1, 2>())
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 2>(), py::keep_alive<1, 3>(),
+           "H, e (aliased: both arrays must be writeable, H Fortran-ordered)")
       .def("display", &siconos::modeling::LagrangianLinearTIR::display)
       .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR& a) {
         a.display();

@@ -21,6 +21,7 @@
 #include <pybind11/stl.h>
 
 #include "EulerMoreauOSI.hpp"
+#include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanGOSI.hpp"
 #include "MoreauJeanOSI.hpp"
@@ -100,4 +101,11 @@ PYBIND11_MODULE(integrators, m) {
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
       .def(py::init<double>(), py::arg("theta"));
+
+  // exact time-integration of linear oscillators with diagonal (modal) operators
+  // (siconos::modeling::LagrangianLinearDiagonalDS), see Bilbao's schemes.
+  py::class_<siconos::integrators::MoreauJeanBilbaoOSI,
+             siconos::integrators::OneStepIntegrator, py::smart_holder>(m,
+                                                                        "MoreauJeanBilbaoOSI")
+      .def(py::init<>());
 }

@@ -248,13 +248,20 @@ def main():
         #  - generate .siconos/pyproject.toml file
         #  - add and configure a target name 'somename' in the generated CMakeLists.txt
         #
-        if not addons_need_rebuild(args):
+        # compiled addons and their generated __init__.py live next to the
+        # build dir (i.e. in the working directory, which is not the driver
+        # directory when run from ctest)
+        args.addons_out = Path(args.build_dir).parent / "addons"
+        new_hash = addons_need_rebuild(args)
+        if new_hash is None:
             msg = "✅ addons unchanged, skipping rebuild"
             logging.info(msg)
         else:
             generate_addons_python_project(args)
             build = generate_cmakelists(args)
             build_addons(args)
+            # record the hash only once the build succeeded
+            Path(args.build_dir, ".addons_hash").write_text(new_hash)
 
         args.no_build = True
 
@@ -288,6 +295,13 @@ def main():
                 env["PYTHONPATH"] += ":" + siconos_pythonpath.resolve().as_posix()
             else:
                 env["PYTHONPATH"] = siconos_pythonpath.resolve().as_posix()
+            if args.use_addons:
+                # 'import addons' must find the generated (regular) package;
+                # the driver-dir 'addons' (sources only) is a namespace package
+                # and regular packages take precedence over it.
+                env["PYTHONPATH"] = (
+                    args.addons_out.parent.resolve().as_posix() + ":" + env["PYTHONPATH"]
+                )
             if sim_options:
                 # the simulation options: a wrapper loads
                 # nonos/simoptions.py, applies them and runs the driver
@@ -865,7 +879,14 @@ def build_addons(args):
         f"{args.build_dir}",
         f"--prefix={args.build_dir}/",
     ]
-    run_command(cmd, args.quiet)
+    # scikit-build-core takes CC from python's sysconfig (e.g. conda clang), which may
+    # not match the toolchain siconos was built with (and may not even link with the
+    # system SDK). Use the siconos compilers unless the user chose some.
+    env = os.environ.copy()
+    for var, compiler in (("CC", "@CMAKE_C_COMPILER@"), ("CXX", "@CMAKE_CXX_COMPILER@")):
+        if compiler and var not in env:
+            env[var] = compiler
+    run_command(cmd, args.quiet, env)
     msg = "✅ addons python package built."
     format_msg(msg, args.quiet)
     logging.info(msg)
@@ -1163,6 +1184,9 @@ def hash_directory(directory, extensions=(".cpp", ".cxx", ".hpp", ".h")):
 
 
 def addons_need_rebuild(args):
+    """Return the new hash of the addons sources if they must be rebuilt
+    (sources changed or generated package missing), None otherwise.
+    The caller writes the hash once the build succeeded."""
     hash_file = Path(args.build_dir) / ".addons_hash"
 
     new_hash = hash_directory(args.addons)
@@ -1170,11 +1194,17 @@ def addons_need_rebuild(args):
     if Path(hash_file).exists():
         old_hash = Path(hash_file).read_text().strip()
 
-    if new_hash != old_hash:
-        Path(hash_file).write_text(new_hash)
-        return True
+    # rebuild also when a previous build failed half-way
+    # (package or compiled modules missing)
+    out = Path(args.addons_out)
+    built = Path(out, "__init__.py").exists() and all(
+        any(out.glob(Path(src).stem + ".*so")) or any(out.glob(Path(src).stem + ".*pyd"))
+        for src in collect_sources(args.addons)
+    )
+    if new_hash != old_hash or not built:
+        return new_hash
 
-    return False
+    return None
 
 
 if __name__ == "__main__":

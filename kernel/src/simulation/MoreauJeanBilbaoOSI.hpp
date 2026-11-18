@@ -155,6 +155,12 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    */
   void updateState(const unsigned int level) override;
 
+  /** Compute the current iteration of the state: nothing to do.
+   *  The scheme is exact for linear (diagonal) systems, there is no Newton
+   *  iteration and updateState() performs the whole velocity/position update.
+   */
+  void computeIteration() override {}
+
   /** print the data to the screen
    */
   void display() const override;
