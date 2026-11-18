@@ -27,6 +27,11 @@
   accepted is the solution; if round-off rejects every case, the case of
   smallest violation is kept and the violation is the local residual.
 
+  A block without rolling row (zero third row and column: a contact whose
+  relation has no rolling row) is a 2D Coulomb contact: r_r = 0, the
+  inverse is the one of its normal and tangent block, and the same cases
+  are solved on the normal and tangent rows.
+
   In rolling_friction_2d_nsgs, the diagonal blocks of W and their inverses
   are extracted once per solve (rolling_friction_2d_enum_initialize, into
   the dWork of the local solver options) and the local problem of a

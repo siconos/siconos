@@ -143,5 +143,30 @@ int main(void) {
            use_enum ? "enum" : "default", bad, worst, ok ? "ok" : "FAILED");
     failures += !ok;
   }
+
+  /* random one-contact problems without rolling row (third row and column
+     of W and q_r zeroed, mu_r random or 0): r_r = 0 */
+  for (int use_enum = 0; use_enum <= 1; ++use_enum) {
+    double worst = 0.;
+    int bad = 0;
+    for (int k = 0; k < 2000; ++k) {
+      double Wr[9], q[3], mu_k, mur_k, r[3];
+      rfc2d_random_chain(1, k % 2, Wr, q, &mu_k, &mur_k);
+      Wr[2] = Wr[5] = Wr[6] = Wr[7] = Wr[8] = 0.;
+      q[2] = 0.;
+      double Wc[9];
+      for (int i = 0; i < 9; ++i) Wc[i] = Wr[i];
+      int info = solve(Wc, q, mu_k, mur_k, use_enum, r);
+      double v = rfc2d_law_violation(1, Wr, q, &mu_k, &mur_k, r);
+      worst = fmax(worst, v);
+      if (info || v > 1e-8 || !isfinite(r[0] + r[1] + r[2])) bad++;
+    }
+    int ok = use_enum ? bad == 0 : bad <= 20;
+    printf(
+        "random without rolling row, %-8s: 2000 problems, %d failures, worst violation %.2e "
+        "%s\n",
+        use_enum ? "enum" : "default", bad, worst, ok ? "ok" : "FAILED");
+    failures += !ok;
+  }
   return failures ? 1 : 0;
 }
