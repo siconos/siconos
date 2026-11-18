@@ -99,8 +99,10 @@ void siconos::mechanics::fem::Mesh::display(bool brief) const {
     std::cout << "Physical entities : (number, tag,  type, name)\n";
     int k = 0;
     for (auto& physical_entry : physical_entities_) {
-      std::cout << k << " " << k + 1 << " " << std::get<0>(physical_entry) << " "
-                << std::get<1>(physical_entry) << "\n";
+      // skip unused tags (see createMeshFromGMSH2)
+      if (!std::get<1>(physical_entry).empty())
+        std::cout << k << " " << k + 1 << " " << std::get<0>(physical_entry) << " "
+                  << std::get<1>(physical_entry) << "\n";
       k++;
     }
   }

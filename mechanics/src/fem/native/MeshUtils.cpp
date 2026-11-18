@@ -229,6 +229,10 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
         t_type >> type;
         t_number >> number;
         std::cout << type << " " << number << " name: " << name << std::endl;
+        // physical_entities[tag - 1] holds the entity of a given tag. Tags are not
+        // necessarily 1..number_of_physical_names (e.g. 4, 5, 6): grow if needed.
+        if (number == 0) THROW_EXCEPTION("createMeshFromGMSH2: physical tag must be > 0");
+        if (number > physical_entities.size()) physical_entities.resize(number);
         physical_entities[number - 1] = make_tuple(type, name);
       }
     }
