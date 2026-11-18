@@ -306,6 +306,19 @@ class OneStepNSProblem {
   std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> getOSIMatrix(
       siconos::integrators::OneStepIntegrator& osi,
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+
+  /** X <- W^{-1} X, where W is the OSI-related matrix of ds used to compute the current
+      InteractionBlock (see getOSIMatrix). Unlike getOSIMatrix, it also handles the sparse
+      factorizations (D1MinusLinearOSI with a LagrangianSparseDS: W = sparse mass matrix).
+
+      \param osi the integrator
+      \param ds the concerned dynamical system
+      \param X the right-hand side, overwritten by the solution
+      \return false if W is the identity (X unchanged)
+  */
+  bool solveWithOSIMatrix(siconos::integrators::OneStepIntegrator& osi,
+                          std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                          siconos::algebra::SiconosMatrix& X);
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif  // ONESTEPNSPROBLEM_H
