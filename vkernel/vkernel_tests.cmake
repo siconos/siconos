@@ -278,6 +278,12 @@ if(WITH_TESTING)
 
     new_python_test(NAME vkernel_python_fremond_oblique_disk SCRIPT fremond_oblique_disk.py)
     new_python_test(NAME vkernel_python_rolling_friction SCRIPT rolling_friction.py)
+    # the AOS kernel reference of rolling_friction_aos.py
+    add_executable(disk_line_rolling_aos
+                   src/siconos/vkernel/tests/disk_line_rolling_aos.cpp)
+    target_link_libraries(disk_line_rolling_aos PRIVATE kernel numerics)
+    new_python_test(NAME vkernel_python_rolling_friction_aos SCRIPT
+                    rolling_friction_aos.py ARGS $<TARGET_FILE:disk_line_rolling_aos>)
     new_python_test(NAME vkernel_python_sliding_square_schemes SCRIPT sliding_square_schemes.py)
     new_python_test(NAME vkernel_python_add_objects SCRIPT test_add_objects.py PYTEST)
     new_python_test(NAME vkernel_python_contact_work SCRIPT test_contact_work.py PYTEST)
