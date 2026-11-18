@@ -100,6 +100,20 @@ static_assert(match::not_removable<siconos::vkernel::config::osi>);
 static_assert(!match::not_removable<siconos::vkernel::config::ball>);
 static_assert(!match::not_removable<siconos::vkernel::config::interaction>);
 
+// a reference handle holds a reference to its index: built from a temporary
+// index it would dangle, so that construction must not exist (the same reason
+// make_ref_handle(D&, index&&) is deleted)
+using ball_ref_handle =
+    siconos::vkernel::storage::handle<siconos::vkernel::storage::handle_ref,
+                                      siconos::vkernel::config::ball, std::size_t,
+                                      siconos::vkernel::config::data_t>;
+using ball_ref_index =
+    siconos::vkernel::storage::index<siconos::vkernel::config::ball, std::size_t>;
+static_assert(!std::constructible_from<ball_ref_handle, siconos::vkernel::config::data_t&,
+                                       ball_ref_index&&>);
+static_assert(!std::constructible_from<ball_ref_handle, siconos::vkernel::config::data_t,
+                                       ball_ref_index&&>);
+
 namespace {
 
 class RegistryRemoveTest : public CppUnit::TestFixture {
@@ -118,6 +132,8 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testHandlesWithoutAttributes);
   CPPUNIT_TEST(testFixedSizePerItemStorageIsRefused);
   CPPUNIT_TEST(testSparseOnlyItemIsRefused);
+  CPPUNIT_TEST(testAccessAt);
+  CPPUNIT_TEST(testConstAccess);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -417,6 +433,56 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
 
     config::sparse_rows_t data;
     CPPUNIT_ASSERT_THROW(storage::add<config::sparse_row>(data), std::logic_error);
+  }
+
+  // storage::access<T>::at: its three overloads read the same value, and the
+  // (handle, data) one passes the data first to get, as get expects
+  void testAccessAt() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::data_t data;
+    auto ball0 = storage::add<config::ball>(data);
+    ball0.q() = {1., 2., 3.};
+
+    // the paired attribute type, as pattern::attributes returns it
+    using ball_attrs_t = std::decay_t<decltype(storage::pattern::attributes(config::ball{}))>;
+    using q_t = std::decay_t<decltype(ball_attrs_t{}[0_c])>;
+
+    CPPUNIT_ASSERT_MESSAGE("at(handle) reads q", storage::access<q_t>::at(ball0)(0) == 1.);
+    CPPUNIT_ASSERT_MESSAGE("at(handle, data) reads q",
+                           storage::access<q_t>::at(ball0, data)(1) == 2.);
+    CPPUNIT_ASSERT_MESSAGE("at(handle, step) reads q",
+                           storage::access<q_t>::at(ball0, 0)(2) == 3.);
+  }
+
+  // a store that is only read can be const: the attribute and property
+  // columns are then read through const references, which is what a
+  // serializer or a read-only view needs
+  void testConstAccess() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::data_t data;
+    auto ball0 = storage::add<config::ball>(data);
+    ball0.q() = {1., 2., 3.};
+    auto& bc0 = storage::prop<"bc_velocities_0", config::topo>(ball0);
+    bc0.resize(1);
+    bc0[0] = 7;
+
+    const config::data_t& cdata = data;
+
+    const auto& qs = storage::attr_values<config::ball, "q">(cdata, 0);
+    CPPUNIT_ASSERT_MESSAGE("a const store reads q", qs[0](1) == 2.);
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(qs[0])>>,
+                  "a const store gives const attribute values");
+
+    const auto& bcs =
+        storage::prop_values<config::ball, "bc_velocities_0", config::topo>(cdata, 0);
+    CPPUNIT_ASSERT_MESSAGE("a const store reads a dynamic property",
+                           bcs.contains(0) && bcs.at(0)[0] == 7);
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(bcs)>>,
+                  "a const store gives a const sparse set");
   }
 
   // the walker on the shapes a column may take: only the refs of the moved

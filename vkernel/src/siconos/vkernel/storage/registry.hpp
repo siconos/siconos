@@ -233,6 +233,13 @@ inline const std::size_t slot_plus_one = slot_id<Key>() + 1;
  *
  * Not templated on the items: it is a vector of type-erased columns indexed by
  * slot_id<Key>, created lazily on first access.
+ *
+ * Not thread safe for structural changes: create_column, push_item,
+ * remove_item, remove_items and permute resize the slot table and the
+ * columns. Read and write access to the values (registry::column) is what the
+ * kernels do in parallel; adding, removing or permuting items is a
+ * single-threaded host operation (the space filter, the start of a step).
+ * Only slot_id's counter is atomic.
  */
 struct registry {
   std::vector<std::unique_ptr<column_base>> slots;
@@ -294,6 +301,13 @@ struct registry {
     }
     registry_detail::column_not_registered();
 #endif
+  }
+
+  /// The same column, read-only: a const store can be read (a serializer, a
+  /// read-only view). The lookup itself mutates nothing, hence the cast.
+  template <typename Key, typename Memory>
+  const Memory& column() const {
+    return const_cast<registry*>(this)->template column<Key, Memory>();
   }
 
   /// Create the column of Key with its memory depth (time_levels<>), and list it
@@ -607,9 +621,23 @@ struct world {
   registry _registry;
 
   world& store() { return *this; }
+  /// the same world, read-only: its columns are then read through const
+  /// references
+  const world& store() const { return *this; }
 
   template <typename K>
   decltype(auto) column() {
+    if constexpr (std::is_same_v<K, info>) {
+      return Info{};
+    } else if constexpr (requires { typename K::dynamic_storage_t; }) {
+      return _registry.template column<K, typename dynamic_column_of<Info, K>::type>();
+    } else {
+      return _registry.template column<K, typename column_of<Info, K>::type>();
+    }
+  }
+
+  template <typename K>
+  decltype(auto) column() const {
     if constexpr (std::is_same_v<K, info>) {
       return Info{};
     } else if constexpr (requires { typename K::dynamic_storage_t; }) {
