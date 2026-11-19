@@ -41,9 +41,37 @@ namespace {
 class BouncingBallTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(BouncingBallTest);
   CPPUNIT_TEST(testBouncingBall);
+  CPPUNIT_TEST(testIntegratorsOwnTheirKinds);
   CPPUNIT_TEST_SUITE_END();
 
  public:
+  // each integrator adds its own system and interaction kinds and keeps the
+  // refs to them: the second one's refs are 1, not the first one's 0
+  void testIntegratorsOwnTheirKinds() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+    using siconos::vkernel::storage::handle;
+
+    config::data_t data;
+
+    handle osi0 = storage::add<config::osi>(data);
+    handle osi1 = storage::add<config::osi>(data);
+
+    auto check_kind_rows = [](auto osi, std::size_t row) {
+      auto check = [&](auto& kinds) {
+        std::apply(
+            [&](const auto&... kind) {
+              (CPPUNIT_ASSERT_EQUAL(row, std::size_t(kind.value())), ...);
+            },
+            kinds);
+      };
+      check(storage::attr<"systems">(osi));
+      check(storage::attr<"interactions">(osi));
+    };
+    check_kind_rows(osi0, 0);
+    check_kind_rows(osi1, 1);
+  }
+
   void testBouncingBall() {
     namespace storage = siconos::vkernel::storage;
     namespace config = siconos::vkernel::config;
