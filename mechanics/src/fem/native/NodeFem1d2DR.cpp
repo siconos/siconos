@@ -77,7 +77,7 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeh(
   LagrangianScleronomousR::computeh(q, y);
   siconos::algebra::SiconosVector& displacement = *((q.getAllVect())[0]);
   contactPoint1_(0) = displacement(node_->global_dof_index()[0]) + node_->x();
-  contactPoint2_(1) = displacement(node_->global_dof_index()[1]) + node_->y();
+  contactPoint1_(1) = displacement(node_->global_dof_index()[1]) + node_->y();
   y(0) = distance();
 
   DEBUG_EXPR(siconos::algebra::print(y););

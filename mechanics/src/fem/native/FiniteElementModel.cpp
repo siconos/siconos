@@ -258,9 +258,8 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
       // " "  << gp_w
       // << " "   << std::endl;);
 
-      double coeff =
-          gp_w * massDensity * detJ / 6.0;  // we divide again by 6.0 since the reference
-                                            // element has volume equal to 1/6.0
+      // the weights of the Gauss points include the volume of the reference element (1/6)
+      double coeff = gp_w * massDensity * detJ;
 
       DEBUG_EXPR(std::cout << "coeff: " << coeff << std::endl;);
       /* M += (coeff * Nt N)*/
@@ -269,7 +268,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
           // DEBUG_PRINTF(" N[%i] = %e\t N[%i] = %e\t entry = %e \n", i, N[i],
           // j, N[j], coeff* N[i]*N[j]);
           auto i3 = siconos::algebra::to_index(3 * i);
-          auto j3 = siconos::algebra::to_index(3 * i);
+          auto j3 = siconos::algebra::to_index(3 * j);
 
           Me(i3, j3) += coeff * N[i] * N[j];
           Me(i3 + 1, j3 + 1) += coeff * N[i] * N[j];
@@ -840,11 +839,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       }
       double detJ = det3x3(J.data());
       DEBUG_PRINTF("detJ = %e\n", detJ);
-      // for (int j = 0; j < 3; j++) {
-      //   for (int i = 0; i < 3; i++) b[i] = 0.0;
-      //   b[j] = 1.0;
-      //   // int info = solv3x3(J, &Jinv[j * 3], b);
-      // }
+      if (detJ <= 0) THROW_EXCEPTION("computeElementaryStiffnessMatrix. detJ <=0");
+      // J[3 * a + b] = d x_b / d xi_a (row major), so that
+      // (Nx, Ny, Nz) = J^{-1} (Nksi, Neta, Nzeta).
+      Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(Jinv.data()) =
+          Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(J.data()).inverse();
 
       // Compute the derivative w.r.t x and y of the shape function
       for (size_t n = 0; n < nnodes; n++) {
@@ -890,9 +889,8 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       siconos::algebra::SiconosDenseMatrix BTDB = B * DB;
       DEBUG_EXPR(siconos::algebra::print(BTDB););
 
-      double coeff = 0.0;
-      coeff = gp_w * detJ / 6.0;  // we divide again by 6.0 since the reference
-                                  // element has volume equal to 1/6.0
+      // the weights of the Gauss points include the volume of the reference element (1/6)
+      double coeff = gp_w * detJ;
       Ke += (coeff * BTDB);
 
       // // check with direct computation (see AFEM Chap 16 Felippa)
