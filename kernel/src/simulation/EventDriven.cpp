@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "EventsManager.hpp"
+#include "Hem5OSI.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianSparseDS.hpp"
@@ -787,6 +788,15 @@ void siconos::simulation::EventDriven::advanceToEvent() {
             // updateIndexSetsWithDoubleCondition();
           }
         }
+      }
+      // The acceleration stored in the DS is the last right-hand side evaluated by the
+      // integrator, at an internal time of its step, not at _tout. Recompute it at _tout
+      // (with p[2] above) so that q, v, the acceleration and lambda[2] are consistent.
+      for (auto& osi : *_allOSI) {
+        if (osi->getType() == siconos::integrators::IntegratorType::LSODAROSI)
+          static_cast<siconos::integrators::LsodarOSI&>(*osi).computeRhs(_tout);
+        else if (osi->getType() == siconos::integrators::IntegratorType::HEM5OSI)
+          static_cast<siconos::integrators::Hem5OSI&>(*osi).computeRhs(_tout);
       }
     }
   } else {

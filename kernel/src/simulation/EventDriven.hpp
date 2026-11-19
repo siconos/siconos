@@ -285,6 +285,11 @@ class EventDriven : public Simulation {
   void updateOutput(unsigned int level) override;
 
   /** run simulation from one Event to the next, according to events manager settings.
+   *
+   *  With LsodarOSI or Hem5OSI, when no new event occurs in the step, the DS states,
+   *  \f$ \lambda_2 \f$, \f$ p_2 \f$ and the DS right-hand side (acceleration) are all
+   *  evaluated at the end time of the step: the right-hand side is recomputed there,
+   *  instead of keeping the last one evaluated by the integrator at an internal time.
    */
   void advanceToEvent() override;
 
