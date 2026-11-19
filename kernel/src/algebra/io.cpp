@@ -20,7 +20,9 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <iterator>
+#include <limits>
 
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
@@ -262,6 +264,23 @@ double siconos::algebra::io::compareRefFile(const SiconosDenseMatrix& data,
   auto ref = readDenseMatrix(filename, mode);
 
   if (verbose) std::cout << "\n ===> Comparison with reference file " << filename << std::endl;
+
+  // data - ref is undefined for mismatched shapes (out-of-bounds reads in Release):
+  // report the mismatch and return +inf so that any `error > epsilon` test fails.
+  if (data.rows() != ref.rows() || data.cols() != ref.cols()) {
+    std::cerr << "compareRefFile: size mismatch with reference file " << filename
+              << ": data is " << data.rows() << "x" << data.cols() << ", reference is "
+              << ref.rows() << "x" << ref.cols() << std::endl;
+    return std::numeric_limits<double>::infinity();
+  }
+  for (auto& i : index) {
+    if (i < 0 || i >= static_cast<int>(data.cols())) {
+      std::cerr << "compareRefFile: column index " << i << " out of range (data has "
+                << data.cols() << " columns)" << std::endl;
+      return std::numeric_limits<double>::infinity();
+    }
+  }
+
   auto err = siconos::algebra::normInfByColumn(data - ref);
 
   if (verbose) {
