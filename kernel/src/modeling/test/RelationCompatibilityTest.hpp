@@ -22,7 +22,7 @@
 
 /** Checks the deprecated names of the LagrangianR / NewtonEulerR API (kept for one release):
  *  - a class overriding a former virtual name (e.g. computeJacobianhOver_q) is still called
- *    through the new name (computeH), which is the one used by the kernel;
+ *    through the new name (computeContactMatrix), which is the one used by the kernel;
  *  - a class overriding the new name is reached through the former name;
  *  - without override, both names run the default implementation (user function);
  *  - the deprecated accessors, setters, members and class names forward to the new ones.

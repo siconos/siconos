@@ -212,10 +212,10 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
         indexSet.bundle(*vi)->relation());
     assert(rel);
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-        const_cast<double*>(rel->H().data());
+        const_cast<double*>(rel->contactMatrix().data());
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-        const_cast<double*>(rel->H().data());
+        const_cast<double*>(rel->contactMatrix().data());
   }
 
   _diagsize0->resize(involvedDS.size());

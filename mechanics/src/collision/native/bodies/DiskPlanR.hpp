@@ -98,7 +98,7 @@ class DiskPlanR : public siconos::modeling::LagrangianScleronomousR,
   /** Computes \f$ \nabla^\top_q h(q) \f$
    * \param q coordinates of the dynamical systems involved in the relation
    */
-  void computeH(const siconos::algebra::BlockVector& q) override;
+  void computeContactMatrix(const siconos::algebra::BlockVector& q) override;
 
   bool equal(double, double, double, double) const;
 

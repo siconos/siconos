@@ -39,18 +39,19 @@ namespace siconos::modeling {
     p &= H(q, \ldots)^\top \lambda,
   \end{aligned}
   \f]
-  where \f$ H \in \mathbb{R}^{m \times n} \f$ (H()) is the <em>contact configuration
-  matrix</em>: it maps the generalized velocities to the local (relative) velocities of the
-  relation. When the relation is given by a function \f$ h \f$, \f$ H \f$ is its Jacobian,
+  where \f$ H \in \mathbb{R}^{m \times n} \f$ (contactMatrix()) is the <em>contact
+  configuration matrix</em>: it maps the generalized velocities to the local (relative)
+  velocities of the relation. When the relation is given by a function \f$ h \f$, \f$ H \f$ is
+  its Jacobian,
   \f[
     H(q, \ldots) = G(q, \ldots) = \nabla_q^\top h(q, \ldots)
     = \left[ \frac{\partial h_i}{\partial q_j} \right]_{1\le i\le m,\;1\le j\le n},
   \f]
-  since \f$ \dot q = v \f$ (\f$ T = I \f$ with the notation of NewtonEulerR); G() returns
-  the same matrix as H(). For contact relations with friction or rolling resistance (e.g.
-  Lagrangian2dVelocityR), the rows of \f$ H \f$ beyond the normal one are not the Jacobian of
-  a function: they contain the change to the local contact frame and the relative velocity
-  between the bodies.
+  since \f$ \dot q = v \f$ (\f$ T = I \f$ with the notation of NewtonEulerR);
+  constraintJacobian() returns the same matrix as contactMatrix(). For contact relations with
+  friction or rolling resistance (e.g. Lagrangian2dVelocityR), the rows of \f$ H \f$ beyond the
+  normal one are not the Jacobian of a function: they contain the change to the local contact
+  frame and the relative velocity between the bodies.
 
   - h may be \f$ h(q) \f$ (scleronomic, LagrangianScleronomousR), \f$ h(q,t) \f$
     (rheonomic, LagrangianRheonomousR), \f$ h(q, \lambda) \f$ (compliant,
@@ -59,9 +60,14 @@ namespace siconos::modeling {
   - All operators can be set by user-defined functions; their signatures depend on the
     derived class.
 
-  <b>Former names</b> (deprecated, kept for one release): jacobianhOver_q() = H(), and in
-  the derived classes, *JacobianhOver_q* = *H*, *jacobianhOver_q_dot* = *Hdot*,
-  jacobianhOver_q_dot_X_qdot = Hdotv.
+  <b>Names in the code.</b> The matrices are named after what they are, not after their
+  letter: \f$ H \f$ is contactMatrix() (setConstantContactMatrix, computeContactMatrix,
+  setComputeContactMatrixFunction, ...), \f$ G \f$ is constraintJacobian(),
+  \f$ \dot H \f$ is contactMatrixDot() and \f$ \dot H v \f$ is contactMatrixDotV().
+
+  <b>Former names</b> (deprecated, kept for one release): jacobianhOver_q() = contactMatrix(),
+  and in the derived classes, *JacobianhOver_q* = *ContactMatrix*, *jacobianhOver_q_dot* =
+  *contactMatrixDot*, jacobianhOver_q_dot_X_qdot = contactMatrixDotV.
  */
 class LagrangianR : public Relation {
  public:
@@ -75,22 +81,22 @@ class LagrangianR : public Relation {
   ACCEPT_SERIALIZATION(LagrangianR);
 
   /** View onto the contact configuration matrix \f$ H \in \mathbb{R}^{m \times n} \f$
-   *  (either H_storage_ or external memory) */
-  std::shared_ptr<siconos::algebra::MapType> H_view_{nullptr};
+   *  (either contactMatrix_storage_ or external memory) */
+  std::shared_ptr<siconos::algebra::MapType> contactMatrix_view_{nullptr};
 
   /** internal (optional) storage used for \f$ H \f$ */
-  std::unique_ptr<std::vector<double>> H_storage_{nullptr};
+  std::unique_ptr<std::vector<double>> contactMatrix_storage_{nullptr};
 
   /** True if \f$ H \f$ is a constant matrix */
-  bool hasConstantH_{false};
+  bool hasConstantContactMatrix_{false};
 
   /** Deprecated names of the members above, kept for one release. */
-  [[deprecated(
-      "use H_view_")]] std::shared_ptr<siconos::algebra::MapType>& jacobianhOver_q_view_{
-      H_view_};
-  [[deprecated("use H_storage_")]] std::unique_ptr<std::vector<double>>&
-      jacobianhOver_q_internal_storage_{H_storage_};
-  [[deprecated("use hasConstantH_")]] bool& hasConstantJacobianhOver_q_{hasConstantH_};
+  [[deprecated("use contactMatrix_view_")]] std::shared_ptr<siconos::algebra::MapType>&
+      jacobianhOver_q_view_{contactMatrix_view_};
+  [[deprecated("use contactMatrix_storage_")]] std::unique_ptr<std::vector<double>>&
+      jacobianhOver_q_internal_storage_{contactMatrix_storage_};
+  [[deprecated("use hasConstantContactMatrix_")]] bool& hasConstantJacobianhOver_q_{
+      hasConstantContactMatrix_};
 
   /** @brief minimal (protected) constructor
    *
@@ -117,16 +123,19 @@ class LagrangianR : public Relation {
 
   /** @return a read-only view on the contact configuration matrix
    *  \f$ H \in \mathbb{R}^{m \times n} \f$, \f$ \dot y = H v + \ldots \f$ */
-  inline auto H() const {
-    return siconos::algebra::ConstMapType(H_view_->data(), H_view_->rows(), H_view_->cols());
+  inline auto contactMatrix() const {
+    return siconos::algebra::ConstMapType(
+        contactMatrix_view_->data(), contactMatrix_view_->rows(), contactMatrix_view_->cols());
   }
 
   /** @return a read-only view on \f$ G = \nabla_q^\top h \f$, which is the same matrix as
-   *  H() for Lagrangian relations (\f$ \dot q = v \f$) */
-  inline auto G() const { return H(); }
+   *  contactMatrix() for Lagrangian relations (\f$ \dot q = v \f$) */
+  inline auto constraintJacobian() const { return contactMatrix(); }
 
-  /** @deprecated use H() */
-  [[deprecated("use H()")]] inline auto jacobianhOver_q() const { return H(); }
+  /** @deprecated use contactMatrix() */
+  [[deprecated("use contactMatrix()")]] inline auto jacobianhOver_q() const {
+    return contactMatrix();
+  }
 
   /** main relation members display */
   void display() const override;

@@ -45,9 +45,9 @@ void fillQ(BlockVector& q) {
 template <class R>
 struct WithH : R {
   WithH() {
-    this->H_storage_ = std::make_unique<std::vector<double>>(3, 0.);
-    this->H_view_ =
-        std::make_shared<siconos::algebra::MapType>(this->H_storage_->data(), 1, 3);
+    this->contactMatrix_storage_ = std::make_unique<std::vector<double>>(3, 0.);
+    this->contactMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+        this->contactMatrix_storage_->data(), 1, 3);
   }
 };
 
@@ -64,9 +64,9 @@ struct OldScleronomousR : WithH<LagrangianScleronomousR> {
 /** a class written with the new API */
 struct NewScleronomousR : WithH<LagrangianScleronomousR> {
   int calls = 0;
-  void computeH(const BlockVector& q) override {
+  void computeContactMatrix(const BlockVector& q) override {
     ++calls;
-    (*H_view_)(0, 1) = q(1);
+    (*contactMatrix_view_)(0, 1) = q(1);
   }
 };
 
@@ -76,7 +76,7 @@ struct OldRheonomousR : WithH<LagrangianRheonomousR> {
   OldRheonomousR() { dhdt_ = std::make_shared<SiconosVector>(1); }
   void computeJacobianhOver_q(const BlockVector& q, double time) {
     ++callsH;
-    (*H_view_)(0, 2) = time;
+    (*contactMatrix_view_)(0, 2) = time;
   }
   void computehdot(const BlockVector& q, double time) {
     ++callsDt;
@@ -103,16 +103,19 @@ struct OldCompliantR : WithH<LagrangianCompliantR> {
 /** allocate G (1 x 7) and H (1 x 6), normally done by initialize */
 struct WithGH : NewtonEulerR {
   WithGH() {
-    G_storage_.resize(1, 7);
-    G_storage_.setZero();
-    G_view_ = std::make_shared<siconos::algebra::MapType>(G_storage_.data(), 1, 7);
-    H_ = std::make_shared<SiconosMatrix>(1, 6);
-    H_->setZero();
+    constraintJacobian_storage_.resize(1, 7);
+    constraintJacobian_storage_.setZero();
+    constraintJacobian_view_ =
+        std::make_shared<siconos::algebra::MapType>(constraintJacobian_storage_.data(), 1, 7);
+    contactMatrix_ = std::make_shared<SiconosMatrix>(1, 6);
+    contactMatrix_->setZero();
     T_buffer_.setZero();  // constant part of T, as in NewtonEulerR::initialize
     T_buffer_.topLeftCorner<3, 3>().setIdentity();
   }
-  /** computeG is protected: expose it */
-  void callComputeG(Interaction& inter, const BlockVector& q) { computeG(0., inter, q); }
+  /** computeConstraintJacobian is protected: expose it */
+  void callComputeG(Interaction& inter, const BlockVector& q) {
+    computeConstraintJacobian(0., inter, q);
+  }
 };
 struct OldNewtonEulerR : WithGH {
   int callsG = 0, callsH = 0;
@@ -124,7 +127,7 @@ struct OldNewtonEulerR : WithGH {
 };
 struct NewNewtonEulerR : WithGH {
   int callsH = 0;
-  void computeH(const Interaction&, const BlockVector&) override { ++callsH; }
+  void computeContactMatrix(const Interaction&, const BlockVector&) override { ++callsH; }
 };
 
 }  // namespace
@@ -135,9 +138,9 @@ void RelationCompatibilityTest::testLagrangianScleronomousR() {
 
   // former override, called through the new name (the one used by the kernel)
   OldScleronomousR oldR;
-  oldR.computeH(q);
+  oldR.computeContactMatrix(q);
   CPPUNIT_ASSERT_EQUAL(1, oldR.calls);
-  CPPUNIT_ASSERT_EQUAL(1., oldR.H()(0, 0));
+  CPPUNIT_ASSERT_EQUAL(1., oldR.contactMatrix()(0, 0));
   oldR.computeJacobianhOver_q(q);  // and through the former name, directly
   CPPUNIT_ASSERT_EQUAL(2, oldR.calls);
 
@@ -145,7 +148,7 @@ void RelationCompatibilityTest::testLagrangianScleronomousR() {
   NewScleronomousR newR;
   static_cast<LagrangianScleronomousR&>(newR).computeJacobianhOver_q(q);
   CPPUNIT_ASSERT_EQUAL(1, newR.calls);
-  CPPUNIT_ASSERT_EQUAL(2., newR.H()(0, 1));
+  CPPUNIT_ASSERT_EQUAL(2., newR.contactMatrix()(0, 1));
 
   // no override: the user function is called once, through either name
   WithH<LagrangianScleronomousR> plain;
@@ -155,22 +158,22 @@ void RelationCompatibilityTest::testLagrangianScleronomousR() {
         ++fcalls;
         H(0, 2) = q(2);
       });
-  plain.computeH(q);
+  plain.computeContactMatrix(q);
   CPPUNIT_ASSERT_EQUAL(1, fcalls);
   plain.computeJacobianhOver_q(q);
   CPPUNIT_ASSERT_EQUAL(2, fcalls);
   CPPUNIT_ASSERT_EQUAL(3., plain.jacobianhOver_q()(0, 2));
-  CPPUNIT_ASSERT(plain.jacobianhOver_q() == plain.H());
-  CPPUNIT_ASSERT(plain.G() == plain.H());
+  CPPUNIT_ASSERT(plain.jacobianhOver_q() == plain.contactMatrix());
+  CPPUNIT_ASSERT(plain.constraintJacobian() == plain.contactMatrix());
 }
 
 void RelationCompatibilityTest::testLagrangianRheonomousR() {
   BlockVector q;
   fillQ(q);
   OldRheonomousR rel;
-  rel.computeH(q, 0.5);
+  rel.computeContactMatrix(q, 0.5);
   CPPUNIT_ASSERT_EQUAL(1, rel.callsH);
-  CPPUNIT_ASSERT_EQUAL(0.5, rel.H()(0, 2));
+  CPPUNIT_ASSERT_EQUAL(0.5, rel.contactMatrix()(0, 2));
   rel.computedhdt(q, 0.5);
   CPPUNIT_ASSERT_EQUAL(1, rel.callsDt);
   CPPUNIT_ASSERT_EQUAL(1., rel.dhdt()(0));
@@ -183,7 +186,7 @@ void RelationCompatibilityTest::testLagrangianCompliantR() {
   SiconosVector lambda(1);
   lambda << 4.;
   OldCompliantR rel;
-  rel.computeH(q, lambda);
+  rel.computeContactMatrix(q, lambda);
   rel.computeD(q, lambda);
   CPPUNIT_ASSERT_EQUAL(1, rel.callsH);
   CPPUNIT_ASSERT_EQUAL(1, rel.callsD);
@@ -201,12 +204,12 @@ void RelationCompatibilityTest::testNewtonEulerR() {
   auto oldR = std::make_shared<OldNewtonEulerR>();
   Interaction inter(std::make_shared<NewtonImpactNSL>(0.), oldR);
   oldR->callComputeG(inter, q);
-  oldR->computeH(inter, q);
+  oldR->computeContactMatrix(inter, q);
   CPPUNIT_ASSERT_EQUAL(1, oldR->callsG);
   CPPUNIT_ASSERT_EQUAL(1, oldR->callsH);
-  CPPUNIT_ASSERT_EQUAL(5., oldR->H()(0, 0));
-  CPPUNIT_ASSERT(oldR->H_NE_prod_T() == oldR->H());
-  CPPUNIT_ASSERT(oldR->H_NE() == oldR->G());
+  CPPUNIT_ASSERT_EQUAL(5., oldR->contactMatrix()(0, 0));
+  CPPUNIT_ASSERT(oldR->H_NE_prod_T() == oldR->contactMatrix());
+  CPPUNIT_ASSERT(oldR->H_NE() == oldR->constraintJacobian());
 
   auto newR = std::make_shared<NewNewtonEulerR>();
   Interaction inter2(std::make_shared<NewtonImpactNSL>(0.), newR);
@@ -219,9 +222,9 @@ void RelationCompatibilityTest::testNewtonEulerR() {
   SiconosMatrix G(1, 7);
   G << 1., 2., 3., 0., 0., 0., 0.;
   plain->setConstantH_NE(G);
-  plain->computeH(inter3, q);
-  CPPUNIT_ASSERT_EQUAL(1., plain->H()(0, 0));
-  CPPUNIT_ASSERT_EQUAL(3., plain->H()(0, 2));
+  plain->computeContactMatrix(inter3, q);
+  CPPUNIT_ASSERT_EQUAL(1., plain->contactMatrix()(0, 0));
+  CPPUNIT_ASSERT_EQUAL(3., plain->contactMatrix()(0, 2));
 }
 
 void RelationCompatibilityTest::testClassAliases() {

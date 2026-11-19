@@ -45,7 +45,7 @@ namespace siconos::modeling {
  * The following operators can be set by user-defined functions:
  *
  *   - \f$ h(q,t) \f$ (setComputehFunction);
- *   - \f$ H(q,t) \f$ (setConstantH, setComputeHFunction);
+ *   - \f$ H(q,t) \f$ (setConstantContactMatrix, setComputeContactMatrixFunction);
  *   - \f$ \frac{\partial h}{\partial t}(q,t) \f$ (setComputedhdtFunction, or override
  *     computedhdt).
  *
@@ -61,8 +61,8 @@ class LagrangianSparseRheonomousR : public LagrangianSparseR {
   siconos::modeling::func_prototypes::FunctionBVS_V computeh_{nullptr};
 
   /** function wrapper used to compute  \f$ H(q,t) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVS_Ms computeH_{nullptr};
-  siconos::modeling::func_prototypes::RFunctionBVS_Ms computeH_python_{nullptr};
+  siconos::modeling::func_prototypes::FunctionBVS_Ms computeContactMatrix_{nullptr};
+  siconos::modeling::func_prototypes::RFunctionBVS_Ms computeContactMatrix_python_{nullptr};
 
   /** \f$ \frac{\partial }{\partial t}h(q,t) \f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> dhdt_{nullptr};
@@ -110,17 +110,17 @@ class LagrangianSparseRheonomousR : public LagrangianSparseR {
    *
    */
   template <typename T>
-  void setConstantH(T&& newValue, siconos::algebra::CopyTag) {
+  void setConstantContactMatrix(T&& newValue, siconos::algebra::CopyTag) {
     static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
                   "Type must be SiconosSparseMatrix");
 
     // Warning: we can't check dimensions --> they depend on the interaction
-    H_storage_ =
+    contactMatrix_storage_ =
         std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
-    hasH_ = true;
-    hasConstantH_ = true;
-    computeH_ = nullptr;
-    computeH_python_ = nullptr;
+    hasContactMatrix_ = true;
+    hasConstantContactMatrix_ = true;
+    computeContactMatrix_ = nullptr;
+    computeContactMatrix_python_ = nullptr;
   }
 
   /** @brief set a constant \f$ H \f$
@@ -135,32 +135,32 @@ class LagrangianSparseRheonomousR : public LagrangianSparseR {
    * @param tag Pass siconos::algebra::alias_t to select this overload
    *        (rather than copy version)
    */
-  void setConstantH(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
-                    siconos::algebra::AliasTag);
+  void setConstantContactMatrix(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac,
+                                siconos::algebra::AliasTag);
 
   /** set a user-defined function to compute \f$ H \f$
    *
    *  @param fct the user-defined function (std::function, lambda ...)
    */
   template <typename Func>
-  void setComputeHFunction(Func&& f) {
+  void setComputeContactMatrixFunction(Func&& f) {
     using Ret = std::invoke_result_t<Func, const siconos::algebra::BlockVector&, double,
                                      siconos::algebra::SiconosSparseMatrix&>;
-    // if (!std::holds_alternative<siconos::algebra::OwnedSparse>(H_storage_)) {
-    ////// H_storage_ =
+    // if (!std::holds_alternative<siconos::algebra::OwnedSparse>(contactMatrix_storage_)) {
+    ////// contactMatrix_storage_ =
     ////////  std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
     // We can't check size of the Jacobian, it depends on the relation
     //}
 
-    hasH_ = true;
-    hasConstantH_ = false;
+    hasContactMatrix_ = true;
+    hasConstantContactMatrix_ = false;
 
     if constexpr (std::is_same_v<Ret, void>) {
-      computeH_ = std::forward<Func>(f);
-      computeH_python_ = nullptr;
+      computeContactMatrix_ = std::forward<Func>(f);
+      computeContactMatrix_python_ = nullptr;
     } else {
-      computeH_python_ = std::forward<Func>(f);
-      computeH_ = nullptr;
+      computeContactMatrix_python_ = std::forward<Func>(f);
+      computeContactMatrix_ = nullptr;
     }
   }
 
@@ -168,7 +168,7 @@ class LagrangianSparseRheonomousR : public LagrangianSparseR {
    *  @param positions q vectors
    *  @param time the current time
    */
-  void computeH(const siconos::algebra::BlockVector& positions, double time);
+  void computeContactMatrix(const siconos::algebra::BlockVector& positions, double time);
 
   /** @return  a read-only view on \f$ \frac{\partial }{\partial t}h(q,t) \f$  */
   inline auto dhdt() const {
@@ -217,21 +217,22 @@ class LagrangianSparseRheonomousR : public LagrangianSparseR {
   /** \name Deprecated names, kept for one release */
   ///@{
   template <typename T>
-  [[deprecated("use setConstantH")]] void setConstantJacobianhOver_q(
+  [[deprecated("use setConstantContactMatrix")]] void setConstantJacobianhOver_q(
       T&& newValue, siconos::algebra::CopyTag tag) {
-    setConstantH(std::forward<T>(newValue), tag);
+    setConstantContactMatrix(std::forward<T>(newValue), tag);
   }
-  [[deprecated("use setConstantH")]] void setConstantJacobianhOver_q(
+  [[deprecated("use setConstantContactMatrix")]] void setConstantJacobianhOver_q(
       Eigen::Map<siconos::algebra::SiconosSparseMatrix>& jac, siconos::algebra::AliasTag tag) {
-    setConstantH(jac, tag);
+    setConstantContactMatrix(jac, tag);
   }
   template <typename Func>
-  [[deprecated("use setComputeHFunction")]] void setComputeJacobianhOver_qFunction(Func&& f) {
-    setComputeHFunction(std::forward<Func>(f));
+  [[deprecated("use setComputeContactMatrixFunction")]] void setComputeJacobianhOver_qFunction(
+      Func&& f) {
+    setComputeContactMatrixFunction(std::forward<Func>(f));
   }
-  [[deprecated("use computeH")]] void computeJacobianhOver_q(
+  [[deprecated("use computeContactMatrix")]] void computeJacobianhOver_q(
       const siconos::algebra::BlockVector& positions, double time) {
-    computeH(positions, time);
+    computeContactMatrix(positions, time);
   }
   [[deprecated("use dhdt()")]] auto hdot() const { return dhdt(); }
   [[deprecated("use setComputedhdtFunction")]] void setComputehdotFunction(

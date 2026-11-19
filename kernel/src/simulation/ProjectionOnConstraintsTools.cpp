@@ -66,7 +66,7 @@ void siconos::simulation::shiftProjectionRhs(siconos::graphs::InteractionsGraph&
     std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> dss{prop.source};
     if (prop.target && prop.target != prop.source) dss.push_back(prop.target);
 
-    auto H = lr->H();  // G(q_j), computed by computeCriteria()
+    auto H = lr->contactMatrix();  // G(q_j), computed by computeCriteria()
     siconos::algebra::SiconosVector shift(H.cols());
     siconos::algebra::Index pos = 0;
     for (auto& ds : dss) {

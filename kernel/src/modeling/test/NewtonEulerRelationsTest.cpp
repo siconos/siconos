@@ -91,8 +91,8 @@ double jacobianError(std::shared_ptr<NonSmoothLaw> nslaw, bool twoBodies, std::m
   BlockVector q0;
   q0.insertPtr(std::make_shared<SiconosVector>(q1));
   if (twoBodies) q0.insertPtr(std::make_shared<SiconosVector>(q2));
-  rel->computeH(inter, q0);
-  const SiconosMatrix H = rel->H();
+  rel->computeContactMatrix(inter, q0);
+  const SiconosMatrix H = rel->contactMatrix();
 
   // Twists: translational velocity (absolute frame), angular velocity (body frame)
   const SiconosVector6 twist1 = randomVector<SiconosVector6>(gen);
@@ -202,8 +202,8 @@ double gapGradientError(std::shared_ptr<NonSmoothLaw> nslaw, bool twoBodies,
   // J_h and H at q
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.3, gap(q1, q2), 1e-12);
   rel->computeJach(0., inter);
-  const SiconosVector Jh = rel->G().row(0).transpose();
-  const SiconosMatrix H = rel->H();
+  const SiconosVector Jh = rel->constraintJacobian().row(0).transpose();
+  const SiconosMatrix H = rel->contactMatrix();
   const double errGrad = (Jh - gradFD).norm() / gradFD.norm();
 
   // J_h T v == (H v)_0
@@ -308,14 +308,14 @@ void NewtonEulerRelationsTest::testNewtonEulerRSecondOrderTerms() {
         J(i, j) = std::uniform_real_distribution<double>(-1., 1.)(gen);
         Jdot(i, j) = std::uniform_real_distribution<double>(-1., 1.)(gen);
       }
-    rel->setConstantG(J);
+    rel->setConstantConstraintJacobian(J);
     inter.initialize_read_access_to_ds_variables(*ds1, twoBodies ? *ds2 : *ds1);
 
     // Set after initialize: H_NE_dot must be allocated at first use.
-    rel->setComputeGdotFunction(
+    rel->setComputeConstraintJacobianDotFunction(
         [&Jdot](const BlockVector&, const BlockVector&,
                 Eigen::Ref<siconos::algebra::MapType> r) { r = Jdot; });
-    rel->computeHdotv(0., inter, ds1, twoBodies ? ds2 : ds1);
+    rel->computeContactMatrixDotV(0., inter, ds1, twoBodies ? ds2 : ds1);
 
     // Reference: Jdot qdot + d/dt(J T(q)) v, T being linear in q (central differences are
     // exact up to round-off)
@@ -335,7 +335,7 @@ void NewtonEulerRelationsTest::testNewtonEulerRSecondOrderTerms() {
           (computeT(q + eps * dq) - computeT(q - eps * dq)) / (2 * eps);
       ref += J.middleCols(7 * body, 7) * (Tdot * v.segment<6>(6 * body));
     }
-    const double err = (SiconosVector(rel->Hdotv()) - ref).norm();
+    const double err = (SiconosVector(rel->contactMatrixDotV()) - ref).norm();
     std::ostringstream msg;
     msg << "NewtonEulerR second-order terms (" << (twoBodies ? "two bodies" : "one body")
         << "): error = " << err;

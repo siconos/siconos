@@ -53,7 +53,7 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0() {
 
   rel->setComputehFunction(hfunc);
 
-  rel->setComputeHFunction(jachq);
+  rel->setComputeContactMatrixFunction(jachq);
 
   rel->setComputedhdtFunction(dhdt);
 

@@ -53,18 +53,19 @@ siconos::joints::KneeJointR::KneeJointR(const Eigen::Ref<siconos::algebra::Sicon
     }
   }
 
-  setComputeGdotFunction([this](const siconos::algebra::BlockVector& q,
-                                const siconos::algebra::BlockVector& qdot,
-                                Eigen::Ref<siconos::algebra::MapType> jacob) {
+  setComputeConstraintJacobianDotFunction([this](const siconos::algebra::BlockVector& q,
+                                                 const siconos::algebra::BlockVector& qdot,
+                                                 Eigen::Ref<siconos::algebra::MapType> jacob) {
     jacob.setZero();
 
     const auto& qdot1 = *qdot.vector(0);
 
     if (qdot.numberOfBlocks() == 2) {
       const auto& qdot2 = *qdot.vector(1);
-      knee::computeH_dot_for2DS(qdot1.tail(4), G1P0_, qdot2.tail(4), G2P0_, *Gdot_);
+      knee::computeH_dot_for2DS(qdot1.tail(4), G1P0_, qdot2.tail(4), G2P0_,
+                                *constraintJacobianDot_);
     } else
-      knee::computeH_dot_for1DS(qdot1.tail(4), G1P0_, *Gdot_);
+      knee::computeH_dot_for1DS(qdot1.tail(4), G1P0_, *constraintJacobianDot_);
   });
 }
 
@@ -125,16 +126,17 @@ void siconos::joints::KneeJointR::setBasePositions(
   }
 }
 
-void siconos::joints::KneeJointR::computeG(double time, siconos::modeling::Interaction& inter,
-                                           const siconos::algebra::BlockVector& q0) {
-  G_view_->setZero();
+void siconos::joints::KneeJointR::computeConstraintJacobian(
+    double time, siconos::modeling::Interaction& inter,
+    const siconos::algebra::BlockVector& q0) {
+  constraintJacobian_view_->setZero();
   auto q1 = q0.vector(0);
   // Only the quaternion part of q is required to compute H (last 4 components)
   if (q0.numberOfBlocks() > 1) {
     auto q2 = q0.vector(1);
-    knee::computeH_for_2DS(q1->tail(4), G1P0_, q2->tail(4), G2P0_, *G_view_);
+    knee::computeH_for_2DS(q1->tail(4), G1P0_, q2->tail(4), G2P0_, *constraintJacobian_view_);
   } else
-    knee::computeH_for_1DS(q1->tail(4), G1P0_, *G_view_);
+    knee::computeH_for_1DS(q1->tail(4), G1P0_, *constraintJacobian_view_);
 }
 
 void siconos::joints::KneeJointR::computeh(

@@ -61,7 +61,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeh(
   y(0) = distance(q_0, q_1, radius_);
 }
 
-void siconos::collision::native::bodies::DiskMovingPlanR::computeH(
+void siconos::collision::native::bodies::DiskMovingPlanR::computeContactMatrix(
     const siconos::algebra::BlockVector& q, double time) {
   init(time);
 
@@ -71,12 +71,12 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeH(
   double D1 = A_ * x + B_ * y + C_;
   double signD1 = copysign(1, D1);
 
-  H_view_->setValue(0, 0, A_ * signD1 / sqrA2pB2_);
-  H_view_->setValue(1, 0, -B_ * signD1 / sqrA2pB2_);
-  H_view_->setValue(0, 1, B_ * signD1 / sqrA2pB2_);
-  H_view_->setValue(1, 1, A_ * signD1 / sqrA2pB2_);
-  H_view_->setValue(0, 2, 0);
-  H_view_->setValue(1, 2, -radius_);
+  contactMatrix_view_->setValue(0, 0, A_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(1, 0, -B_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(0, 1, B_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(1, 1, A_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(0, 2, 0);
+  contactMatrix_view_->setValue(1, 2, -radius_);
 }
 
 void siconos::collision::native::bodies::DiskMovingPlanR::computedhdt(

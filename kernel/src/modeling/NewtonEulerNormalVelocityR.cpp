@@ -72,36 +72,39 @@ void siconos::modeling::NewtonEulerNormalVelocityR::computeContactVelocityJacobi
     // body 1 contributes +R_c [I, [G1 - P]x R1], body 2 contributes -R_c [I, [G2 - P]x R2]
     const double sign = (body == 0) ? 1.0 : -1.0;
     siconos::geometry::computeRotationMatrix(q, R);
-    H_->block(0, 6 * body, nRows, 3) = sign * Rc;
-    H_->block(0, 6 * body + 3, nRows, 3) = sign * Rc * skew(q.head<3>() - contactPoint1_) * R;
+    contactMatrix_->block(0, 6 * body, nRows, 3) = sign * Rc;
+    contactMatrix_->block(0, 6 * body + 3, nRows, 3) =
+        sign * Rc * skew(q.head<3>() - contactPoint1_) * R;
   }
-  DEBUG_EXPR(siconos::algebra::print(*H_););
+  DEBUG_EXPR(siconos::algebra::print(*contactMatrix_););
 }
 
 void siconos::modeling::NewtonEulerNormalVelocityR::initialize(Interaction& inter) {
   auto qSize = 7;
   if (inter.has2Bodies()) qSize *= 2;
 
-  G_storage_.resize(1, qSize);
-  G_view_ = std::make_shared<siconos::algebra::MapType>(G_storage_.data(), 1, qSize);
-  G_view_->setZero();
+  constraintJacobian_storage_.resize(1, qSize);
+  constraintJacobian_view_ = std::make_shared<siconos::algebra::MapType>(
+      constraintJacobian_storage_.data(), 1, qSize);
+  constraintJacobian_view_->setZero();
   NewtonEulerR::initialize(inter);
   //  _isContact=1;
 }
 
-void siconos::modeling::NewtonEulerNormalVelocityR::computeG(
+void siconos::modeling::NewtonEulerNormalVelocityR::computeConstraintJacobian(
     double time, siconos::modeling::Interaction& inter,
     const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(double time, Interaction& "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeContactMatrix(double time, "
+      "Interaction& "
       "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
   DEBUG_PRINTF("with time =  %f\n", time);
   DEBUG_PRINTF("with inter =  %p\n", &inter);
 
-  G_view_->row(0).leftCols(3) = nc_;
+  constraintJacobian_view_->row(0).leftCols(3) = nc_;
   if (inter.has2Bodies()) {
-    G_view_->row(0).segment(7, 3) = -nc_;
+    constraintJacobian_view_->row(0).segment(7, 3) = -nc_;
   }
 
   for (unsigned int iDS = 0; iDS < q0.numberOfBlocks(); iDS++) {
@@ -143,7 +146,7 @@ void siconos::modeling::NewtonEulerNormalVelocityR::computeG(
         "siconos::modeling::NewtonEulerNormalVelocityR::computeJachq :quattBuuf : %e,%e,%e \n",
         quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
-    G_view_->setValue(
+    constraintJacobian_view_->setValue(
         0, 7 * iDS + 3,
         sign * (quatBuff.R_component_2() * nc_(0) + quatBuff.R_component_3() * nc_(1) +
                 quatBuff.R_component_4() * nc_(2)));
@@ -155,31 +158,34 @@ void siconos::modeling::NewtonEulerNormalVelocityR::computeG(
       _2qiquatGP = quatGP;
       _2qiquatGP *= 2 * ((*q)(3 + i));
       quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;
-      G_view_->setValue(
+      constraintJacobian_view_->setValue(
           0, 7 * iDS + 3 + i,
           sign * (quatBuff.R_component_2() * nc_(0) + quatBuff.R_component_3() * nc_(1) +
                   quatBuff.R_component_4() * nc_(2)));
     }
   }
 
-  DEBUG_EXPR(siconos::algebra::print(*G_view_););
+  DEBUG_EXPR(siconos::algebra::print(*constraintJacobian_view_););
   DEBUG_END(
-      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(double time, Interaction& "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeContactMatrix(double time, "
+      "Interaction& "
       "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n");
 }
 
-void siconos::modeling::NewtonEulerNormalVelocityR::computeH(
+void siconos::modeling::NewtonEulerNormalVelocityR::computeContactMatrix(
     const Interaction& inter, const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(Interaction& inter, "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeContactMatrix(Interaction& "
+      "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n")
 
   computeContactFrame_(false);
   computeContactVelocityJacobian_(q0, 1);
 
   DEBUG_END(
-      "siconos::modeling::NewtonEulerNormalVelocityR::computeH(Interaction& inter, "
+      "siconos::modeling::NewtonEulerNormalVelocityR::computeContactMatrix(Interaction& "
+      "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 }
 

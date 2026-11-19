@@ -471,7 +471,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
           "siconos::simulation::SICONOS_OSNSP ");
     auto ltir = std::static_pointer_cast<siconos::modeling::LagrangianLinearTIR>(
         mainInteraction->relation());
-    auto C = ltir->H();
+    auto C = ltir->contactMatrix();
 
     assert(Xfree);
 

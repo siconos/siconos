@@ -80,7 +80,7 @@ class NodeFem1d2DR : public siconos::modeling::LagrangianScleronomousR {
   /** Computes \f$ \nabla^\top_q h(q) \f$
    * \param q coordinates of the dynamical systems involved in the relation
    */
-  void computeH(const siconos::algebra::BlockVector& q) override;
+  void computeContactMatrix(const siconos::algebra::BlockVector& q) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

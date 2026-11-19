@@ -38,8 +38,9 @@ p = H^\top \lambda
 Minimal setup requires the H (called C in the constructors) and D matrices.
 
 With the notations of LagrangianR and LagrangianCompliantR,
-\f$ H = \nabla_q h(q,\lambda) \f$ (H()) and \f$ D = \nabla_{\lambda}h(q,\lambda) \f$
-(D()). CMatrix() and DMatrix() are the former (deprecated) names of H() and D().
+\f$ H = \nabla_q h(q,\lambda) \f$ (contactMatrix()) and \f$ D = \nabla_{\lambda}h(q,\lambda)
+\f$ (D()). CMatrix() and DMatrix() are the former (deprecated) names of contactMatrix() and
+D().
 
 */
 class LagrangianCompliantLinearTIR : public LagrangianR {
@@ -82,8 +83,8 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    */
   void checkSize(const Interaction& inter) const override;
 
-  /** \deprecated use H() */
-  [[deprecated("use H()")]] inline auto CMatrix() const { return H(); }
+  /** \deprecated use contactMatrix() */
+  [[deprecated("use contactMatrix()")]] inline auto CMatrix() const { return contactMatrix(); }
 
   /** \return a read-only view on \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$ */
   inline auto D() const {

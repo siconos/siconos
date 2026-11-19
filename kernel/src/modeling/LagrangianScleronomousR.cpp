@@ -35,22 +35,23 @@
 void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto sizeDS = inter.getSizeOfDS();
-  if (hasConstantH_) {
-    assert(H_view_);
-    assert(H_view_->rows() == sizeY);
-    assert(H_view_->cols() == sizeDS);
+  if (hasConstantContactMatrix_) {
+    assert(contactMatrix_view_);
+    assert(contactMatrix_view_->rows() == sizeY);
+    assert(contactMatrix_view_->cols() == sizeDS);
   } else {
-    if (!H_storage_) {
-      H_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+    if (!contactMatrix_storage_) {
+      contactMatrix_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
     }
-    H_view_ = std::make_shared<siconos::algebra::MapType>(H_storage_->data(), sizeY, sizeDS);
+    contactMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+        contactMatrix_storage_->data(), sizeY, sizeDS);
   }
 
-  if (hasHdot_) {
-    // True only if setComputeHdotFunction has been called
+  if (hasContactMatrixDot_) {
+    // True only if setComputeContactMatrixDotFunction has been called
     // Ensure that memory is properly allocated for hdot_
-    if (!Hdot_) {
-      Hdot_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
+    if (!contactMatrixDot_) {
+      contactMatrixDot_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
     }
   }
 }
@@ -66,61 +67,62 @@ void siconos::modeling::LagrangianScleronomousR::computeh(
   if (computeh_) computeh_(positions, y);
 }
 
-void siconos::modeling::LagrangianScleronomousR::setConstantH(
+void siconos::modeling::LagrangianScleronomousR::setConstantContactMatrix(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
-  H_storage_ = nullptr;
+  contactMatrix_storage_ = nullptr;
 
-  H_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), newValue.rows(),
-                                                        newValue.cols());
-  hasConstantH_ = true;
-  computeH_ = nullptr;
+  contactMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasConstantContactMatrix_ = true;
+  computeContactMatrix_ = nullptr;
 }
 
-void siconos::modeling::LagrangianScleronomousR::setComputeHFunction(
+void siconos::modeling::LagrangianScleronomousR::setComputeContactMatrixFunction(
     const siconos::modeling::func_prototypes::FunctionBV_M& func) {
-  computeH_ = func;
+  computeContactMatrix_ = func;
 }
 
-void siconos::modeling::LagrangianScleronomousR::computeH(
+void siconos::modeling::LagrangianScleronomousR::computeContactMatrix(
     const siconos::algebra::BlockVector& positions) {
-  if (!computeHLegacy_) {  // dispatch to a class overriding the deprecated name
-    detail::LegacyCallGuard guard(computeHLegacy_);
+  if (!computeContactMatrixLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computeContactMatrixLegacy_);
     SICONOS_IGNORE_DEPRECATED_BEGIN
     computeJacobianhOver_q(positions);
     SICONOS_IGNORE_DEPRECATED_END
     return;
   }
-  if (computeH_) computeH_(positions, *H_view_);
+  if (computeContactMatrix_) computeContactMatrix_(positions, *contactMatrix_view_);
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& positions) {
-  computeH(positions);
+  computeContactMatrix(positions);
 }
 
-void siconos::modeling::LagrangianScleronomousR::setComputeHdotFunction(
+void siconos::modeling::LagrangianScleronomousR::setComputeContactMatrixDotFunction(
     const siconos::modeling::func_prototypes::FunctionBVBV_M& func) {
-  hasHdot_ = true;
-  computeHdot_ = func;
+  hasContactMatrixDot_ = true;
+  computeContactMatrixDot_ = func;
 }
 
-void siconos::modeling::LagrangianScleronomousR::computeHdot(
+void siconos::modeling::LagrangianScleronomousR::computeContactMatrixDot(
     const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
-  if (computeHdot_) computeHdot_(q, qdot, *Hdot_);
+  if (computeContactMatrixDot_) computeContactMatrixDot_(q, qdot, *contactMatrixDot_);
 }
 
-void siconos::modeling::LagrangianScleronomousR::computeHdotv(double time,
-                                                              Interaction& inter) {
+void siconos::modeling::LagrangianScleronomousR::computeContactMatrixDotV(double time,
+                                                                          Interaction& inter) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot starts");
 
-  computeHdot(*ds_vars[tools::enum_to_index(ds_var::q0)],
-              *ds_vars[tools::enum_to_index(ds_var::q1)]);
-  if (!Hdotv_) {
-    Hdotv_ = std::make_shared<siconos::algebra::SiconosVector>(Hdot_->rows());
+  computeContactMatrixDot(*ds_vars[tools::enum_to_index(ds_var::q0)],
+                          *ds_vars[tools::enum_to_index(ds_var::q1)]);
+  if (!contactMatrixDotV_) {
+    contactMatrixDotV_ =
+        std::make_shared<siconos::algebra::SiconosVector>(contactMatrixDot_->rows());
   }
-  siconos::algebra::matrixBlockVector_prod(*Hdot_, *ds_vars[tools::enum_to_index(ds_var::q1)],
-                                           *Hdotv_);
+  siconos::algebra::matrixBlockVector_prod(
+      *contactMatrixDot_, *ds_vars[tools::enum_to_index(ds_var::q1)], *contactMatrixDotV_);
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot ends");
 }
 
@@ -138,18 +140,18 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(
   if (derivativeNumber == 0) {
     computeh(*ds_vars[tools::enum_to_index(ds_var::q0)], y);
   } else {
-    computeH(*ds_vars[tools::enum_to_index(ds_var::q0)]);
+    computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)]);
 
     if (derivativeNumber == 1) {
-      siconos::algebra::matrixBlockVector_prod(*H_view_,
+      siconos::algebra::matrixBlockVector_prod(*contactMatrix_view_,
                                                *ds_vars[tools::enum_to_index(ds_var::q1)], y);
     } else if (derivativeNumber == 2) {
-      siconos::algebra::matrixBlockVector_prod(*H_view_,
+      siconos::algebra::matrixBlockVector_prod(*contactMatrix_view_,
                                                *ds_vars[tools::enum_to_index(ds_var::q2)], y);
-      computeHdot(*ds_vars[tools::enum_to_index(ds_var::q0)],
-                  *ds_vars[tools::enum_to_index(ds_var::q1)]);
+      computeContactMatrixDot(*ds_vars[tools::enum_to_index(ds_var::q0)],
+                              *ds_vars[tools::enum_to_index(ds_var::q1)]);
       siconos::algebra::matrixBlockVector_prod(
-          *Hdot_, *ds_vars[tools::enum_to_index(ds_var::q1)], y, false);
+          *contactMatrixDot_, *ds_vars[tools::enum_to_index(ds_var::q1)], y, false);
 
     } else
       THROW_EXCEPTION(
@@ -169,13 +171,13 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(
 
   DEBUG_PRINTF("level = %i\n", level);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  computeH(*ds_vars[tools::enum_to_index(ds_var::q0)]);
+  computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)]);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   DEBUG_EXPR(siconos::algebra::print(lambda););
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *H_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level], false);
+      lambda, *contactMatrix_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level], false);
   DEBUG_EXPR(siconos::algebra::print(*ds_vars[tools::enum_to_index(ds_var::p0) + level]););
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
@@ -190,9 +192,9 @@ void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Intera
       "inter) \n");
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   DEBUG_EXPR(siconos::algebra::print(inter););
-  computeH(*ds_vars[tools::enum_to_index(ds_var::q0)]);
-  computeHdot(*ds_vars[tools::enum_to_index(ds_var::q0)],
-              *ds_vars[tools::enum_to_index(ds_var::q1)]);
+  computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)]);
+  computeContactMatrixDot(*ds_vars[tools::enum_to_index(ds_var::q0)],
+                          *ds_vars[tools::enum_to_index(ds_var::q1)]);
 
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeJach(double time, "

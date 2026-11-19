@@ -72,11 +72,11 @@ namespace siconos::modeling {
   \f[
     y = g, \qquad \dot y = n^\top u = (H_c)_{1,:}\, v,
   \f]
-  i.e. the contact configuration matrix \f$ H \f$ (H()) is the first row of \f$ H_c \f$,
-  computed directly from the geometry (computeH) rather than as \f$ G T \f$.
+  i.e. the contact configuration matrix \f$ H \f$ (contactMatrix()) is the first row of \f$ H_c
+  \f$, computed directly from the geometry (computeContactMatrix) rather than as \f$ G T \f$.
 
-  <b>Gradient of the gap.</b> \f$ G \f$ (G(), used for the projection onto the constraints)
-  is computed by computeG as
+  <b>Gradient of the gap.</b> \f$ G \f$ (constraintJacobian(), used for the projection onto the
+  constraints) is computed by computeConstraintJacobian as
   \f$ G = \nabla_q^\top \bigl[ n^\top (P_1(q_1) - P_2(q_2)) \bigr] \f$ with \f$ n \f$
   held fixed. This is the exact gradient of \f$ g \f$ when \f$ P_1 - P_2 \f$ is parallel to
   \f$ n \f$ (which is the case for points given by a contact detection), and then
@@ -128,8 +128,8 @@ class NewtonEulerNormalVelocityR : public NewtonEulerR {
    *  \param inter the interaction using this relation
    *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
-  virtual void computeG(double time, siconos::modeling::Interaction& inter,
-                        const siconos::algebra::BlockVector& q0) override;
+  virtual void computeConstraintJacobian(double time, siconos::modeling::Interaction& inter,
+                                         const siconos::algebra::BlockVector& q0) override;
 
   /** compute the contact frame \f$ R_c \f$ (contactFrame_) from the normal \f$ n \f$.
    *  Throws if \f$ n \f$ is zero.
@@ -138,7 +138,7 @@ class NewtonEulerNormalVelocityR : public NewtonEulerR {
    */
   void computeContactFrame_(bool withTangents);
 
-  /** fill the first nRows rows of \f$ H \f$ (H_) with the first nRows rows of
+  /** fill the first nRows rows of \f$ H \f$ (contactMatrix_) with the first nRows rows of
    *  \f$ H_c(q) = R_c [\, I_3 \;\; [x_{G_1} - P]_\times R_1 \;\; -I_3 \;\;
    *  -[x_{G_2} - P]_\times R_2 \,] \f$, with \f$ P = P_1 \f$ and the current contactFrame_.
    *
@@ -172,7 +172,8 @@ class NewtonEulerNormalVelocityR : public NewtonEulerR {
    *  \param inter interaction that owns the relation
    *  \param q0 coordinates \f$ q \f$ of the bodies of the interaction
    */
-  void computeH(const Interaction& inter, const siconos::algebra::BlockVector& q0) override;
+  void computeContactMatrix(const Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
   /** update the contact points and the normal from the data attached to the bodies,
    *  \f$ P_1 = x_{G_1} + R_1 P_1^{\mathrm{loc}} \f$, \f$ P_2 = x_{G_2} + R_2

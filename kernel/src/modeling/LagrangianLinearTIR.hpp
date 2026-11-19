@@ -33,7 +33,7 @@ namespace siconos::modeling {
 
     \f$ p = H^\top \lambda \f$
 
-    with a constant contact configuration matrix \f$ H \f$ (H(), called C in the
+    with a constant contact configuration matrix \f$ H \f$ (contactMatrix(), called C in the
     constructors and formerly returned by CMatrix(), deprecated). \f$ H \f$ is the only
     required input to build a LagrangianLinearTIR.
 
@@ -70,8 +70,8 @@ class LagrangianLinearTIR : public LagrangianR {
    */
   void checkSize(const Interaction& inter) const override;
 
-  /** \deprecated use H() */
-  [[deprecated("use H()")]] inline auto CMatrix() const { return H(); }
+  /** \deprecated use contactMatrix() */
+  [[deprecated("use contactMatrix()")]] inline auto CMatrix() const { return contactMatrix(); }
 
   /** \return  a read-only view on e vector */
   inline auto eVector() const {

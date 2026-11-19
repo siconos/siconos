@@ -85,13 +85,13 @@ class LagrangianSparseR : public Relation {
 
   /** The Jacobian of the constraints with respect to the generalized coordinates   \f$ q \f$
    */
-  siconos::algebra::SparseStorage H_storage_{std::monostate{}};
+  siconos::algebra::SparseStorage contactMatrix_storage_{std::monostate{}};
 
   /** true if H is not set or set and constant */
-  bool hasConstantH_{true};
+  bool hasConstantContactMatrix_{true};
 
   /** True if H is required */
-  bool hasH_{false};
+  bool hasContactMatrix_{false};
 
   /**
    * @brief Utility function providing uniform access to the  \f$ H \f$ matrix.
@@ -111,13 +111,15 @@ class LagrangianSparseR : public Relation {
    *       to the actual internal or external object.
    */
   template <typename F>
-  decltype(auto) useH(F&& f) const {
-    return siconos::algebra::visitStorage(H_storage_, std::forward<F>(f), "H_storage_");
+  decltype(auto) useContactMatrix(F&& f) const {
+    return siconos::algebra::visitStorage(contactMatrix_storage_, std::forward<F>(f),
+                                          "contactMatrix_storage_");
   }
 
   template <typename F>
-  decltype(auto) useH(F&& f) {
-    return siconos::algebra::visitStorage(H_storage_, std::forward<F>(f), "H_storage_");
+  decltype(auto) useContactMatrix(F&& f) {
+    return siconos::algebra::visitStorage(contactMatrix_storage_, std::forward<F>(f),
+                                          "contactMatrix_storage_");
   }
 
   /** @brief minimal (protected) constructor
@@ -145,8 +147,8 @@ class LagrangianSparseR : public Relation {
   virtual void checkSize(const Interaction& inter) const override {};
 
   /** @return a read-only reference on \f$ H \f$ matrix */
-  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> H() const {
-    return useH([](auto const& M) {
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> contactMatrix() const {
+    return useContactMatrix([](auto const& M) {
       return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
     });
   }
@@ -155,15 +157,15 @@ class LagrangianSparseR : public Relation {
    *
    *   pybind11 use only!
    */
-  const siconos::algebra::SiconosSparseMatrix& H_py() const {
+  const siconos::algebra::SiconosSparseMatrix& contactMatrix_py() const {
     return siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
-        H_storage_,
+        contactMatrix_storage_,
         [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
-        "H_storage_");
+        "contactMatrix_storage_");
   }
 
   /** @return True if  \f$ H \f$ matrix has been set */
-  bool hasH() const { return hasH_; }
+  bool hasContactMatrix() const { return hasContactMatrix_; }
 
   /** main relation members display */
   void display() const override;
@@ -183,15 +185,18 @@ class LagrangianSparseR : public Relation {
 
   /** \name Deprecated names, kept for one release */
   ///@{
-  [[deprecated("use H()")]] inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>
+  [[deprecated(
+      "use contactMatrix()")]] inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>
   jacobianhOver_q() const {
-    return H();
+    return contactMatrix();
   }
-  [[deprecated("use H_py()")]] const siconos::algebra::SiconosSparseMatrix&
+  [[deprecated("use contactMatrix_py()")]] const siconos::algebra::SiconosSparseMatrix&
   jacobianhOver_q_py() const {
-    return H_py();
+    return contactMatrix_py();
   }
-  [[deprecated("use hasH()")]] bool hasJacobianhOver_q() const { return hasH(); }
+  [[deprecated("use hasContactMatrix()")]] bool hasJacobianhOver_q() const {
+    return hasContactMatrix();
+  }
   ///@}
 };
 

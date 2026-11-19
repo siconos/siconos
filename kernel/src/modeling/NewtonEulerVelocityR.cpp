@@ -28,16 +28,17 @@
 
 void siconos::modeling::NewtonEulerVelocityR::initialize(Interaction& inter) {
   const auto qSize = 7 * (inter.getSizeOfDS() / 6);
-  G_storage_.resize(3, qSize);
-  G_view_ = std::make_shared<siconos::algebra::MapType>(G_storage_.data(), 3, qSize);
-  G_view_->setZero();
+  constraintJacobian_storage_.resize(3, qSize);
+  constraintJacobian_view_ = std::make_shared<siconos::algebra::MapType>(
+      constraintJacobian_storage_.data(), 3, qSize);
+  constraintJacobian_view_->setZero();
   NewtonEulerR::initialize(inter);
 }
 
-void siconos::modeling::NewtonEulerVelocityR::computeH(
+void siconos::modeling::NewtonEulerVelocityR::computeContactMatrix(
     const Interaction& inter, const siconos::algebra::BlockVector& q0) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerVelocityR::computeH(...)\n");
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerVelocityR::computeContactMatrix(...)\n");
   computeContactFrame_(true);
   computeContactVelocityJacobian_(q0, 3);
-  DEBUG_END("siconos::modeling::NewtonEulerVelocityR::computeH(...)\n");
+  DEBUG_END("siconos::modeling::NewtonEulerVelocityR::computeContactMatrix(...)\n");
 }

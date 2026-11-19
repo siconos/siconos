@@ -76,7 +76,7 @@ class Lagrangian2dVelocityAngularVelocityR : public LagrangianScleronomousR {
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeH(const siconos::algebra::BlockVector& q) override;
+  void computeContactMatrix(const siconos::algebra::BlockVector& q) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

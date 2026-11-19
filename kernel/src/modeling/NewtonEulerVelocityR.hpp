@@ -74,7 +74,8 @@ class NewtonEulerVelocityR : public NewtonEulerNormalVelocityR {
    *  \param inter  interaction that owns the relation
    *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
-  void computeH(const Interaction& inter, const siconos::algebra::BlockVector& q0) override;
+  void computeContactMatrix(const Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
   void display() const override {}
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }

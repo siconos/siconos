@@ -171,18 +171,18 @@ Experimental high-performance numerics additions:
    |---|---|
    | `Lagrangian2d1DR`, `Lagrangian2d2DR`, `Lagrangian2d3DR` | `Lagrangian2dNormalVelocityR`, `Lagrangian2dVelocityR`, `Lagrangian2dVelocityAngularVelocityR` |
    | `NewtonEuler1DR`, `NewtonEuler3DR` | `NewtonEulerNormalVelocityR`, `NewtonEulerVelocityR` |
-   | `LagrangianR::jacobianhOver_q()` | `H()` (and `G()`, same matrix) |
-   | `setConstantJacobianhOver_q`, `setComputeJacobianhOver_qFunction`, `computeJacobianhOver_q` | `setConstantH`, `setComputeHFunction`, `computeH` |
-   | `setComputejacobianhOver_q_dotFunction`, `computeJacobianhOver_q_dot` | `setComputeHdotFunction`, `computeHdot` |
-   | `jacobianhOver_q_dot_X_qdot()`, `computeJacobianhOver_q_dot_X_qdot` | `Hdotv()`, `computeHdotv` |
+   | `LagrangianR::jacobianhOver_q()` | `contactMatrix()` (and `constraintJacobian()`, same matrix) |
+   | `setConstantJacobianhOver_q`, `setComputeJacobianhOver_qFunction`, `computeJacobianhOver_q` | `setConstantContactMatrix`, `setComputeContactMatrixFunction`, `computeContactMatrix` |
+   | `setComputejacobianhOver_q_dotFunction`, `computeJacobianhOver_q_dot` | `setComputeContactMatrixDotFunction`, `computeContactMatrixDot` |
+   | `jacobianhOver_q_dot_X_qdot()`, `computeJacobianhOver_q_dot_X_qdot` | `contactMatrixDotV()`, `computeContactMatrixDotV` |
    | rheonomous `hdot()`, `setComputehdotFunction`, `computehdot` | `dhdt()`, `setComputedhdtFunction`, `computedhdt` |
    | compliant `setComputeJacobianhOver_lambdaFunction`, `computeJacobianhOver_lambda` | `setComputeDFunction`, `computeD`, accessor `D()` |
-   | linear `CMatrix()`, `DMatrix()` | `H()`, `D()` |
-   | `NewtonEulerR::H_NE()`, `setConstantH_NE`, `computeH_NE_` | `G()`, `setConstantG`, `computeG` |
-   | `H_NE_prod_T()`, `computeH_NE_prod_T` | `H()`, `computeH` |
-   | `setComputeH_NE_dotFunction`, `computeH_NE_dot` | `setComputeGdotFunction`, `computeGdot` |
-   | `secondOrderTimeDerivativeTerms()`, `computeSecondOrderTimeDerivativeTerms` | `Hdotv()`, `computeHdotv` |
-   | protected members `jacobianhOver_q_view_`, `H_NE_view_`, `H_NE_prod_T_`, ... | `H_view_`, `G_view_`, `H_`, ... |
+   | linear `CMatrix()`, `DMatrix()` | `contactMatrix()`, `D()` |
+   | `NewtonEulerR::H_NE()`, `setConstantH_NE`, `computeH_NE_` | `constraintJacobian()`, `setConstantConstraintJacobian`, `computeConstraintJacobian` |
+   | `H_NE_prod_T()`, `computeH_NE_prod_T` | `contactMatrix()`, `computeContactMatrix` |
+   | `setComputeH_NE_dotFunction`, `computeH_NE_dot` | `setComputeConstraintJacobianDotFunction`, `computeConstraintJacobianDot` |
+   | `secondOrderTimeDerivativeTerms()`, `computeSecondOrderTimeDerivativeTerms` | `contactMatrixDotV()`, `computeContactMatrixDotV` |
+   | protected members `jacobianhOver_q_view_`, `H_NE_view_`, `H_NE_prod_T_`, ... | `contactMatrix_view_`, `constraintJacobian_view_`, `H_`, ... |
 
 7. **Numerics public API cleanup**:
    - Expanded cryptic abbreviations in FrictionContact/GlobalFrictionContact solver option setters

@@ -215,9 +215,9 @@ void siconos::joints::CouplerJointR::computeh(
   y(0) = y2(0) - y1(0) * ratio_ + offset_;
 }
 
-void siconos::joints::CouplerJointR::computeG(double time,
-                                              siconos::modeling::Interaction& inter,
-                                              const siconos::algebra::BlockVector& q0) {
+void siconos::joints::CouplerJointR::computeConstraintJacobian(
+    double time, siconos::modeling::Interaction& inter,
+    const siconos::algebra::BlockVector& q0) {
   siconos::algebra::SiconosDenseMatrix jachq1{1, q0.size()};
   siconos::algebra::SiconosDenseMatrix jachq2{1, q0.size()};
   jachq1.setZero();
@@ -232,7 +232,7 @@ void siconos::joints::CouplerJointR::computeG(double time,
   joint1_->computeJachqDoF(inter, *v1_[0], v1_[1], jachq1, dof1_);
   joint2_->computeJachqDoF(inter, *v2_[0], v2_[1], jachq2, dof2_);
   // Constraint is the linear relation between them
-  (*G_view_) = jachq2 - ratio_ * jachq1;
+  (*constraintJacobian_view_) = jachq2 - ratio_ * jachq1;
 }
 
 void siconos::joints::CouplerJointR::computehDoF(
@@ -250,7 +250,7 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
     Eigen::Ref<siconos::algebra::SiconosDenseMatrix> jachq, siconos::algebra::Index axis) {
   // The Jacobian of the DoF of the constraint is the same as the
-  // Jacobian of the constraint itself. (Same as computeH(), but
+  // Jacobian of the constraint itself. (Same as computeContactMatrix(), but
   // don't store result in member object.)
   assert(axis == 0);
 

@@ -30,9 +30,9 @@
 void siconos::modeling::LagrangianSparseR::display() const {
   std::cout << "=====> Relation of type " << tools::enum_to_string(_relationType)
             << " and subtype " << tools::enum_to_string(_subType) << "\n";
-  if (hasH_) {
+  if (hasContactMatrix_) {
     std::cout << "- jacobian of h over q\n";
-    useH([&](const auto& M) { siconos::algebra::print(M); });
+    useContactMatrix([&](const auto& M) { siconos::algebra::print(M); });
     std::cout << "\n";
   }
 }

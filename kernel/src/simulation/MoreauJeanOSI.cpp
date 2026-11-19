@@ -1261,10 +1261,12 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
 
   // 1 - product H Xfree{}
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    auto H = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation())->H();
+    auto H = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation())
+                 ->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())->H();
+    auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
+                 ->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   }
 
@@ -1300,7 +1302,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
       auto compR = std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
           inter.relation());
 
-      auto C = compR->H();
+      auto C = compR->contactMatrix();
       double h = sim->timeStep();
       osnsp_rhs *= h * _theta;
 
@@ -1373,7 +1375,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto relation =
         std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
-    auto H = relation->H();
+    auto H = relation->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs_position, true);
     osnsp_rhs_position *= h * _theta;
 
@@ -1401,7 +1403,8 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
                siconos::algebra::print(osnsp_rhs_position););
 
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())->H();
+    auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
+                 ->contactMatrix();
     const auto& ds_vars = inter.read_dynamical_systems_variables();
 
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs_position, true);

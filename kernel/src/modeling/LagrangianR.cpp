@@ -31,7 +31,8 @@
 void siconos::modeling::LagrangianR::display() const {
   std::cout << "=====> Relation of type " << tools::enum_to_string(_relationType)
             << " and subtype " << tools::enum_to_string(_subType) << "\n";
-  if (H_view_) std::cout << " jacobianhOver_q_ :\n" << *H_view_ << "\n";
+  if (contactMatrix_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *contactMatrix_view_ << "\n";
 }
 
 void siconos::modeling::LagrangianR::allocate_read_dynamical_systems_var_vectors(

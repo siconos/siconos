@@ -45,9 +45,9 @@ void siconos::collision::native::bodies::DiskDiskR::computeh(
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
 }
 
-void siconos::collision::native::bodies::DiskDiskR::computeH(
+void siconos::collision::native::bodies::DiskDiskR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
-  assert(H_view_);
+  assert(contactMatrix_view_);
 
   double x1 = q(0);
   double y1 = q(1);
@@ -72,21 +72,22 @@ void siconos::collision::native::bodies::DiskDiskR::computeH(
   [d     d         d   d      ]
   */
 
-  H_view_->setValue(0, 0, -dxsd);
-  H_view_->setValue(1, 0, dysd);
-  H_view_->setValue(0, 1, -dysd);
-  H_view_->setValue(1, 1, -dxsd);
-  H_view_->setValue(0, 2, 0.);
-  H_view_->setValue(1, 2, -_r1);
-  H_view_->setValue(0, 3, dxsd);
-  H_view_->setValue(1, 3, -dysd);
-  H_view_->setValue(0, 4, dysd);
-  H_view_->setValue(1, 4, dxsd);
-  H_view_->setValue(0, 5, 0.);
-  H_view_->setValue(1, 5, -_r2);
+  contactMatrix_view_->setValue(0, 0, -dxsd);
+  contactMatrix_view_->setValue(1, 0, dysd);
+  contactMatrix_view_->setValue(0, 1, -dysd);
+  contactMatrix_view_->setValue(1, 1, -dxsd);
+  contactMatrix_view_->setValue(0, 2, 0.);
+  contactMatrix_view_->setValue(1, 2, -_r1);
+  contactMatrix_view_->setValue(0, 3, dxsd);
+  contactMatrix_view_->setValue(1, 3, -dysd);
+  contactMatrix_view_->setValue(0, 4, dysd);
+  contactMatrix_view_->setValue(1, 4, dxsd);
+  contactMatrix_view_->setValue(0, 5, 0.);
+  contactMatrix_view_->setValue(1, 5, -_r2);
 }
 
 void siconos::collision::native::bodies::DiskDiskR::display() const {
   std::cout << "=====> Disk-Disk relation \n";
-  if (H_view_) std::cout << " jacobianhOver_q_ :\n" << *H_view_ << "\n";
+  if (contactMatrix_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *contactMatrix_view_ << "\n";
 }

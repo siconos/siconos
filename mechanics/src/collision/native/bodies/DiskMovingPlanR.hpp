@@ -71,7 +71,7 @@ class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param time current time value
    */
-  void computeH(const siconos::algebra::BlockVector& q, double time) override;
+  void computeContactMatrix(const siconos::algebra::BlockVector& q, double time) override;
 
   /** Update \f$ \frac{\partial }{\partial t}h(q,t) \f$
    *  \param position 'list' of state vectors (for all ds involved in the interaction)

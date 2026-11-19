@@ -31,7 +31,7 @@ G(q) v⁺ = −e G(q) v⁻   if g(q) = 0         (impact law)
 | `q, v` | positions, velocities | `ds->q()`, `ds->velocity()` |
 | `q_k, v_k` | values at the beginning of the step | DS memories `qMemory()`, `velocityMemory()` |
 | `g(q)` | gaps (constraints `g ≥ 0`) | interaction output `y(0)` |
-| `G(q) = ∇g(q)ᵀ` | Jacobian of the constraints | `LagrangianR::H()` (computed by `computeJach`) |
+| `G(q) = ∇g(q)ᵀ` | Jacobian of the constraints | `LagrangianR::contactMatrix()` (computed by `computeJach`) |
 | `ġ = G v` | relative velocity | output `y(1)`; at the beginning of the step: memory `y_k(1)` |
 | `W` | iteration matrix `M + hθC + h²θ²K` | `MoreauJeanOSI` (`getOSIMatrix`) |
 | `θ` | θ-method parameter | `MoreauJeanOSI(theta)` |

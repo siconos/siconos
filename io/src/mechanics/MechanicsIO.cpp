@@ -164,8 +164,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -206,8 +206,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -260,8 +260,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -325,8 +325,8 @@ void siconos::io::ContactPointVisitor::operator()(
   }
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -380,8 +380,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -420,8 +420,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -461,8 +461,8 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
-  siconos::algebra::SiconosVector cf{rel.H().cols()};
-  cf.noalias() = rel.H().transpose() * *inter->lambda(1);
+  siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+  cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -1153,8 +1153,8 @@ void siconos::io::ContactInternalVariableVisitor::operator()(
   auto internalVariables = inter->internalVariables();
 
   if (internalVariables) {
-    siconos::algebra::SiconosVector cf{rel.H().cols()};
-    cf.noalias() = rel.H().transpose() * *inter->lambda(0);
+    siconos::algebra::SiconosVector cf{rel.contactMatrix().cols()};
+    cf.noalias() = rel.contactMatrix().transpose() * *inter->lambda(0);
 
     // std::cout << " lambda_0 " ;
     // siconos::algebra::print(*inter->lambda(0));

@@ -46,7 +46,8 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1() {
   // which required an Interaction. See examples in siconos tutorials for reals tests.
 
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->H() == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianLinearTIR1a : ", folr->contactMatrix() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1c : ",
                                folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);

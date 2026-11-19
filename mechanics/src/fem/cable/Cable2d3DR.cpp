@@ -32,11 +32,12 @@
 void siconos::fem::cable::Cable2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
 
-  if (!H_storage_) {
-    H_storage_ = std::make_unique<std::vector<double>>(2 * qSize);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(2 * qSize);
   }
-  H_view_ = std::make_shared<siconos::algebra::MapType>(H_storage_->data(), 2, qSize);
-  H_view_->setZero();
+  contactMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(contactMatrix_storage_->data(), 2, qSize);
+  contactMatrix_view_->setZero();
 }
 
 void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVector& q,
@@ -54,13 +55,14 @@ void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVect
   DEBUG_END("Cable2d3DR::computeh(...)\n")
 }
 
-void siconos::fem::cable::Cable2d3DR::computeH(const siconos::algebra::BlockVector& q) {
+void siconos::fem::cable::Cable2d3DR::computeContactMatrix(
+    const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "Cable2d3DR::computeH(const siconos::algebra::BlockVector& q, "
+      "Cable2d3DR::computeContactMatrix(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
 
-  H_view_->row(0).segment(_node_dof_index, 3) = nc_;
-  H_view_->row(1).segment(_node_dof_index, 3) = tangent_;
+  contactMatrix_view_->row(0).segment(_node_dof_index, 3) = nc_;
+  contactMatrix_view_->row(1).segment(_node_dof_index, 3) = tangent_;
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
@@ -68,7 +70,7 @@ void siconos::fem::cable::Cable2d3DR::computeH(const siconos::algebra::BlockVect
   }
 
   DEBUG_END(
-      "Cable2d3DR::computeH(const siconos::algebra::BlockVector& q, "
+      "Cable2d3DR::computeContactMatrix(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z) \n");
 }
 

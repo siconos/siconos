@@ -40,17 +40,19 @@ void siconos::modeling::Lagrangian2dVelocityAngularVelocityR::initialize(Interac
         "must of size 3 or 6");
   }
   auto qSize = 3 * (inter.getSizeOfDS() / 3);
-  if (!H_storage_) {
-    H_storage_ = std::make_unique<std::vector<double>>(3 * qSize);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(3 * qSize);
   }
-  H_view_ = std::make_shared<siconos::algebra::MapType>(H_storage_->data(), 3, qSize);
-  H_view_->setZero();
+  contactMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(contactMatrix_storage_->data(), 3, qSize);
+  contactMatrix_view_->setZero();
 }
 
-void siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeH(
+void siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeH(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeContactMatrix("
+      "Interaction& inter, "
       "siconos::algebra::BlockVector q0 \n");
   siconos::algebra::SiconosVector2 tangent;
   tangent << -nc_.y(), nc_.x();
@@ -58,26 +60,27 @@ void siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeH(
   lever_arm << contactPoint1_.x() - q(0), contactPoint1_.y() - q(1);
 
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm.x(), lever_arm.y());
-  H_view_->row(0).segment(0, 2) = nc_;
-  (*H_view_)(0, 2) = lever_arm.x() * nc_.y() - lever_arm.y() * nc_.x();
-  H_view_->row(1).segment(0, 2) << tangent.x(), tangent.y();
-  (*H_view_)(1, 2) = lever_arm.x() * tangent.y() - lever_arm.y() * tangent.x();
+  contactMatrix_view_->row(0).segment(0, 2) = nc_;
+  (*contactMatrix_view_)(0, 2) = lever_arm.x() * nc_.y() - lever_arm.y() * nc_.x();
+  contactMatrix_view_->row(1).segment(0, 2) << tangent.x(), tangent.y();
+  (*contactMatrix_view_)(1, 2) = lever_arm.x() * tangent.y() - lever_arm.y() * tangent.x();
 
-  H_view_->row(2).setZero();
-  (*H_view_)(2, 2) = 1.0;
+  contactMatrix_view_->row(2).setZero();
+  (*contactMatrix_view_)(2, 2) = 1.0;
 
   if (q.size() == 6) {
-    (*H_view_)(2, 5) = -1.0;
+    (*contactMatrix_view_)(2, 5) = -1.0;
     lever_arm << contactPoint1_.x() - q(3), contactPoint1_.y() - q(4);
 
-    H_view_->row(0).segment(3, 2) = -nc_;
-    (*H_view_)(0, 5) = -lever_arm.x() * nc_.y() + lever_arm.y() * nc_.x();
-    H_view_->row(1).segment(3, 2) << -tangent.x(), -tangent.y();
-    (*H_view_)(1, 5) = -lever_arm.x() * tangent.y() + lever_arm.y() * tangent.x();
+    contactMatrix_view_->row(0).segment(3, 2) = -nc_;
+    (*contactMatrix_view_)(0, 5) = -lever_arm.x() * nc_.y() + lever_arm.y() * nc_.x();
+    contactMatrix_view_->row(1).segment(3, 2) << -tangent.x(), -tangent.y();
+    (*contactMatrix_view_)(1, 5) = -lever_arm.x() * tangent.y() + lever_arm.y() * tangent.x();
   }
-  DEBUG_EXPR(std::cout << H_view_ << "\n";);
+  DEBUG_EXPR(std::cout << contactMatrix_view_ << "\n";);
   DEBUG_END(
-      "siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeH(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dVelocityAngularVelocityR::computeContactMatrix("
+      "Interaction& inter, "
       "siconos::algebra::BlockVector q0) \n");
 }
 

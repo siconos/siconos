@@ -171,7 +171,7 @@ Jach(q) =  [                                                ]
 
 */
 
-void siconos::collision::native::bodies::DiskPlanR::computeH(
+void siconos::collision::native::bodies::DiskPlanR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
   double x = q(0);
   double y = q(1);
@@ -179,12 +179,12 @@ void siconos::collision::native::bodies::DiskPlanR::computeH(
   double D1 = A * x + B * y + C;
   double signD1 = copysign(1, D1);
 
-  H_view_->setValue(0, 0, A * signD1 / sqrA2pB2);
-  H_view_->setValue(1, 0, -B * signD1 / sqrA2pB2);
-  H_view_->setValue(0, 1, B * signD1 / sqrA2pB2);
-  H_view_->setValue(1, 1, A * signD1 / sqrA2pB2);
-  H_view_->setValue(0, 2, 0);
-  H_view_->setValue(1, 2, -r);
+  contactMatrix_view_->setValue(0, 0, A * signD1 / sqrA2pB2);
+  contactMatrix_view_->setValue(1, 0, -B * signD1 / sqrA2pB2);
+  contactMatrix_view_->setValue(0, 1, B * signD1 / sqrA2pB2);
+  contactMatrix_view_->setValue(1, 1, A * signD1 / sqrA2pB2);
+  contactMatrix_view_->setValue(0, 2, 0);
+  contactMatrix_view_->setValue(1, 2, -r);
 }
 
 bool siconos::collision::native::bodies::DiskPlanR::equal(double pA, double pB, double pC,

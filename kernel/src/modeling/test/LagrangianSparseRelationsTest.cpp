@@ -104,7 +104,7 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseRheonomousR() {
 
   // First test - user-defined function for every operators
   rel->setComputehFunction(hfunc);
-  rel->setComputeHFunction(jachqfunc);
+  rel->setComputeContactMatrixFunction(jachqfunc);
   rel->setComputedhdtFunction(hdotfunc);
 
   nsds->link(inter, lds1, lds2);
@@ -124,22 +124,22 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseRheonomousR() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - rheonomous (sparse storage) - Compute dhdt",
                                result_y.isApprox(href), true);
 
-  rel->computeH(block, tref);
+  rel->computeContactMatrix(block, tref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - rheonomous (sparse storage) - Compute jacobian h_q",
-                               rel->H().isApprox(*jacref), true);
-  rel->computeH(block, 0.);  // reset
+                               rel->contactMatrix().isApprox(*jacref), true);
+  rel->computeContactMatrix(block, 0.);  // reset
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - rheonomous (sparse storage) - Compute jacobian h_q (2)",
-                               rel->H().isApprox(*jacref), false);
+                               rel->contactMatrix().isApprox(*jacref), false);
 
   // Set consant value - Copy
-  rel->setConstantH(*jacref, siconos::algebra::copy_t);
+  rel->setConstantContactMatrix(*jacref, siconos::algebra::copy_t);
   rel->initialize(*inter);
   (*q0)(1) *= 4;
-  rel->computeH(block, 1.3);  // this should not have any effect
+  rel->computeContactMatrix(block, 1.3);  // this should not have any effect
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - rheonomous (sparse storage) - constant jacobian h_q (copy)",
-      rel->H().isApprox(*jacref), true);
+      rel->contactMatrix().isApprox(*jacref), true);
 
   // back to setcompute, just to check
   auto jachqfunc2 = [](const siconos::algebra::BlockVector& pos, double time,
@@ -155,12 +155,12 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseRheonomousR() {
     std::cout << "Compute jacobian h v2 ...\n";
   };
 
-  rel->setComputeHFunction(jachqfunc2);
+  rel->setComputeContactMatrixFunction(jachqfunc2);
   rel->initialize(*inter);
-  rel->computeH(block, tref);
+  rel->computeContactMatrix(block, tref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - rheonomous (sparse storage) -  Compute jacobian h_q (3)",
-      rel->H().isApprox(2. * *jacref), true);
+      rel->contactMatrix().isApprox(2. * *jacref), true);
 
   // Set consant value - alias
 
@@ -168,12 +168,12 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseRheonomousR() {
       jacref->rows(), jacref->cols(), jacref->nonZeros(), jacref->outerIndexPtr(),
       jacref->innerIndexPtr(), jacref->valuePtr());
 
-  rel->setConstantH(*jacmap, siconos::algebra::alias_t);
+  rel->setConstantContactMatrix(*jacmap, siconos::algebra::alias_t);
   rel->initialize(*inter);
-  rel->computeH(block, 1.3);  // this should not have any effect
+  rel->computeContactMatrix(block, 1.3);  // this should not have any effect
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - rheonomous (sparse storage) - constant jacobian h_q (alias)",
-      rel->H().isApprox(*jacref), true);
+      rel->contactMatrix().isApprox(*jacref), true);
 
   // For a complete test/example with initialize(inter), compute call and so on
   // see CamFollower-Rheonomous
@@ -243,7 +243,7 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseScleronomousR() {
   jacref->insert(0, 4) = (*v0)(1);
   jacref->makeCompressed();
 
-  rel->setComputeHFunction(jachqfunc);
+  rel->setComputeContactMatrixFunction(jachqfunc);
   auto jachq_dot = [](const siconos::algebra::BlockVector& pos,
                       const siconos::algebra::BlockVector& qdot,
                       siconos::algebra::SiconosSparseMatrix& result) {
@@ -260,7 +260,7 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseScleronomousR() {
   jacdotref->insert(0, 4) = (*v1)(1);
   jacdotref->makeCompressed();
 
-  rel->setComputeHdotFunction(jachq_dot);
+  rel->setComputeContactMatrixDotFunction(jachq_dot);
 
   nsds->link(inter, lds1, lds2);
 
@@ -275,28 +275,28 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseScleronomousR() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - scleronomous (sparse storage) - Compute h",
                                result_y.isApprox(href), true);
 
-  rel->computeH(block);
+  rel->computeContactMatrix(block);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - scleronomous (sparse storage) - Compute jacobian h_q",
-                               rel->H().isApprox(*jacref), true);
+                               rel->contactMatrix().isApprox(*jacref), true);
 
-  rel->computeHdot(block, block2);
+  rel->computeContactMatrixDot(block, block2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - scleronomous (sparse storage) - Compute jacobian h_q_dot_",
-      rel->Hdot().isApprox(*jacdotref), true);
+      rel->contactMatrixDot().isApprox(*jacdotref), true);
 
   // Set constant value - Copy
-  rel->setConstantH(*jacref, siconos::algebra::copy_t);
-  rel->setConstantHdot(*jacdotref, siconos::algebra::copy_t);
+  rel->setConstantContactMatrix(*jacref, siconos::algebra::copy_t);
+  rel->setConstantContactMatrixDot(*jacdotref, siconos::algebra::copy_t);
   rel->initialize(*inter);
-  rel->computeH(block);  // this should not have any effect
+  rel->computeContactMatrix(block);  // this should not have any effect
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - scleronomous (sparse storage) - constant jacobian h_q (copy)",
-      rel->H().isApprox(*jacref), true);
-  rel->computeHdot(block, block2);  // this should not have any effect
+      rel->contactMatrix().isApprox(*jacref), true);
+  rel->computeContactMatrixDot(block, block2);  // this should not have any effect
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - scleronomous (sparse storage) - constant jacobian h_q_dot (copy)",
-      rel->Hdot().isApprox(*jacdotref), true);
+      rel->contactMatrixDot().isApprox(*jacdotref), true);
 
   // back to setcompute, just to check
   auto jachqfunc3 = [](const siconos::algebra::BlockVector& pos,
@@ -313,15 +313,15 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseScleronomousR() {
     std::cout << "Compute jacobian h v2 ...\n";
   };
 
-  rel->setComputeHdotFunction(jachqfunc3);
+  rel->setComputeContactMatrixDotFunction(jachqfunc3);
   rel->initialize(*inter);
-  rel->computeHdot(block, block2);
-  //   siconos::algebra::print(rel->Hdot());
+  rel->computeContactMatrixDot(block, block2);
+  //   siconos::algebra::print(rel->contactMatrixDot());
   //   siconos::algebra::print(*jacdotref);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - scleronomous (sparse storage) -  Compute jacobian h_q_dot (3)",
-      rel->Hdot().isApprox(2. * *jacdotref), true);
+      rel->contactMatrixDot().isApprox(2. * *jacdotref), true);
 
   // Set constant value - alias
 
@@ -332,17 +332,17 @@ void LagrangianSparseRelationsTest::testBuildLagrangianSparseScleronomousR() {
       jacdotref->rows(), jacdotref->cols(), jacdotref->nonZeros(), jacdotref->outerIndexPtr(),
       jacdotref->innerIndexPtr(), jacdotref->valuePtr());
 
-  rel->setConstantH(*jacmap, siconos::algebra::alias_t);
-  rel->setConstantHdot(*jacdotmap, siconos::algebra::alias_t);
+  rel->setConstantContactMatrix(*jacmap, siconos::algebra::alias_t);
+  rel->setConstantContactMatrixDot(*jacdotmap, siconos::algebra::alias_t);
   rel->initialize(*inter);
-  rel->computeH(block);             // this should not have any effect
-  rel->computeHdot(block, block2);  // this should not have any effect
+  rel->computeContactMatrix(block);             // this should not have any effect
+  rel->computeContactMatrixDot(block, block2);  // this should not have any effect
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - scleronomous (sparse storage) - constant jacobian h_q (alias)",
-      rel->H().isApprox(*jacref), true);
+      rel->contactMatrix().isApprox(*jacref), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "test - scleronomous (sparse storage) - constant jacobian h_q_dot (alias)",
-      rel->Hdot().isApprox(*jacdotref), true);
+      rel->contactMatrixDot().isApprox(*jacdotref), true);
 
   // For a complete test/example with initialize(inter), compute call and so on
   // see CamFollower-Scleronomous

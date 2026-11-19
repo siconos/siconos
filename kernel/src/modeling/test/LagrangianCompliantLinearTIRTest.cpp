@@ -42,8 +42,8 @@ void LagrangianCompliantLinearTIRTest::tearDown() {}
 void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1() {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(*C, *D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->H() == *C,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianCompliantLinearTIR1a : ", folr->contactMatrix() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->D() == *D,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1c : ",
@@ -61,8 +61,8 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1() 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianCompliantLinearTIR1a : ", folr2->eVector() == *e, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr2->H() == *C,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianCompliantLinearTIR1a : ", folr2->contactMatrix() == *C, true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 

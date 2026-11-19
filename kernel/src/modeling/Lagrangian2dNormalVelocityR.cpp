@@ -40,25 +40,27 @@ void siconos::modeling::Lagrangian2dNormalVelocityR::initialize(Interaction& int
   }
 
   auto qSize = 3 * (inter.getSizeOfDS() / 3);
-  if (!H_storage_) {
-    H_storage_ = std::make_unique<std::vector<double>>(qSize);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(qSize);
   }
-  H_view_ = std::make_shared<siconos::algebra::MapType>(H_storage_->data(), 1, qSize);
-  H_view_->setZero();
+  contactMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(contactMatrix_storage_->data(), 1, qSize);
+  contactMatrix_view_->setZero();
 }
 
-void siconos::modeling::Lagrangian2dNormalVelocityR::computeH(
+void siconos::modeling::Lagrangian2dNormalVelocityR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "siconos::modeling::Lagrangian2dNormalVelocityR::computeH(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dNormalVelocityR::computeContactMatrix(Interaction& "
+      "inter, "
       "siconos::algebra::BlockVector q0 \n");
 
   double G1x = q(0);
   double G1y = q(1);
 
-  H_view_->row(0).segment(0, 2) = nc_;
+  contactMatrix_view_->row(0).segment(0, 2) = nc_;
 
-  (*H_view_)(0, 2) =
+  (*contactMatrix_view_)(0, 2) =
       (G1y - contactPoint1_.y()) * nc_.x() - (G1x - contactPoint1_.x()) * nc_.y();
 
   if (q.size() == 6) {
@@ -66,13 +68,14 @@ void siconos::modeling::Lagrangian2dNormalVelocityR::computeH(
     double G2x = q(3);
     double G2y = q(4);
 
-    H_view_->row(0).segment(3, 2) = -nc_;
-    (*H_view_)(0, 5) =
+    contactMatrix_view_->row(0).segment(3, 2) = -nc_;
+    (*contactMatrix_view_)(0, 5) =
         (G2y - contactPoint1_.y()) * nc_.x() - (G2x - contactPoint1_.x()) * nc_.y();
   }
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
   DEBUG_END(
-      "siconos::modeling::Lagrangian2dNormalVelocityR::computeH(Interaction& inter, "
+      "siconos::modeling::Lagrangian2dNormalVelocityR::computeContactMatrix(Interaction& "
+      "inter, "
       "siconos::algebra::BlockVector q0) \n");
 }
 

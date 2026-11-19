@@ -97,7 +97,7 @@ void saveProjectionOrigin(const siconos::modeling::NonSmoothDynamicalSystem& nsd
 
     for each interaction of indexSet, where \f$ (a - q_j) \f$ is the concatenation over
     the source and target dynamical systems of the interaction (same order as the
-    columns of LagrangianR::H()). MLCPProjectOnConstraints::computeqBlock uses
+    columns of LagrangianR::contactMatrix()). MLCPProjectOnConstraints::computeqBlock uses
     \f$ y^0 \f$ as the vector q of the MLCP.
 
     Must be called right after computeCriteria() (which computes \f$ y^0 = g(q_j) \f$

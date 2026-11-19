@@ -839,7 +839,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto lagr =
         std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
-    auto C = lagr->H();
+    auto C = lagr->contactMatrix();
     assert(Xfree);
     siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
@@ -868,8 +868,8 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
         auto scleR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
             inter->relation());
-        scleR->computeHdotv(simulation()->getTkp1(), *inter);
-        osnsp_rhs += *ID * scleR->Hdotv();
+        scleR->computeContactMatrixDotV(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scleR->contactMatrixDotV();
       }
     }
   } else

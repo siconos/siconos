@@ -43,7 +43,7 @@ namespace siconos::modeling {
  * can be set by user-defined functions, or computed by overriding the virtual functions:
  *
  *   - \f$ h(q,t) \f$: setComputehFunction, or override computeh;
- *   - \f$ H(q,t) \f$: setComputeHFunction, or override computeH;
+ *   - \f$ H(q,t) \f$: setComputeContactMatrixFunction, or override computeContactMatrix;
  *   - \f$ \frac{\partial h}{\partial t}(q,t) \f$: setComputedhdtFunction, or override
  *     computedhdt.
  *
@@ -59,7 +59,7 @@ class LagrangianRheonomousR : public LagrangianR {
   siconos::modeling::func_prototypes::FunctionBVS_V computeh_{nullptr};
 
   /** function wrapper used to compute \f$ H(q,t) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVS_M computeH_{nullptr};
+  siconos::modeling::func_prototypes::FunctionBVS_M computeContactMatrix_{nullptr};
 
   /** \f$ \frac{\partial h}{\partial t}(q,t) \f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> dhdt_{nullptr};
@@ -71,8 +71,9 @@ class LagrangianRheonomousR : public LagrangianR {
   bool hasdhdt_{false};
 
   /** Deprecated names of the members above, kept for one release. */
-  [[deprecated("use computeH_")]] siconos::modeling::func_prototypes::FunctionBVS_M&
-      computejacobianhOver_q_{computeH_};
+  [[deprecated(
+      "use computeContactMatrix_")]] siconos::modeling::func_prototypes::FunctionBVS_M&
+      computejacobianhOver_q_{computeContactMatrix_};
   [[deprecated("use dhdt_")]] std::shared_ptr<siconos::algebra::SiconosVector>& hdot_{dhdt_};
   [[deprecated(
       "use computedhdt_")]] siconos::modeling::func_prototypes::FunctionBVS_V& computehdot_{
@@ -81,7 +82,7 @@ class LagrangianRheonomousR : public LagrangianR {
 
  private:
   /** flags of the dispatch to the deprecated virtual names (see RelationCompatibility.hpp) */
-  bool computeHLegacy_{false};
+  bool computeContactMatrixLegacy_{false};
   bool computedhdtLegacy_{false};
 
  public:
@@ -117,15 +118,16 @@ class LagrangianRheonomousR : public LagrangianR {
    *  @param fct the user-defined function (std::function, lambda ...), called as
    *  fct(q, t, H)
    */
-  void setComputeHFunction(const siconos::modeling::func_prototypes::FunctionBVS_M& fct);
+  void setComputeContactMatrixFunction(
+      const siconos::modeling::func_prototypes::FunctionBVS_M& fct);
 
-  /** Computes \f$ H(q, t) \f$ (H_view_). The default calls the user-defined function, if
-   *  any. Override this function to compute \f$ H \f$ in a derived class.
+  /** Computes \f$ H(q, t) \f$ (contactMatrix_view_). The default calls the user-defined
+   * function, if any. Override this function to compute \f$ H \f$ in a derived class.
    *
    *  @param q coordinates of the dynamical systems involved in the relation
    *  @param time current time value
    */
-  virtual void computeH(const siconos::algebra::BlockVector& q, double time);
+  virtual void computeContactMatrix(const siconos::algebra::BlockVector& q, double time);
 
   /** @return a read-only view on \f$ \frac{\partial h}{\partial t}(q,t) \f$ */
   inline auto dhdt() const {
@@ -176,12 +178,13 @@ class LagrangianRheonomousR : public LagrangianR {
 
   /** \name Deprecated names, kept for one release */
   ///@{
-  [[deprecated("use setComputeHFunction")]] void setComputeJacobianhOver_qFunction(
+  [[deprecated("use setComputeContactMatrixFunction")]] void setComputeJacobianhOver_qFunction(
       const siconos::modeling::func_prototypes::FunctionBVS_M& fct) {
-    setComputeHFunction(fct);
+    setComputeContactMatrixFunction(fct);
   }
-  /** \deprecated former name of computeH. Still called for classes that override it. */
-  [[deprecated("override/call computeH")]] virtual void computeJacobianhOver_q(
+  /** \deprecated former name of computeContactMatrix. Still called for classes that override
+   * it. */
+  [[deprecated("override/call computeContactMatrix")]] virtual void computeJacobianhOver_q(
       const siconos::algebra::BlockVector& q, double time);
   [[deprecated("use dhdt()")]] auto hdot() const { return dhdt(); }
   [[deprecated("use setComputedhdtFunction")]] void setComputehdotFunction(

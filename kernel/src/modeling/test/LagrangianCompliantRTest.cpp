@@ -42,9 +42,10 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0() {
                               const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
                               Eigen::Ref<siconos::algebra::SiconosVector> y) {});
 
-  rel->setComputeHFunction([](const siconos::algebra::BlockVector& q,
-                              const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
-                              Eigen::Ref<siconos::algebra::MapType> result) {});
+  rel->setComputeContactMatrixFunction(
+      [](const siconos::algebra::BlockVector& q,
+         const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+         Eigen::Ref<siconos::algebra::MapType> result) {});
 
   rel->setComputeDFunction([](const siconos::algebra::BlockVector& q,
                               const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,

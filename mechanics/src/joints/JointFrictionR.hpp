@@ -49,8 +49,8 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeG(double time, siconos::modeling::Interaction& inter,
-                        const siconos::algebra::BlockVector& q0) override;
+  virtual void computeConstraintJacobian(double time, siconos::modeling::Interaction& inter,
+                                         const siconos::algebra::BlockVector& q0) override;
 
  public:
   /** Initialize a joint friction for a common case: a single axis with a
