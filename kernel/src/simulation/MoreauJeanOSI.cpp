@@ -2147,14 +2147,17 @@ void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int 
       "siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int level)\n");
   DEBUG_PRINTF("level = %u\n", level);
 
-  auto& indexSet = *simulation()->indexSet(level);
   auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
 
-  // we first compute p[1] from lambda[1] on indexSet1
-  for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
-    DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 1 \n");
+  // we first compute p[1] from lambda[1] on indexSet0, as in
+  // OneStepIntegrator::updateInput: lambda[1] is zero for the interactions that are not
+  // in indexSet1, and the relations must also update their own input-related data there
+  // (e.g. NewtonEulerR::contactForce, which would otherwise keep its last value once the
+  // contact opens).
+  for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
+    DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 0 \n");
     if (!checkInteractionOSI(indexSet0, ui)) continue;
-    auto& inter = *indexSet.bundle(*ui);
+    auto& inter = *indexSet0.bundle(*ui);
     assert(inter.lowerLevelForInput() <= level);
     assert(inter.upperLevelForInput() >= level);
     inter.computeInput(time, level);
