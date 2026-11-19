@@ -96,6 +96,18 @@ class TimeSteppingCombinedProjection : public TimeStepping {
    */
   void updateIndexSet(siconos::simulation::Topology::size_type level) override;
 
+  /** compute the outputs at the beginning of the step and save them in memory (y_k).
+   *
+   *  newtonSolve() is called once per index set iteration, and each iteration restarts the
+   *  step with the enlarged index set (Acary, CMAME 2013, Algorithm 2). The first call is
+   *  done at the beginning of the step. For the next ones, the DS states are reset to their
+   *  beginning-of-step values (memory) and the outputs and Jacobians are recomputed there,
+   *  without saving them in memory: otherwise y_k would be overwritten by the end-of-step
+   *  values of the previous iteration, and the velocity problem would be built with the
+   *  Jacobians at the end of the step.
+   */
+  void updateAndSwapAllOutput() override;
+
   // struct _SimulationEffectOnOSNSP;
 
  public:
@@ -153,6 +165,7 @@ class TimeSteppingCombinedProjection : public TimeStepping {
   inline void setConstraintTol(double v) { _constraintTol = v; }
 
   inline void setConstraintTolUnilateral(double v) { _constraintTolUnilateral = v; }
+  inline double constraintTolUnilateral() const { return _constraintTolUnilateral; }
 
   inline double maxViolationUnilateral() { return _maxViolationUnilateral; }
   inline double maxViolationEquality() { return _maxViolationEquality; }

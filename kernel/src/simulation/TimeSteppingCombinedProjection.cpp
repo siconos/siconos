@@ -89,6 +89,47 @@ void siconos::simulation::TimeSteppingCombinedProjection::initializeOneStepNSPro
   }
 }
 
+void siconos::simulation::TimeSteppingCombinedProjection::updateAndSwapAllOutput() {
+  if (_nbIndexSetsIteration <= 1) {
+    TimeStepping::updateAndSwapAllOutput();
+    return;
+  }
+  // Restart the step: DS states back to their beginning-of-step values ...
+  auto nsds = nonSmoothDynamicalSystem();
+  auto dsGraph = nsds->dynamicalSystems();
+  for (auto vi : *dsGraph) {
+    auto ds = dsGraph->bundle(vi);
+    if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      *neds->q() = neds->qMemory().getSiconosVector(0);
+      *neds->twist() = neds->twistMemory().getSiconosVector(0);
+      neds->computeT(*neds->q());
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      *d->q() = d->qMemory().getSiconosVector(0);
+      *d->velocity() = d->velocityMemory().getSiconosVector(0);
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      *d->q() = d->qMemory().getSiconosVector(0);
+      *d->velocity() = d->velocityMemory().getSiconosVector(0);
+    } else
+      THROW_EXCEPTION(
+          "siconos::simulation::TimeSteppingCombinedProjection::"
+          "updateAndSwapAllOutput() - Ds is "
+          "not from NewtonEulerDS neither from LagrangianDS.");
+  }
+  updateWorldFromDS();
+  // ... and outputs/Jacobians recomputed there, but not saved in memory (y_k is kept).
+  double tkp1 = getTkp1();
+  auto indexSet0 = nsds->topology()->indexSet0();
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
+    auto inter = indexSet0->bundle(*ui);
+    inter->computeOutput(tkp1, 0);
+    inter->relation()->computeJach(tkp1, *inter);
+    for (auto level = inter->lowerLevelForOutput(); level <= inter->upperLevelForOutput();
+         ++level)
+      inter->computeOutput(tkp1, level);
+  }
+}
+
 void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
   DEBUG_PRINT("================================================");
   DEBUG_PRINT("siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()");
@@ -744,7 +785,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
             // auto Osi = indexSet0->properties(*ui0).osi;
             //  We assume that the integrator of the ds1 drive the update of the
             //  index set
-            auto ds1 = indexSet1->properties(*ui0).source;
+            auto ds1 = indexSet0->properties(*ui0).source;
             auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
 
             activate = osi->addInteractionInIndexSet(inter0, i);
