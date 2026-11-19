@@ -33,6 +33,20 @@ namespace siconos::integrators {
 
     This class reimplement a special activation of constraints
     in the MoreauJeanOSI for the Combined Projection Algorithm
+    (Algorithm 2, used with siconos::simulation::TimeSteppingCombinedProjection).
+
+    Index sets (numberOfIndexSets() = 3):
+    - indexSet 1, active set \f$ \mathcal{A} \f$ of the velocity problem: cleared at the
+      beginning of each step; a constraint is added when it is violated at the end of an
+      index set iteration, \f$ g_\alpha(q) < -\epsilon \f$, with
+      \f$ \epsilon \f$ = TimeSteppingCombinedProjection::constraintTolUnilateral()
+      (0 with another simulation). Closed contacts (\f$ g_\alpha = 0 \f$) are not added:
+      they would be held closed by the equality projection. Constraints are never removed
+      within a step (removeInteractionFromIndexSet() is not used).
+    - indexSet 2, set of the position projection: all of indexSet 1.
+
+    The input of level 0 (p(0), the projection impulse) is also allocated
+    (_levelMinForInput = 0). See docs/devel/PROJECTION_SCHEMES.md.
 
     References :
 
@@ -88,6 +102,10 @@ class MoreauJeanCombinedProjectionOSI : public MoreauJeanOSI {
 
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i
+   *
+   *  - i = 1: \f$ g_\alpha(q) < -\epsilon \f$ (violated constraint, \f$ g = \f$ y(0)),
+   *    \f$ \epsilon \f$ = TimeSteppingCombinedProjection::constraintTolUnilateral();
+   *  - i = 2: always true (every active contact is projected).
    *
    *  \param inter concerned interaction
    *  \param i level
