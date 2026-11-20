@@ -82,6 +82,24 @@ class TimeSteppingSchemesTest : public CppUnit::TestFixture {
 
   // First-order system: RLC circuit with a diode
   CPPUNIT_TEST(circuitRLCDEulerMoreau);
+  CPPUNIT_TEST(circuitRLCDEulerMoreauResiduals);
+
+  // Variants added for the coverage of the time-stepping code
+  CPPUNIT_TEST(beadsManagedMoreauJean);
+  CPPUNIT_TEST(beadsMoreauJeanSparseBlockStorage);
+  CPPUNIT_TEST(sphere3DFrictionMoreauJeanReducedDirect);
+  CPPUNIT_TEST(springChainClampedMoreauJean);
+  CPPUNIT_TEST(springChainMoreauJean);
+  CPPUNIT_TEST(frictionOscillatorMoreauJean);
+  CPPUNIT_TEST(frictionOscillatorMoreauJeanGOSI);
+  CPPUNIT_TEST(frictionOscillatorSparseMoreauJean);
+  CPPUNIT_TEST(frictionOscillatorSparseMoreauJeanGOSI);
+  CPPUNIT_TEST(sphere3DFrictionMoreauJeanGOSIGlobalReduced);
+  CPPUNIT_TEST(bilateralPendulumDirectProjection);
+  CPPUNIT_TEST(doublePendulumMoreauJeanNonlinearFull);
+  CPPUNIT_TEST(stackMoreauJean);
+  CPPUNIT_TEST(stackDirectProjection);
+  CPPUNIT_TEST(stackMoreauJeanSymmetricGraph);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -112,6 +130,27 @@ class TimeSteppingSchemesTest : public CppUnit::TestFixture {
   void cubeCombinedProjection();
   void freeRigidBodyMoreauJean();
   void circuitRLCDEulerMoreau();
+  void circuitRLCDEulerMoreauResiduals();
+
+ private:
+  void circuitRLCD(bool residuals);
+
+ public:
+  void beadsManagedMoreauJean();
+  void beadsMoreauJeanSparseBlockStorage();
+  void sphere3DFrictionMoreauJeanReducedDirect();
+  void springChainClampedMoreauJean();
+  void springChainMoreauJean();
+  void frictionOscillatorMoreauJean();
+  void frictionOscillatorMoreauJeanGOSI();
+  void frictionOscillatorSparseMoreauJean();
+  void frictionOscillatorSparseMoreauJeanGOSI();
+  void sphere3DFrictionMoreauJeanGOSIGlobalReduced();
+  void bilateralPendulumDirectProjection();
+  void doublePendulumMoreauJeanNonlinearFull();
+  void stackMoreauJean();
+  void stackDirectProjection();
+  void stackMoreauJeanSymmetricGraph();
 };
 
 #endif

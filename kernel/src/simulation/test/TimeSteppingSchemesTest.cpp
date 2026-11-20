@@ -21,10 +21,13 @@
 #include <cstdlib>
 #include <deque>
 #include <filesystem>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "BoundaryCondition.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "SiconosKernel.hpp"
 #include "io.hpp"
 
@@ -63,6 +66,10 @@ struct Case {
   std::deque<SiconosVector> vectors;
   // level of lambda to record (1 for the velocity-level schemes, 0 for Schatzman-Paoli)
   unsigned int lambda_level{1};
+  // additional values to record (e.g. for interactions created during the simulation)
+  std::function<void(std::vector<double>&)> extra;
+  // record the multipliers (not when they are not unique, e.g. a box resting on 4 points)
+  bool record_lambda{true};
 };
 
 void append(std::vector<double>& row, const Eigen::Ref<const Eigen::VectorXd>& x) {
@@ -75,21 +82,21 @@ void append(std::vector<double>& row, const Eigen::Ref<const Eigen::VectorXd>& x
 std::vector<double> record(Case& c) {
   std::vector<double> row{c.simulation->nextTime()};
   for (auto& ds : c.dss) {
-    if (auto lds = std::dynamic_pointer_cast<mod::LagrangianDS>(ds)) {
-      append(row, lds->q_read());
-      append(row, lds->velocity_read());
-    } else if (auto neds = std::dynamic_pointer_cast<mod::NewtonEulerDS>(ds)) {
-      append(row, neds->q_read());
-      append(row, neds->twist_read());
+    // Lagrangian (dense or sparse) and Newton-Euler systems (velocity = twist)
+    if (auto sods = std::dynamic_pointer_cast<mod::SecondOrderDS>(ds)) {
+      append(row, sods->q_read());
+      append(row, sods->velocity_read());
     } else if (auto fods = std::dynamic_pointer_cast<mod::FirstOrderLinearDS>(ds)) {
       append(row, fods->x_read());
     }
   }
   for (auto& inter : c.interactions) {
     row.push_back((*inter->y(0))(0));
+    if (!c.record_lambda) continue;
     auto lambda = inter->lambda(c.lambda_level);
     row.push_back((lambda && lambda->size() > 0) ? (*lambda)(0) : 0.0);
   }
+  if (c.extra) c.extra(row);
   return row;
 }
 
@@ -98,10 +105,16 @@ std::vector<double> record(Case& c) {
    written to <name>.dat in the working directory (for inspection). */
 SiconosDenseMatrix run(Case& c, int nsteps, const std::string& name = "") {
   std::vector<std::vector<double>> rows;
-  for (int k = 0; k < nsteps; ++k) {
-    c.simulation->advanceToEvent();
-    rows.push_back(record(c));
-    c.simulation->processEvents();
+  try {
+    for (int k = 0; k < nsteps; ++k) {
+      c.simulation->advanceToEvent();
+      rows.push_back(record(c));
+      c.simulation->processEvents();
+    }
+  } catch (...) {
+    std::cerr << "\n" << name << ": exception at step " << rows.size() << "\n";
+    siconos::exception::process();  // prints the details of a siconos exception
+    throw;
   }
   if (std::getenv("SICONOS_TEST_DUMP_TRAJECTORIES") && !name.empty()) {
     SiconosDenseMatrix all(static_cast<Eigen::Index>(rows.size()),
@@ -175,16 +188,20 @@ enum class Scheme {
 
 /* Time stepping with one LCP (or MLCP if `mixed`) at the velocity level, and the
    position-level problem of the projection schemes. */
-void setupSimulation(Case& c, Scheme scheme, double h, double theta = 0.5,
-                     bool mixed = false) {
+/* `tune`, if given, configures the velocity-level problem (storage, assembly). */
+void setupSimulation(Case& c, Scheme scheme, double h, double theta = 0.5, bool mixed = false,
+                     std::function<void(osns::LinearOSNS&)> tune = nullptr) {
   auto td = std::make_shared<TimeDiscretisation>(c.nsds->t0(), h);
   auto velocity_problem = [&]() -> std::shared_ptr<osns::OneStepNSProblem> {
+    std::shared_ptr<osns::LinearOSNS> pb;
     if (mixed) {
-      auto pb = std::make_shared<osns::MLCP>(SICONOS_MLCP_ENUM);
+      pb = std::make_shared<osns::MLCP>(SICONOS_MLCP_ENUM);
       setTolerance(*pb, 1e-12);
-      return pb;
+    } else {
+      pb = std::make_shared<osns::LCP>();
     }
-    return std::make_shared<osns::LCP>();
+    if (tune) tune(*pb);
+    return pb;
   };
   auto position_problem = [&]() {
     auto pb = std::make_shared<osns::MLCPProjectOnConstraints>(SICONOS_MLCP_ENUM);
@@ -251,13 +268,61 @@ void setupSimulation(Case& c, Scheme scheme, double h, double theta = 0.5,
 // Systems
 // ---------------------------------------------------------------------------------------
 
+constexpr double beads_radius = 0.1;
+constexpr double beads_e = 0.8;
+
+/* Interaction between two beads i < i+1: y = z_{i+1} - z_i - 2R. */
+std::shared_ptr<Interaction> beadsInteraction(Case& c) {
+  auto& H = c.matrices.emplace_back(1, 2);
+  H << -1.0, 1.0;
+  auto& b = c.vectors.emplace_back(1);
+  b << -2 * beads_radius;
+  return std::make_shared<Interaction>(std::make_shared<mod::NewtonImpactNSL>(beads_e),
+                                       std::make_shared<mod::LagrangianLinearTIR>(H, b));
+}
+
+/* Interaction manager creating the bead/bead interactions when the beads get closer than
+   `link_gap`, and removing them when they get farther than `unlink_gap`, as a contact
+   detection would. */
+class BeadsContactDetection : public sim::InteractionManager {
+  Case& case_;
+  double link_gap_, unlink_gap_;
+
+ public:
+  std::vector<std::shared_ptr<Interaction>> pairs;  // pairs[i]: beads i and i+1 (or null)
+  int links{0}, unlinks{0};
+
+  BeadsContactDetection(Case& c, double link_gap, double unlink_gap)
+      : case_{c}, link_gap_{link_gap}, unlink_gap_{unlink_gap}, pairs(c.dss.size() - 1) {}
+
+  void updateInteractions(std::shared_ptr<sim::Simulation> simulation) override {
+    for (std::size_t i = 0; i + 1 < case_.dss.size(); ++i) {
+      double zi = std::static_pointer_cast<mod::LagrangianDS>(case_.dss[i])->q_read()(0);
+      double zj = std::static_pointer_cast<mod::LagrangianDS>(case_.dss[i + 1])->q_read()(0);
+      double gap = zj - zi - 2 * beads_radius;
+      if (!pairs[i] && gap < link_gap_) {
+        pairs[i] = beadsInteraction(case_);
+        simulation->link(pairs[i], case_.dss[i], case_.dss[i + 1]);
+        links++;
+      } else if (pairs[i] && gap > unlink_gap_) {
+        simulation->unlink(pairs[i]);
+        pairs[i].reset();
+        unlinks++;
+      }
+    }
+  }
+};
+
 /* Column of 3 beads (1 dof each, radius 0.1) above the ground, falling with different
    velocities: impacts with the ground and between beads (simultaneous ones included),
-   then resting contacts. 4 unilateral contacts, linear relations. */
-Case beads() {
+   then resting contacts. 3 unilateral contacts, linear relations, a single restitution
+   coefficient (as in the hots-python models, see validate_with_hots.py).
+   If `managed`, only the ground contact is given: the bead/bead interactions are created
+   and removed during the simulation by BeadsContactDetection (see beadsManaged). */
+Case beads(bool managed = false) {
   Case c;
   c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 1.0);
-  const double R = 0.1;
+  const double R = beads_radius;
   const double z0[3] = {0.15, 0.45, 0.8};
   const double v0[3] = {0.0, -1.0, -2.0};
   for (int i = 0; i < 3; ++i) {
@@ -278,20 +343,66 @@ Case beads() {
   auto& b0 = c.vectors.emplace_back(1);
   b0 << -R;
   auto inter0 =
-      std::make_shared<Interaction>(std::make_shared<mod::NewtonImpactNSL>(0.9),
+      std::make_shared<Interaction>(std::make_shared<mod::NewtonImpactNSL>(beads_e),
                                     std::make_shared<mod::LagrangianLinearTIR>(H0, b0));
   c.nsds->link(inter0, c.dss[0]);
   c.interactions.push_back(inter0);
+  if (managed) return c;
   // bead/bead: y = z_{i+1} - z_i - 2R
   for (int i = 0; i < 2; ++i) {
-    auto& H = c.matrices.emplace_back(1, 2);
-    H << -1.0, 1.0;
+    auto inter = beadsInteraction(c);
+    c.nsds->link(inter, c.dss[i], c.dss[i + 1]);
+    c.interactions.push_back(inter);
+  }
+  return c;
+}
+
+/* Chain of 5 masses on a line, linked by springs and dampers (sparse stiffness and damping
+   matrices, LagrangianSparseLinearTIDS), moving towards two obstacles: the last mass hits
+   a wall, the middle one a stop behind it. The first mass is either clamped by a boundary
+   condition (`clamped`) or attached to a fixed wall by a spring. */
+Case springChain(bool clamped) {
+  Case c;
+  c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 1.0);
+  const int n = 5;
+  const double k = 100.0, damping = 0.01;
+  SiconosVector q = SiconosVector::Zero(n), v = SiconosVector::Constant(n, 1.0);
+  if (clamped) v(0) = 0.0;
+  std::vector<Eigen::Triplet<double>> tk, tm;
+  for (int i = 0; i < n; ++i) {
+    tm.emplace_back(i, i, 1.0);
+    // spring between i-1 (or the wall for i = 0) and i
+    tk.emplace_back(i, i, k);
+    if (i > 0) {
+      tk.emplace_back(i - 1, i - 1, k);
+      tk.emplace_back(i - 1, i, -k);
+      tk.emplace_back(i, i - 1, -k);
+    }
+  }
+  siconos::algebra::SiconosSparseMatrix M(n, n), K(n, n);
+  M.setFromTriplets(tm.begin(), tm.end());
+  K.setFromTriplets(tk.begin(), tk.end());
+  siconos::algebra::SiconosSparseMatrix C = damping * K;
+  auto ds =
+      std::make_shared<mod::LagrangianSparseLinearTIDS>(q, v, M, siconos::algebra::copy_t);
+  ds->setStiffnessMatrix(K, siconos::algebra::copy_t);
+  ds->setDampingMatrix(C, siconos::algebra::copy_t);
+  if (clamped)
+    ds->setBoundaryConditions(
+        std::make_shared<mod::BoundaryCondition>(mod::BoundaryCondition::Indices{0}));
+  c.nsds->insertDynamicalSystem(ds);
+  c.dss.push_back(ds);
+  // wall at q_4 = 0.05 (y = 0.05 - q_4), stop at q_2 = 0.08 (y = 0.08 - q_2)
+  for (auto [dof, position] : {std::pair{4, 0.05}, std::pair{2, 0.08}}) {
+    auto& H = c.matrices.emplace_back(1, n);
+    H.setZero();
+    H(0, dof) = -1.0;
     auto& b = c.vectors.emplace_back(1);
-    b << -2 * R;
+    b << position;
     auto inter =
         std::make_shared<Interaction>(std::make_shared<mod::NewtonImpactNSL>(0.5),
                                       std::make_shared<mod::LagrangianLinearTIR>(H, b));
-    c.nsds->link(inter, c.dss[i], c.dss[i + 1]);
+    c.nsds->link(inter, ds);
     c.interactions.push_back(inter);
   }
   return c;
@@ -588,6 +699,7 @@ class PointOnPlaneR : public Base {
    contact per corner (8 interactions). */
 Case cube(bool friction) {
   Case c;
+  c.record_lambda = false;  // 4 contacts at rest on a rigid face: not unique
   c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 1.0);
   const double a = 0.2, m = 1.0;
   siconos::algebra::SiconosVector7 q;
@@ -622,8 +734,147 @@ Case cube(bool friction) {
   return c;
 }
 
+/* Mass (x, y, z) held in the plane by springs and dampers (stiffness and damping
+   matrices), launched on a plane with Coulomb friction: stick-slip oscillations. Dense
+   (LagrangianLinearTIDS) or sparse (LagrangianSparseLinearTIDS) storage. */
+Case frictionOscillator(bool sparse) {
+  Case c;
+  c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 1.0);
+  const double m = 1.0, kx = 50.0, ky = 80.0, cd = 0.2;
+  SiconosVector q{3}, v{3}, f{3};
+  q << 0.1, -0.05, 0.02;
+  v << 0.0, 1.0, 0.0;
+  f << 0.0, 0.0, -m * g;
+  SiconosDenseMatrix M = m * SiconosDenseMatrix::Identity(3, 3),
+                     K = SiconosDenseMatrix::Zero(3, 3), C = SiconosDenseMatrix::Zero(3, 3);
+  K(0, 0) = kx;
+  K(1, 1) = ky;
+  K(0, 1) = K(1, 0) = 10.0;
+  C(0, 0) = C(1, 1) = cd;
+  std::shared_ptr<mod::LagrangianDS> lds;
+  if (sparse) {
+    siconos::algebra::SiconosSparseMatrix Ms = M.sparseView(), Ks = K.sparseView(),
+                                          Cs = C.sparseView();
+    auto ds =
+        std::make_shared<mod::LagrangianSparseLinearTIDS>(q, v, Ms, siconos::algebra::copy_t);
+    ds->setStiffnessMatrix(Ks, siconos::algebra::copy_t);
+    ds->setDampingMatrix(Cs, siconos::algebra::copy_t);
+    ds->setConstantFext(f, siconos::algebra::copy_t);
+    c.dss.push_back(ds);
+  } else {
+    auto ds = std::make_shared<mod::LagrangianLinearTIDS>(q, v, M, siconos::algebra::copy_t);
+    ds->setStiffnessMatrix(K, siconos::algebra::copy_t);
+    ds->setDampingMatrix(C, siconos::algebra::copy_t);
+    ds->setConstantFext(f, siconos::algebra::copy_t);
+    c.dss.push_back(ds);
+  }
+  c.nsds->insertDynamicalSystem(c.dss[0]);
+  auto& H = c.matrices.emplace_back(3, 3);
+  H << 0, 0, 1,  //
+      1, 0, 0,   //
+      0, 1, 0;
+  auto inter = std::make_shared<Interaction>(
+      std::make_shared<mod::NewtonImpactFrictionNSL>(0.0, 0.0, 0.3, 3),
+      std::make_shared<mod::LagrangianLinearTIR>(H));
+  c.nsds->link(inter, c.dss[0]);
+  c.interactions.push_back(inter);
+  return c;
+}
+
+/* Contact of a point of body 1 (given in its frame) with a face of body 2 (point and
+   outward normal of the face given in the frame of body 2): the face is taken as an
+   infinite plane. */
+template <class Base>
+class PointOnFaceR : public Base {
+  siconos::algebra::SiconosVector3 point_, face_point_, face_normal_;
+
+ public:
+  PointOnFaceR(const siconos::algebra::SiconosVector3& point,
+               const siconos::algebra::SiconosVector3& face_point,
+               const siconos::algebra::SiconosVector3& face_normal)
+      : Base{}, point_{point}, face_point_{face_point}, face_normal_{face_normal} {}
+
+  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
+                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector7>>& q2,
+                Eigen::Ref<SiconosVector> y) override {
+    assert(q2);
+    Eigen::Quaterniond r1(q1(3), q1(4), q1(5), q1(6)),
+        r2((*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6));
+    Eigen::Vector3d p = q1.head<3>() + r1.normalized() * point_;
+    Eigen::Vector3d a = q2->head<3>() + r2.normalized() * face_point_;
+    Eigen::Vector3d n = r2.normalized() * face_normal_;
+    double gap = (p - a).dot(n);
+    this->contactPoint1_ = p;
+    this->contactPoint2_ = p - gap * n;
+    this->nc_ = n;
+    y.setZero();
+    y(0) = gap;
+  }
+};
+
+/* Two boxes (side 0.2): the lower one lies on the ground (3 bottom points), the upper one
+   is dropped with a tilt and a spin on the top face of the lower one (3 bottom points):
+   3 interactions between the same pair of bodies, the lower box is pushed into the
+   ground.
+   \warning With TimeSteppingCombinedProjection, the simulation diverges when the upper box
+   settles on its 3 contacts (t = 0.164: the upper box is projected to z = 1.3e7), see
+   setupSimulation(c, Scheme::combined_projection, 4e-3) on this system. (Not used with
+   friction: resting on 4 frictional contacts is an indeterminate problem on which the friction
+   solvers converge very slowly.) */
+Case stack(bool friction) {
+  Case c;
+  c.record_lambda = false;  // 4 contacts at rest on a rigid face: not unique
+  c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 1.0);
+  const double a = 0.2, m = 1.0;
+  siconos::algebra::SiconosMatrix33 I =
+      (m * a * a / 6.0) * siconos::algebra::SiconosMatrix33::Identity();
+  siconos::algebra::SiconosVector3 weight(0.0, 0.0, -m * g);
+  Eigen::Quaterniond tilt(Eigen::AngleAxisd(0.15, Eigen::Vector3d(1, 2, 0).normalized()));
+  siconos::algebra::SiconosVector7 q_low, q_up;
+  q_low << 0.0, 0.0, a / 2, 1.0, 0.0, 0.0, 0.0;
+  q_up << 0.01, -0.01, 1.5 * a + 0.05, tilt.w(), tilt.x(), tilt.y(), tilt.z();
+  siconos::algebra::SiconosVector6 v_low = siconos::algebra::SiconosVector6::Zero(), v_up;
+  v_up << 0.1, 0.0, -0.5, 0.0, 0.0, 1.5;
+  auto low =
+      std::make_shared<mod::NewtonEulerDS>(q_low, v_low, m, I, siconos::algebra::copy_t);
+  auto up = std::make_shared<mod::NewtonEulerDS>(q_up, v_up, m, I, siconos::algebra::copy_t);
+  for (auto& ds : {low, up}) {
+    ds->setConstantFext(weight, siconos::algebra::copy_t);
+    c.nsds->insertDynamicalSystem(ds);
+    c.dss.push_back(ds);
+  }
+  auto nslaw = [&]() -> std::shared_ptr<mod::NonSmoothLaw> {
+    if (friction) return std::make_shared<mod::NewtonImpactFrictionNSL>(0.3, 0.0, 0.4, 3);
+    return std::make_shared<mod::NewtonImpactNSL>(0.3);
+  };
+  // 3 points of the bottom face of each box (2 corners and the middle of the opposite
+  // edge, around the center of mass): with the 4 corners, the 4 coplanar contacts are
+  // redundant and the projection of the combined projection scheme (G G^T singular)
+  // blows up when the upper box lands.
+  for (auto [sx, sy] : {std::pair{-1.0, -1.0}, std::pair{1.0, -1.0}, std::pair{0.0, 1.0}}) {
+    siconos::algebra::SiconosVector3 corner(sx * a / 2, sy * a / 2, -a / 2);
+    std::shared_ptr<mod::Relation> ground, face;
+    siconos::algebra::SiconosVector3 top(0.0, 0.0, a / 2), ez(0.0, 0.0, 1.0);
+    if (friction) {
+      ground = std::make_shared<PointOnPlaneR<mod::NewtonEulerVelocityR>>(corner);
+      face = std::make_shared<PointOnFaceR<mod::NewtonEulerVelocityR>>(corner, top, ez);
+    } else {
+      ground = std::make_shared<PointOnPlaneR<mod::NewtonEulerNormalVelocityR>>(corner);
+      face = std::make_shared<PointOnFaceR<mod::NewtonEulerNormalVelocityR>>(corner, top, ez);
+    }
+    auto inter_ground = std::make_shared<Interaction>(nslaw(), ground);
+    c.nsds->link(inter_ground, low);
+    c.interactions.push_back(inter_ground);
+    auto inter_face = std::make_shared<Interaction>(nslaw(), face);
+    c.nsds->link(inter_face, up, low);
+    c.interactions.push_back(inter_face);
+  }
+  return c;
+}
+
 /* Time stepping with a (global) frictional contact problem, solved to convergence. */
-void setupFrictionSimulation(Case& c, int dim, bool global, double h, double theta = 0.5) {
+void setupFrictionSimulation(Case& c, int dim, bool global, double h, double theta = 0.5,
+                             std::function<void(osns::LinearOSNS&)> tune = nullptr) {
   auto td = std::make_shared<TimeDiscretisation>(c.nsds->t0(), h);
   std::shared_ptr<osns::OneStepNSProblem> pb;
   std::shared_ptr<integ::OneStepIntegrator> osi;
@@ -637,6 +888,7 @@ void setupFrictionSimulation(Case& c, int dim, bool global, double h, double the
     osi = std::make_shared<integ::MoreauJeanOSI>(theta);
   }
   // the results must not depend on where an iterative solver stops
+  if (tune) tune(static_cast<osns::LinearOSNS&>(*pb));
   setTolerance(*pb, 1e-14, 100000);
   auto ts = std::make_shared<sim::TimeStepping>(c.nsds, td, osi, pb);
   ts->setNewtonTolerance(1e-12);
@@ -770,15 +1022,19 @@ void TimeSteppingSchemesTest::bilateralPendulumCombinedProjection() {
 }
 
 void TimeSteppingSchemesTest::cubeFrictionMoreauJean() {
+  // until t = 0.5: afterwards the cube rests on 4 frictional contacts, an indeterminate
+  // problem on which NSGS converges very slowly (and the Newton solvers are much slower)
   auto c = cube(true);
   setupFrictionSimulation(c, 3, false, 4e-3);
-  check("cubeFrictionMoreauJean", run(c, 200, "cubeFrictionMoreauJean"));
+  check("cubeFrictionMoreauJean", run(c, 125, "cubeFrictionMoreauJean"));
 }
 
 void TimeSteppingSchemesTest::cubeFrictionMoreauJeanGOSI() {
+  // until t = 0.5: afterwards the cube rests on 4 frictional contacts, an indeterminate
+  // problem on which NSGS converges very slowly (and the Newton solvers are much slower)
   auto c = cube(true);
   setupFrictionSimulation(c, 3, true, 4e-3);
-  check("cubeFrictionMoreauJeanGOSI", run(c, 200, "cubeFrictionMoreauJeanGOSI"));
+  check("cubeFrictionMoreauJeanGOSI", run(c, 125, "cubeFrictionMoreauJeanGOSI"));
 }
 
 void TimeSteppingSchemesTest::cubeMoreauJean() {
@@ -818,7 +1074,14 @@ void TimeSteppingSchemesTest::freeRigidBodyMoreauJean() {
   check("freeRigidBodyMoreauJean", run(c, 200, "freeRigidBodyMoreauJean"));
 }
 
-void TimeSteppingSchemesTest::circuitRLCDEulerMoreau() {
+void TimeSteppingSchemesTest::circuitRLCDEulerMoreau() { circuitRLCD(false); }
+
+void TimeSteppingSchemesTest::circuitRLCDEulerMoreauResiduals() {
+  // Newton loop with the residual-based convergence criteria on y and r
+  circuitRLCD(true);
+}
+
+void TimeSteppingSchemesTest::circuitRLCD(bool residuals) {
   // RLC circuit with an ideal diode (complementarity), as in CircuitRLCD of the tutorials
   Case c;
   c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 5e-3);
@@ -847,5 +1110,144 @@ void TimeSteppingSchemesTest::circuitRLCDEulerMoreau() {
   c.simulation = std::make_shared<sim::TimeStepping>(
       c.nsds, td, std::make_shared<integ::EulerMoreauOSI>(0.5), std::make_shared<osns::LCP>());
   c.lambda_level = 0;
-  check("circuitRLCDEulerMoreau", run(c, 500, "circuitRLCDEulerMoreau"));
+  std::string name = residuals ? "circuitRLCDEulerMoreauResiduals" : "circuitRLCDEulerMoreau";
+  if (residuals) {
+    auto ts = std::static_pointer_cast<sim::TimeStepping>(c.simulation);
+    ts->setComputeResiduY(true);
+    ts->setComputeResiduR(true);
+  }
+  check(name, run(c, 500, name));
+}
+
+// ---------------------------------------------------------------------------------------
+// Variants added to cover more of the time-stepping code (see the coverage report)
+// ---------------------------------------------------------------------------------------
+
+void TimeSteppingSchemesTest::beadsManagedMoreauJean() {
+  // Same beads as beadsMoreauJean, but the bead/bead interactions are created and removed
+  // by an interaction manager: same trajectory (the interactions exist whenever they can
+  // become active).
+  auto c = beads(true);
+  setupSimulation(c, Scheme::moreau_jean, 2e-3);
+  auto detection = std::make_shared<BeadsContactDetection>(c, 0.05, 0.1);
+  c.simulation->insertInteractionManager(detection);
+  c.extra = [detection](std::vector<double>& row) {
+    for (auto& inter : detection->pairs) {
+      row.push_back(inter ? (*inter->y(0))(0) : 0.0);
+      row.push_back(inter ? (*inter->lambda(1))(0) : 0.0);
+    }
+  };
+  auto samples = run(c, 300, "beadsManagedMoreauJean");
+  CPPUNIT_ASSERT_MESSAGE("no interaction created", detection->links > 0);
+  CPPUNIT_ASSERT_MESSAGE("no interaction removed", detection->unlinks > 0);
+  check("beadsManagedMoreauJean", samples);
+}
+
+void TimeSteppingSchemesTest::beadsMoreauJeanSparseBlockStorage() {
+  auto c = beads();
+  setupSimulation(c, Scheme::moreau_jean, 2e-3, 0.5, false, [](osns::LinearOSNS& pb) {
+    // the sparse block storage needs a block solver (not Lemke)
+    pb.setMStorageType(NM_SPARSE_BLOCK);
+    pb.setSolverId(SICONOS_LCP_NSGS_SBM);
+    setTolerance(pb, 1e-14, 100000);
+  });
+  check("beadsMoreauJeanSparseBlockStorage", run(c, 300, "beadsMoreauJeanSparseBlockStorage"));
+}
+
+void TimeSteppingSchemesTest::sphere3DFrictionMoreauJeanReducedDirect() {
+  // the reduced direct assembly is implemented for the sparse storage only (and the LCP
+  // driver handles dense matrices only: the frictional contact problem is used here)
+  auto c = sphere3D();
+  setupFrictionSimulation(c, 3, false, 5e-3, 0.5, [](osns::LinearOSNS& pb) {
+    pb.setMStorageType(NM_SPARSE);
+    pb.setAssemblyType(osns::LinearOSNSAssemblyType::REDUCED_DIRECT);
+  });
+  check("sphere3DFrictionMoreauJeanReducedDirect",
+        run(c, 200, "sphere3DFrictionMoreauJeanReducedDirect"));
+}
+
+void TimeSteppingSchemesTest::springChainClampedMoreauJean() {
+  auto c = springChain(true);
+  setupSimulation(c, Scheme::moreau_jean, 2e-3);
+  check("springChainClampedMoreauJean", run(c, 400, "springChainClampedMoreauJean"));
+}
+
+void TimeSteppingSchemesTest::springChainMoreauJean() {
+  auto c = springChain(false);
+  setupSimulation(c, Scheme::moreau_jean, 2e-3);
+  check("springChainMoreauJean", run(c, 400, "springChainMoreauJean"));
+}
+
+void TimeSteppingSchemesTest::frictionOscillatorMoreauJean() {
+  auto c = frictionOscillator(false);
+  setupFrictionSimulation(c, 3, false, 5e-3);
+  check("frictionOscillatorMoreauJean", run(c, 200, "frictionOscillatorMoreauJean"));
+}
+
+void TimeSteppingSchemesTest::frictionOscillatorMoreauJeanGOSI() {
+  auto c = frictionOscillator(false);
+  setupFrictionSimulation(c, 3, true, 5e-3);
+  check("frictionOscillatorMoreauJeanGOSI", run(c, 200, "frictionOscillatorMoreauJeanGOSI"));
+}
+
+void TimeSteppingSchemesTest::frictionOscillatorSparseMoreauJean() {
+  auto c = frictionOscillator(true);
+  setupFrictionSimulation(c, 3, false, 5e-3);
+  check("frictionOscillatorSparseMoreauJean",
+        run(c, 200, "frictionOscillatorSparseMoreauJean"));
+}
+
+void TimeSteppingSchemesTest::frictionOscillatorSparseMoreauJeanGOSI() {
+  auto c = frictionOscillator(true);
+  setupFrictionSimulation(c, 3, true, 5e-3);
+  check("frictionOscillatorSparseMoreauJeanGOSI",
+        run(c, 200, "frictionOscillatorSparseMoreauJeanGOSI"));
+}
+
+void TimeSteppingSchemesTest::sphere3DFrictionMoreauJeanGOSIGlobalReduced() {
+  auto c = sphere3D();
+  setupFrictionSimulation(c, 3, true, 5e-3, 0.5, [](osns::LinearOSNS& pb) {
+    pb.setAssemblyType(osns::LinearOSNSAssemblyType::GLOBAL_REDUCED);
+  });
+  check("sphere3DFrictionMoreauJeanGOSIGlobalReduced",
+        run(c, 200, "sphere3DFrictionMoreauJeanGOSIGlobalReduced"));
+}
+
+void TimeSteppingSchemesTest::bilateralPendulumDirectProjection() {
+  auto c = bilateralPendulum();
+  setupSimulation(c, Scheme::direct_projection, 2e-3, 0.5, true);
+  check("bilateralPendulumDirectProjection", run(c, 400, "bilateralPendulumDirectProjection"));
+}
+
+void TimeSteppingSchemesTest::doublePendulumMoreauJeanNonlinearFull() {
+  // Newton loop with the update of the interactions and index sets at each iteration
+  // (the residual-based criteria are not implemented for MoreauJeanOSI, see
+  // circuitRLCDEulerMoreauResiduals)
+  auto c = doublePendulum();
+  setupSimulation(c, Scheme::moreau_jean, 2e-3);
+  auto ts = std::static_pointer_cast<sim::TimeStepping>(c.simulation);
+  ts->setNewtonOptions(sim::TimeSteppingType::NONLINEAR_FULL);
+  check("doublePendulumMoreauJeanNonlinearFull",
+        run(c, 400, "doublePendulumMoreauJeanNonlinearFull"));
+}
+
+void TimeSteppingSchemesTest::stackMoreauJean() {
+  auto c = stack(false);
+  setupSimulation(c, Scheme::moreau_jean, 4e-3);
+  check("stackMoreauJean", run(c, 200, "stackMoreauJean"));
+}
+
+void TimeSteppingSchemesTest::stackMoreauJeanSymmetricGraph() {
+  // same as stackMoreauJean, with the symmetric version of the interaction graphs
+  // (OneStepNSProblem::updateInteractionBlocks, symmetric case): same trajectory
+  auto c = stack(false);
+  c.nsds->setSymmetric(true);
+  setupSimulation(c, Scheme::moreau_jean, 4e-3);
+  check("stackMoreauJeanSymmetricGraph", run(c, 200, "stackMoreauJeanSymmetricGraph"));
+}
+
+void TimeSteppingSchemesTest::stackDirectProjection() {
+  auto c = stack(false);
+  setupSimulation(c, Scheme::direct_projection, 4e-3);
+  check("stackDirectProjection", run(c, 200, "stackDirectProjection"));
 }
