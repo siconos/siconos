@@ -70,16 +70,6 @@ class LagrangianRheonomousR : public LagrangianR {
   /** True if \f$ \frac{\partial h}{\partial t} \f$ is taken into account */
   bool hasdhdt_{false};
 
-  /** Deprecated names of the members above, kept for one release. */
-  [[deprecated(
-      "use computeContactMatrix_")]] siconos::modeling::func_prototypes::FunctionBVS_M&
-      computejacobianhOver_q_{computeContactMatrix_};
-  [[deprecated("use dhdt_")]] std::shared_ptr<siconos::algebra::SiconosVector>& hdot_{dhdt_};
-  [[deprecated(
-      "use computedhdt_")]] siconos::modeling::func_prototypes::FunctionBVS_V& computehdot_{
-      computedhdt_};
-  [[deprecated("use hasdhdt_")]] bool& hashdot_{hasdhdt_};
-
  private:
   /** flags of the dispatch to the deprecated virtual names (see RelationCompatibility.hpp) */
   bool computeContactMatrixLegacy_{false};

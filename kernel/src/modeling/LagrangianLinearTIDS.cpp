@@ -90,10 +90,11 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   }
   // - Fill parts corresponding to the jacobians of total forces -
   // mass and lu_mass are (must be) up to date
-  if (hasMass()) {
+  // (without stiffness and damping, the bottom blocks are zero: nothing more to fill)
+  if (hasMass() && (hasStiffnessMatrix() || hasDampingMatrix())) {
     // In that case, we'll need a buffer to save inv(Mass).jacobian_qForces and
-    // inv(Mass).jacobian_v Forces
-    if (hasStiffnessMatrix() || hasDampingMatrix()) buffer_.resize(ndof_ * ndof_ * 2);
+    // inv(Mass).jacobian_v Forces (allocated before the views below are built on it)
+    buffer_.resize(ndof_ * ndof_ * 2);
     // View onto left part of buffer_
     Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacq(buffer_.data(), ndof_, ndof_);
     // View onto right part of buffer_
@@ -121,7 +122,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
           jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
       }
     }
-  } else  // No mass
+  } else  // No mass (or nothing to fill)
   {       // ==> no buffer
     //  fill in jacobianRhsOver_x_
     for (siconos::algebra::Index j = 0; j < ndof_; ++j) {

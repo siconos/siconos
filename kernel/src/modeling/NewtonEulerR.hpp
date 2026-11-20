@@ -167,19 +167,6 @@ class NewtonEulerR : public Relation {
    *  do not depend on \f$ \dot v \f$. */
   siconos::algebra::SiconosVector contactMatrixDotV_;
 
-  /** Deprecated names of the members above, kept for one release. */
-  [[deprecated(
-      "use constraintJacobian_view_")]] std::shared_ptr<siconos::algebra::MapType>& H_NE_view_{
-      constraintJacobian_view_};
-  [[deprecated("use constraintJacobian_storage_")]] siconos::algebra::SiconosMatrix&
-      H_NE_internal_storage_{constraintJacobian_storage_};
-  [[deprecated(
-      "use constraintJacobianDot_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>&
-      H_NE_dot_{constraintJacobianDot_};
-  [[deprecated(
-      "use contactMatrix_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>& H_NE_prod_T_{
-      contactMatrix_};
-
   /** allocate \f$ \dot G \f$ (constraintJacobianDot_), with the size of \f$ G \f$, if not done
    */
   void allocateConstraintJacobianDot_();

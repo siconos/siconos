@@ -383,6 +383,7 @@ void SBM_gemv_3x3(size_t sizeX, size_t sizeY,
     if (currentRowNumber != 0) nbRows -= A->blocksize0[currentRowNumber - 1];
 
     assert((nbRows <= sizeY));
+    (void)nbRows;  // only used in assertions (NDEBUG)
     for (size_t blockNum = A->index1_data[currentRowNumber];
          blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum) {
       assert(blockNum < A->filled2);
@@ -396,6 +397,7 @@ void SBM_gemv_3x3(size_t sizeX, size_t sizeY,
       if (colNumber != 0) nbColumns -= A->blocksize1[colNumber - 1];
 
       assert((nbColumns <= sizeX));
+      (void)nbColumns;  // only used in assertions (NDEBUG)
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       size_t posInX = 0;
@@ -1480,6 +1482,7 @@ void SBM_row_prod_no_diag_3x3(size_t sizeX, size_t sizeY, size_t currentRowNumbe
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum],
        * nbRows, &x[posInX], 1, 1.0, y, 1); */
       assert((nbColumns == 3));
+      (void)nbColumns;  // only used in assertions (NDEBUG)
       mvp3x3(A->block[blockNum], &x[posInX], y);
       /* op_counter_mul += 9 ; */
       /* op_counter_add += 9 ; */
@@ -1610,6 +1613,7 @@ void SBM_row_prod_no_diag_1x1(size_t sizeX, size_t sizeY, size_t currentRowNumbe
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum],
        * nbRows, &x[posInX], 1, 1.0, y, 1); */
       assert((nbColumns == 1));
+      (void)nbColumns;  // only used in assertions (NDEBUG)
       y[0] += A->block[blockNum][0] * x[posInX];
     }
   }
@@ -2023,6 +2027,7 @@ bool SBM_entry(SparseBlockStructuredMatrix* M, size_t row, size_t col, double va
       }
       assert(nbColumns > 0);
       assert(col_pos < nbColumns);
+      (void)nbColumns;  // only used in assertions (NDEBUG)
 
       DEBUG_PRINTF("row_pos = %zu, col_pos = %zu \n", row_pos, col_pos);
 
@@ -2098,6 +2103,7 @@ double SBM_get_value(const SparseBlockStructuredMatrix* const M, size_t row, siz
   if (colblocknumber != 0) nbColumns -= M->blocksize1[colblocknumber - 1];
   assert(rowpos < nbRows);
   assert(colpos < nbColumns);
+  (void)nbColumns;  // only used in assertions (NDEBUG)
 
   return M->block[blockNumber][rowpos + colpos * nbRows];
 }

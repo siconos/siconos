@@ -518,12 +518,23 @@ function(build_python_tests)
     leak:importlib
     ")
 
-    # asan lib path (run gcc --print-file-name=libasan.so to find it)
-    execute_process(
-    COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libasan.so
-    OUTPUT_VARIABLE LIBASAN_PATH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+    # The asan runtime must be loaded first by the python interpreter (not built with asan).
+    if(APPLE)
+      # clang runtime, loaded with DYLD_INSERT_LIBRARIES. LeakSanitizer is not supported on
+      # macOS: detect_leaks=1 makes the runtime abort at startup.
+      execute_process(
+        COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libclang_rt.asan_osx_dynamic.dylib
+        OUTPUT_VARIABLE LIBASAN_PATH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      set(ASAN_PYTHON_ENV "DYLD_INSERT_LIBRARIES=${LIBASAN_PATH};ASAN_OPTIONS=detect_leaks=0")
+    else()
+      # asan lib path (run gcc --print-file-name=libasan.so to find it)
+      execute_process(
+        COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libasan.so
+        OUTPUT_VARIABLE LIBASAN_PATH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      set(ASAN_PYTHON_ENV "LD_PRELOAD=${LIBASAN_PATH};ASAN_OPTIONS=detect_leaks=1;LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
+    endif()
 
 
   endif()
@@ -548,7 +559,7 @@ function(build_python_tests)
 
       if(WITH_SANITIZER)
             set_tests_properties(${name} PROPERTIES ENVIRONMENT
-              "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS};LD_PRELOAD=${LIBASAN_PATH};ASAN_OPTIONS=detect_leaks=1;LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
+              "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS};${ASAN_PYTHON_ENV}")
       else()
         set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS}")
       endif()

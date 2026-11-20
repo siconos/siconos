@@ -90,14 +90,6 @@ class LagrangianR : public Relation {
   /** True if \f$ H \f$ is a constant matrix */
   bool hasConstantContactMatrix_{false};
 
-  /** Deprecated names of the members above, kept for one release. */
-  [[deprecated("use contactMatrix_view_")]] std::shared_ptr<siconos::algebra::MapType>&
-      jacobianhOver_q_view_{contactMatrix_view_};
-  [[deprecated("use contactMatrix_storage_")]] std::unique_ptr<std::vector<double>>&
-      jacobianhOver_q_internal_storage_{contactMatrix_storage_};
-  [[deprecated("use hasConstantContactMatrix_")]] bool& hasConstantJacobianhOver_q_{
-      hasConstantContactMatrix_};
-
   /** @brief minimal (protected) constructor
    *
    *  @param lagType the sub-type of the relation

@@ -28,6 +28,12 @@ extern "C" {
 // IWYU pragma: begin_exports
 #if defined(HAS_MKL_CBLAS)
 #include <mkl_cblas.h>
+#elif defined(HAS_ACCELERATE)
+// Accelerate: the interface of macOS >= 13.3 (the former cblas.h is deprecated).
+#ifndef ACCELERATE_NEW_LAPACK
+#define ACCELERATE_NEW_LAPACK
+#endif
+#include <cblas_new.h>
 #else
 #include <cblas.h>
 #endif

@@ -182,7 +182,13 @@ Experimental high-performance numerics additions:
    | `H_NE_prod_T()`, `computeH_NE_prod_T` | `contactMatrix()`, `computeContactMatrix` |
    | `setComputeH_NE_dotFunction`, `computeH_NE_dot` | `setComputeConstraintJacobianDotFunction`, `computeConstraintJacobianDot` |
    | `secondOrderTimeDerivativeTerms()`, `computeSecondOrderTimeDerivativeTerms` | `contactMatrixDotV()`, `computeContactMatrixDotV` |
-   | protected members `jacobianhOver_q_view_`, `H_NE_view_`, `H_NE_prod_T_`, ... | `contactMatrix_view_`, `constraintJacobian_view_`, `H_`, ... |
+   | protected members `jacobianhOver_q_view_`, `H_NE_view_`, `H_NE_prod_T_`, ... (**removed**, no alias) | `contactMatrix_view_`, `constraintJacobian_view_`, `contactMatrix_`, ... |
+
+   The former protected member names were first kept as reference members, but these
+   aliases were removed: every constructor of the relations initialized them (one
+   deprecation warning per relation class in every file that includes its header), and a
+   copied relation kept references to the members of the original object. A derived class
+   that used them must use the new names (compile error, no silent change).
 
 7. **Numerics public API cleanup**:
    - Expanded cryptic abbreviations in FrictionContact/GlobalFrictionContact solver option setters

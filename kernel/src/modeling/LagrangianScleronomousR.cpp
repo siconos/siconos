@@ -49,7 +49,7 @@ void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) 
 
   if (hasContactMatrixDot_) {
     // True only if setComputeContactMatrixDotFunction has been called
-    // Ensure that memory is properly allocated for hdot_
+    // Ensure that memory is properly allocated for contactMatrixDot_
     if (!contactMatrixDot_) {
       contactMatrixDot_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
     }

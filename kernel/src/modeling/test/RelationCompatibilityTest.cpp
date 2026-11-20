@@ -53,12 +53,12 @@ struct WithH : R {
 
 // --- Scleronomic ---
 /** a user class written with the former API: overrides computeJacobianhOver_q (without
- *  `override`) and writes through the former member name. */
+ *  `override`). (The former member names, e.g. jacobianhOver_q_view_, have been removed.) */
 struct OldScleronomousR : WithH<LagrangianScleronomousR> {
   int calls = 0;
   void computeJacobianhOver_q(const BlockVector& q) {
     ++calls;
-    (*jacobianhOver_q_view_)(0, 0) = q(0);
+    (*contactMatrix_view_)(0, 0) = q(0);
   }
 };
 /** a class written with the new API */
@@ -80,7 +80,7 @@ struct OldRheonomousR : WithH<LagrangianRheonomousR> {
   }
   void computehdot(const BlockVector& q, double time) {
     ++callsDt;
-    (*hdot_)(0) = 2 * time;
+    (*dhdt_)(0) = 2 * time;
   }
 };
 
@@ -95,7 +95,7 @@ struct OldCompliantR : WithH<LagrangianCompliantR> {
   void computeJacobianhOver_lambda(const BlockVector& q,
                                    const Eigen::Ref<const SiconosVector>& lambda) {
     ++callsD;
-    (*jacobianhOver_lambda_)(0, 0) = lambda(0);
+    (*D_)(0, 0) = lambda(0);
   }
 };
 
@@ -122,7 +122,7 @@ struct OldNewtonEulerR : WithGH {
   void computeH_NE_(double, Interaction&, const BlockVector&) { ++callsG; }
   void computeH_NE_prod_T(const Interaction&, const BlockVector&) {
     ++callsH;
-    (*H_NE_prod_T_)(0, 0) = 5.;
+    (*contactMatrix_)(0, 0) = 5.;
   }
 };
 struct NewNewtonEulerR : WithGH {

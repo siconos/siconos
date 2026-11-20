@@ -29,7 +29,17 @@
 #define FCAST(T, X) (T*)(&X)
 #define FCASTP(T, X) (T*)X
 
+#if defined(HAS_ACCELERATE)
+// Accelerate: the interface of macOS >= 13.3 (the former clapack.h is deprecated).
+#ifndef ACCELERATE_NEW_LAPACK
+#define ACCELERATE_NEW_LAPACK
+#endif
+#include <lapack.h>
+#define SICONOS_CLPK_INT __LAPACK_int
+#else
 #include <clapack.h>
+#define SICONOS_CLPK_INT __CLPK_integer
+#endif
 #define LAPACK_NAME(N) N##_
 
 #define LA_TRANS 'T'
@@ -38,8 +48,8 @@
 #define LA_LO 'L'
 #define LA_NONUNIT 'N'
 #define LA_UNIT 'U'
-#define INTEGER(X) FCAST(__CLPK_integer, X)
-#define INTEGERP(X) FCASTP(__CLPK_integer, X)
+#define INTEGER(X) FCAST(SICONOS_CLPK_INT, X)
+#define INTEGERP(X) FCASTP(SICONOS_CLPK_INT, X)
 #define CHAR(X) FCAST(char, X)
 
 // --- DGESVD ---
@@ -47,11 +57,11 @@
 // and one for the real computation.
 // We may add a test on info value to call lwork only once?
 #define WRAP_DGESVD(F, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, INFO) \
-  __CLPK_integer lwork = -1;                                                    \
-  __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));          \
+  SICONOS_CLPK_INT lwork = -1;                                                  \
+  double* work = (double*)malloc(sizeof(*work));                                \
   F(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, work, &lwork, INFO);          \
-  lwork = (__CLPK_integer)work[0];                                              \
-  work = (__CLPK_doublereal*)realloc(work, (size_t)lwork * sizeof(*work));      \
+  lwork = (SICONOS_CLPK_INT)work[0];                                            \
+  work = (double*)realloc(work, (size_t)lwork * sizeof(*work));                 \
   F(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, work, &lwork, INFO);          \
   free(work);
 
@@ -73,25 +83,25 @@
 #define WRAP_DPOSV(F, A1, A2, A3, A4, A5, A6, A7, INFO) F(A1, A2, A3, A4, A5, A6, A7, INFO)
 
 // --- DGELS ---
-#define WRAP_DGELS(F, A1, A2, A3, A4, A5, A6, A7, A8, INFO)                \
-  __CLPK_integer lwork = -1;                                               \
-  __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));     \
-  F(A1, A2, A3, A4, A5, A6, A7, A8, work, &lwork, INFO);                   \
-  lwork = (__CLPK_integer)work[0];                                         \
-  work = (__CLPK_doublereal*)realloc(work, (size_t)lwork * sizeof(*work)); \
-  F(A1, A2, A3, A4, A5, A6, A7, A8, work, &lwork, INFO);                   \
+#define WRAP_DGELS(F, A1, A2, A3, A4, A5, A6, A7, A8, INFO)     \
+  SICONOS_CLPK_INT lwork = -1;                                  \
+  double* work = (double*)malloc(sizeof(*work));                \
+  F(A1, A2, A3, A4, A5, A6, A7, A8, work, &lwork, INFO);        \
+  lwork = (SICONOS_CLPK_INT)work[0];                            \
+  work = (double*)realloc(work, (size_t)lwork * sizeof(*work)); \
+  F(A1, A2, A3, A4, A5, A6, A7, A8, work, &lwork, INFO);        \
   free(work);
 
 // --- DGETRI ---
-#define WRAP_DGETRI(F, A1, A2, A3, A4, INFO)                                    \
-  __CLPK_integer lwork = -1;                                                    \
-  __CLPK_doublereal* C_WORK;                                                    \
-  C_WORK = (__CLPK_doublereal*)malloc(sizeof *C_WORK);                          \
-  assert(C_WORK);                                                               \
-  F(A1, A2, A3, A4, C_WORK, &lwork, INFO);                                      \
-  lwork = (__CLPK_integer)(C_WORK[0]);                                          \
-  C_WORK = (__CLPK_doublereal*)realloc(C_WORK, (size_t)lwork * sizeof *C_WORK); \
-  F(A1, A2, A3, A4, C_WORK, &lwork, INFO);                                      \
+#define WRAP_DGETRI(F, A1, A2, A3, A4, INFO)                         \
+  SICONOS_CLPK_INT lwork = -1;                                       \
+  double* C_WORK;                                                    \
+  C_WORK = (double*)malloc(sizeof *C_WORK);                          \
+  assert(C_WORK);                                                    \
+  F(A1, A2, A3, A4, C_WORK, &lwork, INFO);                           \
+  lwork = (SICONOS_CLPK_INT)(C_WORK[0]);                             \
+  C_WORK = (double*)realloc(C_WORK, (size_t)lwork * sizeof *C_WORK); \
+  F(A1, A2, A3, A4, C_WORK, &lwork, INFO);                           \
   free(C_WORK);
 
 // --- DGETRF ---

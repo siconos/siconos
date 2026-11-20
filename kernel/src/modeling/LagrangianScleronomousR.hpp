@@ -75,16 +75,6 @@ class LagrangianScleronomousR : public LagrangianR {
   /** \f$ \dot H \dot q \f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> contactMatrixDotV_{nullptr};
 
-  /** Deprecated names of the members above, kept for one release. */
-  [[deprecated("use computeContactMatrix_")]] siconos::modeling::func_prototypes::FunctionBV_M&
-      computejacobianhOver_q_{computeContactMatrix_};
-  [[deprecated("use contactMatrixDot_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>&
-      jacobianhOver_q_dot_{contactMatrixDot_};
-  [[deprecated("use hasContactMatrixDot_")]] bool& hasJacobianhOver_q_dot_{
-      hasContactMatrixDot_};
-  [[deprecated("use contactMatrixDotV_")]] std::shared_ptr<siconos::algebra::SiconosVector>&
-      jacobianhOver_q_dot_X_qdot_{contactMatrixDotV_};
-
  private:
   /** flag of the dispatch to the deprecated virtual name (see RelationCompatibility.hpp) */
   bool computeContactMatrixLegacy_{false};

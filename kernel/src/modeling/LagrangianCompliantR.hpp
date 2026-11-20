@@ -65,15 +65,6 @@ class LagrangianCompliantR : public LagrangianR {
   /** function wrapper used to compute \f$ D = \nabla^\top_{\lambda} h(q, \lambda) \f$ */
   siconos::modeling::func_prototypes::FunctionBVV_M computeD_{nullptr};
 
-  /** Deprecated names of the members above, kept for one release. */
-  [[deprecated(
-      "use computeContactMatrix_")]] siconos::modeling::func_prototypes::FunctionBVV_M&
-      computejacobianhOver_q_{computeContactMatrix_};
-  [[deprecated(
-      "use D_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>& jacobianhOver_lambda_{D_};
-  [[deprecated("use computeD_")]] siconos::modeling::func_prototypes::FunctionBVV_M&
-      computejacobianhOver_lambda_{computeD_};
-
   ACCEPT_SERIALIZATION(LagrangianCompliantR);
 
   /** initialize H and D matrices or components specific to derived classes
