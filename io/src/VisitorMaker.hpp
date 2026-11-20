@@ -27,6 +27,8 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/type_traits.hpp>
+
+#include "SiconosConfig.h"
 // #include <iostream>
 
 namespace siconos::modeling {
@@ -34,11 +36,11 @@ class DynamicalSystem;
 class LagrangianDS;
 class NewtonEulerDS;
 class LagrangianR;
-class Lagrangian2d2DR;
-class Lagrangian2d3DR;
+class Lagrangian2dVelocityR;
+class Lagrangian2dVelocityAngularVelocityR;
 class NewtonEulerR;
-class NewtonEuler1DR;
-class NewtonEuler3DR;
+class NewtonEulerNormalVelocityR;
+class NewtonEulerVelocityR;
 class NewtonEulerVelocityAngularVelocityR;
 
 }  // namespace siconos::modeling
@@ -64,6 +66,12 @@ class DiskPlanR;
 class CircleCircleR;
 }  // namespace native::bodies
 }  // namespace siconos::collision
+
+#ifdef SICONOS_HAS_OpenCASCADE
+namespace siconos::mechanics::occ {
+class OccBody;
+}
+#endif
 
 namespace siconos::joints {
 class CouplerJointR;
@@ -121,6 +129,16 @@ class VisitMaker {
   // does nothing.
 };
 
+/* The classes that override accept (e.g. OccBody) call visit(const Class&): each one must be
+   listed in the global visitors, otherwise the default visit of the base visitor throws. */
+#ifdef SICONOS_HAS_OpenCASCADE
+template <typename T>
+using OccVisitMaker = VisitMaker<siconos::mechanics::occ::OccBody, T>;
+#else
+template <typename T>
+using OccVisitMaker = T;
+#endif
+
 /* build the global visitor for all specified classes */
 template <typename T>
 struct GlobalDSVisitor {
@@ -134,7 +152,7 @@ struct GlobalDSVisitor {
                          VisitMaker<siconos::collision::native::bodies::Circle,
                                     VisitMaker<siconos::collision::RigidBodyDS,
                                                VisitMaker<siconos::collision::RigidBody2dDS,
-                                                          T>>>>>>>::Action;
+                                                          OccVisitMaker<T>>>>>>>>::Action;
 };
 
 #ifdef SICONOS_HAS_BULLET
@@ -144,15 +162,15 @@ struct GlobalRelationVisitor {
   using Make = typename VisitMaker<
       siconos::modeling::LagrangianR,
       VisitMaker<
-          siconos::modeling::Lagrangian2d2DR,
+          siconos::modeling::Lagrangian2dVelocityR,
           VisitMaker<
-              siconos::modeling::Lagrangian2d3DR,
+              siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
               VisitMaker<
                   siconos::modeling::NewtonEulerR,
                   VisitMaker<
-                      siconos::modeling::NewtonEuler1DR,
+                      siconos::modeling::NewtonEulerNormalVelocityR,
                       VisitMaker<
-                          siconos::modeling::NewtonEuler3DR,
+                          siconos::modeling::NewtonEulerVelocityR,
                           VisitMaker<
                               siconos::modeling::NewtonEulerVelocityAngularVelocityR,
                               VisitMaker<
@@ -216,15 +234,15 @@ struct GlobalRelationVisitor {
   using Make = typename VisitMaker<
       siconos::modeling::LagrangianR,
       VisitMaker<
-          siconos::modeling::Lagrangian2d2DR,
+          siconos::modeling::Lagrangian2dVelocityR,
           VisitMaker<
-              siconos::modeling::Lagrangian2d3DR,
+              siconos::modeling::Lagrangian2dVelocityAngularVelocityR,
               VisitMaker<
                   siconos::modeling::NewtonEulerR,
                   VisitMaker<
-                      siconos::modeling::NewtonEuler1DR,
+                      siconos::modeling::NewtonEulerNormalVelocityR,
                       VisitMaker<
-                          siconos::modeling::NewtonEuler3DR,
+                          siconos::modeling::NewtonEulerVelocityR,
                           VisitMaker<
                               siconos::modeling::NewtonEulerVelocityAngularVelocityR,
                               VisitMaker<

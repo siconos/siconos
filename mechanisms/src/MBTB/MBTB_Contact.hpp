@@ -24,7 +24,7 @@
 
 namespace siconos::modeling {
 
-class NewtonEuler1DR;
+class NewtonEulerNormalVelocityR;
 class Interaction;
 }  // namespace siconos::modeling
 
@@ -59,7 +59,7 @@ class MBTB_Contact {
     A link to the relation, either MBTB_ContactRelation or
     MBTB_FC3DContactRelation.
    */
-  std::shared_ptr<siconos::modeling::NewtonEuler1DR> _Relation{nullptr};
+  std::shared_ptr<siconos::modeling::NewtonEulerNormalVelocityR> _Relation{nullptr};
   /*!
     Built during the building of the MBTB_Contact.
     A link to the interaction.

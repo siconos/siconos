@@ -174,7 +174,8 @@ void writeSparseMatrix(const std::string& filename,
  *  \param[in] mode the storage type used in the file (either ASCII_IN or BINARY_IN)
  *  \param verbose True to print verbose output.
  *  \return Positive or 0.0 if the file was loaded and the comparison was performed,
- *  otherwise -1.
+ *  otherwise -1. +inf if data and the reference have different shapes or if an
+ *  index is out of range (a message is printed on std::cerr).
  */
 double compareRefFile(const SiconosDenseMatrix& data, std::string filename, double epsilon,
                       std::vector<int> index = {},

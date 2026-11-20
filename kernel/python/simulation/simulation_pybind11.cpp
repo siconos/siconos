@@ -160,6 +160,16 @@ PYBIND11_MODULE(simulation, m) {
       .def("prepareNewtonIteration",
            &siconos::simulation::TimeStepping::prepareNewtonIteration);
 
+  py::enum_<siconos::simulation::ProjectionUpdate>(
+      m, "ProjectionUpdate",
+      "update rule of the positions in the projection loop of the projected Moreau-Jean "
+      "schemes (see docs/devel/PROJECTION_SCHEMES.md)")
+      .value("incremental", siconos::simulation::ProjectionUpdate::incremental,
+             "q_{j+1} = q_j + G(q_j)^T lambda_j, rhs g(q_j) (default, historical)")
+      .value("from_origin", siconos::simulation::ProjectionUpdate::from_origin,
+             "q_{j+1} = a + G(q_j)^T mu_j, rhs g(q_j) + G(q_j)(a - q_j): exact projection "
+             "of a (Lagrangian systems only)");
+
   py::class_<siconos::simulation::TimeSteppingDirectProjection,
              siconos::simulation::TimeStepping, py::smart_holder>(
       m, "TimeSteppingDirectProjection")
@@ -183,7 +193,16 @@ PYBIND11_MODULE(simulation, m) {
            &siconos::simulation::TimeSteppingDirectProjection::setConstraintTolUnilateral,
            py::arg("v"))
       .def("setConstraintTol",
-           &siconos::simulation::TimeSteppingDirectProjection::setConstraintTol, py::arg("v"));
+           &siconos::simulation::TimeSteppingDirectProjection::setConstraintTol, py::arg("v"))
+      .def("setProjectionUpdate",
+           &siconos::simulation::TimeSteppingDirectProjection::setProjectionUpdate,
+           py::arg("v"))
+      .def("projectionUpdate",
+           &siconos::simulation::TimeSteppingDirectProjection::projectionUpdate)
+      .def("setProjectionTolq",
+           &siconos::simulation::TimeSteppingDirectProjection::setProjectionTolq, py::arg("v"))
+      .def("projectionTolq",
+           &siconos::simulation::TimeSteppingDirectProjection::projectionTolq);
 
   auto igpy =
       py::class_<siconos::graphs::InteractionsGraph, py::smart_holder>(m, "InteractionsGraph");

@@ -2039,10 +2039,10 @@ class VView:
 
             with io_tmpfile() as tmpf:
                 # fix compatibility with h5py version: to be removed in the future
-                tmpf[0].write(shape_data)
-                tmpf[0].flush()
+                tmpf.fid.write(shape_data)
+                tmpf.fid.flush()
                 reader = self.vtk_reader[shape_type]()
-                reader.SetFileName(tmpf[1])
+                reader.SetFileName(tmpf.name)
                 reader.Update()
                 self.readers[shape_name] = reader
 
@@ -2099,7 +2099,7 @@ class VView:
                     suffix=f".{shape_type}",
                     contents=(self.io.shapes()[shape_name][:][0]).decode("utf-8"),
                 ) as tmpf:
-                    shape = occ_load_file(tmpf[1])
+                    shape = occ_load_file(tmpf.name)
 
                     # whole shape
                     reader = topods_shape_reader(shape)

@@ -27,6 +27,7 @@
 #include "Relation.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
+#include "TimeSteppingCombinedProjection.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
@@ -138,17 +139,25 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
   // double h = simulation()->timeStep();
   if (i == 1)  // index set for resolution at the velocity
   {
+    // Only violated constraints are activated (Acary, CMAME 2013, Algorithm 2): a
+    // closed contact (y = 0, e.g. after a projection) must not be activated, since the
+    // projection on the active set is done on equality and would hold it closed.
+    double tol = 0.0;
+    if (auto ts =
+            std::dynamic_pointer_cast<siconos::simulation::TimeSteppingCombinedProjection>(
+                simulation()))
+      tol = ts->constraintTolUnilateral();
     auto y = (*(inter->y(0)))(0);  // y(0) is the position
     DEBUG_PRINTF(
         "siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet "
         "yref=%e \n",
         y);
     DEBUG_EXPR(
-        if (y <= 0) printf(
+        if (y < -tol) printf(
             "siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet "
             "ACTIVATE in indexSet level = %i.\n",
             i);)
-    return (y <= 0);
+    return (y < -tol);
   } else if (i == 2)  //  special index for the projection
   {
     DEBUG_EXPR(

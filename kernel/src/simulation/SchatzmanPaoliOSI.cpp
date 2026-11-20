@@ -84,13 +84,29 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS(
     ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lltids->dimension());
 
-    // We first swap the initial value contained in q and v after initialization.
-    lltids->swapInMemory();
-    // we compute the new state values
+    // Start of the two-step scheme: at t_0, the memories must hold q_0 (index 0) and
+    // q_{-1} (index 1). q_{-1} is the second-order Taylor expansion
+    //   q_{-1} = q_0 - h v_0 + h^2/2 M^{-1} f_0,  f_0 = F_ext(t_0) - K q_0 - C v_0,
+    // so that the first free step gives q_1 = 2 q_0 - q_{-1} + h^2 M^{-1} f_0
+    //   = q_0 + h v_0 + h^2/2 M^{-1} f_0 (exact for constant forces).
+    // (Formerly, the memories held (q_0 + h v_0, q_0) at t_0: the scheme was one step
+    // ahead, and the impact law used y_k instead of y_{k-1}.)
     auto h = simulation()->timeStep();
-    *lltids->q() = lltids->q0() + h * lltids->velocity0();
-
-    //*velocity=*velocity; we do nothing for the velocity
+    const auto q0 = lltids->q0();
+    const auto v0 = lltids->velocity0();
+    siconos::algebra::SiconosVector f0 = siconos::algebra::SiconosVector::Zero(q0.size());
+    if (lltids->hasExternalForces()) {
+      lltids->computeFext(time);
+      f0 += lltids->fext();
+    }
+    if (lltids->hasStiffnessMatrix()) f0 -= lltids->stiffnessMatrix() * q0;
+    if (lltids->hasDampingMatrix()) f0 -= lltids->dampingMatrix() * v0;
+    siconos::algebra::SiconosVector a0 =
+        lltids->hasMass() ? siconos::algebra::SiconosVector(lltids->mass().lu().solve(f0))
+                          : f0;
+    *lltids->q() = q0 - h * v0 + 0.5 * h * h * a0;  // q_{-1}
+    lltids->swapInMemory();
+    *lltids->q() = q0;  // q_0
     lltids->swapInMemory();
   }
 
@@ -294,7 +310,7 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
                       (1.0 / (2.0 * h) * _theta * (q_k - q_k_1) + (1.0 - _theta) * v_k);
       }
       if (lltids->hasStiffnessMatrix())
-        residuFree += h * h * lltids->hasStiffnessMatrix() * q_k;
+        residuFree += h * h * lltids->stiffnessMatrix() * q_k;  // residuFree += h^2 K q_k
 
       if (lltids->hasExternalForces()) {
         // computes Fext(ti)
@@ -471,7 +487,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
           "siconos::simulation::SICONOS_OSNSP ");
     auto ltir = std::static_pointer_cast<siconos::modeling::LagrangianLinearTIR>(
         mainInteraction->relation());
-    auto C = ltir->CMatrix();
+    auto C = ltir->contactMatrix();
 
     assert(Xfree);
 

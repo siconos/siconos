@@ -670,7 +670,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   if (auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
           mainInteraction->relation())) {
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
-    auto C = lagr->jacobianhOver_q();
+    auto C = lagr->contactMatrix();
 
     DEBUG_EXPR(siconos::algebra::print(*C););
     assert(Xfree);
@@ -699,7 +699,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   /*Newton-Euler */
   else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
                mainInteraction->relation())) {
-    auto CT = ner->H_NE_prod_T();
+    auto CT = ner->contactMatrix();
     DEBUG_EXPR(siconos::algebra::print(*CT));
     assert(Xfree);
     // creates a POINTER link between workX[ds] (xfree) and the
@@ -750,7 +750,7 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSetHalfExplici
     /* Active for impulses calculations? Contacts that are closed */
     double y = (*(inter->y(0)))(0);  // current position
     DEBUG_PRINTF("y= %18.14e\n", y);
-    return (y <= DEFAULT_TOL_D1MINUS);
+    return (y <= _activeSetTolerance);
   } else if (i == 2) {
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
@@ -764,7 +764,7 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSetHalfExplici
     DEBUG_PRINTF("y_k= %18.14e\n", y_k);
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
-    return (y <= DEFAULT_TOL_D1MINUS && y_k > DEFAULT_TOL_D1MINUS);
+    return (y <= _activeSetTolerance && y_k > _activeSetTolerance);
   } else
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::"

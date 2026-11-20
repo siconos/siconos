@@ -470,7 +470,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             *currentInteractionBlock +=
                 std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
                     inter->relation())
-                    ->DMatrix() /
+                    ->D() /
                 simulation()->timeStep();
           }
         }
@@ -480,10 +480,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         // (inter1 == inter2)
         auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
-        auto centralInteractionBlock = getOSIMatrix(*osi, ds);
-        if (centralInteractionBlock) {  // else it means centralInteractionBlock = identity
-          *work = centralInteractionBlock->solve(*work);
-        }
+        // work <- W^{-1} work (unchanged if W = identity)
+        solveWithOSIMatrix(*osi, ds, *work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(siconos::algebra::print(*work););
         *currentInteractionBlock += *leftInteractionBlock * *work;
@@ -498,7 +496,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             *currentInteractionBlock +=
                 std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
                     inter->relation())
-                    ->DMatrix() /
+                    ->D() /
                 simulation()->timeStep();
           }
         }
@@ -679,8 +677,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
       // because right = transpose(left) and because of
       // size checking inside the getBlock function, a
       // getRight call will fail.
-      auto centralInteractionBlock = getOSIMatrix(*osi, ds);
-      *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
+      // rightInteractionBlock <- W^{-1} rightInteractionBlock (unchanged if W = identity)
+      solveWithOSIMatrix(*osi, ds, *rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     }

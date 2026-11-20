@@ -43,6 +43,7 @@ if(WITH_TESTING)
   new_test(SOURCES LagrangianLinearTIDSTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NewtonEulerDSTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NewtonEulerRelationsTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES RelationCompatibilityTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NonSmoothDynamicalSystemTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES SiconosVisitorTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES BoundaryConditionTest.cpp  ${SIMPLE_TEST_MAIN})
@@ -52,6 +53,10 @@ if(WITH_TESTING)
   new_test(SOURCES LsodarTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES EulerMoreauTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN})
+  # Non-regression tests of the time-stepping schemes (refs: <test name>.ref in
+  # src/simulation/test, regenerated with SICONOS_REGENERATE_TEST_REFS=1)
+  new_test(SOURCES TimeSteppingSchemesTest.cpp ${SIMPLE_TEST_MAIN}
+    COMPILE_DEFINITIONS "SICONOS_TEST_REF_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/src/simulation/test\"")
   if(LPSOLVE_FOUND)
     # HAS_EXTREME_POINT_ALGO must be added to compile def if lpsolve has been found.
     list(APPEND compile_defs HAS_EXTREME_POINT_ALGO)

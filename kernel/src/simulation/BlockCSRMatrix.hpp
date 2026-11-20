@@ -221,7 +221,7 @@ class BlockCSRMatrix {
 
   /** fill the matrix with the H matrix
    *
-   *  \warning only for NewtonEuler3DR
+   *  \warning only for NewtonEulerVelocityR
    *
    *  \param indexSet of the active constraints
    */

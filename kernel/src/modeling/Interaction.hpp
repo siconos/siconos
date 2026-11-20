@@ -622,6 +622,18 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    */
   void swapInMemory();
 
+  /** Overwrite the most recent entry of the memories of y and lambda with their current
+   *  values, without shifting the older entries (and save the internal variables as
+   *  swapInMemory() does).
+   *
+   *  Used to refresh the output at the beginning of a time step (after a possible change
+   *  of the state or of the relation) while keeping the history needed by multi-step
+   *  integrators (SchatzmanPaoliOSI uses \f$ y_{k-1} \f$): swapInMemory() would push
+   *  \f$ y_k \f$ a second time and lose \f$ y_{k-1} \f$. For a memory of depth 1, both
+   *  methods are equivalent.
+   */
+  void updateLatestInMemory();
+
   /** print the data to the screen
    */
   void display(bool brief = true) const;

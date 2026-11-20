@@ -125,6 +125,10 @@ class RunnerConfig:
 
         have_bullet = siconos.mechanics.have_bullet
         have_occ = siconos.mechanics.have_occ
+        # reset what a previous backend may have set (set_backend after the constructor)
+        self.use_bullet = False
+        self.occ = None
+        self.bullet = None
         if self.backend == "bullet" and have_bullet:
             import siconos.mechanics.collision.bullet
 
@@ -1889,12 +1893,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             try:
                 ds1 = topo.getDynamicalSystem(body1_name)
-            except IndexError:
+            except (IndexError, RuntimeError):  # static object: not a ds
                 ds1 = None
 
             try:
                 ds2 = topo.getDynamicalSystem(body2_name)
-            except IndexError:
+            except (IndexError, RuntimeError):  # static object: not a ds
                 ds2 = None
 
             # static object in second
@@ -3581,15 +3585,21 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if explode_computeOneStepNSProblem_in_python:
                     fc = self._osnspb
                     # self.log(fc.updateInteractionBlocks, with_timer)()
-                    self.log(fc.preCompute, with_timer, after=False)(s.nextTime())
-                    self.log(fc.updateMu, with_timer)()
-                    if self._run_options.get("osi") == integrators.MoreauJeanOSI:
-                        if fc.getSizeOutput != 0:
+                    # as in FrictionContact::compute(): when preCompute returns false
+                    # (no active interaction), the problem (size, M, q) is not updated
+                    # and must not be solved (mu is empty, the rest is stale).
+                    has_problem = self.log(fc.preCompute, with_timer, after=False)(
+                        s.nextTime()
+                    )
+                    if has_problem:
+                        self.log(fc.updateMu, with_timer)()
+                        if self._run_options.get("osi") == integrators.MoreauJeanOSI:
+                            if fc.getSizeOutput != 0:
+                                info = self.log(fc.solve, with_timer)()
+                                self.log(fc.postCompute, with_timer)()
+                        else:
                             info = self.log(fc.solve, with_timer)()
                             self.log(fc.postCompute, with_timer)()
-                    else:
-                        info = self.log(fc.solve, with_timer)()
-                        self.log(fc.postCompute, with_timer)()
                 else:
                     info = self.log(s.computeOneStepNSProblem, with_timer)(
                         simu.constants.SICONOS_OSNSP_TS_VELOCITY
@@ -3609,11 +3619,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if s.numberOfOSNSProblems > 0:
                     if explode_computeOneStepNSProblem_in_python:
                         fc = self._osnspb
-                        self.log(fc.preCompute, with_timer)(s.nextTime())
-                        self.log(fc.updateMu, with_timer)()
-                        if fc.getSizeOutput != 0:
-                            info = self.log(fc.solve, with_timer)()
-                            self.log(fc.postCompute, with_timer)()
+                        # see the linear case above
+                        has_problem = self.log(fc.preCompute, with_timer)(s.nextTime())
+                        if has_problem:
+                            self.log(fc.updateMu, with_timer)()
+                            if fc.getSizeOutput != 0:
+                                info = self.log(fc.solve, with_timer)()
+                                self.log(fc.postCompute, with_timer)()
                     else:
                         info = self.log(s.computeOneStepNSProblem, with_timer)(
                             simu.constants.SICONOS_OSNSP_TS_VELOCITY

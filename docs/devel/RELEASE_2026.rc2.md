@@ -116,6 +116,7 @@ Experimental high-performance numerics additions:
 
 - Cohesive zone model integration with position-level formulation
 - Renamed `NewtonEuler5DR` → `NewtonEulerVelocityAngularVelocityR` and matching contact relation classes
+- Consistent naming of the Lagrangian and Newton-Euler relations: `H` is the contact configuration matrix (`ẏ = H v`, input `p = Hᵀλ`) and, for Newton-Euler, `G = ∇_q h` with `H = G T`; contact relation classes are named after their output (see Breaking Changes, item 7)
 - FEM strain/stress and constraint tensor output
 - `mechanics_run` improvements for `vnative_options`, `contact_nodes`, and empty nodal forces
 - Output of cohesive forces and displacement jumps
@@ -162,6 +163,26 @@ Experimental high-performance numerics additions:
 6. **GFC reformulation functions**:
    - Old: `globalFrictionContactProblem_reformulate_*` / `*_restore`
    - New: `globalFrictionContactProblem_reduce_*` / `expand_*` (deprecated aliases kept)
+
+7. **Lagrangian and Newton-Euler relations** (deprecated aliases kept for one release; a class
+   that still overrides a former virtual name keeps being called):
+
+   | Former name | New name |
+   |---|---|
+   | `Lagrangian2d1DR`, `Lagrangian2d2DR`, `Lagrangian2d3DR` | `Lagrangian2dNormalVelocityR`, `Lagrangian2dVelocityR`, `Lagrangian2dVelocityAngularVelocityR` |
+   | `NewtonEuler1DR`, `NewtonEuler3DR` | `NewtonEulerNormalVelocityR`, `NewtonEulerVelocityR` |
+   | `LagrangianR::jacobianhOver_q()` | `contactMatrix()` (and `constraintJacobian()`, same matrix) |
+   | `setConstantJacobianhOver_q`, `setComputeJacobianhOver_qFunction`, `computeJacobianhOver_q` | `setConstantContactMatrix`, `setComputeContactMatrixFunction`, `computeContactMatrix` |
+   | `setComputejacobianhOver_q_dotFunction`, `computeJacobianhOver_q_dot` | `setComputeContactMatrixDotFunction`, `computeContactMatrixDot` |
+   | `jacobianhOver_q_dot_X_qdot()`, `computeJacobianhOver_q_dot_X_qdot` | `contactMatrixDotV()`, `computeContactMatrixDotV` |
+   | rheonomous `hdot()`, `setComputehdotFunction`, `computehdot` | `dhdt()`, `setComputedhdtFunction`, `computedhdt` |
+   | compliant `setComputeJacobianhOver_lambdaFunction`, `computeJacobianhOver_lambda` | `setComputeDFunction`, `computeD`, accessor `D()` |
+   | linear `CMatrix()`, `DMatrix()` | `contactMatrix()`, `D()` |
+   | `NewtonEulerR::H_NE()`, `setConstantH_NE`, `computeH_NE_` | `constraintJacobian()`, `setConstantConstraintJacobian`, `computeConstraintJacobian` |
+   | `H_NE_prod_T()`, `computeH_NE_prod_T` | `contactMatrix()`, `computeContactMatrix` |
+   | `setComputeH_NE_dotFunction`, `computeH_NE_dot` | `setComputeConstraintJacobianDotFunction`, `computeConstraintJacobianDot` |
+   | `secondOrderTimeDerivativeTerms()`, `computeSecondOrderTimeDerivativeTerms` | `contactMatrixDotV()`, `computeContactMatrixDotV` |
+   | protected members `jacobianhOver_q_view_`, `H_NE_view_`, `H_NE_prod_T_`, ... | `contactMatrix_view_`, `constraintJacobian_view_`, `H_`, ... |
 
 7. **Numerics public API cleanup**:
    - Expanded cryptic abbreviations in FrictionContact/GlobalFrictionContact solver option setters
@@ -245,6 +266,8 @@ Experimental high-performance numerics additions:
 2. Replace `SP::Type` with `std::shared_ptr<Type>`
 3. Update any custom solver integration to use the registration system
 4. Rename `NewtonEuler5DR` and related contact relations to `NewtonEulerVelocityAngularVelocityR`
+5. Rename the Lagrangian and Newton-Euler relation API (Breaking Changes, item 7). The former
+   names still compile, with deprecation warnings
 
 ### For Python Users
 

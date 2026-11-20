@@ -33,7 +33,7 @@ void siconos::collision::ContactR::computeh(
   DEBUG_BEGIN("siconos::collision::ContactR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEuler3DR::computeh(q1, q2, y);
+  NewtonEulerVelocityR::computeh(q1, q2, y);
 
   y(0) = distance();
 

@@ -52,6 +52,13 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
   double h = sim->timeStep();               // time step length
   auto allOSNS = sim->oneStepNSProblems();  // all OSNSP
   auto topo = sim->nonSmoothDynamicalSystem()->topology();
+
+  // The index sets I^+_k must be computed with the state at the beginning of the step
+  // (q_k, v^+_k), i.e. after the impact of the previous step: the outputs y have been
+  // updated at the end of the previous step (update(1)), but the index sets were last
+  // updated before the impact (decision of the strategy, below). Without this, contacts
+  // that separate after an impact (g <= 0, dot g > 0) stay in I_2 and get a contact force.
+  if (!allOSNS->empty()) sim->updateIndexSets();
   auto indexSet2 = topo->indexSet(2);
 
   /**************************************************************************************************************
@@ -705,7 +712,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
 
     assert(Xfree);
-    auto C = rel->jacobianhOver_q();
+    auto C = rel->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
     DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
@@ -745,14 +752,14 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
             "siconos::integrators::D1MinusLinearOSI::computeFreeOutput. acceleration term "
             "involving Hessian matrix of Relation\n");
         DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
-        scler->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
-        osnsp_rhs += *ID * scler->jacobianhOver_q_dot_X_qdot();
+        scler->computeContactMatrixDotV(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scler->contactMatrixDotV();
       }
       DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     }
   } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
                  inter->relation())) {
-    auto CT = ner->H_NE_prod_T();
+    auto CT = ner->contactMatrix();
     DEBUG_EXPR(siconos::algebra::print(*CT));
     assert(Xfree);
     // creates a POINTER link between workX[ds] (xfree) and the
@@ -779,10 +786,10 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       auto ds1 = indexSet->properties(vertex_inter).source;
       auto ds2 = indexSet->properties(vertex_inter).target;
 
-      ner->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, ds1, ds2);
+      ner->computeContactMatrixDotV(simulation()->getTkp1(), *inter, ds1, ds2);
 
-      DEBUG_EXPR(siconos::algebra::print(*ner->secondOrderTimeDerivativeTerms()));
-      osnsp_rhs += *ID * ner->secondOrderTimeDerivativeTerms();
+      DEBUG_EXPR(siconos::algebra::print(*ner->contactMatrixDotV()));
+      osnsp_rhs += *ID * ner->contactMatrixDotV();
 
       DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     }
@@ -824,7 +831,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     /* Active for impulses calculations? Contacts that are closed */
     double y = (*(inter->y(0)))(0);  // current position
     DEBUG_PRINTF("y= %24.16e\n", y);
-    return (y <= DEFAULT_TOL_D1MINUS);
+    return (y <= _activeSetTolerance);
   } else if (i == 2) {
     DEBUG_PRINT(" level == 2\n");
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
@@ -836,9 +843,9 @@ bool siconos::integrators::D1MinusLinearOSI::
     auto yDot = (*(inter->y(1)))(0);  // current position
     DEBUG_PRINTF("y= %24.16e\n", y);
     DEBUG_PRINTF("yDot= %24.16e\n", yDot);
-    DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) << std::endl;);
-    DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) << std::endl;);
-    return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
+    DEBUG_EXPR(std::cout << std::boolalpha << (y <= _activeSetTolerance) << std::endl;);
+    DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= _activeSetTolerance) << std::endl;);
+    return (y <= _activeSetTolerance) && (yDot <= _activeSetTolerance);
   } else if (i == 3) {
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
@@ -852,7 +859,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     DEBUG_PRINTF("y_k= %24.16e\n", y_k);
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
-    return (y <= DEFAULT_TOL_D1MINUS && y_k > DEFAULT_TOL_D1MINUS);
+    return (y <= _activeSetTolerance && y_k > _activeSetTolerance);
   } else
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::"

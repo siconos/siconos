@@ -20,11 +20,11 @@
 #define Bullet1DR_hpp
 
 #include "BulletDeclarations.h"
-#include "NewtonEuler1DR.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 
 namespace siconos::collision::bullet {
 
-class Bullet1DR : public siconos::modeling::NewtonEuler1DR {
+class Bullet1DR : public siconos::modeling::NewtonEulerNormalVelocityR {
  private:
   ACCEPT_SERIALIZATION(Bullet1DR);
 

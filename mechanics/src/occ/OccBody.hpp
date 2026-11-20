@@ -39,7 +39,10 @@ namespace siconos::mechanics::occ {
 class OccBody : public siconos::modeling::NewtonEulerDS {
  private:
   using OffSet = std::array<double, 7>;
-  using ContactShape_vector = std::vector<std::tuple<OccContactShapeV&, OffSet, int>>;
+  // the variants hold shared pointers: stored by value, they share the ownership of the
+  // contact shapes (a reference could be bound to a temporary, e.g. created by the python
+  // bindings)
+  using ContactShape_vector = std::vector<std::tuple<OccContactShapeV, OffSet, int>>;
   using TopoDS_Shape_vector = std::vector<std::tuple<std::shared_ptr<TopoDS_Shape>, OffSet>>;
 
   /** Vector of shapes. Each element is a tuple with:
@@ -77,7 +80,7 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       \param group contact group default 0
   */
   void addContactShape(
-      OccContactShapeV& shape,
+      const OccContactShapeV& shape,
       std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> position =
           std::nullopt,
       std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =

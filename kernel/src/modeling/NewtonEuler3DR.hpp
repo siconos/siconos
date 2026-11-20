@@ -16,65 +16,10 @@
  * limitations under the License.
  */
 /*! \file NewtonEuler3DR.hpp
-
+ *  \deprecated NewtonEuler3DR has been renamed NewtonEulerVelocityR: include
+ * NewtonEulerVelocityR.hpp. This header is kept for one release.
  */
-#ifndef NEWTONEULERRELATIONFC3D_H
-#define NEWTONEULERRELATIONFC3D_H
-
-#include "NewtonEuler1DR.hpp"
-#include "SiconosMatrix.hpp"
-
-namespace siconos::modeling {
-
-/**
-    This class is an interface for relation with impact and FC3D.
-    From NewtonEuler1DR, it inherits to the computation of the jacobian, this
-    operator is use for the predictor of activation and deactivation of the
-    Interaction. The OSNSP is build using the matrix jachqT, that is computed
-    from the point if contact pc1, pc2 and Nc. Use this class consists in
-    overload the method computeh, and children class has to set the menber pc1,
-    pc2 and nc.
-
-*/
-class NewtonEuler3DR : public NewtonEuler1DR {
- private:
-  ACCEPT_SERIALIZATION(NewtonEuler3DR);
-
-  void FC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1);
-  void FC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
-
-  /** Rotation matrix converting the absolute coordinate to the contact frame^
-   *  coordinate. This matrix contains the unit vector(s)of the contact frame in
-   *  row. Internal bufer.
-   */
-  siconos::algebra::SiconosMatrix33 rotationAbsoluteToContactFrame_ =
-      siconos::algebra::SiconosMatrix33::Zero();
-
- public:
-  /** destructor */
-  virtual ~NewtonEuler3DR() noexcept = default;
-
-  /** initialize components specific to derived classes.
-   *
-   *  \param inter the interaction using this relation
-   */
-  void initialize(Interaction& inter) override;
-
-  /** Default implementation consists in multiplying jachq and T (see
-   *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
-   *  contact point locations and the local frame at contact
-   *
-   *  \param inter  interaction that owns the relation
-   *  \param q0  the block vector to the dynamical system position
-   */
-  void computeH_NE_prod_T(const Interaction& inter,
-                          const siconos::algebra::BlockVector& q0) override;
-
-  void display() const override {}
-  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
-};
-}  // namespace siconos::modeling
-#endif  // NEWTONEULERRELATIONFC3D_H
+#ifndef NEWTONEULER3DR_COMPAT_HPP
+#define NEWTONEULER3DR_COMPAT_HPP
+#include "NewtonEulerVelocityR.hpp"
+#endif  // NEWTONEULER3DR_COMPAT_HPP

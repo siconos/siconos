@@ -30,7 +30,7 @@
 //   DEBUG_BEGIN("Contact2d3DR::computeh(...)\n");
 
 //   // Update contact points and distance if necessary
-//   Lagrangian2d3DR::computeh(q, z, y);
+//   Lagrangian2dVelocityAngularVelocityR::computeh(q, z, y);
 
 //   y(0) = distance();
 

@@ -34,6 +34,10 @@ class MeshVertex;
 
 using GaussPointsTab = std::vector<std::vector<double>>;
 
+// Gauss points: reference coordinates, then the weight. For T3 and TH4, the weights
+// include the measure of the reference element (1/2 and 1/6): sum_k w_k f(x_k)
+// approximates the integral over the reference element.
+
 // B2 / B3, order 3
 static const GaussPointsTab GaussPointsB2_3 = {{1 / sqrt(3), 1.0}, {-1 / sqrt(3), 1.0}};
 
@@ -48,7 +52,7 @@ static const GaussPointsTab GaussPointsT3_2 = {
     {0.16666666666666667, 0.16666666666666667, 0.1666666666666666}};
 
 // TH4 order 1
-static const GaussPointsTab GaussPointsTH4_1 = {{0.25, 0.25, 0.25, 1.0}};
+static const GaussPointsTab GaussPointsTH4_1 = {{0.25, 0.25, 0.25, 1.0 / 6.0}};
 
 // TH4 order 2
 static const GaussPointsTab GaussPointsTH4_2 = {

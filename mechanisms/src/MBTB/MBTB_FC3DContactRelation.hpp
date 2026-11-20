@@ -19,7 +19,7 @@
 #ifndef MBTB_FC3DCONTACTRELATION
 #define MBTB_FC3DCONTACTRELATION
 
-#include "NewtonEuler3DR.hpp"  // Base class
+#include "NewtonEulerVelocityR.hpp"  // Base class
 
 namespace siconos::mechanisms {
 
@@ -29,11 +29,11 @@ class MBTB_Contact;
 //! friction.
 /*!
   Aggregation to the class MBTB_Contact, the member _pContact contains the CAD
-  information. It derivates from Siconos::NewtonEuler3DR. This class does the
+  information. It derivates from Siconos::NewtonEulerVelocityR. This class does the
   link between CAD and Siconos.
  */
 
-class MBTB_FC3DContactRelation : public siconos::modeling::NewtonEuler3DR {
+class MBTB_FC3DContactRelation : public siconos::modeling::NewtonEulerVelocityR {
  protected:
   //! The member containing the CAD properties.
   std::shared_ptr<MBTB_Contact> _pContact{nullptr};

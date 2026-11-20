@@ -83,7 +83,15 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
   //      - simu->osi->initializeWorkVectorsForInteraction(inter)
   //      - simu->osi->updateAndSwapAllOutput()
 
-  if (_steps > 1)  // Multi--step methods
+  // Multi-step methods (SchatzmanPaoliOSI): this function is called at the beginning of
+  // each time step (TimeStepping::initializeNewtonSolve), after the memories have been
+  // pushed at the end of the previous step. Once the memories hold _steps values, the
+  // output must only refresh the latest entry: pushing it again would replace y_{k-1}
+  // with y_k. (For one-step methods, the memory has one entry and both are the same.)
+  const bool refreshOnly =
+      _steps > 1 && inter.yMemory(inter.lowerLevelForOutput()).nbVectorsInMemory() >= _steps;
+
+  if (_steps > 1 && !refreshOnly)  // Multi--step methods: fill the memory
   {
     // Compute the old Values of Output with stored values in Memory
     for (unsigned int k = 0; k < _steps - 1; k++) {
@@ -117,7 +125,10 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i) {
     inter.computeOutput(time, i);
   }
-  inter.swapInMemory();
+  if (refreshOnly)
+    inter.updateLatestInMemory();
+  else
+    inter.swapInMemory();
 }
 
 void siconos::integrators::OneStepIntegrator::_check_and_update_interaction_levels(

@@ -1,0 +1,107 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*! \file Lagrangian2dVelocityR.hpp
+
+ */
+#ifndef LAGRANGIAN2DVELOCITYR_HPP
+#define LAGRANGIAN2DVELOCITYR_HPP
+
+#include "LagrangianScleronomousR.hpp"
+
+namespace siconos::modeling {
+/** Unilateral contact with friction between two 2D rigid bodies (or a body and a fixed
+ *  obstacle), as Lagrangian systems: normal and tangential components of the relative
+ *  velocity at the contact point, \f$ \dot y = (u_N, u_T) = H v \f$, for a
+ *  NewtonImpactFrictionNSL of size 2. The first component of \f$ y \f$ is the gap.
+ *
+ *  See Lagrangian2dNormalVelocityR for the notation and \f$ H \f$ (first two rows).
+ *
+ *  Former name: Lagrangian2d2DR (deprecated alias).
+ */
+class Lagrangian2dVelocityR : public LagrangianScleronomousR {
+ protected:
+  ACCEPT_SERIALIZATION(Lagrangian2dVelocityR);
+
+  /* Current Contact Points, may be updated within Newton loop based
+   * on _relPc1, _relPc2. */
+  siconos::algebra::SiconosVector2 contactPoint1_ = siconos::algebra::SiconosVector2::Zero();
+  siconos::algebra::SiconosVector2 contactPoint2_ = siconos::algebra::SiconosVector2::Zero();
+
+  /* Inward Normal at the contact.
+   * \todo The meaning of "Inward" has to be explained carefully.
+   */
+  siconos::algebra::SiconosVector2 nc_ = siconos::algebra::SiconosVector2::Zero();
+
+  /** Not used by the kernel (it was meant to select the projection onto
+   *  \f$ y = 0 \f$ or \f$ y \geq 0 \f$). Kept for compatibility. */
+  bool _isOnContact = false;
+
+ public:
+  using LagrangianScleronomousR::LagrangianScleronomousR;
+
+  /** destructor */
+  virtual ~Lagrangian2dVelocityR() noexcept = default;
+
+  void initialize(Interaction& inter) override;
+
+  /** to compute the output y = h(q,z) of the Relation
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
+     \param y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+
+  /** to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  void computeContactMatrix(const siconos::algebra::BlockVector& q) override;
+
+  /** Return the distance between pc1 and pc, with sign according to normal */
+  double distance() const;
+
+  inline const siconos::algebra::SiconosVector2& pc1() const { return contactPoint1_; }
+
+  inline const siconos::algebra::SiconosVector2& pc2() const { return contactPoint2_; }
+
+  inline const siconos::algebra::SiconosVector2& nc() const { return nc_; }
+
+  /** @brief Update contact point info.
+   *
+   *  @param pos1 Position on ds1 in ds1 frame.
+   *  @param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
+   *  @param normal Normal in ds2 frame (or world frame if ds2=null).
+   */
+  inline void updateContactPoints(const siconos::algebra::SiconosVector2& pos1,
+                                  const siconos::algebra::SiconosVector2& pos2,
+                                  const siconos::algebra::SiconosVector2& normal) {
+    assert(normal.norm() != 0);
+    contactPoint1_ = pos1;
+    contactPoint2_ = pos2;
+    nc_ = normal;
+  }
+
+  void display() const override;
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
+};
+/** \deprecated former name of Lagrangian2dVelocityR, kept for one release. */
+using Lagrangian2d2DR [[deprecated("use Lagrangian2dVelocityR")]] = Lagrangian2dVelocityR;
+
+}  // namespace siconos::modeling
+#endif  // NEWTONEULERRIMPACT_H

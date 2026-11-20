@@ -34,7 +34,7 @@
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC)
     : LagrangianR{RelationSubType::LinearTIR} {
-  jacobianhOver_q_view_ =
+  contactMatrix_view_ =
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 }
 
@@ -42,7 +42,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
     Eigen::Ref<siconos::algebra::SiconosVector> newe)
     : LagrangianR{RelationSubType::LinearTIR} {
-  jacobianhOver_q_view_ =
+  contactMatrix_view_ =
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 
   eVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(newe.data(), newe.size());
@@ -51,8 +51,8 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter) const {
   auto sizeY = inter.dimension();
 
-  if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
-      jacobianhOver_q_view_->rows() != sizeY)
+  if (!(contactMatrix_view_) || contactMatrix_view_->cols() != inter.getSizeOfDS() ||
+      contactMatrix_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "
         "between H "
@@ -72,7 +72,7 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(
   const auto& ds_vars = inter.read_dynamical_systems_variables();
 
   siconos::algebra::matrixBlockVector_prod(
-      *jacobianhOver_q_view_,
+      *contactMatrix_view_,
       *ds_vars[tools::enum_to_index(LagrangianR::ds_var::q0) + derivativeNumber], y);
 
   if (derivativeNumber == 0) {
@@ -95,7 +95,7 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(
                  *ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + level]););
 
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_,
+      lambda, *contactMatrix_view_,
       *ds_vars[tools::enum_to_index(LagrangianR::ds_var::p0) + level], false);
 
   DEBUG_END("void siconos::modeling::LagrangianLinearTIR::computeInput()\n")
@@ -105,7 +105,7 @@ void siconos::modeling::LagrangianLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
   std::cout << " C:\n";
-  siconos::algebra::print(*jacobianhOver_q_view_);
+  siconos::algebra::print(*contactMatrix_view_);
   std::cout << " e: " << std::endl;
   if (eVector_view_)
     std::cout << eVector_view_ << "\n";

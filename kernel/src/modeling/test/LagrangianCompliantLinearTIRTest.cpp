@@ -43,9 +43,9 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1() 
   std::cout << "--> Test: constructor 1." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(*C, *D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianCompliantLinearTIR1a : ", folr->CMatrix() == *C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianCompliantLinearTIR1a : ", folr->DMatrix() == *D, true);
+      "testBuildLagrangianCompliantLinearTIR1a : ", folr->contactMatrix() == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->D() == *D,
+                               true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1c : ",
                                folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
@@ -62,7 +62,7 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1() 
       "testBuildLagrangianCompliantLinearTIR1a : ", folr2->eVector() == *e, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianCompliantLinearTIR1a : ", folr2->jacobianhOver_q() == *C, true);
+      "testBuildLagrangianCompliantLinearTIR1a : ", folr2->contactMatrix() == *C, true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 

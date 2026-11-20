@@ -158,6 +158,27 @@ class D1MinusLinearOSI : public OneStepIntegrator {
 
   static constexpr double DEFAULT_TOL_D1MINUS = 1e-8;
 
+  /** tolerance on the gap (and gap velocity) to decide if a contact is closed
+   *  (y <= tol) and active for the contact forces (y <= tol and dot y <= tol). */
+  double _activeSetTolerance{DEFAULT_TOL_D1MINUS};
+
+ public:
+  /** Which contacts get an impulse (velocity level impact problem) in a time step:
+   *  - closed_contacts (default): the impact problem is solved at each step on all the
+   *    closed contacts. With the Newton impact law, an impulse is obtained for the contacts
+   *    that are closing or approaching (negative gap velocity); persistent contacts with a
+   *    small negative gap velocity are corrected (no drift).
+   *  - closing_contacts: the impact problem is solved only if a contact has been closing
+   *    during the step (open at the beginning, closed at the end), as in the reference
+   *    implementation of Schindler & Acary 2014. Closed contacts are otherwise handled by
+   *    the contact forces only (acceleration level): a persistent contact with a negative
+   *    gap velocity is not corrected and may drift.
+   */
+  enum class ImpactDetection { closed_contacts, closing_contacts };
+
+ private:
+  ImpactDetection _impactDetection{ImpactDetection::closed_contacts};
+
  public:
   /** Switching variable for various versions of D1MinusLinear
    */
@@ -179,6 +200,36 @@ class D1MinusLinearOSI : public OneStepIntegrator {
 
   /** destructor */
   virtual ~D1MinusLinearOSI() noexcept = default;
+
+  /** true if an impact has been detected in the current time step (set in computeResidu):
+   *  the impact (velocity level) problem has to be solved only in this case.
+   */
+  bool isThereImpactInTheTimeStep() const { return _isThereImpactInTheTimeStep; }
+
+  /** \return the rule used to decide which contacts get an impulse */
+  ImpactDetection impactDetection() const { return _impactDetection; }
+
+  /** set the rule used to decide which contacts get an impulse (see ImpactDetection)
+   *  \param rule closed_contacts (default) or closing_contacts
+   */
+  void setImpactDetection(ImpactDetection rule) { _impactDetection = rule; }
+
+  /** true if the impact (velocity level) problem must be solved in the current step */
+  bool solveImpactProblem() const {
+    return _impactDetection == ImpactDetection::closed_contacts || _isThereImpactInTheTimeStep;
+  }
+
+  /** \return the tolerance used to build the index sets (closed / active contacts) */
+  double activeSetTolerance() const { return _activeSetTolerance; }
+
+  /** set the tolerance used to build the index sets: a contact is closed if its gap
+   *  y <= tol, active for the contact forces if moreover dot y <= tol, and impacting if it
+   *  was open (y_k > tol) at the beginning of the step. Default: 1e-8.
+   *  With tol = 0, the sign of the gap is used, as in the original formulation
+   *  (Schindler & Acary 2014).
+   *  \param tol the tolerance
+   */
+  void setActiveSetTolerance(double tol) { _activeSetTolerance = tol; }
 
   /** get the type of the D1MinusLinear
    * \return unsigned int type  the type to set

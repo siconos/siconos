@@ -30,10 +30,10 @@
 #include "ContactVelocityAngularVelocityR.hpp"
 #include "Disk.hpp"
 #include "InteractionManager.hpp"
-#include "Lagrangian2d2DR.hpp"
-#include "Lagrangian2d3DR.hpp"
-#include "NewtonEuler3DR.hpp"
+#include "Lagrangian2dVelocityAngularVelocityR.hpp"
+#include "Lagrangian2dVelocityR.hpp"
 #include "NewtonEulerVelocityAngularVelocityR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosCollisionManager.hpp"
@@ -250,7 +250,7 @@ PYBIND11_MODULE(_collision, m) {
                              &siconos::collision::RigidBody2dDS::allowSelfCollide)
       .def_property_readonly("scalarMass", &siconos::collision::RigidBody2dDS::scalarMass);
 
-  py::class_<siconos::collision::ContactR, siconos::modeling::NewtonEuler3DR,
+  py::class_<siconos::collision::ContactR, siconos::modeling::NewtonEulerVelocityR,
              py::smart_holder>(m, "ContactR")
       .def_readonly("bodyShapeRecordA", &siconos::collision::ContactR::bodyShapeRecordA)
       .def_readonly("bodyShapeRecordB", &siconos::collision::ContactR::bodyShapeRecordB);
@@ -263,12 +263,13 @@ PYBIND11_MODULE(_collision, m) {
       .def_readonly("bodyShapeRecordB",
                     &siconos::collision::ContactVelocityAngularVelocityR::bodyShapeRecordB);
 
-  py::class_<siconos::collision::Contact2d3DR, siconos::modeling::Lagrangian2d3DR,
-             py::smart_holder>(m, "Contact2d3DR")
+  py::class_<siconos::collision::Contact2d3DR,
+             siconos::modeling::Lagrangian2dVelocityAngularVelocityR, py::smart_holder>(
+      m, "Contact2d3DR")
       .def_readonly("bodyShapeRecordA", &siconos::collision::Contact2d3DR::bodyShapeRecordA)
       .def_readonly("bodyShapeRecordB", &siconos::collision::Contact2d3DR::bodyShapeRecordB);
 
-  py::class_<siconos::collision::Contact2dR, siconos::modeling::Lagrangian2d2DR,
+  py::class_<siconos::collision::Contact2dR, siconos::modeling::Lagrangian2dVelocityR,
              py::smart_holder>(m, "Contact2dR")
       .def_readonly("bodyShapeRecordA", &siconos::collision::Contact2dR::bodyShapeRecordA)
       .def_readonly("bodyShapeRecordB", &siconos::collision::Contact2dR::bodyShapeRecordB);

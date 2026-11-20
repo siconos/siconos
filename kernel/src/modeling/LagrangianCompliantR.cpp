@@ -32,14 +32,13 @@ void siconos::modeling::LagrangianCompliantR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto sizeDS = inter.getSizeOfDS();
 
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), sizeY, sizeDS);
+  contactMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+      contactMatrix_storage_->data(), sizeY, sizeDS);
 
-  if (!jacobianhOver_lambda_)
-    jacobianhOver_lambda_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
+  if (!D_) D_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
 }
 
 void siconos::modeling::LagrangianCompliantR::setComputehFunction(
@@ -54,28 +53,52 @@ void siconos::modeling::LagrangianCompliantR::computeh(
   if (computeh_) computeh_(positions, lambda, y);
 }
 
-void siconos::modeling::LagrangianCompliantR::setComputeJacobianhOver_qFunction(
+void siconos::modeling::LagrangianCompliantR::setComputeContactMatrixFunction(
     const siconos::modeling::func_prototypes::FunctionBVV_M& func) {
-  computejacobianhOver_q_ = func;
+  computeContactMatrix_ = func;
+}
+
+void siconos::modeling::LagrangianCompliantR::computeContactMatrix(
+    const siconos::algebra::BlockVector& positions,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
+  if (!computeContactMatrixLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computeContactMatrixLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computeJacobianhOver_q(positions, lambda);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  if (computeContactMatrix_) computeContactMatrix_(positions, lambda, *contactMatrix_view_);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& positions,
     const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
-  if (computejacobianhOver_q_)
-    computejacobianhOver_q_(positions, lambda, *jacobianhOver_q_view_);
+  computeContactMatrix(positions, lambda);
 }
 
-void siconos::modeling::LagrangianCompliantR::setComputeJacobianhOver_lambdaFunction(
+void siconos::modeling::LagrangianCompliantR::setComputeDFunction(
     const siconos::modeling::func_prototypes::FunctionBVV_M& func) {
-  computejacobianhOver_lambda_ = func;
+  computeD_ = func;
+}
+
+void siconos::modeling::LagrangianCompliantR::computeD(
+    const siconos::algebra::BlockVector& positions,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
+  if (!computeDLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computeDLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computeJacobianhOver_lambda(positions, lambda);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  if (computeD_) computeD_(positions, lambda, *D_);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeJacobianhOver_lambda(
     const siconos::algebra::BlockVector& positions,
     const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
-  if (computejacobianhOver_lambda_)
-    computejacobianhOver_lambda_(positions, lambda, *jacobianhOver_lambda_);
+  computeD(positions, lambda);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeOutput(
@@ -88,16 +111,16 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(
   } else {
     auto& y = *inter.y(derivativeNumber);
     auto& lambda = *inter.lambda(derivativeNumber);
-    computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
-    computeJacobianhOver_lambda(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+    computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+    computeD(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
     if (derivativeNumber == 1) {
       // y = Jach[0] q1 + Jach[1] lambda
-      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
+      siconos::algebra::matrixBlockVector_prod(*contactMatrix_view_,
                                                *ds_vars[tools::enum_to_index(ds_var::q1)], y);
-      y += *jacobianhOver_lambda_ * lambda;
+      y += *D_ * lambda;
     } else if (derivativeNumber == 2)
       siconos::algebra::matrixBlockVector_prod(
-          *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::q2)],
+          *contactMatrix_view_, *ds_vars[tools::enum_to_index(ds_var::q2)],
           y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       THROW_EXCEPTION(
@@ -112,16 +135,15 @@ void siconos::modeling::LagrangianCompliantR::computeInput(
 
   auto& lambda = *inter.lambda(level);
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+  computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level],
-      false);
+      lambda, *contactMatrix_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level], false);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeJach(double time, Interaction& inter) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
   auto& lambda = *inter.lambda(0);
-  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
-  computeJacobianhOver_lambda(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+  computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
+  computeD(*ds_vars[tools::enum_to_index(ds_var::q0)], lambda);
 }

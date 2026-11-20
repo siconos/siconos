@@ -1262,11 +1262,11 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   // 1 - product H Xfree{}
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation())
-                 ->jacobianhOver_q();
+                 ->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
-                 ->H_NE_prod_T();
+                 ->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   }
 
@@ -1286,23 +1286,23 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
 
       auto rheoR =
           std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter.relation());
-      rheoR->computehdot(*ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)],
+      rheoR->computedhdt(*ds_vars[tools::enum_to_index(modeling::LagrangianR::ds_var::q0)],
                          simulation()->getTkp1());
 
       // siconos::algebra::SiconosDenseMatrix ID =
       //     siconos::algebra::SiconosDenseMatrix::Identity(sizeY, sizeY);
       // This should be optimized -- vacary
       // y += hDot
-      // auto hDot = rheoR->hdot();
+      // auto hDot = rheoR->dhdt();
       // osnsp_rhs += ID * hDot;
-      osnsp_rhs += rheoR->hdot();
+      osnsp_rhs += rheoR->dhdt();
     }
     if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
       assert(((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp);
       auto compR = std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
           inter.relation());
 
-      auto C = compR->CMatrix();
+      auto C = compR->contactMatrix();
       double h = sim->timeStep();
       osnsp_rhs *= h * _theta;
 
@@ -1375,7 +1375,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto relation =
         std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
-    auto H = relation->jacobianhOver_q();
+    auto H = relation->contactMatrix();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs_position, true);
     osnsp_rhs_position *= h * _theta;
 
@@ -1404,7 +1404,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutputPosition(
 
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
-                 ->H_NE_prod_T();
+                 ->contactMatrix();
     const auto& ds_vars = inter.read_dynamical_systems_variables();
 
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs_position, true);
@@ -2147,14 +2147,17 @@ void siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int 
       "siconos::integrators::MoreauJeanOSI::updateInput(double time, unsigned int level)\n");
   DEBUG_PRINTF("level = %u\n", level);
 
-  auto& indexSet = *simulation()->indexSet(level);
   auto& indexSet0 = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
 
-  // we first compute p[1] from lambda[1] on indexSet1
-  for (auto [ui, uiend] = indexSet.vertices(); ui != uiend; ++ui) {
-    DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 1 \n");
+  // we first compute p[1] from lambda[1] on indexSet0, as in
+  // OneStepIntegrator::updateInput: lambda[1] is zero for the interactions that are not
+  // in indexSet1, and the relations must also update their own input-related data there
+  // (e.g. NewtonEulerR::contactForce, which would otherwise keep its last value once the
+  // contact opens).
+  for (auto [ui, uiend] = indexSet0.vertices(); ui != uiend; ++ui) {
+    DEBUG_PRINT("MoreauJeanOSI::updateInput. compute p[1] from lambda[1] on indexSet 0 \n");
     if (!checkInteractionOSI(indexSet0, ui)) continue;
-    auto& inter = *indexSet.bundle(*ui);
+    auto& inter = *indexSet0.bundle(*ui);
     assert(inter.lowerLevelForInput() <= level);
     assert(inter.upperLevelForInput() >= level);
     inter.computeInput(time, level);

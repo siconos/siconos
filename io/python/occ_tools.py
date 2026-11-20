@@ -35,7 +35,7 @@ from OCC.Core.STEPControl import STEPControl_Reader
 from OCC.Core.StlAPI import StlAPI_Writer
 from OCC.Core.TopAbs import TopAbs_EDGE, TopAbs_FACE
 from OCC.Core.TopExp import TopExp_Explorer
-from OCC.Core.TopoDS import TopoDS_Compound, topods_Edge, topods_Face
+from OCC.Core.TopoDS import TopoDS_Compound, topods
 
 
 #
@@ -127,14 +127,14 @@ def occ_topo_list(shape):
     edges = []
 
     while topExp.More():
-        face = topods_Face(topExp.Current())
+        face = topods.Face(topExp.Current())
         faces.append(face)
         topExp.Next()
 
     topExp.Init(shape, TopAbs_EDGE)
 
     while topExp.More():
-        edge = topods_Edge(topExp.Current())
+        edge = topods.Edge(topExp.Current())
         edges.append(edge)
         topExp.Next()
 
@@ -195,10 +195,10 @@ def topods_shape_reader(shape, deflection=0.001):
         mesh.Perform()
         assert mesh.IsDone()
         stl_writer.SetASCIIMode(False)
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
+        stl_writer.Write(shape, tmpf.name)
+        tmpf.fid.flush()
 
-        reader.SetFileName(tmpf[1])
+        reader.SetFileName(tmpf.name)
         reader.Update()
 
     return reader
@@ -215,11 +215,11 @@ def brep_reader(brep_string, indx):
     stl_writer = StlAPI_Writer()
 
     with siconos.io.tools.tmpfile(suffix=".stl") as tmpf:
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
+        stl_writer.Write(shape, tmpf.name)
+        tmpf.fid.flush()
 
         reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
+        reader.SetFileName(tmpf.name)
         reader.Update()
 
         return reader

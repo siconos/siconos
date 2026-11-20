@@ -89,6 +89,47 @@ void siconos::simulation::TimeSteppingCombinedProjection::initializeOneStepNSPro
   }
 }
 
+void siconos::simulation::TimeSteppingCombinedProjection::updateAndSwapAllOutput() {
+  if (_nbIndexSetsIteration <= 1) {
+    TimeStepping::updateAndSwapAllOutput();
+    return;
+  }
+  // Restart the step: DS states back to their beginning-of-step values ...
+  auto nsds = nonSmoothDynamicalSystem();
+  auto dsGraph = nsds->dynamicalSystems();
+  for (auto vi : *dsGraph) {
+    auto ds = dsGraph->bundle(vi);
+    if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      *neds->q() = neds->qMemory().getSiconosVector(0);
+      *neds->twist() = neds->twistMemory().getSiconosVector(0);
+      neds->computeT(*neds->q());
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      *d->q() = d->qMemory().getSiconosVector(0);
+      *d->velocity() = d->velocityMemory().getSiconosVector(0);
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      *d->q() = d->qMemory().getSiconosVector(0);
+      *d->velocity() = d->velocityMemory().getSiconosVector(0);
+    } else
+      THROW_EXCEPTION(
+          "siconos::simulation::TimeSteppingCombinedProjection::"
+          "updateAndSwapAllOutput() - Ds is "
+          "not from NewtonEulerDS neither from LagrangianDS.");
+  }
+  updateWorldFromDS();
+  // ... and outputs/Jacobians recomputed there, but not saved in memory (y_k is kept).
+  double tkp1 = getTkp1();
+  auto indexSet0 = nsds->topology()->indexSet0();
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
+    auto inter = indexSet0->bundle(*ui);
+    inter->computeOutput(tkp1, 0);
+    inter->relation()->computeJach(tkp1, *inter);
+    for (auto level = inter->lowerLevelForOutput(); level <= inter->upperLevelForOutput();
+         ++level)
+      inter->computeOutput(tkp1, level);
+  }
+}
+
 void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
   DEBUG_PRINT("================================================");
   DEBUG_PRINT("siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()");
@@ -314,27 +355,12 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       nsds->updateInput(nextTime(), 0);
     }
 
-    // Store the q vector of each DS.
-
-    // for (auto aVi2 : *dsGraph) {  // = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
-    //  auto ds = dsGraph->bundle(aVi2);
-    //   auto& workVectors = *dsGraph->properties(aVi2).workVectors;
-
-    //   if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-    //     *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
-    //   } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds))
-    //   {
-    //     *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-    //   } else if (auto d =
-    //                  std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds))
-    //                  {
-    //     *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-    //   } else
-    //     THROW_EXCEPTION(
-    //         "siconos::simulation::TimeSteppingCombinedProjection::"
-    //         "advanceToEvent() :: - Ds is "
-    //         "not from NewtonEulerDS neither from LagrangianDS.");
-    //}
+    // Step 2 of Algorithm 2: projection of a = q (positions after the velocity step) on
+    // the active set (indexSet 2). For ProjectionUpdate::from_origin, a is saved: each
+    // iteration projects from a, q_{j+1} = a + G(q_j)^T mu_j (see ProjectionUpdate).
+    const bool fromOrigin = _projectionUpdate == ProjectionUpdate::from_origin;
+    if (fromOrigin && runningProjection && _doCombinedProj)
+      saveProjectionOrigin(*nsds, _projectionOrigin);
 
     _nbProjectionIteration = 0;
 
@@ -358,6 +384,12 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 #ifdef TSPROJ_DEBUG_LEVEL1
       std::cout << "TimeSteppingCombinedProjection compute OSNSP POS.\n";
 #endif
+      // Right-hand side of the linearized projection: y0 = g(q_j) (computeCriteria),
+      // shifted to g(q_j) + G(q_j)(a - q_j) for from_origin.
+      if (fromOrigin)
+        shiftProjectionRhs(*nsds->topology()->indexSet(_indexSetLevelForProjection),
+                           _projectionOrigin);
+
       info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS);
 
       if (info) {
@@ -370,64 +402,17 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
       nsds->updateInput(nextTime(), 0);
 
-      for (auto aVi2 : *dsGraph) {
-        auto ds = dsGraph->bundle(aVi2);
-        // auto& workVectors = *dsGraph->properties(aVi2).workVectors;
-
-        if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-          auto q = neds->q();
-          // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
-          if (neds->p(0)) {
-            //*q = * qtmp +  *neds->p(0);
-            *q += *neds->p(0);
-          }
-          neds->normalizeq();
-          // siconos::modeling::newton_euler::computeT);
-
-#ifdef TSPROJ_DEBUG_LEVEL1
-          neds->display();
-#endif
-        } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-          auto q = d->q();
-          // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
-          if (d->p(0)) {
-            //*q = * qtmp +  *d->p(0);
-            *q += *d->p(0);
-          }
-#ifdef TSPROJ_DEBUG_LEVEL1
-          std::cout << " q=\n";
-          siconos::algebra::print(*q);
-          std::cout << " p(0)=\n";
-          siconos::algebra::print(*d->p(0));
-          std::cout << " p(1)=\n";
-          siconos::algebra::print(*d->p(1));
-#endif
-        } else if (auto d =
-                       std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
-          auto q = d->q();
-          // auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
-          if (d->p(0)) {
-            //*q = * qtmp +  *d->p(0);
-            *q += *d->p(0);
-          }
-#ifdef TSPROJ_DEBUG_LEVEL1
-          std::cout << " q=\n";
-          siconos::algebra::print(*q);
-          std::cout << " p(0)=\n";
-          siconos::algebra::print(*d->p(0));
-          std::cout << " p(1)=\n";
-          siconos::algebra::print(*d->p(1));
-#endif
-        } else
-          THROW_EXCEPTION(
-              "siconos::simulation::TimeSteppingCombinedProjection::"
-              "advanceToEvent() - Ds is "
-              "not from NewtonEulerDS neither from LagrangianDS.");
-      }
+      // Position update with p0 = G(q_j)^T lambda (updateInput(0) above):
+      // q += p0 (incremental) or q = a + p0 (from_origin).
+      double dq = updatePositionsAfterProjection(*nsds, _projectionOrigin, _projectionUpdate);
 
       updateWorldFromDS();
 
       computeCriteria(&runningProjection);
+      // from_origin: iterate until the fixed point q = a + G(q)^T mu has converged, not
+      // only until the constraints are satisfied (otherwise q - a is not normal to the
+      // constraint manifold).
+      if (fromOrigin && dq > _projectionTolq) runningProjection = true;
 
       // cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
       // Z:"<<endl;
@@ -744,7 +729,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
             // auto Osi = indexSet0->properties(*ui0).osi;
             //  We assume that the integrator of the ds1 drive the update of the
             //  index set
-            auto ds1 = indexSet1->properties(*ui0).source;
+            auto ds1 = indexSet0->properties(*ui0).source;
             auto osi = DSG0.properties(DSG0.descriptor(ds1)).osi();
 
             activate = osi->addInteractionInIndexSet(inter0, i);

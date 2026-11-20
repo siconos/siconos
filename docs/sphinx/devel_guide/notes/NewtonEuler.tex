@@ -1167,11 +1167,21 @@ with
 
 
 
-In the siconos notation, we have for the relation
+In the siconos notation, we have for the relation (classes \texttt{NewtonEulerR} and
+\texttt{LagrangianR})
 \begin{equation}
   \label{eq:100}
-   C =   J^\alpha(q) \quad CT = J^\alpha(q)T(q)
+  \dot y = H(q)\, v, \qquad p = H^\top(q)\lambda, \qquad
+  H(q) = G(q)\, T(q), \quad G(q) = J^\alpha(q) = \nabla^\top_q h^\alpha(q),
 \end{equation}
+where $H$ (\texttt{H()}) is the \emph{contact configuration matrix}, which maps the twist to
+the local relative velocities. For the normal component of a contact, $H$ is the Jacobian
+of the gap function times $T(q)$. For the tangential components (friction) or the rolling
+components, the rows of $H$, written as $G^\alpha_\t(q) T(q)$ above, are not the Jacobian
+of a function: they contain the change to the local contact frame and the relative velocity
+between the two bodies. $G$ (\texttt{G()}) is then only meaningful for the normal row. The
+terms of $\ddot y$ that do not depend on $\dot v$, $\dot H v = \dot G \dot q + G \dot T v$,
+are given by \texttt{Hdotv()}. For Lagrangian systems, $T = I$ and $G = H$.
 
 
 

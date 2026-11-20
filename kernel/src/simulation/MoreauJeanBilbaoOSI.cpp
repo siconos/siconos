@@ -202,9 +202,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
     // = std::make_shared<siconos::algebra::SiconosVector>(ndof));
     auto& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
-    auto omega2 = lldds->stiffnessMatrix();
-    auto damp = lldds->dampingMatrix();
-    auto mass = lldds->massMatrix();
+    // mass, stiffness and damping are optional (diagonal) operators:
+    // only read the ones that are set.
 
     double one_minus_theta, dt_sigma_star;
     auto time_step = simulation()->timeStep();
@@ -216,9 +215,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
       massk = 1.;
       sigmak = 0.;
       omega2k = 0.;
-      if (lldds->hasMassMatrix()) massk = mass(k, k);
-      if (lldds->hasDampingMatrix()) sigmak = 0.5 * damp(k);
-      if (lldds->hasStiffnessMatrix()) omega2k = omega2(k);
+      if (lldds->hasMassMatrix()) massk = lldds->massMatrix()(k);
+      if (lldds->hasDampingMatrix()) sigmak = 0.5 * lldds->dampingMatrix()(k);
+      if (lldds->hasStiffnessMatrix()) omega2k = lldds->stiffnessMatrix()(k);
       compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
       iteration_matrix(k, k) =
           one / (massk + coeff * one_minus_theta * omega2k + dt_sigma_star);
@@ -278,7 +277,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     const auto& q_i = lldds.qMemory().getSiconosVector(0);
     DEBUG_EXPR(siconos::algebra::print(q_i););
     DEBUG_EXPR(siconos::algebra::print(v_i););
-    auto stiffness = lldds.stiffnessMatrix();
+    const bool has_stiffness = lldds.hasStiffnessMatrix();
     // Get iteration matrix
     const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
     auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
@@ -290,9 +289,11 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     auto& vfree = *work_ds[siconos::integrators::MoreauJeanBilbaoOSI::VFREE];
     // Compute vfree
     auto dimension = lldds.dimension();
-    for (decltype(dimension) k = 0; k < dimension; ++k)
-      vfree(k) = v_i(k) - inv_iteration_matrix(k, k) * (time_step * stiffness(k) * q_i(k) +
-                                                        two_dt_sigma_star(k) * v_i(k));
+    for (decltype(dimension) k = 0; k < dimension; ++k) {
+      double omega2k = has_stiffness ? lldds.stiffnessMatrix()(k) : 0.;
+      vfree(k) = v_i(k) - inv_iteration_matrix(k, k) *
+                              (time_step * omega2k * q_i(k) + two_dt_sigma_star(k) * v_i(k));
+    }
     DEBUG_EXPR(siconos::algebra::print(vfree););
   }
   DEBUG_END("siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState()")
@@ -346,7 +347,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
   assert(lagr && "MoreauJeanBilbaoOSI only implemented for Lagrangian systems.");
 
-  auto H = lagr->jacobianhOver_q();
+  auto H = lagr->contactMatrix();
   siconos::algebra::matrixBlockVector_prod(H, x_free, osnsp_rhs, true);
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput{osnsp, inter,
                                                indexSet.properties(vertex_inter)};

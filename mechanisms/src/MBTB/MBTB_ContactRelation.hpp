@@ -19,7 +19,7 @@
 #ifndef MBTB_CONTACTRELATION
 #define MBTB_CONTACTRELATION
 
-#include "NewtonEuler1DR.hpp"  // Base class
+#include "NewtonEulerNormalVelocityR.hpp"  // Base class
 
 namespace siconos::mechanisms {
 
@@ -29,10 +29,10 @@ class MBTB_Contact;
 //! friction).
 /*!
   Aggregation to the class MBTB_Contact, the member _pContact contains the CAD
-  information. It derivates from Siconos::NewtonEuler1DR. This class does the
+  information. It derivates from Siconos::NewtonEulerNormalVelocityR. This class does the
   link between CAD and Siconos.
  */
-class MBTB_ContactRelation : public siconos::modeling::NewtonEuler1DR {
+class MBTB_ContactRelation : public siconos::modeling::NewtonEulerNormalVelocityR {
  protected:
   std::shared_ptr<MBTB_Contact> _pContact{nullptr};
 

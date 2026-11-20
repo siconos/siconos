@@ -68,7 +68,7 @@ void siconos::collision::native::bodies::SphereLDSPlanR::computeh(
 
 void normalize(std::shared_ptr<siconos::algebra::SiconosVector>, unsigned int);
 
-void siconos::collision::native::bodies::SphereLDSPlanR::computeJacobianhOver_q(
+void siconos::collision::native::bodies::SphereLDSPlanR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
   double theta = q(3);
   double phi = q(4);
@@ -78,22 +78,22 @@ void siconos::collision::native::bodies::SphereLDSPlanR::computeJacobianhOver_q(
   double cphi = cos(phi);
   double sphi = sin(phi);
 
-  jacobianhOver_q_view_->setValue(0, 0, n1);
-  jacobianhOver_q_view_->setValue(1, 0, u1);
-  jacobianhOver_q_view_->setValue(2, 0, v1);
-  jacobianhOver_q_view_->setValue(0, 1, n2);
-  jacobianhOver_q_view_->setValue(1, 1, u2);
-  jacobianhOver_q_view_->setValue(2, 1, v2);
-  jacobianhOver_q_view_->setValue(0, 2, n3);
-  jacobianhOver_q_view_->setValue(1, 2, u3);
-  jacobianhOver_q_view_->setValue(2, 2, v3);
-  jacobianhOver_q_view_->setValue(0, 3, 0);
-  jacobianhOver_q_view_->setValue(1, 3, -rv1 * cphi - rv2 * sphi);
-  jacobianhOver_q_view_->setValue(2, 3, ru1 * cphi + ru2 * sphi);
-  jacobianhOver_q_view_->setValue(0, 4, 0);
-  jacobianhOver_q_view_->setValue(1, 4, -rv3);
-  jacobianhOver_q_view_->setValue(2, 4, ru3);
-  jacobianhOver_q_view_->setValue(0, 5, 0);
-  jacobianhOver_q_view_->setValue(1, 5, -rv3 * cthe + rv2 * cphi * sthe - rv1 * sphi * sthe);
-  jacobianhOver_q_view_->setValue(2, 5, ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sthe);
+  contactMatrix_view_->setValue(0, 0, n1);
+  contactMatrix_view_->setValue(1, 0, u1);
+  contactMatrix_view_->setValue(2, 0, v1);
+  contactMatrix_view_->setValue(0, 1, n2);
+  contactMatrix_view_->setValue(1, 1, u2);
+  contactMatrix_view_->setValue(2, 1, v2);
+  contactMatrix_view_->setValue(0, 2, n3);
+  contactMatrix_view_->setValue(1, 2, u3);
+  contactMatrix_view_->setValue(2, 2, v3);
+  contactMatrix_view_->setValue(0, 3, 0);
+  contactMatrix_view_->setValue(1, 3, -rv1 * cphi - rv2 * sphi);
+  contactMatrix_view_->setValue(2, 3, ru1 * cphi + ru2 * sphi);
+  contactMatrix_view_->setValue(0, 4, 0);
+  contactMatrix_view_->setValue(1, 4, -rv3);
+  contactMatrix_view_->setValue(2, 4, ru3);
+  contactMatrix_view_->setValue(0, 5, 0);
+  contactMatrix_view_->setValue(1, 5, -rv3 * cthe + rv2 * cphi * sthe - rv1 * sphi * sthe);
+  contactMatrix_view_->setValue(2, 5, ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sthe);
 }

@@ -356,21 +356,10 @@ void siconos::mechanisms::MBTB_JointBuild(
     return;
   }
   unsigned int lNbEq = 0;
-  unsigned int nbDS = 1;
-  unsigned int qDim = 7;
   /*Data to build the graph*/
   mbtb::data::sJointType[numJ] = jointType;
   mbtb::data::sJointIndexDS[2 * numJ] = indexDS1;
   mbtb::data::sJointIndexDS[2 * numJ + 1] = indexDS2;
-  /*BUILD H SiconosMatrix and NSLAW*/
-  if (jointType == JointsType::Pivot0 || jointType == JointsType::Pivot1) {
-    nbDS = 1;
-    if (jointType == JointsType::Pivot1) {
-      nbDS = 2;
-    }
-  } else if (jointType == JointsType::Prismatic0) {
-    nbDS = 1;
-  }
 
   siconos::algebra::SiconosVector3 P;
   siconos::algebra::SiconosVector3 A;
@@ -404,11 +393,10 @@ void siconos::mechanisms::MBTB_JointBuild(
 
   lNbEq = mbtb::data::sJointRelations[numJ]->_jointR->numberOfConstraints();
 
-  auto lH = std::make_shared<siconos::algebra::SiconosMatrix>(lNbEq, nbDS * qDim);
-  lH->setZero();
+  // The constraint Jacobian G of the joint is allocated (and zeroed) by
+  // NewtonEulerR::initialize and recomputed by the joint at each step: it must not be set
+  // with setConstantConstraintJacobian, which would freeze it.
   auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
-
-  mbtb::data::sJointRelations[numJ]->_jointR->setConstantH_NE(*lH);
   //  mbtb::data::sInterJoints[numJ].reset(new Interaction(JointName,
   //  sAllDSByInter[numJ],
   //                                           numJ, lNbEq , lNSL,

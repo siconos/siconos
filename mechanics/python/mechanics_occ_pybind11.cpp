@@ -26,7 +26,7 @@
 
 #include "ContactPoint.hpp"
 #include "Geometer.hpp"
-#include "NewtonEuler3DR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "OccBody.hpp"
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
@@ -141,7 +141,9 @@ PYBIND11_MODULE(_occ, m) {
       .def(py::init<const siconos::mechanics::occ::ContactPoint&,
                     const siconos::mechanics::occ::ContactPoint&,
                     const siconos::mechanics::occ::DistanceCalculator&>(),
-           py::arg("contact1"), py::arg("contact2"), py::arg("indistance_calculator"))
+           py::keep_alive<1, 2>(),  // OccR keeps references to its contact points
+           py::keep_alive<1, 3>(), py::arg("contact1"), py::arg("contact2"),
+           py::arg("indistance_calculator"))
       .def("setOffset1", &siconos::mechanics::occ::OccR::setOffset1)
       .def("setOffset2", &siconos::mechanics::occ::OccR::setOffset2);
 }

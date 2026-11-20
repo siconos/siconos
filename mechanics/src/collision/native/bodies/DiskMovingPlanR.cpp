@@ -61,7 +61,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeh(
   y(0) = distance(q_0, q_1, radius_);
 }
 
-void siconos::collision::native::bodies::DiskMovingPlanR::computeJacobianhOver_q(
+void siconos::collision::native::bodies::DiskMovingPlanR::computeContactMatrix(
     const siconos::algebra::BlockVector& q, double time) {
   init(time);
 
@@ -71,15 +71,15 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeJacobianhOver_q
   double D1 = A_ * x + B_ * y + C_;
   double signD1 = copysign(1, D1);
 
-  jacobianhOver_q_view_->setValue(0, 0, A_ * signD1 / sqrA2pB2_);
-  jacobianhOver_q_view_->setValue(1, 0, -B_ * signD1 / sqrA2pB2_);
-  jacobianhOver_q_view_->setValue(0, 1, B_ * signD1 / sqrA2pB2_);
-  jacobianhOver_q_view_->setValue(1, 1, A_ * signD1 / sqrA2pB2_);
-  jacobianhOver_q_view_->setValue(0, 2, 0);
-  jacobianhOver_q_view_->setValue(1, 2, -radius_);
+  contactMatrix_view_->setValue(0, 0, A_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(1, 0, -B_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(0, 1, B_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(1, 1, A_ * signD1 / sqrA2pB2_);
+  contactMatrix_view_->setValue(0, 2, 0);
+  contactMatrix_view_->setValue(1, 2, -radius_);
 }
 
-void siconos::collision::native::bodies::DiskMovingPlanR::computehdot(
+void siconos::collision::native::bodies::DiskMovingPlanR::computedhdt(
     const siconos::algebra::BlockVector& q, double time) {
   init(time);
 
@@ -88,7 +88,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computehdot(
 
   double D1 = A_ * x + B_ * y + C_;
   double signD1 = copysign(1, D1);
-  (*hdot_)(0) = (-AAdot_ - BBdot_) * fabs(D1) / cubsqrA2pB2_ +
+  (*dhdt_)(0) = (-AAdot_ - BBdot_) * fabs(D1) / cubsqrA2pB2_ +
                 (Adot_ * x + Bdot_ * y + Cdot_) * signD1 / sqrA2pB2_;
 }
 

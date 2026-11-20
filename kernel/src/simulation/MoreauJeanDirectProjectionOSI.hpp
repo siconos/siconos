@@ -34,6 +34,22 @@ namespace siconos::integrators {
 
     This class reimplement a special activation of constraints
     in the MoreauJeanOSI for the Direct Projection Algorithm
+    (Algorithm 1, used with siconos::simulation::TimeSteppingDirectProjection).
+
+    Activation of indexSet 1 (contacts of the velocity problem), rule
+    FIRSTWAY_ACTIVATION of MoreauJeanDirectProjectionOSI.cpp, with the forecast gap
+    \f$ \tilde g_\alpha = g_\alpha + \gamma h \dot g_\alpha \f$ evaluated at the
+    beginning of the step (outputs y(0), y(1)):
+    - add if \f$ \tilde g_\alpha \leq \f$ activateYPosThreshold() (1e-7 by default);
+    - remove if \f$ \tilde g_\alpha > \f$ deactivateYPosThreshold() (1e-7) and
+      \f$ \dot g_\alpha \geq \f$ deactivateYVelThreshold() (0).
+
+    \f$ \gamma = 1/2 \f$ unless set by MoreauJeanOSI::setGamma() or the constructor
+    (gamma). The scheme of Acary (CMAME 2013) and the Scilab code Hots use
+    \f$ \gamma = 1 \f$ and a threshold of 1e-10: see docs/devel/PROJECTION_SCHEMES.md.
+
+    numberOfIndexSets() = 2: indexSet 0 (all interactions, used for the projection when
+    TimeSteppingDirectProjection is built with level 0) and indexSet 1.
 
     References :
 

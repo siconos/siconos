@@ -19,7 +19,7 @@
 #ifndef ContactR_hpp
 #define ContactR_hpp
 
-#include "NewtonEuler3DR.hpp"
+#include "NewtonEulerVelocityR.hpp"
 #include "SiconosVector.hpp"
 
 namespace siconos::algebra {
@@ -29,7 +29,7 @@ class BlockVector;
 namespace siconos::collision {
 class BodyShapeRecord;
 
-class ContactR : public siconos::modeling::NewtonEuler3DR {
+class ContactR : public siconos::modeling::NewtonEulerVelocityR {
  private:
   ACCEPT_SERIALIZATION(ContactR);
 

@@ -25,59 +25,67 @@
 
 namespace siconos::modeling {
 /**
-    Lagrangian Compliant Relation: Scleronomous, Non-Holonomic
+    @brief Lagrangian (2nd order) compliant relations, with \f$ y = h(q, \lambda) \f$
+    (dense storage)
 
-    This class provides tools to describe Lagrangian (2nd order) non linear relations, with:
+    \f[
+    \begin{aligned}
+      y &= h(q, \lambda), \\
+      \dot y &= H(q, \lambda)\, \dot q + D(q, \lambda)\, \dot\lambda, \\
+      p &= H(q, \lambda)^\top \lambda,
+    \end{aligned}
+    \qquad
+    H = \nabla_q^\top h(q, \lambda), \quad D = \nabla_\lambda^\top h(q, \lambda).
+    \f]
 
-    \f$
-    y = h(q,\lambda(t))
-    \f$
+    \f$ H \f$ is the contact configuration matrix (see LagrangianR), and \f$ D \f$ has the
+    same meaning as in the first-order relations. The following operators can be set by
+    user-defined functions, or computed by overriding the virtual functions:
 
-    \f$
-    \dot y = G0(q,\lambda(t))\dot q + G1((q,\lambda(t))\dot\lambda(t)
-    \f$
+    - \f$ h(q, \lambda) \f$: setComputehFunction, or override computeh;
+    - \f$ H(q, \lambda) \f$: setComputeContactMatrixFunction, or override computeContactMatrix;
+    - \f$ D(q, \lambda) \f$: setComputeDFunction, or override computeD.
 
-    \f$
-    p = G0^t(q,\lambda(t))\lambda(t)
-    \f$
-
-    with
-    \f$
-    G0(q,\lambda(t)) = \nabla_q h(q,\lambda(t))
-    \f$
-
-    \f$
-    G1(q,\lambda(t)) = \nabla_{\lambda}h(q,\lambda(t))
-    \f$
-
-    The following operators can be set by user-defined functions:
-
-    - \f$ h(q, \lambda) \f$
-    - \f$ G0(q, \lambda) \f$
-    - \f$ G1(q, \lambda) \f$
-
+    <b>Former names</b> (deprecated, kept for one release): setComputeJacobianhOver_qFunction,
+    computeJacobianhOver_q, setComputeJacobianhOver_lambdaFunction,
+    computeJacobianhOver_lambda (a class overriding them is still called).
+    jacobianhOver_lambda() (the Relation interface) returns D().
 */
 class LagrangianCompliantR : public LagrangianR {
  protected:
   /** function wrapper used to compute \f$ h(q, \lambda) \f$ */
   siconos::modeling::func_prototypes::FunctionBVV_V computeh_{nullptr};
 
-  /** function wrapper used to compute  \f$ G_0=\nabla^\top_q h(q, \lambda) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVV_M computejacobianhOver_q_{nullptr};
+  /** function wrapper used to compute \f$ H = \nabla^\top_q h(q, \lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVV_M computeContactMatrix_{nullptr};
 
-  /** jacobian matrix \f$G_1 = \nabla^\top_{\lambda}h(q, \lambda) \f$  */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_lambda_{nullptr};
+  /** \f$ D = \nabla^\top_{\lambda}h(q, \lambda) \f$  */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> D_{nullptr};
 
-  /** function wrapper used to compute  \f$ G_1=\nabla^\top_{\lambda} h(q, \lambda) \f$ */
-  siconos::modeling::func_prototypes::FunctionBVV_M computejacobianhOver_lambda_{nullptr};
+  /** function wrapper used to compute \f$ D = \nabla^\top_{\lambda} h(q, \lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVV_M computeD_{nullptr};
+
+  /** Deprecated names of the members above, kept for one release. */
+  [[deprecated(
+      "use computeContactMatrix_")]] siconos::modeling::func_prototypes::FunctionBVV_M&
+      computejacobianhOver_q_{computeContactMatrix_};
+  [[deprecated(
+      "use D_")]] std::shared_ptr<siconos::algebra::SiconosMatrix>& jacobianhOver_lambda_{D_};
+  [[deprecated("use computeD_")]] siconos::modeling::func_prototypes::FunctionBVV_M&
+      computejacobianhOver_lambda_{computeD_};
 
   ACCEPT_SERIALIZATION(LagrangianCompliantR);
 
-  /** initialize G matrices or components specific to derived classes
+  /** initialize H and D matrices or components specific to derived classes
    *
    *  \param inter : the Interaction
    */
   void initialize(Interaction& inter) override;
+
+ private:
+  /** flags of the dispatch to the deprecated virtual names (see RelationCompatibility.hpp) */
+  bool computeContactMatrixLegacy_{false};
+  bool computeDLegacy_{false};
 
  public:
   /** default and only constructor */
@@ -86,7 +94,7 @@ class LagrangianCompliantR : public LagrangianR {
   /** destructor */
   virtual ~LagrangianCompliantR() noexcept = default;
 
-  /** set a user-defined function to compute \f$ h(q, \lambda) \f$  \f$
+  /** set a user-defined function to compute \f$ h(q, \lambda) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
@@ -103,41 +111,47 @@ class LagrangianCompliantR : public LagrangianR {
                         const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** set a user-defined function to compute \f$ \nabla^\top_q h(q, \lambda) \f$ \f$
+  /** set a user-defined function to compute \f$ H = \nabla^\top_q h(q, \lambda) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianhOver_qFunction(
+  void setComputeContactMatrixFunction(
       const siconos::modeling::func_prototypes::FunctionBVV_M& fct);
 
-  /** Computes \f$ \nabla^\top_q h(q, \lambda) \f$
+  /** Computes \f$ H = \nabla^\top_q h(q, \lambda) \f$. The default calls the user-defined
+   *  function, if any. Override this function to compute \f$ H \f$ in a derived class.
+   *
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param lambda interaction  \f$ \lambda \f$  vector
    */
-  virtual void computeJacobianhOver_q(
+  virtual void computeContactMatrix(
       const siconos::algebra::BlockVector& q,
       const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
 
-  /** set a user-defined function to compute \f$ \nabla^\top_{\lambda} h(q, \lambda) \f$ \f$
+  /** set a user-defined function to compute \f$ D = \nabla^\top_{\lambda} h(q, \lambda) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianhOver_lambdaFunction(
-      const siconos::modeling::func_prototypes::FunctionBVV_M& fct);
+  void setComputeDFunction(const siconos::modeling::func_prototypes::FunctionBVV_M& fct);
 
-  /** Computes \f$ \nabla^\top_{\lambda} h(q, \lambda) \f$
+  /** Computes \f$ D = \nabla^\top_{\lambda} h(q, \lambda) \f$. The default calls the
+   *  user-defined function, if any. Override this function to compute \f$ D \f$.
+   *
    *  \param q coordinates of the dynamical systems involved in the relation
    *  \param lambda interaction  \f$ \lambda \f$  vector
    */
-  virtual void computeJacobianhOver_lambda(
-      const siconos::algebra::BlockVector& q,
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
+  virtual void computeD(const siconos::algebra::BlockVector& q,
+                        const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
 
-  /*  \return a read-only view on the matrix \f$ \nabla^\top_{\lambda}h(q,\lambda) \f$*/
+  /** \return a read-only view on \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$ */
+  inline auto D() const {
+    return siconos::algebra::ConstMapType(D_->data(), D_->rows(), D_->cols());
+  }
+
+  /** \return a read-only view on \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$ (the
+   *  Relation interface, same as D()) */
   inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
-    return siconos::algebra::ConstMapType(jacobianhOver_lambda_->data(),
-                                          jacobianhOver_lambda_->rows(),
-                                          jacobianhOver_lambda_->cols());
+    return D();
   }
 
   /** to compute output
@@ -157,8 +171,29 @@ class LagrangianCompliantR : public LagrangianR {
   void computeInput(double time, Interaction& inter,
                     siconos::algebra::blocks::size_type level = 0) override;
 
-  /** compute all the H Jacobian */
+  /** compute H and D */
   void computeJach(double time, Interaction& inter) override;
+
+  /** \name Deprecated names, kept for one release */
+  ///@{
+  [[deprecated("use setComputeContactMatrixFunction")]] void setComputeJacobianhOver_qFunction(
+      const siconos::modeling::func_prototypes::FunctionBVV_M& fct) {
+    setComputeContactMatrixFunction(fct);
+  }
+  /** \deprecated former name of computeContactMatrix. Still called for classes that override
+   * it. */
+  [[deprecated("override/call computeContactMatrix")]] virtual void computeJacobianhOver_q(
+      const siconos::algebra::BlockVector& q,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
+  [[deprecated("use setComputeDFunction")]] void setComputeJacobianhOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVV_M& fct) {
+    setComputeDFunction(fct);
+  }
+  /** \deprecated former name of computeD. Still called for classes that override it. */
+  [[deprecated("override/call computeD")]] virtual void computeJacobianhOver_lambda(
+      const siconos::algebra::BlockVector& q,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
+  ///@}
 };
 }  // namespace siconos::modeling
 

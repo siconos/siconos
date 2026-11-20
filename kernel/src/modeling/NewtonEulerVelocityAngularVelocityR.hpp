@@ -15,61 +15,72 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file NewtonEuler5DR.hpp
+/*! \file NewtonEulerVelocityAngularVelocityR.hpp
+ *  \brief Contact relation between Newton-Euler bodies: relative velocity and tangential
+ *  relative angular velocity in the contact frame (Coulomb friction and rolling resistance).
  */
+#ifndef NEWTONEULERVELOCITYANGULARVELOCITYR_HPP
+#define NEWTONEULERVELOCITYANGULARVELOCITYR_HPP
 
-#ifndef NEWTONEULERRELATIONRFC3D_H
-#define NEWTONEULERRELATIONRFC3D_H
-
-#include "NewtonEuler1DR.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 
 namespace siconos::modeling {
-/**
-   This class is an interface for relation with impact and RFC3D.
 
+/** Unilateral contact with friction and rolling resistance between body 1 and body 2 (or
+  body 1 and a fixed obstacle): relative velocity at the contact point and tangential
+  components of the relative angular velocity, in the contact frame.
+
+  The geometry (contact points \f$ P_1, P_2 \f$, normal \f$ n \f$, gap \f$ g \f$), the
+  contact frame \f$ R_c = [\, n \;\; t_1 \;\; t_2 \,]^\top \f$ and the matrix \f$ H_c(q) \f$
+  are defined in NewtonEulerNormalVelocityR. With \f$ \omega_i = R_i \Omega_i \f$ the angular
+  velocities in the inertial frame, here \f$ m = 5 \f$ and
+  \f[
+    \dot y = \begin{bmatrix} R_c\, u \\ t_1^\top (\omega_1 - \omega_2) \\
+                             t_2^\top (\omega_1 - \omega_2) \end{bmatrix} = H(q)\, v,
+    \qquad
+    H(q) = \begin{bmatrix}
+      R_c & R_c [x_{G_1} - P]_\times R_1 & -R_c & -R_c [x_{G_2} - P]_\times R_2 \\
+      0 & (R_c R_1)_{2:3,:} & 0 & -(R_c R_2)_{2:3,:}
+    \end{bmatrix},
+  \f]
+  where \f$ (R_c R_i)_{2:3,:} \f$ denotes the last two rows of \f$ R_c R_i \f$. The
+  rotation about the normal (spin) is not taken into account. The first component of
+  \f$ y \f$ is the gap \f$ g \f$, to be set by the derived class (e.g.
+  ContactVelocityAngularVelocityR in mechanics). The impulse applied to the bodies is
+  \f$ H^\top \lambda \f$, for a NewtonImpactRollingFrictionNSL.
+
+  Only the first row of \f$ G \f$ (the gradient of the gap, see NewtonEulerNormalVelocityR) is
+  computed; the other rows are zero.
+
+  \see DevNotes, chapter "NewtonEulerR: computation of \f$ \nabla_q H \f$", subsection
+  "Case FC3D: using the local frame local velocities".
 */
-
-class NewtonEulerVelocityAngularVelocityR : public NewtonEuler1DR {
+class NewtonEulerVelocityAngularVelocityR : public NewtonEulerNormalVelocityR {
  private:
   ACCEPT_SERIALIZATION(NewtonEulerVelocityAngularVelocityR);
 
-  void RFC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1);
-  void RFC3DcomputeJachqTFromContacts(
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q1,
-      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q2);
-
-  /** Rotation matrix converting the absolute coordinate to the contact frame^
-   *  coordinate. This matrix contains the unit vector(s)of the contact frame in
-   *  row. Internal bufer.
-   */
-  siconos::algebra::SiconosMatrix33 rotationAbsoluteToContactFrame_ =
-      siconos::algebra::SiconosMatrix33::Zero();
-
- protected:
  public:
   /** destructor
    */
   virtual ~NewtonEulerVelocityAngularVelocityR() noexcept = default;
 
-  /** initialize components specific to derived classes.
+  /** allocate \f$ G \f$ (5 rows) and the operators of NewtonEulerR.
    *
    *  \param inter the interaction using this relation
    */
   void initialize(Interaction& inter) override;
 
-  /** Default implementation consists in multiplying jachq and T (see
-   *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
-   *  contact point locations and the local frame at contact
+  /** compute \f$ H(q) \f$ directly from the contact point and the contact frame (instead of
+   *  the product \f$ G T \f$).
    *
    *  \param inter interaction that owns the relation
-   *  \param q0  the block vector to the dynamical system position
+   *  \param q0  coordinates \f$ q \f$ of the bodies of the interaction
    */
-  void computeH_NE_prod_T(const Interaction& inter,
-                          const siconos::algebra::BlockVector& q0) override;
+  void computeContactMatrix(const Interaction& inter,
+                            const siconos::algebra::BlockVector& q0) override;
 
   virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 
 }  // namespace siconos::modeling
-#endif  // NEWTONEULERRELATIONRFC3D_H
+#endif  // NEWTONEULERVELOCITYANGULARVELOCITYR_HPP

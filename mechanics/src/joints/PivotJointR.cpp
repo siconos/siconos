@@ -144,18 +144,19 @@ void siconos::joints::PivotJointR::buildOrthonormalBase() {
         "vectors.")
 }
 
-void siconos::joints::PivotJointR::computeH_NE_(double time,
-                                                siconos::modeling::Interaction& inter,
-                                                const siconos::algebra::BlockVector& q0) {
-  H_NE_view_->setZero();
+void siconos::joints::PivotJointR::computeConstraintJacobian(
+    double time, siconos::modeling::Interaction& inter,
+    const siconos::algebra::BlockVector& q0) {
+  constraintJacobian_view_->setZero();
   auto q1 = q0.vector(0);
   // Only the quaternion part of q is required to compute H (last 4 components)
   if (q0.numberOfBlocks() > 1) {
     auto q2 = q0.vector(1);
     pivot::computeH_for_2DS(q1->tail<4>(), G1P0_, q2->tail<4>(), G2P0_, axis1_, axis2_, cq2q_,
-                            *H_NE_view_);
+                            *constraintJacobian_view_);
   } else
-    pivot::computeH_for_1DS(q1->tail<4>(), G1P0_, axis1_, axis2_, cq2q_, *H_NE_view_);
+    pivot::computeH_for_1DS(q1->tail<4>(), G1P0_, axis1_, axis2_, cq2q_,
+                            *constraintJacobian_view_);
 }
 
 void siconos::joints::PivotJointR::computeh(

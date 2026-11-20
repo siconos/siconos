@@ -33,22 +33,22 @@
 void siconos::mechanics::fem::NodeFem1d2DR::initialize(modeling::Interaction& inter) {
   auto sizeDS = inter.getSizeOfDS();
 
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(1 * sizeDS);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(1 * sizeDS);
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), 1, sizeDS);
-  jacobianhOver_q_view_->setZero();
+  contactMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(contactMatrix_storage_->data(), 1, sizeDS);
+  contactMatrix_view_->setZero();
 }
 
-void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
+void siconos::mechanics::fem::NodeFem1d2DR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "NodeFem1d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+      "NodeFem1d2DR::computeContactMatrix(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
 
-  jacobianhOver_q_view_->setValue(0, node_->global_dof_index()[0], nc_.x());
-  jacobianhOver_q_view_->setValue(0, node_->global_dof_index()[1], nc_.y());
+  contactMatrix_view_->setValue(0, node_->global_dof_index()[0], nc_.x());
+  contactMatrix_view_->setValue(0, node_->global_dof_index()[1], nc_.y());
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
@@ -56,7 +56,7 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
   }
   DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
   DEBUG_END(
-      "NodeFem1d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+      "NodeFem1d2DR::computeContactMatrix(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z) \n");
 }
 
@@ -77,7 +77,7 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeh(
   LagrangianScleronomousR::computeh(q, y);
   siconos::algebra::SiconosVector& displacement = *((q.getAllVect())[0]);
   contactPoint1_(0) = displacement(node_->global_dof_index()[0]) + node_->x();
-  contactPoint2_(1) = displacement(node_->global_dof_index()[1]) + node_->y();
+  contactPoint1_(1) = displacement(node_->global_dof_index()[1]) + node_->y();
   y(0) = distance();
 
   DEBUG_EXPR(siconos::algebra::print(y););

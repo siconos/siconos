@@ -64,7 +64,7 @@ class SphereLDSPlanR : public siconos::modeling::LagrangianScleronomousR,
   /** Computes \f$ \nabla^\top_q h(q) \f$
    * \param q coordinates of the dynamical systems involved in the relation
    */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
+  void computeContactMatrix(const siconos::algebra::BlockVector& q) override;
 
   bool equal(double _A, double _B, double _C, double _D, double _r) const {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);

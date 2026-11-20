@@ -76,7 +76,7 @@
 #include <iostream>
 
 #include "Interaction.hpp"
-#include "NewtonEuler1DR.hpp"
+#include "NewtonEulerNormalVelocityR.hpp"
 #include "NewtonEulerR.hpp"
 #include "RotationQuaternion.hpp"  // for orthoBaseFromVector
 #include "SiconosVector.hpp"
@@ -120,7 +120,8 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
   auto& internalVariables = *internalVariables_sp;
 
   auto rel = inter.relation();
-  auto rel_NewtonEuler1DR = std::dynamic_pointer_cast<siconos::modeling::NewtonEuler1DR>(rel);
+  auto rel_NewtonEuler1DR =
+      std::dynamic_pointer_cast<siconos::modeling::NewtonEulerNormalVelocityR>(rel);
 
   if (rel_NewtonEuler1DR) {
     /* internalVariables(0) --> beta and surface */
@@ -140,7 +141,8 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
     // Initial value of surface = 1.0 (should be fixed correctly based on geometry)
     (*internalVariables[BinaryCohesiveNSL::BETA_SURFACE])(1) = 1.0;
 
-    DEBUG_EXPR_WE(std::cout << "\n The relation is of type NewtonEuler1DR" << std::endl;);
+    DEBUG_EXPR_WE(std::cout << "\n The relation is of type NewtonEulerNormalVelocityR"
+                            << std::endl;);
 
     // Store initial relative contact points
     internalVariables[BinaryCohesiveNSL::INITIAL_RELATIVE_COHESIVE_POINT_1] =
@@ -205,7 +207,7 @@ BinaryCohesiveNSL::initializeInternalVariables(siconos::modeling::Interaction& i
     };);
 
   } else {
-    // Simplified initialization for non-NewtonEuler1DR relations
+    // Simplified initialization for non-NewtonEulerNormalVelocityR relations
     internalVariables[BinaryCohesiveNSL::COHESION] =
         std::make_shared<siconos::algebra::SiconosVector3>();
     internalVariables[BinaryCohesiveNSL::BETA_SURFACE] =
@@ -246,7 +248,7 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
 
     auto rel = inter.relation();
     auto rel_NewtonEuler1DR =
-        std::dynamic_pointer_cast<siconos::modeling::NewtonEuler1DR>(rel);
+        std::dynamic_pointer_cast<siconos::modeling::NewtonEulerNormalVelocityR>(rel);
 
     if (rel_NewtonEuler1DR) {
       // Get stored initial configuration
@@ -315,7 +317,7 @@ void BinaryCohesiveNSL::updateInternalVariables(siconos::modeling::Interaction& 
                               << jump_in_contact_frame.transpose() << std::endl;);
 
     } else {
-      // Simplified case for non-NewtonEuler1DR
+      // Simplified case for non-NewtonEulerNormalVelocityR
       auto size = this->size();
       if (size == 1) {
         delta = (*inter.y(0))(0);

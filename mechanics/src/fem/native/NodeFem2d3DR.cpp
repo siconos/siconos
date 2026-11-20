@@ -31,36 +31,36 @@
 void siconos::mechanics::fem::NodeFem2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto sizeDS = inter.getSizeOfDS();
 
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(2 * sizeDS);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(2 * sizeDS);
   }
 
   if ((sizeDS != 3) and (sizeDS != 6)) {
     THROW_EXCEPTION(
         "NodeFem2d3DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), 2, sizeDS);
-  jacobianhOver_q_view_->setZero();
+  contactMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(contactMatrix_storage_->data(), 2, sizeDS);
+  contactMatrix_view_->setZero();
 }
 
-void siconos::mechanics::fem::NodeFem2d3DR::computeJacobianhOver_q(
+void siconos::mechanics::fem::NodeFem2d3DR::computeContactMatrix(
     const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN("NodeFem2d3DR::computeJachq(const BlockVector& q, BlockVector& z \n");
 
-  jacobianhOver_q_view_->setValue(0, _node_index * 3, nc_.x());
-  jacobianhOver_q_view_->setValue(0, _node_index * 3 + 1, nc_.y());
-  jacobianhOver_q_view_->setValue(0, _node_index * 3 + 2, nc_.z());
+  contactMatrix_view_->setValue(0, _node_index * 3, nc_.x());
+  contactMatrix_view_->setValue(0, _node_index * 3 + 1, nc_.y());
+  contactMatrix_view_->setValue(0, _node_index * 3 + 2, nc_.z());
 
-  jacobianhOver_q_view_->setValue(1, _node_index * 3, tangent_.x());
-  jacobianhOver_q_view_->setValue(1, _node_index * 3 + 1, tangent_.y());
-  jacobianhOver_q_view_->setValue(1, _node_index * 3 + 2, tangent_.z());
+  contactMatrix_view_->setValue(1, _node_index * 3, tangent_.x());
+  contactMatrix_view_->setValue(1, _node_index * 3 + 1, tangent_.y());
+  contactMatrix_view_->setValue(1, _node_index * 3 + 2, tangent_.z());
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
     THROW_EXCEPTION("NodeFem2d3DR is not implemented for cable/cable contact");
   }
-  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_view_););
+  DEBUG_EXPR(siconos::algebra::print(*contactMatrix_view_););
   DEBUG_END("NodeFem2d3DR::computeJachq(const BlockVector& q, BlockVector& z) \n");
 }
 

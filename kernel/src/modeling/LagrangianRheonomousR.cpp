@@ -33,33 +33,40 @@
 void siconos::modeling::LagrangianRheonomousR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto sizeDS = inter.getSizeOfDS();
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+  if (!contactMatrix_storage_) {
+    contactMatrix_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), sizeY, sizeDS);
+  contactMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+      contactMatrix_storage_->data(), sizeY, sizeDS);
 
-  if (computehdot_) {  // True only if setComputehdotFunction has been called
-    // Ensure that memory is properly allocated for hdot_
-    if (!hdot_) {
-      hdot_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+  if (computedhdt_) {  // True only if setComputedhdtFunction has been called
+    // Ensure that memory is properly allocated for dhdt_
+    if (!dhdt_) {
+      dhdt_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
     }
   }
 }
 
-void siconos::modeling::LagrangianRheonomousR::setComputehdotFunction(
+void siconos::modeling::LagrangianRheonomousR::setComputedhdtFunction(
     const siconos::modeling::func_prototypes::FunctionBVS_V& hdot_func) {
-  // Warning: we can't allocate hdot here, since we have no clue on the
+  // Warning: we can't allocate dhdt here, since we have no clue on the
   // required size
-  computehdot_ = hdot_func;
+  computedhdt_ = hdot_func;
 }
 
-void siconos::modeling::LagrangianRheonomousR::computehdot(
+void siconos::modeling::LagrangianRheonomousR::computedhdt(
     const siconos::algebra::BlockVector& positions, double time) {
-  if (computehdot_)
+  if (!computedhdtLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computedhdtLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computehdot(positions, time);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  if (computedhdt_)
     // in that case, internal_storage must have been allocated by
     // setCompute... call
-    computehdot_(positions, time, *hdot_);
+    computedhdt_(positions, time, *dhdt_);
 }
 
 void siconos::modeling::LagrangianRheonomousR::setComputehFunction(
@@ -74,17 +81,33 @@ void siconos::modeling::LagrangianRheonomousR::computeh(
   if (computeh_) computeh_(positions, time, y);
 }
 
-void siconos::modeling::LagrangianRheonomousR::setComputeJacobianhOver_qFunction(
+void siconos::modeling::LagrangianRheonomousR::setComputeContactMatrixFunction(
     const siconos::modeling::func_prototypes::FunctionBVS_M& func) {
-  // Warning: we can't allocate hdot here, since we have no clue on the
+  // Warning: we can't allocate dhdt here, since we have no clue on the
   // required size
-  computejacobianhOver_q_ = func;
+  computeContactMatrix_ = func;
+}
+
+void siconos::modeling::LagrangianRheonomousR::computeContactMatrix(
+    const siconos::algebra::BlockVector& positions, double time) {
+  if (!computeContactMatrixLegacy_) {  // dispatch to a class overriding the deprecated name
+    detail::LegacyCallGuard guard(computeContactMatrixLegacy_);
+    SICONOS_IGNORE_DEPRECATED_BEGIN
+    computeJacobianhOver_q(positions, time);
+    SICONOS_IGNORE_DEPRECATED_END
+    return;
+  }
+  if (computeContactMatrix_) computeContactMatrix_(positions, time, *contactMatrix_view_);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& positions, double time) {
-  if (computejacobianhOver_q_)
-    computejacobianhOver_q_(positions, time, *jacobianhOver_q_view_);
+  computeContactMatrix(positions, time);
+}
+
+void siconos::modeling::LagrangianRheonomousR::computehdot(
+    const siconos::algebra::BlockVector& positions, double time) {
+  computedhdt(positions, time);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeOutput(
@@ -94,21 +117,21 @@ void siconos::modeling::LagrangianRheonomousR::computeOutput(
   if (derivativeNumber == 0)
     computeh(*ds_vars[tools::enum_to_index(ds_var::q0)], time, y);
   else {
-    computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+    computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
     if (derivativeNumber == 1) {
-      if (!hdot_) {
+      if (!dhdt_) {
         auto sizeY = inter.dimension();
-        hdot_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        dhdt_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
       }
       // Computation of the partial derivative w.r.t time of h(q,t)
-      computehdot(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+      computedhdt(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
+      siconos::algebra::matrixBlockVector_prod(*contactMatrix_view_,
                                                *ds_vars[tools::enum_to_index(ds_var::q1)], y);
       // Sum of the terms
-      y += *hdot_;
+      y += *dhdt_;
     } else if (derivativeNumber == 2) {
-      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
+      siconos::algebra::matrixBlockVector_prod(*contactMatrix_view_,
                                                *ds_vars[tools::enum_to_index(ds_var::q2)],
                                                y);  // Approx:,  ...
       // \warning : the computation of y[2] (in event-driven
@@ -125,20 +148,19 @@ void siconos::modeling::LagrangianRheonomousR::computeOutput(
 void siconos::modeling::LagrangianRheonomousR::computeInput(
     double time, Interaction& inter, siconos::algebra::blocks::size_type level) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+  computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level],
-      false);
+      lambda, *contactMatrix_view_, *ds_vars[tools::enum_to_index(ds_var::p0) + level], false);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeJach(double time, Interaction& inter) {
   const auto& ds_vars = inter.read_dynamical_systems_variables();
-  computeJacobianhOver_q(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+  computeContactMatrix(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
   // computeJachqDot(time, inter);
   //    computeDotJachq(time, q, z);
   // computeJachlambda(time, inter);
-  computehdot(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
+  computedhdt(*ds_vars[tools::enum_to_index(ds_var::q0)], time);
 }

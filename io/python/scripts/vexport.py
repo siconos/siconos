@@ -245,7 +245,7 @@ def step_reader(step_string):
     with io.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
         step_reader = STEPControl_Reader()
 
-        status = step_reader.ReadFile(tmpfile[1])
+        status = step_reader.ReadFile(tmpfile.name)
 
         if status == IFSelect_RetDone:  # check status
             failsonly = False
@@ -261,11 +261,11 @@ def step_reader(step_string):
                 builder.Add(comp, shape)
 
             with io.tmpfile(suffix=".stl") as tmpf:
-                stl_writer.Write(comp, tmpf[1])
-                tmpf[0].flush()
+                stl_writer.Write(comp, tmpf.name)
+                tmpf.fid.flush()
 
                 reader = vtk.vtkSTLReader()
-                reader.SetFileName(tmpf[1])
+                reader.SetFileName(tmpf.name)
                 reader.Update()
 
                 return reader
@@ -285,11 +285,11 @@ def brep_reader(brep_string, indx):
     stl_writer = StlAPI_Writer()
 
     with io.tmpfile(suffix=".stl") as tmpf:
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
+        stl_writer.Write(shape, tmpf.name)
+        tmpf.fid.flush()
 
         reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
+        reader.SetFileName(tmpf.name)
         reader.Update()
 
         return reader

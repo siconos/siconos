@@ -73,9 +73,9 @@ void siconos::joints::JointFrictionR::computeh(
   y.setZero();
 }
 
-void siconos::joints::JointFrictionR::computeH_NE_(double time,
-                                                   siconos::modeling::Interaction& inter,
-                                                   const siconos::algebra::BlockVector& q0) {
+void siconos::joints::JointFrictionR::computeConstraintJacobian(
+    double time, siconos::modeling::Interaction& inter,
+    const siconos::algebra::BlockVector& q0) {
   auto n = siconos::algebra::to_index(_axisMax - _axisMin + 1);
   assert(n == 1);  // For now, multi-axis support TODO
 
@@ -96,9 +96,9 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
-  assert(H_NE_view_->rows() == 1);
-  //  (*H_NE_view_) = -jacobianhOver_q_Tmp->row((*_axis)[0] - _axisMin);
-  (*H_NE_view_) = -*jacobianhOver_q_Tmp;
+  assert(constraintJacobian_view_->rows() == 1);
+  //  (*constraintJacobian_view_) = -jacobianhOver_q_Tmp->row((*_axis)[0] - _axisMin);
+  (*constraintJacobian_view_) = -*jacobianhOver_q_Tmp;
 }
 
 size_t siconos::joints::JointFrictionR::numberOfConstraints() const { return _axis->size(); }

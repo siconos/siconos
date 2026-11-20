@@ -19,6 +19,7 @@
 
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "NewtonEulerDS.hpp"
@@ -397,8 +398,8 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     } else
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::OneStepNS::getOSIMatrix for D1Minus, only "
-          "implemented for "
-          "Lagrangian or NewtonEuler");
+          "implemented for LagrangianDS or NewtonEulerDS (use solveWithOSIMatrix for "
+          "LagrangianSparseDS)");
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
   // note FP: but it seems that getOSIMatrix is not used in this case ...
@@ -450,4 +451,25 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInterna
   }
   DEBUG_END(
       "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionInternalState()\n");
+}
+
+bool siconos::nonsmooth_formulations::OneStepNSProblem::solveWithOSIMatrix(
+    siconos::integrators::OneStepIntegrator& osi,
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+    siconos::algebra::SiconosMatrix& X) {
+  // Sparse case: D1MinusLinearOSI uses the (sparse) LU factorization of the mass matrix.
+  // It cannot be returned by getOSIMatrix (dense LU), so solve directly.
+  if (osi.getType() == siconos::integrators::IntegratorType::D1MINUSLINEAROSI) {
+    if (auto lsds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      if (lsds->hasMass()) lsds->init_lu_mass();  // factorize if not up to date
+      if (!lsds->LUMass()) return false;          // identity mass
+      X = lsds->LUMass()->solve(X);
+      return true;
+    }
+  }
+  // Dense cases
+  auto luIterationMatrix = getOSIMatrix(osi, ds);
+  if (!luIterationMatrix) return false;  // identity
+  X = luIterationMatrix->solve(X);
+  return true;
 }

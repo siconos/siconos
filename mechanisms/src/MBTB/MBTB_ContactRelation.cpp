@@ -28,7 +28,7 @@
 
 siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
     std::shared_ptr<MBTB_Contact> pC)
-    : NewtonEuler1DR() {
+    : NewtonEulerNormalVelocityR() {
   _pContact = pC;
 }
 
@@ -141,7 +141,7 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 
 /*This function has to compute a Normal, at the extremal point. It is also the
  * direction (P1,P2) between the two extremal points*/
-// void siconos::mechanisms::MBTB_ContactRelation::computeJacobianhOver_q(double time ){
+// void siconos::mechanisms::MBTB_ContactRelation::computeH(double time ){
 
 //   jacobianhOver_q_->setValue(0,0,-_pContact->_nX);
 //   jacobianhOver_q_->setValue(0,1,-_pContact->_nY);
