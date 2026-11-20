@@ -27,21 +27,46 @@
 namespace siconos::integrators {
 
 /**
-   SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
+   Schatzman-Paoli time-integrator (two-step, position-based scheme for impacts).
 
-   SchatzmanPaoliOSI class is used to define some time-integrators methods for a
-   list of dynamical systems.
+   Only implemented for siconos::modeling::LagrangianLinearTIDS:
+   \f$ M\ddot q + C\dot q + Kq = F_{ext}(t) + G^T\lambda \f$, with unilateral constraints
+   \f$ g(q) = Hq + b \ge 0 \f$ and a Newton impact law of restitution coefficient e.
 
-   A SchatzmanPaoliOSI instance is defined by the value of theta and the list of
-   concerned dynamical systems.  Each DynamicalSystem is associated to
-   a SiconosMatrix, named "W"
+   With \f$ \Delta^2 q = q_{k+1} - 2q_k + q_{k-1} \f$, the step \f$ k \to k+1 \f$ solves
 
-   W matrices are initialized and computed in initializeIterationMatrix and
-   computeIterationMatrix. Depending on the DS type, they may depend on time and DS
-   state (x).
+   \f[
+   \begin{array}{l}
+   M\Delta^2 q
+   + h^2 C\left(\theta\,\frac{q_{k+1}-q_{k-1}}{2h} + (1-\theta)\,v_k\right)
+   + h^2 K\left(\theta^2 q_{k+1} + (1-\theta^2)\,q_k\right)
+   - h^2\left(\theta F_{ext}(t_{k+1}) + (1-\theta)F_{ext}(t_k)\right) = G^T r_{k+1},\\[2pt]
+   0 \le g(q_{k+1}) + e\,g(q_{k-1}) \perp r_{k+1} \ge 0,\qquad
+   v_{k+1} = \frac{q_{k+1}-q_{k-1}}{2h}.
+   \end{array}
+   \f]
 
-   For Lagrangian systems, the implementation uses p[0] for storing the
-   discrete multiplier.
+   In the code:
+   - \f$ W = M + \frac{h\theta}{2}C + h^2\theta^2 K \f$ (initializeIterationMatrix());
+   - computeResidu() evaluates the left-hand side at \f$ q_{k+1} = q_k \f$ (RESIDU_FREE),
+     computeFreeState() gives \f$ q_{free} = q_k - W^{-1}\,\mathrm{RESIDU\_FREE} \f$;
+   - the LCP (index set 0: all the constraints) is
+     \f$ w = H W^{-1} H^T r + g(q_{free}) + e\,g(q_{k-1}) \f$, where \f$ g(q_{k-1}) \f$ is
+     read in the memory of the output, Interaction::yMemory(0) at index 1;
+   - updateState(): \f$ q_{k+1} = q_{free} + W^{-1}H^T r \f$ (r is stored in p[0]) and the
+     velocity is the centred difference quotient above.
+
+   Two-step start: at \f$ t_0 \f$ the memories hold \f$ (q_0, q_{-1}) \f$ with
+   \f$ q_{-1} = q_0 - h v_0 + \frac{h^2}{2}M^{-1}(F_{ext}(t_0) - Kq_0 - Cv_0) \f$
+   (initializeWorkVectorsForDS()), so that \f$ q_1 \f$ is a second-order Taylor
+   expansion. The memory of the output is filled with \f$ g(q_0) \f$ twice.
+
+   The output memory must keep \f$ g(q_k) \f$ and \f$ g(q_{k-1}) \f$: at the beginning
+   of each step, OneStepIntegrator::updateAndSwapAllOutput() only refreshes the latest
+   entry (Interaction::updateLatestInMemory()) instead of pushing it again.
+
+   See docs/devel/SCHATZMAN_PAOLI_SCHEME.md for the derivation, the history of the
+   fixes and the validation with hots-python.
 
    Main functions:
 

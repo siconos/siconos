@@ -84,27 +84,51 @@ def moreau_siconos(t, model, theta=0.5, gamma=0.5):
     return Trajectory(t, q, v)
 
 
-def paoli_as_siconos(t, model):
-    """Schatzman-Paoli as computed by SchatzmanPaoliOSI (theta = 1/2, no stiffness): the
-    scheme is started from (q_{-1}, q_0) = (q0, q0 + h v0), so that the position computed at
-    t_k is the one of t_{k+1}, and the impact law is g(q_{k+1}) + e g(q_k) >= 0 instead of
-    g(q_{k+1}) + e g(q_{k-1}) >= 0 (both look like a one-step shift of the memories).
-    Reproduces the Siconos results to the accuracy of the LCP solver."""
+def paoli_with_kc(t, model, theta=0.5):
+    """Schatzman-Paoli scheme of SchatzmanPaoliOSI for M q'' + C q' + K q = F (constant M,
+    K, C, F). With D2q = q_{k+1} - 2 q_k + q_{k-1}:
+
+        M D2q + h^2 C (theta (q_{k+1} - q_{k-1}) / (2h) + (1 - theta) v_k)
+              + h^2 K (theta^2 q_{k+1} + (1 - theta^2) q_k) - h^2 F = G^T r,
+        0 <= g(q_{k+1}) + e g(q_{k-1})  _|_  r >= 0,   v_{k+1} = (q_{k+1} - q_{k-1}) / (2h),
+
+    started from q_{-1} = q_0 - h v_0 + h^2/2 M^{-1} (F - K q_0 - C v_0).
+    hots.paoli_schatzman (a port of the Scilab PaoliLinearOnestep) uses other weights of K
+    and C and is much less accurate on this system (3e-3 instead of 7e-5 before the first
+    impact of springChainSchatzmanPaoli, against the exact solution), so it is not used for
+    systems with K or C."""
     from hots.lcp import lcp
 
     n = t.size
-    q = np.zeros((n, model.ndof))
     h = t[1] - t[0]
-    qm, qi = model.q0.copy(), model.q0 + h * model.v0
-    q[0] = model.q0
+    K, C = model.KC(t[0], model.q0, model.v0)
+    M = model.M(model.q0, t[0])
+    F = model.fext(t[0])
+    Winv = np.linalg.inv(M + 0.5 * h * theta * C + h * h * theta * theta * K)
+    qm = (
+        model.q0
+        - h * model.v0
+        + 0.5 * h * h * np.linalg.solve(M, F - K @ model.q0 - C @ model.v0)
+    )
+    qi, vi = model.q0.copy(), model.v0.copy()
+    q = np.zeros((n, model.ndof))
+    v = np.zeros((n, model.ndof))
+    q[0], v[0] = qi, vi
     for k in range(n - 1):
-        Winv = np.linalg.inv(model.M(qi, t[k]))
-        qfree = 2 * qi - qm + h * h * Winv @ model.F(t[k])
+        residu = (
+            M @ (qm - qi)
+            + h * h * C @ (theta * (qi - qm) / (2 * h) + (1 - theta) * vi)
+            + h * h * K @ qi
+            - h * h * F
+        )
+        qfree = qi - Winv @ residu
         G = model.G(qi)
-        r, _ = lcp(G @ Winv @ G.T, model.H(qfree) + model.e * model.H(qi))
-        q[k + 1] = qfree + Winv @ G.T @ r
-        qm, qi = qi, q[k + 1]
-    return Trajectory(t, q, np.zeros_like(q))
+        r, _ = lcp(G @ Winv @ G.T, model.H(qfree) + model.e * model.H(qm))
+        qn = qfree + Winv @ G.T @ r
+        vi = (qn - qm) / (2 * h)
+        qm, qi = qi, qn
+        q[k + 1], v[k + 1] = qi, vi
+    return Trajectory(t, q, v)
 
 
 def combined_as_siconos(t, model, theta=0.5, tolactive=1e-10):
@@ -274,8 +298,8 @@ def run_hots(scheme, model, t):
         )
     if scheme == "paoli":
         return paoli_schatzman_fixed(t, model, theta=0.5)
-    if scheme == "paoli-as-siconos":
-        return paoli_as_siconos(t, model)
+    if scheme == "paoli-kc":
+        return paoli_with_kc(t, model, theta=0.5)
     if scheme == "combined-as-siconos":
         return combined_as_siconos(t, model)
     raise ValueError(scheme)
@@ -292,10 +316,8 @@ cases = {
     # combined_as_siconos), Hots/CMAME after it.
     "beadsCombinedProjection": (beads, beads_qv, "combined", True, None),
     "beadsCombinedProjection ": (beads, beads_qv, "combined-as-siconos", True, None),
-    # Known deviation: shifted start and impact law of SchatzmanPaoliOSI (see
-    # paoli_as_siconos); v is a difference quotient in this scheme, it is not compared.
+    # v is a difference quotient in this scheme, it is not compared.
     "beadsSchatzmanPaoli": (beads, beads_qv, "paoli", False, None),
-    "beadsSchatzmanPaoli ": (beads, beads_qv, "paoli-as-siconos", False, None),
     "rockingBlockMoreauJean": (rocking_block, block_qv, "moreau", True, None),
     # the projections stop when the gaps are below 1e-10 (Siconos) or when the fixed point
     # converges (Hots, 1e-12): the positions differ by a few 1e-10
@@ -318,6 +340,14 @@ cases = {
         chain_qv(False),
         "moreau",
         True,
+        None,
+    ),
+    # Siconos formulas transcribed in Python (see paoli_with_kc); v is a difference quotient.
+    "springChainSchatzmanPaoli": (
+        lambda: spring_chain(False),
+        chain_qv(False),
+        "paoli-kc",
+        False,
         None,
     ),
 }

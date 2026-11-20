@@ -540,6 +540,22 @@ void siconos::modeling::Interaction::swapInMemory() {
   DEBUG_END("void siconos::modeling::Interaction::swapInMemory()\n");
 }
 
+void siconos::modeling::Interaction::updateLatestInMemory() {
+  for (auto i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++) {
+    if (_yMemory[i].nbVectorsInMemory() > 0)
+      _yMemory[i].getSiconosVectorMutable(0) = *_y[i];
+    else
+      _yMemory[i].swap(*_y[i]);
+  }
+  for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
+    if (_lambdaMemory[i].nbVectorsInMemory() > 0)
+      _lambdaMemory[i].getSiconosVectorMutable(0) = *_lambda[i];
+    else
+      _lambdaMemory[i].swap(*_lambda[i]);
+  }
+  swapInternalVariablesInMemory();
+}
+
 void siconos::modeling::Interaction::computeOutput(
     double time, siconos::algebra::blocks::size_type derivativeNumber) {
   DEBUG_BEGIN("siconos::modeling::Interaction::computeOutput(...)\n");

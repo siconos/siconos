@@ -361,7 +361,7 @@ Case beads(bool managed = false) {
    matrices, LagrangianSparseLinearTIDS), moving towards two obstacles: the last mass hits
    a wall, the middle one a stop behind it. The first mass is either clamped by a boundary
    condition (`clamped`) or attached to a fixed wall by a spring. */
-Case springChain(bool clamped) {
+Case springChain(bool clamped, bool dense = false) {
   Case c;
   c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 1.0);
   const int n = 5;
@@ -383,10 +383,20 @@ Case springChain(bool clamped) {
   M.setFromTriplets(tm.begin(), tm.end());
   K.setFromTriplets(tk.begin(), tk.end());
   siconos::algebra::SiconosSparseMatrix C = damping * K;
-  auto ds =
-      std::make_shared<mod::LagrangianSparseLinearTIDS>(q, v, M, siconos::algebra::copy_t);
-  ds->setStiffnessMatrix(K, siconos::algebra::copy_t);
-  ds->setDampingMatrix(C, siconos::algebra::copy_t);
+  std::shared_ptr<mod::SecondOrderDS> ds;
+  if (dense) {  // for the integrators restricted to LagrangianLinearTIDS (SchatzmanPaoliOSI)
+    auto dds = std::make_shared<mod::LagrangianLinearTIDS>(
+        q, v, siconos::algebra::SiconosDenseMatrix(M), siconos::algebra::copy_t);
+    dds->setStiffnessMatrix(siconos::algebra::SiconosDenseMatrix(K), siconos::algebra::copy_t);
+    dds->setDampingMatrix(siconos::algebra::SiconosDenseMatrix(C), siconos::algebra::copy_t);
+    ds = dds;
+  } else {
+    auto sds =
+        std::make_shared<mod::LagrangianSparseLinearTIDS>(q, v, M, siconos::algebra::copy_t);
+    sds->setStiffnessMatrix(K, siconos::algebra::copy_t);
+    sds->setDampingMatrix(C, siconos::algebra::copy_t);
+    ds = sds;
+  }
   if (clamped)
     ds->setBoundaryConditions(
         std::make_shared<mod::BoundaryCondition>(mod::BoundaryCondition::Indices{0}));
@@ -1170,6 +1180,13 @@ void TimeSteppingSchemesTest::springChainClampedMoreauJean() {
   auto c = springChain(true);
   setupSimulation(c, Scheme::moreau_jean, 2e-3);
   check("springChainClampedMoreauJean", run(c, 400, "springChainClampedMoreauJean"));
+}
+
+void TimeSteppingSchemesTest::springChainSchatzmanPaoli() {
+  // stiffness and damping terms of the Schatzman-Paoli scheme
+  auto c = springChain(false, true);
+  setupSimulation(c, Scheme::schatzman_paoli, 2.5e-3);
+  check("springChainSchatzmanPaoli", run(c, 400, "springChainSchatzmanPaoli"));
 }
 
 void TimeSteppingSchemesTest::springChainMoreauJean() {

@@ -100,6 +100,7 @@ class TimeSteppingSchemesTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(stackMoreauJean);
   CPPUNIT_TEST(stackDirectProjection);
   CPPUNIT_TEST(stackMoreauJeanSymmetricGraph);
+  CPPUNIT_TEST(springChainSchatzmanPaoli);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -151,6 +152,7 @@ class TimeSteppingSchemesTest : public CppUnit::TestFixture {
   void stackMoreauJean();
   void stackDirectProjection();
   void stackMoreauJeanSymmetricGraph();
+  void springChainSchatzmanPaoli();
 };
 
 #endif
