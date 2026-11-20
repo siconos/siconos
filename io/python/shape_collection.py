@@ -253,7 +253,7 @@ class ShapeCollection:
                     with siconos.io.tools.tmpfile(
                         contents=content, suffix=f".{shape_type}"
                     ) as tmpf:
-                        comp = siconos.io.occ_tools.occ_load_file(tmpf[1])
+                        comp = siconos.io.occ_tools.occ_load_file(tmpf.name)
                     self._shapes[shape_name] = comp
                     self._io._keep.append(self._shapes[shape_name])
 

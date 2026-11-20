@@ -80,6 +80,13 @@ class exception : public virtual std::exception, public virtual boost::exception
   typedef boost::error_info<struct tag_errno_code, int> errno_code;
   typedef boost::error_info<struct tag_errno_description, const char*> errno_description;
   typedef boost::error_info<struct message, std::string> extra_message;
+
+  /** The diagnostic information (message, throw location, errno), so that it is also shown
+      by the code that only catches std::exception, e.g. the python bindings (RuntimeError):
+      a catch by type of siconos::exception may fail across shared libraries (hidden RTTI). */
+  const char* what() const noexcept override {
+    return boost::diagnostic_information_what(*this, true);
+  }
   /** Outputs diagnostic information about unhandled exceptions.
       Must be called inside a catch section.
   */

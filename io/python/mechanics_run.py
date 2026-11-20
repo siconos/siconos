@@ -125,6 +125,10 @@ class RunnerConfig:
 
         have_bullet = siconos.mechanics.have_bullet
         have_occ = siconos.mechanics.have_occ
+        # reset what a previous backend may have set (set_backend after the constructor)
+        self.use_bullet = False
+        self.occ = None
+        self.bullet = None
         if self.backend == "bullet" and have_bullet:
             import siconos.mechanics.collision.bullet
 
@@ -1889,12 +1893,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             try:
                 ds1 = topo.getDynamicalSystem(body1_name)
-            except IndexError:
+            except (IndexError, RuntimeError):  # static object: not a ds
                 ds1 = None
 
             try:
                 ds2 = topo.getDynamicalSystem(body2_name)
-            except IndexError:
+            except (IndexError, RuntimeError):  # static object: not a ds
                 ds2 = None
 
             # static object in second

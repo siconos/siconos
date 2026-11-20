@@ -205,7 +205,7 @@ with contextlib.suppress(OSError), MechanicsHdf5("siconos-mechanisms.hdf5", "r")
         with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
             step_reader = STEPControl_Reader()
 
-            status = step_reader.ReadFile(tmpfile[1])
+            status = step_reader.ReadFile(tmpfile.name)
 
             if status == IFSelect_RetDone:  # check status
                 failsonly = False

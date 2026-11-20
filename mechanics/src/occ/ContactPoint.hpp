@@ -40,7 +40,9 @@ struct ContactPoint {
 
   // const OccContactShape& contactShape() const { return _shape; };
 
-  const OccContactShapeV& contactShape;
+  // by value: the variant holds a shared pointer to the shape (a reference could be bound
+  // to a temporary, e.g. created by the python bindings)
+  const OccContactShapeV contactShape;
 
   double u{0.};
   double v{0.};

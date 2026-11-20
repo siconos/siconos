@@ -60,6 +60,9 @@
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#ifdef SICONOS_HAS_OpenCASCADE
+#include "OccBody.hpp"  // IWYU pragma: keep (visitors, see VisitorMaker.hpp)
+#endif
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
 #include "Question.hpp"

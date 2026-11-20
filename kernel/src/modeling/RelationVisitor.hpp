@@ -80,6 +80,15 @@ class OccBody;
 namespace siconos::modeling {
 class Relation;
 class LagrangianScleronomousR;
+class LagrangianR;
+class LagrangianRheonomousR;
+class LagrangianSparseR;
+class Lagrangian2dVelocityR;
+class Lagrangian2dVelocityAngularVelocityR;
+class NewtonEulerR;
+class NewtonEulerNormalVelocityR;
+class NewtonEulerVelocityR;
+class NewtonEulerVelocityAngularVelocityR;
 
 namespace relations {
 
@@ -121,6 +130,160 @@ struct Visitor {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianScleronomousR in a "
         "derived class of relations::Visitor");
+  }
+
+  // Each relation class that overrides accept (tourist.visit(*this)) needs its overloads
+  // here: otherwise its accept calls the overload of a base class (e.g. visit(const
+  // Relation&)), and the visitors built with VisitorMaker (io) never reach their visit
+  // function for this class.
+  virtual void visit(std::shared_ptr<siconos::modeling::LagrangianR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to LagrangianR in a derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::LagrangianR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for LagrangianR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::LagrangianR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for LagrangianR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::LagrangianRheonomousR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to LagrangianRheonomousR in a "
+        "derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::LagrangianRheonomousR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for LagrangianRheonomousR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::LagrangianRheonomousR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for LagrangianRheonomousR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::LagrangianSparseR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to LagrangianSparseR in a derived "
+        "class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::LagrangianSparseR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for LagrangianSparseR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::LagrangianSparseR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for LagrangianSparseR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::Lagrangian2dVelocityR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to Lagrangian2dVelocityR in a "
+        "derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::Lagrangian2dVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for Lagrangian2dVelocityR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::Lagrangian2dVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for Lagrangian2dVelocityR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(
+      std::shared_ptr<siconos::modeling::Lagrangian2dVelocityAngularVelocityR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "Lagrangian2dVelocityAngularVelocityR in a derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::Lagrangian2dVelocityAngularVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for Lagrangian2dVelocityAngularVelocityR in a "
+        "derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::Lagrangian2dVelocityAngularVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for Lagrangian2dVelocityAngularVelocityR in a "
+        "derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::NewtonEulerR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to NewtonEulerR in a derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::NewtonEulerR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::NewtonEulerR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::NewtonEulerNormalVelocityR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to NewtonEulerNormalVelocityR in a "
+        "derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::NewtonEulerNormalVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerNormalVelocityR in a derived class "
+        "of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::NewtonEulerNormalVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerNormalVelocityR in a derived class "
+        "of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::NewtonEulerVelocityR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to NewtonEulerVelocityR in a derived "
+        "class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::NewtonEulerVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerVelocityR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::NewtonEulerVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerVelocityR in a derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::modeling::NewtonEulerVelocityAngularVelocityR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "NewtonEulerVelocityAngularVelocityR in a derived class "
+        "of relations::Visitor");
+  }
+  virtual void visit(siconos::modeling::NewtonEulerVelocityAngularVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerVelocityAngularVelocityR in a "
+        "derived class of "
+        "relations::Visitor");
+  }
+  virtual void visit(const siconos::modeling::NewtonEulerVelocityAngularVelocityR&) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerVelocityAngularVelocityR in a "
+        "derived class of "
+        "relations::Visitor");
   }
 
 #ifdef HAVE_SICONOS_MECHANICS

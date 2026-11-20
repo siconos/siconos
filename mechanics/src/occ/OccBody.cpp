@@ -35,7 +35,7 @@ siconos::mechanics::occ::OccBody::OccBody(Eigen::Ref<siconos::algebra::SiconosVe
       _shapes(std::make_shared<TopoDS_Shape_vector>()) {}
 
 void siconos::mechanics::occ::OccBody::addContactShape(
-    OccContactShapeV& shape,
+    const OccContactShapeV& shape,
     std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> pos,
     std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> ori, int group) {
   OffSet offset = {0, 0, 0, 1, 0, 0, 0};
@@ -52,7 +52,7 @@ void siconos::mechanics::occ::OccBody::addContactShape(
     offset[6] = (*ori)(3);
   }
 
-  _contactShapes->push_back(std::make_tuple(std::ref(shape), offset, group));
+  _contactShapes->push_back(std::make_tuple(shape, offset, group));
 
   updateContactShapes();
 
