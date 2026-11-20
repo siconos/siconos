@@ -63,7 +63,11 @@ void siconos::simulation::shiftProjectionRhs(siconos::graphs::InteractionsGraph&
     // (a - q_j), concatenated over the dynamical systems of the interaction, in the order
     // of the columns of H (source, then target if different).
     const auto& prop = indexSet.properties(*ui);
-    std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> dss{prop.source};
+    // (reserve + push_back: initializer list + push_back triggers a -Warray-bounds false
+    // positive with gcc 15)
+    std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> dss;
+    dss.reserve(2);
+    dss.push_back(prop.source);
     if (prop.target && prop.target != prop.source) dss.push_back(prop.target);
 
     auto H = lr->contactMatrix();  // G(q_j), computed by computeCriteria()

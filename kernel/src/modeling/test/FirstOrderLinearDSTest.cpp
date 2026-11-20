@@ -77,6 +77,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1_alias() {
   ds->setConstantA(*A0, siconos::algebra::alias_t);
   ds->setConstantbVector(*b0, siconos::algebra::alias_t);
   siconos::algebra::SiconosMatrix Mref(3, 3);
+  Mref.setZero();
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
@@ -156,6 +157,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1_copy() {
   ds->setConstantA(*A0, siconos::algebra::copy_t);
   ds->setConstantbVector(*b0, siconos::algebra::copy_t);
   siconos::algebra::SiconosMatrix Mref(3, 3);
+  Mref.setZero();
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
@@ -190,6 +192,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2_alias() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test const 2 (alias) : ", ds->bVector() == *b0, true);
   double time = 12;
   siconos::algebra::SiconosMatrix Mref(3, 3);
+  Mref.setZero();
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
