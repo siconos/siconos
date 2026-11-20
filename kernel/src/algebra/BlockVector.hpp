@@ -153,8 +153,10 @@ class BlockVector {
   void setVectorPtr(std::size_t pos, std::shared_ptr<SiconosVector> v);
 
   /**
-     Assignment operator
-     Full copy -> each block is a new, no shared memory
+     Assignment operator: copies the values of input into the blocks of this.
+     The blocks of this keep their memory (they may be views on other vectors, which
+     are then updated); no memory is shared with input. A null block of this gets a
+     new copy of the corresponding block of input.
 
       \param input the vector to be copied
       \return  BlockVector&

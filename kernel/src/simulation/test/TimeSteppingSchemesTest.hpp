@@ -83,6 +83,8 @@ class TimeSteppingSchemesTest : public CppUnit::TestFixture {
   // First-order system: RLC circuit with a diode
   CPPUNIT_TEST(circuitRLCDEulerMoreau);
   CPPUNIT_TEST(circuitRLCDEulerMoreauResiduals);
+  // First-order system with a nonlinear (Type2R) relation and a relay law
+  CPPUNIT_TEST(stepSystemEulerMoreauType2R);
 
   // Variants added for the coverage of the time-stepping code
   CPPUNIT_TEST(beadsManagedMoreauJean);
@@ -132,6 +134,7 @@ class TimeSteppingSchemesTest : public CppUnit::TestFixture {
   void freeRigidBodyMoreauJean();
   void circuitRLCDEulerMoreau();
   void circuitRLCDEulerMoreauResiduals();
+  void stepSystemEulerMoreauType2R();
 
  private:
   void circuitRLCD(bool residuals);

@@ -70,19 +70,27 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForDS(
   // Compute W (iteration matrix)
   initializeIterationMatrix(t, ds);
 
-  // buffers allocation (into the graph)
+  // buffers allocation (into the graph), set to zero: X_PARTIAL_NS_FOR_RELATION is only
+  // written by prepareNewtonIteration when the Jacobians of the relations are not
+  // explicit, and is read by computeFreeState in any case.
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::RESIDU] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+      std::make_shared<siconos::algebra::SiconosVector>(
+          siconos::algebra::SiconosVector::Zero(ds->dimension()));
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::RESIDU_FREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+      std::make_shared<siconos::algebra::SiconosVector>(
+          siconos::algebra::SiconosVector::Zero(ds->dimension()));
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+      std::make_shared<siconos::algebra::SiconosVector>(
+          siconos::algebra::SiconosVector::Zero(ds->dimension()));
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::X_PARTIAL_NS_FOR_RELATION] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+      std::make_shared<siconos::algebra::SiconosVector>(
+          siconos::algebra::SiconosVector::Zero(ds->dimension()));
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::DELTA_X_FOR_RELATION] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+      std::make_shared<siconos::algebra::SiconosVector>(
+          siconos::algebra::SiconosVector::Zero(ds->dimension()));
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER] =
-      std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
+      std::make_shared<siconos::algebra::SiconosVector>(
+          siconos::algebra::SiconosVector::Zero(ds->dimension()));
 
   // Update dynamical system components (for memory swap).
   fods->computefVector(*fods->x(), t);  // Only fold is concerned, for FirstOrderNonLinearDS.
@@ -140,13 +148,17 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
     auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
 
     inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_Y] =
-        std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        std::make_shared<siconos::algebra::SiconosVector>(
+            siconos::algebra::SiconosVector::Zero(sizeY));
     inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA] =
-        std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        std::make_shared<siconos::algebra::SiconosVector>(
+            siconos::algebra::SiconosVector::Zero(sizeY));
     inter_work[siconos::integrators::EulerMoreauOSI::YOLD] =
-        std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        std::make_shared<siconos::algebra::SiconosVector>(
+            siconos::algebra::SiconosVector::Zero(sizeY));
     inter_work[siconos::integrators::EulerMoreauOSI::LAMBDAOLD] =
-        std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        std::make_shared<siconos::algebra::SiconosVector>(
+            siconos::algebra::SiconosVector::Zero(sizeY));
 
     if (relationSubType == siconos::modeling::RelationSubType::NonLinearR ||
         relationSubType == siconos::modeling::RelationSubType::Type2R) {
@@ -155,7 +167,8 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
 
       // Work vector used during computeResiduInput and updateInput
       inter_work[siconos::integrators::EulerMoreauOSI::WORK_DS] =
-          std::make_shared<siconos::algebra::SiconosVector>(sizeOfDS);
+          std::make_shared<siconos::algebra::SiconosVector>(
+              siconos::algebra::SiconosVector::Zero(sizeOfDS));
 
       inter_work_mat[siconos::integrators::EulerMoreauOSI::MAT_KHAT] =
           std::make_shared<siconos::algebra::SiconosMatrix>(sizeOfDS, sizeY);

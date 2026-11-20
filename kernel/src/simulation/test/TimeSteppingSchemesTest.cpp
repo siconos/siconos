@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
+#include "FirstOrderType2R.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
 #include "SiconosKernel.hpp"
 #include "io.hpp"
@@ -86,7 +87,7 @@ std::vector<double> record(Case& c) {
     if (auto sods = std::dynamic_pointer_cast<mod::SecondOrderDS>(ds)) {
       append(row, sods->q_read());
       append(row, sods->velocity_read());
-    } else if (auto fods = std::dynamic_pointer_cast<mod::FirstOrderLinearDS>(ds)) {
+    } else if (auto fods = std::dynamic_pointer_cast<mod::FirstOrderNonLinearDS>(ds)) {
       append(row, fods->x_read());
     }
   }
@@ -1127,6 +1128,86 @@ void TimeSteppingSchemesTest::circuitRLCD(bool residuals) {
     ts->setComputeResiduR(true);
   }
   check(name, run(c, 500, name));
+}
+
+void TimeSteppingSchemesTest::stepSystemEulerMoreauType2R() {
+  // Piecewise-linear gene regulatory network (SignSystem of the tutorials, biology/
+  // StepSystem): x' = f(x) + g(lambda), y = h(x), relay law -1 <= lambda <= 1 (sign of y),
+  // with a nonlinear g (FirstOrderType2R relation). EulerMoreauOSI with the Newton loop
+  // on the linearised relation and the residual of the output. The trajectory reaches the
+  // switching surfaces and slides on them.
+  Case c;
+  c.nsds = std::make_shared<NonSmoothDynamicalSystem>(0.0, 3.0);
+  SiconosVector x0{2};
+  x0 << 1.0, 6.0;
+  auto ds = std::make_shared<mod::FirstOrderNonLinearDS>(x0, siconos::algebra::copy_t);
+  ds->setComputefVectorFunction([](const Eigen::Ref<const SiconosVector>& x, double,
+                                   Eigen::Ref<siconos::algebra::MapVectorType> f) {
+    f(0) = -4.5 * x(0);
+    f(1) = -1.5 * x(1);
+  });
+  ds->setComputeJacobianfOver_xFunction([](const Eigen::Ref<const SiconosVector>&, double,
+                                           Eigen::Ref<siconos::algebra::MapType> J) {
+    J.setZero();
+    J(0, 0) = -4.5;
+    J(1, 1) = -1.5;
+  });
+  c.nsds->insertDynamicalSystem(ds);
+  c.dss.push_back(ds);
+
+  auto r = std::make_shared<mod::FirstOrderType2R>();
+  r->setComputehFunction([](const siconos::algebra::BlockVector& x,
+                            const Eigen::Ref<const SiconosVector>&,
+                            Eigen::Ref<SiconosVector> y) {
+    y(0) = x(0) - 4;
+    y(1) = x(1) - 4;
+    y(2) = x(0) - 8;
+    y(3) = x(1) - 8;
+  });
+  r->setComputegFunction(
+      [](const Eigen::Ref<const SiconosVector>& l, siconos::algebra::BlockVector& g) {
+        g(0) = 10.0 * (1 + l(2)) * (1 - l(1));
+        g(1) = 10.0 * (1 - l(0)) * (1 + l(3));
+      });
+  auto& C = c.matrices.emplace_back(4, 2);
+  C << 1, 0, 0, 1, 1, 0, 0, 1;
+  r->setConstantJacobianhOver_state(C);
+  r->setComputeJacobiangOver_lambdaFunction(
+      [](const Eigen::Ref<const SiconosVector>& l, Eigen::Ref<siconos::algebra::MapType> B) {
+        B.setZero();
+        B(1, 0) = -10.0 * (1 + l(3));
+        B(0, 1) = -10.0 * (1 + l(2));
+        B(0, 2) = 10.0 * (1 - l(1));
+        B(1, 3) = 10.0 * (1 - l(0));
+      });
+  auto inter = std::make_shared<Interaction>(std::make_shared<mod::RelayNSL>(4, -1.0, 1.0), r);
+  c.nsds->link(inter, ds);
+  c.interactions.push_back(inter);
+
+  auto td = std::make_shared<TimeDiscretisation>(0.0, 1e-3);
+  auto osnsp = std::make_shared<osns::Relay>(SICONOS_RELAY_LEMKE);
+  osnsp->numericsSolverOptions()->dparam[0] = 1e-8;
+  auto ts = std::make_shared<sim::TimeStepping>(
+      c.nsds, td, std::make_shared<integ::EulerMoreauOSI>(0.5), osnsp);
+  ts->setComputeResiduY(true);
+  ts->setUseRelativeConvergenceCriteron(false);
+  ts->setNewtonTolerance(5e-4);
+  ts->setNewtonMaxIteration(20);
+  ts->setResetAllLambda(false);
+  c.simulation = ts;
+  c.lambda_level = 0;
+  // the number of Newton iterations is part of the result: with a correct linearisation
+  // the Newton loop converges in a few iterations (it reached the maximum, 20, at each
+  // step when the linearisation was wrong)
+  unsigned int maxNewton = 0;
+  c.extra = [&maxNewton, ts, inter](std::vector<double>& row) {
+    append(row, *inter->lambda(0));  // the 4 multipliers
+    maxNewton = std::max(maxNewton, ts->getNewtonNbIterations());
+    row.push_back(ts->getNewtonNbIterations());
+  };
+  auto samples = run(c, 3000, "stepSystemEulerMoreauType2R");
+  CPPUNIT_ASSERT_MESSAGE("Newton loop not converged (max iterations reached)", maxNewton < 20);
+  check("stepSystemEulerMoreauType2R", samples);
 }
 
 // ---------------------------------------------------------------------------------------

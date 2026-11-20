@@ -179,6 +179,20 @@ void BlockVectorTest::testAssignment() {
 
   yB *= 1.3;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (w0->array() == 2.).all(), true);
+
+  // The blocks of the destination keep their memory: a block vector made of views on
+  // other vectors updates them (used by the integrators for their work vectors).
+  auto a0 = std::make_shared<siconos::algebra::SiconosVector>(3);
+  a0->setZero();
+  siconos::algebra::BlockVector view{};
+  view.insertPtr(a0);
+  siconos::algebra::BlockVector src{1, 3};
+  src.vector(0)->setConstant(5.);
+  view = src;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment (view) : ", view.vector(0) == a0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment (view) : ", (a0->array() == 5.).all(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment (view) : ", view.vector(0) != src.vector(0),
+                               true);
   std::cout << "✅--> assignment test ended with success." << std::endl;
 }
 

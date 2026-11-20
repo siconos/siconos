@@ -148,14 +148,18 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
   // totalSize_ = other.totalSize_;
   //  blockStartIndices_ = other.blockStartIndices_;
 
-  // Deep copy if blocks
-  blocks_.clear();
-  blocks_.reserve(other.blocks_.size());
-  for (const auto& block : other.blocks_) {
-    if (block)
-      blocks_.emplace_back(std::make_shared<SiconosVector>(*block));
+  // Copy the values into the existing blocks: the blocks of *this may be views on other
+  // vectors (e.g. the work vectors of the integrators link interaction block vectors to
+  // the vectors of the dynamical systems); reallocating them would break these links.
+  // A missing block of *this gets a new copy (no memory shared with other).
+  for (std::size_t i = 0; i < blocks_.size(); ++i) {
+    const auto& src = other.blocks_[i];
+    if (!src)
+      blocks_[i].reset();
+    else if (blocks_[i])
+      *blocks_[i] = *src;
     else
-      blocks_.emplace_back(nullptr);
+      blocks_[i] = std::make_shared<SiconosVector>(*src);
   }
 
   return *this;
