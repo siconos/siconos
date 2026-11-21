@@ -148,10 +148,11 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::initialize_impl(
 
     // Register custom Siconos sphere-sphere collision algorithm
     // This replaces the default Bullet sphere-sphere algorithm with our custom implementation
-    siconos_btSphereSphereCollisionAlgorithm::CreateFunc* sphereSphereAlgo =
-        new siconos_btSphereSphereCollisionAlgorithm::CreateFunc();
-    _impl->_dispatcher->registerCollisionCreateFunc(SPHERE_SHAPE_PROXYTYPE,
-                                                    SPHERE_SHAPE_PROXYTYPE, sphereSphereAlgo);
+    // (owned by _impl: the dispatcher does not delete the registered creation functions)
+    _impl->m_sphereSphereAlgo_ =
+        std::make_unique<siconos_btSphereSphereCollisionAlgorithm::CreateFunc>();
+    _impl->_dispatcher->registerCollisionCreateFunc(
+        SPHERE_SHAPE_PROXYTYPE, SPHERE_SHAPE_PROXYTYPE, _impl->m_sphereSphereAlgo_.get());
   }
 
   _impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;

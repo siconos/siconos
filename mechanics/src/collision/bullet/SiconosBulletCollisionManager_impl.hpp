@@ -26,6 +26,7 @@
 
 #include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
 #include <BulletCollision/CollisionDispatch/btBox2dBox2dCollisionAlgorithm.h>
+#include <BulletCollision/CollisionDispatch/btCollisionCreateFunc.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionDispatch/btConvex2dConvex2dAlgorithm.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
@@ -149,6 +150,9 @@ class SiconosBulletCollisionManager_impl
 
   std::unique_ptr<btConvex2dConvex2dAlgorithm::CreateFunc> m_convexAlgo2d_{nullptr};
   std::unique_ptr<btBox2dBox2dCollisionAlgorithm::CreateFunc> m_box2dbox2dAlgo_{nullptr};
+  /** custom sphere-sphere algorithm (siconos_btSphereSphereCollisionAlgorithm); the
+   *  dispatcher does not own the creation functions registered in it */
+  std::unique_ptr<btCollisionAlgorithmCreateFunc> m_sphereSphereAlgo_{nullptr};
   std::unique_ptr<btVoronoiSimplexSolver> m_simplexSolver_{nullptr};
   std::unique_ptr<btMinkowskiPenetrationDepthSolver> m_pdSolver_{nullptr};
 
