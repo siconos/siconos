@@ -87,12 +87,40 @@ Options (`FrictionContact_options.h`):
 
 | option | index | default | meaning |
 |---|---|---|---|
-| `SICONOS_FRICTION_3D_NSN_LM_FALLBACK` | iparam 23 | 1 | 0: off, 1: on |
+| `SICONOS_FRICTION_3D_NSN_LM_FALLBACK` | iparam 23 | 1 (GFC3D_NSN_AC), 0 (FC3D_NSN_AC/FB/NM) | 0: off, 1: on |
 | `SICONOS_FRICTION_3D_NSN_LM_COEF` | dparam 6 | 1.0 | c in λ = c‖Ψ‖ |
+| `SICONOS_FRICTION_2D_NSN_LM_FALLBACK` | iparam 28 | 0 | GFC2D_NSN_AC |
+| `SICONOS_FRICTION_2D_NSN_LM_COEF` | dparam 6 | 1.0 | GFC2D_NSN_AC |
+
+The direction and the stall test are shared (`numerics/src/NonSmoothSolvers/nonsmooth_newton_levenberg_marquardt.{h,c}`:
+`nonsmooth_newton_lm_direction`, which works on a sparse copy of a dense or sparse-block
+Jacobian, and `nonsmooth_newton_lm_is_stalled`). On a Levenberg–Marquardt step the
+Goldstein–Price line search is bounded by α ≤ 1 (the direction is already damped; with the
+unbounded bracket [1e-16, 1e10] and few line-search iterations, as the 10 of GFC2D_NSN_AC, the
+step could end up at ~5e9 and the iteration diverged).
 
 Limitation: without line search (`SICONOS_FRICTION_3D_NSN_LINESEARCH_NO`) the iteration is not
 globalized and the fallback does not help (Box_Stacks, Jean–Moreau, no line search: full steps
 cycle around ‖Ψ‖ ≈ 1.1e-3 with or without it).
+
+### Other solvers (GFC2D_NSN_AC, FC3D_NSN_AC/FB/NM): available, off by default
+
+The fallback was added to `gfc2d_nonsmooth_Newton_AlartCurnier.c` and to the reduced 3D
+solvers (`fc3d_nonsmooth_Newton_solvers.c`), but enabling it by default degraded them:
+
+- GFC2D (`test_gfc2d_nsn_vs_fc2d_nsgs`, `gfc2d_TEST_NSN_COLLECTION_1`): after a slow phase of
+  Newton (‖Ψ‖ decreasing by < 1% per iteration), the first Levenberg–Marquardt step (α = 1)
+  moved the iterate to a wrong region (contact statuses from 196 open / 34 sliding to 1 open /
+  229 sliding) where the residual was a bit smaller; the iteration then crept and never
+  converged, while Newton alone converges to the solution of the reference NSGS solver;
+- FC3D_NSN_AC on `Capsules-i100-889`: 132 iterations (error 7.6e-7) without the fallback,
+  not converged after 200 iterations (2.5e-4) with it (triggered every other iteration);
+- requiring 3 consecutive stalled iterations instead of 1 did not fix GFC2D and lost the
+  rescue of GFC3D on Spheres.
+
+The fallback is therefore enabled by default only for GFC3D_NSN_AC, where it was validated;
+for the other solvers it remains available as an option. A more robust globalization (trust
+region, non-monotone line search) would be needed to make it a default there.
 
 ## 4. Default formulation
 

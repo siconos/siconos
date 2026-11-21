@@ -23,6 +23,7 @@
 #include <math.h>    // for isnan, isinf, pow
 
 #include "FischerBurmeisterGenerated.h"
+#include "nonsmooth_newton_levenberg_marquardt.h"  // for nonsmooth_newton_lm_direction
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif
@@ -206,18 +207,19 @@ void fc3d_nonsmooth_Newton_computeAWpB(double* A, NumericsMatrix* W, double* B,
   }
 }
 
-int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(fc3d_nonsmooth_Newton_solvers* equation,
-                                                    double* reaction, double* velocity,
-                                                    double* mu, double* rho, double* F,
-                                                    double* A, double* B, NumericsMatrix* W,
-                                                    double* qfree, NumericsMatrix* AWpB,
-                                                    double* direction, double* tmp,
-                                                    double alpha[1], unsigned int maxiter_ls) {
+/* Goldstein--Price line search with an upper bound alpha_max_initial of the step: 1 for a
+ * Levenberg--Marquardt direction (already damped, it must not be stretched), 1e10 for a Newton
+ * direction. */
+static int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice_bounded(
+    fc3d_nonsmooth_Newton_solvers* equation, double* reaction, double* velocity, double* mu,
+    double* rho, double* F, double* A, double* B, NumericsMatrix* W, double* qfree,
+    NumericsMatrix* AWpB, double* direction, double* tmp, double alpha[1],
+    unsigned int maxiter_ls, double alpha_max_initial) {
   unsigned problemSize = W->size0;
 
   double inf = 1e10;
   double alphamin = 0.0;
-  double alphamax = inf;
+  double alphamax = alpha_max_initial;
 
   double m1 = 0.01, m2 = 0.99;
 
@@ -300,6 +302,18 @@ int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(fc3d_nonsmooth_Newton_solver
 
 /* cf Facchinei & Pang, Finite-Dimensional Variational Inequalities
  * and Complementarity Problems, Volume II, p 805. */
+
+int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(fc3d_nonsmooth_Newton_solvers* equation,
+                                                    double* reaction, double* velocity,
+                                                    double* mu, double* rho, double* F,
+                                                    double* A, double* B, NumericsMatrix* W,
+                                                    double* qfree, NumericsMatrix* AWpB,
+                                                    double* direction, double* tmp,
+                                                    double alpha[1], unsigned int maxiter_ls) {
+  return fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice_bounded(
+      equation, reaction, velocity, mu, rho, F, A, B, W, qfree, AWpB, direction, tmp, alpha,
+      maxiter_ls, 1e10);
+}
 
 int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers* equation,
                                            double* reaction, double* velocity, double* mu,
@@ -566,6 +580,12 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   double linear_solver_residual = 0.0;
 
+  /* Levenberg--Marquardt fallback (see nonsmooth_newton_levenberg_marquardt.h). */
+  const int lm_fallback = options->iparam[SICONOS_FRICTION_3D_NSN_LM_FALLBACK];
+  const double lm_coef = options->dparam[SICONOS_FRICTION_3D_NSN_LM_COEF];
+  double previous_residual_norm = INFINITY;
+  int lm_stalled_iterations = 0;
+
   while (iter++ < itermax) {
     int info_fun = equation->function(equation->data, problemSize, reaction, velocity,
                                       equation->problem->mu, rho, F, Ax, Bx);
@@ -587,7 +607,30 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     NM_unpreserve(AWpB);
     NM_preserve(AWpB);
     NM_set_LU_factorized(AWpB, false);
-    int lsi = NM_LU_solve(AWpB, direction, 1);
+
+    /* Stalled Newton iteration (residual decreased by less than 1% during the last
+     * NONSMOOTH_NEWTON_LM_STALL_ITERATIONS iterations): use the
+     * Levenberg--Marquardt direction instead of the Newton direction. */
+    const double residual_norm = cblas_dnrm2(problemSize, F, 1);
+    const int use_lm = lm_fallback && lm_coef > 0.0 &&
+                       nonsmooth_newton_lm_is_stalled(residual_norm, previous_residual_norm,
+                                                      &lm_stalled_iterations);
+    previous_residual_norm = residual_norm;
+    int lsi = 1;
+    int lm_ok = 0;
+    if (use_lm) {
+      lsi = nonsmooth_newton_lm_direction(AWpB, F, lm_coef * residual_norm, direction);
+      lm_ok = (lsi == 0);
+      numerics_printf_verbose(1,
+                              "---- FC3D - NSN iteration %d, Newton stalled (||F|| = %e): "
+                              "Levenberg--Marquardt direction, info = %d",
+                              iter, residual_norm, lsi);
+      if (lsi) {  // fall back to the Newton direction
+        cblas_dcopy_msan(problemSize, F, 1, direction, 1);
+        cblas_dscal(problemSize, -1., direction, 1);
+      }
+    }
+    if (!use_lm || lsi) lsi = NM_LU_solve(AWpB, direction, 1);
 
     /* NM_copy needed here */
     //    NM_copy(AWpB_backup, AWpB);
@@ -622,9 +665,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
         break;
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
         /* Goldstein Price */
-        info_ls = fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(
+        info_ls = fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice_bounded(
             equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, problem->M, problem->q,
-            AWpB, direction, reaction_ls_tmp, &alpha, options->iparam[12]);
+            AWpB, direction, reaction_ls_tmp, &alpha, options->iparam[12], lm_ok ? 1.0 : 1e10);
         break;
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO:
         /* FBLSA */

@@ -22,6 +22,8 @@
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs, INFINITY
 
+#include "nonsmooth_newton_levenberg_marquardt.h"  // for nonsmooth_newton_lm_direction
+
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif
@@ -327,9 +329,11 @@ static int global_linesearch_goldstein_price(
     GlobalFrictionContactProblem* problem, double* current_solution, double* search_direction,
     double* rho, double* residual, CSparseMatrix* jacobian_csc, double* trial_point,
     double* trial_residual, double* step_length, unsigned int max_ls_iterations,
-    GFC2D_AC_Function compute_ac) {
+    GFC2D_AC_Function compute_ac, double alpha_max_initial) {
   double alpha_min = GFC2D_NSN_AC_LS_INITIAL_ALPHA_MIN;
-  double alpha_max = GFC2D_NSN_AC_LS_INITIAL_ALPHA_MAX;
+  /* upper bound of the step: 1 for a Levenberg--Marquardt direction (already damped, it
+   * must not be stretched), GFC2D_NSN_AC_LS_INITIAL_ALPHA_MAX for a Newton direction */
+  double alpha_max = alpha_max_initial;
 
   /* Goldstein--Price bracket constants. */
   const double slope_lower_bound = GFC2D_NSN_AC_LS_SLOPE_LOWER;
@@ -762,6 +766,12 @@ restart:
     previous_contact_status[i] = -1;
   }
 
+  /* Levenberg--Marquardt fallback (see nonsmooth_newton_levenberg_marquardt.h). */
+  const int lm_fallback = options->iparam[SICONOS_FRICTION_2D_NSN_LM_FALLBACK];
+  const double lm_coef = options->dparam[SICONOS_FRICTION_2D_NSN_LM_COEF];
+  double previous_residual_norm = INFINITY;
+  int lm_stalled_iterations = 0;
+
   /* ====================================================================== *
    * Main Newton loop
    * ====================================================================== */
@@ -804,11 +814,34 @@ restart:
       J_to_solve = NM_add(regul, reg_eye, 1.0, nm_jacobian);
     }
 
+    /* Stalled Newton iteration (residual decreased by less than 1% during the last
+     * NONSMOOTH_NEWTON_LM_STALL_ITERATIONS iterations): use the
+     * Levenberg--Marquardt direction instead of the Newton direction. */
+    const int use_lm = lm_fallback && lm_coef > 0.0 &&
+                       nonsmooth_newton_lm_is_stalled(residual_norm, previous_residual_norm,
+                                                      &lm_stalled_iterations);
+    int lm_info = 1;
+    if (use_lm) {
+      lm_info = nonsmooth_newton_lm_direction(nm_jacobian, system_residual,
+                                              lm_coef * residual_norm, newton_direction);
+      numerics_printf_verbose(1,
+                              "---- GFC2D - NSN_AC iteration %d, Newton stalled (residual "
+                              "%e, previous %e): Levenberg--Marquardt direction, info = %d",
+                              iteration, residual_norm, previous_residual_norm, lm_info);
+      if (lm_info != 0) {  // fall back to the Newton direction
+        cblas_dcopy(system_size, system_residual, 1, newton_direction, 1);
+        cblas_dscal(system_size, -1., newton_direction, 1);
+      }
+    }
+    previous_residual_norm = residual_norm;
+
     /* NM_preserve/unpreserve ensures that the internal factorization of
      * the Jacobian used by the linear solver is invalidated because the
      * underlying triplet data has changed since the previous iteration. */
     const int linear_solver_info =
-        NM_LU_solve(NM_preserve(NM_unpreserve(J_to_solve)), newton_direction, 1);
+        (use_lm && lm_info == 0)
+            ? 0
+            : NM_LU_solve(NM_preserve(NM_unpreserve(J_to_solve)), newton_direction, 1);
 
     if (J_to_solve != nm_jacobian) {
       NM_free(J_to_solve);
@@ -854,7 +887,8 @@ restart:
         line_search_status = global_linesearch_goldstein_price(
             problem, current_solution, newton_direction, rho, system_residual,
             NM_csc(nm_jacobian), linesearch_workspace, linesearch_residual, &step_length,
-            options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER], compute_ac);
+            options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER], compute_ac,
+            (use_lm && lm_info == 0) ? 1.0 : GFC2D_NSN_AC_LS_INITIAL_ALPHA_MAX);
         break;
 
       default:
@@ -1030,6 +1064,12 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
   /* Default to the Alart--Curnier formulation (mu * max(0, r_N - rho_N u_N)). */
   options->iparam[SICONOS_FRICTION_2D_NSN_FORMULATION] =
       SICONOS_FRICTION_2D_NSN_FORMULATION_ALART_CURNIER;
+
+  /* Levenberg--Marquardt fallback when the Newton iteration stalls: off by default (on the
+   * granular 2D test problems it moved the iterate to a wrong region, see
+   * nonsmooth_newton_levenberg_marquardt.h) */
+  options->iparam[SICONOS_FRICTION_2D_NSN_LM_FALLBACK] = 0;
+  options->dparam[SICONOS_FRICTION_2D_NSN_LM_COEF] = 1.0;
 }
 
 /* ===========================================================================

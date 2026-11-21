@@ -117,6 +117,10 @@ void fc3d_nonsmooth_newton_jean_moreau_set_default(SolverOptions* options) {
       SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
+  /* Levenberg--Marquardt fallback when the Newton iteration stalls: off by default (see
+   * nonsmooth_newton_levenberg_marquardt.h) */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LM_FALLBACK] = 0;
+  options->dparam[SICONOS_FRICTION_3D_NSN_LM_COEF] = 1.0;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;
 
 #ifdef WITH_MUMPS
