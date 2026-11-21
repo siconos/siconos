@@ -33,6 +33,7 @@ SIM_OPTION_DESTS = (
     "T",
     "h",
     "output_format",
+    "svg_output",
     "scheme",
     "theta",
     "gamma",
@@ -176,7 +177,7 @@ def main():
 
     if sim_options and not args.is_python:
         print(
-            "siconos: the simulation options (--t0 --T --h --output-format "
+            "siconos: the simulation options (--t0 --T --h --output-format --svg-output "
             "--scheme ... --resume) need a python driver",
             file=sys.stderr,
         )
@@ -557,7 +558,7 @@ def parse_command_line(with_remainder=True):
 
     # -- Simulation options (python drivers) --
     # Override what the driver script chose, before it runs (see
-    # nonos/simoptions.py). The run options (t0, T, h, output-format) are
+    # nonos/simoptions.py). The run options (t0, T, h, output-format, svg-output) are
     # shared by all the backends; the rest are the vnative backend only.
     sim_group = parser.add_argument_group(
         "Simulation options (python drivers, override the driver's choices)"
@@ -576,6 +577,14 @@ def parse_command_line(with_remainder=True):
         choices=("siconos", "vtkhdf", "both"),
         help="the tables of the hdf5 file, the ParaView files, or both "
         "(run option)",
+    )
+    sim_group.add_argument(
+        "--svg-output",
+        metavar="TIME,...",
+        help="SVG pictures of the scene at these times (a value with a decimal "
+        "point) or simulation step numbers (an int), 2D only, "
+        "<file>_svg_<time>.svg beside the hdf5 file (run option, see "
+        "siconos_svg)",
     )
     sim_group.add_argument(
         "--scheme",

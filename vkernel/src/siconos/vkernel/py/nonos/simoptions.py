@@ -15,7 +15,7 @@ patches). Nothing is given, nothing is changed.
 Two groups of options:
 
   - the run options of siconos.io.mechanics_run.MechanicsHdf5Runner, shared
-    by all the backends: t0, T, h, output_format. They are forced in
+    by all the backends: t0, T, h, output_format, svg_output. They are forced in
     run_options before run_initialize reads them.
   - the objects of nonos.bridge, the vnative backend only: the scheme of the
     integrator (MoreauJean, MoreauJeanGOSI, AnitescuTasora,
@@ -67,7 +67,7 @@ SCHEME_ALIASES = {
 SCHEME_NAMES = {v: k for k, v in SCHEMES.items()}
 
 # the run options of MechanicsHdf5Runner, the backends all
-CROSS_BACKEND_OPTIONS = ("t0", "T", "h", "output_format")
+CROSS_BACKEND_OPTIONS = ("t0", "T", "h", "output_format", "svg_output")
 # the objects of nonos.bridge, vnative only
 VNATIVE_OPTIONS = (
     "scheme",

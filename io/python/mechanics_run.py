@@ -22,6 +22,7 @@ import siconos.io as sio
 # Siconos imports
 import siconos.io.mechanics_hdf5
 import siconos.io.shape_collection
+import siconos.io.svg
 import siconos.io.vtkhdf
 
 # Siconos Mechanics imports
@@ -574,6 +575,17 @@ class MechanicsHdf5Runner_run_options(dict):
                       bodies as disks (BODIES_AS_DISKS), much lighter than
                       their shapes for the large cases""",
         )
+        create_option(
+            d,
+            "svg_output",
+            "string or list, optional",
+            None,
+            """SVG pictures of the scene (2D) at these times, "0.5,1.0":
+                      a value with a decimal point is a time, an int a
+                      simulation step number; the step at or before each
+                      time is drawn, in <io_filename>_svg_<time>.svg (see
+                      siconos.io.svg and the siconos_svg converter)""",
+        )
 
         # default verbose and debug  options
         create_option(
@@ -805,6 +817,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._vtkhdf_static_writer = None
         self._vtkhdf_contacts_writer = None
         self._vtkhdf_fem_writer = None
+        self._svg = None
         self._static_rows = slice(0, 0)
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
@@ -2938,6 +2951,40 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             ),
         )
 
+    def output_svg(self, output_step=False):
+        """
+        Counts the contacts of an output step for the sides of the segments
+        and draws the SVG pictures due at this step (svg_output), from the
+        rows the hdf5 tables have.
+        """
+        time = self.current_time()
+        due = self._svg.due(time)
+        if not (output_step or due):
+            return
+        positions = self.get_io_array(self._io.positions(self._nsds))
+        velocities = self.get_io_array(self._io.velocities(self._nsds))
+        points, point_data = siconos.io.vtkhdf.bodies_point_data(positions, velocities)
+        bodies, velocities = siconos.io.vtkhdf.siconos_rows(time, points, point_data)
+        columns = self._contact_points_columns()
+        contacts = np.zeros((0, columns))
+        if not self._initializing and self._nsds.topology().indexSetsSize() > 1:
+            contacts = self._io.contactPoints(
+                self._nsds, self._output_contact_index_set
+            )
+        rows = (
+            time,
+            siconos.io.svg.as_table(bodies[:, 1:], 8),
+            siconos.io.svg.as_table(velocities[:, 1:], 7),
+            siconos.io.svg.as_table(
+                self._format_adaptor["static"][self._static_rows, 1:], 8
+            ),
+            siconos.io.svg.as_table(np.asarray(contacts)[:, :columns], columns),
+        )
+        if output_step:
+            self._svg.output_step(*rows)
+        if due:
+            self._svg.draw(*rows)
+
     def output_bodies(self, with_timer=False, initial=False):
         """
         Outputs the dynamic objects in the format(s) given by output_format.
@@ -3440,7 +3487,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # which is able to serialize python object.
 
         d["friction_contact_trace_params"] = "not serialized"  # fix it
-        d["osi"] = "not serialized"  # fix it
+        # the class of the integrator, the scheme of the run
+        d["osi"] = siconos.io.svg.scheme_name(d["osi"])
         d["time_stepping"] = "not serialized"  # fix it
 
         d["start_run_iteration_hook"] = "not serialized"  # fix it
@@ -3476,20 +3524,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             if isinstance(obj, enum_types):
                 return obj.value
-            elif isinstance(obj, (str, int, float, bool, list, dict, type(None))):
-                return obj
-            elif hasattr(obj, "__class__") and hasattr(obj, "__dir__"):
-                return {
-                    key: serialize_enum(getattr(obj, key))
-                    for key in dir(obj)
-                    if not key.startswith("_") and hasattr(obj, key)
-                }
+            if isinstance(obj, (np.integer, np.floating, np.bool_)):
+                return obj.item()
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            # the other objects (vnative options, callables): their type only
+            return f"not serialized ({type(obj).__name__})"
 
-            raise TypeError(
-                f"Object of type {obj.__class__.__name__} is not JSON serializable"
-            )
-
-        dict_json = json.dumps(d)
+        dict_json = json.dumps(d, default=serialize_enum)
         self._format_adaptor["siconos_mechanics_run_options"].attrs["options"] = (
             dict_json
         )
@@ -3898,6 +3940,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     static_filename,
                     compression=self._use_compression,
                     append=self._vtkhdf_append,
+                )
+
+        if run_options.get("svg_output"):
+            if self._dimension != 2:
+                siconos.io.tools.warn("svg_output: 2D simulations only, ignored")
+            else:
+                self._svg = siconos.io.svg.RunPictures(
+                    self._io_filename,
+                    siconos.io.vtkhdf.ShapeTable(self._data, self._dimension),
+                    siconos.io.svg.parse_times(run_options["svg_output"]),
+                    h,
+                    scheme=siconos.io.svg.scheme_name(run_options["osi"]),
                 )
 
         # Respect run() parameter for multipoints_iterations for
@@ -4312,12 +4366,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.begin_output_step()
         self.output_static_objects()
         self.output_bodies(initial=True)
+        if self._svg is not None:
+            self.output_svg(output_step=True)
 
         if self._should_output_domains:
             self.log(self.output_domains, run_options["with_timer"])()
         self.end_output_step(self.current_time())
 
-        # self.output_run_options()
+        self.output_run_options()
 
         self.print_verbose("start simulation ...")
         self._initializing = False
@@ -4544,6 +4600,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 self.log(self.output_results, with_timer)()
 
+            if self._svg is not None:
+                self.log(self.output_svg, with_timer)(cond or self._k == 1)
+
             if (
                 self._output_backup
                 and (self._k % self._output_backup_frequency == 0)
@@ -4624,6 +4683,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         try:
             info = self.log(self.run_initialize, with_timer)()
             info = self.log(self.run_loop, with_timer)()
+            if self._svg is not None:
+                self._svg.finish()
         finally:
             for writer in (
                 self._vtkhdf_writer,
