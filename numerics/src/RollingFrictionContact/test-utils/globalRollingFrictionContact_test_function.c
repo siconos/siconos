@@ -143,6 +143,7 @@ int globalRollingFrictionContact_test_function(TestCase* current) {
   free(velocity);
   free(globalvelocity);
   fclose(foutput);
+  free(str);  // (problem_name points into str)
   free(problem->name);
   globalRollingFrictionContactProblem_free(problem);
   problem = NULL;

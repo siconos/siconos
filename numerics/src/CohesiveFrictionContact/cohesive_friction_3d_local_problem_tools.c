@@ -54,12 +54,15 @@ CohesiveFrictionContactProblem* cohesive_friction_3d_local_problem_allocate(
   localproblem->c_n = (double*)malloc(sizeof(double));
   localproblem->c_t = (double*)malloc(sizeof(double));
 
-  if (storageType != NM_SPARSE_BLOCK) {
+  if (storageType != NM_SPARSE_BLOCK && storageType != NM_SPARSE) {
+    /* NM_DENSE: the diagonal block is copied into this buffer by fill_M */
     localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
-  } else /* NM_SPARSE_BLOCK */
-  {
-    localproblem->M = NM_create_with_data(
-        NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
+  } else {
+    /* NM_SPARSE_BLOCK, and NM_SPARSE through the block matrix of the diagonal blocks built
+     * once by the solver: fill_M points to the diagonal block, no buffer (a buffer
+     * allocated here was lost at the first fill_M: memory leak). A local solver that needs
+     * its own copy allocates it (e.g. fc3d_projection_initialize_with_regularization). */
+    localproblem->M = NM_create_with_data(NM_DENSE, 3, 3, NULL);
   }
   return localproblem;
 }

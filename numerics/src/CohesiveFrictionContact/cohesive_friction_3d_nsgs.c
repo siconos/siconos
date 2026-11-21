@@ -376,12 +376,19 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
     }
 
     default: {
+      fc3d_problem->M = NULL;
+      frictionContactProblem_free(fc3d_problem);
       return numerics_error(
           "cohesive_fc3d_nsgs_initialize_local_solver_contact",
           "Numerics, cohesive_fc3d_nsgs failed. Unknown internal solver : %s.\n",
           solver_options_id_to_name(local_opts_contact->solverId));
     }
   }
+  /* the wrapper was only needed by the initialization of the contact local solver (none of
+   * the initializers above keeps it); M belongs to the problem */
+  fc3d_problem->M = NULL;
+  frictionContactProblem_free(fc3d_problem);
+
   /** Connect to local solver */
   switch (local_opts_cohesion->solverId) {
     /* Projection */
@@ -1020,6 +1027,9 @@ int cohesive_friction_3d_nsgs(CohesiveFrictionContactProblem* problem, double* r
   localproblem_contact->q = NULL;
   localproblem_contact->mu = NULL;
   frictionContactProblem_free(localproblem_contact);
+  free(localProblemFunctionToolkit);
+  free(freeze_contacts);
+  free(scontacts);
   // getchar();
   DEBUG_PRINTF("Final iteration: %d, error: %e\n", iter, error);
   DEBUG_END("cohesive_friction_3d_nsgs(...)\n");

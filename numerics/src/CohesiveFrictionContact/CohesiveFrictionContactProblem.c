@@ -87,6 +87,13 @@ void cohesiveFrictionContactProblem_free(CohesiveFrictionContactProblem* problem
       NM_free(problem->U);
       problem->U = NULL;
     }
+    /* the vectors belong to the problem, as in frictionContactProblem_free */
+    free(problem->q);
+    free(problem->mu);
+    free(problem->c_n);
+    free(problem->c_t);
+    free(problem->q_u);
+    free(problem->q_v);
     free(problem);
   }
 }

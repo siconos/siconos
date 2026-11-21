@@ -1392,6 +1392,8 @@ static void gfc3d_ipm_snm_step_qp2(gfc3d_IPM_SNM_workspace* ws) {
       }
 
       // First linear linear system
+      // (J is rebuilt at each iteration: free the one of the previous iteration)
+      if (J) J = NM_free(J);
       J = NM_create(NM_SPARSE, m + 2 * nd + n, m + 2 * nd + n);
       J_nzmax = M_nzmax + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd + n + 2 * n + n;
       NM_triplet_alloc(J, J_nzmax);
@@ -2010,6 +2012,10 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
   while (iteration < max_iter) {
     int jacobian_is_nan = 0;
+    /* the steps build the Jacobian at iteration 0 and update it in place afterwards: they
+     * must see the current iteration (with ws.iteration left at 0, the Jacobian and the
+     * arrow matrices were rebuilt at each iteration and the previous ones leaked) */
+    ws.iteration = iteration;
     switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM]) {
       /*  Build the Jacobian matrix without reducing the linear system.
        *
