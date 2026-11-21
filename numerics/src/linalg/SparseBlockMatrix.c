@@ -319,7 +319,11 @@ void SBM_gemv(size_t sizeX, size_t sizeY, double alpha,
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
   */
-  cblas_dscal(to_blasint(sizeY), beta, y, 1);
+  /* beta == 0: y is overwritten, not scaled (as in BLAS gemv; 0 * NaN = NaN) */
+  if (beta == 0.0)
+    memset(y, 0, sizeY * sizeof(double));
+  else
+    cblas_dscal(to_blasint(sizeY), beta, y, 1);
 
   for (size_t currentRowNumber = 0; currentRowNumber < A->filled1 - 1; ++currentRowNumber) {
     /* Get dim. of the current block */

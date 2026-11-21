@@ -388,7 +388,8 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)M->nz);
   }
   M->i = (CS_INT*)malloc(sizeof(CS_INT) * M->nzmax);
-  int_to_csi(fclib_problem->M->i, M->i, (unsigned)M->nz);
+  /* nz < 0 (compressed columns: -1) is not a number of entries: copy nzmax entries */
+  int_to_csi(fclib_problem->M->i, M->i, (unsigned)(M->nz >= 0 ? M->nz : M->nzmax));
 
   problem->H = NM_create(NM_SPARSE, fclib_problem->H->m, fclib_problem->H->n);
 
@@ -419,7 +420,8 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
   }
 
   H->i = (CS_INT*)malloc(sizeof(CS_INT) * H->nzmax);
-  int_to_csi(fclib_problem->H->i, H->i, (unsigned)H->nz);
+  /* nz < 0 (compressed columns: -1) is not a number of entries: copy nzmax entries */
+  int_to_csi(fclib_problem->H->i, H->i, (unsigned)(H->nz >= 0 ? H->nz : H->nzmax));
 
   NM_reset_versions(problem->M);
   return problem;
@@ -584,7 +586,8 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
     int_to_csi(fclib_problem->M->p, M->p, (unsigned)M->nz);
   }
   M->i = (CS_INT*)malloc(sizeof(CS_INT) * M->nzmax);
-  int_to_csi(fclib_problem->M->i, M->i, (unsigned)M->nz);
+  /* nz < 0 (compressed columns: -1) is not a number of entries: copy nzmax entries */
+  int_to_csi(fclib_problem->M->i, M->i, (unsigned)(M->nz >= 0 ? M->nz : M->nzmax));
 
   problem->H = NM_create(NM_SPARSE, fclib_problem->H->m, fclib_problem->H->n);
 
@@ -615,7 +618,8 @@ GlobalRollingFrictionContactProblem* from_fclib_global_rolling(
   }
 
   H->i = (CS_INT*)malloc(sizeof(CS_INT) * H->nzmax);
-  int_to_csi(fclib_problem->H->i, H->i, (unsigned)H->nz);
+  /* nz < 0 (compressed columns: -1) is not a number of entries: copy nzmax entries */
+  int_to_csi(fclib_problem->H->i, H->i, (unsigned)(H->nz >= 0 ? H->nz : H->nzmax));
 
   NM_reset_versions(problem->M);
   return problem;

@@ -125,8 +125,12 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix* A, const doubl
         }
       }
     } else {
-      for (CS_INT j = 0; j < m; j++) {
-        y[j] *= beta;
+      /* beta == 0: y is overwritten, not scaled (as in BLAS gemv). Scaling would keep
+       * a NaN or an Inf of an uninitialized or reused y (0 * NaN = NaN). */
+      if (beta == 0.0) {
+        for (CS_INT j = 0; j < m; j++) y[j] = 0.0;
+      } else {
+        for (CS_INT j = 0; j < m; j++) y[j] *= beta;
       }
 
       for (CS_INT j = 0; j < n; j++) {
