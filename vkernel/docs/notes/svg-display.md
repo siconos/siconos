@@ -58,8 +58,15 @@ to its file. Measured (`bench_inrun.py`, siconos.asor-work/svg: 1000 disks
 in a box, 50 steps, CPU, 4 OpenMP threads, a picture every 5 steps): 0.033
 s per picture (140 KB, circle mode with arrows), against 3.5 ms per step
 of that run, so about 10 steps; the run took 0.53 s with 10 pictures, 0.18
-s without. Not measured in a run at 20k bodies (that needs the CUDA build;
-from the converter, a 10k picture in `use` mode takes 0.04 s, section 2).
+s without. At 20000 disks (same script, CUDA build, cuNSearch, 4 OpenMP
+threads): 0.110 s per picture (1.77 MB, `use` mode), 10 µs per step
+without picture, 4 ms once at the first step; the run took 1.57 s with 10
+pictures, 0.45 s without,
+about 9 ms per step. That scene is barely loaded (the disks fall from a
+grid: 142 contacts at the end), so a step of a settled pile costs more and
+the share of the pictures is smaller. The cost is that of the renderer
+(python), the same on the CPU and CUDA builds: 0.033 s at 1000 disks on
+both.
 
 ### After the simulation
 
