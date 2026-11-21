@@ -18,7 +18,7 @@
 
 // AOS kernel reference: a regular polygon (N vertices, circumradius
 // Rc, m = 1, g = 9.81) on the line y = 0, exact geometry: one interaction
-// per vertex, Lagrangian2d3DR (normal, tangent, rolling rows) between the
+// per vertex, Lagrangian2dVelocityAngularVelocityR (normal, tangent, rolling rows) between the
 // vertex and its projection on the line, NewtonImpactRollingFrictionNSL,
 // MoreauJeanOSI, RollingFrictionContact (rolling_friction_2d_driver).  At
 // t = 0 the polygon rests on a face, its centre above the origin.
@@ -39,7 +39,7 @@ using siconos::algebra::BlockVector;
 using siconos::algebra::SiconosVector2;
 
 // a vertex (vx, vy in the frame of the polygon) against the line y = 0
-struct vertex_line_r : siconos::modeling::Lagrangian2d3DR {
+struct vertex_line_r : siconos::modeling::Lagrangian2dVelocityAngularVelocityR {
   double vx, vy;
   vertex_line_r(double x, double y) : vx(x), vy(y) {}
   void update(const BlockVector& q) {
@@ -52,11 +52,11 @@ struct vertex_line_r : siconos::modeling::Lagrangian2d3DR {
   }
   void computeh(const BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) override {
     update(q);
-    Lagrangian2d3DR::computeh(q, y);
+    Lagrangian2dVelocityAngularVelocityR::computeh(q, y);
   }
-  void computeJacobianhOver_q(const BlockVector& q) override {
+  void computeContactMatrix(const BlockVector& q) override {
     update(q);
-    Lagrangian2d3DR::computeJacobianhOver_q(q);
+    Lagrangian2dVelocityAngularVelocityR::computeContactMatrix(q);
   }
 };
 

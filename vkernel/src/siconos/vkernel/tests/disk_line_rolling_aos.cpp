@@ -17,7 +17,7 @@
  */
 
 // AOS kernel reference: one disk on the line y = 0, exact
-// geometry, Lagrangian2d3DR (normal, tangent, rolling rows),
+// geometry, Lagrangian2dVelocityAngularVelocityR (normal, tangent, rolling rows),
 // NewtonImpactRollingFrictionNSL, MoreauJeanOSI, RollingFrictionContact
 // (rolling_friction_2d_driver).  The slope alpha is modelled by tilting
 // gravity: g = g (sin alpha, -cos alpha) in the frame of the line.
@@ -34,7 +34,7 @@
 using siconos::algebra::BlockVector;
 using siconos::algebra::SiconosVector2;
 
-struct disk_line_r : siconos::modeling::Lagrangian2d3DR {
+struct disk_line_r : siconos::modeling::Lagrangian2dVelocityAngularVelocityR {
   double R;
   explicit disk_line_r(double r) : R(r) {}
   void update(const BlockVector& q) {
@@ -46,11 +46,11 @@ struct disk_line_r : siconos::modeling::Lagrangian2d3DR {
   }
   void computeh(const BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) override {
     update(q);
-    Lagrangian2d3DR::computeh(q, y);
+    Lagrangian2dVelocityAngularVelocityR::computeh(q, y);
   }
-  void computeJacobianhOver_q(const BlockVector& q) override {
+  void computeContactMatrix(const BlockVector& q) override {
     update(q);
-    Lagrangian2d3DR::computeJacobianhOver_q(q);
+    Lagrangian2dVelocityAngularVelocityR::computeContactMatrix(q);
   }
 };
 
