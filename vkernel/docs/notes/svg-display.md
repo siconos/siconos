@@ -241,7 +241,9 @@ body while it is interpolated; a time bar.
   of its output step). It is a script over the same SMIL animation: where scripts
   do not run (an SVG shown as an image, `<img>`, as in rendered Markdown)
   the animation plays as without it. Open the file itself in a browser
-  (Firefox, Chromium). Off by default; the committed figures have none.
+  (Firefox, Chromium). With the controls the animation opens paused on
+  its first frame (play: the button or space); without them it plays as
+  soon as it is opened. Off by default; the committed figures have none.
 - A browser (Firefox, Chromium) plays it. A viewer without SMIL
   (rsvg-convert, Inkscape, print) shows the first step: every animation
   has its stills, `--frame N` (section 1). Checked in Firefox (icecat,

@@ -519,6 +519,8 @@ CONTROLS_SCRIPT = """(function () {
       e.preventDefault();
     }
   });
+  // opened paused on the first frame: play (button or space) to start
+  go(0);
   (function loop() {
     show();
     window.requestAnimationFrame(loop);
