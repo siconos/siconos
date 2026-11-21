@@ -164,8 +164,8 @@ class myExtrema_GenExtSS {
   Standard_Real myv2sup;
   Standard_Integer myusample;
   Standard_Integer myvsample;
-  Handle_TColgp_HArray2OfPnt mypoints1;
-  Handle_TColgp_HArray2OfPnt mypoints2;
+  Handle(TColgp_HArray2OfPnt) mypoints1;
+  Handle(TColgp_HArray2OfPnt) mypoints2;
   Standard_Real mytol1;
   Standard_Real mytol2;
   myExtrema_FuncExtSS myF;
