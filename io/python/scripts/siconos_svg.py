@@ -129,6 +129,15 @@ if __name__ == "__main__":
         "--speed", type=float, default=1.0, help="the playback speed, 1: real time"
     )
     parser.add_argument(
+        "--from",
+        dest="start",
+        type=float,
+        help="the animation and the strobe from this time",
+    )
+    parser.add_argument(
+        "--to", dest="end", type=float, help="the animation and the strobe to this time"
+    )
+    parser.add_argument(
         "--controls",
         action="store_true",
         help="buttons under the animation: pause, step, seek (a script)",
@@ -150,6 +159,7 @@ if __name__ == "__main__":
         discrete=args.discrete,
         speed=args.speed,
         controls=args.controls,
+        window=(args.start, args.end),
         arrows=args.arrows,
         chains=args.chains,
         cones=args.cones,

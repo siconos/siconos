@@ -428,8 +428,9 @@ def test_animation_controls(bounce_run, tmp_path):
     text = read(name)
     root = ET.fromstring(text)
     ids = {e.get("id") for e in root.iter()}
-    for button in ("first", "previous", "play", "next", "last", "seek", "time"):
+    for button in ("first", "previous", "play", "next", "last", "finer", "coarser"):
         assert f"control-{button}" in ids
+    assert "control-seek" in ids and "control-time" in ids
     data = re.search(
         r"var ANIMATION = \{starts: \[([^\]]*)\], times: \[([^\]]*)\], "
         r"duration: ([0-9.e+-]+)",
@@ -442,6 +443,29 @@ def test_animation_controls(bounce_run, tmp_path):
     # the same animation under the controls
     body = re.compile(r'<g id="bodies".*?\n</g>\n', re.S)
     assert body.search(text).group(0) == body.search(read(plain)).group(0)
+
+
+def test_animation_window(bounce_run, tmp_path):
+    """window: the frames are the output steps between its ends, all of
+    them with stride 1, every second one and the last with stride 2."""
+    with h5py.File(bounce_run, "r") as f:
+        times = svg.FileSteps(f["data"]).times
+    t0, t1 = float(times[3]), float(times[9])
+    for stride in (1, 2):
+        (name,) = svg.convert(
+            bounce_run,
+            animate=True,
+            controls=True,
+            window=(t0, t1),
+            stride=stride,
+            directory=str(tmp_path / str(stride)),
+        )
+        drawn = re.search(r"times: \[([^\]]*)\]", read(name)).group(1)
+        inside = [t for t in times if t0 <= t <= t1]
+        expected = sorted(set(inside[::stride]) | {inside[-1]})
+        assert np.allclose(_numbers(drawn), expected, rtol=1e-8)
+    with pytest.raises(ValueError):
+        svg.convert(bounce_run, animate=True, window=(10.0, 11.0))
 
 
 def test_restart(tmp_path):

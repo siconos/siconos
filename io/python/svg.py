@@ -99,6 +99,17 @@ def _same_time(a, b):
     return abs(a - b) <= SAME_TIME * max(1.0, abs(a))
 
 
+def _in_window(time, window):
+    """time in the window (t0, t1) of an animation, the ends included (None:
+    no bound)."""
+    if window is None:
+        return True
+    t0, t1 = window
+    return (t0 is None or time >= t0 or _same_time(time, t0)) and (
+        t1 is None or time <= t1 or _same_time(time, t1)
+    )
+
+
 def scheme_name(osi):
     """The name of an integrator (a class or an object) for the title, as
     the run options of the file have it."""
@@ -409,6 +420,24 @@ CONTROLS_SCRIPT = """(function () {
   // a frame is shown from a little after its start, where the discrete
   // values (the contacts of the step) are those of the frame
   var EPS = 1e-6 * a.duration;
+  // the step of previous and next, in frames: 1, 2, 5, 10, 20, 50...
+  var sizes = [1];
+  while (sizes[sizes.length - 1] < n - 1) {
+    var last = sizes[sizes.length - 1];
+    sizes.push(String(last).charAt(0) === "2" ? last * 5 / 2 : last * 2);
+  }
+  var size = 0;
+  // the interval of the frames, if they are evenly spaced
+  var spacing = null;
+  if (n > 1) {
+    var lo = Infinity, hi = 0;
+    for (var j = 1; j < n; j++) {
+      var d = a.times[j] - a.times[j - 1];
+      lo = Math.min(lo, d);
+      hi = Math.max(hi, d);
+    }
+    if (hi - lo <= 1e-6 * hi) spacing = (a.times[n - 1] - a.times[0]) / (n - 1);
+  }
   function now() {
     var t = svg.getCurrentTime() % a.duration;
     return t < 0 ? 0 : t;
@@ -427,8 +456,12 @@ CONTROLS_SCRIPT = """(function () {
     var paused = svg.animationsPaused();
     play.setAttribute("visibility", paused ? "visible" : "hidden");
     pause.setAttribute("visibility", paused ? "hidden" : "visible");
+    var k1 = sizes[size];
+    var by = k1 + (k1 > 1 ? " frames" : " frame") +
+      (spacing ? " = " + Number((k1 * spacing).toPrecision(6)) + " s" : "");
     label.textContent = "frame " + k + " / " + (n - 1) + " \\u00b7 t = " +
-      Number(p.toPrecision(6)) + " s" + (paused ? " \\u00b7 paused" : "");
+      Number(p.toPrecision(6)) + " s \\u00b7 step " + by +
+      (paused ? " \\u00b7 paused" : "");
   }
   function go(k) {
     k = Math.max(0, Math.min(n - 1, k));
@@ -440,7 +473,11 @@ CONTROLS_SCRIPT = """(function () {
     var t = now(), k = frame(t);
     // back: first to the start of the frame shown
     if (d < 0 && t - a.starts[k] > 2 * EPS) d = 0;
-    go(k + d);
+    go(k + d * sizes[size]);
+  }
+  function resize(d) {
+    size = Math.max(0, Math.min(sizes.length - 1, size + d));
+    show();
   }
   function toggle() {
     if (svg.animationsPaused()) svg.unpauseAnimations();
@@ -455,6 +492,8 @@ CONTROLS_SCRIPT = """(function () {
   on("control-play", toggle);
   on("control-next", function () { step(1); });
   on("control-last", function () { go(n - 1); });
+  on("control-finer", function () { resize(-1); });
+  on("control-coarser", function () { resize(1); });
   on("control-seek", function (e) {
     var p = svg.createSVGPoint();
     p.x = e.clientX;
@@ -469,7 +508,10 @@ CONTROLS_SCRIPT = """(function () {
     ArrowLeft: function () { step(-1); },
     ArrowRight: function () { step(1); },
     Home: function () { go(0); },
-    End: function () { go(n - 1); }
+    End: function () { go(n - 1); },
+    "-": function () { resize(-1); },
+    "+": function () { resize(1); },
+    "=": function () { resize(1); }
   };
   document.addEventListener("keydown", function (e) {
     if (keys[e.key]) {
@@ -1348,6 +1390,9 @@ class Picture:
             ("play", "M8,4l9,5l-9,5z"),
             ("next", "M9,4l8,5l-8,5z"),
             ("last", "M17,4v10M7,4l8,5l-8,5z"),
+            # the step of previous and next: smaller, larger
+            ("finer", "M7,9h10"),
+            ("coarser", "M7,9h10M12,4v10"),
         )
         w(f'<g id="controls" font-size="11" fill="{INK}">')
         for k, (name, d) in enumerate(icons):
@@ -1363,6 +1408,8 @@ class Picture:
                     f'<path id="icon-pause" d="M8,4h3v10h-3zM13,4h3v10h-3z" '
                     f'fill="{INK}"/>'
                 )
+            elif name in ("finer", "coarser"):
+                w(f'<path d="{d}" fill="none" stroke="{INK}" stroke-width="2"/>')
             else:
                 w(f'<path d="{d}" fill="{INK}" stroke="{INK}"/>')
             w("</g>")
@@ -1629,7 +1676,8 @@ class RunPictures:
     the drawn steps, as convert counts those of the file.
     options: those of Picture, and coulomb (the Coulomb plot of each
     picture), animate and strobe (of the output steps, written at the end;
-    the steps are held in memory), uniform, discrete, speed, controls (of
+    the steps are held in memory), window (t0, t1: the output steps of the
+    animation, those only are held), uniform, discrete, speed, controls (of
     the animation), directory.
     """
 
@@ -1639,6 +1687,7 @@ class RunPictures:
         self.coulomb = options.pop("coulomb", False)
         self.animate = options.pop("animate", False)
         self.strobe = options.pop("strobe", False)
+        self.window = options.pop("window", None)
         self.animation_options = {
             key: options.pop(key)
             for key in ("uniform", "discrete", "speed", "controls")
@@ -1679,7 +1728,7 @@ class RunPictures:
         if self._voted != step.time:
             self.picture.vote(step)
             self._voted = step.time
-            if self.animate or self.strobe:
+            if (self.animate or self.strobe) and _in_window(step.time, self.window):
                 self.steps.append(step)
 
     def draw(self, step):
@@ -1817,6 +1866,7 @@ def convert(
     discrete=False,
     speed=1.0,
     controls=False,
+    window=None,
     **options,
 ):
     """Write the pictures of the output steps at times (at or before each)
@@ -1827,8 +1877,11 @@ def convert(
     animate, strobe: an animation, a strobe picture of the output steps
     (every stride-th one, the last included); the pictures of times and
     frames then use the view of the animation, so that a picture is the
-    frame of the animation. uniform, discrete, speed, controls: those of
-    the animation (Picture.write_animation).
+    frame of the animation. window: (t0, t1), the output steps of the
+    animation and of the strobe picture between t0 and t1 (included; None
+    for no bound), every stride-th one from the first, the last included.
+    uniform, discrete, speed, controls: those of the animation
+    (Picture.write_animation).
     options: those of Picture. Returns the file names.
     """
     import h5py
@@ -1849,7 +1902,12 @@ def convert(
             vtkhdf.ShapeTable(data, dimension), vtkhdf.FemMeshes(data), **options
         )
         n = len(steps.times)
-        selected = sorted(set(range(0, n, max(stride, 1))) | {n - 1})
+        inside = [k for k in range(n) if _in_window(steps.times[k], window)]
+        if (animate or strobe) and not inside:
+            raise ValueError(f"no output step in the window {window}")
+        selected = (
+            sorted(set(inside[:: max(stride, 1)]) | {inside[-1]}) if inside else []
+        )
         requests = [(steps.resolve(time=t), t) for t in times]
         if animate or strobe:
             # a frame of the animation

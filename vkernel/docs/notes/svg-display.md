@@ -79,6 +79,7 @@ siconos_svg run.hdf5 --time 0.27 -o fig.svg
 siconos_svg run.hdf5 --dir pictures --coulomb # and the Coulomb plots
 siconos_svg run.hdf5 --animate --stride 2     # every second output step
 siconos_svg run.hdf5 --animate --controls     # with pause, step, seek
+siconos_svg run.hdf5 --animate --controls --from 0.4 --to 0.6  # an event
 siconos_svg run.hdf5 --strobe --stride 10 --frame 3
 ```
 
@@ -223,13 +224,21 @@ body while it is interpolated; a time bar.
   The last step is held for one frame (0.1 s, or the mean interval of the
   steps) before the animation starts again.
 - Frames are output steps: an animation is never finer than
-  `output_frequency`. `--stride k` keeps every k-th step.
+  `output_frequency` × h, and nothing is drawn between two output steps
+  (it would be an interpolation, not the simulation). `--stride k` keeps
+  every k-th step (default 1, all of them). `--from T0 --to T1` (`window`:
+  (T0, T1) in `svg_options`, None for no bound) keeps the output steps
+  between T0 and T1 only: an event at the finest step (stride 1, or a run
+  with a smaller `output_frequency`) without the size of the whole run; in
+  a run, only the steps of the window are held in memory.
 - `--controls` (`"controls": True` in `svg_options`) adds a bar under the
   picture to examine a behaviour: first frame, previous, play / pause,
-  next, last frame (also Home, ←, space, →, End), a click on the time bar
-  to go to a time, and the frame number and its physical time (between
-  two frames, the interpolated time; paused on a frame, the time of its
-  output step). It is a script over the same SMIL animation: where scripts
+  next, last frame (also Home, ←, space, →, End), the step of previous
+  and next, − and + (also the keys - and +): 1, 2, 5, 10, 20, 50...
+  frames, given in seconds when the frames are evenly spaced; a click on
+  the time bar to go to a time; the frame number and its physical time
+  (between two frames, the interpolated time; paused on a frame, the time
+  of its output step). It is a script over the same SMIL animation: where scripts
   do not run (an SVG shown as an image, `<img>`, as in rendered Markdown)
   the animation plays as without it. Open the file itself in a browser
   (Firefox, Chromium). Off by default; the committed figures have none.

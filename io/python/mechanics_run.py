@@ -596,7 +596,8 @@ class MechanicsHdf5Runner_run_options(dict):
                       material_sides, labels) and of the run: directory,
                       coulomb (the Coulomb plot of each picture), animate
                       and strobe (of the output steps, written at the end
-                      of the run), uniform, discrete, speed, controls""",
+                      of the run), window (t0, t1: their output steps),
+                      uniform, discrete, speed, controls""",
         )
 
         # default verbose and debug  options
