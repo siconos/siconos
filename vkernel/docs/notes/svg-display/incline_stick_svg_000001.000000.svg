@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="474" viewBox="0 -22 800 474" font-family="sans-serif">
+<rect x="0" y="-22" width="100%" height="100%" fill="#fcfcfb"/>
+<text id="title" font-size="12" fill="#2b2b2b"><tspan x="6" y="-6">t = 1 s · MoreauJeanOSI · 1 bodies · 2 contacts · mu = 0.5 · arrows: reaction impulse, largest 0.0349 N s</tspan></text>
+<defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#c0392b"/></marker></defs>
+<g id="static" stroke-linecap="butt">
+<g id="s1"><path id="h1_0" d="M80.21,139.29l-30.84,18.78M120.19,153.83l-30.84,18.78M160.16,168.38l-30.84,18.78M200.13,182.93l-30.84,18.78M240.11,197.48l-30.84,18.78M280.08,212.03l-30.84,18.78M320.05,226.58l-30.84,18.78M360.03,241.13l-30.84,18.78M400.00,255.68l-30.84,18.78M439.97,270.23l-30.84,18.78M479.95,284.78l-30.84,18.78M519.92,299.33l-30.84,18.78M559.89,313.88l-30.84,18.78M599.87,328.42l-30.84,18.78M639.84,342.97l-30.84,18.78M679.81,357.52l-30.84,18.78M719.79,372.07l-30.84,18.78" stroke="#8c8c8c" stroke-width="0.8" fill="none"/><line id="l1_0" x1="80.21" y1="139.29" x2="719.79" y2="372.07" stroke="#2b2b2b" stroke-width="1.5"/></g>
+</g>
+<g id="bodies" stroke="#2b2b2b" stroke-width="0.8" fill-opacity="0.85">
+<g id="b1" fill="#440154"><polygon points="186.81,178.11 293.40,216.91 332.20,110.31 225.61,71.52"/></g>
+</g>
+<g id="contacts" fill="none">
+<path d="M182.17,137.81L186.81,178.11L216.27,150.22" stroke="#e8a33d" stroke-width="1" fill="#e8a33d" fill-opacity="0.15"/>
+<line x1="186.81" y1="178.11" x2="196.77" y2="138.78" stroke="#c0392b" stroke-width="1.5" marker-end="url(#head)"/>
+<path d="M282.40,121.29L293.40,216.91L363.30,150.73" stroke="#e8a33d" stroke-width="1" fill="#e8a33d" fill-opacity="0.15"/>
+<line x1="293.40" y1="216.91" x2="283.44" y2="121.17" stroke="#c0392b" stroke-width="1.5" marker-end="url(#head)"/>
+</g>
+<g id="legend" font-size="11" fill="#2b2b2b"><rect x="630" y="432" width="18" height="12" fill="#440154"/><text x="652" y="443">|v| = 8.67e-18 m/s</text></g>
+</svg>

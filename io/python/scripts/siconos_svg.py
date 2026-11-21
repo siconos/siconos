@@ -3,9 +3,17 @@
 Description: SVG pictures of the output steps of a 2D Siconos mechanics-IO
 HDF5 file: the static objects, the fixed segments hatched on their material
 side, the bodies coloured by their speed, the contacts (reaction impulse,
-Coulomb cone).  One file per picture, <file>_svg_<time>.svg beside the HDF5
-file.  --time draws the output step at or before the time; --frame an
-output step index (negative from the end); the last step by default.
+Coulomb cone, force chains), the FEM meshes deformed.  One file per
+picture, <file>_svg_<time>.svg beside the HDF5 file.  --time draws the
+output step at or before the time; --frame an output step index (negative
+from the end); the last step by default.  --coulomb adds the (r_n, r_t)
+plot of each picture, <file>_coulomb_<time>.svg.
+
+--animate writes <file>_svg_animation.svg, the output steps animated
+(SMIL: a browser plays it, a viewer without SMIL shows the first step);
+--strobe <file>_svg_strobe.svg, the steps superimposed.  With either, the
+pictures of --time and --frame are drawn in the view of the animation:
+--frame N is the frame N of the animation (of the steps kept by --stride).
 
 Simulations run with run_options["svg_output"] = "0.5,1.0" (or --svg-output
 on the siconos command line) write the same pictures during the run.
@@ -52,6 +60,7 @@ if __name__ == "__main__":
     )
     for name, what in (
         ("arrows", "the reaction arrows"),
+        ("chains", "the force chains"),
         ("cones", "the Coulomb cones"),
     ):
         group = parser.add_mutually_exclusive_group()
@@ -72,7 +81,53 @@ if __name__ == "__main__":
         help="the material side of the segments of the static object ID: on the "
         "side of perp(p2 - p1) (+1) or the other (-1), instead of the inference",
     )
+    parser.add_argument(
+        "--scale",
+        choices=("proportional", "fixed", "log"),
+        default="proportional",
+        help="the length of the arrows: proportional to the impulse, fixed (the "
+        "direction only) or log (3 decades)",
+    )
+    parser.add_argument(
+        "--colour",
+        choices=("speed", "omega", "none"),
+        default="speed",
+        help="the colouring of the bodies: |v|, |omega| or none",
+    )
     parser.add_argument("--labels", action="store_true", help="the body ids")
+    parser.add_argument(
+        "--view",
+        type=float,
+        nargs=4,
+        metavar=("X0", "X1", "Y0", "Y1"),
+        help="crop the pictures to this window (said in their title)",
+    )
+    parser.add_argument(
+        "--coulomb", action="store_true", help="the Coulomb plot of each picture"
+    )
+    parser.add_argument(
+        "--animate", action="store_true", help="the animation of the output steps"
+    )
+    parser.add_argument(
+        "--strobe", action="store_true", help="the output steps superimposed"
+    )
+    parser.add_argument(
+        "--stride",
+        type=int,
+        default=1,
+        help="every stride-th output step (and the last)",
+    )
+    parser.add_argument(
+        "--uniform",
+        action="store_true",
+        help="one frame per output step, instead of the physical times",
+    )
+    parser.add_argument(
+        "--discrete", action="store_true", help="no interpolation between the steps"
+    )
+    parser.add_argument(
+        "--speed", type=float, default=1.0, help="the playback speed, 1: real time"
+    )
     args = parser.parse_args()
 
     names = convert(
@@ -82,10 +137,21 @@ if __name__ == "__main__":
         directory=args.dir,
         output=args.output,
         mode=args.mode,
+        coulomb=args.coulomb,
+        animate=args.animate,
+        strobe=args.strobe,
+        stride=args.stride,
+        uniform=args.uniform,
+        discrete=args.discrete,
+        speed=args.speed,
         arrows=args.arrows,
+        chains=args.chains,
         cones=args.cones,
+        scale=args.scale,
+        colour=args.colour,
         material_sides=dict(args.material_side),
         labels=args.labels,
+        view=args.view,
     )
     for name in names:
         print(name)

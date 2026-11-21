@@ -586,6 +586,18 @@ class MechanicsHdf5Runner_run_options(dict):
                       time is drawn, in <io_filename>_svg_<time>.svg (see
                       siconos.io.svg and the siconos_svg converter)""",
         )
+        create_option(
+            d,
+            "svg_options",
+            "dict, optional",
+            None,
+            """the options of the SVG pictures (siconos.io.svg.Picture:
+                      mode, arrows, chains, cones, scale, colour,
+                      material_sides, labels) and of the run: directory,
+                      coulomb (the Coulomb plot of each picture), animate
+                      and strobe (of the output steps, written at the end
+                      of the run), uniform, discrete, speed""",
+        )
 
         # default verbose and debug  options
         create_option(
@@ -2971,7 +2983,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             contacts = self._io.contactPoints(
                 self._nsds, self._output_contact_index_set
             )
-        rows = (
+        # the FEM displacements in spatial order, as output_displacements
+        fem = {}
+        if self._fem_dof_mappings:
+            for ds_id, displacements in self._io.displacements(self._nsds).items():
+                mapping = self._fem_dof_mappings.get(ds_id)
+                if mapping is not None:
+                    fem[ds_id] = np.asarray(
+                        displacements[mapping["dof_indices"]], dtype=np.float32
+                    ).astype(np.float64)
+        step = siconos.io.svg.Step(
             time,
             siconos.io.svg.as_table(bodies[:, 1:], 8),
             siconos.io.svg.as_table(velocities[:, 1:], 7),
@@ -2979,11 +3000,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._format_adaptor["static"][self._static_rows, 1:], 8
             ),
             siconos.io.svg.as_table(np.asarray(contacts)[:, :columns], columns),
+            fem,
         )
         if output_step:
-            self._svg.output_step(*rows)
+            self._svg.output_step(step)
         if due:
-            self._svg.draw(*rows)
+            self._svg.draw(step)
 
     def output_bodies(self, with_timer=False, initial=False):
         """
@@ -3942,17 +3964,30 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     append=self._vtkhdf_append,
                 )
 
-        if run_options.get("svg_output"):
+        svg_options = dict(run_options.get("svg_options") or {})
+        if (
+            run_options.get("svg_output")
+            or svg_options.get("animate")
+            or (svg_options.get("strobe"))
+        ):
             if self._dimension != 2:
                 siconos.io.tools.warn("svg_output: 2D simulations only, ignored")
             else:
+                svg_options.setdefault(
+                    "scheme", siconos.io.svg.scheme_name(run_options["osi"])
+                )
+                svg_options.setdefault("length_unit", run_options["gravity_scale"])
                 self._svg = siconos.io.svg.RunPictures(
                     self._io_filename,
                     siconos.io.vtkhdf.ShapeTable(self._data, self._dimension),
-                    siconos.io.svg.parse_times(run_options["svg_output"]),
+                    siconos.io.svg.parse_times(run_options.get("svg_output") or ()),
                     h,
-                    scheme=siconos.io.svg.scheme_name(run_options["osi"]),
+                    siconos.io.vtkhdf.FemMeshes(self._data),
+                    **svg_options,
                 )
+                if len(times) > 0:
+                    # a restart: the votes of the steps of the file
+                    self._svg.preload(self._data)
 
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by

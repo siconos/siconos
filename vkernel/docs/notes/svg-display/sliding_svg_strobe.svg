@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="355" viewBox="0 -38 800 355" font-family="sans-serif">
+<rect x="0" y="-38" width="100%" height="100%" fill="#fcfcfb"/>
+<text id="title" font-size="12" fill="#2b2b2b"><tspan x="6" y="-22">t = 0 to 0.7 s, 10 steps superimposed · MoreauJeanOSI · 1 bodies · 2 contacts · mu = 0.3</tspan><tspan x="6" y="-6">arrows: reaction impulse, largest 0.0251 N s</tspan></text>
+<defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#c0392b"/></marker></defs>
+<g id="static" stroke-linecap="butt">
+<g id="s1"><path id="h1_0" d="M88.19,220.92l-24.80,31.01M132.74,220.92l-24.80,31.01M177.28,220.92l-24.80,31.01M221.82,220.92l-24.80,31.01M266.37,220.92l-24.80,31.01M310.91,220.92l-24.80,31.01M355.46,220.92l-24.80,31.01M400.00,220.92l-24.80,31.01M444.54,220.92l-24.80,31.01M489.09,220.92l-24.80,31.01M533.63,220.92l-24.80,31.01M578.18,220.92l-24.80,31.01M622.72,220.92l-24.80,31.01M667.26,220.92l-24.80,31.01M711.81,220.92l-24.80,31.01" stroke="#8c8c8c" stroke-width="0.8" fill="none"/><line id="l1_0" x1="88.19" y1="220.92" x2="711.81" y2="220.92" stroke="#2b2b2b" stroke-width="1.5"/></g>
+</g>
+<g id="bodies" stroke="#2b2b2b" stroke-width="0.8">
+<g id="frame0" opacity="0.150">
+<g id="b1" fill="#fde725"><polygon points="150.55,220.92 275.28,220.92 275.28,96.20 150.55,96.20"/></g>
+</g>
+<g id="frame1" opacity="0.244">
+<g id="b1" fill="#fde725"><polygon points="164.87,220.95 289.59,220.96 289.60,96.24 164.88,96.23"/></g>
+</g>
+<g id="frame2" opacity="0.339">
+<g id="b1" fill="#5ec962"><polygon points="181.89,220.95 306.61,220.96 306.62,96.24 181.90,96.23"/></g>
+</g>
+<g id="frame3" opacity="0.433">
+<g id="b1" fill="#5ec962"><polygon points="196.56,220.95 321.28,220.96 321.29,96.24 196.57,96.23"/></g>
+</g>
+<g id="frame4" opacity="0.528">
+<g id="b1" fill="#21918c"><polygon points="208.88,220.95 333.61,220.96 333.61,96.24 208.89,96.23"/></g>
+</g>
+<g id="frame5" opacity="0.622">
+<g id="b1" fill="#21918c"><polygon points="218.86,220.95 343.58,220.96 343.59,96.24 218.87,96.23"/></g>
+</g>
+<g id="frame6" opacity="0.717">
+<g id="b1" fill="#3b528b"><polygon points="226.48,220.95 351.21,220.96 351.22,96.24 226.49,96.23"/></g>
+</g>
+<g id="frame7" opacity="0.811">
+<g id="b1" fill="#3b528b"><polygon points="231.76,220.95 356.49,220.96 356.49,96.24 231.77,96.23"/></g>
+</g>
+<g id="frame8" opacity="0.906">
+<g id="b1" fill="#440154"><polygon points="234.69,220.95 359.42,220.96 359.42,96.24 234.70,96.23"/></g>
+</g>
+<g id="frame9" opacity="1.000">
+<g id="b1" fill="#440154"><polygon points="235.35,220.95 360.07,220.96 360.08,96.24 235.36,96.23"/></g>
+</g>
+</g>
+<g id="contacts" fill="none">
+<path d="M204.94,119.60L235.35,220.95L265.75,119.60" stroke="#e8a33d" stroke-width="1" fill="#e8a33d" fill-opacity="0.15"/>
+<line x1="235.35" y1="220.95" x2="257.10" y2="117.40" stroke="#c0392b" stroke-width="1.5" marker-end="url(#head)"/>
+<path d="M329.66,119.59L360.07,220.96L390.48,119.59" stroke="#e8a33d" stroke-width="1" fill="#e8a33d" fill-opacity="0.15"/>
+<line x1="360.07" y1="220.96" x2="338.32" y2="117.39" stroke="#c0392b" stroke-width="1.5" marker-end="url(#head)"/>
+</g>
+<g id="legend" font-size="11" fill="#2b2b2b"><text x="626" y="308" text-anchor="end">|v| 3.3e-16</text><rect x="630" y="297" width="18" height="12" fill="#440154"/><rect x="648" y="297" width="18" height="12" fill="#3b528b"/><rect x="666" y="297" width="18" height="12" fill="#21918c"/><rect x="684" y="297" width="18" height="12" fill="#5ec962"/><rect x="702" y="297" width="18" height="12" fill="#fde725"/><text x="724" y="308">2 m/s</text></g>
+</svg>

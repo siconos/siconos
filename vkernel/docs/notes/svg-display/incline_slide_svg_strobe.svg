@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="602" viewBox="0 -38 800 602" font-family="sans-serif">
+<rect x="0" y="-38" width="100%" height="100%" fill="#fcfcfb"/>
+<text id="title" font-size="12" fill="#2b2b2b"><tspan x="6" y="-22">t = 0 to 1 s, 12 steps superimposed · MoreauJeanOSI · 1 bodies · 2 contacts · mu = 0.3</tspan><tspan x="6" y="-6">arrows: reaction impulse, largest 0.0288 N s</tspan></text>
+<defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#c0392b"/></marker></defs>
+<g id="static" stroke-linecap="butt">
+<g id="s1"><path id="h1_0" d="M85.58,115.49l-35.89,14.02M124.88,138.18l-35.89,14.02M164.18,160.88l-35.89,14.02M203.48,183.57l-35.89,14.02M242.79,206.26l-35.89,14.02M282.09,228.95l-35.89,14.02M321.39,251.64l-35.89,14.02M360.70,274.33l-35.89,14.02M400.00,297.03l-35.89,14.02M439.30,319.72l-35.89,14.02M478.61,342.41l-35.89,14.02M517.91,365.10l-35.89,14.02M557.21,387.79l-35.89,14.02M596.52,410.48l-35.89,14.02M635.82,433.18l-35.89,14.02M675.12,455.87l-35.89,14.02M714.42,478.56l-35.89,14.02" stroke="#8c8c8c" stroke-width="0.8" fill="none"/><line id="l1_0" x1="85.58" y1="115.49" x2="714.42" y2="478.56" stroke="#2b2b2b" stroke-width="1.5"/></g>
+</g>
+<g id="bodies" stroke="#2b2b2b" stroke-width="0.8">
+<g id="frame0" opacity="0.150">
+<g id="b1" fill="#440154"><polygon points="190.38,176.00 295.19,236.51 355.70,131.71 250.89,71.20"/></g>
+</g>
+<g id="frame1" opacity="0.227">
+<g id="b1" fill="#440154"><polygon points="191.17,176.46 295.98,236.97 356.49,132.16 251.68,71.65"/></g>
+</g>
+<g id="frame2" opacity="0.305">
+<g id="b1" fill="#3b528b"><polygon points="194.38,178.31 299.19,238.82 359.70,134.02 254.89,73.50"/></g>
+</g>
+<g id="frame3" opacity="0.382">
+<g id="b1" fill="#3b528b"><polygon points="200.06,181.59 304.87,242.10 365.38,137.29 260.57,76.78"/></g>
+</g>
+<g id="frame4" opacity="0.459">
+<g id="b1" fill="#21918c"><polygon points="208.21,186.29 313.02,246.81 373.53,142.00 268.72,81.49"/></g>
+</g>
+<g id="frame5" opacity="0.536">
+<g id="b1" fill="#21918c"><polygon points="218.82,192.42 323.63,252.93 384.14,148.13 279.33,87.62"/></g>
+</g>
+<g id="frame6" opacity="0.614">
+<g id="b1" fill="#21918c"><polygon points="231.91,199.98 336.72,260.49 397.23,155.68 292.42,95.17"/></g>
+</g>
+<g id="frame7" opacity="0.691">
+<g id="b1" fill="#5ec962"><polygon points="247.46,208.96 352.27,269.47 412.78,164.66 307.97,104.15"/></g>
+</g>
+<g id="frame8" opacity="0.768">
+<g id="b1" fill="#5ec962"><polygon points="265.48,219.36 370.29,279.87 430.80,175.06 325.99,114.55"/></g>
+</g>
+<g id="frame9" opacity="0.845">
+<g id="b1" fill="#fde725"><polygon points="285.97,231.19 390.78,291.70 451.29,186.89 346.48,126.38"/></g>
+</g>
+<g id="frame10" opacity="0.923">
+<g id="b1" fill="#fde725"><polygon points="308.93,244.45 413.74,304.96 474.25,200.15 369.44,139.64"/></g>
+</g>
+<g id="frame11" opacity="1.000">
+<g id="b1" fill="#fde725"><polygon points="313.82,247.27 418.63,307.78 479.14,202.97 374.33,142.46"/></g>
+</g>
+</g>
+<g id="contacts" fill="none">
+<path d="M326.54,193.46L313.82,247.27L354.06,209.35" stroke="#e8a33d" stroke-width="1" fill="#e8a33d" fill-opacity="0.15"/>
+<line x1="313.82" y1="247.27" x2="326.54" y2="193.46" stroke="#c0392b" stroke-width="1.5" marker-end="url(#head)"/>
+<path d="M442.25,207.84L418.63,307.78L493.36,237.35" stroke="#e8a33d" stroke-width="1" fill="#e8a33d" fill-opacity="0.15"/>
+<line x1="418.63" y1="307.78" x2="442.25" y2="207.84" stroke="#c0392b" stroke-width="1.5" marker-end="url(#head)"/>
+</g>
+<g id="legend" font-size="11" fill="#2b2b2b"><text x="626" y="555" text-anchor="end">|v| 0</text><rect x="630" y="544" width="18" height="12" fill="#440154"/><rect x="648" y="544" width="18" height="12" fill="#3b528b"/><rect x="666" y="544" width="18" height="12" fill="#21918c"/><rect x="684" y="544" width="18" height="12" fill="#5ec962"/><rect x="702" y="544" width="18" height="12" fill="#fde725"/><text x="724" y="555">2.36 m/s</text></g>
+</svg>

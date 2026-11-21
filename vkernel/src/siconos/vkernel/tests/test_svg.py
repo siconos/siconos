@@ -16,18 +16,26 @@
 # limitations under the License.
 #
 
-"""The SVG pictures of siconos.io.svg on a vnative run: two disks roll down
-a slope against a wall.
+"""The SVG pictures of siconos.io.svg on vnative runs.
 
-- the pictures of the run (svg_output) and of the file (convert) are the
-  same bytes, with output_format "vtkhdf" too (no dynamic tables);
+slope: two disks roll down a slope against a wall.
+- the pictures of the run (svg_output, svg_options) and of the file
+  (convert) are the same bytes, the animation and the Coulomb plot too, with
+  output_format "vtkhdf" (no dynamic tables) as well;
 - the slope is hatched below, the wall on its right, from the contacts;
-- a disk is drawn where the dynamic table puts it;
+- a disk is drawn where the dynamic table puts it, its contact points on
+  its outline;
 - a time between two output steps draws the step before it;
 - the picture at t = 1 is the reference svg_slope_wall.ref.svg
-  (SICONOS_SVG_UPDATE_REF=1 rewrites it);
-- the side inference on synthetic contacts: both sides, end points, the
-  override.
+  (SICONOS_SVG_UPDATE_REF=1 rewrites it).
+wall: a disk thrown at a wall from each side: the wall is not hatched.
+bounce: a disk thrown on a floor, animated: the arrow tip is on an edge of
+the cone exactly when the contact slides; the picture of a frame and the
+frame of the animation agree; the hatch is the same in all the frames.
+restart: the slope run to 0.5 then continued to 1: the converter draws the
+picture of the continued run.
+The side inference on synthetic contacts: both sides, end points, the
+override.
 
 Each simulation runs in its own process (a second vnative simulation in a
 process crashes). Run with pytest, nonos and siconos.io in the PYTHONPATH.
@@ -37,6 +45,7 @@ import os
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 import h5py
 import numpy as np
@@ -48,12 +57,49 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REFERENCE = os.path.join(HERE, "svg_slope_wall.ref.svg")
 RADIUS = 0.5
 TIMES = "0.5,1.0,0.27"
+MU_BOUNCE = 0.1
 
 
-def run(filename, output_format):
-    """The scene, run with the pictures of TIMES."""
-    import siconos.numerics as sn
+def build(io, scene):
     from siconos.mechanics.collision.tools import Contactor
+
+    io.add_primitive_shape("Disk", "Disk", [RADIUS])
+    if scene == "slope":
+        io.add_primitive_shape("Slope", "Segment", (-3, 1.5, 3, 0))
+        io.add_primitive_shape("Wall", "Segment", (3, 0, 3, 2))
+        io.add_object("slope", [Contactor("Slope")], translation=[0, 0])
+        io.add_object("wall", [Contactor("Wall")], translation=[0, 0])
+        # on the slope y = 0.75 - x / 4, a little above it
+        disks = [((x, 0.75 - 0.25 * x + 0.55), (0, 0)) for x in (0.0, 1.8)]
+        io.add_Newton_impact_friction_nsl("contact", mu=0.3, e=0)
+    elif scene == "wall":
+        io.add_primitive_shape("Floor", "Segment", (-3, 0, 3, 0))
+        io.add_primitive_shape("Wall", "Segment", (0, 0, 0, 2))
+        io.add_object("floor", [Contactor("Floor")], translation=[0, 0])
+        io.add_object("wall", [Contactor("Wall")], translation=[0, 0])
+        disks = [((-1.5, RADIUS), (3, 0)), ((1.5, RADIUS), (-3, 0))]
+        io.add_Newton_impact_friction_nsl("contact", mu=0.3, e=0)
+    else:
+        io.add_primitive_shape("Floor", "Segment", (-1, 0, 16, 0))
+        io.add_object("floor", [Contactor("Floor")], translation=[0, 0])
+        disks = [((0, 1.5), (6, 0))]
+        io.add_Newton_impact_friction_nsl("contact", mu=MU_BOUNCE, e=0.5)
+    for k, (x, v) in enumerate(disks):
+        io.add_object(
+            f"disk{k}",
+            [Contactor("Disk")],
+            translation=list(x),
+            orientation=[0],
+            velocity=[v[0], v[1], 0],
+            mass=1,
+            inertia=0.5 * RADIUS**2,
+        )
+
+
+def run(filename, output_format, scene, T=1.0, new=True):
+    """A scene, run with the pictures of TIMES, its animation and Coulomb
+    plots; new: build the scene, else continue the run of the file."""
+    import siconos.numerics as sn
     from siconos.io.mechanics_run import (
         MechanicsHdf5Runner,
         MechanicsHdf5Runner_run_options,
@@ -62,53 +108,49 @@ def run(filename, output_format):
     import nonos  # noqa: F401 registers the vnative backend
 
     config = RunnerConfig("vnative")
-    with MechanicsHdf5Runner(config=config, io_filename=filename) as io:
-        io.add_primitive_shape("Slope", "Segment", (-3, 1.5, 3, 0))
-        io.add_primitive_shape("Wall", "Segment", (3, 0, 3, 2))
-        io.add_object("slope", [Contactor("Slope")], translation=[0, 0])
-        io.add_object("wall", [Contactor("Wall")], translation=[0, 0])
-        io.add_primitive_shape("Disk", "Disk", [RADIUS])
-        # on the slope y = 0.75 - x / 4, a little above it
-        for k, x in enumerate((0.0, 1.8)):
-            io.add_object(
-                f"disk{k}",
-                [Contactor("Disk")],
-                translation=[x, 0.75 - 0.25 * x + 0.55],
-                orientation=[0],
-                velocity=[0, 0, 0],
-                mass=1,
-                inertia=0.5 * RADIUS**2,
-            )
-        io.add_Newton_impact_friction_nsl("contact", mu=0.3, e=0)
+    if new:
+        with MechanicsHdf5Runner(config=config, io_filename=filename) as io:
+            build(io, scene)
 
     options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
     options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 1000
     options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-10
     run_options = MechanicsHdf5Runner_run_options()
     run_options["t0"] = 0
-    run_options["T"] = 1.0
+    run_options["T"] = T
     run_options["h"] = 0.005
     run_options["solver_options"] = options
-    run_options["output_frequency"] = 10
+    run_options["output_frequency"] = 1 if scene == "bounce" else 10
     run_options["output_format"] = output_format
     run_options["svg_output"] = TIMES
+    run_options["svg_options"] = {"animate": True, "coulomb": True}
     run_options["verbose"] = False
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
         io.run(run_options)
 
 
-def simulate(directory, output_format):
+def simulate(directory, output_format="siconos", scene="slope", T=1.0, new=True):
     os.makedirs(directory, exist_ok=True)
-    filename = os.path.join(directory, "slope_wall.hdf5")
-    subprocess.run(
-        [sys.executable, __file__, filename, output_format], check=True, cwd=directory
-    )
+    filename = os.path.join(directory, f"{scene}.hdf5")
+    args = [filename, output_format, scene, str(T), "new" if new else "continue"]
+    subprocess.run([sys.executable, __file__, *args], check=True, cwd=directory)
     return filename
 
 
 @pytest.fixture(scope="module")
 def siconos_run(tmp_path_factory):
-    return simulate(str(tmp_path_factory.mktemp("siconos")), "siconos")
+    return simulate(str(tmp_path_factory.mktemp("siconos")))
+
+
+@pytest.fixture(scope="module")
+def bounce_run(tmp_path_factory):
+    # it bounces and slides, then rolls from about t = 2.3
+    return simulate(str(tmp_path_factory.mktemp("bounce")), scene="bounce", T=2.6)
+
+
+def read(name):
+    with open(name) as f:
+        return f.read()
 
 
 def picture(filename, time):
@@ -139,7 +181,7 @@ def _hatch(text, static_id):
         rf'<path id="h{-static_id}_0" d="M[^l]*l([-0-9.]+),([-0-9.]+)', text
     )
     line = re.search(
-        rf'<line id="s{-static_id}_0" x1="([-0-9.]+)" y1="([-0-9.]+)" '
+        rf'<line id="l{-static_id}_0" x1="([-0-9.]+)" y1="([-0-9.]+)" '
         rf'x2="([-0-9.]+)" y2="([-0-9.]+)"',
         text,
     )
@@ -167,14 +209,15 @@ def test_body_pose(siconos_run):
         data = f["data"]
         ids = {name: int(o.attrs["id"]) for name, o in data["input"].items()}
         steps = svg.FileSteps(data)
-        _, bodies, _, _, _ = steps.step(steps.resolve(time=1.0))
+        bodies = steps.step(steps.resolve(time=1.0)).bodies
     _, (x1, y1, x2, y2) = _hatch(text, ids["slope"])
     scale = (x2 - x1) / 6.0
     # y down in the picture
     assert (y2 - y1) / 1.5 == pytest.approx(scale, rel=1e-3)
     for row in bodies:
         circle = re.search(
-            rf'<g id="b{int(row[0])}"><circle cx="([-0-9.]+)" cy="([-0-9.]+)" r="([-0-9.]+)"',
+            rf'<g id="b{int(row[0])}" fill="[^"]*"><circle cx="([-0-9.]+)" '
+            rf'cy="([-0-9.]+)" r="([-0-9.]+)"',
             text,
         )
         cx, cy, r = map(float, circle.groups())
@@ -211,6 +254,169 @@ def test_vtkhdf_output_format(siconos_run, tmp_path):
     assert picture(filename, 1.0) == picture(siconos_run, 1.0)
 
 
+def _numbers(text):
+    return [float(v) for v in re.split("[ ,]+", text.strip())]
+
+
+def test_run_and_file_animation_and_coulomb(siconos_run, tmp_path):
+    directory = str(tmp_path)
+    names = svg.convert(
+        siconos_run, animate=True, coulomb=True, times=[0.5], directory=directory
+    )
+    assert read(names[0]) == read(svg.animation_filename(siconos_run))
+    assert read(svg.coulomb_filename(siconos_run, 0.5, directory)) == read(
+        svg.coulomb_filename(siconos_run, 0.5)
+    )
+
+
+def test_coulomb_fraction(siconos_run):
+    text = read(svg.coulomb_filename(siconos_run, 1.0))
+    with h5py.File(siconos_run, "r") as f:
+        steps = svg.FileSteps(f["data"])
+        contacts = steps.step(steps.resolve(time=1.0)).contacts
+    local = contacts[:, svg.CF["reaction_local"]]
+    rn, rt, mu = local[:, 0], local[:, 1], contacts[:, svg.CF["mu"]]
+    limit = (rn > 0) & (np.abs(rt) >= (1 - svg.SATURATION) * mu * rn)
+    assert f"{limit.sum()} of {(rn > 0).sum()} loaded contacts" in text
+
+
+def test_contact_points_on_outlines(siconos_run):
+    """The arrows start on the outline of a disk (or on the slope)."""
+    text = read(svg.svg_filename(siconos_run, 1.0))
+    circles = [
+        _numbers(" ".join(m))
+        for m in re.findall(
+            r'<circle cx="([-0-9.]+)" cy="([-0-9.]+)" r="([-0-9.]+)"', text
+        )
+    ]
+    starts = re.findall(r'<line x1="([-0-9.]+)" y1="([-0-9.]+)" [^>]*marker-end', text)
+    assert starts
+    for x, y in starts:
+        gaps = [
+            abs(np.hypot(float(x) - cx, float(y) - cy) - r) for cx, cy, r in circles
+        ]
+        assert min(gaps) < 0.05
+
+
+def test_wall_both_sides(tmp_path, capsys):
+    filename = simulate(str(tmp_path), scene="wall")
+    capsys.readouterr()
+    (name,) = svg.convert(filename, directory=str(tmp_path / "file"))
+    text = read(name)
+    with h5py.File(filename, "r") as f:
+        ids = {name: int(o.attrs["id"]) for name, o in f["data/input"].items()}
+    assert f'id="h{-ids["wall"]}_0"' not in text
+    assert f'id="h{-ids["floor"]}_0"' in text
+    assert f"static {ids['wall']} segment" in capsys.readouterr().err
+
+
+def _still_contact(text):
+    """The cone (e1, p, e2) and the arrow (p, tip) of a picture with one
+    contact, in px."""
+    cone = re.search(
+        r'<path d="M([-0-9.,]+)L([-0-9.,]+)L([-0-9.,]+)" stroke="#e8a33d"', text
+    )
+    arrow = re.search(
+        r'<line x1="([-0-9.]+)" y1="([-0-9.]+)" x2="([-0-9.]+)" y2="([-0-9.]+)" [^>]*marker-end',
+        text,
+    )
+    e1, p, e2 = (np.array(_numbers(g)) for g in cone.groups())
+    a = np.array([float(v) for v in arrow.groups()])
+    return e1, p, e2, a[:2], a[2:]
+
+
+def test_cone_saturated_when_sliding(bounce_run, tmp_path):
+    """The arrow tip on an edge of the cone at the contacts at the limit,
+    inside it at the others; both happen in the run."""
+    with h5py.File(bounce_run, "r") as f:
+        steps = svg.FileSteps(f["data"])
+        found = {True: 0, False: 0}
+        for k in range(len(steps.times)):
+            contacts = steps.step(k).contacts
+            if len(contacts) != 1:
+                continue
+            (rn, rt, _), mu = contacts[0, svg.CF["reaction_local"]], contacts[0, 0]
+            if rn <= 0:
+                continue
+            saturated = abs(rt) >= (1 - svg.SATURATION) * mu * rn
+            (name,) = svg.convert(bounce_run, frames=[k], directory=str(tmp_path))
+            e1, p, e2, start, tip = _still_contact(read(name))
+            assert np.allclose(start, p, atol=0.01)
+            on_edge = min(np.linalg.norm(tip - e1), np.linalg.norm(tip - e2))
+            arrow, axis = tip - p, (e1 + e2) / 2 - p
+            angle = np.arccos(
+                arrow @ axis / np.linalg.norm(arrow) / np.linalg.norm(axis)
+            )
+            if saturated:
+                assert on_edge < 0.05
+            else:
+                # inside, up to the rounding of the px coordinates
+                assert angle < np.arctan(mu) + 5e-4
+            found[saturated] += 1
+    assert found[True] and found[False]
+
+
+def test_animation(bounce_run, tmp_path):
+    """The animation of the run is the file's; its SMIL lists agree with
+    their keyTimes; its frame N is the picture of frame N; the floor has one
+    hatch, below it."""
+    with h5py.File(bounce_run, "r") as f:
+        n = len(svg.FileSteps(f["data"]).times)
+    names = svg.convert(bounce_run, animate=True, frames=[7], directory=str(tmp_path))
+    animation = read(names[0])
+    assert animation == read(svg.animation_filename(bounce_run))
+    root = ET.fromstring(animation)
+    # the SMIL elements of the frames (the time bar has no keyTimes)
+    smil = [
+        e
+        for e in root.iter()
+        if e.tag.endswith(("animate", "animateTransform")) and e.get("keyTimes")
+    ]
+    assert smil
+    for e in smil:
+        values = e.get("values").split(";")
+        keys = [float(t) for t in e.get("keyTimes").split(";")]
+        assert len(values) == len(keys) and keys[0] == 0 and keys == sorted(keys)
+    bodies = next(e for e in root.iter() if e.get("id") == "bodies")
+    for e in bodies.iter():
+        if e.get("keyTimes") and e.get("attributeName") != "visibility":
+            assert len(e.get("values").split(";")) == n
+    body = re.search(
+        r'<g id="b1" transform="translate\(([-0-9.,]+)\)"><animateTransform attributeName="transform" type="translate" values="([^"]+)"',
+        animation,
+    )
+    positions = np.array([_numbers(p) for p in body.group(2).split(";")])
+    # the contacts of a frame move with their body to its next pose
+    followed = 0
+    for k in range(n - 1):
+        group = next((e for e in root.iter() if e.get("id") == f"contacts{k}"), None)
+        if group is None:
+            continue
+        shift = next(e for e in group.iter() if e.get("type") == "translate")
+        end = _numbers(shift.get("values").split(";")[-1])
+        assert np.allclose(end, positions[k + 1] - positions[k], atol=0.011)
+        followed += 1
+    assert followed
+    frame = body.group(2).split(";")[7]
+    still = read(names[1])
+    circle = re.search(
+        r'<g id="b1" fill="[^"]*"><circle cx="([-0-9.]+)" cy="([-0-9.]+)"', still
+    )
+    assert frame == f"{circle.group(1)},{circle.group(2)}"
+    assert len(re.findall(r'<path id="h1_0"', animation)) == 1
+    stroke = re.search(r'<path id="h1_0" d="M[^l]*l([-0-9.]+),([-0-9.]+)', animation)
+    assert float(stroke.group(2)) > 0
+
+
+def test_restart(tmp_path):
+    """A run continued from its file: the converter draws its picture."""
+    filename = simulate(str(tmp_path), T=0.5)
+    os.remove(svg.svg_filename(filename, 0.5))
+    simulate(str(tmp_path), T=1.0, new=False)
+    (name,) = svg.convert(filename, times=[1.0], directory=str(tmp_path / "file"))
+    assert read(name) == read(svg.svg_filename(filename, 1.0))
+
+
 # -- the side inference alone -------------------------------------------------
 
 
@@ -228,9 +434,15 @@ SEGMENT = [((-1, 0), np.array((0.0, 0.0)), np.array((2.0, 0.0)))]
 
 def test_sides_from_contacts():
     sides = svg.Sides(1e-6)
-    # bodies above the segment, one contact at an end point (no vote)
+    # bodies above the segment; at the end points, a normal along the
+    # segment and the face normal of a polygon pressed on the corner (bench
+    # dambreak): no vote
     sides.add_contacts(
-        SEGMENT, _contacts([(0.5, 0), (1.5, 0), (2, 0)], [(0, 1), (0.1, 0.99), (1, 0)])
+        SEGMENT,
+        _contacts(
+            [(0.5, 0), (1.5, 0), (2, 0), (0, 0)],
+            [(0, 1), (0.1, 0.99), (1, 0), (-0.943, -0.332)],
+        ),
     )
     (side,) = sides.material(SEGMENT, [], 1.0).values()
     assert np.allclose(side, (0, -1))
@@ -257,10 +469,49 @@ def test_sides_from_bodies_and_override(capsys):
     assert np.allclose(side, (0, -1))
 
 
+def _box():
+    """An open box: left wall down, floor, right wall up; the floor and the
+    walls of separate static objects."""
+    return [
+        ((-1, 0), np.array((0.0, 2.0)), np.array((0.0, 0.0))),
+        ((-2, 0), np.array((0.0, 0.0)), np.array((4.0, 0.0))),
+        ((-3, 0), np.array((4.0, 0.0)), np.array((4.0, 2.0))),
+    ]
+
+
+def test_sides_chain():
+    """Contacts on the floor only: the walls, joined to it, are hatched
+    outside."""
+    box = _box()
+    sides = svg.Sides(1e-6)
+    sides.add_contacts(box, _contacts([(2, 0)], [(0, 1)]))
+    material = sides.material(box, [], 1.0)
+    assert np.allclose(material[(-2, 0)], (0, -1))
+    assert np.allclose(material[(-1, 0)], (-1, 0))
+    assert np.allclose(material[(-3, 0)], (1, 0))
+
+
+def test_sides_junction(capsys):
+    """A wall standing on the middle of a floor is not in its chain, nor a
+    wall at a joint of three segments."""
+    floor = [
+        ((-1, 0), np.array((0.0, 0.0)), np.array((2.0, 0.0))),
+        ((-2, 0), np.array((2.0, 0.0)), np.array((4.0, 0.0))),
+        ((-3, 0), np.array((2.0, 0.0)), np.array((2.0, 2.0))),
+    ]
+    sides = svg.Sides(1e-6)
+    sides.add_contacts(floor, _contacts([(1, 0), (3, 0)], [(0, 1), (0, 1)]))
+    material = sides.material(floor, [], 1.0)
+    assert np.allclose(material[(-1, 0)], (0, -1))
+    assert np.allclose(material[(-2, 0)], (0, -1))
+    assert material[(-3, 0)] is None
+    assert "no contact nor body" in capsys.readouterr().err
+
+
 def test_parse_times():
     assert svg.parse_times("0.5,1,2e-1, 3.0") == [0.5, 1, 0.2, 3.0]
     assert svg.parse_times("[0.5]") == [0.5]
 
 
 if __name__ == "__main__":
-    run(sys.argv[1], sys.argv[2])
+    run(sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4]), sys.argv[5] == "new")
