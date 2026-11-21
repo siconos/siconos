@@ -100,8 +100,9 @@ void ObserverTest::test_SMO_ZOH() {
   auto& data = *simZOH->data();
   siconos::algebra::io::write("SMO_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
-  auto error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol);
-  bool test = !(error > _tol);
+  double tol = _tol * data.cwiseAbs().maxCoeff();
+  auto error = siconos::algebra::io::compareRefFile(data, "SMO.ref", tol);
+  bool test = !(error > tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_ZOH : ", test, true);
 }
@@ -121,7 +122,8 @@ void ObserverTest::test_SMO_Lsodar() {
   siconos::algebra::io::write("SMO_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
-  bool test = !((error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol)) > _tol);
+  double tol = _tol * data.cwiseAbs().maxCoeff();
+  bool test = !((error = siconos::algebra::io::compareRefFile(data, "SMO.ref", tol)) > tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_Lsodar : ", test, true);
 }
@@ -141,8 +143,9 @@ void ObserverTest::test_Luenberger_ZOH() {
   siconos::algebra::io::write("Luenberger_ZOH..dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
+  double tol = _tol * data.cwiseAbs().maxCoeff();
   bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", _tol)) > _tol);
+      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", tol)) > tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
@@ -162,8 +165,9 @@ void ObserverTest::test_Luenberger_Lsodar() {
   siconos::algebra::io::write("Luenberger_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
+  double tol = _tol * data.cwiseAbs().maxCoeff();
   bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", _tol)) > _tol);
+      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", tol)) > tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test, true);
 }

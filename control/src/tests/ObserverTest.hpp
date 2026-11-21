@@ -53,7 +53,11 @@ class ObserverTest : public CppUnit::TestFixture {
   double _h{0.05};
   double _t0{0.};
   double _T{100};
-  double _tol{7e-11};
+  /** relative tolerance of the comparisons with the references (times max |data|): the ZOH
+   *  matrices are computed with Lsodar at tolerances of a few machine epsilons, and the
+   *  round-off differences between platforms (macOS arm64 / Linux x86_64) reach 8e-11 on data
+   *  of size 400 (the former absolute 7e-11 only held on the platform of the references) */
+  double _tol{1e-11};
   double _beta{0.2};
 
   std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS{nullptr};
