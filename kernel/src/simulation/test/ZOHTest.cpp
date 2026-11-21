@@ -17,11 +17,56 @@
  */
 #include "ZOHTest.hpp"
 
+#include <cmath>
+#include <iostream>
+#include <string>
+
 #include "EventsManager.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
 #include "io.hpp"
+
+namespace {
+/* Comparison of a smooth trajectory with its reference. The matrices of the ZOH scheme are
+   computed by integrating an ODE with Lsodar at tolerances of a few machine epsilons: the
+   round-off differences between platforms (macOS arm64 / Linux x86_64) accumulate to ~1e-12
+   over the run, hence a tolerance relative to the size of the data. */
+bool compareSmooth(const std::string& name, const siconos::algebra::SiconosMatrix& dataPlot,
+                   const siconos::algebra::SiconosMatrix& dataPlotRef) {
+  double error = siconos::algebra::normInf(dataPlot - dataPlotRef);
+  double tol = 1e-10 * dataPlotRef.cwiseAbs().maxCoeff();
+  std::cout << "------- " << name << ": error = " << error << " (tolerance " << tol
+            << ") -------" << std::endl;
+  return error < tol;
+}
+
+/* Orlov's relay controller: x0' = x1, x1' = -(2 sgn(x0) + sgn(x1)). Once the state reaches
+   the switching surface x0 = 0 (t ~ 5.083), y0 = x0 is ~1e-18 and does not depend on the
+   multiplier (the first row of B is zero): any lambda0 in [-1, 1] satisfies the relay law at
+   this step, and the relay solver and the platform round-off select different (valid)
+   values (Lemke and AVI Cao-Ferris differ by 1.7e-7, the enumerative solver more). The
+   trajectory is therefore compared with the reference only until the switching surface is
+   reached; afterwards, the properties of the controller are checked: the state stays in an
+   O(h) neighbourhood of the sliding surface (|x0| <= 2.4e-5 with h = 1e-3) and converges to
+   the origin (|x(T)| ~ 1e-8). */
+bool compareRelay(const std::string& name, const siconos::algebra::SiconosMatrix& dataPlot,
+                  const siconos::algebra::SiconosMatrix& dataPlotRef, double tol) {
+  // first row of the reference on the switching surface
+  Eigen::Index reach = 0;
+  while (reach < dataPlotRef.rows() && std::abs(dataPlotRef(reach, 1)) > 1e-12) ++reach;
+  double error =
+      siconos::algebra::normInf(dataPlot.topRows(reach) - dataPlotRef.topRows(reach));
+  double max_x0 = dataPlot.col(1).tail(dataPlot.rows() - reach).cwiseAbs().maxCoeff();
+  // columns: t, x0, x1, control (2), lambda (2)
+  double final_x = dataPlot.block(dataPlot.rows() - 1, 1, 1, 2).cwiseAbs().maxCoeff();
+  std::cout << "------- " << name
+            << ": switching surface reached at t = " << dataPlotRef(reach, 0)
+            << ", error before = " << error << ", max |x0| after = " << max_x0
+            << ", |x(T)| = " << final_x << " -------" << std::endl;
+  return error < tol && max_x0 < 1e-4 && final_x < 1e-6;
+}
+}  // namespace
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -136,11 +181,9 @@ void ZOHTest::testMatrixIntegration1() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration1.ref");
-  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testMatrixExp1 : ", compareSmooth("testMatrixIntegration1", dataPlot, dataPlotRef),
+      true);
 }
 
 void ZOHTest::testMatrixIntegration2() {
@@ -203,11 +246,9 @@ void ZOHTest::testMatrixIntegration2() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration2.ref");
-  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", siconos::algebra::normInf(diff) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testMatrixExp2 : ", compareSmooth("testMatrixIntegration2", dataPlot, dataPlotRef),
+      true);
 }
 
 void ZOHTest::testMatrixIntegration3() {
@@ -279,11 +320,9 @@ void ZOHTest::testMatrixIntegration3() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration3.ref");
-  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", siconos::algebra::normInf(diff) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testMatrixExp3 : ", compareRelay("testMatrixIntegration3", dataPlot, dataPlotRef, _tol),
+      true);
 }
 
 void ZOHTest::testMatrixIntegration4() {
@@ -355,9 +394,7 @@ void ZOHTest::testMatrixIntegration4() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration4.ref");
-  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", siconos::algebra::normInf(diff) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testMatrixExp4 : ", compareRelay("testMatrixIntegration4", dataPlot, dataPlotRef, _tol),
+      true);
 }
