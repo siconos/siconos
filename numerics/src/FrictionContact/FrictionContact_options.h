@@ -447,7 +447,15 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM {
   /** Jacobian regularization strategy for GFC3D_NSN_AC
    *  (see SICONOS_FRICTION_3D_NSN_REGULARIZATION)
    */
-  SICONOS_FRICTION_3D_NSN_REGULARIZATION = 22
+  SICONOS_FRICTION_3D_NSN_REGULARIZATION = 22,
+  /** Levenberg--Marquardt fallback of GFC3D_NSN_AC (0: off, 1: on, default 1).
+   *  When the Newton iteration stalls (the residual decreases by less than 1% from one
+   *  iteration to the next), the direction of the iteration is computed from
+   *  \f$ (J^\top J + \lambda I) d = -J^\top \Psi \f$ with
+   *  \f$ \lambda \f$ = SICONOS_FRICTION_3D_NSN_LM_COEF \f$ \times \|\Psi\| \f$
+   *  instead of \f$ J d = -\Psi \f$ (see docs/devel/GFC3D_NSN_LM_FALLBACK.md).
+   */
+  SICONOS_FRICTION_3D_NSN_LM_FALLBACK = 23
 
 };
 
@@ -527,6 +535,9 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM {
   SICONOS_FRICTION_3D_NSN_REGUL = 4,
   /** Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0) */
   SICONOS_FRICTION_3D_SCALING_ALPHA = 5,
+  /** Coefficient c of the Levenberg--Marquardt fallback of GFC3D_NSN_AC:
+   *  \f$ \lambda = c \|\Psi\| \f$ (default 1.0, see SICONOS_FRICTION_3D_NSN_LM_FALLBACK) */
+  SICONOS_FRICTION_3D_NSN_LM_COEF = 6,
 };
 
 /** Double parameters for global 2D NSN solver */

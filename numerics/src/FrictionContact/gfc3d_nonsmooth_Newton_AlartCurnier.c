@@ -136,6 +136,9 @@ static const double GFC3D_NSN_AC_LS_INITIAL_ALPHA_MIN = 1e-16;
 static const double GFC3D_NSN_AC_LS_INITIAL_ALPHA_MAX = 1e10;
 static const double GFC3D_NSN_AC_LS_SLOPE_LOWER = 0.01;
 static const double GFC3D_NSN_AC_LS_SLOPE_UPPER = 0.99;
+/* Levenberg--Marquardt fallback: the iteration is considered stalled when the residual
+ * norm decreased by less than 1% since the previous iteration. */
+static const double GFC3D_NSN_AC_LM_STALL_RATIO = 0.99;
 
 /* ===========================================================================
  * Workspace size helpers
@@ -524,6 +527,39 @@ static int global_linesearch_goldstein_price(
                           max_ls_iterations, step_length[0]);
 
   return -1;
+}
+
+/**
+ * \brief Levenberg--Marquardt direction of the Newton system.
+ *
+ * Solves \f$ (J^\top J + \lambda I) d = -J^\top \Psi \f$. Unlike the Newton direction
+ * \f$ J d = -\Psi \f$ (or its shifted variant \f$ (J + \epsilon I) d = -\Psi \f$),
+ * this direction is a descent direction of the merit function
+ * \f$ \frac{1}{2}\|\Psi\|^2 \f$ for any \f$ \lambda > 0 \f$, and its components along
+ * the directions associated with small singular values \f$ \sigma \f$ of J are damped
+ * (factor \f$ \sigma / (\sigma^2 + \lambda) \f$) instead of being amplified. It is used
+ * as a fallback when the Newton iteration stalls on a (nearly) singular Jacobian, see
+ * docs/devel/GFC3D_NSN_LM_FALLBACK.md.
+ *
+ * \param[in] jacobian the Jacobian J of the Newton system (square)
+ * \param[in] residual the residual \f$ \Psi \f$
+ * \param[in] lambda the damping parameter \f$ \lambda > 0 \f$
+ * \param[out] direction the direction d
+ * \return the info of the linear solver (0 on success)
+ */
+static int gfc3d_nsn_ac_lm_direction(NumericsMatrix* jacobian, const double* residual,
+                                     double lambda, double* direction) {
+  NumericsMatrix* jacobian_t = NM_transpose(jacobian);
+  NumericsMatrix* jtj = NM_multiply(jacobian_t, jacobian);
+  NumericsMatrix* eye = NM_eye(jacobian->size1);
+  NumericsMatrix* lm_matrix = NM_add(lambda, eye, 1.0, jtj);
+  NM_gemv(-1.0, jacobian_t, residual, 0.0, direction);
+  const int info = NM_LU_solve(NM_preserve(lm_matrix), direction, 1);
+  NM_free(lm_matrix);
+  NM_free(eye);
+  NM_free(jtj);
+  NM_free(jacobian_t);
+  return info;
 }
 
 /**
@@ -1011,6 +1047,11 @@ restart:
     previous_contact_status[i] = -1;
   }
 
+  /* Levenberg--Marquardt fallback (see gfc3d_nsn_ac_lm_direction). */
+  const int lm_fallback = options->iparam[SICONOS_FRICTION_3D_NSN_LM_FALLBACK];
+  const double lm_coef = options->dparam[SICONOS_FRICTION_3D_NSN_LM_COEF];
+  double previous_residual_norm = INFINITY;
+
   /* ====================================================================== *
    * Main Newton loop
    * ====================================================================== */
@@ -1056,11 +1097,32 @@ restart:
       J_to_solve = NM_add(regul, reg_eye, 1.0, nm_jacobian);
     }
 
+    /* Stalled Newton iteration (residual decreased by less than 1%): use the
+     * Levenberg--Marquardt direction instead of the Newton direction. */
+    const int use_lm = lm_fallback && lm_coef > 0.0 &&
+                       residual_norm > GFC3D_NSN_AC_LM_STALL_RATIO * previous_residual_norm;
+    int lm_info = 1;
+    if (use_lm) {
+      lm_info = gfc3d_nsn_ac_lm_direction(nm_jacobian, system_residual,
+                                          lm_coef * residual_norm, newton_direction);
+      numerics_printf_verbose(1,
+                              "---- GFC3D - NSN_AC iteration %d, Newton stalled (residual "
+                              "%e, previous %e): Levenberg--Marquardt direction, info = %d",
+                              iteration, residual_norm, previous_residual_norm, lm_info);
+      if (lm_info != 0) {  // fall back to the Newton direction
+        cblas_dcopy(system_size, system_residual, 1, newton_direction, 1);
+        cblas_dscal(system_size, -1., newton_direction, 1);
+      }
+    }
+    previous_residual_norm = residual_norm;
+
     /* NM_preserve/unpreserve ensures that the internal factorization of
      * the Jacobian used by the linear solver is invalidated because the
      * underlying triplet data has changed since the previous iteration. */
     const int linear_solver_info =
-        NM_LU_solve(NM_preserve(NM_unpreserve(J_to_solve)), newton_direction, 1);
+        (use_lm && lm_info == 0)
+            ? 0
+            : NM_LU_solve(NM_preserve(NM_unpreserve(J_to_solve)), newton_direction, 1);
 
     if (J_to_solve != nm_jacobian) {
       NM_free(J_to_solve);
@@ -1262,11 +1324,18 @@ void gfc3d_nonsmooth_newton_alart_curnier_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;
 
   options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 0; /* > 0 memory is allocated */
+  /* Alart--Curnier by default: on the FCLIB problems (Box_Stacks, Spheres) the Jean--Moreau
+   * formulation (former default) stalled at a non-solution point with a nearly singular
+   * Jacobian, while Alart--Curnier converged with every line-search setting (see
+   * docs/devel/GFC3D_NSN_LM_FALLBACK.md). */
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] =
-      SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+      SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
       SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 1000;
+  /* Levenberg--Marquardt fallback when the Newton iteration stalls */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LM_FALLBACK] = 1;
+  options->dparam[SICONOS_FRICTION_3D_NSN_LM_COEF] = 1.0;
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.; /* default rho */
 
