@@ -396,6 +396,93 @@ LOG_DECADES = 3
 SATURATION = 1e-3
 # the animations: the duration of a frame when one frame per output step
 FRAME_DURATION = 0.1
+# the controls of an animation: the height of their bar (px) and their script
+# (ANIMATION, written before it: starts, the document times of the frames;
+# times, their physical times; duration; discrete; seek, the x and width of
+# the time bar)
+CONTROLS_HEIGHT = 30
+CONTROLS_SCRIPT = """(function () {
+  var svg = document.documentElement, a = ANIMATION, n = a.starts.length;
+  var label = document.getElementById("control-time");
+  var play = document.getElementById("icon-play");
+  var pause = document.getElementById("icon-pause");
+  // a frame is shown from a little after its start, where the discrete
+  // values (the contacts of the step) are those of the frame
+  var EPS = 1e-6 * a.duration;
+  function now() {
+    var t = svg.getCurrentTime() % a.duration;
+    return t < 0 ? 0 : t;
+  }
+  function frame(t) {
+    var k = 0;
+    while (k + 1 < n && a.starts[k + 1] <= t + EPS / 2) k++;
+    return k;
+  }
+  function show() {
+    var t = now(), k = frame(t), p = a.times[k];
+    if (!a.discrete && k + 1 < n) {
+      var u = (t - a.starts[k]) / (a.starts[k + 1] - a.starts[k]);
+      p += u * (a.times[k + 1] - a.times[k]);
+    }
+    var paused = svg.animationsPaused();
+    play.setAttribute("visibility", paused ? "visible" : "hidden");
+    pause.setAttribute("visibility", paused ? "hidden" : "visible");
+    label.textContent = "frame " + k + " / " + (n - 1) + " \\u00b7 t = " +
+      Number(p.toPrecision(6)) + " s" + (paused ? " \\u00b7 paused" : "");
+  }
+  function go(k) {
+    k = Math.max(0, Math.min(n - 1, k));
+    svg.pauseAnimations();
+    svg.setCurrentTime(a.starts[k] + EPS);
+    show();
+  }
+  function step(d) {
+    var t = now(), k = frame(t);
+    // back: first to the start of the frame shown
+    if (d < 0 && t - a.starts[k] > 2 * EPS) d = 0;
+    go(k + d);
+  }
+  function toggle() {
+    if (svg.animationsPaused()) svg.unpauseAnimations();
+    else svg.pauseAnimations();
+    show();
+  }
+  function on(id, f) {
+    document.getElementById(id).addEventListener("click", f);
+  }
+  on("control-first", function () { go(0); });
+  on("control-previous", function () { step(-1); });
+  on("control-play", toggle);
+  on("control-next", function () { step(1); });
+  on("control-last", function () { go(n - 1); });
+  on("control-seek", function (e) {
+    var p = svg.createSVGPoint();
+    p.x = e.clientX;
+    p.y = e.clientY;
+    p = p.matrixTransform(svg.getScreenCTM().inverse());
+    var u = Math.max(0, Math.min(1, (p.x - a.seek[0]) / a.seek[1]));
+    svg.setCurrentTime(u * a.duration * (1 - 1e-9));
+    show();
+  });
+  var keys = {
+    " ": toggle,
+    ArrowLeft: function () { step(-1); },
+    ArrowRight: function () { step(1); },
+    Home: function () { go(0); },
+    End: function () { go(n - 1); }
+  };
+  document.addEventListener("keydown", function (e) {
+    if (keys[e.key]) {
+      keys[e.key]();
+      e.preventDefault();
+    }
+  });
+  (function loop() {
+    show();
+    window.requestAnimationFrame(loop);
+  })();
+})();
+"""
 
 
 class Step(
@@ -603,9 +690,9 @@ class Picture:
             return 0.0
         return self._arrow_lengths(frame.contacts[:, CF["reaction"]][:, :2])[1]
 
-    def _header(self, w, view, title):
+    def _header(self, w, view, title, bottom=0):
         """The svg element, the background, the arrow head and the title,
-        above the view."""
+        above the view; bottom: px below the view (the controls)."""
         lines = [""]
         for part in title.split(" · "):
             if lines[-1] and len(lines[-1]) + 3 + len(part) > TITLE_CHARACTERS:
@@ -613,7 +700,7 @@ class Picture:
             else:
                 lines[-1] += (" · " if lines[-1] else "") + part
         top = TITLE_LINE * len(lines) + 6
-        height = view.height + top
+        height = view.height + top + bottom
         w('<?xml version="1.0" encoding="UTF-8"?>\n')
         w(
             f'<svg xmlns="http://www.w3.org/2000/svg" '
@@ -1076,17 +1163,29 @@ class Picture:
         w("</svg>\n")
 
     def write_animation(
-        self, out, steps, uniform=False, discrete=False, speed=1.0, contacts=None
+        self,
+        out,
+        steps,
+        uniform=False,
+        discrete=False,
+        speed=1.0,
+        contacts=None,
+        controls=False,
     ):
         """An animated SVG (SMIL) of the steps: the bodies move, the static
         objects are shown while alive, the contacts of each step in turn. A
         viewer without SMIL shows the first step.
 
         uniform: one frame per step, FRAME_DURATION each, else the physical
-        times of the steps, slowed down by speed (speed 1: real time).
+        times of the steps, slowed down by speed (speed 1: real time); the
+        last step is held for one frame (FRAME_DURATION, or the mean
+        interval of the steps) before the animation starts again.
         discrete: no interpolation between the steps.
         contacts: draw the contacts (None: below ARROW_LIMIT contacts in all
         the steps).
+        controls: a bar of buttons under the picture (a script: pause, play,
+        step frame by frame, seek on the time bar); the animation plays
+        without it where scripts do not run.
         The votes of all the steps must have been counted.
         """
         frames = [_Frame(self, s) for s in steps]
@@ -1095,15 +1194,19 @@ class Picture:
         view = self._view(self.view or self.bounds(frames))
         low, high = self._range(frames)
         if uniform or n < 2 or times[-1] == times[0]:
-            key_times = np.linspace(0, 1, n) if n > 1 else np.zeros(1)
+            key_times = np.arange(n) / n
             duration = FRAME_DURATION * n
         else:
-            key_times = (times - times[0]) / (times[-1] - times[0])
-            duration = (times[-1] - times[0]) / speed
+            span = times[-1] - times[0]
+            span += span / (n - 1)
+            key_times = (times - times[0]) / span
+            duration = span / speed
         mode = "discrete" if discrete else "linear"
+        # a linear animation ends at the key time 1: the frame values with
+        # the last one again (held)
         keys = ";".join(f"{t:.6f}" for t in key_times)
         timing = (
-            f' keyTimes="{keys}" dur="{duration:.6g}s" calcMode="{mode}" '
+            f' keyTimes="{keys};1" dur="{duration:.6g}s" calcMode="{mode}" '
             f'repeatCount="indefinite"'
         )
         discrete_timing = (
@@ -1127,7 +1230,7 @@ class Picture:
             title += " · contacts of each step"
         title += self._view_title()
         w = out.write
-        self._header(w, view, title)
+        self._header(w, view, title, CONTROLS_HEIGHT if controls else 0)
 
         # the static objects of all the steps, shown while alive; the sides
         # are those of all the steps
@@ -1163,7 +1266,7 @@ class Picture:
                         f"M{view.xy(f.fem[a])}L{view.xy(f.fem[b])}L{view.xy(f.fem[c])}Z"
                         for a, b, c in self.fem.triangles[self.fem.cell_ranges[ds_id]]
                     )
-                    for f in frames
+                    for f in frames + frames[-1:]
                 ]
                 for ds_id in self.fem.ids
             }
@@ -1227,7 +1330,61 @@ class Picture:
             f'<animate attributeName="width" values="0;{view.width - 16:.0f}" '
             f'dur="{duration:.6g}s" repeatCount="indefinite"/></rect></g>\n'
         )
+        if controls:
+            self._write_controls(
+                w, view, key_times * duration, times, duration, discrete
+            )
         w("</svg>\n")
+
+    @staticmethod
+    def _write_controls(w, view, starts, times, duration, discrete):
+        """The buttons under the view and their script: starts, the document
+        times of the frames (s), times, their physical times."""
+        y = view.height + 6
+        # first, previous, play / pause, next, last: an icon each, 24 px apart
+        icons = (
+            ("first", "M7,4v10M17,4l-8,5l8,5z"),
+            ("previous", "M15,4l-8,5l8,5z"),
+            ("play", "M8,4l9,5l-9,5z"),
+            ("next", "M9,4l8,5l-8,5z"),
+            ("last", "M17,4v10M7,4l8,5l-8,5z"),
+        )
+        w(f'<g id="controls" font-size="11" fill="{INK}">')
+        for k, (name, d) in enumerate(icons):
+            w(
+                f'<g id="control-{name}" transform="translate({8 + 28 * k},{y:.0f})" '
+                f'cursor="pointer"><rect width="24" height="18" rx="3" '
+                f'fill="{STATIC_FILL}"/>'
+            )
+            if name == "play":
+                # the pause icon, shown while playing
+                w(
+                    f'<path id="icon-play" d="{d}" fill="{INK}" visibility="hidden"/>'
+                    f'<path id="icon-pause" d="M8,4h3v10h-3zM13,4h3v10h-3z" '
+                    f'fill="{INK}"/>'
+                )
+            else:
+                w(f'<path d="{d}" fill="{INK}" stroke="{INK}"/>')
+            w("</g>")
+        w(
+            f'<text id="control-time" x="{8 + 28 * len(icons) + 6}" y="{y + 13:.0f}">'
+            f"</text>"
+        )
+        # the time bar of the view is the seek bar
+        w(
+            f'<rect id="control-seek" x="8" y="{view.height - 12:.0f}" '
+            f'width="{view.width - 16:.0f}" height="12" fill-opacity="0" '
+            f'cursor="pointer"/></g>\n'
+        )
+        numbers = ",".join(f"{t:.6g}" for t in starts)
+        physical = ",".join(f"{t:.9g}" for t in times)
+        w(
+            f"<script><![CDATA[\n"
+            f"var ANIMATION = {{starts: [{numbers}], times: [{physical}], "
+            f"duration: {duration:.6g}, discrete: {'true' if discrete else 'false'}, "
+            f"seek: [8, {view.width - 16:.0f}]}};\n"
+            f"{CONTROLS_SCRIPT}]]></script>\n"
+        )
 
     @staticmethod
     def _contacts_follow(view, frame, after, start, end, duration):
@@ -1329,13 +1486,13 @@ class Picture:
                 )
             w(
                 f'<animateTransform attributeName="transform" type="translate" '
-                f'values="{";".join(positions)}"{timing}/>'
+                f'values="{";".join(positions + positions[-1:])}"{timing}/>'
             )
             fill = fills[k]
             w(f'<g transform="rotate({degrees[0]:.3f})" fill="{fill[0]}">')
             w(
                 f'<animateTransform attributeName="transform" type="rotate" '
-                f'values="{";".join(f"{d:.3f}" for d in degrees)}"{timing}/>'
+                f'values="{";".join(f"{d:.3f}" for d in degrees[list(range(n)) + [n - 1]])}"{timing}/>'
             )
             if len(set(fill)) > 1:
                 w(
@@ -1472,8 +1629,8 @@ class RunPictures:
     the drawn steps, as convert counts those of the file.
     options: those of Picture, and coulomb (the Coulomb plot of each
     picture), animate and strobe (of the output steps, written at the end;
-    the steps are held in memory), uniform, discrete, speed (of the
-    animation), directory.
+    the steps are held in memory), uniform, discrete, speed, controls (of
+    the animation), directory.
     """
 
     def __init__(self, io_filename, shapes, requests, h, fem=None, **options):
@@ -1484,7 +1641,7 @@ class RunPictures:
         self.strobe = options.pop("strobe", False)
         self.animation_options = {
             key: options.pop(key)
-            for key in ("uniform", "discrete", "speed")
+            for key in ("uniform", "discrete", "speed", "controls")
             if key in options
         }
         self.h = h
@@ -1659,6 +1816,7 @@ def convert(
     uniform=False,
     discrete=False,
     speed=1.0,
+    controls=False,
     **options,
 ):
     """Write the pictures of the output steps at times (at or before each)
@@ -1669,7 +1827,8 @@ def convert(
     animate, strobe: an animation, a strobe picture of the output steps
     (every stride-th one, the last included); the pictures of times and
     frames then use the view of the animation, so that a picture is the
-    frame of the animation.
+    frame of the animation. uniform, discrete, speed, controls: those of
+    the animation (Picture.write_animation).
     options: those of Picture. Returns the file names.
     """
     import h5py
@@ -1719,7 +1878,12 @@ def convert(
                 with open(name, "w") as out:
                     if kind == "animation":
                         picture.write_animation(
-                            out, animation_steps, uniform, discrete, speed
+                            out,
+                            animation_steps,
+                            uniform,
+                            discrete,
+                            speed,
+                            controls=controls,
                         )
                     else:
                         picture.write_strobe(out, animation_steps, bounds)

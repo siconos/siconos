@@ -43,7 +43,8 @@ decimals and zero padded (`run_svg_000001.250000.svg`) so that they sort.
 those of the run: `directory`, `coulomb` (the Coulomb plot of each
 picture), `animate` and `strobe` (of the output steps, written at the end
 of the run as `<hdf5 file>_svg_animation.svg`, `_svg_strobe.svg`; the
-steps are held in memory), `uniform`, `discrete`, `speed` (section 4).
+steps are held in memory), `uniform`, `discrete`, `speed`, `controls`
+(section 4).
 
 The run draws from the arrays it writes in the HDF5 tables, rounded to
 float32 as the tables are: it works with `output_format` `"vtkhdf"` (no
@@ -77,6 +78,7 @@ siconos_svg run.hdf5 --frame 0 --frame -1     # output step indices
 siconos_svg run.hdf5 --time 0.27 -o fig.svg
 siconos_svg run.hdf5 --dir pictures --coulomb # and the Coulomb plots
 siconos_svg run.hdf5 --animate --stride 2     # every second output step
+siconos_svg run.hdf5 --animate --controls     # with pause, step, seek
 siconos_svg run.hdf5 --strobe --stride 10 --frame 3
 ```
 
@@ -218,8 +220,19 @@ body while it is interpolated; a time bar.
   faster), or `--uniform`, one frame per output step of 0.1 s (the
   step-to-step behaviour: chattering, a drift); `--discrete` draws each
   step as it is, without interpolation between them.
+  The last step is held for one frame (0.1 s, or the mean interval of the
+  steps) before the animation starts again.
 - Frames are output steps: an animation is never finer than
   `output_frequency`. `--stride k` keeps every k-th step.
+- `--controls` (`"controls": True` in `svg_options`) adds a bar under the
+  picture to examine a behaviour: first frame, previous, play / pause,
+  next, last frame (also Home, ←, space, →, End), a click on the time bar
+  to go to a time, and the frame number and its physical time (between
+  two frames, the interpolated time; paused on a frame, the time of its
+  output step). It is a script over the same SMIL animation: where scripts
+  do not run (an SVG shown as an image, `<img>`, as in rendered Markdown)
+  the animation plays as without it. Open the file itself in a browser
+  (Firefox, Chromium). Off by default; the committed figures have none.
 - A browser (Firefox, Chromium) plays it. A viewer without SMIL
   (rsvg-convert, Inkscape, print) shows the first step: every animation
   has its stills, `--frame N` (section 1). Checked in Firefox (icecat,
@@ -270,7 +283,7 @@ writes it as `dambreak_svg_animation.svg`.
 | sliding | [sliding_svg_strobe.svg](svg-display/sliding_svg_strobe.svg) | 3.8 KB |
 | column | [column_svg_animation.svg](svg-display/column_svg_animation.svg) | 86 KB |
 | shear | [shear_svg_strobe.svg](svg-display/shear_svg_strobe.svg) | 11 KB |
-| bounce | [bounce_svg_000000.455000.svg](svg-display/bounce_svg_000000.455000.svg), [Coulomb](svg-display/bounce_coulomb_000000.455000.svg), [animation](svg-display/bounce_svg_animation.svg) | 3.2, 1.3, 266 KB |
+| bounce | [bounce_svg_000000.455000.svg](svg-display/bounce_svg_000000.455000.svg), [Coulomb](svg-display/bounce_coulomb_000000.455000.svg), [animation](svg-display/bounce_svg_animation.svg) | 3.2, 1.3, 268 KB |
 | dambreak | [dambreak_svg_000002.231372.svg](svg-display/dambreak_svg_000002.231372.svg), [front](svg-display/dambreak_front_svg_000002.231372.svg), [Coulomb](svg-display/dambreak_coulomb_000003.347058.svg) | 198, 210, 24 KB |
 
 - **incline_stick**: a square on a 20° incline, mu = 0.5 > tan 20°: at

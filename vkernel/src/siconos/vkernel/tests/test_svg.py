@@ -377,10 +377,17 @@ def test_animation(bounce_run, tmp_path):
         values = e.get("values").split(";")
         keys = [float(t) for t in e.get("keyTimes").split(";")]
         assert len(values) == len(keys) and keys[0] == 0 and keys == sorted(keys)
+    # a value per frame; a linear animation holds the last one to the key
+    # time 1
     bodies = next(e for e in root.iter() if e.get("id") == "bodies")
     for e in bodies.iter():
         if e.get("keyTimes") and e.get("attributeName") != "visibility":
-            assert len(e.get("values").split(";")) == n
+            values = e.get("values").split(";")
+            if e.get("calcMode") == "linear":
+                assert len(values) == n + 1 and values[-1] == values[-2]
+                assert e.get("keyTimes").endswith(";1")
+            else:
+                assert len(values) == n
     body = re.search(
         r'<g id="b1" transform="translate\(([-0-9.,]+)\)"><animateTransform attributeName="transform" type="translate" values="([^"]+)"',
         animation,
@@ -406,6 +413,35 @@ def test_animation(bounce_run, tmp_path):
     assert len(re.findall(r'<path id="h1_0"', animation)) == 1
     stroke = re.search(r'<path id="h1_0" d="M[^l]*l([-0-9.]+),([-0-9.]+)', animation)
     assert float(stroke.group(2)) > 0
+
+
+def test_animation_controls(bounce_run, tmp_path):
+    """--controls adds the buttons and their script, with the start of each
+    frame in the animation; without it the animation has no script."""
+    with h5py.File(bounce_run, "r") as f:
+        n = len(svg.FileSteps(f["data"]).times)
+    (plain,) = svg.convert(bounce_run, animate=True, directory=str(tmp_path / "a"))
+    (name,) = svg.convert(
+        bounce_run, animate=True, controls=True, directory=str(tmp_path / "b")
+    )
+    assert "<script" not in read(plain)
+    text = read(name)
+    root = ET.fromstring(text)
+    ids = {e.get("id") for e in root.iter()}
+    for button in ("first", "previous", "play", "next", "last", "seek", "time"):
+        assert f"control-{button}" in ids
+    data = re.search(
+        r"var ANIMATION = \{starts: \[([^\]]*)\], times: \[([^\]]*)\], "
+        r"duration: ([0-9.e+-]+)",
+        text,
+    )
+    starts = _numbers(data.group(1))
+    duration = float(data.group(3))
+    assert len(starts) == len(_numbers(data.group(2))) == n
+    assert starts[0] == 0 and all(np.diff(starts) > 0) and starts[-1] < duration
+    # the same animation under the controls
+    body = re.compile(r'<g id="bodies".*?\n</g>\n', re.S)
+    assert body.search(text).group(0) == body.search(read(plain)).group(0)
 
 
 def test_restart(tmp_path):
