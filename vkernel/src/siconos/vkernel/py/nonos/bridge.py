@@ -979,9 +979,11 @@ class MechanicsIO(Stored):
     def contactInfo(self, nsds, output_contact_index_set):
         return self.handle().contact_info(self._simulation.handle().current_step())
 
-    def contactContactWork(self, nsds, output_contact_index_set, omega, tol=1e-8):
+    def contactContactWork(
+        self, nsds, output_contact_index_set, omega, tol=1e-8, gap_law=False, h=0.0
+    ):
         return self.handle().contact_work(
-            self._simulation.handle().current_step(), omega, tol
+            self._simulation.handle().current_step(), omega, tol, int(gap_law), h
         )
 
 

@@ -573,7 +573,7 @@ struct io : item {
           attr<"co_info">(*self()).data()->size());
     }
 
-    decltype(auto) contact_work(auto step, auto theta, auto tol) {
+    decltype(auto) contact_work(auto step, auto theta, auto tol, auto gap_law, auto h) {
       // fix: theta is omega in mechanics_run.py & MechanicsIO.hpp
       auto& data = self()->data();
       using env_t = decltype(self()->env());
@@ -581,6 +581,7 @@ struct io : item {
 
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
       auto& ydot_ks = storage::attr_values<interaction, "ydot">(data, step - 1);
+      auto& ys = storage::attr_values<interaction, "y">(data, step);
       auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
 
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
@@ -591,8 +592,8 @@ struct io : item {
 
       // active interactions only (index set 1), numbered as in contact_info
       scalar k = 0;
-      for (auto [ydot, ydot_k, lambda, index_nslaw, activation] :
-           view::zip(ydots, ydot_ks, lambdas, nslaws, activations)) {
+      for (auto [ydot, ydot_k, y, lambda, index_nslaw, activation] :
+           view::zip(ydots, ydot_ks, ys, lambdas, nslaws, activations)) {
         if (!activation) continue;
         handle nslaw = storage::make_handle(data, index_nslaw);
 
@@ -645,6 +646,12 @@ struct io : item {
         scalar answer_5;
         scalar answer_6 = 0.;  // work of the impact law, 0 without impact
 
+        // the normal complementarity residual at step + 1: the Newton impact law
+        // vn_plus + e vn_minus, or, for the inelastic gap laws (quasi inelastic and
+        // the Anitescu-Tasora stabilisation), vn_plus + g_pos / h
+        const scalar normal_residual =
+            vn_plus + (gap_law ? std::max(scalar(0), y(0)) / h : e * vn_minus);
+
         scalar norm_pt = sqrt(pt_1 * pt_1);
         scalar norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
         if constexpr (std::derived_from<typename interaction::nslaw,
@@ -652,9 +659,9 @@ struct io : item {
           norm_vt_plus = sqrt(vt_1_average_theta * vt_1_average_theta);
         }
         // scalar norm_vt_minus = sqrt(vt_1_minus*vt_1_minus);
-        if ((pn < tol) and (vn_plus + e * vn_minus > tol))
+        if ((pn < tol) and (normal_residual > tol))
           answer_5 = 0;  // take-off = 0
-        else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {
+        else if ((pn > tol) and (normal_residual < tol)) {
           if ((norm_pt - mu * pn > tol)) {
             // std::cout << "WARNING: the impulse is outside the Coulomb cone
             // " << std::endl;
@@ -711,7 +718,8 @@ struct io : item {
           method("velocities", &interface<Handle>::velocities<indice>),
           method("contact_points", &interface<Handle>::contact_points<indice>),
           method("contact_info", &interface<Handle>::contact_info<indice>),
-          method("contact_work", &interface<Handle>::contact_work<indice, scalar, scalar>));
+          method("contact_work",
+                 &interface<Handle>::contact_work<indice, scalar, scalar, int, scalar>));
     }
   };
 };

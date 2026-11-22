@@ -3164,6 +3164,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._nsds,
                 self._output_contact_index_set,
                 omega=self._run_options.get("theta"),
+                gap_law=type(getattr(self, "_osi", None)).__name__
+                in ("MoreauJeanQuasiInelasticOSI", "AnitescuTasoraInelastic"),
+                h=self._run_options.get("h"),
             )
 
             # print(contact_work)
@@ -3257,6 +3260,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._nsds,
                 self._output_contact_index_set,
                 omega=self._run_options.get("theta"),
+                gap_law=type(getattr(self, "_osi", None)).__name__
+                in ("MoreauJeanQuasiInelasticOSI", "AnitescuTasoraInelastic"),
+                h=self._run_options.get("h"),
             )
             # print('cf_work', cf_work)
 
