@@ -114,6 +114,10 @@ template <typename S>
 struct sweep_state {
   S change = 0;
   S largest = 0;
+  // the step and the contact recovery speed, for the inelastic (stabilised,
+  // signed gap) sweep only
+  S h = 0;
+  S v_recovery = 0;
 };
 
 // the multiplier of an interaction that is not active is zero: it starts
@@ -172,9 +176,9 @@ decltype(auto) first_rows(auto& v) {
 // rows of lambda zero
 template <int Rows>
 void projected_gauss_seidel_step(auto& p, auto nds, const auto& h1, const auto& h2,
-                                 const auto& ydot, const auto& e, const auto& mu,
-                                 const auto& mu_r, auto& m1, auto& m2, const auto& blocked1,
-                                 const auto& blocked2, auto& full_lambda, auto& v1, auto& v2) {
+                                 auto normal_rhs, const auto& mu, const auto& mu_r, auto& m1,
+                                 auto& m2, const auto& blocked1, const auto& blocked2,
+                                 auto& full_lambda, auto& v1, auto& v2) {
   using vector = std::decay_t<decltype(v1)>;
   const bool two = nds == 2;
 
@@ -210,10 +214,10 @@ void projected_gauss_seidel_step(auto& p, auto nds, const auto& h1, const auto& 
     return;  // every velocity component it acts on is blocked
   }
 
-  // u = H v + e ydot_N(k), no tangential restitution, none on the rolling row
+  // u = H v + normal_rhs (the impact law on the normal row)
   auto u = (g1 * v1).eval();
   if (two) u += g2 * v2;
-  u(0) += e * ydot(0);
+  u(0) += normal_rhs;
 
   if constexpr (std::decay_t<decltype(full_lambda)>::RowsAtCompileTime > Rows) {
     full_lambda.template tail<std::decay_t<decltype(full_lambda)>::RowsAtCompileTime - Rows>()
@@ -258,8 +262,8 @@ struct apply_projected_gauss_seidel
   static void apply(auto& p, auto nds, const auto& h1, const auto& h2, const auto& ydot,
                     const auto& e, const auto& mu, auto& m1, auto& m2, const auto& blocked1,
                     const auto& blocked2, auto& lambda, auto& v1, auto& v2) {
-    projected_gauss_seidel_step<2>(p, nds, h1, h2, ydot, e, mu, 0., m1, m2, blocked1, blocked2,
-                                   lambda, v1, v2);
+    projected_gauss_seidel_step<2>(p, nds, h1, h2, e * ydot(0), mu, 0., m1, m2, blocked1,
+                                   blocked2, lambda, v1, v2);
   }
 };
 
@@ -283,12 +287,37 @@ struct apply_projected_gauss_seidel_with_rolling
     if (mu_r > 0 &&
         contacts::with_rolling_rows<model::newton_impact_rolling_friction::rolling_size>(h1,
                                                                                          h2)) {
-      projected_gauss_seidel_step<3>(p, nds, h1, h2, ydot, e, mu, mu_r, m1, m2, blocked1,
+      projected_gauss_seidel_step<3>(p, nds, h1, h2, e * ydot(0), mu, mu_r, m1, m2, blocked1,
                                      blocked2, lambda, v1, v2);
     } else {
-      projected_gauss_seidel_step<2>(p, nds, h1, h2, ydot, e, mu, 0., m1, m2, blocked1,
+      projected_gauss_seidel_step<2>(p, nds, h1, h2, e * ydot(0), mu, 0., m1, m2, blocked1,
                                      blocked2, lambda, v1, v2);
     }
+  }
+};
+
+// the Anitescu-Tasora stabilisation, as Chrono implements it (the signed gap
+// over h, clamped at the contact recovery speed), in place of the impact law:
+// the normal RHS is max(gap / h, -v_recovery).  A separation may close by the
+// end of the step, an overlap is pushed out at no more than v_recovery.  This
+// is NOT Jean's quasi inelastic law (which uses max(0, gap) and never pushes
+// out): the comparison must never confuse the two.
+struct apply_projected_gauss_seidel_inelastic
+    : kernel<active<interactions>, in<"nds", by_topology>, in<"h_matrix1">, in<"h_matrix2">,
+             in<"y">, through<"nslaw", "mu">, through<"ds1", "mass_matrix", by_topology>,
+             through<"ds2", "mass_matrix", by_topology>,
+             through<"ds1", "bc_velocities_0", by_topology>,
+             through<"ds2", "bc_velocities_0", by_topology>, inout<"lambda">,
+             add_through<"ds1", "velocity", by_topology, next>,
+             add_through<"ds2", "velocity", by_topology, next>>,
+      ordered {
+  static void apply(auto& p, auto nds, const auto& h1, const auto& h2, const auto& y,
+                    const auto& mu, auto& m1, auto& m2, const auto& blocked1,
+                    const auto& blocked2, auto& lambda, auto& v1, auto& v2) {
+    using scalar = std::decay_t<decltype(y(0))>;
+    const scalar rhs = std::max(y(0) / p.h, -p.v_recovery);
+    projected_gauss_seidel_step<2>(p, nds, h1, h2, rhs, mu, 0., m1, m2, blocked1, blocked2,
+                                   lambda, v1, v2);
   }
 };
 
@@ -473,6 +502,28 @@ struct sweep : stage<
   }
 };
 
+struct sweep_inelastic : stage<
+                             "Run one stabilised sweep: "
+                             "lambda <- P_K(lambda - eta (H v + clamp(gap/h, -v_recovery))), "
+                             "v <- v + M^-1 H^T dlambda, interaction by interaction"> {
+  static void run(auto& c) {
+    if constexpr (std::decay_t<decltype(c.kind)>::nslaw_is_fremond()) {
+      if (c.kind.number_of_interactions() > 0) {
+        throw std::runtime_error("anitescu_tasora: the Frémond impact law is not supported");
+      }
+    } else if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
+      using scalar = typename decltype(c.kind.env())::scalar;
+      sweep_state<scalar> p;
+      p.h = c.h;
+      p.v_recovery = scalar(0.6);  // the Chrono default (contact_recovery_speed)
+      c.kind.template run<apply_projected_gauss_seidel_inelastic>(c.step, p);
+      c.change = std::max(c.change, p.change / std::max(p.largest, scalar(1e-300)));
+    } else if (c.kind.number_of_interactions() > 0) {
+      throw std::runtime_error("anitescu_tasora: contacts with FEM systems are not supported");
+    }
+  }
+};
+
 struct assemble_contact_impulses
     : stage<"Assemble p0 = H^T lambda, the contact impulses (outputs)"> {
   static void run(auto& c) {
@@ -642,6 +693,22 @@ using apgd_time_step_schedule = sequence<
          for_systems<mj::update_contact_state>,
          for_interactions<co::update_output_velocities>>>;
 
+// the same, inelastic (stabilised, signed gap over h): the AT term of Chrono
+// in the sweep of the projected Gauss-Seidel, no restitution
+using inelastic_time_step_schedule = sequence<
+    "Anitescu-Tasora time step, inelastic (stabilised)",
+    for_systems<th::recompute_minv_f, th::compute_free_state>,
+    for_interactions<co::sync_relation_sets, co::compute_jacobians, co::compute_outputs, co::compute_free_outputs>,
+    co::compute_active_set,
+    when<co::with_contacts,
+         for_interactions<co::compute_time_invariant_jacobians, at::apply_warm_start>,
+         at::start,
+         repeat<at::converged, at::next_sweep, for_interactions<at::sweep_inelastic>>,
+         at::check,
+         for_systems<at::update_positions>,
+         at::setup_impulses,
+         for_interactions<at::assemble_contact_impulses, co::update_output_velocities>>>;
+
 // the state before the first step: as moreau_jean
 using initial_schedule = moreau_jean::initial_schedule;
 
@@ -658,6 +725,10 @@ struct scheme {
 
 struct apgd_scheme : scheme {
   using time_step_schedule = anitescu_tasora::apgd_time_step_schedule;
+};
+
+struct inelastic_scheme : scheme {
+  using time_step_schedule = anitescu_tasora::inelastic_time_step_schedule;
 };
 
 }  // namespace siconos::vkernel::simul::anitescu_tasora

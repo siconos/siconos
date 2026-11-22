@@ -306,6 +306,7 @@ SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
 SCHEME_LOCAL_PROBLEM_FREMOND = 5
 SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC = 6
+SCHEME_CONE_COMPLEMENTARITY_INELASTIC = 7
 
 
 class Simulation(Stored):
@@ -358,6 +359,8 @@ class Simulation(Stored):
             scheme = SCHEME_CONE_COMPLEMENTARITY_APGD
         elif type(osi).__name__ == "MoreauJeanQuasiInelasticOSI":
             scheme = SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC
+        elif type(osi).__name__ == "AnitescuTasoraInelastic":
+            scheme = SCHEME_CONE_COMPLEMENTARITY_INELASTIC
         elif type(osi).__name__ == "ExplicitDEMOSI":
             scheme = SCHEME_EXPLICIT_PENALTY
             vosi.set_theta(osi.theta_dem)
@@ -372,15 +375,18 @@ class Simulation(Stored):
         # contact exactly at gap 0 and a fixed h), and it cannot be the Frémond
         # law (which writes friction on the theta-weighted velocity)
         laws = NewtonImpactFrictionNSL.laws
-        if type(osi).__name__ == "MoreauJeanQuasiInelasticOSI":
+        if type(osi).__name__ in (
+            "MoreauJeanQuasiInelasticOSI",
+            "AnitescuTasoraInelastic",
+        ):
             if NewtonImpactFrictionNSL.max_en > 0:
                 raise ValueError(
-                    "vnative: the quasi inelastic shock law replaces the restitution, "
+                    "vnative: the inelastic gap law replaces the restitution, "
                     "set e = 0 on the interaction laws"
                 )
             if "FremondImpactFrictionNSL" in laws:
                 raise ValueError(
-                    "vnative: the quasi inelastic shock law and the Frémond impact "
+                    "vnative: the inelastic gap law and the Frémond impact "
                     "law cannot be mixed"
                 )
         # the Frémond impact law is a scheme of the vkernel, on all the
@@ -880,6 +886,16 @@ class AnitescuTasoraOSI(siconos_integrators.MoreauJeanOSI):
 
 class AnitescuTasoraAPGDOSI(siconos_integrators.MoreauJeanOSI):
     """the same, the cone complementarity problem solved by APGD"""
+
+
+class AnitescuTasoraInelastic(siconos_integrators.MoreauJeanOSI):
+    """run_options["osi"] for the Anitescu-Tasora scheme with the stabilisation
+    of Anitescu-Tasora as Chrono implements it (simul/anitescu_tasora.hpp,
+    cone_complementarity_inelastic): the normal RHS is the signed gap over h,
+    clamped at the contact recovery speed (0.6).  A separation may close by the
+    end of the step, an overlap is pushed out: this is NOT Jean's quasi
+    inelastic law, which the comparison must not confuse it with.  Only its
+    type is read by Simulation.insertIntegrator."""
 
 
 class ExplicitDEMOSI(siconos_integrators.MoreauJeanOSI):
