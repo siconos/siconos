@@ -284,6 +284,8 @@ if(WITH_TESTING)
     new_python_test(NAME vkernel_python_quasi_inelastic SCRIPT quasi_inelastic.py)
     new_python_test(NAME vkernel_python_quasi_inelastic_fem_mix SCRIPT
                     quasi_inelastic_fem_mix.py)
+    new_python_test(NAME vkernel_python_quasi_inelastic_pile SCRIPT
+                    quasi_inelastic_pile.py)
     new_python_test(NAME vkernel_python_rolling_friction SCRIPT rolling_friction.py)
     # the AOS kernel reference of rolling_friction_aos.py
     add_executable(disk_line_rolling_aos
