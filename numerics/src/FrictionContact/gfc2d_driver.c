@@ -146,12 +146,10 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       break;
     }
     case FC2D_NSGS: {
-      printf("SICONOS_FRICTION_2D_NSGS");
       numerics_printf_verbose(
           1,
           " ========================== Call NSGS solver with reformulation into "
-          "Friction-Contact 3D problem ==========================\n");
-      verbose = 1;
+          "Friction-Contact 2D problem ==========================\n");
       // We compute only if the local problem has contacts
       DEBUG_PRINTF("Number of contacts = %i \n", problem->H->size1 / 3);
       if (problem->H->size1 > 0) {

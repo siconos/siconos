@@ -255,7 +255,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       break;
     }
     case GFC3D_IPM_SNM_PROX: {
-      verbose = 1;
       gfc3d_IPM_SNM(problem, reaction, velocity, globalVelocity, &info, options);
 
       SolverOptions* nsn_options = options->internalSolvers[0];

@@ -454,7 +454,6 @@ REGISTER_SOLVER_3VAR(GFC3D_TFP_WR, "GFC3D_TFP_WR", "Global 3D Friction Contact w
 void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
                       double* velocity, double* globalVelocity, int* info,
                       SolverOptions* options) {
-  verbose = 1;
   NumericsMatrix* H = problem->H;
   // We compute only if the local problem has contacts
   DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
