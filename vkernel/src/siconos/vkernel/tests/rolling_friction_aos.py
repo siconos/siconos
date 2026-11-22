@@ -38,7 +38,6 @@
 
 import math
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -46,12 +45,15 @@ import h5py
 import numpy as np
 
 mu = 0.5
-h = 1e-3
+# the two kernels are compared at the same h: a coarse one keeps the test
+# short; an output every OUTPUT steps
+h = 1e-2
+OUTPUT = 5
 R, m, g = 1.0, 1.0, 9.81
 
 # the cases: (mu_r, tan alpha, v0, w0, T)
 CASES = {
-    "roll": (0.1, 0.0, 2.0, -2.0, 4.0),
+    "roll": (0.1, 0.0, 2.0, -2.0, 3.5),
     "coulomb": (0.0, 0.0, 2.0, -2.0, 1.0),
     "slip": (0.1, 0.0, 2.0, 0.0, 2.0),
     "incline": (0.1, 0.2, 0.0, 0.0, 1.0),
@@ -104,22 +106,16 @@ def run_vnative(case, filename):
     run_options["h"] = h
     run_options["theta"] = 0.5
     run_options["solver_options"] = options
+    run_options["output_frequency"] = OUTPUT
     # the runner divides its gravity, 9.80665, by gravity_scale
     run_options["gravity_scale"] = 9.80665 / g
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
         io.run(run_options)
 
 
-def vnative(case, tmpdir):
-    """t, then x, vx and w in the frame of the line"""
-    filename = os.path.join(tmpdir, case + ".hdf5")
-    r = subprocess.run(
-        [sys.executable, __file__, "--vnative", case, filename],
-        capture_output=True,
-        text=True,
-    )
-    if r.returncode != 0:
-        raise RuntimeError(f"exit status {r.returncode}\n{r.stdout}{r.stderr}")
+def vnative(case, filename):
+    """t, then x, vx and w in the frame of the line, from the file of the
+    vnative run"""
     with h5py.File(filename, "r") as f:
         q, v = f["data/dynamic"][:], f["data/velocities"][:]
     ds = v[0, 1]
@@ -129,34 +125,45 @@ def vnative(case, tmpdir):
     return q[:, 0], q[:, 2] * c - q[:, 3] * s, v[:, 2] * c - v[:, 3] * s, v[:, 7]
 
 
-def aos(program, case):
-    """the columns t x y theta vx vy w rn rt rr"""
+def aos_command(program, case):
+    """the command of the reference, its columns t x y theta vx vy w rn rt
+    rr"""
     mu_r, tan, v0, w0, T = CASES[case]
     args = [mu, mu_r, math.atan(tan), v0, w0, T, h, 0.5]
-    r = subprocess.run(
-        [program] + [repr(float(a)) for a in args],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return np.loadtxt(r.stdout.splitlines())
+    return [program] + [repr(float(a)) for a in args]
 
 
 if len(sys.argv) == 4 and sys.argv[1] == "--vnative":
     run_vnative(sys.argv[2], sys.argv[3])
     sys.exit(0)
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import case_processes  # noqa: E402
+
 program = os.path.abspath(sys.argv[1])
 tmpdir = tempfile.mkdtemp()
+files = {case: os.path.join(tmpdir, case + ".hdf5") for case in CASES}
+# all the runs side by side: the vnative ones and the references
+runs = case_processes.run(
+    [[sys.executable, __file__, "--vnative", case, files[case]] for case in CASES]
+    + [aos_command(program, case) for case in CASES]
+)
+vnative_runs = dict(zip(CASES, runs[: len(CASES)]))
+aos_runs = dict(zip(CASES, runs[len(CASES) :]))
 failed = False
 for case in CASES:
-    ref = aos(program, case)
-    try:
-        t, x, vx, w = vnative(case, tmpdir)
-    except RuntimeError as e:
-        print(f"FAILED: {case}: {e}")
+    r = aos_runs[case]
+    if r.returncode != 0:
+        print(f"FAILED: {case}: reference exit status {r.returncode}\n{r.stderr}")
         failed = True
         continue
+    ref = np.loadtxt(r.stdout.splitlines())
+    r = vnative_runs[case]
+    if r.returncode != 0:
+        print(f"FAILED: {case}: exit status {r.returncode}\n{r.stdout}{r.stderr}")
+        failed = True
+        continue
+    t, x, vx, w = vnative(case, files[case])
     rows = np.rint(t / h).astype(int)
     if rows.max() >= len(ref):
         print(f"FAILED: {case}: {len(t)} vnative rows, {len(ref)} reference rows")

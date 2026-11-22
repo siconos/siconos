@@ -32,7 +32,8 @@
 #   roll           horizontal, mu_r > 0, Moreau-Jean: deceleration, stop
 #   roll-mjf       the same, the Moreau-Jean-Frémond scheme
 #   coulomb        horizontal, mu_r = 0: rolls forever
-#   incline-<tan>  at rest on a slope of tan alpha (scan around mu_r / R)
+#   incline        at rest on slopes of tan alpha (scan around mu_r / R),
+#                  one disk per slope, side by side in one scene
 #   roll-at        horizontal, Anitescu-Tasora (projected Gauss-Seidel): the
 #                  associated (convexified) law, the disk decelerates
 #   roll-apgd      the same, APGD
@@ -53,7 +54,6 @@
 import functools
 import math
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -76,7 +76,9 @@ R, m, g = 0.5, 1.0, 9.80665
 inertia = 0.5 * m * R**2
 mu, mu_r = 0.5, 0.05
 v0 = 1.0
-h = 1e-3
+# the checks hold at any h (the deceleration is exact, the tolerances of the
+# stop scale with h): a coarse one keeps the test short
+h = 1e-2
 
 # the cases: (T, mu_r, tan alpha)
 CASES = {
@@ -90,9 +92,10 @@ CASES = {
     "gosi": (0.1, mu_r, 0.0),
     "dem": (0.1, mu_r, 0.0),
 }
+# the slopes of the incline case, SPACING apart
 TANS = (0.09, 0.099, 0.101, 0.11, 0.2)
-for tan in TANS:
-    CASES[f"incline-{tan}"] = (0.5, mu_r, tan)
+SPACING = 20.0
+CASES["incline"] = (0.5, mu_r, 0.0)
 
 
 def run(case, filename):
@@ -106,7 +109,23 @@ def run(case, filename):
         L = 50.0
         io.add_primitive_shape("Ground", "Segment", (-L, -L * tan, L, L * tan))
         n = (-math.sin(alpha), math.cos(alpha))
-        if case == "pair":
+        if case == "incline":
+            # a slope through (k SPACING, 0) and a disk at rest on it, each
+            for k, slope in enumerate(TANS):
+                x0, a = k * SPACING, math.atan(slope)
+                io.add_primitive_shape(
+                    f"Slope{k}", "Segment", (x0 - 5, -5 * slope, x0 + 5, 5 * slope)
+                )
+                io.add_object(f"slope{k}", [Contactor(f"Slope{k}")], translation=[0, 0])
+                io.add_object(
+                    f"disk{k}",
+                    [Contactor("Disk")],
+                    translation=[x0 - R * math.sin(a), R * math.cos(a)],
+                    orientation=[0],
+                    mass=m,
+                    inertia=inertia,
+                )
+        elif case == "pair":
             # side by side, the first one rolling into the second one
             for k, (x, v) in enumerate([(0.0, v0), (2 * R + 0.1, 0.0)]):
                 io.add_object(
@@ -146,7 +165,8 @@ def run(case, filename):
                 mass=m,
                 inertia=inertia,
             )
-        io.add_object("ground", [Contactor("Ground")], translation=[0, 0])
+        if case != "incline":
+            io.add_object("ground", [Contactor("Ground")], translation=[0, 0])
         io.add_Newton_impact_rolling_friction_nsl(
             "contact", mu=mu, mu_r=case_mu_r, e=0.0
         )
@@ -200,6 +220,7 @@ if len(sys.argv) == 3:
     sys.exit(0)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import case_processes  # noqa: E402
 import ref_trajectory  # noqa: E402
 
 failed = False
@@ -212,14 +233,20 @@ def fail(message):
 
 
 tmpdir = tempfile.mkdtemp()
+# all the cases side by side, then checked in turn
+outputs = {case: os.path.join(tmpdir, case + ".npz") for case in CASES}
+results = dict(
+    zip(
+        CASES,
+        case_processes.run(
+            [[sys.executable, __file__, case, outputs[case]] for case in CASES]
+        ),
+    )
+)
 
 
 def run_case(case):
-    out = os.path.join(tmpdir, case + ".npz")
-    r = subprocess.run(
-        [sys.executable, __file__, case, out], capture_output=True, text=True
-    )
-    return r, out
+    return results[case], outputs[case]
 
 
 def disk_rows(out):
@@ -273,21 +300,25 @@ else:
     if not ref_trajectory.check(out + ".hdf5", "rolling_friction_coulomb", 1e-8):
         fail("coulomb: reference")
 
-# at rest on a slope: rolls iff tan alpha > mu_r / R
-for tan in TANS:
-    case = f"incline-{tan}"
-    r, out = run_case(case)
-    if r.returncode != 0:
-        fail(f"{case}: exit status {r.returncode}\n{r.stdout}{r.stderr}")
-        continue
-    v, q = disk_rows(out)
-    alpha = math.atan(tan)
-    a = max(0.0, 2 / 3 * g * (math.sin(alpha) - mu_r / R * math.cos(alpha)))
-    speed = math.hypot(v[-1, 2], v[-1, 3])
-    T = CASES[case][0]
-    print(f"{case}: speed(T) = {speed:.6e} (expected {a * T:.6e})")
-    if abs(speed - a * T) > tol * max(1, a * T):
-        fail(f"{case}: speed")
+# at rest on a slope: rolls iff tan alpha > mu_r / R; the disk of a slope
+# by its first position
+r, out = run_case("incline")
+if r.returncode != 0:
+    fail(f"incline: exit status {r.returncode}\n{r.stdout}{r.stderr}")
+else:
+    data = np.load(out)
+    v, q = data["v"], data["q"]
+    first = q[q[:, 0] == q[0, 0]]
+    T = CASES["incline"][0]
+    for k, tan in enumerate(TANS):
+        ds = first[np.argmin(np.abs(first[:, 2] - k * SPACING)), 1]
+        vk = v[v[:, 1] == ds]
+        alpha = math.atan(tan)
+        a = max(0.0, 2 / 3 * g * (math.sin(alpha) - mu_r / R * math.cos(alpha)))
+        speed = math.hypot(vk[-1, 2], vk[-1, 3])
+        print(f"incline-{tan}: speed(T) = {speed:.6e} (expected {a * T:.6e})")
+        if abs(speed - a * T) > tol * max(1, a * T):
+            fail(f"incline-{tan}: speed")
 
 # Anitescu-Tasora: the associated law, the disk decelerates; reference only
 for case in ("roll-at", "roll-apgd"):
@@ -309,15 +340,14 @@ for case in ("roll", "pair", "pile"):
     if r is not None and r.returncode != 0:
         fail(f"{case}: exit status {r.returncode}\n{r.stdout}{r.stderr}")
         continue
-    if not ref_trajectory.check(
-        out + ".hdf5", f"rolling_friction_{case}", 1e-6, every=10
-    ):
+    if not ref_trajectory.check(out + ".hdf5", f"rolling_friction_{case}", 1e-6):
         fail(f"{case}: reference")
 
 # the schemes without rolling resistance refuse it
 for case in ("gosi", "dem"):
     r, out = run_case(case)
-    print(f"{case}: exit status {r.returncode}, {r.stdout.strip()}")
+    last = (r.stdout.strip().splitlines() or [""])[-1]
+    print(f"{case}: exit status {r.returncode}, {last}")
     if r.returncode != 3 or "rolling resistance" not in r.stdout:
         fail(f"{case}: rolling resistance should be refused")
 

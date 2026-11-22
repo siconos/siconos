@@ -42,14 +42,20 @@
 
 import math
 import os
-import subprocess
 import sys
 import tempfile
 
 import h5py
 import numpy as np
 
-h = 1e-3
+# the two kernels are compared at the same h, coarse where they agree at
+# any h. On a face (slide, incline) the two kernels may stop the square one
+# step apart, an error of order g h^2, and a coarse h rocks it: h = 1e-3
+# there. An output every OUTPUT_DT (s): the writing of an output costs more
+# than a step.
+H = 5e-3
+H_FACE = 1e-3
+OUTPUT_DT = 0.02
 m, g = 1.0, 9.81
 SQUARE = 1 / math.sqrt(2)  # the circumradius of the unit square
 # above the tipping threshold of the unit square pivoting on a corner,
@@ -59,7 +65,7 @@ W_TIP = 2.6
 # the cases: (N, Rc, mu, mu_r, tan alpha, vx0, vy0, w0, T), the initial
 # velocity in the frame of the line
 CASES = {
-    "slide": (4, SQUARE, 0.3, 0.1, 0.0, 2.0, 0.0, 0.0, 1.0),
+    "slide": (4, SQUARE, 0.3, 0.1, 0.0, 2.0, 0.0, 0.0, 0.8),
     "tip-0": (4, SQUARE, 0.5, 0.0, 0.0, W_TIP / 2, W_TIP / 2, -W_TIP, 1.0),
     "tip-0.1": (4, SQUARE, 0.5, 0.1, 0.0, W_TIP / 2, W_TIP / 2, -W_TIP, 1.0),
     "octagon-0": (8, 1.0, 0.5, 0.0, 0.0, 3.0, 0.0, -3.0 / math.cos(math.pi / 8), 2.0),
@@ -76,6 +82,11 @@ CASES = {
     ),
     "incline": (4, SQUARE, 0.5, 0.1, 0.2, 0.0, 0.0, 0.0, 0.5),
 }
+
+
+def step(case):
+    """the h of a case"""
+    return H_FACE if case in ("slide", "incline") else H
 
 
 def vertices(N, Rc):
@@ -134,25 +145,19 @@ def run_vnative(case, filename):
     run_options = MechanicsHdf5Runner_run_options()
     run_options["t0"] = 0
     run_options["T"] = T
-    run_options["h"] = h
+    run_options["h"] = step(case)
     run_options["theta"] = 0.5
     run_options["solver_options"] = options
+    run_options["output_frequency"] = round(OUTPUT_DT / step(case))
     # the runner divides its gravity, 9.80665, by gravity_scale
     run_options["gravity_scale"] = 9.80665 / g
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
         io.run(run_options)
 
 
-def vnative(case, tmpdir):
-    """t, then x, y, theta, vx, vy, w in the frame of the line"""
-    filename = os.path.join(tmpdir, case + ".hdf5")
-    r = subprocess.run(
-        [sys.executable, __file__, "--vnative", case, filename],
-        capture_output=True,
-        text=True,
-    )
-    if r.returncode != 0:
-        raise RuntimeError(f"exit status {r.returncode}\n{r.stdout}{r.stderr}")
+def vnative(case, filename):
+    """t, then x, y, theta, vx, vy, w in the frame of the line, from the file
+    of the vnative run"""
     with h5py.File(filename, "r") as f:
         q, v = f["data/dynamic"][:], f["data/velocities"][:]
     ds = v[0, 1]
@@ -173,35 +178,46 @@ def vnative(case, tmpdir):
     )
 
 
-def aos(program, case):
-    """the columns t x y theta vx vy w"""
+def aos_command(program, case):
+    """the command of the reference, its columns t x y theta vx vy w"""
     N, Rc, mu, mu_r, tan, vx0, vy0, w0, T = CASES[case]
-    args = [N, Rc, mu, mu_r, math.atan(tan), vx0, vy0, w0, T, h, 0.5]
-    r = subprocess.run(
-        [program] + [str(a) if isinstance(a, int) else repr(float(a)) for a in args],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return np.loadtxt(r.stdout.splitlines())
+    args = [N, Rc, mu, mu_r, math.atan(tan), vx0, vy0, w0, T, step(case), 0.5]
+    return [program] + [str(a) if isinstance(a, int) else repr(float(a)) for a in args]
 
 
 if len(sys.argv) == 4 and sys.argv[1] == "--vnative":
     run_vnative(sys.argv[2], sys.argv[3])
     sys.exit(0)
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import case_processes  # noqa: E402
+
 program = os.path.abspath(sys.argv[1])
 tmpdir = tempfile.mkdtemp()
+files = {case: os.path.join(tmpdir, case + ".hdf5") for case in CASES}
+# all the runs side by side: the vnative ones and the references
+runs = case_processes.run(
+    [[sys.executable, __file__, "--vnative", case, files[case]] for case in CASES]
+    + [aos_command(program, case) for case in CASES]
+)
+vnative_runs = dict(zip(CASES, runs[: len(CASES)]))
+refs = {}
 failed = False
-for case in CASES:
-    ref = aos(program, case)
-    try:
-        t, *traj = vnative(case, tmpdir)
-    except RuntimeError as e:
-        print(f"FAILED: {case}: {e}")
+for case, r in zip(CASES, runs[len(CASES) :]):
+    if r.returncode != 0:
+        print(f"FAILED: {case}: reference exit status {r.returncode}\n{r.stderr}")
+        failed = True
+    else:
+        refs[case] = np.loadtxt(r.stdout.splitlines())
+for case in refs:
+    ref = refs[case]
+    r = vnative_runs[case]
+    if r.returncode != 0:
+        print(f"FAILED: {case}: exit status {r.returncode}\n{r.stdout}{r.stderr}")
         failed = True
         continue
-    rows = np.rint(t / h).astype(int)
+    t, *traj = vnative(case, files[case])
+    rows = np.rint(t / step(case)).astype(int)
     if rows.max() >= len(ref):
         print(f"FAILED: {case}: {len(t)} vnative rows, {len(ref)} reference rows")
         failed = True
@@ -232,13 +248,16 @@ for case in CASES:
 
 # the physics, on the reference: the slide stops flat at v0^2 / (2 mu g),
 # the square tips over without rolling resistance and falls back with it
-ref = aos(program, "slide")
+ref = refs["slide"]
 x_stop = 2.0**2 / (2 * 0.3 * g)
-if abs(ref[-1, 1] - x_stop) > 2 * 2.0 * h or np.max(np.abs(ref[:, 3])) > 1e-9:
+if (
+    abs(ref[-1, 1] - x_stop) > 2 * 2.0 * step("slide")
+    or np.max(np.abs(ref[:, 3])) > 1e-9
+):
     print(f"FAILED: slide: x(T) {ref[-1, 1]:.6f}, expected {x_stop:.6f}, flat")
     failed = True
 for case, over in (("tip-0", True), ("tip-0.1", False)):
-    theta_T = aos(program, case)[-1, 3]
+    theta_T = refs[case][-1, 3]
     if (theta_T < -math.pi / 4) != over:
         print(f"FAILED: {case}: theta(T) {theta_T:.4f}, tips over expected {over}")
         failed = True
