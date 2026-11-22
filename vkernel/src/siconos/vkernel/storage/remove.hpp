@@ -47,7 +47,6 @@ void remove_many(auto& data, std::vector<std::size_t> indices) {
       "storage::remove_many: this item lives as long as the store (removable = false)");
   std::sort(indices.begin(), indices.end(), std::greater<>{});
   indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
-  using indice = typename get_info_t<std::decay_t<decltype(data)>>::template env<Item>::indice;
   data.store()._registry.template remove_items<Item>(std::move(indices));
 }
 
