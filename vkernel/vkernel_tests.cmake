@@ -84,6 +84,8 @@ if(WITH_TESTING)
   new_test(NAME vkernel_fremond_disk SOURCES fremond_disk.cpp ${SIMPLE_TEST_MAIN}
            DEPS "${COMPACTNSEARCH}")
   new_test(NAME vkernel_fremond_rigid SOURCES fremond_rigid.cpp ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_quasi_inelastic_disk SOURCES quasi_inelastic_disk.cpp
+           ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
   # a FEM square falling on the ground (rt_rt interactions). square_200.msh and
@@ -199,6 +201,7 @@ if(WITH_TESTING)
       vkernel_bouncing_disk_line
       vkernel_fremond_disk
       vkernel_fremond_rigid
+      vkernel_quasi_inelastic_disk
       vkernel_fem_t3
       vkernel_bouncing_disks
       vkernel_fixed_disks
