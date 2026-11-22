@@ -32,6 +32,7 @@ class Stored:
         # no law of a previous storage
         NewtonImpactFrictionNSL.laws.clear()
         NewtonImpactFrictionNSL.rolling_resistance = False
+        NewtonImpactFrictionNSL.max_en = 0.0
 
     @classmethod
     def data(cls):
@@ -212,6 +213,9 @@ class NewtonImpactFrictionNSL(Stored):
     # Simulation.insertIntegrator)
     laws = set()
     rolling_resistance = False
+    # the largest normal restitution e of the laws of the storage: the quasi
+    # inelastic shock law replaces the restitution (see insertIntegrator)
+    max_en = 0.0
 
     def __init__(self, e, not_used, mu, dimension):
         self._handle = vkernel.disks.add_nslaw(self.data())
@@ -221,6 +225,7 @@ class NewtonImpactFrictionNSL(Stored):
         self._handle.set_mu_r(0.0)
         # self._handle.set_dimension(dimension)
         NewtonImpactFrictionNSL.laws.add(type(self).__name__)
+        NewtonImpactFrictionNSL.max_en = max(NewtonImpactFrictionNSL.max_en, abs(e))
 
 
 class NewtonImpactRollingFrictionNSL(NewtonImpactFrictionNSL):
@@ -300,6 +305,7 @@ SCHEME_CONE_COMPLEMENTARITY = 2
 SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
 SCHEME_LOCAL_PROBLEM_FREMOND = 5
+SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC = 6
 
 
 class Simulation(Stored):
@@ -350,6 +356,8 @@ class Simulation(Stored):
             scheme = SCHEME_CONE_COMPLEMENTARITY
         elif type(osi).__name__ == "AnitescuTasoraAPGDOSI":
             scheme = SCHEME_CONE_COMPLEMENTARITY_APGD
+        elif type(osi).__name__ == "MoreauJeanQuasiInelasticOSI":
+            scheme = SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC
         elif type(osi).__name__ == "ExplicitDEMOSI":
             scheme = SCHEME_EXPLICIT_PENALTY
             vosi.set_theta(osi.theta_dem)
@@ -358,10 +366,26 @@ class Simulation(Stored):
             vosi.set_tangential_stiffness(osi.tangential_stiffness)
         else:
             scheme = SCHEME_LOCAL_PROBLEM
+        # the quasi inelastic shock law of the vnative Moreau-Jean local
+        # problem: it replaces the restitution, so e must be 0 on the laws (e
+        # multiplies ydot, the law divides the gap by h; they agree only for a
+        # contact exactly at gap 0 and a fixed h), and it cannot be the Frémond
+        # law (which writes friction on the theta-weighted velocity)
+        laws = NewtonImpactFrictionNSL.laws
+        if type(osi).__name__ == "MoreauJeanQuasiInelasticOSI":
+            if NewtonImpactFrictionNSL.max_en > 0:
+                raise ValueError(
+                    "vnative: the quasi inelastic shock law replaces the restitution, "
+                    "set e = 0 on the interaction laws"
+                )
+            if "FremondImpactFrictionNSL" in laws:
+                raise ValueError(
+                    "vnative: the quasi inelastic shock law and the Frémond impact "
+                    "law cannot be mixed"
+                )
         # the Frémond impact law is a scheme of the vkernel, on all the
         # interactions: it cannot be mixed with the Newton law, and only
         # Moreau-Jean on the local problem implements it
-        laws = NewtonImpactFrictionNSL.laws
         if "FremondImpactFrictionNSL" in laws:
             if laws & {"NewtonImpactFrictionNSL", "NewtonImpactRollingFrictionNSL"}:
                 raise ValueError(
@@ -827,6 +851,17 @@ SICONOS_TS_NONLINEAR = "SICONOS_TS_NONLINEAR"
 
 
 MoreauJeanOSI = Osi
+
+
+class MoreauJeanQuasiInelasticOSI(Osi):
+    """run_options["osi"] for the quasi inelastic shock law of Jean 1999
+    (CMAME 177, Eq 25) of the vnative backend (simul/moreau_jean.hpp,
+    local_problem_quasi_inelastic): a MoreauJeanOSI whose normal shock law is
+    the positive part of the gap over h instead of the restitution.  The law
+    replaces the restitution, so the interaction laws must have e = 0
+    (refused otherwise), and it acts on the rigid-rigid contacts only (the FEM
+    contacts keep the Newton law).  Only its type is read by
+    Simulation.insertIntegrator."""
 
 
 class Unimplemented:

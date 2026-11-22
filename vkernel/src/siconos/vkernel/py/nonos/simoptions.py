@@ -46,6 +46,7 @@ SCHEME_CONE_COMPLEMENTARITY = 2
 SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
 SCHEME_LOCAL_PROBLEM_FREMOND = 5
+SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC = 6
 
 SCHEMES = {
     "MoreauJean": SCHEME_LOCAL_PROBLEM,
@@ -54,6 +55,7 @@ SCHEMES = {
     "AnitescuTasoraAPGD": SCHEME_CONE_COMPLEMENTARITY_APGD,
     "DEM": SCHEME_EXPLICIT_PENALTY,
     "MoreauJeanFremond": SCHEME_LOCAL_PROBLEM_FREMOND,
+    "MoreauJeanQuasiInelastic": SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC,
 }
 # short aliases of the scheme names, also accepted
 SCHEME_ALIASES = {
@@ -63,6 +65,8 @@ SCHEME_ALIASES = {
     "at-apgd": "AnitescuTasoraAPGD",
     "dem": "DEM",
     "mjf": "MoreauJeanFremond",
+    "mji": "MoreauJeanQuasiInelastic",
+    "quasi-inelastic": "MoreauJeanQuasiInelastic",
 }
 SCHEME_NAMES = {v: k for k, v in SCHEMES.items()}
 

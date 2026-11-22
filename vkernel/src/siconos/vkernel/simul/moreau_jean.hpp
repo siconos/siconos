@@ -87,6 +87,30 @@ struct apply_fremond_impact_law
   }
 };
 
+// the quasi inelastic shock law of Jean 1999 (CMAME 177:235-257), Eq 25, on
+// the free output derivative: the normal row of q is shifted by the positive
+// part of the gap over h, so that the normal velocity at step + 1 is no more
+// negative than -g_pos/h and an overlap (y <= 0) gives the plain inelastic
+// condition u_N >= 0.  Not a new friction law and not a restitution: e is not
+// used.
+//   q_N = H_N v_free + max(0, y(0)) / h
+// The condition is on the velocity u_N(k + 1) at the step, as the Moreau-Jean
+// contact law always is, so it does not carry theta: theta weights the smooth
+// dynamics and the position update, not the contact condition.  (The
+// theta-weighted form ( g_pos + h (1 - theta) ydot ) / (h theta) that makes
+// g(k + 1) >= 0 exact under q(k+1) = q(k) + h (theta v(k+1) + (1-theta) v(k)) is
+// NOT used: for theta < 1 it forces the new normal velocity to reverse to
+// compensate the old one, i.e. it ejects a falling contact - measured, see the
+// design note.)
+struct apply_quasi_inelastic_shock_law
+    : kernel<all<interactions>, in<"y">, inout<"ydot", next>> {
+  static void apply(const auto& p, const auto& y, auto& ydot_next) {
+    using scalar = std::decay_t<decltype(y(0))>;
+    const scalar g_pos = y(0) > scalar(0) ? y(0) : scalar(0);
+    ydot_next(0) += g_pos / p.h;
+  }
+};
+
 // the free output derivative of an active interaction in q of the problem
 struct assemble_free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
   static void apply(auto& p, auto row, const auto& ydot_next) {
@@ -136,6 +160,21 @@ struct apply_newton_impact_law
         throw std::runtime_error(
             "the Frémond impact law is implemented in the Moreau-Jean scheme only");
       }
+    } else {
+      c.kind.template run<moreau_jean::apply_newton_impact_law>(c.step, nullptr);
+    }
+  }
+};
+
+// the quasi inelastic shock law of Jean 1999 on the rigid-rigid kinds; the
+// FEM kinds keep the Newton impact law (for a deformable body the Signorini
+// condition is self-correcting, Jean sec 4.2)
+struct apply_quasi_inelastic_shock_law
+    : stage<"Apply the quasi inelastic shock law on the free ydot at step + 1"> {
+  static void run(auto& c) {
+    if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
+      c.kind.template run<moreau_jean::apply_quasi_inelastic_shock_law>(
+          c.step, theta_method::stages::parameters(c.kind, c.h, c.integrator.theta()));
     } else {
       c.kind.template run<moreau_jean::apply_newton_impact_law>(c.step, nullptr);
     }
@@ -298,6 +337,13 @@ using time_step_schedule = time_step_schedule_with<"Moreau-Jean time step", mj::
 // interaction, chosen when the simulation is set up (see selectable_scheme.hpp)
 using fremond_time_step_schedule =
     time_step_schedule_with<"Moreau-Jean-Frémond time step", mj::apply_fremond_impact_law>;
+
+// the Moreau-Jean time step with the quasi inelastic shock law (Jean 1999,
+// Eq 25) on the rigid kinds, the Newton impact law on the FEM kinds: chosen
+// by local_problem_quasi_inelastic (see selectable_scheme.hpp)
+using quasi_inelastic_time_step_schedule =
+    time_step_schedule_with<"Moreau-Jean quasi-inelastic time step",
+                            mj::apply_quasi_inelastic_shock_law>;
 
 // the state before the first step
 using initial_schedule =
