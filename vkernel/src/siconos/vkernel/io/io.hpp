@@ -98,12 +98,21 @@ struct io : item {
 
       /* /!\ the rigid systems, the first kind */
       auto hosi = self()->make_handle(osi());
-      const auto& p0_v = std::get<0>(hosi.systems()).p0_view(hosi.p0_vector_assembled());
+      auto&& p0h = hosi.p0_vector_assembled();
+      // p0 is assembled only when there are active contacts (the solve block):
+      // a predicted (involved) contact can be output at a step where the solve
+      // did not run, and then p0 has no storage yet.  Do not dereference it.
+      const bool p0_ready = (p0h._v != nullptr);
+      const auto& p0_v = std::get<0>(hosi.systems()).p0_view(p0h);
 
       attr<"p0_info">(*self()).clear();
 
       for (auto [id, involved, index] : view::zip(ids, involveds, indices)) {
-        if (involved) {
+        // p0 is sized by the solve (impulse) to the involved systems: an
+        // involved system is read only when p0 exists and its block is in
+        // range, so a scheme that reaches the output before the solve has
+        // sized p0 (or an empty p0) does not read past the assembled vector
+        if (involved and p0_ready and std::size_t(index) < algebra::size0(p0_v)) {
           /* contact */
           auto&& p0 = algebra::get_vector(p0_v, index);
           attr<"p0_info">(*self()).push_back({(scalar)id, p0[0], p0[1], p0[2]});
