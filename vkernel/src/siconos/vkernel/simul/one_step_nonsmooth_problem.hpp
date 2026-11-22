@@ -25,7 +25,7 @@
 #include <memory>
 #include <print>
 
-#include "siconos/vkernel/algebra/algebra.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/simul/simul_head.hpp"
 
 namespace siconos::vkernel {

@@ -17,7 +17,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "siconos/vkernel/algebra/algebra.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/collision/array_hash.hpp"
 #include "siconos/vkernel/collision/collision_head.hpp"
 #include "siconos/vkernel/collision/diskdisk_r.hpp"

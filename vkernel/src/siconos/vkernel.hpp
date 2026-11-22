@@ -12,7 +12,7 @@
 #include <tuple>
 #include <typeinfo>
 
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/algebra.hpp"
 #include "siconos/vkernel/collision/diskdisk_r.hpp"
 #include "siconos/vkernel/collision/diskline_r.hpp"
 #include "siconos/vkernel/collision/neighborhood.hpp"

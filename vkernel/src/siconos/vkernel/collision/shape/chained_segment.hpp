@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/collision/collision.hpp"
 #include "siconos/vkernel/collision/collision_head.hpp"
 #include "siconos/vkernel/collision/shape/segment.hpp"

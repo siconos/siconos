@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "siconos/vkernel/algebra/math.hpp"
 #include "siconos/vkernel/collision/collision_head.hpp"
 #include "siconos/vkernel/collision/shape/disk.hpp"
 #include "siconos/vkernel/collision/shape_of.hpp"

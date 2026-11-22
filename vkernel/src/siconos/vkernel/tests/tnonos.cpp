@@ -14,7 +14,7 @@
 #include <typeinfo>
 
 #include "siconos/vkernel.hpp"
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/config/environment.hpp"
 #include "siconos/vkernel/model/lagrangian_ds.hpp"
 #include "siconos/vkernel/model/lagrangian_r.hpp"

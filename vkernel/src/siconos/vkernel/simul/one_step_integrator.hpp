@@ -8,7 +8,7 @@
 #pragma once
 
 #include "interaction.hpp"
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/model/lagrangian_r.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/moreau_jean.hpp"

@@ -16,9 +16,9 @@
 #include <variant>
 #include <vector>
 
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/algebra/linear_algebra.hpp"
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/storage/pattern/pattern.hpp"
 #include "siconos/vkernel/storage/sparse_set.hpp"
 #include "siconos/vkernel/storage/storage.hpp"

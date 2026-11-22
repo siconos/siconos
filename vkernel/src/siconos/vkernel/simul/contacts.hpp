@@ -13,8 +13,8 @@
 #include <string>
 #include <type_traits>
 
-#include "siconos/vkernel/algebra/eigen.hpp"
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/model/lagrangian_ds.hpp"
 #include "siconos/vkernel/model/lagrangian_r.hpp"
 // after the models

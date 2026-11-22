@@ -12,7 +12,7 @@
 #include <map>
 #include <stdexcept>
 
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/collision/collision.hpp"
 #include "siconos/vkernel/collision/diskfdisk_r.hpp"
 #include "siconos/vkernel/collision/diskfsegment_r.hpp"

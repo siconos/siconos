@@ -212,7 +212,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/externals/cxd/src/
         FILES_MATCHING PATTERN "*.hpp")
 
 # Build root and install root are both "the directory containing siconos/".
-# The public headers include Eigen (algebra/eigen.hpp) and several
+# The public headers include Eigen (algebra/eigen_backend.hpp) and several
 # Siconos/Numerics headers (CSparseMatrix.h, NumericsMatrix.h, SolverOptions.h,
 # SiconosConfig.h, fclib_interface.h), so the component must export both:
 # numerics does not re-export Eigen3, and without it the installed headers do

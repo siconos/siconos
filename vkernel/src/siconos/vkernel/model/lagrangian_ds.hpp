@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/model/model_head.hpp"
 
 namespace siconos::vkernel::model {

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/collision/diskmesh_r.hpp"
 #include "siconos/vkernel/model/lagrangian_ds.hpp"
 #include "siconos/vkernel/model/lagrangian_r.hpp"

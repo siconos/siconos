@@ -9,7 +9,7 @@
 
 #include <stdexcept>
 
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/simul/contacts.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/moreau_jean.hpp"

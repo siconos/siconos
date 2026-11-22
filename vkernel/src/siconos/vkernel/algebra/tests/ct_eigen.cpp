@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 
 namespace siconos::vkernel::algebra {
 static_assert(vector<int, 3>::SizeAtCompileTime != Eigen::Dynamic);

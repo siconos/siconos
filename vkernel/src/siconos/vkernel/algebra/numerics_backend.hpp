@@ -18,31 +18,13 @@
 #include "NumericsSparseMatrix.h"
 #include "numerics_errors.h"   // NUMERICS_OK
 #include "numerics_verbose.h"  // CHECK_RETURN
-#include "siconos/vkernel/algebra/algebra.hpp"
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/algebra/linear_algebra.hpp"
 #include "siconos/vkernel/algebra/sparse_factor.hpp"
 #include "siconos/vkernel/storage/pattern/pattern.hpp"
 #include "siconos/vkernel/storage/traits/traits.hpp"
 
-namespace siconos::vkernel::storage::pattern::match {
-template <typename T>
-concept vec = requires { typename std::decay_t<T>::vec_t; };
-
-template <typename T>
-concept any_mat = !vec<T> && requires { typename std::decay_t<T>::any_mat_t; };
-
-template <typename T>
-concept mat = any_mat<T> && requires { typename std::decay_t<T>::mat_t; };
-
-template <typename T>
-concept diag_mat = any_mat<T> && requires { typename std::decay_t<T>::diag_mat_t; };
-
-}  // namespace siconos::vkernel::storage::pattern::match
-
 namespace siconos::vkernel::algebra {
-
-namespace match = siconos::vkernel::storage::pattern::match;
 
 using indice_t = std::size_t;
 

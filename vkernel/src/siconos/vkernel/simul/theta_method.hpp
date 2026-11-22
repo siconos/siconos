@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "siconos/vkernel/algebra/eigen.hpp"
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/simul/kernels.hpp"
 #include "siconos/vkernel/storage/schedule.hpp"
 

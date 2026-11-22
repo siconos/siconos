@@ -9,7 +9,6 @@
 
 #include <functional>
 
-#include "siconos/vkernel/algebra/algebra.hpp"
 #include "siconos/vkernel/model/lagrangian_ds.hpp"
 #include "siconos/vkernel/model/model_head.hpp"
 

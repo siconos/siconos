@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/model/nslaws.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/simul_head.hpp"
