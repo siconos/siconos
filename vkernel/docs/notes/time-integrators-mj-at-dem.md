@@ -243,6 +243,41 @@ Two notes on this case:
 - 6 of the 4800 AT steps stop at an error of 1.3e-12 to 1.3e-11 for a
   1e-12 tolerance.
 
+### 3.8 The shock law at the contact: Newton, quasi inelastic, AT stabilisation
+
+The normal law at a rigid-rigid contact is a shift of the free output
+derivative `q_N`, added before the frictional contact problem is solved:
+
+| law | `q_N` shift | on an overlap (`y < 0`) |
+|---|---|---|
+| Newton, `e = 0` | `e ydot_N(k)` | stops, no push-out |
+| Jean 1999 Eq 25 (`MoreauJeanQuasiInelasticOSI`) | `max(0, y)/h` | keeps it (`g_pos`) |
+| Anitescu-Tasora stabilisation (`AnitescuTasoraInelastic`) | `max(y/h, -v_r)` | pushes out, speed ≤ `v_r` = 0.6 |
+
+The condition is on the velocity `u_N(k+1)` at the step, so it does not
+carry `theta`: `theta` weights the smooth dynamics and the position update,
+not the contact condition. (A `theta`-weighted form
+`(g_pos + h(1-theta) ydot)/(h theta)` that makes `g(k+1) >= 0` exact under
+the trapezoidal update was measured to *eject* a falling contact for
+`theta < 1`, and is not used.)
+
+The figure is the same disk dropped on a floor (`v0 = -1`, `e = 0`,
+`mu = 1`, `theta = 0.5`) under the three laws; the left panel is the gap,
+the right the normal velocity. Jean (blue) closes the gap and settles with
+the small permanent overlap of `g_pos` (~6e-4) and no upward velocity; the
+AT stabilisation (red) pushes the overlap out (a recovery velocity
++0.37 m/s, the gap opens to ~3e-3); Newton (grey) stops at the first active
+step. The three are different mechanisms and never the same curve: Jean is
+Eq 25 of the paper, AT is its signed-gap stabilisation, and a push-out is
+not what Jean calls the quasi inelastic law.
+
+![quasi inelastic](time-integrators-mj-at-dem/quasi_inelastic.png)
+
+`tests/quasi_inelastic.py` (the ctest) checks the behaviour (no ejection,
+rest, the two-step impulse, the refusals); the figure is made by
+`time-integrators-mj-at-dem/scripts/quasi_inelastic_plot.py` (needs
+matplotlib and the vnative backend).
+
 ## 4. Findings beyond the schemes
 
 - **Loose solver tolerance makes resting contacts chatter**, for every
