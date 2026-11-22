@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include <stdexcept>
 
 #include "siconos/vkernel/algebra/numerics_backend.hpp"
@@ -176,6 +177,17 @@ struct apply_quasi_inelastic_shock_law
       c.kind.template run<moreau_jean::apply_quasi_inelastic_shock_law>(
           c.step, theta_method::stages::parameters(c.kind, c.h, c.integrator.theta()));
     } else {
+      // the law is for rigid-rigid contacts (Jean sec 4.2): a deformable body
+      // keeps the Newton impact law. Warn once when the world mixes them.
+      if (c.kind.number_of_interactions() > 0) {
+        static bool warned = false;
+        if (!warned) {
+          std::fprintf(stderr,
+                       "vkernel: the quasi inelastic shock law applies to the rigid-rigid "
+                       "contacts only; the FEM contacts keep the Newton impact law\n");
+          warned = true;
+        }
+      }
       c.kind.template run<moreau_jean::apply_newton_impact_law>(c.step, nullptr);
     }
   }
