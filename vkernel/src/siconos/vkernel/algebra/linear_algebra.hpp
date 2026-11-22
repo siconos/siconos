@@ -78,14 +78,6 @@ concept vector_raw = matrix<T> && T::ColsAtCompileTime == 1;
 template <typename T>
 concept vector = vector_raw<std::decay_t<T>>;
 
-// Is there a better way to check if a matrix from the Eigen C++ library  is
-// diagonal :
-template <typename T>
-concept diagonal_matrix_raw = !matrix<T> && requires(T m) { m.diagonal()[0]; };
-
-template <typename T>
-concept diagonal_matrix = diagonal_matrix_raw<std::decay_t<T>>;
-
 // general sparse case
 template <typename T>
 concept sparse_matrix_raw = requires(T m) {
@@ -104,6 +96,18 @@ concept sparse_matrix_raw = requires(T m) {
 
 template <typename T>
 concept sparse_matrix = sparse_matrix_raw<std::decay_t<T>>;
+
+// A diagonal matrix: it has a diagonal() and it is neither a dense nor a sparse
+// matrix.  A sparse matrix also has .diagonal() (of type Eigen::Diagonal), which
+// is a sparse-backed diagonal expression, not a diagonal storage: it must stay a
+// sparse matrix (the dense storage wrappers bind it as one, and Python can cast
+// Eigen::SparseMatrix but not Eigen::Diagonal).
+template <typename T>
+concept diagonal_matrix_raw =
+    !matrix<T> && !sparse_matrix<T> && requires(T m) { m.diagonal()[0]; };
+
+template <typename T>
+concept diagonal_matrix = diagonal_matrix_raw<std::decay_t<T>>;
 
 template <typename T>
 concept any_matrix_raw = (diagonal_matrix<T> || matrix<T> || sparse_matrix<T>);
