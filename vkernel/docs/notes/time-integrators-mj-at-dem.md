@@ -271,6 +271,11 @@ step. The three are different mechanisms and never the same curve: Jean is
 Eq 25 of the paper, AT is its signed-gap stabilisation, and a push-out is
 not what Jean calls the quasi inelastic law.
 
+The bottom row is the same three laws on a 20 deg incline with `mu = 0.6`:
+the disk rolls, the gap to the slope stays at 0 for all three, and the rolling
+distance is identical — the law changes the normal shock only, not friction or
+rolling.
+
 ![quasi inelastic](time-integrators-mj-at-dem/quasi_inelastic.png)
 
 `tests/quasi_inelastic.py` (the ctest) checks the behaviour (no ejection,

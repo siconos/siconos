@@ -67,22 +67,46 @@ def run(case, filename):
     config = RunnerConfig("vnative")
     with MechanicsHdf5Runner(config=config, io_filename=filename) as io:
         io.add_primitive_shape("Disk", "Disk", [R])
-        io.add_primitive_shape("Ground", "Segment", (-10, 0, 10, 0))
-        io.add_object(
-            "disk",
-            [Contactor("Disk")],
-            translation=[0, y0],
-            orientation=[0],
-            velocity=v0,
-            mass=m,
-            inertia=inertia,
-        )
-        io.add_object("ground", [Contactor("Ground")], translation=[0, 0])
-        e = 1.0 if case == "e-positive" else 0.0
-        if case == "fremond":
-            io.add_Fremond_impact_friction_nsl("contact", mu=1.0, e=0.0)
+        if case.startswith("qi-incline"):
+            # a disk on an incline (gravity on): a disk ROLLS (friction prevents
+            # slipping, not rolling).  mu high: rolls without slip; mu low: slips.
+            import math
+
+            alpha = math.radians(20.0)
+            mu_law = 0.6 if case == "qi-incline-roll" else 0.02
+            L = 4.0
+            dx, dy = math.cos(alpha), math.sin(alpha)
+            nx, ny = -math.sin(alpha), math.cos(alpha)  # normal, material side down
+            io.add_primitive_shape("Ground", "Segment", (0, 0, L * dx, L * dy))
+            cx, cy = 0.5 * L * dx + R * nx, 0.5 * L * dy + R * ny
+            io.add_object(
+                "disk",
+                [Contactor("Disk")],
+                translation=[cx, cy],
+                orientation=[0],
+                velocity=[0.0, 0.0, 0.0],
+                mass=m,
+                inertia=inertia,
+            )
+            io.add_object("ground", [Contactor("Ground")], translation=[0, 0])
+            io.add_Newton_impact_friction_nsl("contact", mu=mu_law, e=0.0)
         else:
-            io.add_Newton_impact_friction_nsl("contact", mu=1.0, e=e)
+            io.add_primitive_shape("Ground", "Segment", (-10, 0, 10, 0))
+            io.add_object(
+                "disk",
+                [Contactor("Disk")],
+                translation=[0, y0],
+                orientation=[0],
+                velocity=v0,
+                mass=m,
+                inertia=inertia,
+            )
+            io.add_object("ground", [Contactor("Ground")], translation=[0, 0])
+            e = 1.0 if case == "e-positive" else 0.0
+            if case == "fremond":
+                io.add_Fremond_impact_friction_nsl("contact", mu=1.0, e=0.0)
+            else:
+                io.add_Newton_impact_friction_nsl("contact", mu=1.0, e=e)
 
     options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
     options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 1000
@@ -90,11 +114,13 @@ def run(case, filename):
 
     run_options = MechanicsHdf5Runner_run_options()
     run_options["t0"] = 0.0
-    run_options["T"] = 0.3
+    run_options["T"] = 0.5 if case.startswith("qi-incline") else 0.3
     run_options["h"] = 1e-3
     run_options["theta"] = 1.0 if case == "qi-one" else 0.5
     run_options["solver_options"] = options
-    if case in ("qi-half", "qi-one", "e-positive", "fremond"):
+    if case in ("qi-half", "qi-one", "e-positive", "fremond") or case.startswith(
+        "qi-incline"
+    ):
         run_options["osi"] = nonos.bridge.MoreauJeanQuasiInelasticOSI
     with MechanicsHdf5Runner(mode="r+", config=config, io_filename=filename) as io:
         io.run(run_options)
@@ -197,6 +223,40 @@ if abs(summary["qi-one"][1]) > 1e-6:
 if not (-2e-3 < summary["qi-half"][1] < 1e-6):
     print(f"FAILED: qi-half overlap out of range ({summary['qi-half'][1]:.3e})")
     failed = True
+
+# the incline (gravity on): a disk ROLLS (friction stops the slipping, not the
+# rolling).  mu high: rolls without slip; mu low: slips.  Measured on the
+# contact tangential slip  v_t - omega R  along the incline.
+import math
+
+ALPHA = math.radians(20.0)
+for case in ("qi-incline-roll", "qi-incline-slip"):
+    out = os.path.join(tmpdir, case + ".npy")
+    r = subprocess.run(
+        [sys.executable, __file__, case, out], capture_output=True, text=True
+    )
+    if r.returncode != 0:
+        print(f"FAILED: {case} exited {r.returncode}\n{r.stderr[-800:]}")
+        failed = True
+        continue
+    dyn = load(out, ".dyn.npy")
+    vel = load(out, ".vel.npy")
+    did = [i for i in np.unique(dyn[:, 1]) if i > 0][0]
+    d = dyn[dyn[:, 1] == did]
+    v = vel[vel[:, 1] == did]
+    disp = float(np.hypot(d[-1, 2] - d[0, 2], d[-1, 3] - d[0, 3]))
+    vt = v[-1, 2] * math.cos(ALPHA) + v[-1, 3] * math.sin(ALPHA)
+    slip = float(abs(vt + v[-1, 7] * R))
+    print(f"{case}: displacement={disp:.3e} tangential slip={slip:.3e}")
+    if disp < 2e-3:
+        print(f"FAILED: {case} does not move ({disp:.3e})")
+        failed = True
+    if case == "qi-incline-roll" and slip > 1e-2:
+        print(f"FAILED: {case} slips (slip {slip:.3e})")
+        failed = True
+    if case == "qi-incline-slip" and slip < 0.05:
+        print(f"FAILED: {case} does not slip (slip {slip:.3e})")
+        failed = True
 
 # the refusals
 for case, what in (("e-positive", "e = 0"), ("fremond", "Frémond")):
