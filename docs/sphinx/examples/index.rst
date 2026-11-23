@@ -3,24 +3,24 @@
 Browse examples
 ===============
 
-A lot of examples of modeling and simulation of nonsmooth systems with Siconos are available.
-They are part of a specific git project, together with some tutorials.
+Many examples of the modeling and simulation of nonsmooth systems with Siconos are available.
+They are part of a separate git project, together with some tutorials.
 
 .. button-link:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials
    :color: secondary
    :expand:
 
-   🚀 **Have a look to siconos-tutorials project examples**
+   🚀 **Have a look at the examples of the siconos-tutorials project**
 
 
 .. _Siconos tutorials and examples: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials
 
 
-All of them are the results of several contributions (which means that depending on each author(s) the documentation
-may be more or less detailed ...)
+They come from many contributors, so, depending on the author(s), the documentation
+may be more or less detailed.
 
-Click on one of the images below to find details about the system and its simulation or check in the table of contents at the bottom of this page to find
-an example that fits with your interests.
+Click on one of the images below for details about the system and its simulation, or look in the table of contents at the bottom of this page for
+an example that matches your interests.
 
 
 Gallery

@@ -14,13 +14,13 @@ Problem statement
 
 Given
 
-* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
+* a symmetric positive semidefinite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
 * a vector :math:`{q} \in {{\mathrm{I\!R}}}^n`
 
 * a vector of coefficients of friction :math:`\mu \in{{\mathrm{I\!R}}}^{n_c}`
 
-the (reduced or dual) frictional contact problem is to find two vectors :math:`u\in{{\mathrm{I\!R}}}^n` , the relative local velocity and :math:`r\in {{\mathrm{I\!R}}}^n` , the contact forces denoted by :math:`\mathrm{FC}(M,q,\mu)` such that
+the (reduced or dual) frictional contact problem, denoted by :math:`\mathrm{FC}(M,q,\mu)`, is to find two vectors, the relative local velocity :math:`u\in{{\mathrm{I\!R}}}^n` and the contact forces :math:`r\in {{\mathrm{I\!R}}}^n`, such that
 
 .. math::
 
@@ -31,51 +31,51 @@ the (reduced or dual) frictional contact problem is to find two vectors :math:`u
 
 where the Coulomb friction cone is defined by :math:`C_{\mu} = \prod\limits_{\alpha=1\ldots n_c} C^{\alpha}_{\mu^\alpha}`
 
-with :math:`C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\alpha_{n}|\}` , and the set :math:`C^{\alpha,\star}_{\mu^\alpha}` its dual.
+with :math:`C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\alpha_{n}|\}`, and the set :math:`C^{\alpha,\star}_{\mu^\alpha}` is its dual.
 
-The modified local velocity :math:`\widehat u ` is not considered as an unknown since it can be obtained uniquely from the local velocity :math:`u` . Coulomb's friction law with Signorini's condition for the unilateral contact written in terms of second order complementarity condition
+The modified local velocity :math:`\widehat u` is not considered as an unknown, since it is uniquely determined by the local velocity :math:`u`. Coulomb's friction law with Signorini's condition for the unilateral contact, written as a second-order cone complementarity condition
 
 .. math::
 
     \begin{eqnarray} C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu} \end{eqnarray}
 
-can be interpreted in a more usual form
+can be written in the more usual form
 
 .. math::
 
     \begin{eqnarray} \begin{cases} 0 \leq u_{N} \perp r_N \geq 0 \quad\quad\text{ Signorini condition}\\ u_T = 0 \Rightarrow \|r_T\| \leq \mu |r_n| \quad\quad\text{ Sticking mode} \\ u_T \neq 0 \Rightarrow r_T = - \mu |r_n| \frac{u_T }{\|u_T\|} \quad\quad\text{ Sliding mode} \end{cases} \end{eqnarray}
 
-This problem models any instance of discretized frictional contact problem obtained from
+This problem models any discretized frictional contact problem obtained from
 
-* the time-discretization of dynamics contact problems with event-capturing of event-tracking schemes,
+* the time discretization of dynamic contact problems with event-capturing or event-tracking schemes,
 
-* the time-discretization of quasi-static contact problems,
+* the time discretization of quasi-static contact problems,
 
-* the modeling of static contact problems. In this last case, :math:`u` plays the role of the relative displacement at contact
+* the modeling of static contact problems. In this last case, :math:`u` plays the role of the relative displacement at contact.
 
 Implementation in numerics
 ==========================
 
 Structure to define the problem: :cpp:class:`FrictionContactProblem`.
 
-Solvers list  :cpp:enum:`FRICTION_SOLVER`
+List of solvers: :cpp:enum:`FRICTION_SOLVER`
 
 The generic drivers for friction-contact problems are:
 
-* :cpp:func:`fc2d_driver` (id contains FRICTION_2D)
-* :cpp:func:`fc3d_driver` (id contains FRICTION_3D)
-* :cpp:func:`gfc3d_driver` (id contains GLOBAL_FRICTION)
-* :cpp:func:`rolling_fc3d_driver` (id contains ROLLING_FRICTION_3D)
+* :cpp:func:`fc2d_driver` (ids containing FRICTION_2D)
+* :cpp:func:`fc3d_driver` (ids containing FRICTION_3D)
+* :cpp:func:`gfc3d_driver` (ids containing GLOBAL_FRICTION)
+* :cpp:func:`rolling_fc3d_driver` (ids containing ROLLING_FRICTION_3D)
 
 
-For details regarding global formulation and rolling-friction problems, see :ref:`gfc_problem` or :ref:`rfc_problem`.
+For details on the global formulation and on rolling friction problems, see :ref:`gfc_problem` and :ref:`rfc_problem`.
 
 .. _fc_error:
 
 Error strategy
 ==============
 
-To set internal solver tolerance (when it makes sense!) use one of the following functions :
+To set the tolerance of the internal solver (when it makes sense), use one of the following functions:
 
 :cpp:func:`fc3d_set_internalsolver_tolerance`, :cpp:func:`gfc3d_set_internalsolver_tolerance`, :cpp:func:`rolling_fc3d_set_internalsolver_tolerance`
 
@@ -93,20 +93,20 @@ It can be:
 
 * SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
 
-  internal solver tolerance = value provided during initialisation of the local solver.
+  internal solver tolerance = value provided at the initialisation of the local solver.
 
-Warning : iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] and dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] must be set properly for all solvers that are using Xfc3d_set_internal_tolerance function.
+Warning: iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] and dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] must be set properly for all the solvers that use an Xfc3d_set_internal_tolerance function.
 
 
 .. _fc2d_solvers:
 
-Friction 2D available solvers
+Available 2D friction solvers
 =============================
 
 Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_2D_NSGS`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-direct solver for LCP based on pivoting method principle for degenerate problem: the choice of pivot variable is performed via lexicographic ordering.
+Nonsmooth Gauss-Seidel solver.
 
 **Driver:** :cpp:func:`fc2d_nsgs`
 
@@ -117,7 +117,7 @@ direct solver for LCP based on pivoting method principle for degenerate problem:
 * iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
 * dparam[SICONOS_DPARAM_TOL] = 1e-4
 
-Conjugated projected gradient (:cpp:enumerator:`SICONOS_FRICTION_2D_CPG`)
+Conjugate projected gradient (:cpp:enumerator:`SICONOS_FRICTION_2D_CPG`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 **Driver:** :cpp:func:`fc2d_cpg`
@@ -130,7 +130,7 @@ Conjugated projected gradient (:cpp:enumerator:`SICONOS_FRICTION_2D_CPG`)
 Lemke solver (:cpp:enumerator:`SICONOS_FRICTION_2D_LEMKE`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Convert friction problem into a LCP and solve it using Lemke solver.
+Converts the friction problem into an LCP and solves it with Lemke's solver.
 
 **Driver:** :cpp:func:`fc2d_lemke`
 
@@ -140,7 +140,7 @@ Convert friction problem into a LCP and solve it using Lemke solver.
 Enumerative solver (:cpp:enumerator:`SICONOS_FRICTION_2D_ENUM`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Convert friction problem into a LCP and solve it using enumerative solver.
+Converts the friction problem into an LCP and solves it with the enumerative solver.
 
 **Driver:** :cpp:func:`fc2d_enum`
 
@@ -148,7 +148,7 @@ Convert friction problem into a LCP and solve it using enumerative solver.
 
 .. _fc3d_solvers:
 
-Friction 3D available solvers
+Available 3D friction solvers
 =============================
 
 Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`)
@@ -158,47 +158,47 @@ Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`)
 **Parameters:**
 
 
-* iparam[SICONOS_IPARAM_MAX_ITER] = 1000 : Maximum iteration number
-* iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] : error computation method,
+* iparam[SICONOS_IPARAM_MAX_ITER] = 1000: maximum number of iterations
+* iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]: error computation method,
 
-  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL : Full error computation with velocity computation
-  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (DEFAULT): Light error computation with incremental values on reaction verification of absolute error at the end
-  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT : only light error computation (velocity not computed)
-  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE :  we adapt the frequency of the full erro evaluation.
+  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL: full error computation, including the velocity
+  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (DEFAULT): light error computation with incremental values on the reaction, and a check of the absolute error at the end
+  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT: light error computation only (velocity not computed)
+  * SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE: the frequency of the full error evaluation is adapted.
 
-* iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0,  error computation frequency
+* iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0: error computation frequency
 
 * iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
 
-* iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] : shuffle the contact indices in the loop
+* iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE]: shuffle the contact indices in the loop
 
-  * SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE : no shuffle
-  * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE : shuffle only at the beginning
-  * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP : shuffle in each iteration
+  * SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE: no shuffle
+  * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE: shuffle only at the beginning
+  * SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP: shuffle at each iteration
 
-* iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] = 0 : seed for the random generator in shuffling  contacts
+* iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] = 0: seed of the random generator used to shuffle the contacts
 
-* iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] : filter local solution if the local error is greater than 1.0
+* iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION]: filter the local solution if the local error is greater than 1.0
 
-  * SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE (default) the filter is not applied
-  * SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE  the filter is applied
+  * SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE (default): the filter is not applied
+  * SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE: the filter is applied
 
-* iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] : method uses overrelaxation
+* iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION]: use over-relaxation
 
-  * SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (default) relaxation is not used,
-  * SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE  relaxation is used with parameter dparam[8],
+  * SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE (default): relaxation is not used,
+  * SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE: relaxation is used with parameter dparam[8],
 
 
-* dparam[SICONOS_DPARAM_TOL] = 1e-4, user tolerance on the loop
+* dparam[SICONOS_DPARAM_TOL] = 1e-4: user tolerance on the loop
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0
-* dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE]  the relaxation parameter omega
+* dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE]: the relaxation parameter omega
 
-out
+Output:
 
-*  iparam[SICONOS_IPARAM_ITER_DONE] = iter number of performed iterations
-* dparam[SICONOS_DPARAM_RESIDU]  reached error
+* iparam[SICONOS_IPARAM_ITER_DONE]: number of iterations performed
+* dparam[SICONOS_DPARAM_RESIDU]: error reached
 
-Default internal solver : :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID`.
+Default internal solver: :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID`.
 
 
 
@@ -210,13 +210,12 @@ Nonsmooth Gauss-Seidel, velocity version (:cpp:enumerator:`SICONOS_FRICTION_3D_N
 **Parameters:**
 
 
-* iparam[SICONOS_IPARAM_MAX_ITER] = 1000 : Maximum iteration number
-* dparam[SICONOS_DPARAM_TOL] = 1e-4, user tolerance
-* iparam[7] as number of performed iterations
+* iparam[SICONOS_IPARAM_MAX_ITER] = 1000: maximum number of iterations
+* dparam[SICONOS_DPARAM_TOL] = 1e-4: user tolerance
+* iparam[7]: number of iterations performed
+* dparam[SICONOS_DPARAM_RESIDU]: error reached
 
- dparam[SICONOS_DPARAM_RESIDU(1)]  reached error
-
-Default internal solver : :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN`.
+Default internal solver: :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN`.
 
 
 Proximal point solver (:cpp:enumerator:`SICONOS_FRICTION_3D_PROX`)
@@ -226,29 +225,31 @@ Proximal point solver (:cpp:enumerator:`SICONOS_FRICTION_3D_PROX`)
 
 **Parameters:**
 
-* iparam[SICONOS_IPARAM_MAX_ITER] = 1000 : Maximum iteration number
+* iparam[SICONOS_IPARAM_MAX_ITER] = 1000: maximum number of iterations
 * iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY]
 
-  * SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION)
+  * SICONOS_FRICTION_3D_PROXIMAL_REGULARIZATION
   * SICONOS_FRICTION_3D_PROXIMAL_PROX (default)
+
 * iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0
 
-* dparam[SICONOS_DPARAM_TOL] = 1e-4, user tolerance on the loop
+* dparam[SICONOS_DPARAM_TOL] = 1e-4: user tolerance on the loop
 * dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] = 1e4
 * dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] = 5.
 * dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_NU] = 1.
 
-out
+Output:
 
 iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]
 
-Default internal solver : :cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`.
+Default internal solver: :cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`.
 
 Fixed-point (Tresca) (:cpp:enumerator:`SICONOS_FRICTION_3D_TFP`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-Fixed point solver for friction-contact 3D problem based on the Tresca
-  problem with fixed friction threshold
+
+Fixed-point solver for the 3D friction-contact problem, based on the Tresca
+problem with a fixed friction threshold.
 
 **Driver:** :cpp:func:`fc3d_TrescaFixedPoint`
 
@@ -261,11 +262,11 @@ Fixed point solver for friction-contact 3D problem based on the Tresca
 * dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =10.0;
 
 
-Default internal solver : :cpp:enumerator:`SICONOS_FRICTION_3D_NSGS` with
+Default internal solver: :cpp:enumerator:`SICONOS_FRICTION_3D_NSGS` with
 :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration`
 as internal solver.
 
-Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
+Nonsmooth Newton, Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 **Driver:** :cpp:func:`fc3d_nonsmooth_Newton_AlartCurnier`
@@ -285,24 +286,25 @@ Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
 * iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]
 
   * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO (default)
-  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP : Loop PLI-NSN strategy
-  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP : NSN and after Loop PLI-NSN strategy for the hybrid solver
-  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN : VI_EG preconditionning to NSN
+  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP: PLI-NSN loop strategy
+  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP: NSN, then PLI-NSN loop strategy for the hybrid solver
+  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN: VI_EG preconditioning of NSN
 
 * iparam[3] = 100000; /* nzmax*/
 * iparam[5] = 1;
 
 * iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY]
 
-  * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT : uses constant value (dparam[SICONOS_FRICTION_3D_NSN_RHO]) for rho
+  * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT: constant value of rho (dparam[SICONOS_FRICTION_3D_NSN_RHO])
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE
 
-* iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1,  mpi com fortran
+* iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1: MPI communicator (Fortran)
 
-* iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] Linear solver used at each Newton iteration
+* iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER]: linear solver used at each Newton iteration
+
   * SICONOS_FRICTION_3D_NSN_USE_CSLUSOL
   * SICONOS_FRICTION_3D_NSN_USE_MUMPS
 
@@ -314,13 +316,13 @@ Nonsmooth Newton/ Alart-Curnier (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC`)
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO
 
-* iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100  maximum number of iterations allowed for the line search.
+* iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100: maximum number of iterations allowed for the line search.
 
 * dparam[SICONOS_DPARAM_TOL] = 1e-3
 * dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1
 
 
-Nonsmooth Newton/ Alart-Curnier (test) (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC_NEW`)
+Nonsmooth Newton, Alart-Curnier (test) (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_AC_NEW`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 **Driver:** :cpp:func:`fc3d_nonsmooth_Newton_AlartCurnier2`
@@ -335,13 +337,13 @@ Nonsmooth Newton/ Alart-Curnier (test) (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN
 
 * iparam[SICONOS_IPARAM_LSA_SEARCH_CRITERION] = SICONOS_LSA_GOLDSTEIN;
 * iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]
-* optionsiparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-* optionsdparam[SICONOS_DPARAM_TOL] = 1e-10;
+* iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+* dparam[SICONOS_DPARAM_TOL] = 1e-10;
 
 * iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
 * iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
-* dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
+* iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
 
 
 Fixed-Point (De Saxce formulation) (:cpp:enumerator:`SICONOS_FRICTION_3D_DSFP`)
@@ -448,7 +450,8 @@ Nonsmooth Newton (Fischer-Burmeister formulation) (:cpp:enumerator:`SICONOS_FRIC
 
 PATH (via GAMS) + AVI reformulation (:cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_PATH`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+
+Solver using PATH (via GAMS) for the 3D friction-contact problem, based on an AVI reformulation.
 
 **Driver:** :cpp:func:`fc3d_AVI_gams_path`
 
@@ -457,16 +460,17 @@ solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI ref
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 * dparam[SICONOS_DPARAM_TOL] = 1e-9;
 
-out
+Output:
 
 * dparam[TOTAL_TIME_USED]
 * iparam[TOTAL_ITER]
 * iparam[LAST_MODEL_STATUS]
 * iparam[LAST_SOLVE_STATUS]
 
-PATHVI (via GAMS) + AVI reformulation :cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_PATHVI`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+PATHVI (via GAMS) + AVI reformulation (:cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_PATHVI`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Solver using PATHVI (via GAMS) for the 3D friction-contact problem, based on an AVI reformulation.
 
 **Driver:** :cpp:func:`fc3d_AVI_gams_pathvi`
 
@@ -475,7 +479,7 @@ solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI r
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 * dparam[SICONOS_DPARAM_TOL] = 1e-9;
 
-out
+Output:
 
 * dparam[TOTAL_TIME_USED]
 * iparam[TOTAL_ITER]
@@ -484,6 +488,7 @@ out
 
 ACLM Fixed-Point (:cpp:enumerator:`SICONOS_FRICTION_3D_ACLMFP`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 **Driver:** :cpp:func:`fc3d_ACLMFixedPoint`
 
 **Parameters:**
@@ -500,12 +505,13 @@ Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_3D_SOCLCP`)
 
 **Driver:** :cpp:func:`fc3d_SOCLCP`
 
-**Parameters:** same as :cpp:enumerator:`SICONOS_SOCLCP_NSGS`, see : ref:`soclcp_solvers`.
+**Parameters:** same as :cpp:enumerator:`SICONOS_SOCLCP_NSGS`, see :ref:`soclcp_solvers`.
 
 
 PATH (via GAMS) + LCP reformulation (:cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_LCP_PATH`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-solver using PATH (via GAMS) for friction-contact 3D problem based on an LCP reformulation
+
+Solver using PATH (via GAMS) for the 3D friction-contact problem, based on an LCP reformulation.
 
 **Driver:** :cpp:func:`fc3d_lcp_gams_path`
 
@@ -514,9 +520,10 @@ solver using PATH (via GAMS) for friction-contact 3D problem based on an LCP ref
 * iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 * dparam[SICONOS_DPARAM_TOL] = 1e-9;
 
-PATHVI (via GAMS) + LCP reformulation :cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_LCP_PATHVI`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-solver using PATHVI (via GAMS) for friction-contact 3D problem based on an LCP reformulation
+PATHVI (via GAMS) + LCP reformulation (:cpp:enumerator:`SICONOS_FRICTION_3D_GAMS_LCP_PATHVI`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Solver using PATHVI (via GAMS) for the 3D friction-contact problem, based on an LCP reformulation.
 
 **Driver:** :cpp:func:`fc3d_lcp_gams_pathvi`
 
@@ -528,8 +535,8 @@ solver using PATHVI (via GAMS) for friction-contact 3D problem based on an LCP r
 Nonsmooth Newton, Natural Map (:cpp:enumerator:`SICONOS_FRICTION_3D_NSN_NM`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Nonsmooth Newton solver based on the Natural--Map function for
-the local (reduced) frictional contact problem in the dense form.
+Nonsmooth Newton solver based on the natural map function for
+the local (reduced) frictional contact problem in dense form.
 
 **Driver:** :cpp:func:`fc3d_nonsmooth_Newton_NaturalMap`
 
@@ -561,8 +568,8 @@ the local (reduced) frictional contact problem in the dense form.
 Fixed point, Panagiotopoulos (:cpp:enumerator:`SICONOS_FRICTION_3D_PFP`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Fixed point solver for friction-contact 3D problem based on the Panagiotopoulos
-method based on an alternative technique between the normal problem and the tangential one.
+Fixed-point solver for the 3D friction-contact problem, based on the Panagiotopoulos
+method, which alternates between the normal problem and the tangential one.
 
 **Driver:** :cpp:func:`fc3d_Panagiotopoulos_FixedPoint`
 
@@ -579,7 +586,7 @@ Two internal solvers: :cpp:enumerator:`SICONOS_LCP_PGS` and :cpp:enumerator:`SIC
 ADMM (:cpp:enumerator:`SICONOS_FRICTION_3D_ADMM`)
 """""""""""""""""""""""""""""""""""""""""""""""""
 
-Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
+Solver based on the `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 
 **Driver:** :cpp:func:`fc3d_admm`
 
@@ -638,14 +645,14 @@ Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 "One contact" solvers
 ^^^^^^^^^^^^^^^^^^^^^
 
-Newton(:cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN`, ...)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Newton (:cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_NSN`, ...)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 **Driver:** :cpp:func:`fc3d_onecontact_nonsmooth_Newton_solvers_solve`
 
 which switches to one of the local drivers below:
 
-.. csv-table:: Projection on cone solvers
+.. csv-table:: One-contact Newton solvers
    :header: "Solver id", "Driver"
    :widths: 15, 30
 
@@ -668,7 +675,7 @@ which switches to one of the local drivers below:
 
 * iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY]
 
-  * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT : uses constant value (dparam[SICONOS_FRICTION_3D_NSN_RHO]) for rho
+  * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_CONSTANT: constant value of rho (dparam[SICONOS_FRICTION_3D_NSN_RHO])
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND (default for NSN)
   * SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM (default for NSN_GP and NSN_GP_HYBRID)
@@ -686,7 +693,7 @@ which switches to one of the local drivers below:
 
   * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO
   * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP (default for NSN)
-  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP (default for NSN_GP and NSP_GP_HYBRID)
+  * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP (default for NSN_GP and NSN_GP_HYBRID)
   * SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN
 
 * iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP] = 1;
@@ -717,7 +724,7 @@ Projection on cone or cylinder (:cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
 * iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]
 * dparam[SICONOS_DPARAM_TOL] =1e-14
-* dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1., used only in the 'with regularization' case
+* dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.: used only in the 'with regularization' case
 
 
 NCP Fixed Point solver (:cpp:enumerator:`SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint`, ...)
@@ -741,7 +748,7 @@ NCP Fixed Point solver (:cpp:enumerator:`SICONOS_FRICTION_3D_NCPGlockerFBFixedPo
 Quartic (:cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_QUARTIC`, ...)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-ids : :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_QUARTIC`, :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU`
+ids: :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_QUARTIC`, :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU`
 
 **Driver:** :cpp:func:`fc3d_unitary_enumerative`
 
@@ -756,7 +763,7 @@ ids : :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_QUARTIC`, :cpp:enumerator:
 As Convex QP (:cpp:enumerator:`SICONOS_FRICTION_3D_CONVEXQP_CYLINDER`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Reformulate the problem as a convex QP and solve using :cpp:enumerator:`SICONOS_CONVEXQP_PG`.
+Reformulates the problem as a convex QP and solves it with :cpp:enumerator:`SICONOS_CONVEXQP_PG`.
 
 
 **Driver:** :cpp:func:`fc3d_ConvexQP_ProjectedGradient_Cylinder`

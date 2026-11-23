@@ -5,35 +5,35 @@ User-defined plugins
 --------------------
 
 
-Siconos proposes a 'plugin' system that allows users to provide their own function(s) to describe some specific behavior for
-some classes components.
+Siconos provides a 'plugin' system that lets users give their own functions to describe specific behaviours of
+some class components.
 
-For example, consider a lagrangian linear dynamical system, where :math:`M\ddot q + C \dot q + K q =  F_{Ext}(t) + p`.
+For example, consider a linear Lagrangian dynamical system, :math:`M\ddot q + C \dot q + K q =  F_{Ext}(t) + p`.
 
-Suppose you want to set :math:`F_{Ext}(t) = cos(t)`, then you can define a C function to compute this cosine and 'plug' it to
-the dynamical system so that each time the system needs to compute its external forces, your cosine function will be called.
+Suppose you want to set :math:`F_{Ext}(t) = cos(t)`. You can define a function that computes this cosine and 'plug' it into
+the dynamical system: each time the system computes its external forces, your function is called.
 
 
-At the time, plug-in are available for :cpp:class:`DynamicalSystems`, :cpp:class:`Relation` and derived classes.
+Plugins are currently available for :cpp:class:`DynamicalSystems`, :cpp:class:`Relation` and their derived classes.
 
-**How to provide user-defined functions ?**
+**How to provide user-defined functions?**
 
-When pluggin mechanism is available for an operator, two methods exist in the class:
+When the plugin mechanism is available for an operator, the class has two methods:
 
-* setCompute<VARNAME>Function: to define the function to be used (any other c++ function, lambda function ...)
+* setCompute<VARNAME>Function: sets the function to use (any C++ function, lambda function, etc.)
 * compute<VARNAME>
 
-So
+Then:
 
-1. Check the documentation class, find de the setCompute<VARNAME>Function and identify the arguments of the required user-defined function
+1. Look up the class documentation, find setCompute<VARNAME>Function and identify the arguments of the required user-defined function.
 
    All types are defined in :ref:`FunctionTypes.hpp <_file_kernel_src_modeling_FunctionTypes.hpp>`.
 
    Example for :cpp:class:`siconos::modeling::LagrangianDS`: :cpp:func:`siconos::modeling::LagrangianDS::setComputeFextFunction` and :cpp:func:`siconos::modeling::LagrangianDS::computeFext`.
 
-2. Define your function as you would for any other function
+2. Define your function as you would any other function.
 
-3. call setCompute<VARNAME>Function
+3. Call setCompute<VARNAME>Function.
 
 That's it!
 
@@ -50,11 +50,11 @@ Example:
    ...
    // ...
    ds.computeFext(2.)
-   // --> call external_forces with time == 2.
+   // --> calls the user function with time == 2.
 
 .. tip::
 
-   Some good places to find complete examples of user-defined functions usage:
+   Some good places to find complete examples of user-defined functions:
 
-   - Tests files in siconos repository; e.g. `LagrangianDSTest.cpp <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/kernel/src/modelingTools/test/LagrangianDSTest.cpp?ref_type=heads>`_
-   - Try to find setCompute... inside `siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials>`_
+   - Test files in the Siconos repository, e.g. `LagrangianDSTest.cpp <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/kernel/src/modelingTools/test/LagrangianDSTest.cpp?ref_type=heads>`_
+   - Search for setCompute... in the `siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials>`_

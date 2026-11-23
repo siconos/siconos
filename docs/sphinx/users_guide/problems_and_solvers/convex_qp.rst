@@ -14,34 +14,34 @@ Problem statement
 
 Given
 
-* an integer :math:`n` , the dimension of the ambient space,
+* an integer :math:`n`, the dimension of the ambient space,
 
-* a SDP matrix :math:`M \in \mathrm{I\!R}^{n \times n}`
+* a positive semidefinite matrix :math:`M \in \mathrm{I\!R}^{n \times n}`,
 
-* a vector :math:`q \in \mathrm{I\!R}^n`
+* a vector :math:`q \in \mathrm{I\!R}^n`,
 
-* a matrix :math:`A \in \mathrm{I\!R}^{m times n}` of constraints
+* a constraint matrix :math:`A \in \mathrm{I\!R}^{m \times n}`,
 
-* a vector :math:`b \in \mathrm{I\!R}^m`
+* a vector :math:`b \in \mathrm{I\!R}^m`,
 
-* a convex set :math:`{C} \in {{\mathrm{I\!R}}}^m`
+* a convex set :math:`{C} \subset {{\mathrm{I\!R}}}^m`,
 
-the convex QP problem is to find a vector :math:`z\in{{\mathrm{I\!R}}}^n` ,
+the convex QP problem is to find a vector :math:`z\in{{\mathrm{I\!R}}}^n` such that
 
 .. math::
 
     \begin{equation*} \begin{array}{lcl} \min & & \frac{1}{2} z^T M z + z^T q \\ s.t & & A z + b \in C \\ \end{array} \end{equation*}
 
-and is most simple example is when :math:`b= 0 A =I` and we obtain
+Its simplest case is :math:`b = 0, A = I`, which gives
 
 .. math::
 
     \begin{equation*} \begin{array}{lcl}
-    \min & & \frac{1}{2} z^T M z + Z^T q \\
+    \min & & \frac{1}{2} z^T M z + z^T q \\
     s.t & & z \in C \\
     \end{array}\end{equation*}
 
-Most of the solver returns
+Most of the solvers return
 
 * the solution vector :math:`z \in \mathrm{I\!R}^n`
 
@@ -51,7 +51,7 @@ Most of the solver returns
 
 * the vector :math:`w \in \mathrm{I\!R}^n` such that :math:`w =A^T \xi`
 
-In the most simple case, we return
+In the simplest case, they return
 
 * the solution vector :math:`z = u \in \mathrm{I\!R}^n`
 
@@ -64,7 +64,7 @@ Structure to define the problem: :struct:`ConvexQP`.
 
 No generic driver.
 
-solvers list  :cpp:enum:`CONVEXQP_SOLVER`
+List of solvers: :cpp:enum:`CONVEXQP_SOLVER`
 
 .. _convex_qp_solvers:
 
@@ -87,10 +87,10 @@ parameters:
 
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
-convex QP, VI solvers`(:cpp:enumerator:`SICONOS_CONVEXQP_VI_FPP` and :cpp:enumerator:`SICONOS_CONVEXQP_VI_EG`)
+convex QP, VI solvers (:cpp:enumerator:`SICONOS_CONVEXQP_VI_FPP` and :cpp:enumerator:`SICONOS_CONVEXQP_VI_EG`)
 --------------------------------------------------------------------------------------------------------------
 
-Rewrite QP as Variational Inequality problem.
+The QP is rewritten as a Variational Inequality problem.
 
 ids: SICONOS_CONVEXQP_VI_FPP (fixed-point projection) and SICONOS_CONVEXQP_VI_EG (extra-gradient)
 
@@ -103,7 +103,7 @@ same as SICONOS_VI_FPP and SICONOS_VI_EG (see :ref:`vi_solvers`).
 convex QP, ADMM (:cpp:enumerator:`SICONOS_CONVEXQP_ADMM`)
 ---------------------------------------------------------
 
-ADMM, alternating direction method of multipliers
+ADMM: alternating direction method of multipliers.
 
 driver :cpp:func:`convexQP_ADMM()`
 

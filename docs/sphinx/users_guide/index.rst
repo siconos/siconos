@@ -1,8 +1,8 @@
 .. _siconos_users_guide:
 
-###########
-Users guide
-###########
+############
+Users' guide
+############
 
 .. toctree::
    :maxdepth: 3

@@ -1,7 +1,7 @@
 .. _siconos_doc:
 
 =======================================================
- Writing and building documention for Siconos Software
+ Writing and building the Siconos documentation
 =======================================================
 
 .. _about_doc:
@@ -9,26 +9,26 @@
 Documentation overview
 ======================
 
-The whole Siconos documentation is gathered on Siconos webpage, https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/.
-It consists in
+The whole Siconos documentation is gathered on the Siconos web page, https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/.
+It consists of
 
-* Different **"textbooks"** : details on algorithms, how to install, use the platform, ... everything user and developers should know concerning Siconos software.
+* several **"textbooks"**: details on algorithms, how to install and use the platform... everything users and developers should know about the Siconos software:
 
   * Getting and installing Siconos software
   * Users' guide
   * Developers' guide
 
-  All these guides are generated with sphinx (http://www.sphinx-doc.org/en/master/index.html) from files written in reStructuredText (http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
+  All these guides are generated with Sphinx (http://www.sphinx-doc.org/en/master/index.html) from files written in reStructuredText (http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html).
 
-  Source files and sphinx configuration file are all in docs/sphinx directory.
+  The source files and the Sphinx configuration file are all in the docs/sphinx directory.
 
-* **Siconos APIs** (Python and C++) documentation, automatically generated from inline comments in source files ( .h and .hpp).
+* the documentation of the **Siconos APIs** (Python and C++), generated automatically from inline comments in the source files (.h and .hpp).
 
-  Rules and best practices to write comments leading to a proper html documentation are detailed in :ref:`documenting_source_code`.
+  The rules and best practices for writing comments that give proper HTML documentation are detailed in :ref:`documenting_source_code`.
 
 
 
-* In addition to these pages, "inline" documentation for the python API, as usual for python packages, based on docstrings, e.g. :
+* in addition to these pages, "inline" documentation of the Python API based on docstrings, as usual for Python packages, e.g.:
 
   .. code-block:: python
 
@@ -39,7 +39,7 @@ It consists in
 
 
 
-The complete documentation can be generated in one shot using doc target
+The complete documentation can be generated in one go with the doc target:
 
 .. code-block:: bash
 
@@ -49,10 +49,10 @@ The complete documentation can be generated in one shot using doc target
    make doc
 
 
-It results in html pages, generated in build-dir/docs/build/html.
-Siconos web site (http://siconos.org) is the online version of those pages.
+This generates HTML pages in build-dir/docs/build/html.
+The Siconos web site (http://siconos.org) is the online version of these pages.
 
-The building process for documentation is described in :ref:`build_doc`.
+The documentation build process is described in :ref:`build_doc`.
 
 
 
@@ -64,30 +64,30 @@ How to write Siconos documentation
 Writing textbooks
 -----------------
 
-* Textbooks are generated from rst files from source-dir/docs/sphinx directory.
-* Everything you need to know to write siconos docs in reStructuredTextPrimer is available here : http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html.
-* All rst files are copied from source dir to binary dir by cmake, so edit only
-  files in source dir.
-* All figures and images must be in sphinx/figures directory.
+* Textbooks are generated from the rst files of the source-dir/docs/sphinx directory.
+* Everything you need to know to write the Siconos docs is in the reStructuredText Primer: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html.
+* All rst files are copied from the source directory to the binary directory by cmake, so only edit
+  the files in the source directory.
+* All figures and images must be in the sphinx/figures directory.
 
 .. _documenting_source_code:
 
 Document source code
 --------------------
 
-Since source code comments (in c/c++ header files) are used to generate doxygen, sphinx and docstrings documentation,
-one has to be very careful when writing those comments and follow the rules below.
+Since source code comments (in C/C++ header files) are used to generate the Doxygen, Sphinx and docstring documentation,
+these comments must be written carefully, following the rules below.
 
 
 .. rubric:: General rules
 
-* Document all header files using doxygen comments, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
-* Try to follow numpydoc (https://numpydoc.readthedocs.io/en/latest/) requirements.
+* Document all header files with Doxygen comments, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
+* Try to follow the numpydoc (https://numpydoc.readthedocs.io/en/latest/) requirements.
 
 
 
 
-.. rubric:: files description
+.. rubric:: File description
 
 Each header file must contain something like
 
@@ -98,8 +98,8 @@ Each header file must contain something like
      */
 
 
-The name and description will be used in the API contents listings.
-If this block is not present, the file (and all the objects or functions it contents) won't appear in the documentation.
+The name and description are used in the API content listings.
+If this block is missing, the file (and all the objects or functions it contains) will not appear in the documentation.
 
 .. rubric:: Classes and structs
 
@@ -111,7 +111,7 @@ Document each class like this
         @brief Short description of the class
 
         Detailed description
-        equations (see details about latex below), reference to textbooks chapter and so on
+        equations (see the details about LaTeX below), references to textbook chapters and so on
      */
      class SiconosVector
      ...
@@ -128,7 +128,7 @@ Document each class like this
      */
      double some_function(int p, int v)
 
-No need to repeat parameters types in comments (param or return)! They will be extracted from function prototype.
+There is no need to repeat the parameter types in the comments (param or return): they are extracted from the function prototype.
 Something like
 
 .. code-block:: c++
@@ -139,15 +139,15 @@ Something like
    */
    unsigned int size(double * A) const;
 
-is totally useless ...
+is useless.
 
 
 .. warning::
 
-   Space, tab and newline are important and taken into account, especially when generating docstrings and doc from docstrings !
+   Spaces, tabs and newlines matter, especially when generating docstrings and documentation from docstrings!
 
-   - always add a newline before the first @param or @return
-   - align properly everything with the first line of the doxygen comment
+   - always add a newline before the first @param or @return;
+   - align everything with the first line of the Doxygen comment.
 
 
 Correct:
@@ -173,19 +173,19 @@ Wrong (missing newline and wrong indent):
 
 
 
-.. rubric:: rst inside doxygen commments
+.. rubric:: rst inside Doxygen comments
 
-Use  "\\rst" / "\\endrst" tags to write reStructuredText (reST) specific (i.e. that doxygen can not tackle) comments.
-See details below for references and math formula.
+Use the "\\rst" / "\\endrst" tags to write reStructuredText (reST) specific comments (i.e. that Doxygen cannot handle).
+See the details below for references and math formulas.
 
-In the case of comments with leading asterisk, use "\\rststar" / "\\endrststar" tags
+For comments with a leading asterisk, use the "\\rststar" / "\\endrststar" tags.
 
-Rq: most of the time it breaks the rendering of python API outputs.
+Note: most of the time, this breaks the rendering of the Python API.
 
-.. rubric:: Enums, union ...
+.. rubric:: Enums, unions...
 
-Since they will probably appear as global variables in python API,
-it's important that each component of the enum has an explicit comment, e.g:
+Since they will probably appear as global variables in the Python API,
+each member of an enum must have an explicit comment, e.g.:
 
 .. code-block:: cpp
 
@@ -199,15 +199,15 @@ it's important that each component of the enum has an explicit comment, e.g:
     }
 
 
-References to sphinx documents
+References to Sphinx documents
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To refer to any other sphinx document (reminder about sphinx cross-ref : http://www.sphinx-doc.org/en/stable/markup/inline.html)
-use "\\rst" / "\\endrst" tags :
+To refer to any other Sphinx document (reminder about Sphinx cross-references: http://www.sphinx-doc.org/en/stable/markup/inline.html),
+use the "\\rst" / "\\endrst" tags:
 
 .. code :: rst
 
-  /** Class used to defined friction-contact problems
+  /** Class used to define friction-contact problems
 
   This class deals with blabla
 
@@ -219,11 +219,11 @@ use "\\rst" / "\\endrst" tags :
 
   */
 
-or with leading asterisk
+or, with a leading asterisk:
 
 .. code :: rst
 
-  /** Class used to defined friction-contact problems
+  /** Class used to define friction-contact problems
    *
    * This class deals with blabla
    *
@@ -238,7 +238,7 @@ or with leading asterisk
 
 
 
-Math and latex
+Math and LaTeX
 ~~~~~~~~~~~~~~
 
 * inline math
@@ -247,27 +247,27 @@ Math and latex
 
      use this \f$ \alpha \f$ to write inline math
 
-     Important: always put a space after and before \f$
+     Important: always put a space before and after \f$
 
 * displayed math
 
-  - Wrap your formula between "\f[t" and "\f]" tags and write math as you would with latex.
+  - Wrap your formula between the "\f[" and "\f]" tags and write the math as you would in LaTeX.
 
 .. _build_doc:
 
 Building process
 ================
 
-One target to generate the whole documentation :
+One target generates the whole documentation:
 
 .. code-block:: bash
 
    cmake -DWITH_DOCUMENTATION=ON ...
    make doc # The whole doc
 
-Resulting files will be in docs/build/html of the current building path.
+The resulting files are in docs/build/html of the build directory.
 
-Below are some details about the documentation generation process, useful only if you want to generate a subpart of the doc or change the configuration and the process.
+Below are some details about the documentation generation process, useful only if you want to generate part of the doc or change the configuration and the process.
 
 
 Tools, config and description
@@ -275,30 +275,30 @@ Tools, config and description
 
 .. rubric:: Tools
 
-* `Doxygen`_: used to generate xml files from comments in source code (hpp C/C++ headers)
-* `Breathe`_ : an extension to reStructuredText and Sphinx to be able to read and render the Doxygen xml outputs.
-   Used to convert xml outputs of doxygen to rst files.
-* `SphinxApidoc`_: used to generate rst files from docstrings in Python code (pure or from pybind11)
-* `Sphinx`_ : powerful generator of documentation (mostly for Python). Will generate html outputs from rst files
+* `Doxygen`_: generates XML files from the comments in the source code (C/C++ headers);
+* `Breathe`_: an extension to reStructuredText and Sphinx that reads and renders the Doxygen XML output.
+  It converts the Doxygen XML output to rst files;
+* `SphinxApidoc`_: generates rst files from the docstrings of the Python code (pure Python or from pybind11);
+* `Sphinx`_: a powerful documentation generator (mostly for Python). It generates the HTML output from the rst files.
 
 
-See the file `docs/requirements.txt <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/docs/requirements.txt?ref_type=heads>`_ in siconos repository for a list of required python packages.
+See the file `docs/requirements.txt <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/docs/requirements.txt?ref_type=heads>`_ in the Siconos repository for the list of required Python packages.
 
 .. rubric:: Config and sources:
 
-* docs/CMakeLists.txt : main driver
-* cmake/doc_tools.cmake : cmake macros and functions calling doxygen, sphinx or other tool related to documentation.
-* cmake/doxygen_warning.cmake : included in LibraryProjectSetup, rules to build "\*.warnings" files.
-* docs/sphinx/conf.py.in : main sphinx configuration file
-* docs/sphinx/index.rst.in : source for documentation main page
-* docs/sphinx/\*/\*.rst : inputs for sphinx doc (textbooks)
-* docs/sphinx/figures/\* : all figures used in sphinx doc
-* docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
+* docs/CMakeLists.txt: main driver
+* cmake/doc_tools.cmake: cmake macros and functions calling Doxygen, Sphinx and the other documentation tools
+* cmake/doxygen_warning.cmake: included in LibraryProjectSetup, rules to build the "\*.warnings" files
+* docs/sphinx/conf.py.in: main Sphinx configuration file
+* docs/sphinx/index.rst.in: source of the main documentation page
+* docs/sphinx/\*/\*.rst: inputs of the Sphinx doc (textbooks)
+* docs/sphinx/figures/\*: all the figures used in the Sphinx doc
+* docs/gendoctools/\*: Python tools used to generate the docs. This Python package is installed in <CMAKE_BINARY_DIR>/share
   at build time.
 
 .. rubric:: Process
 
-The whole process is executed with "make doc" and is summarized on the figure below.
+The whole process is run by "make doc" and is summarized in the figure below.
 
 .. figure:: /figures/doc_process/build_breathe.*
    :figclass: align-center
@@ -306,50 +306,50 @@ The whole process is executed with "make doc" and is summarized on the figure be
    Generation of the documentation for the C++ and Python API
 
 
-Remark : during generation process, siconos python packages are imported and only
+Remark: during the generation process, the Siconos Python packages are imported, and only
 objects with non-empty docstrings are documented.
 
 .. rubric:: Other (exotic) configuration options
 
-* Full doxygen (i.e. extract all from sources!)  html documentation.
+* Full Doxygen HTML documentation (i.e. extract everything from the sources).
 
-  Target : developpers only. Indeed, everything is included in sphinx doc except things like callgraph or collaboration graphs.
-  Use this when those graphs are needed.
+  Target: developers only. Everything is included in the Sphinx doc except things like call graphs or collaboration graphs.
+  Use this when you need these graphs.
 
-  Same as above, with a new cmake option :
+  Same as above, with an extra cmake option:
 
 .. code-block:: bash
 
    cmake -DWITH_DOCUMENTATION=ON -DUSE_DEVEL_DOXYGEN=ON
    make doc # The whole doc
 
-Doxygen ouput is set to be "quiet" and without warnings.
-But, if required (devel), use:
+The Doxygen output is "quiet", without warnings.
+If you need the warnings (development), use:
 
 
-* Generate doxygen warnings
+* Generate Doxygen warnings
 
-  Use WITH_DOXYGEN_WARNINGS option (in USER_OPTIONS_FILE or in command line), e.g. :
+  Use the WITH_DOXYGEN_WARNINGS option (in USER_OPTIONS_FILE or on the command line), e.g.:
 
   .. code-block:: bash
 
      cmake -DWITH_DOCUMENTATION=ON -DWITH_DOXYGEN_WARNINGS=ON
      make filter_warnings
 
-  It will generate (during compilation process) and print doxygen warnings in files
+  This generates (during compilation) and prints the Doxygen warnings in files
   saved in CMAKE_BINARY_DIR/doxygen_warnings. A warnings file is generated for
-  each input source file. The final call to 'make filter_warnings' will concatenate all interesting
-  warnings into one file, doxygen_warnings/SUMMARY.warnings
+  each input source file. The final call to 'make filter_warnings' concatenates all the relevant
+  warnings into one file, doxygen_warnings/SUMMARY.warnings.
 
-  doxygen warnings conf is defined in docs/config/doxy_warnings.config.in and setup in
+  The configuration of the Doxygen warnings is defined in docs/config/doxy_warnings.config.in and set up in
   cmake/doxygen_warnings.cmake.
 
 .. code-block:: bash
 
    python3 -m pip install -rU ./docs/requirements.txt
 
-See also the file `ci_gitlab/make_siconos_doc.sh <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/devel/siconos/-/blob/main/ci_gitlab/make_siconos_doc.sh?ref_type=heads>`_ in siconos repository.
-It may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu.
+See also the file `ci_gitlab/make_siconos_doc.sh <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/devel/siconos/-/blob/main/ci_gitlab/make_siconos_doc.sh?ref_type=heads>`_ in the Siconos repository.
+It is used by the GitLab continuous integration to install all the dependencies needed to build the doc on Ubuntu, so it can help you set up your own doc build.
 
 
 

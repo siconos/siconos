@@ -12,7 +12,7 @@ This page describes the discretisation of the dynamics for second-order (Lagrang
    v(t) = \dot q^+(t) \\
    q(t_0) = q_0, \ \dot q(t_0) = v_0
 
-with usual notations in Siconos, where the matrices :math:`M, K` and :math:`C` are diagonals, and with
+with the usual Siconos notation, where the matrices :math:`M, K` and :math:`C` are diagonal, and with
 
 .. math::
    :label: displ
@@ -20,13 +20,13 @@ with usual notations in Siconos, where the matrices :math:`M, K` and :math:`C` a
    q(t) = q_0 + \int_{t_0}^t v^+(t)
 
 
-:math:`v^+(t)` stands for right limit of v in t
+:math:`v^+(t)` being the right limit of v at t,
 
 and with the vectors :math:`q = [q_k], v = [v_k], k\in[0,ndof-1]`.
 
-The feature of the proposed scheme is to combine an exact method for the linear (non-contacting) part of the equations of motion with a Moreau-Jean time-stepping
-approach to handle impulses and velocity jumps. This is the implementation of what is proposed in :cite:`Issanchou.2018` for the simulation of musical string instruments.
-Some simulation examples are proposed in examples/Mechanics/Music directory of Siconos repository.
+The scheme combines an exact method for the linear (non-contacting) part of the equations of motion with a Moreau-Jean time-stepping
+approach to handle impulses and velocity jumps. It implements the method proposed in :cite:`Issanchou.2018` for the simulation of string musical instruments.
+Some simulation examples are given in the examples/Mechanics/Music directory of the Siconos tutorials.
 
 
 Summary
@@ -39,24 +39,24 @@ Detailed calculations
 ---------------------
 
 
-For comparison purpose, we consider two different schemes, the classical (in Siconos) 'Moreau-Jean' and an implementation of what is proposed in :cite:`Bilbao.2008`, denoted respectively MJ and BMJ in the following.
+For comparison, we consider two different schemes: the classical (in Siconos) 'Moreau-Jean' scheme and an implementation of the scheme proposed in :cite:`Bilbao.2008`, denoted MJ and BMJ respectively in the following.
 
 
 Let us integrate the dynamics over a time step, :math:`\Delta t = t^{i+1} - t^i`.
 
-Notations :
+Notation:
 
 .. math::
 
    q_k(t^i) = q_k^i \\
    v_k(t^{i}) = v_k^i \\
 
-In the following, we will use k for space (bottom) indices and i for time (top) indices.
+In the following, k is used for space (bottom) indices and i for time (top) indices.
 
-MJ is based on a theta-scheme, for :math:`\theta \in [0,1]`
+MJ is based on a theta-scheme, with :math:`\theta \in [0,1]`.
 
 
-MJ we consider diagonal stiffness and damping,
+For MJ, we consider diagonal stiffness and damping,
 
 .. math::
    :nowrap:
@@ -68,9 +68,9 @@ MJ we consider diagonal stiffness and damping,
    \end{eqnarray}
 
 
-:math:`\omega_k` and :math:`\sigma_k` being respectively the modal pulsation and the damping parameter (see for instance values taken from :cite:`Issanchou.2018`).
+:math:`\omega_k` and :math:`\sigma_k` being respectively the modal angular frequency and the damping parameter (see for instance the values taken from :cite:`Issanchou.2018`).
 
-Bilbao exact scheme writes:
+Bilbao's exact scheme reads:
 
 .. math::
 
@@ -79,7 +79,7 @@ Bilbao exact scheme writes:
    C\dot q &\approx \frac{1}{\Delta t}\Sigma^*(q^{i+1} - q^{i-1}) \\
    \end{array}
 
-for :math:`\Gamma = diag(\gamma_k)` and :math:`\Sigma^* = diag(\sigma_k^*)` some diagonal matrices, with
+with the diagonal matrices :math:`\Gamma = diag(\gamma_k)` and :math:`\Sigma^* = diag(\sigma_k^*)`, where
 
 .. math::
 
@@ -130,7 +130,7 @@ and
    [M + \frac{\Delta t^2}{2}(\mathcal{I} - \Gamma)K + \Delta t\Sigma^*] (v^{i+1}-v^{i}) + \Delta tKq^i + 2\Delta t \Sigma^* v^i = p^{i+1} \\
 
 
-Both discretisations writes
+Both discretisations read
 
 .. math::
 
@@ -154,9 +154,9 @@ with
 Taylor expansions
 ^^^^^^^^^^^^^^^^^
 
-For some values of the time step it may be necessary to use Taylor expansions of iteration matrix and :math:`\Delta t\sigma^*` to avoid convergence problems.
+For some values of the time step, it may be necessary to use Taylor expansions of the iteration matrix and of :math:`\Delta t\sigma^*` to avoid convergence problems.
 
-Those terms write:
+These terms read:
 
 .. math::
 
@@ -169,8 +169,8 @@ Those terms write:
    &+  \Delta t^{7} \left(\frac{\omega^{6} \sigma}{20160} - \frac{\omega^{4} \sigma^{3}}{1512} + \frac{\omega^{2} \sigma^{5}}{420} - \frac{\sigma^{7}}{315}\right) + \mathcal{O}\left(\Delta t^{8}\right)\\
 
 
-Non-smooth problem formulation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nonsmooth problem formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. math::

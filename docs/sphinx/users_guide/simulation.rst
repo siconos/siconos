@@ -4,25 +4,25 @@
 Simulation of non-smooth dynamical systems
 ******************************************
 
-Once the model (i.e. the nonsmooth dynamical system) has been properly defined and described as explained in :ref:`modeling_nsds`,
-the global simulation strategy to formalize and solve this system must be defined.
-At the time, two types of algorithms are available in siconos:
+Once the model (i.e. the nonsmooth dynamical system) has been defined as explained in :ref:`modeling_nsds`,
+you must define the global simulation strategy used to formulate and solve this system.
+Two types of algorithms are currently available in Siconos:
 
-* *Event-driven algorithms*: based on the time-decomposition of the dynamics in modes, time-intervals where the dynamics are smooth, and discrete events, times where the dynamics are nonsmooth.
-* *Event-capturing algorithms* (a.k.a time-stepping), where a time-discretisation of the whole system (smooth dynamics, constraints, nonsmooth laws) is written leading to a one-step nonsmooth problem that must be solved at each time step.
+* *Event-driven algorithms*: the dynamics are decomposed in time into modes, time intervals where the dynamics are smooth, and discrete events, times where the dynamics are nonsmooth.
+* *Event-capturing algorithms* (a.k.a. time-stepping): the whole system (smooth dynamics, constraints, nonsmooth laws) is discretised in time, which leads to a one-step nonsmooth problem to be solved at each time step.
 
-Details, advantages and drawbacks of both methods are largely discussed in :cite:`Acary.Brogliato2008`.
+The details, advantages and drawbacks of both methods are discussed at length in :cite:`Acary.Brogliato2008`.
 
 For both algorithms, the main steps to describe a simulation are:
 
-* define a time discretisation
-* describe how dynamical systems will be integrated, thanks to 'one-step integrators'
-* choose a formalisation and a solver for the nonsmooth problem, which leads to what we call 'one-step nonsmooth problem' based on numerics solvers.
+* define a time discretisation;
+* describe how the dynamical systems are integrated, with 'one-step integrators';
+* choose a formulation and a solver for the nonsmooth problem, which gives what we call a 'one-step nonsmooth problem', solved with numerics solvers.
 
-The types of integrators, solvers, formulation obviously strongly depend on the strategy.
-To clarify things before getting into details, here are the standard minimal steps to write to build a simulation::
+The types of integrators, solvers and formulations of course depend strongly on the strategy.
+Before getting into details, here are the minimal steps to build a simulation::
 
-  # define a one-step integrator and associate it to a dynamical system
+  # define a one-step integrator and associate it with a dynamical system
   osi = MoreauJeanOSI(theta)
   osi.insertDynamicalSystem(your_ds)
 
@@ -42,10 +42,10 @@ To clarify things before getting into details, here are the standard minimal ste
 
 
 Depending on your problem, you may have to change the integrator (here a :cpp:class:`MoreauJeanOSI`), the nonsmooth problem formulation (:cpp:class:`LCP`) and the
-global strategy (:cpp:class:`TimeStepping`). Details on all the possibilities will be given in the sections below. You may also check the examples package to find some
+global strategy (:cpp:class:`TimeStepping`). All the possibilities are detailed in the sections below. You can also look at the examples for
 templates.
 
-Then, the simulation loop will be::
+The simulation loop is then::
 
   while simu.hasNextEvent():
 

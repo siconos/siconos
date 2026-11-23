@@ -1,78 +1,81 @@
 .. _event_driven:
 
-Event-Driven schemes
+Event-driven schemes
 ====================
 
-General Principle
+General principle
 -----------------
 
-The principle of the event-driven is based on the time-decomposition of the dynamics in modes, time-intervals where the dynamics is smooth, and discrete events, times where the dynamics are nonsmooth. From the numerical point of view, the event-driven scheme use the decomposition in time of the dynamics in order to
+Event-driven schemes decompose the dynamics in time into modes, time intervals where the dynamics are smooth, and discrete events, times where the dynamics are nonsmooth. Numerically, the event-driven scheme uses this decomposition to
 
-* detect and solve the non smooth dynamics at events with a reinitialization rule of the state,
-* integrate the smooth dynamics between two events with any ODE solvers with root-findings and possibly bilateral constraints on the state.
+* detect and solve the nonsmooth dynamics at events, with a reinitialization rule for the state;
+* integrate the smooth dynamics between two events with an ODE solver with root finding, possibly with bilateral constraints on the state.
 
-Event Driven implementation
+Event-driven implementation
 ---------------------------
 
 Integration of the smooth dynamics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Between events, the dynamics are integrated thanks to Lsodar algorithm and with the function EventDriven::integrate.
+Between events, the dynamics are integrated with the Lsodar algorithm, through the function EventDriven::integrate.
 
 Considering two given functions f(x,t) and g(x,t), a call to::
 
   integrate(tinit, tend, tout, iout)
 
-results in the integration of the function f(x,t) between tinit and tend, and search for roots of the function g(x,t). If roots are found, integration stops, and last time is saved in tout.
+integrates f(x,t) between tinit and tend and searches for the roots of the function g(x,t). If a root is found, the integration stops and the time reached is saved in tout.
 
-The in-out parameter iout is an indicator that must be set to 1 at first call. If no root was found, it is equal to 2 if so to 3.
+The in-out parameter iout is an indicator that must be set to 1 at the first call. On output, it is 2 if no root was found, and 3 otherwise.
 
-Thus for an EventDriven simulation:
+Thus, for an EventDriven simulation:
 
-* the dynamics of all the concerned DynamicalSystems is rewritten as :math:`\dot = f(x,t)`
-* the relations are used to defined the g(x,t) functions
+* the dynamics of all the DynamicalSystems involved are rewritten as :math:`\dot x = f(x,t)`;
+* the relations are used to define the functions g(x,t).
 
-Once again the proper definition of f and g depends on the system type as described below.
+The definition of f and g depends on the type of system, as described below.
 
 Events
 ^^^^^^
 
-In Siconos the object Event just handle a type (see below) and a long int which corresponds to the time of occurrence of the event. A process function is also defined, which action depends on the event type.
+In Siconos, an Event object only holds a type (see below) and a long int, the time at which the event occurs. It also defines a process function, whose action depends on the type of event.
 
 The possible types (derived classes) are:
 
-* TimeDiscretisationEvent: event that corresponds to user-defined time discretisation points. These events are created and schedule when the EventDriven simulation is initialized. Process function call results in :
-  * update (compute) output for all the concerned Interactions
-  * save current values (DynamicalSystems states and Interactions input/output) in memory vectors. Last saved values become initial values for next integration.
+* TimeDiscretisationEvent: an event at one of the user-defined time discretisation points. These events are created and scheduled when the EventDriven simulation is initialized. The process function:
 
-* NonSmoothEvent: "points" where the dynamics are non smooth and which required a special treatment. These events are detected thanks to a roots-finding algorithm, and corresponds to violation of some given constraints (relation). The action of the process function is roughly (the full process depends on the system type and is described in \ref docSimuEDDetails):
-  * update (compute) output for all the concerned Interactions
-  * update the index sets
-  * formalize and solve one or more non-smooth problems
-  * save current values (DynamicalSystems states and Interactions input/output) in memory vectors. Last saved values become initial values for next integration.
+  * updates (computes) the output of all the Interactions involved;
+  * saves the current values (states of the DynamicalSystems and input/output of the Interactions) in memory vectors. The last saved values become the initial values of the next integration.
+
+* NonSmoothEvent: "points" where the dynamics are nonsmooth and need a special treatment. These events are detected by a root-finding algorithm and correspond to the violation of some constraints (relations). The process function roughly does the following (the full process depends on the type of system and is described below):
+
+  * updates (computes) the output of all the Interactions involved;
+  * updates the index sets;
+  * formulates and solves one or more nonsmooth problems;
+  * saves the current values (states of the DynamicalSystems and input/output of the Interactions) in memory vectors. The last saved values become the initial values of the next integration.
 
 The Events manager
 ^^^^^^^^^^^^^^^^^^
 
-To handle all the events, a specific object is built: the EventsManager. It belongs to the EventDriven class and holds two eventsContainers (sets of Events):
-- pastEvents: for all the Events that has already been treated
-- unProcessedEvents: for the future events, already scheduled but not treated
-We also denote "currentEvent" the last processed event, which corresponds to the initial point of the current integration, and "nextEvent" the event following "currentEvent".
+All the events are handled by a dedicated object, the EventsManager. It belongs to the EventDriven class and holds two eventsContainers (sets of Events):
 
-The events manager is initialized with time-discretisation events, from the user time-discretisation. Then, each time a new event is detected (added by user or when a root is found during integration) it is scheduled in the manager.
-The manager has also a \link EventsManager::processEvents processEvents \endlink function, which moves currentEvent to past events set, processes nextEvent and prepare the next step.
+* pastEvents: all the Events that have already been processed;
+* unProcessedEvents: the future events, already scheduled but not yet processed.
 
-Other useful functions are:
-- \link EventsManager::startingTime() startingTime \endlink, \link EventsManager::nextTime() nextTime \endlink
+We also call "currentEvent" the last processed event, which is the starting point of the current integration, and "nextEvent" the event that follows "currentEvent".
 
-The Simulation process
+The events manager is initialized with time-discretisation events, from the user time discretisation. Then, each time a new event is detected (added by the user, or when a root is found during integration), it is scheduled in the manager.
+The manager also has a :cpp:func:`EventsManager::processEvents` function, which moves currentEvent to the set of past events, processes nextEvent and prepares the next step.
+
+Other useful functions are :cpp:func:`EventsManager::startingTime` and :cpp:func:`EventsManager::nextTime`.
+
+The simulation process
 ----------------------
 
-Thus, a general step  of integration for EventDriven will looks like:
-"While there are some events in the unProcessedEvents set, integrate the smooth dynamics between current and next event and then process with the behavior at event".
-Or:
+A general integration step of an EventDriven simulation is thus:
+"While there are events in the unProcessedEvents set, integrate the smooth dynamics between the current and the next event, then process the behaviour at the event".
+In code:
 
-code-block:: c++
+.. code-block:: c++
 
   // Assume a NonSmoothDynamicalSystem nsds and
   // a TimeDiscretisation td ...
@@ -83,7 +86,7 @@ code-block:: c++
   // We get the events manager
   auto eventsManager = s->eventsManager();
 
-  // while there are some events ...
+  // while there are events ...
   while(eventsManager->hasNextEvent())
   {
   // integrate between current and next event
@@ -100,18 +103,18 @@ code-block:: c++
 
 .. _event_driven_lagrange:
 
-Event Driven algorithm for Lagrangian systems
+Event-driven algorithm for Lagrangian systems
 ---------------------------------------------
 
-At the time, the only available event-driven algorithm in Siconos is for Lagrangian dynamical systems, subjected to perfect unilateral constraints and with the Newton impact rules.
+Currently, the only event-driven algorithm available in Siconos is for Lagrangian dynamical systems, subject to perfect unilateral constraints, with Newton impact laws.
 
-Because of the unilateral constraints, the evolution of the considered system may be non-smooth. Some jumps can occur in the velocity and the "acceleration" may not be defined everywhere. The generalized coordinates, assumed to be absolutely continuous are:
+Because of the unilateral constraints, the evolution of the system may be nonsmooth. The velocity may jump and the "acceleration" may not be defined everywhere. The generalized coordinates, assumed to be absolutely continuous, are:
 
 .. math::
 
    q(t) = q(t_0) +\int_{t_0}^t v^+(t)dt \ with \ v = \dot q
 
-We will index with "+" and "-" right and left values of the variable at discontinuity.
+The indices "+" and "-" denote the right and left values of a variable at a discontinuity.
 
 The equations of motion are written in terms of a measure differential equation:
 
@@ -119,30 +122,30 @@ The equations of motion are written in terms of a measure differential equation:
 
    M(q)dv +  F_{int}(t, q,  v^+)dt=F_{ext}(t) +  dr
 
-r being the generalized force due the unilateral constraints.
-Using the Lebesgue decomposition theorem and its variants, the differential measure dv and dr are decomposed in:
+r being the generalized force due to the unilateral constraints.
+Using the Lebesgue decomposition theorem and its variants, the differential measures dv and dr are decomposed as:
 
 .. math::
 
    dv = \gamma dt + (v^+-v^-)\sum_i\delta_{t_i} + dv_s \\
    dr = fdt + \sum_ip_i\delta_{t_i}+dr_s
 
-First term of the decomposition corresponds to the smooth part, with :math:`\gamma =\ddot q`, the acceleration in the usual sense. The second term corresponds to the behavior at times of discontinuities, ( :math:`\delta_{t_i}`: Dirac), and the last term, a singular measure, will be neglected.
+The first term of the decomposition is the smooth part, with :math:`\gamma =\ddot q`, the acceleration in the usual sense. The second term is the behaviour at the times of discontinuity (:math:`\delta_{t_i}`: Dirac measure), and the last term, a singular measure, is neglected.
 
-Thanks to these decompositions, the non-smooth Dynamics can be split into "impact equations", that will correspond to the non-smooth events, and some "smooth Dynamics". These equations are completed by the constraints, formulated at different kinematics levels, as shown in the following paragraphs.
+With these decompositions, the nonsmooth dynamics can be split into "impact equations", which correspond to the nonsmooth events, and "smooth dynamics". These equations are completed by the constraints, written at different kinematic levels, as shown in the following paragraphs.
 
 The impact equations
 ^^^^^^^^^^^^^^^^^^^^
 
-The impact equations can be written at the time :math:`t_i` of discontinuities:
+The impact equations can be written at the times :math:`t_i` of discontinuity:
 
 .. math::
 
    M(q(t_i))(v^{+}(t_i)- v^{-}(t_i)) = p_i,
 
-:math:`p_i` is like an impulsion.
+:math:`p_i` is an impulse.
 
-This equation will be solved at the time of impact together with an impact law. That is for a Newton impact law
+This equation is solved at the time of impact together with an impact law, here a Newton impact law:
 
 .. math::
    M(q(t_i))(v^{+}(t_i)- v^{-}(t_i)) = p_i, \\
@@ -151,18 +154,18 @@ This equation will be solved at the time of impact together with an impact law. 
    p_i =   \nabla_q^T h(q(t_i)) P_{N,i}\\
    0\leq  \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0
 
-This problem can be reduced on the local unknowns :math:`\dot y^{+}(t_i),P_{N,i}` if the matrix :math:`M(q(t_i))` is assumed to be invertible, leading to the following Linear Complementarity Problem at time :math:`t_i` of discontinuities of v:
+If the matrix :math:`M(q(t_i))` is invertible, this problem can be reduced to the local unknowns :math:`\dot y^{+}(t_i),P_{N,i}`, which gives the following Linear Complementarity Problem at the time :math:`t_i` of a discontinuity of v:
 
 .. math::
    \dot y^{+}(t_i) =  \nabla_q h(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T h(q(t_i))   P_{N,i} + \dot y^{-}(t_i) \\
    0\leq  \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0
 
-Later this system will be identified as "LCP at velocity level".
+This system is called the "LCP at velocity level" below.
 
-The smooth Dynamics
+The smooth dynamics
 ^^^^^^^^^^^^^^^^^^^
 
-The smooth dynamics which is valid almost everywhere for the Lebesgue measure :math:`dt` is governed by  the following equation:
+The smooth dynamics, valid almost everywhere for the Lebesgue measure :math:`dt`, are governed by the following equation:
 
 .. math::
 
@@ -170,7 +173,7 @@ The smooth dynamics which is valid almost everywhere for the Lebesgue measure :m
 
 where we assume that :math:`f^+=f^-=f\, (dt-a.e.)`.
 
-The following smooth systems are then to be solved:
+The following smooth systems must then be solved:
 
 .. math::
 
@@ -179,13 +182,13 @@ The following smooth systems are then to be solved:
    f^+ =  \nabla_q h(q(t))^T F^+(t) \\
    0 \leq y \perp F^+(t) \geq 0
 
-To solve these systems, at each time, i.e. to known the configuration after each events and to integrate it numerically, it is useful to express the complementarity laws at different kinematics level. We also introduce the pre-defined index sets (about index sets, see \ref docSimuIndexSets):\n
+To solve these systems at each time, i.e. to know the configuration after each event and to integrate it numerically, it is useful to write the complementarity laws at different kinematic levels. We also introduce the following index sets:
 
-:math:`I_0` is the set of all the potential UnitaryRelations (UR).
-:math:`I_1 = \{ ur_\alpha\in I_{0} , y_{\alpha} = 0 \}` (or if the UR is in :math:`I_1` then contact occurs).
-:math:`I_2 = \{ ur_\alpha\in I_{1} , \dot y_{\alpha} = 0 \}` (or if the UR is in :math:`I_2`, contact remains, no take off).
+* :math:`I_0` is the set of all potential UnitaryRelations (UR);
+* :math:`I_1 = \{ ur_\alpha\in I_{0} , y_{\alpha} = 0 \}` (if the UR is in :math:`I_1`, there is contact);
+* :math:`I_2 = \{ ur_\alpha\in I_{1} , \dot y_{\alpha} = 0 \}` (if the UR is in :math:`I_2`, the contact persists: no take-off).
 
-This results in the new writing of the <b>Bilateral Smooth Dynamics</b>:
+This leads to the following form of the **bilateral smooth dynamics**:
 
 .. math::
 
@@ -194,59 +197,55 @@ This results in the new writing of the <b>Bilateral Smooth Dynamics</b>:
    F^{+,\alpha} = 0,   \quad \forall \alpha \in I_0-I_2 \\ \\
    \ddot y^{+,\alpha} = 0  \quad \forall \alpha \in I_2
 
-which can be reduced on variable :math:`\ddot y^+` and :math:`F^+`, if M(q) is invertible, when :math:`\alpha \in I_2`:
+which, if M(q) is invertible, can be reduced to the variables :math:`\ddot y^+` and :math:`F^+` for :math:`\alpha \in I_2`:
 
 .. math::
 
    \ddot y^{+,\alpha} = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, v^+)+ F_{ext}(t)  ) +  \dot{ \nabla_q h(q)} v^+  +\nabla_q h(q) M^{-1}  \nabla_q h(q(t))^T F^{+,\alpha}(t)  \\ \\
    0 \leq \ddot y^{+,\alpha} \perp F^{+,\alpha} \geq 0
 
-Later this system will be identified as <b>"LCP at acceleration level"</b>.
+This system is called the **"LCP at acceleration level"** below.
 
 The algorithm
 -------------
 
-Finally, the event-driven algorithm will be:
+The event-driven algorithm is then as follows.
 
-knowing the value of :math:`y, \dot y` and :math:`I_1, I_2` at the beginning of the time step :math:`[t_k, t_{k+1}]`:
+Knowing :math:`y, \dot y` and :math:`I_1, I_2` at the beginning of the time step :math:`[t_k, t_{k+1}]`:
 
--# <b> Integration of the Bilateral Smooth Dynamics </b> up to an event given by the root-finding of the following function :
+#. **Integrate the bilateral smooth dynamics** up to an event, given by the root finding of the following function:
 
-.. math::
-   y^\alpha =0,\quad \forall \alpha \in I_0 - I_2 \\
-   or \\
-   F^{+,\alpha} = 0, \quad \forall \alpha \in I_2
+   .. math::
 
-This results in the computation of :math:`y, \dot y` at this new point and to an update of the index sets :math:`I_1` and :math:`I_2`.
+      y^\alpha =0,\quad \forall \alpha \in I_0 - I_2 \\
+      or \\
+      F^{+,\alpha} = 0, \quad \forall \alpha \in I_2
 
--# if :math:`I_1 - I_2 \neq \emptyset` then Impacts occur:
-      - Formalize and solve the <b>"LCP at velocity level"</b>
-      - Update the index sets :math:`I_1` and :math:`I_2` and check that  :math:`I_1 - I_2 =\emptyset`
+   This gives :math:`y, \dot y` at the new point and updates the index sets :math:`I_1` and :math:`I_2`.
 
-   endif
+#. If :math:`I_1 - I_2 \neq \emptyset`, impacts occur:
 
--# if :math:`I_2\neq \emptyset` then
-    - Formalize and solve the <b>"LCP at acceleration level"</b>
-    - for :math:`\alpha \in I_2` do
-      if :math:`\ddot y_{\alpha} >0, F_{\alpha} = 0` remove :math:`\alpha` from :math:`I_2` and :math:`I_1`
-      else if :math:`\ddot y_{\alpha} =0, F_{\alpha}=0` then undetermined case.
-      endif\n
+   * formulate and solve the **"LCP at velocity level"**;
+   * update the index sets :math:`I_1` and :math:`I_2` and check that :math:`I_1 - I_2 =\emptyset`.
 
-    endfor\n
-    endif\n
+#. If :math:`I_2\neq \emptyset`:
 
--# go to the next time step.
+   * formulate and solve the **"LCP at acceleration level"**;
+   * for each :math:`\alpha \in I_2`: if :math:`\ddot y_{\alpha} >0, F_{\alpha} = 0`, remove :math:`\alpha` from :math:`I_2` and :math:`I_1`;
+     if :math:`\ddot y_{\alpha} =0, F_{\alpha}=0`, the case is undetermined.
+
+#. Go to the next time step.
 
 Implementation in Siconos
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-According to \ref doc_lagds, in Siconos, the Dynamics of Lagrangian systems is written as:
+As explained in :ref:`dynamical_systems`, the dynamics of Lagrangian systems are written in Siconos as:
 
 .. math::
    M(q) \ddot q + fGyr(\dot q, q) + F_{Int}(\dot q , q , t) &= F_{Ext}(t) + p \\
 
-Next,:math:`fGyr` term will be forget and considered as included in :math:`F_{Int}`.
-And Lagrangian relations are (see \ref docRelationLag):
+In the following, the :math:`fGyr` term is omitted and considered as included in :math:`F_{Int}`.
+The Lagrangian relations are (see :ref:`relations`):
 
 .. math::
 
@@ -254,15 +253,15 @@ And Lagrangian relations are (see \ref docRelationLag):
    \dot y &= \nabla_q h(Q)\dot Q \\
    P &= \nabla_q h(Q)^t\lambda
 
-Q (resp. P) being a collection of all the q (resp. p) of the Dynamical Systems involved in the Interaction.
+Q (resp. P) being the collection of all the q (resp. p) of the Dynamical Systems involved in the Interaction.
 
-As we have seen in the previous section, the notion of kinematics level is really important. We introduce this in Siconos thanks to
-"[i]" notation. More precisely, for each Unitary Relation, we define y[i] as the derivative number i of variable y, according to time.
-In the same way, we denote :math:`\lambda[i]` the variable that is linked with y[i] through a Non-Smooth law (usually a complementarity).
-Finally to each :math:`\lambda[i]` corresponds a p[i].
-To make things clearer, let us rewrite the previous defined systems with Siconos notations:
+As seen in the previous section, the kinematic level is essential. Siconos represents it with the
+"[i]" notation: for each Unitary Relation, y[i] is the i-th time derivative of y.
+In the same way, :math:`\lambda[i]` is the variable linked to y[i] by a nonsmooth law (usually a complementarity condition).
+Finally, each :math:`\lambda[i]` has a corresponding p[i].
+To make things clearer, let us rewrite the systems defined above with the Siconos notation:
 
-- <b>Bilateral Smooth Dynamics</b>:
+* **Bilateral smooth dynamics**:
 
 .. math::
 
@@ -271,7 +270,7 @@ To make things clearer, let us rewrite the previous defined systems with Siconos
    \lambda[2]_{\alpha} = 0,   \quad \forall \alpha \in I_0-I_2 \\ \\
    y[2]_{\alpha} = 0  \quad \forall \alpha \in I_2
 
-with roots finding of:
+with root finding of:
 
 .. math::
 
@@ -279,22 +278,22 @@ with roots finding of:
    or \\
    g(x,t) = \lambda[2]_\alpha, \quad \forall \alpha \in I_2
 
-- <b>"LCP at velocity level"</b>
+* **"LCP at velocity level"**:
 
 .. math::
 
    y[1]^{+} =  \nabla_q h(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T h(q(t_i))\lambda[1] + y[1]^{-} \\
    0\leq y[1]^{+} + e y[1]^{-}  \perp \lambda[1] \geq 0
 
-- <b>"LCP at acceleration level"</b>
+* **"LCP at acceleration level"**:
 
 .. math::
 
    y[2]_{\alpha} = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, \dot q)+ F_{ext}(t)  ) +  \dot{ \nabla_q h(q)} \dot q  +\nabla_q h(q) M^{-1}  \nabla_q h(q(t))^T \lambda[2]_{\alpha}  \\ \\
    0 \leq y[2]_{\alpha}\perp \lambda[2]_{\alpha} \geq 0
 
-Then, to build an EventDriven simulation, it is necessary to define two OneStepNSProblems, one at velocity and one at acceleration level.
-So here is a classical code for simulation construction::
+To build an EventDriven simulation, you therefore need two OneStepNSProblems, one at the velocity level and one at the acceleration level.
+Here is a typical construction of the simulation::
 
   EventDriven* s = new EventDriven(ball);
   // -- Time discretisation --
@@ -305,45 +304,48 @@ So here is a classical code for simulation construction::
   OneStepNSProblem * impact = new LCP(s, "impact",solverName,101, 0.0001,"max",0.6);
   OneStepNSProblem * acceleration = new LCP(s, "acceleration",solverName,101, 0.0001,"max",0.6);
 
-Finally, the algorithm described earlier is:
+In Siconos, the algorithm described above becomes:
 
--# Integration of the Bilateral Smooth Dynamics:
-To integrate these systems thanks to lsodar, we need to define f(x,t) and g(x,t).
-To compute f(x,t), we:
-- formalize and solve a "LCP at acceleration level" to compute :math:`(y[2],lambda[2])`
-- collect and rewrite the Dynamics of all the Dynamical Systems as a first order system, including the result of the LCP computation.
-The function g(x,t) is given by:
+#. Integration of the bilateral smooth dynamics.
+   To integrate these systems with Lsodar, we need to define f(x,t) and g(x,t).
+   To compute f(x,t), we:
 
-.. math::
+   * formulate and solve an "LCP at acceleration level" to compute :math:`(y[2],\lambda[2])`;
+   * collect and rewrite the dynamics of all the Dynamical Systems as a first-order system, including the result of the LCP.
 
-   g(x,t) &= y[0], \quad \forall \alpha \in I_0 - I_2 \\
-   \\
-   g(x,t) &= \lambda[2], \quad \forall \alpha \in I_2
+   The function g(x,t) is given by:
 
-Corresponding code::
+   .. math::
 
-  s->advanceToEvent()
-  // This results in a call to Lsodar->integrate and to schedule of new non-smooth events if necessary
+      g(x,t) &= y[0], \quad \forall \alpha \in I_0 - I_2 \\
+      \\
+      g(x,t) &= \lambda[2], \quad \forall \alpha \in I_2
 
-The next steps are done during call to eventsManager->processEvents(), but they will be detailed below.
--# Compute y[0] and y[1] and update the index sets::
+   Corresponding code::
 
-  simulation->updateOutput(0, 1);
-  simulation->updateIndexSets();
+     s->advanceToEvent()
+     // This calls Lsodar->integrate and schedules new nonsmooth events if necessary
 
--# if :math:`I_1 - I_2 \neq \emptyset`, formalize and solve a LCP at velocity level::
+   The next steps are done during the call to eventsManager->processEvents(); they are detailed below.
 
-  simulation->computeOneStepNSProblem("impact");
+#. Compute y[0] and y[1] and update the index sets::
 
--# compute p[1], post-impact velocity, y[1] and indexSet[2]::
+     simulation->updateOutput(0, 1);
+     simulation->updateIndexSets();
 
-  simulation->update(1);
+#. If :math:`I_1 - I_2 \neq \emptyset`, formulate and solve an LCP at velocity level::
 
--# if :math:`I_2 \neq \emptyset`, formalize and solve a LCP at acceleration level, and update index sets with some conditions::
+     simulation->computeOneStepNSProblem("impact");
 
-  simulation->computeOneStepNSProblem("acceleration");
-  simulation->updateIndexSetsWithDoubleCondition();
+#. Compute p[1], the post-impact velocity, y[1] and indexSet[2]::
 
--# next time step::
+     simulation->update(1);
 
-  simulation->nextStep();
+#. If :math:`I_2 \neq \emptyset`, formulate and solve an LCP at acceleration level, and update the index sets with some conditions::
+
+     simulation->computeOneStepNSProblem("acceleration");
+     simulation->updateIndexSetsWithDoubleCondition();
+
+#. Next time step::
+
+     simulation->nextStep();

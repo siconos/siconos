@@ -18,17 +18,17 @@ Users' guide
 Siconos API
 ===========
 
-*Documentation generated from sources (C++ and Python) : classes members and methods descriptions, functions prototypes ...*
+*Documentation generated from the sources (C++ and Python): class members and methods, function prototypes, etc.*
 
 .. toctree::
    :maxdepth: 5
 
    reference/index
 
-Developpers' corner
-===================
+Developers' corner
+==================
 
-*For people who contribute to siconos*
+*For people who contribute to Siconos*
 
 .. toctree::
    :maxdepth: 5

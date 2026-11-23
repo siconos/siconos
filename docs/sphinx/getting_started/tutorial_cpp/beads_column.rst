@@ -1,20 +1,20 @@
 .. _beads_column_example:
 
-Tutorial : a column of three beads
+Tutorial: a column of beads
 ==========================================
 
 .. highlight:: c++
 
-This tutorial deals with a column of beads, subjected to the
-gravity. It introduces Lagrangian Linear systems with Lagrangian
-Linear Relations and Newton impact law.
+This tutorial deals with a column of beads subject to
+gravity. It introduces linear Lagrangian systems with linear Lagrangian
+relations and the Newton impact law.
 
-Building the Non-Smooth Dynamical System
-----------------------------------------
+Building the nonsmooth dynamical system
+---------------------------------------
 
-As described in the figure below, we consider a ball of mass :math:`m` and radius :math:`R`, described by 3 generalized coordinates :math:`q=(z,x,\theta)`
-The ball is subjected to the gravity :math:`g`. The system is also constituted by a rigid plane, defined by its position :math:`h` with respect
-to the axis Oz. We assume that the position of the plane is fixed and not modeled as a dynamical system.
+As shown in the figure below, we consider a ball of mass :math:`m` and radius :math:`R`, described by 3 generalized coordinates :math:`q=(z,x,\theta)`.
+The ball is subject to gravity :math:`g`. The system also includes a rigid plane, defined by its position :math:`h` along
+the axis Oz. We assume that the plane is fixed and not modeled as a dynamical system.
 
 .. figure:: /figures/mechanics/BouncingBall/BouncingBall.*
    :width: 8cm
@@ -22,7 +22,7 @@ to the axis Oz. We assume that the position of the plane is fixed and not modele
 
    fig 1: Coordinate system
 
-The equation of motion of a ball is given by
+The equation of motion of a ball is
 
 .. math::
 
@@ -38,15 +38,15 @@ The equation of motion of a ball is given by
 
 with
 
-* :math:`M` the inertia term, a :math:`n\times{}n` matrix.
-* :math:`p` the force due to the non-smooth law, ie the reaction at impact.
+* :math:`M` the inertia term, an :math:`n\times{}n` matrix;
+* :math:`p` the force due to the nonsmooth law, i.e. the reaction at impact;
 * :math:`F_{ext}(t):  \mathcal R \rightarrow \mathcal R^{n}` the given external force.
 
-That fits with Lagrangian, Linear and Time-Invariant Dynamical System, represented by LagrangianLinearTIDS class (see \ref dsInSiconos).
+This is a linear time-invariant Lagrangian dynamical system, represented by the LagrangianLinearTIDS class (see :ref:`dynamical_systems`).
 
-Next, we will suppose that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by :math:`i`, the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.
+We now consider a column of "dsNumber" balls like the one above (mass and radius may differ; if necessary, variables are indexed by :math:`i`, the number of the ball). Each ball is governed by a linear system like the one written for a single ball, and may be in contact with the balls above and below it.
 
-Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given \ref tutGCtemplate "here" as multiBeads.cpp.
+Let us now write the input file. As in the first tutorial, we create a new directory, multiBeads, and save the :ref:`template <template_siconos_driver>` as multiBeads.cpp.
 
 We start by setting some parameters, like the number of balls, their initial positions and velocities and so on::
 
@@ -58,18 +58,17 @@ We start by setting some parameters, like the number of balls, their initial pos
   double t0 = 0;                   // initial computation time
   double T = 10;                   // final computation time
   double h = 0.005;                // time step
-  double position_init = 10.5;     // initial position for lowest bead.
-  double velocity_init = 0.0;      // initial velocity for lowest bead.
-  double R = 0.1;                  // balls radius
+  double position_init = 10.5;     // initial position of the lowest bead
+  double velocity_init = 0.0;      // initial velocity of the lowest bead
+  double R = 0.1;                  // radius of the balls
 
-Then, we define some initial conditions for the balls, and create the
-corresponding Dynamical Systems, all of type Lagrangian, Linear and
-Time Invariant.
+Then, we define the initial conditions of the balls, and create the
+corresponding Dynamical Systems, all linear time-invariant Lagrangian systems.
 
 All the systems are inserted in a container, a DynamicalSystemsSet,
 named allDS.
 
-From now on, to simplify writing, we suppose that all
+From now on, to simplify, we assume that all
 balls have the same mass, :math:`m = 1`, and the same radius, :math:`R=0.1`::
 
   // -------------------------
@@ -96,8 +95,8 @@ balls have the same mass, :math:`m = 1`, and the same radius, :math:`R=0.1`::
       // set values
       (*(q0[i]))(0) = position_init;
       (*(v0[i]))(0) = velocity_init;
-      // Create a new Lagrangian Linear Dynamical System, with q0] and v0[i] as initial conditions,
-      // Mass as mass matrix and i as number of identification.
+      // Create a new linear Lagrangian dynamical system, with q0[i] and v0[i] as initial conditions,
+      // Mass as mass matrix and i as identification number.
       // The system is then inserted in allDS.
       allDS.insert( new LagrangianLinearTIDS(i,nDof,*(q0[i]),*(v0[i]),*Mass));
       // Increment values for next system
@@ -105,7 +104,7 @@ balls have the same mass, :math:`m = 1`, and the same radius, :math:`R=0.1`::
       velocity_init+= increment_velocity;
   }
 
-Next, it is necessary to define the external forces, the gravity, applied on each ball. According to :ref:`dsPlugins`, a plug-in function is available for those forces. (For details on plug-in functions, see :ref:`siconos_plugins`). Its signature (the type of its arguments) is given in DefaultPlugin.cpp. So we copy it in a new file, say BeadsPlugin.cpp, and we define an extern function, gravity.::
+Next, we define the external forces, i.e. gravity, applied to each ball. As explained in :ref:`dsPlugins`, a plugin function is available for these forces (for details on plugin functions, see :ref:`siconos_plugins`). Its signature (the types of its arguments) is given in DefaultPlugin.cpp. We copy it into a new file, say BeadsPlugin.cpp, and define an extern function, gravity::
 
   const double m = 1; // bead mass
   const double g = 9.81; // gravity
@@ -118,14 +117,14 @@ Next, it is necessary to define the external forces, the gravity, applied on eac
       fExt[0] = -m*g;
   }
 
-Warning
+Warning:
 
-* gravity must be an *extern "C"* function, and code is C, not C++.
-* the name of the plugin file, BeadsPlugin.cpp here, must be xxxPlugin.cpp, xxx being whatever you want.
+* gravity must be an *extern "C"* function, and the code is C, not C++;
+* the name of the plugin file, BeadsPlugin.cpp here, must be xxxPlugin.cpp, xxx being anything you want.
 
 
-Now we have to say "use gravity from BeadsPlugin.cpp to compute the external forces of my systems."
-This is done thanks to "setComputeFExtFunction" function, in multiBeads.cpp::
+Now we have to say "use gravity from BeadsPlugin.cpp to compute the external forces of my systems".
+This is done with the "setComputeFExtFunction" function, in multiBeads.cpp::
 
    //
    CheckInsertDS checkDS;
@@ -142,7 +141,7 @@ This is done thanks to "setComputeFExtFunction" function, in multiBeads.cpp::
         // Note that we now use a CheckInsertDS object: checkDS.first is
 	// an iterator that points to the DS inserted above.
         //
-	// Set the external forces for the last created system.
+	// Set the external forces of the last created system.
 	(static_cast<LagrangianDS*>(*(checkDS.first)))->setComputeFExtFunction("BeadsPlugin.so", "gravity");
 	// A cast is required, since allDS handles DynamicalSystem*,
 	// not LagrangianLinearTIDS*.
@@ -151,40 +150,40 @@ This is done thanks to "setComputeFExtFunction" function, in multiBeads.cpp::
 	velocity_init+= increment_velocity;
       }
 
-From this point, any call to the external forces of a system in allDS will result in a call to the function gravity defined in BeadsPlugin.cpp.
+From now on, any computation of the external forces of a system in allDS calls the function gravity defined in BeadsPlugin.cpp.
 
-*Remark:* :math:`m` and :math:`R` are set inside the BeadsPlugin file
+*Remark:* :math:`m` and :math:`R` are set inside the BeadsPlugin file,
 but it would also be possible, and maybe better, to pass them as
-parameters in gravity function.
-See \ref doc_usingPlugin for details on that option.
+parameters of the gravity function
+(see :ref:`siconos_plugins`).
 
-Ok, now DynamicalSystems are clearly defined and all saved in allDS. Let's turn our attention to Interactions. In the same way, they will be handled by a container, an InteractionsSet, named allInteractions. The potential interactions are the contacts between beads and the impact on the ground. Thus, for dsNumbers systems, there are dsNumbers-1 "bead-bead" Interactions plus one between the "bottom bead" and the floor.
+The DynamicalSystems are now defined and all saved in allDS. Let us turn to the Interactions. They are also handled by a container, an InteractionsSet, named allInteractions. The potential interactions are the contacts between beads and the impact on the ground. Thus, for dsNumber systems, there are dsNumber-1 "bead-bead" Interactions plus one between the "bottom bead" and the floor.
 
-We start with bead-floor Interaction: the ball at the bottom bounces on the rigid plane, introducing a constraint on the position of the ball, given by:
+We start with the bead-floor Interaction: the bottom ball bounces on the rigid plane, which introduces a constraint on the position of the ball:
 :math:`z-R-h\geq 0`.
-To define an Interaction, it is first necessary to set some relations between local variables at contact and the global coordinates.
-Thus, as a local variables of the Interaction, we introduce :math:`y` as the distance between the ball and the floor and :math:`\lambda` as the multiplier that corresponds to
-the reaction at contact. Then the relation is written,
+To define an Interaction, we first need a relation between the local variables at contact and the global coordinates.
+As local variables of the Interaction, we introduce :math:`y`, the distance between the ball and the floor, and :math:`\lambda`, the multiplier that corresponds to
+the reaction at contact. The relation is then:
 
 .. math::
 
    y =& Hq + b = [1 \ 0 \ 0] q - R - h \\
    p =& H^t \lambda
 
-(next, we set h=0).
+(below, we set h=0).
 
 .. compound::
 
-   Finally we need to define a non-smooth law to define the behavior of the ball at impact.
-   The unilateral constraint is such that
+   Finally, we need a nonsmooth law that defines the behaviour of the ball at impact.
+   The unilateral constraint reads
 
    .. math:: 0 \leq y \perp \lambda \geq 0
 
-   completed with a Newton Impact law, for which we set the restitutive coefficient :math:`e` to 0.9:
+   completed with a Newton impact law, with a restitution coefficient :math:`e` set to 0.9:
 
    .. math:: \textrm{if} \ y=0, \ \dot y(t^+) = -e \dot y(t^-)
 
-   with :math:`t^+` and :math:`t^-` being post and pre-impact times.
+   :math:`t^+` and :math:`t^-` being the post- and pre-impact times.
 
 The first Interaction can then be constructed::
 
@@ -195,9 +194,9 @@ The first Interaction can then be constructed::
   // The total number of Interactions
   int interactionNumber = dsNumber;
   // Interaction first bead and floor
-  // A set for the systems handles by the "current" Interaction
+  // A set for the systems handled by the "current" Interaction
   DynamicalSystemsSet dsConcerned;
-  // Only the "bottom" bead is concerned by this first Interaction,
+  // Only the "bottom" bead is involved in this first Interaction,
   // therefore DynamicalSystem number 0.
   dsConcerned.insert(allDS.getDynamicalSystemPtr(0));
   // -- Newton impact law --
@@ -215,11 +214,11 @@ The first Interaction can then be constructed::
   Interaction * inter0 = new Interaction("bead-floor", dsConcerned,num,interactionSize, nslaw0, relation0);
   allInteractions.insert(inter0);
 
-In the same way, the potential contact between two balls introduces some new constraints:
+In the same way, the potential contact between two balls introduces new constraints:
 
 :math:`(z_i-R_i)-(z_j-R_j)-h \geq 0`, if ball :math:`i` is on top of ball :math:`j`.
 
-So if we consider the Interaction between ball :math:`i` and :math:`j`, :math:`y` being the distance between two balls and :math:`\lambda` the multiplier, we get:
+So, for the Interaction between balls :math:`i` and :math:`j`, with :math:`y` the distance between the two balls and :math:`\lambda` the multiplier, we get:
 
 .. math::
 
@@ -230,7 +229,7 @@ So if we consider the Interaction between ball :math:`i` and :math:`j`, :math:`y
    q_i
    \end{array}\right]
 
-With the same non smooth law as for the first Interaction::
+With the same nonsmooth law as for the first Interaction::
 
   // A list of names for the Interactions
   vector<string> id;
@@ -257,13 +256,13 @@ With the same non smooth law as for the first Interaction::
 	  ostr << i;
 	  id[i-1]= ostr.str();
 	  // The relations
-	  LLR[i-1] = new LagrangianLinearR(*relation); // we use copy constructor to built all relations
+	  LLR[i-1] = new LagrangianLinearR(*relation); // the copy constructor builds all the relations
 	  checkInter = allInteractions.insert( new Interaction(id[i-1], dsConcerned,i,interactionSize, nslaw0, LLR[i-1]));
       }
       delete relation;
   }
 
-Note that each Relation corresponds to one and only one Interaction (which is not the case of NonSmoothLaw); that's why we need to built a new Relation LLR[i-1] for each Interaction.
+Note that each Relation belongs to one and only one Interaction (unlike a NonSmoothLaw); that is why we build a new Relation LLR[i-1] for each Interaction.
 
 Everything is now ready to build the NonSmoothDynamicalSystem and the related Model::
 
@@ -283,9 +282,9 @@ The Simulation
 Time-Stepping scheme
 """"""""""""""""""""
 
-As a first example, we will use a Moreau's time-stepping scheme, where the non-smooth problem will be written as a LCP. The process is more or less the same as for the Diode Bridge case, so we won't detail it. The only difference is that now, the OneStepIntegrator handles several DynamicalSystems::
+As a first example, we use Moreau's time-stepping scheme, where the nonsmooth problem is written as an LCP. The process is more or less the same as for the diode bridge, so we do not detail it. The only difference is that the OneStepIntegrator now handles several DynamicalSystems::
 
-  string solverName = "Lemke";      // solver algorithm used for non-smooth problem
+  string solverName = "Lemke";      // solver used for the nonsmooth problem
   Simulation* s = new TimeStepping(multiBeads);
   // -- Time discretisation --
   TimeDiscretisation * t = new TimeDiscretisation(h,s);
@@ -299,50 +298,50 @@ As a first example, we will use a Moreau's time-stepping scheme, where the non-s
 Event-Driven algorithm
 """"""""""""""""""""""
 
-In that second part, an event-driven algorithm is used to solve the problem. Event-Driven Simulation principle is detailed in :ref:`event_driven`.
+In this second part, an event-driven algorithm is used to solve the problem. The principle of event-driven simulations is detailed in :ref:`event_driven`.
 
-The dynamics is decomposed in "modes", time-intervalls where the dynamics is smooth and discrete events where the dynamics is non-smooth.
+The dynamics are decomposed into "modes", time intervals where the dynamics are smooth, and discrete events, where the dynamics are nonsmooth.
 
-In the present case, non smooth events will corresponds to impacts between balls. Each time such an event is detected, a non-smooth problem is formalized and solved (as a LCP here) while between events, the systems are integrated thanks to Lsodar, ODE solver with roots-finding algorithm.
+Here, nonsmooth events are impacts between balls. Each time such an event is detected, a nonsmooth problem is formulated and solved (here as an LCP), while between events the systems are integrated with Lsodar, an ODE solver with root finding.
 
-As for the Time-stepping, we first need to built the simulation and then its time-discretisation::
+As for time-stepping, we first build the simulation and then its time discretisation::
 
   // The simulation belongs to Model multiBeads
   EventDriven* s = new EventDriven(multiBeads);
   TimeDiscretisation * t = new TimeDiscretisation(h,s);
 
-Next step is the declaration of integrators for the dynamical systems.
-The integrator will handle all the DynamicalSystems of the Model. During integration of the systems, Lsodar will search for roots of some equations (the constraints ie the Interactions of the NonSmoothDynamicalSystem). The required OSI type is Lsodar, applied to allDS::
+The next step is the declaration of the integrators of the dynamical systems.
+The integrator handles all the DynamicalSystems of the Model. During the integration, Lsodar searches for the roots of some equations (the constraints, i.e. the Interactions of the NonSmoothDynamicalSystem). The required OSI type is Lsodar, applied to allDS::
 
   OneStepIntegrator * OSI = new Lsodar(allDS,s);
 
-Each time a root is found, a new NonSmoothEvent is created and it's then necessary to write and solve a non-smooth problem. We won't detail this here but just remember that this requires two LCP, one at "velocity" level, named impact, and another at "acceleration" level, named acceleration.
-The whole event-driven algorithm for Lagrangian Systems is available here: :ref:`event_driven_lagrange`::
+Each time a root is found, a new NonSmoothEvent is created and a nonsmooth problem must be formulated and solved. We do not detail this here; just remember that this requires two LCPs, one at the "velocity" level, named impact, and another at the "acceleration" level, named acceleration.
+The whole event-driven algorithm for Lagrangian systems is described in :ref:`event_driven_lagrange`::
 
   OneStepNSProblem * impact = new LCP(s, "impact",solverName,101, 0.0001,"max",0.6);
   OneStepNSProblem * acceleration = new LCP(s, "acceleration",solverName,101, 0.0001,"max",0.6);
 
-The Model is now complete, we can start the simulation process.
+The Model is now complete, and we can start the simulation process.
 
-Simulation Process
+Simulation process
 ------------------
 
 Time-Stepping
 """""""""""""
 
-Once again, the process is the same as in the first tutorial and won't be detailed.
-Concerning the output, we save the position and velocity of all balls::
+Once again, the process is the same as in the first tutorial and is not detailed.
+For the output, we save the position and velocity of all the balls::
 
   s->initialize();
   int k = 0;
   int N = t->getNSteps(); // Number of time steps
-  // Prepare output and save value for the initial time
+  // Prepare the output and save the values at the initial time
   unsigned int outputSize = dsNumber*2+1;
   SimpleMatrix dataPlot(N+1,outputSize ); // Output data matrix
   // time
   dataPlot(k, 0) = multiBeads->getT0();
   // Positions and velocities
-  i = 0; // Remember that DS are sorted in a growing order according to their number.
+  i = 0; // Remember that the DS are sorted in increasing order of their number.
   DSIterator it;
   for(it = allDS.begin();it!=allDS.end();++it)
   {
@@ -351,8 +350,8 @@ Concerning the output, we save the position and velocity of all balls::
       i++;
   }
 
-Note that we use a "DSIterator", which is simply a pointer to a set of DynamicalSystems; allDS.begin() is a pointer to the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then \*it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding :math:`q` and :math:`v`.
-A static_cast is also required since allDS contains DynamicalSystem whereas we need functions specific to LagrangianDS (getQ ...).
+Note that we use a "DSIterator", which is simply a pointer into a set of DynamicalSystems: allDS.begin() points to the first object handled by allDS and allDS.end() "just after" the last one. The system currently pointed to is \*it ("content of the pointer"). The loop above thus goes through all the DynamicalSystems and gets the corresponding :math:`q` and :math:`v`.
+A static_cast is required, since allDS contains DynamicalSystem objects whereas we need functions specific to LagrangianDS (getQ...).
 
 Next, we write::
 
@@ -373,7 +372,7 @@ Next, we write::
       }
   }
 
-and for output file saving::
+and to save the output file::
 
   ioMatrix io("result.dat", "ascii");
   io.write(dataPlot,"noDim");
@@ -381,34 +380,35 @@ and for output file saving::
 Event-Driven
 """"""""""""
 
-The principle of an EventDriven simulation roughly consists in integration between some events with stops and special treatment at these events. Thus we introduce a specific object, the EventsManager, a kind of stack of events used to handle them, where they are saved in a chronological order. It belongs to the Simulation object and can be accessed with::
+An EventDriven simulation roughly integrates between events, stops at each event and gives it a special treatment. Events are handled by a specific object, the EventsManager, a kind of stack where events are saved in chronological order. It belongs to the Simulation object and can be accessed with::
 
   EventsManager * eventsManager = s->getEventsManagerPtr();
 
-The manager is built during the ininitialization, which is still the first required step of any simulation process::
+The manager is built during the initialization, which is still the first step of any simulation process::
 
   s->initialize();
 
-Among other things, this initialization schedules time events from the TimeDiscretisation object into the manager. Each time step is saved as a TimeDiscretionEvent.
+Among other things, this initialization schedules the time events of the TimeDiscretisation object in the manager. Each time step is saved as a TimeDiscretisationEvent.
 
-Then the simulation process consists in:
-* check if there is a "future" event
-* integrate the system until this future event is reached or until a non-smooth event is found
-* schedule the possibly new event
-* deal with the system at event (for example, in case of a non-smooth event, formalize and solve one or more LCP)
-* next step
+The simulation process then consists in:
 
-Once again this is only a summary and we encourage you to read :ref:`event_driven` to get more details about the event-driven strategy.
+* checking whether there is a "future" event;
+* integrating the system until this future event is reached or until a nonsmooth event is found;
+* scheduling the new event, if any;
+* processing the system at the event (for example, for a nonsmooth event, formulating and solving one or more LCPs);
+* going to the next step.
+
+Once again, this is only a summary; see :ref:`event_driven` for more details on the event-driven strategy.
 
 The resulting code is::
 
-   // While there are some events in the manager ...
+   // While there are events in the manager ...
     while(eventsManager->hasNextEvent())
       {
 	eventDriven->computeOneStep();
       }
 
-Concerning output, we first save displacements and velocities at each time step::
+For the output, we first save the displacements and velocities at each time step::
 
     while(eventsManager->hasNextEvent())
       {
@@ -417,7 +417,7 @@ Concerning output, we first save displacements and velocities at each time step:
 
 	eventDriven->processEvents();
         // Positions and velocities for user time steps
-	i = 0; // Remember that DS are sorted in a growing order according to their number.
+	i = 0; // Remember that the DS are sorted in increasing order of their number.
 	DSIterator it;
 	dataPlot(k, 0) = eventDriven->getStartingTime();
 	for(it = allDS.begin();it!=allDS.end();++it)
@@ -428,9 +428,9 @@ Concerning output, we first save displacements and velocities at each time step:
 	  }
       }
 
-But when a non-smooth event occurs, that may be interesting to get pre and post impact values.
-In Siconos, the values saved in object are usually the last computed, thus in the present case, post-impact values.
-The next-to-last values are saved in "memory" objects; we get them in case of "Non-Smooth event"::
+But when a nonsmooth event occurs, it may be interesting to get the pre- and post-impact values.
+In Siconos, the values saved in objects are usually the last computed ones, here the post-impact values.
+The next-to-last values are saved in "memory" objects; we get them for a "NonSmoothEvent"::
 
     while(eventsManager->hasNextEvent())
       {
@@ -440,7 +440,7 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
 	eventDriven->processEvents();
 	if(eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
 	  {
-	    i = 0; // Remember that DS are sorted in a growing order according to their number.
+	    i = 0; // Remember that the DS are sorted in increasing order of their number.
 	    DSIterator it;
 	    dataPlot(k, 0) = eventDriven->getStartingTime();
 	    for(it = allDS.begin();it!=allDS.end();++it)
@@ -452,7 +452,7 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
 	    k++;
 	  }
         // Positions and velocities for user time steps
-	i = 0; // Remember that DS are sorted in a growing order according to their number.
+	i = 0; // Remember that the DS are sorted in increasing order of their number.
 	DSIterator it;
 	dataPlot(k, 0) = eventDriven->getStartingTime();
 	for(it = allDS.begin();it!=allDS.end();++it)
@@ -467,12 +467,12 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot,"noDim");
 
-The simulation is now ready. The input file is completed with required headers and delete instructions at the end.
-Check the following links to see the complete input files:
+The simulation is now ready. The input file is completed with the required headers and delete instructions at the end.
+The complete input files are:
 
-* BeadsColumnTS.cpp for the Time-Stepping version
-* BeadsColumnED.cpp for the Event-Driven
-* BeadsPlugin.cpp for the file that contains external plug-in
+* BeadsColumnTS.cpp for the time-stepping version;
+* BeadsColumnED.cpp for the event-driven version;
+* BeadsPlugin.cpp, the file that contains the external plugin.
 
 
 Results
@@ -482,17 +482,17 @@ You can now run in a terminal::
 
   siconos multiBeadsTS.cpp
 
-and then plot with for example gnuplot::
+and then plot the results, for example with gnuplot::
 
   gnuplot -persist result.gp
 
-result.gp being a command file (see example in mechanics/MultiBeadsColumn)
+result.gp being a command file (see the example in mechanics/MultiBeadsColumn).
 
-Results are given in fig 2, below:
+The results are shown in fig 2 below:
 
 .. figure:: /figures/mechanics/MultiBeads/MultiBeads.*
    :align: center
 
-   fig 2: Result of MultiBeads simulation
+   fig 2: Results of the MultiBeads simulation
 
 .. highlight:: python

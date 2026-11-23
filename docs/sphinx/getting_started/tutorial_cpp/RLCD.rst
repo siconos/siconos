@@ -5,16 +5,16 @@ Simulation of an electrical oscillator supplying a resistor through a half-wave 
 
 Author: Pascal Denoyelle, September 22, 2005
 
-You may refer to the source code of this example, `found here <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/examples/electronics/CircuitRLCD/CircuitRLCD.cpp?ref_type=heads>`_.
+The source code of this example is `available here <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/examples/electronics/CircuitRLCD/CircuitRLCD.cpp?ref_type=heads>`_.
 
 There is also a PDF version of this document, `viewable online here <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/electronics/CircuitRLCD/Template-CircuitRLCD.pdf>`_.
 
-Description of the physical problem : electrical oscillator with half-wave rectifier
-````````````````````````````````````````````````````````````````````````````````````
+Description of the physical problem: electrical oscillator with half-wave rectifier
+```````````````````````````````````````````````````````````````````````````````````
 
-In this sample, a LC oscillator initialized with a given voltage
-across the capacitor and a null current through the inductor provides
-the energy to a load resistance through a half-wave rectifier
+In this example, an LC oscillator, initialized with a given voltage
+across the capacitor and zero current through the inductor, supplies
+energy to a load resistor through a half-wave rectifier
 consisting of an ideal diode (see :ref:`fig-CircuitRLCD`).
 
 .. _fig-CircuitRLCD:
@@ -24,46 +24,46 @@ consisting of an ideal diode (see :ref:`fig-CircuitRLCD`).
 
    fig 1: Electrical oscillator with half-wave rectifier
 
-Only the positive wave of the oscillating voltage across the LC is
-provided to the resistor. The energy is dissipated in the resistor
-resulting in a damped oscillation.
+Only the positive half-wave of the oscillating voltage across the LC is
+applied to the resistor. The energy is dissipated in the resistor,
+which results in a damped oscillation.
 
 
-Definition of a general abstract class of NSDS : the linear time invariant complementarity system (LCS)
-```````````````````````````````````````````````````````````````````````````````````````````````````````
+Definition of a general abstract class of NSDS: the linear time-invariant complementarity system (LCS)
+``````````````````````````````````````````````````````````````````````````````````````````````````````
 
-This type of non-smooth dynamical system consists of :
+This type of nonsmooth dynamical system consists of:
 
-* a time invariant linear dynamical system (the oscillator). The state
-  variable of this system is denoted by :math:`x`.
+* a linear time-invariant dynamical system (the oscillator). The state
+  variable of this system is denoted by :math:`x`;
 
-* a non-smooth law describing the behaviour of the diode as a
-  complementarity condition between current and reverse voltage
-  (variables (:math:`y,\lambda`) )
+* a nonsmooth law describing the behaviour of the diode as a
+  complementarity condition between the current and the reverse voltage
+  (variables (:math:`y,\lambda`));
 
-* a linear time invariant relation between the state variable
-  :math:`x` and the non-smooth law variables (:math:`y,\lambda`)
+* a linear time-invariant relation between the state variable
+  :math:`x` and the nonsmooth law variables (:math:`y,\lambda`).
 
-Dynamical system and Boundary conditions
+Dynamical system and boundary conditions
 ''''''''''''''''''''''''''''''''''''''''
 
 Remark:
 
 .. pull-quote::
 
-   In a more general setting, the system's evolution would be
-   described by a DAE :
+   In a more general setting, the evolution of the system would be
+   described by a DAE:
 
    .. math::
 
       G \cdot x' = A \cdot x + E \cdot u + b + r
 
-   with :math:`G , A , E` matrices constant over time (time invariant
-   system), :math:`u , b` source terms functions of time and
-   :math:`r`, a term coming from the non-smooth law variables :
+   with :math:`G , A , E` matrices constant over time (time-invariant
+   system), :math:`u , b` source terms, functions of time, and
+   :math:`r` a term coming from the nonsmooth law variables:
    :math:`r = B \cdot \lambda + a` with :math:`B , a` constant over
-   time.  We will consider here the case of an ordinary differential
-   equation :
+   time. We consider here the case of an ordinary differential
+   equation:
 
    .. math::
 
@@ -75,34 +75,34 @@ Remark:
 Relation between constrained variables and state variables
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-In the linear time invariant framework, the non-smooth law acts on the
-linear dynamical system evolution through the variable :math:`r = B
-\cdot \lambda + a`. Reciprocally, the state variable :math:`x` acts on the
-non-smooth law through the relation :math:`y = C \cdot x + D \cdot
+In the linear time-invariant framework, the nonsmooth law acts on the
+evolution of the linear dynamical system through the variable :math:`r = B
+\cdot \lambda + a`. Conversely, the state variable :math:`x` acts on the
+nonsmooth law through the relation :math:`y = C \cdot x + D \cdot
 \lambda + F \cdot u + e` with :math:`C , D , F , e` constant over
 time.
 
-Definition of the Non Smooth Law between constrained variables
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Definition of the nonsmooth law between constrained variables
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-It is a complementarity condition between y and :math:`\lambda` :
+It is a complementarity condition between y and :math:`\lambda`:
 :math:`0 \leq y \, \perp \, \lambda \geq 0`. This corresponds to the
 behaviour of the rectifying diode, as described in
 :ref:`non-smooth-laws`.
 
-The formalization of the electrical oscillator with half-wave rectifier into the LCS
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Formulation of the electrical oscillator with half-wave rectifier as an LCS
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-The equations come from the following physical laws :
+The equations come from the following physical laws:
 
-* the Kirchhoff current law (KCL) establishes that the sum of the
-  currents arriving at a node is zero,
-* the Kirchhoff voltage law (KVL) establishes that the sum of the
-  voltage drops in a loop is zero,
+* Kirchhoff's current law (KCL) states that the sum of the
+  currents arriving at a node is zero;
+* Kirchhoff's voltage law (KVL) states that the sum of the
+  voltage drops around a loop is zero;
 * the branch constitutive equations define the relation between the
-  current through a bipolar device and the voltage across it
+  current through a two-terminal device and the voltage across it.
 
-Refering to :ref:`fig-CircuitRLCD`, the Kirchhoff laws could be written as:
+Referring to :ref:`fig-CircuitRLCD`, the Kirchhoff laws can be written as:
 
 .. math::
 
@@ -123,8 +123,8 @@ while the branch constitutive equations for linear devices are:
    v_R = R i_R
    \end{array}
 
-and last the "branch constitutive equation" of the ideal diode that is
-no more an equation but instead a complementarity condition:
+and finally the "branch constitutive equation" of the ideal diode, which is
+no longer an equation but a complementarity condition:
 
 .. math::
 
@@ -142,7 +142,7 @@ Shockley's law.
    :align: center
    :width: 13cm
 
-   fig 2: Non-smooth and smooth characteristics of a diode
+   fig 2: Nonsmooth and smooth characteristics of a diode
 
 
 .. _sec-dyn-eq:
@@ -175,7 +175,7 @@ After rearranging the previous equations, we obtain:
    \end{array} \right)
    \cdot i_D
 
-that fits in the frame of \ref{sec-def-NSDS} with
+which fits in the LCS framework defined above, with
 
 .. math::
 
@@ -228,15 +228,15 @@ as the second equation of the linear time invariant relation with
 
 .. _non-smooth-laws:
 
-Non Smooth laws
-'''''''''''''''
+Nonsmooth laws
+''''''''''''''
 
-There is just the complementarity condition resulting from the ideal diode characteristic:
+There is only the complementarity condition resulting from the ideal diode characteristic:
 
 .. math:: 0 \leq i_D \, \perp \, -v_D \geq 0
 
-Description of the numerical simulation: the Moreau's time-stepping scheme
-``````````````````````````````````````````````````````````````````````````
+Description of the numerical simulation: Moreau's time-stepping scheme
+``````````````````````````````````````````````````````````````````````
 
 Time discretization of the dynamical system
 '''''''''''''''''''''''''''''''''''''''''''
@@ -251,7 +251,7 @@ The integration of the ODE over a time step :math:`[t_i,t_{i+1}]` of length :mat
 
 The left-hand term is :math:`x(t_{i+1})-x(t_i)`.
 
-Right-hand terms are approximated this way:
+The right-hand terms are approximated as follows:
 
 * :math:`\int_{t_i}^{t_{i+1}} A \cdot x\,dt` is approximated using a
   :math:`\theta`-method
@@ -262,7 +262,7 @@ Right-hand terms are approximated this way:
      (A \cdot x(t_{i+1})) + h (1-\theta) (A \cdot x(t_{i}))
 
 * since the second integral comes from independent sources, it can be
-  evaluated with whatever quadrature method, for instance a
+  evaluated with any quadrature method, for instance a
   :math:`\theta`-method
 
   .. math::
@@ -271,20 +271,20 @@ Right-hand terms are approximated this way:
      (E \cdot u(t_{i+1}) + b(t_{i+1})) +
      h (1-\theta) (E \cdot u(t_{i}) + b(t_{i}))
 
-* the third integral is approximated like in an implicit Euler integration
+* the third integral is approximated as in an implicit Euler integration
 
   .. math:: \int_{t_i}^{t_{i+1}}r\,dt \approx h r(t_{i+1})
 
 
-By replacing the accurate solution :math:`x(t_i)` by the approximated value :math:`x_i`, we get:
+Replacing the exact solution :math:`x(t_i)` by the approximate value :math:`x_i`, we get:
 
 .. math::
 
    x_{i+1}-x_i = h \theta (A \cdot x_{i+1}) + h (1-\theta) (A \cdot x_{i}) +
                  h \theta (E \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (E \cdot u(t_{i}) + b(t_{i})) + h r_{i+1}
 
-Assuming that :math:`I - h \theta A` is invertible, matrix :math:`W`
-is defined as :math:`(I - h \theta A)^{-1}`. We get then:
+Assuming that :math:`I - h \theta A` is invertible, the matrix :math:`W`
+is defined as :math:`(I - h \theta A)^{-1}`. We then get:
 
 .. math::
 
@@ -298,7 +298,7 @@ An intermediate variable :math:`x_{free}` related to the smooth part of the syst
    x_{free} = W(I + h (1-\theta) A) \cdot x_{i} +
               W (h \theta (E \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (E \cdot u(t_{i}) + b(t_{i})))
 
-Thus the calculus of :math:`x_{i+1}` becomes:
+The computation of :math:`x_{i+1}` thus becomes:
 
 .. math:: x_{i+1} = x_{free} + h W r_{i+1}
 
@@ -306,7 +306,7 @@ Thus the calculus of :math:`x_{i+1}` becomes:
 Time discretization of the relations
 ''''''''''''''''''''''''''''''''''''
 
-It comes straightforwardly:
+It follows directly that:
 
 .. math::
 
@@ -315,18 +315,18 @@ It comes straightforwardly:
    y_{i+1} =& C \cdot x_{i+1} + D \cdot \lambda_{i+1} + F \cdot u(t_{i+1}) + e
 
 
-Time discretization of the non-smooth law
-'''''''''''''''''''''''''''''''''''''''''
+Time discretization of the nonsmooth law
+''''''''''''''''''''''''''''''''''''''''
 
-It comes straightforwardly:
+It follows directly that:
 
 .. math:: 0 \leq y_{i+1} \, \perp \, \lambda_{i+1} \geq 0
 
 Summary of the time discretized equations
 '''''''''''''''''''''''''''''''''''''''''
 
-These equations are summarized assuming that there is no source term
-and simplified relations as for the electrical oscillator with
+These equations are summarized below, assuming that there is no source term
+and simplified relations, as for the electrical oscillator with
 half-wave rectifier.
 
 .. math::
@@ -343,10 +343,10 @@ half-wave rectifier.
 Numerical simulation
 ''''''''''''''''''''
 
-The integration algorithm with a fixed step is described here :
+The fixed-step integration algorithm is described here:
 
-   **Algorthm 1**: Integration of the electrical oscillator with half-wave
-   rectifier through a fixed Moreau time stepping scheme
+   **Algorithm 1**: Integration of the electrical oscillator with half-wave
+   rectifier with a fixed-step Moreau time-stepping scheme
 
    **Require:** :math:`R > 0 , L > 0 , C > 0`
 
@@ -354,7 +354,7 @@ The integration algorithm with a fixed step is described here :
 
    **Require:** Initial value of inductor voltage :math:`v_L = x_0(0)`
 
-   **Require:** Optional, initial value  of inductor current :math:`i_L = x_0(1)` (default: 0)
+   **Require:** Optional, initial value of inductor current :math:`i_L = x_0(1)` (default: 0)
 
    :math:`n_{step} = \frac{T - t_0}{h}`
 
@@ -370,13 +370,13 @@ The integration algorithm with a fixed step is described here :
 
    :math:`D = (R)`
 
-   // *Construction of time independent operators*
+   // *Construction of time-independent operators*
 
    **Require:** :math:`I - h \theta A` invertible
    :math:`W = (I - h \theta A)^{-1}`
    :math:`M = D + h C W B`
 
-   // *Non-smooth dynamical system integration*
+   // *Nonsmooth dynamical system integration*
 
    **for** :math:`i=0` to :math:`n_{step}-1` **do**
 
@@ -384,11 +384,11 @@ The integration algorithm with a fixed step is described here :
 
       x_{free} =& W (I + h (1 - \theta) A) x_i && \textrm{// Computation of $x_{free}$}
 
-      q =& C \cdot x_{free} &&  \textrm{// Formalization of the one step LCP}
+      q =& C \cdot x_{free} &&  \textrm{// Formulation of the one-step LCP}
 
-      (y_{i+1},\lambda_{i+1}) =& \textrm{solveLCP}(M,q) &&  \textrm{// One step LCP solving}
+      (y_{i+1},\lambda_{i+1}) =& \textrm{solveLCP}(M,q) &&  \textrm{// Solution of the one-step LCP}
 
-      x_{i+1} =& x_{free} + h W B \lambda_{i+1} &&  \textrm{// Computation of new state}
+      x_{i+1} =& x_{free} + h W B \lambda_{i+1} &&  \textrm{// Computation of the new state}
 
    **end for**
 
@@ -396,10 +396,10 @@ The integration algorithm with a fixed step is described here :
 Comparison with numerical results coming from SPICE models and algorithms
 `````````````````````````````````````````````````````````````````````````
 
-We have used the SMASH simulator from Dolphin to perform a simulation
-of this circuit with a smooth model of the diode as given by
-Shockley's law , with a classical one step solver (Newton-Raphson) and
-a choice between backward-Euler and trapezoidal integrators.
+We used the SMASH simulator from Dolphin to simulate
+this circuit with a smooth model of the diode, given by
+Shockley's law, with a classical one-step solver (Newton-Raphson) and
+a choice between backward Euler and trapezoidal integrators.
 
 Characteristic of the diode in the SPICE model
 ''''''''''''''''''''''''''''''''''''''''''''''
@@ -415,7 +415,7 @@ diode).
    :align: center
    :width: 13cm
 
-   fig 3: Diodes characteristics from SPICE model :math:`(N=0.25, N=1)`
+   fig 3: Diode characteristics from the SPICE model :math:`(N=0.25, N=1)`
 
 The stiff diode is close to an ideal one with a threshold of 0.2 V.
 
@@ -424,14 +424,14 @@ Simulation results
 
 :ref:`fig-comp-SMASH-SICONOS-BE10us` displays a comparison of the
 SMASH and SICONOS results with a backward Euler integration and a
-fixed time step of 10 μs. A stiff diode model was used in SMASH
-simulations.  For :ref:`fig-comp-SMASH-SICONOS-TRAP10us`, a
-trapezoidal integrator was used, yielding a better accuracy.  One can
-notice that the results from both simulators are very close. The
-slight differences are due to the smooth model of the diode used by
-SMASH, and mainly to the threshold of around 0.2 V. Such a threshold
-yields small differences in the conduction state of the diode with
-respect to the ideal diode.
+fixed time step of 10 μs. A stiff diode model was used in the SMASH
+simulations. For :ref:`fig-comp-SMASH-SICONOS-TRAP10us`, a
+trapezoidal integrator was used, which gives better accuracy. The
+results of both simulators are very close. The
+slight differences are due to the smooth diode model used by
+SMASH, and mainly to its threshold of about 0.2 V. This threshold
+causes small differences in the conduction state of the diode
+compared with the ideal diode.
 
 .. _fig-comp-SMASH-SICONOS-BE10us:
 

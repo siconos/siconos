@@ -1,8 +1,8 @@
 .. _template_siconos_driver:
 
 
-C++ template for siconos driver
-===============================
+C++ template for a Siconos driver
+=================================
 
 .. highlight:: c++
 

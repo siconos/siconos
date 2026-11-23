@@ -11,7 +11,7 @@ Nonlinear Complementarity Problems (NCP)
 Problem statement
 =================
 
-Given a sufficiently smooth function :math:`{F}\colon {{\mathrm{I\!R}}}^{n} \to {{\mathrm{I\!R}}}^{n}` The Nonlinear Complementarity Problem (NCP) is to find two vectors :math:`(z,w \in {{\mathrm{I\!R}}}^{n})` such that:
+Given a sufficiently smooth function :math:`{F}\colon {{\mathrm{I\!R}}}^{n} \to {{\mathrm{I\!R}}}^{n}`, the Nonlinear Complementarity Problem (NCP) is to find two vectors :math:`(z,w \in {{\mathrm{I\!R}}}^{n})` such that:
 
 .. math::
 
@@ -25,17 +25,17 @@ Structure to define the problem: :cpp:class:`NonlinearComplementarityProblem`.
 
 The generic driver for all NCP is :cpp:func:`ncp_driver()`.
 
-Solvers list  :cpp:enum:`NCP_SOLVER`
+List of solvers: :cpp:enum:`NCP_SOLVER`
 
 .. _ncp_solvers:
 
 NCP available solvers
 =====================
 
-Newton, Fisher-Burmeister (:cpp:enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`)
--------------------------------------------------------------------------
+Newton, Fischer-Burmeister (:cpp:enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`)
+--------------------------------------------------------------------------
 
-NCP Solver using the FB merit function and a Newton-based method with line-search
+NCP solver using the FB merit function and a Newton-based method with line search.
 
 driver: :cpp:func:`ncp_newton_FBLSA`
 
@@ -51,7 +51,7 @@ parameters:
 Newton, min merit function (:cpp:enumerator:`SICONOS_NCP_NEWTON_MIN_FBLSA`)
 ---------------------------------------------------------------------------
 
-NCP Solver using the min merit function (+ the FB as backup) and a Newton-based method with line-search
+NCP solver using the min merit function (with FB as a backup) and a Newton-based method with line search.
 
 driver: :cpp:func:`ncp_newton_minFBLSA`
 
@@ -60,8 +60,8 @@ parameters: same as :cpp:enumerator:`SICONOS_NCP_NEWTON_FB_FBLSA`
 Path search algorithm (:cpp:enumerator:`SICONOS_NCP_PATHSEARCH`)
 -----------------------------------------------------------------
 
-NCP Solver using a path search algorithm, following the work of D. Ralph.
-M. Ferris, and many other collaborators of the latter.
+NCP solver using a path search algorithm, following the work of D. Ralph,
+M. Ferris and many of their collaborators.
 
 driver: :cpp:func:`ncp_newton_pathsearch`
 

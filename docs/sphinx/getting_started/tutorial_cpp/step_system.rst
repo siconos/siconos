@@ -6,11 +6,11 @@ Gene regulatory networks
 .. highlight:: c++
 
 This example describes the simulation of a gene regulatory network in Siconos.
-For a complete description of the problem see :cite:`Acary.DeJong.Brogliatio2014`
+For a complete description of the problem, see :cite:`Acary.DeJong.Brogliatio2014`.
 
-A piecewise linear model is used as a model for the gene regulatory network, in which the variables denote concentrations of gene products.
+The gene regulatory network is described by a piecewise linear model, in which the variables are concentrations of gene products.
 
-We consider a two genes system with the following dynamics:
+We consider a two-gene system with the following dynamics:
 
 .. math::
 
@@ -31,4 +31,4 @@ with the step functions:
       1 & x_j < \theta_j^k\end{array}\right.
    \end{equation}
 
-:math:`\theta_j^k` are thresholds that control inhibition/activation of the expression of a gene.
+The :math:`\theta_j^k` are thresholds that control the inhibition or activation of the expression of a gene.

@@ -18,6 +18,6 @@ Developer guide
 
 To do.
 
-`Unpolished developement notes`_.
+`Unpolished development notes`_.
 
-.. _Unpolished developement notes: ./notes/DevNotes.pdf
+.. _Unpolished development notes: ./notes/DevNotes.pdf

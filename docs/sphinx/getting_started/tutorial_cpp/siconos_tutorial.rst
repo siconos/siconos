@@ -4,7 +4,7 @@
 Siconos tutorials in C++
 ========================
 
-Check the :ref:`siconos_examples` and examples marked as tutorial ...
+See the :ref:`siconos_examples`, in particular those marked as tutorials.
 
 
 .. toctree::

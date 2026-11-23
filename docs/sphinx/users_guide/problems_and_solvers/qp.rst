@@ -29,7 +29,7 @@ subject to:
 Available solvers
 =================
 
-The qp pack is not yet implemented. The only available function is :cpp:func:`ql0001()` (fortran subroutine).
+The QP package is not implemented yet. The only available function is :cpp:func:`ql0001()` (a Fortran subroutine).
 
 
 .. seealso::

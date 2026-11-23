@@ -4,17 +4,17 @@
 Test doxygen/sphinx links
 -------------------------
 
-Below some examples on how to write internal links to siconos objects in sphinx documents (rst).
+Below are some examples of internal links to Siconos objects in Sphinx documents (rst).
 
-* Link to a siconos class or a struct:
+* Link to a Siconos class or struct:
 
   .. code-block:: rst
 
      Try to link to :cpp:class:`siconos::modeling::DynamicalSystem`
 
-  **Result** :
+  **Result**:
 
-  Try link to :cpp:class:`siconos::modeling::DynamicalSystem`
+  Try to link to :cpp:class:`siconos::modeling::DynamicalSystem`
 
 
 .. * Link to a file (programs listing):
@@ -33,28 +33,28 @@ Below some examples on how to write internal links to siconos objects in sphinx 
 
      Try to link to :ref:`file_kernel_src_modeling_DynamicalSystem.hpp`
 
-  **Result** :
+  **Result**:
 
   Try to link to :ref:`file_kernel_src_modeling_DynamicalSystem.hpp`
 
 
-* Link to a class method :
+* Link to a class method:
 
   .. code-block:: rst
 
      Try to link to :cpp:func:`Simulation::nextStep`
 
-  **Result** :
+  **Result**:
 
   Try to link to :cpp:func:`Simulation::nextStep`
 
 
-* Link to a function :
+* Link to a function:
 
   .. code-block:: rst
 
      Try to link to :cpp:func:`cs_dl_norm`
 
-  **Result** :
+  **Result**:
 
   Try to link to :cpp:func:`cs_dl_norm`

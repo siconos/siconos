@@ -31,7 +31,7 @@ Structure to define the problem: :cpp:class:`RelayProblem`.
 
 The generic driver for all Relay problems is :cpp:func:`relay_driver()`.
 
-Solvers list  :cpp:enum:`RELAY_SOLVER`
+List of solvers: :cpp:enum:`RELAY_SOLVER`
 
 .. _relay_solvers:
 
@@ -44,7 +44,7 @@ Direct solvers
 Enumerative solver (:cpp:enumerator:`SICONOS_RELAY_ENUM`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The relay problem is reformulated as a LCP and solved with enum method, see :ref:`lcp_solvers`.
+The relay problem is reformulated as an LCP and solved with the enumerative method, see :ref:`lcp_solvers`.
 
 driver: :cpp:func:`relay_enum()`
 
@@ -53,7 +53,7 @@ parameters: same as :cpp:enumerator:`SICONOS_LCP_ENUM`.
 Lemke solver (:cpp:enumerator:`SICONOS_RELAY_LEMKE`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""
 
-The relay problem is reformulated as a LCP and solved with Lemke's method, see :ref:`lcp_solvers`.
+The relay problem is reformulated as an LCP and solved with Lemke's method, see :ref:`lcp_solvers`.
 
 driver: :cpp:func:`relay_lexicolemke()`
 
@@ -63,13 +63,13 @@ parameters: same as :cpp:enumerator:`SICONOS_LCP_ENUM`.
 PATH (:cpp:enumerator:`SICONOS_RELAY_PATH`)
 """"""""""""""""""""""""""""""""""""""""""""
 
-The relay problem is reformulated as a LCP and solved with the PATH solver
+The relay problem is reformulated as an LCP and solved with the PATH solver.
 
-*Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see* :ref:`siconos_install_guide` *)*
+*Works only if Siconos has been built with PATH support (if PathFerris or PathVI has been found, see* :ref:`siconos_install_guide` *)*
 
 driver: :cpp:func:`relay_path()`
 
-parameters : none.
+parameters: none.
 
 AVI reformulation
 -----------------
@@ -77,7 +77,7 @@ AVI reformulation
 AVI, Cao/Ferris solver (:cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K` .
+Based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K`.
 
 driver:  :cpp:func:`relay_avi_caoferris()`
 
