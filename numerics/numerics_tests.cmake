@@ -570,6 +570,13 @@ if(WITH_TESTING)
   #===========================================
   begin_tests(src/MixedProblems/test)
   new_test(SOURCES mixed_problem_simple_test.c)
+  # Mohr-Coulomb blocks: analytic solutions, coupled non-symmetric problems, footing data
+  # of the Plasticity tests compared with the Plasticity NSGS solver.
+  new_test(SOURCES mixed_problem_mohr_coulomb_test.c
+    COMPILE_DEFINITIONS "PLASTICITY_DATA_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/src/Plasticity/test/data\"")
+  # Friction 2D/3D blocks with several contacts, rolling friction, blocks of different
+  # dimensions, dense and sparse storage of M.
+  new_test(SOURCES mixed_problem_friction_test.c)
 
   #===========================================
   # Generic mechanical tests

@@ -5,8 +5,8 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 
-#ifndef rolling_friction_3d_compute_error_H
-#define rolling_friction_3d_compute_error_H
+#ifndef rolling_friction_2d_compute_error_H
+#define rolling_friction_2d_compute_error_H
 
 /*!\file rolling_friction_3d_compute_error.h
   \brief functions related to error computation for friction-contact problems
