@@ -65,6 +65,7 @@ class CopyVisitor:
         self.time_idx = None
         self.times = None
         self.excluded_objects = None
+        self.excluded_names = []
         # rows of the input kept in each table that has a step index
         self.kept = {}
 
@@ -92,10 +93,11 @@ class CopyVisitor:
         if self.excluded_objects is None and self.object_filter is not None:
             if self.object_filter is not None:
                 inp = obj.file["data/input"]
+                self.excluded_names = [
+                    name for name, x in inp.items() if not self.object_filter(name, x)
+                ]
                 self.excluded_objects = [
-                    x.attrs["id"]
-                    for name, x in inp.items()
-                    if not self.object_filter(name, x)
+                    inp[name].attrs["id"] for name in self.excluded_names
                 ]
                 print(f"Excluding object IDs {self.excluded_objects}")
 
@@ -106,6 +108,16 @@ class CopyVisitor:
             else:
                 id = obj.attrs["id"]
             if id in self.excluded_objects:
+                return
+
+        # Joints, permanent interactions, boundary conditions and external
+        # functions that name an excluded object are not copied either
+        for ref in ("object1", "object2", "body1_name", "body2_name", "body_name"):
+            value = obj.attrs.get(ref)
+            if isinstance(value, bytes):
+                value = value.decode()
+            if value is not None and value in self.excluded_names:
+                print(f'Excluding "{path}" ({ref} = {value})')
                 return
 
         # Get indexes of filtered times in data/dynamic
@@ -147,7 +159,10 @@ class CopyVisitor:
 
             # Filter current indexes
             tables = ["data/cf", "data/dynamic", "data/velocities", "data/static"]
-            if index is not None or path in tables:
+            # columns of the objects of a row: ds_id, in cf and cf_info: ds1, ds2
+            objects = {table: slice(1, 2) for table in tables}
+            objects.update({"data/cf": slice(-2, None), "data/cf_info": slice(2, 4)})
+            if index is not None or path in objects:
                 if self.time_idx is not None:
                     # Get indexes of corresponding times in current dataset
                     if index is not None:
@@ -159,14 +174,13 @@ class CopyVisitor:
                         )
                     elif path == "data/dynamic":
                         time_idx = self.time_idx
-                    # Time-filter all but static objects
-                    elif path != "data/static":
+                    # Time-filter cf and velocities (static objects are not)
+                    elif path in ["data/cf", "data/velocities"]:
                         time_idx = np.isin(obj[:, 0], self.times).nonzero()[0]
 
                 # Additionally remove any lines referencing excluded objects
-                if self.excluded_objects is not None and path in tables:
-                    # ds_id in column 1, in cf: ds1, ds2 the last 2 columns
-                    ids = obj[:, -2:] if path == "data/cf" else obj[:, 1:2]
+                if self.excluded_objects is not None and path in objects:
+                    ids = obj[:, objects[path]]
                     excluded = np.isin(ids, self.excluded_objects).any(axis=1)
                     ex_idx = excluded.nonzero()[0]
                     if time_idx is None:
