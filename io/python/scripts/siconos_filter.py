@@ -165,7 +165,10 @@ class CopyVisitor:
 
                 # Additionally remove any lines referencing excluded objects
                 if self.excluded_objects is not None and path in tables:
-                    ex_idx = np.isin(obj[:, 1], self.excluded_objects).nonzero()[0]
+                    # ds_id in column 1, in cf: ds1, ds2 the last 2 columns
+                    ids = obj[:, -2:] if path == "data/cf" else obj[:, 1:2]
+                    excluded = np.isin(ids, self.excluded_objects).any(axis=1)
+                    ex_idx = excluded.nonzero()[0]
                     if time_idx is None:
                         time_idx = np.arange(obj.shape[0])
                     time_idx = np.setdiff1d(time_idx, ex_idx)
