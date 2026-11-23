@@ -60,7 +60,7 @@ class CopyVisitor:
     def __init__(self, time_filter=None, object_filter=None, attr_filter=None):
         self.time_filter = None
         if time_filter is not None:
-            self.time_filter = np.vectorize(time_filter)
+            self.time_filter = np.vectorize(time_filter, otypes=[bool])
         self.object_filter = object_filter
         self.time_idx = None
         self.excluded_objects = None
@@ -139,12 +139,11 @@ class CopyVisitor:
                         time_idx = self.time_idx
                     # Time-filter all but static objects
                     elif path != "data/static":
-                        time_idx = np.in1d(obj[:, 0], self.times).nonzero()[0]
+                        time_idx = np.isin(obj[:, 0], self.times).nonzero()[0]
 
                 # Additionally remove any lines referencing excluded objects
                 if self.excluded_objects is not None:
-                    exclude = np.vectorize(lambda i: i in self.excluded_objects)
-                    ex_idx = exclude(obj[:, 1]).nonzero()[0]
+                    ex_idx = np.isin(obj[:, 1], self.excluded_objects).nonzero()[0]
                     if time_idx is None:
                         time_idx = np.arange(obj.shape[0])
                     time_idx = np.setdiff1d(time_idx, ex_idx)
@@ -172,7 +171,9 @@ class CopyVisitor:
             self.copy_attrs(ds, obj)
 
             # Copy the filtered or unfiltered dataset
-            if time_idx is not None:
+            if obj.shape == ():  # scalar datasets: /format, data/script/source
+                ds[()] = obj[()]
+            elif time_idx is not None:
                 if len(time_idx) == 0:
                     pass
                 elif len(time_idx) == 1:
@@ -258,7 +259,15 @@ if __name__ == "__main__":
                     return v
 
     with h5py.File(args.fns_in[0], mode="r") as io_in:
+        # a file without version attributes is a v1.0 file
+        version = (io_in.attrs.get("version_major", 1), io_in.attrs.get("version_minor", 0))
+        if version[0] != 1:
+            print(f'"{args.fns_in[0]}": format version {version[0]}.{version[1]}, only v1 is filtered')
+            sys.exit(1)
         with h5py.File(args.fn_out[0], mode="w") as io_out:
+            # attributes of the file: version_major, version_minor, dimension
+            for a in io_in.attrs:
+                io_out.attrs[a] = io_in.attrs[a]
             io_in.visititems(
                 CopyVisitor(
                     time_filter=TimeFilter(),
