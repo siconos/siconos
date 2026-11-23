@@ -230,8 +230,8 @@ static double* fc2d_nsgs_compute_local_problem_determinant(
   return diagonal_block_determinant;
 }
 
-static inline void fc2d_nsgs_local_solve(double* W, double D, double* q, double mu,
-                                         double* P) {
+static inline void fc2d_nsgs_parallel_local_solve(double* W, double D, double* q, double mu,
+                                                  double* P) {
   /* | Wnn Wnt |
      | Wtn Wtt | */
 
@@ -389,8 +389,9 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
                                       z);
 
         /* Solve local problem */
-        fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
-                              local_problem->q, problem->mu[contact], localreaction);
+        fc2d_nsgs_parallel_local_solve(local_problem->M->dense,
+                                       diagonal_block_determinant[contact], local_problem->q,
+                                       problem->mu[contact], localreaction);
 
         light_error_2 = light_error_squared(localreaction, &z[pos]);
         light_error_sum += light_error_2;
@@ -458,8 +459,9 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
                                       z);
 
         /* Solve local problem */
-        fc2d_nsgs_local_solve(local_problem->M->dense, diagonal_block_determinant[contact],
-                              local_problem->q, problem->mu[contact], localreaction);
+        fc2d_nsgs_parallel_local_solve(local_problem->M->dense,
+                                       diagonal_block_determinant[contact], local_problem->q,
+                                       problem->mu[contact], localreaction);
 
         if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
                 SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
@@ -528,7 +530,10 @@ void fc2d_nsgs_permut(FrictionContactProblem* problem, double* z, double* w, int
  */
 
 static int fc2d_nsgs_permut_init_wrap(void* problem, SolverOptions* options) {
-  fc2d_nsgs_set_default(options);
+  /* fc2d_nsgs_set_default already called by solver_options_create: calling it again here, at
+   * each driver call, reset the options set by the user */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 

@@ -168,7 +168,42 @@ static void test_footing(void) {
   printf("\n");
 }
 
+/* sigma = 0 is not a solution when q_N >= 0 but eta |q_T| > q_N + theta |q_T| (theta < eta):
+ * the trivial-case tests of the driver and of the Newton local solver used q_N >= 0. */
+static void test_not_trivial(void) {
+  printf("=== q_N >= 0 but sigma = 0 not solution (eta = 0.5, theta = 0) ===\n");
+  int ids[] = {0, PLASTICITY_2D_ONECONE_NSN, PLASTICITY_2D_ONECONE_ProjectionOnCone};
+  for (int k = 0; k < 3; k++) {
+    double* M = (double*)calloc(9, sizeof(double));
+    M[0] = M[4] = M[8] = 1.;
+    double* q = (double*)malloc(3 * sizeof(double));
+    q[0] = 0.1;
+    q[1] = 1.;
+    q[2] = 0.;
+    double* eta = (double*)malloc(sizeof(double));
+    double* theta = (double*)calloc(1, sizeof(double));
+    eta[0] = 0.5;
+    PlasticityProblem* problem =
+        plasticityProblem_new_with_data(3, 1, NM_create_with_data(NM_DENSE, 3, 3, M), q,
+                                        plasticity_DruckerPrager_model_new(eta, theta));
+    double sigma[3] = {0.}, w[3] = {0.};
+    SolverOptions* options = solver_options_create(PLASTICITY_2D_NSGS);
+    if (ids[k]) solver_options_update_internal(options, 0, ids[k]);
+    options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    int info = plasticity_2d_driver(problem, sigma, w, options);
+    /* theta = 0, M = I: sigma = P_K(-q), -q = (-0.1, -1, 0) -> (0.32, -0.16, 0) */
+    const double expected[3] = {0.32, -0.16, 0.};
+    printf("  internal solver %s\n", ids[k] ? solver_options_id_to_name(ids[k]) : "default");
+    check(info == 0 && dist(3, sigma, expected) < 1e-13, "sigma = P_K(-q)",
+          dist(3, sigma, expected));
+    solver_options_delete(options);
+    plasticityProblem_free(problem);
+  }
+  printf("\n");
+}
+
 int main(void) {
+  test_not_trivial();
   test_identity();
   test_footing();
   printf("%d check(s) failed\n", failures);

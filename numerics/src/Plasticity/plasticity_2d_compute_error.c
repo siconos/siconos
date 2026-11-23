@@ -44,6 +44,12 @@ void plasticity_2d_unitary_compute_and_add_error(double* restrict r, double* res
   *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
+int plasticity_2d_DruckerPrager_zero_is_solution(const double q[3], double eta, double theta) {
+  double nT = sqrt(q[1] * q[1] + q[2] * q[2]);
+  double scale = fmax(fabs(q[0]), nT);
+  return (eta * nT <= q[0] + theta * nT + DBL_EPSILON * scale) ? 1 : 0;
+}
+
 int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
                                 double tolerance, SolverOptions* options, double norm,
                                 double* error) {

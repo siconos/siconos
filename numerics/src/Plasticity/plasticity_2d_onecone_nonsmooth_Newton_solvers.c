@@ -228,7 +228,9 @@ int plasticity_2d_onecone_nonsmooth_Newton_solvers_solve(PlasticityProblem* loca
   /*  check trivial solution */
 
   double* q = localproblem->q;
-  if (q[0] > -DBL_EPSILON) {
+  if (plasticity_2d_DruckerPrager_zero_is_solution(
+          q, localproblem->model.drucker_prager->eta[0],
+          localproblem->model.drucker_prager->theta[0])) {
     local_reaction[0] = 0.0;
     local_reaction[1] = 0.0;
     local_reaction[2] = 0.0;

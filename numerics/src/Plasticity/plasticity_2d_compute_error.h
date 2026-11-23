@@ -49,6 +49,16 @@ void plasticity_2d_unitary_compute_and_add_error(double* restrict r, double* res
                                                  double eta, double theta, double* error,
                                                  double* worktmp);
 
+/** Check whether sigma = 0 solves the one-cone Drucker-Prager problem with w = q:
+ *  q + theta ||q_T|| e_N must be in the dual cone K_eta^* = {eta ||v_T|| <= v_N}, i.e.
+ *  eta ||q_T|| <= q_N + theta ||q_T||. (q_N >= 0 is enough only when theta >= eta.)
+ *  \param[in] q the local vector (w for sigma = 0)
+ *  \param[in] eta cone coefficient
+ *  \param[in] theta dilatancy coefficient
+ *  \return 1 if sigma = 0 is a solution, 0 otherwise
+ */
+int plasticity_2d_DruckerPrager_zero_is_solution(const double q[3], double eta, double theta);
+
 #if defined(__cplusplus)
 }
 #endif

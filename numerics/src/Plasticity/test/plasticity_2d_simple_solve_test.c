@@ -192,11 +192,9 @@ int main(void) {
   options_generic->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   total_info += test_unit("./data/plasticity_2d_footing_100.dat", options_generic);
   total_info += test_unit("./data/plasticity_2d_footing_100_theta0.05.dat", options_generic);
-  /* known non-convergence, not counted: non-associated case theta = 0, eta = 0.1, the NSGS
-   * stalls at an error ~1.8e-5 (to be investigated) */
-  options_generic->iparam[SICONOS_IPARAM_MAX_ITER] = 3000;
-  int known = test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_generic);
-  if (known) printf("known non-convergence (footing_100_theta0), not counted\n");
+  /* non-associated case theta = 0, eta = 0.1 (used to stall: the trivial-solution test
+   * sigma = 0 if q_N >= 0 is wrong when theta < eta) */
+  total_info += test_unit("./data/plasticity_2d_footing_100_theta0.dat", options_generic);
 
   /* Von Mises (J2) model: see plasticity_2d_vonmises_test.c */
   solver_options_delete(options_generic);

@@ -718,7 +718,10 @@ void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem* problem, double* z, dou
  */
 
 static int fc2d_nsgs_graph_permut_cuda_init_wrap(void* problem, SolverOptions* options) {
-  fc2d_nsgs_set_default(options);
+  /* fc2d_nsgs_set_default already called by solver_options_create: calling it again here, at each
+   * driver call, reset the options set by the user */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 

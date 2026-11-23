@@ -208,8 +208,8 @@ static double* fc2d_nsgs_compute_local_problem_determinant(unsigned int nc,
   return diagonal_block_determinant;
 }
 
-static inline void fc2d_nsgs_local_solve(double* W, double D, double* q, double mu,
-                                         double* P) {
+static inline void fc2d_nsgs_parallel_local_solve(double* W, double D, double* q, double mu,
+                                                  double* P) {
   /* | Wnn Wnt |
      | Wtn Wtt | */
 
@@ -487,7 +487,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
                 index1_data, index2_data, local_problem, z);
 
             /* Solve local problem */
-            fc2d_nsgs_local_solve(
+            fc2d_nsgs_parallel_local_solve(
                 local_problem->M->dense, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
@@ -618,7 +618,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
                 index1_data, index2_data, local_problem, z);
 
             /* Solve local problem */
-            fc2d_nsgs_local_solve(
+            fc2d_nsgs_parallel_local_solve(
                 local_problem->M->dense, diagonal_block_determinant[permuted_contact],
                 local_problem->q, problem->mu[permuted_contact], localreaction);
 
@@ -763,7 +763,10 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem* problem, double* z, double* 
  */
 
 static int fc2d_nsgs_graph_permut_init_wrap(void* problem, SolverOptions* options) {
-  fc2d_nsgs_set_default(options);
+  /* fc2d_nsgs_set_default already called by solver_options_create: calling it again here, at
+   * each driver call, reset the options set by the user */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 

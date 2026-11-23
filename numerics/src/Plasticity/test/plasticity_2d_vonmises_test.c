@@ -367,7 +367,40 @@ static void test_nsgs(void) {
   printf("\n");
 }
 
+/* Von Mises with q_N >= 0: sigma = 0 is a solution only if q = 0 (the trivial-case test of
+ * the driver used q_N >= 0). M = I: sigma_N = -q_N, sigma_T = P_disk(-q_T). */
+static void test_not_trivial(void) {
+  printf("=== Von Mises, q_N >= 0 (not a trivial case) ===\n");
+  double* M = (double*)calloc(9, sizeof(double));
+  M[0] = M[4] = M[8] = 1.;
+  double* q = (double*)malloc(3 * sizeof(double));
+  q[0] = 1.;
+  q[1] = 2.;
+  q[2] = 0.;
+  double* sigma_y = (double*)malloc(sizeof(double));
+  sigma_y[0] = 0.5;
+  PlasticityProblem* problem = plasticityProblem_new();
+  problem->dimension = 3;
+  problem->numberOfCones = 1;
+  problem->M = NM_create_with_data(NM_DENSE, 3, 3, M);
+  problem->q = q;
+  problem->model_type = PLASTICITY_MODEL_VON_MISES;
+  problem->model.von_mises = plasticity_VonMises_model_new(sigma_y);
+  double sigma[3] = {0.}, w[3] = {0.};
+  SolverOptions* options = solver_options_create(PLASTICITY_2D_NSGS);
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  int info = plasticity_2d_driver(problem, sigma, w, options);
+  double R = plasticity_2d_vonMises_radius(0.5);
+  const double expected[3] = {-1., -R, 0.};
+  double err = fabs(sigma[0] - expected[0]) + fabs(sigma[1] - expected[1]) + fabs(sigma[2]);
+  check(info == 0 && err < 1e-14, "sigma_N = -q_N, sigma_T = -R q_T/|q_T|", err);
+  solver_options_delete(options);
+  plasticityProblem_free(problem);
+  printf("\n");
+}
+
 int main(void) {
+  test_not_trivial();
   test_projection();
   test_local_solver();
   test_iterative_local_solvers();

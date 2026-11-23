@@ -10,6 +10,7 @@
  */
 
 #include <float.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,6 +20,7 @@
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
+#include "plasticity_2d_compute_error.h"
 #include "plasticity_2d_solvers.h"
 #include "solver_registry.h"
 
@@ -33,8 +35,20 @@ int plasticity_2d_checkTrivialCase(PlasticityProblem* problem, double* strainrat
   double* q = problem->q;
   int n = 3 * nc;
 
+  /* sigma = 0 must solve every cone: Drucker-Prager, q + theta |q_T| e_N in the dual cone
+   * (q_N >= 0 is not enough when theta < eta); Von Mises, 0 is inside the yield set: w = q
+   * must vanish */
   for (int i = 0; i < nc; i++) {
-    if (q[3 * i] < -DBL_EPSILON) return -1;
+    if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER) {
+      if (!plasticity_2d_DruckerPrager_zero_is_solution(
+              &q[3 * i], problem->model.drucker_prager->eta[i],
+              problem->model.drucker_prager->theta[i]))
+        return -1;
+    } else {
+      if (fabs(q[3 * i]) > DBL_EPSILON || fabs(q[3 * i + 1]) > DBL_EPSILON ||
+          fabs(q[3 * i + 2]) > DBL_EPSILON)
+        return -1;
+    }
   }
   for (int i = 0; i < n; ++i) {
     strainrate[i] = q[i];

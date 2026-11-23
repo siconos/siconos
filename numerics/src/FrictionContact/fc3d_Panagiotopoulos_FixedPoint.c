@@ -296,8 +296,10 @@ void fc3d_panagiotopoulos_fixed_point_set_default(SolverOptions* options) {
  */
 
 static int fc3d_pfp_init_wrap(void* problem, SolverOptions* options) {
+  /* fc3d_panagiotopoulos_fixed_point_set_default already called by solver_options_create:
+   * calling it again here, at each driver call, reset the options set by the user */
   (void)problem;
-  fc3d_panagiotopoulos_fixed_point_set_default(options);
+  (void)options;
   return NUMERICS_OK;
 }
 

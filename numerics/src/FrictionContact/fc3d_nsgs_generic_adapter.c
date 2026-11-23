@@ -332,7 +332,7 @@ void fc3d_nsgs_generic(FrictionContactProblem* problem, double* reaction, double
       .alloc_freezing = NULL, /* Use default allocation in nsgs_solve */
       .alloc_shuffled = NULL, /* Use default allocation in nsgs_solve */
       .localproblem = localproblem,
-      .verbose = 2,                                          /* Print every iteration */
+      .verbose = verbose, /* numerics verbosity level (2: print every iteration) */
       .user_tolerance = options->dparam[SICONOS_DPARAM_TOL], /* Store user tolerance */
       .error_eval_freq = 0, /* Full error every iteration (0=always) */
       .dimension = 3,
