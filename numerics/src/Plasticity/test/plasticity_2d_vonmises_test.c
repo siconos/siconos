@@ -31,6 +31,8 @@
  * rho = 1 / max_i M_ii, w recomputed as M sigma + q.
  */
 
+#include "plasticity_2d_vonmises.h"
+
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
@@ -44,7 +46,6 @@
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "plasticity_2d_solvers.h"
-#include "plasticity_2d_vonmises_projection.h"
 
 static int failures = 0;
 
@@ -76,6 +77,24 @@ static double vonmises_residual(int nc, const double* M, const double* q,
 
 /* ------------------------------------------------------------------------------------------
  */
+/* k-th pseudo-random local problem: M = A A^T + 0.2 I + skew part (positive definite
+ * symmetric part), q of amplitude 1e-3 to 1e3 */
+static void random_local_problem(int k, double M[9], double q[3], double* sigma_y) {
+  double A[9];
+  for (int i = 0; i < 9; i++) A[i] = sin(12.9898 * (k + 1) + 78.233 * i);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++) {
+      double s = 0.;
+      for (int l = 0; l < 3; l++) s += A[i + 3 * l] * A[j + 3 * l];
+      double skew = 0.3 * sin(3.7 * (k + 1) + 1.3 * i - 2.1 * j) -
+                    0.3 * sin(3.7 * (k + 1) + 1.3 * j - 2.1 * i);
+      M[i + 3 * j] = s + (i == j ? 0.2 : 0.) + skew;
+    }
+  double amp = pow(10., (k % 7) - 3);
+  for (int i = 0; i < 3; i++) q[i] = amp * sin(4.1 * (k + 1) + 2.7 * i);
+  *sigma_y = 0.5 + 0.4 * sin(0.37 * k);
+}
+
 static void test_projection(void) {
   printf("=== projection on the Von Mises cylinder ===\n");
   double sigma_y = 2.0, R = plasticity_2d_vonMises_radius(sigma_y);
@@ -142,7 +161,7 @@ static void test_local_solver(void) {
   const double I3[9] = {1., 0., 0., 0., 1., 0., 0., 0., 1.};
   const double q1[3] = {-1., 1., 3.};
   double sigma_y = 0.5, R = plasticity_2d_vonMises_radius(sigma_y);
-  int status = plasticity_2d_vonMises_local_solve(I3, q1, sigma_y, sigma);
+  int status = plasticity_2d_vonMises_return_mapping(I3, q1, sigma_y, sigma);
   double expected[3] = {1., -R / sqrt(10.), -3. * R / sqrt(10.)};
   double err = fabs(sigma[0] - expected[0]) + fabs(sigma[1] - expected[1]) +
                fabs(sigma[2] - expected[2]);
@@ -152,7 +171,7 @@ static void test_local_solver(void) {
 
   /* M = I, elastic: sigma = -q */
   const double q2[3] = {2., 0.1, -0.2};
-  status = plasticity_2d_vonMises_local_solve(I3, q2, sigma_y, sigma);
+  status = plasticity_2d_vonMises_return_mapping(I3, q2, sigma_y, sigma);
   err = fabs(sigma[0] + q2[0]) + fabs(sigma[1] + q2[1]) + fabs(sigma[2] + q2[2]);
   check(status == 0 && err < 1e-15, "M = I, elastic: sigma = -q", err);
 
@@ -162,11 +181,11 @@ static void test_local_solver(void) {
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++) M[i + 3 * j] = M_rows[3 * i + j];
   const double q3[3] = {-1., 2., -1.5}; /* plastic */
-  status = plasticity_2d_vonMises_local_solve(M, q3, 1.0, sigma);
+  status = plasticity_2d_vonMises_return_mapping(M, q3, 1.0, sigma);
   check(status == 0 && check_local_solution(M, q3, 1.0, sigma, 1e-13, 1),
         "non-symmetric M, plastic: conditions", 0.);
   const double q4[3] = {-1., 0.05, -0.02}; /* elastic */
-  status = plasticity_2d_vonMises_local_solve(M, q4, 1.0, sigma);
+  status = plasticity_2d_vonMises_return_mapping(M, q4, 1.0, sigma);
   check(status == 0 && check_local_solution(M, q4, 1.0, sigma, 1e-13, 1),
         "non-symmetric M, elastic: conditions", 0.);
 
@@ -174,20 +193,9 @@ static void test_local_solver(void) {
   int nfail = 0, nplastic = 0;
   double worst = 0.;
   for (int k = 0; k < 1000; k++) {
-    double A[9], Mk[9], qk[3];
-    for (int i = 0; i < 9; i++) A[i] = sin(12.9898 * (k + 1) + 78.233 * i);
-    for (int i = 0; i < 3; i++)
-      for (int j = 0; j < 3; j++) {
-        double s = 0.;
-        for (int l = 0; l < 3; l++) s += A[i + 3 * l] * A[j + 3 * l];
-        double skew = 0.3 * sin(3.7 * (k + 1) + 1.3 * i - 2.1 * j) -
-                      0.3 * sin(3.7 * (k + 1) + 1.3 * j - 2.1 * i);
-        Mk[i + 3 * j] = s + (i == j ? 0.2 : 0.) + skew;
-      }
-    double amp = pow(10., (k % 7) - 3);
-    for (int i = 0; i < 3; i++) qk[i] = amp * sin(4.1 * (k + 1) + 2.7 * i);
-    double sy = 0.5 + 0.4 * sin(0.37 * k);
-    status = plasticity_2d_vonMises_local_solve(Mk, qk, sy, sigma);
+    double Mk[9], qk[3], sy;
+    random_local_problem(k, Mk, qk, &sy);
+    status = plasticity_2d_vonMises_return_mapping(Mk, qk, sy, sigma);
     if (hypot(sigma[1], sigma[2]) >= plasticity_2d_vonMises_radius(sy) * (1 - 1e-12))
       nplastic++;
     double res = vonmises_residual(1, Mk, qk, &sy, sigma) /
@@ -197,6 +205,78 @@ static void test_local_solver(void) {
   }
   printf("  (%d plastic cases out of 1000)\n", nplastic);
   check(nfail == 0, "1000 pseudo-random local problems: worst residual", worst);
+  printf("\n");
+}
+
+/* Iterative local solvers (fixed point, semi-smooth Newton) on the 1000 local problems,
+ * compared with the return mapping. */
+typedef int (*local_solver_t)(const double*, const double*, double, double*,
+                              Plasticity2DVonMisesLocalParameters*);
+
+static void test_iterative_local_solver(const char* name, local_solver_t solver,
+                                        Plasticity2DVonMisesLocalParameters p0,
+                                        int must_converge) {
+  int nconv = 0, iter_sum = 0, nwrong = 0;
+  double worst = 0.;
+  for (int k = 0; k < 1000; k++) {
+    double Mk[9], qk[3], sy, ref[3], sigma[3] = {0., 0., 0.};
+    random_local_problem(k, Mk, qk, &sy);
+    plasticity_2d_vonMises_return_mapping(Mk, qk, sy, ref);
+    Plasticity2DVonMisesLocalParameters p = p0;
+    if (solver(Mk, qk, sy, sigma, &p) == 0) {
+      nconv++;
+      double d = sqrt((sigma[0] - ref[0]) * (sigma[0] - ref[0]) +
+                      (sigma[1] - ref[1]) * (sigma[1] - ref[1]) +
+                      (sigma[2] - ref[2]) * (sigma[2] - ref[2])) /
+                 (1. + sqrt(ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2]));
+      worst = fmax(worst, d);
+      if (d > 1e-8) nwrong++;
+    }
+    iter_sum += p.iter_done;
+  }
+  printf("  %-44s converged %4d / 1000, mean iterations %7.1f\n", name, nconv,
+         iter_sum / 1000.);
+  if (must_converge) check(nconv == 1000, "  all converged", 1000 - nconv);
+  check(nwrong == 0, "  same solution as the return mapping (worst rel. diff.)", worst);
+}
+
+static void test_iterative_local_solvers(void) {
+  printf("=== iterative one-element solvers vs return mapping ===\n");
+  Plasticity2DVonMisesLocalParameters p = {.max_iter = 1000,
+                                           .tol = 1e-13,
+                                           .rho_strategy = 0,
+                                           .rho = 0.,
+                                           .linesearch = 0,
+                                           .linesearch_max_iter = 0,
+                                           .hybrid = 0};
+
+  p.rho_strategy = PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE;
+  test_iterative_local_solver("fixed point, adaptive rho", plasticity_2d_vonMises_fixed_point,
+                              p, 1);
+  p.rho_strategy = PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;
+  test_iterative_local_solver("fixed point, rho = 1/|M|", plasticity_2d_vonMises_fixed_point,
+                              p, 0);
+
+  p.max_iter = 50;
+  p.rho_strategy = PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;
+  p.linesearch = PLASTICITY_NSN_LINESEARCH_ARMIJO;
+  test_iterative_local_solver("semi-smooth Newton, Armijo",
+                              plasticity_2d_vonMises_semismooth_newton, p, 0);
+  p.linesearch = PLASTICITY_NSN_LINESEARCH_GOLDSTEINPRICE;
+  test_iterative_local_solver("semi-smooth Newton, Goldstein-Price",
+                              plasticity_2d_vonMises_semismooth_newton, p, 0);
+  p.linesearch = PLASTICITY_NSN_LINESEARCH_NO;
+  test_iterative_local_solver("semi-smooth Newton, no line search",
+                              plasticity_2d_vonMises_semismooth_newton, p, 0);
+  p.linesearch = PLASTICITY_NSN_LINESEARCH_ARMIJO;
+  p.rho_strategy = PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_CONSTANT;
+  p.rho = 1.0;
+  test_iterative_local_solver("semi-smooth Newton, Armijo, rho = 1",
+                              plasticity_2d_vonMises_semismooth_newton, p, 0);
+  p.rho_strategy = PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;
+  p.hybrid = 1;
+  test_iterative_local_solver("semi-smooth Newton, Armijo, hybrid",
+                              plasticity_2d_vonMises_semismooth_newton, p, 1);
   printf("\n");
 }
 
@@ -245,10 +325,15 @@ static void test_nsgs(void) {
   double R = plasticity_2d_vonMises_radius(0.5);
   double expected[3] = {1., -R / sqrt(10.), -3. * R / sqrt(10.)};
 
-  int ids[][2] = {{PLASTICITY_2D_NSGS, 0},
-                  {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES},
-                  {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_ProjectionOnCone},
-                  {PLASTICITY_2D_NSGS_GENERIC, 0}};
+  int ids[][2] = {
+      {PLASTICITY_2D_NSGS, 0},
+      {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING},
+      {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES_FP},
+      {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES_NSN},
+      {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_ProjectionOnCone},
+      {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration},
+      {PLASTICITY_2D_NSGS_GENERIC, 0},
+      {PLASTICITY_2D_NSGS_GENERIC, PLASTICITY_2D_ONECONE_VONMISES_FP}};
   for (size_t k = 0; k < sizeof ids / sizeof ids[0]; k++) {
     solve_file(ex1, ids[k][0], ids[k][1], 1e-14, 1000, sigma, 1e-14);
     double err = 0.;
@@ -261,15 +346,22 @@ static void test_nsgs(void) {
   const char* footing = "./data/plasticity_2d_vonmises_footing_100.dat";
   double* s1 = (double*)calloc(300, sizeof(double));
   double* s2 = (double*)calloc(300, sizeof(double));
-  solve_file(footing, PLASTICITY_2D_NSGS, 0, 1e-12, 100000, s1, 1e-10);
-  solve_file(footing, PLASTICITY_2D_NSGS_GENERIC, 0, 1e-12, 100000, s2, 1e-10);
-  double d = 0., nrm = 0.;
-  for (int i = 0; i < 300; i++) {
-    d += (s1[i] - s2[i]) * (s1[i] - s2[i]);
-    nrm += s1[i] * s1[i];
+  solve_file(footing, PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING, 1e-12,
+             100000, s1, 1e-10);
+  int footing_ids[][2] = {{PLASTICITY_2D_NSGS, 0},
+                          {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES_FP},
+                          {PLASTICITY_2D_NSGS, PLASTICITY_2D_ONECONE_VONMISES_NSN},
+                          {PLASTICITY_2D_NSGS_GENERIC, 0}};
+  for (size_t k = 0; k < sizeof footing_ids / sizeof footing_ids[0]; k++) {
+    solve_file(footing, footing_ids[k][0], footing_ids[k][1], 1e-12, 100000, s2, 1e-10);
+    double d = 0., nrm = 0.;
+    for (int i = 0; i < 300; i++) {
+      d += (s1[i] - s2[i]) * (s1[i] - s2[i]);
+      nrm += s1[i] * s1[i];
+    }
+    check(sqrt(d) / (1. + sqrt(nrm)) < 1e-8, "same stress as with the return mapping",
+          sqrt(d) / (1. + sqrt(nrm)));
   }
-  check(sqrt(d) / (1. + sqrt(nrm)) < 1e-8, "NSGS and NSGS_GENERIC give the same stress",
-        sqrt(d) / (1. + sqrt(nrm)));
   free(s1);
   free(s2);
   printf("\n");
@@ -278,6 +370,7 @@ static void test_nsgs(void) {
 int main(void) {
   test_projection();
   test_local_solver();
+  test_iterative_local_solvers();
   test_nsgs();
   printf("%d check(s) failed\n", failures);
   return failures ? 1 : 0;

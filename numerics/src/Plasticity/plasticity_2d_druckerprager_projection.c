@@ -5,7 +5,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 
-#include "plasticity_2d_projection.h"  // for plasticity_2d_projectionOnConeWithDiago...
+#include "plasticity_2d_druckerprager_projection.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
@@ -23,8 +23,7 @@
 #include "plasticity_2d_compute_error.h"  // for plasticity_2d_Tresca_unitary_compute_an...
 #include "plasticity_2d_local_problem_tools.h"  // for plasticity_2d_local_problem_compute_q
 #include "plasticity_2d_solvers.h"
-#include "plasticity_2d_vonmises_projection.h"  // for Von Mises projection
-#include "projectionOnCone.h"                   // for projectionOnCone
+#include "projectionOnCone.h"  // for projectionOnCone
 #include "solver_registry.h"
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -388,60 +387,3 @@ REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
                 100,   /* default_max_iter */
                 1e-14, /* default_tol */
                 1);    /* is_local */
-
-/* ===========================================================================
- * Von Mises (J2) local solvers, cone coordinates (see plasticity_2d_vonmises_projection.h)
- * =========================================================================== */
-
-int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
-                                             double* stress_local, SolverOptions* options) {
-  (void)options;
-  /* one projection step: sigma <- P_C(sigma - rho (M sigma + q)), rho = 1 / M_NN */
-  double* MLocal = localproblem->M->dense;
-  double* qLocal = localproblem->q;
-  double sigma_y = localproblem->model.von_mises->sigma_y[0];
-  double rho = 1.0 / MLocal[0];
-  double w[3];
-  for (int i = 0; i < 3; i++)
-    w[i] = qLocal[i] + MLocal[i] * stress_local[0] + MLocal[i + 3] * stress_local[1] +
-           MLocal[i + 6] * stress_local[2];
-  for (int i = 0; i < 3; i++) stress_local[i] -= rho * w[i];
-  plasticity_2d_projectionOnVonMises(stress_local, sigma_y);
-  return 0;
-}
-
-int plasticity_2d_vonMises_exact_solve(PlasticityProblem* localproblem, double* stress_local,
-                                       SolverOptions* options) {
-  (void)options;
-  int status = plasticity_2d_vonMises_local_solve(localproblem->M->dense, localproblem->q,
-                                                  localproblem->model.von_mises->sigma_y[0],
-                                                  stress_local);
-  /* status 2: scalar equation solved to ~1e3 eps only, the solution is still usable */
-  return (status == 1) ? 1 : 0;
-}
-
-void plasticity_2d_vonmises_set_default(SolverOptions* options) { (void)options; }
-
-/* Wrapper for Von Mises projection (local solver) */
-static int plasticity_2d_projection_on_von_mises_init_wrap(void* problem,
-                                                           SolverOptions* options) {
-  (void)problem;
-  (void)options;
-  return NUMERICS_OK;
-}
-
-static int plasticity_2d_projection_on_von_mises_solve_wrap(void* localproblem,
-                                                            double* reaction, double* velocity,
-                                                            SolverOptions* options) {
-  (void)velocity; /* Local solvers don't use velocity parameter */
-  return plasticity_2d_vonMises_exact_solve((PlasticityProblem*)localproblem, reaction,
-                                            options);
-}
-
-REGISTER_SOLVER(PLASTICITY_2D_ONECONE_VONMISES, "PLASTICITY_2D_ONECONE_VONMISES",
-                "Exact solution of the one-element Von Mises (J2) problem",
-                plasticity_2d_projection_on_von_mises_init_wrap,
-                plasticity_2d_projection_on_von_mises_solve_wrap, NULL, NULL,
-                plasticity_2d_vonmises_set_default, 100, /* default_max_iter */
-                1e-14,                                   /* default_tol */
-                1);                                      /* is_local */

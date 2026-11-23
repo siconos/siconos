@@ -73,10 +73,34 @@ const char* plasticity_model_type_to_string(PlasticityModelType model_type) {
 Plasticity_DruckerPrager_model* plasticity_DruckerPrager_model_new(double* eta,
                                                                    double* theta) {
   Plasticity_DruckerPrager_model* model =
-      (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+      (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
   model->eta = eta;
   model->theta = theta;
   return model;
+}
+
+int plasticity_DruckerPrager_cohesion_shift(const PlasticityProblem* problem, double** shift) {
+  *shift = NULL;
+  if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER || !problem->model.drucker_prager)
+    return 0;
+  const Plasticity_DruckerPrager_model* model = problem->model.drucker_prager;
+  if (!model->cohesion) return 0;
+  int nc = problem->numberOfCones;
+  int has_cohesion = 0;
+  for (int c = 0; c < nc; c++) {
+    if (model->cohesion[c] != 0.0) {
+      has_cohesion = 1;
+      if (!(model->eta[c] > 0.0))
+        return numerics_error("plasticity_DruckerPrager_cohesion_shift",
+                              "cone %d: cohesion %g with eta = %g <= 0 (not a cone)", c,
+                              model->cohesion[c], model->eta[c]);
+    }
+  }
+  if (!has_cohesion) return 0;
+  *shift = (double*)calloc(3 * (size_t)nc, sizeof(double));
+  for (int c = 0; c < nc; c++)
+    if (model->cohesion[c] != 0.0) (*shift)[3 * c] = model->cohesion[c] / model->eta[c];
+  return 0;
 }
 
 void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model* model) {
@@ -142,6 +166,10 @@ void plasticity_display(PlasticityProblem* problem) {
         NM_vector_display(theta, problem->numberOfCones);
       } else
         printf("No theta vector\n");
+      if (problem->model.drucker_prager->cohesion) {
+        printf("cohesion vector (Drucker-Prager):\n");
+        NM_vector_display(problem->model.drucker_prager->cohesion, problem->numberOfCones);
+      }
       break;
     }
     case PLASTICITY_MODEL_VON_MISES: {
@@ -268,7 +296,7 @@ PlasticityProblem* plasticity_newFromFile(FILE* file) {
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
       Plasticity_DruckerPrager_model* model =
-          (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+          (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
       model->eta = (double*)malloc(nc * sizeof(double));
       for (size_t i = 0; i < nc; i++) {
         check_io(fscanf(file, "%lf ", &(model->eta[i])));
@@ -344,6 +372,8 @@ void plasticityProblem_free(PlasticityProblem* problem) {
           free(model->eta);
         }
         model->eta = NULL;
+        if (model->cohesion) free(model->cohesion);
+        model->cohesion = NULL;
         free(model);
         problem->model.drucker_prager = NULL;
       }
@@ -428,11 +458,16 @@ PlasticityProblem* plasticity_copy(PlasticityProblem* problem) {
       Plasticity_DruckerPrager_model* model = GET_DRUCKER_PRAGER(problem);
       if (model) {
         new_problem->model.drucker_prager =
-            (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+            (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
         new_problem->model.drucker_prager->eta = (double*)malloc(nc * sizeof(double));
         memcpy(new_problem->model.drucker_prager->eta, model->eta, nc * sizeof(double));
         new_problem->model.drucker_prager->theta = (double*)malloc(nc * sizeof(double));
         memcpy(new_problem->model.drucker_prager->theta, model->theta, nc * sizeof(double));
+        if (model->cohesion) {
+          new_problem->model.drucker_prager->cohesion = (double*)malloc(nc * sizeof(double));
+          memcpy(new_problem->model.drucker_prager->cohesion, model->cohesion,
+                 nc * sizeof(double));
+        }
       } else {
         new_problem->model.drucker_prager = NULL;
       }

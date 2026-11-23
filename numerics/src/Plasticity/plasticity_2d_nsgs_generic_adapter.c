@@ -20,10 +20,11 @@
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "plasticity_2d_compute_error.h"
+#include "plasticity_2d_druckerprager_projection.h"
 #include "plasticity_2d_local_problem_tools.h"
 #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"
-#include "plasticity_2d_projection.h"
 #include "plasticity_2d_solvers.h"
+#include "plasticity_2d_vonmises.h"
 #include "safe_casts.h"
 
 /* Profiling support - define NSGS_PROFILE to enable */
@@ -164,17 +165,23 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
     }
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     switch (localsolver_options->solverId) {
-      /* Von Mises (J2): exact solution of the one-element problem, except for the single
-       * projection step (see plasticity_2d_vonmises_projection.h) */
+      /* Von Mises (J2) local solvers (see plasticity_2d_vonmises.h). The Drucker-Prager
+       * ids select the Von Mises solver of the same family. */
       case PLASTICITY_2D_ONECONE_ProjectionOnCone:
         solver = &plasticity_2d_projectionOnVonMises_solve;
         break;
-      case PLASTICITY_2D_ONECONE_VONMISES:
+      case PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING:
+        solver = &plasticity_2d_vonMises_return_mapping_solve;
+        break;
+      case PLASTICITY_2D_ONECONE_VONMISES_FP:
       case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration:
+        solver = &plasticity_2d_vonMises_fixed_point_solve;
+        break;
+      case PLASTICITY_2D_ONECONE_VONMISES_NSN:
       case PLASTICITY_2D_ONECONE_NSN:
       case PLASTICITY_2D_ONECONE_NSN_GP:
       case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID:
-        solver = &plasticity_2d_vonMises_exact_solve;
+        solver = &plasticity_2d_vonMises_nsn_solve;
         break;
       default:
         plasticity_2d_local_problem_free(localproblem, problem);

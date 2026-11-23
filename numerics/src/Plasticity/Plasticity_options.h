@@ -31,8 +31,17 @@ enum PLASTICITY_SOLVER {
    */
   PLASTICITY_2D_ONECONE_NSN_GP_HYBRID = 20065,
 
-  /** Von Mises radial return projection, one cone solver */
-  PLASTICITY_2D_ONECONE_VONMISES = 20070
+  /** Von Mises (J2), one element: return mapping (exact solution, closest-point projection
+      of the trial stress -M^{-1} q on the yield set in the M-norm) */
+  PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING = 20070,
+  /** Von Mises (J2), one element: fixed point on the natural map
+      sigma <- P_C(sigma - rho (M sigma + q)) (rho strategy: PLASTICITY_NSN_RHO_STRATEGY) */
+  PLASTICITY_2D_ONECONE_VONMISES_FP = 20071,
+  /** Von Mises (J2), one element: semi-smooth Newton on the natural map
+      sigma - P_C(sigma - rho (M sigma + q)) = 0, with line search */
+  PLASTICITY_2D_ONECONE_VONMISES_NSN = 20072,
+  /** deprecated name of PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING */
+  PLASTICITY_2D_ONECONE_VONMISES = PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING
 };
 
 enum PLASTICITY_IPARAM {

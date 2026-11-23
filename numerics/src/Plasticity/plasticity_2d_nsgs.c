@@ -26,10 +26,11 @@
 #include "numerics_verbose.h"
 #include "op3x3.h"
 #include "plasticity_2d_compute_error.h"                     // for fc3d_compute_e..
+#include "plasticity_2d_druckerprager_projection.h"          // for fc3d_projectio...
 #include "plasticity_2d_local_problem_tools.h"               // for fc3d_local_pro..
 #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  //
-#include "plasticity_2d_projection.h"                        // for fc3d_projectio...
 #include "plasticity_2d_solvers.h"
+#include "plasticity_2d_vonmises.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_STDOUT */
@@ -193,20 +194,26 @@ static int plasticity_2d_nsgs_initialize_local_solver(
       }
     }
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
-    /* Von Mises (J2): the one-element problem has an exact solution, used for all the local
-     * solvers except the single projection step (see plasticity_2d_vonmises_projection.h) */
+    /* Von Mises (J2) local solvers (see plasticity_2d_vonmises.h). The Drucker-Prager ids
+     * select the Von Mises solver of the same family. */
     local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
     local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
     switch (localsolver_options->solverId) {
       case PLASTICITY_2D_ONECONE_ProjectionOnCone:
         local_function_toolkit->local_solver = &plasticity_2d_projectionOnVonMises_solve;
         break;
-      case PLASTICITY_2D_ONECONE_VONMISES:
+      case PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING:
+        local_function_toolkit->local_solver = &plasticity_2d_vonMises_return_mapping_solve;
+        break;
+      case PLASTICITY_2D_ONECONE_VONMISES_FP:
       case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration:
+        local_function_toolkit->local_solver = &plasticity_2d_vonMises_fixed_point_solve;
+        break;
+      case PLASTICITY_2D_ONECONE_VONMISES_NSN:
       case PLASTICITY_2D_ONECONE_NSN:
       case PLASTICITY_2D_ONECONE_NSN_GP:
       case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID:
-        local_function_toolkit->local_solver = &plasticity_2d_vonMises_exact_solve;
+        local_function_toolkit->local_solver = &plasticity_2d_vonMises_nsn_solve;
         break;
       default: {
         return numerics_error("plasticity_2d_nsgs_initialize_local_solver",

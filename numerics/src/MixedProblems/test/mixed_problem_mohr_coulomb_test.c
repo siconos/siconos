@@ -47,7 +47,8 @@
 
 /* Reference solution with the Plasticity NSGS solver (all cones Mohr-Coulomb). */
 static int solve_plasticity_reference(int nc, const double* M, const double* q,
-                                      const double* eta, const double* theta, double* z) {
+                                      const double* eta, const double* theta,
+                                      const double* cohesion, double* z) {
   int n = 3 * nc;
   double* Mc = (double*)malloc((size_t)n * n * sizeof(double));
   double* qc = (double*)malloc(n * sizeof(double));
@@ -57,9 +58,13 @@ static int solve_plasticity_reference(int nc, const double* M, const double* q,
   memcpy(qc, q, n * sizeof(double));
   memcpy(etac, eta, nc * sizeof(double));
   memcpy(thetac, theta, nc * sizeof(double));
-  PlasticityProblem* P =
-      plasticityProblem_new_with_data(3, nc, NM_create_with_data(NM_DENSE, n, n, Mc), qc,
-                                      plasticity_DruckerPrager_model_new(etac, thetac));
+  Plasticity_DruckerPrager_model* model = plasticity_DruckerPrager_model_new(etac, thetac);
+  if (cohesion) {
+    model->cohesion = (double*)malloc(nc * sizeof(double));
+    memcpy(model->cohesion, cohesion, nc * sizeof(double));
+  }
+  PlasticityProblem* P = plasticityProblem_new_with_data(
+      3, nc, NM_create_with_data(NM_DENSE, n, n, Mc), qc, model);
   double* w = (double*)calloc(n, sizeof(double));
   SolverOptions* options = solver_options_create(PLASTICITY_2D_NSGS);
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
@@ -119,8 +124,8 @@ static int test_identity_dilatancy(void) {
                         z_expected, 1e-8);
 }
 
-/* Two coupled cones, non-symmetric M (diagonally dominant). Reference: Plasticity NSGS,
-   which stops early (scaled residual ~1e-7, hence the 1e-6 tolerance on z). */
+/* Two coupled cones, non-symmetric M (diagonally dominant), with or without cohesion.
+   Reference: Plasticity NSGS (plasticity_2d_driver, which translates the cohesion). */
 static const double M2_rows[36] = {2.0, 0.3, 0.1, 0.2, 0.1, 0.0,  /* */
                                    0.1, 1.5, 0.2, 0.0, 0.2, 0.1,  /* */
                                    0.0, 0.1, 1.8, 0.1, 0.0, 0.2,  /* */
@@ -128,42 +133,46 @@ static const double M2_rows[36] = {2.0, 0.3, 0.1, 0.2, 0.1, 0.0,  /* */
                                    0.1, 0.2, 0.0, 0.0, 1.6, 0.3,  /* */
                                    0.0, 0.1, 0.2, 0.1, 0.1, 1.7}; /* */
 
-static int test_coupled_nonsymmetric(int cones_per_block) {
-  printf("=== Mohr-Coulomb, 2 coupled cones, non-symmetric M, %s ===\n",
-         cones_per_block == 1 ? "one block per cone" : "one block with 2 cones");
+static int test_coupled_nonsymmetric(int cones_per_block, int with_cohesion) {
+  printf("=== Mohr-Coulomb, 2 coupled cones, non-symmetric M, %s%s ===\n",
+         cones_per_block == 1 ? "one block per cone" : "one block with 2 cones",
+         with_cohesion ? ", cohesion" : "");
   int n = 6, nc = 2;
   double* M = colmajor_from_rowmajor(n, M2_rows);
   double q[6] = {-1., 0.8, -0.3, -0.5, -0.6, 0.4};
   double eta[2] = {0.5, 0.4}, theta[2] = {0.3, 0.};
+  double cohesion_values[2] = {0.2, 0.3};
+  double* cohesion = with_cohesion ? cohesion_values : NULL;
 
   double z_ref[6] = {0.};
-  int info = solve_plasticity_reference(nc, M, q, eta, theta, z_ref);
-  BlockSpec ref_block[1] = {{MIXED_MODEL_DRUCKER_PRAGER, 0, 3, nc, eta, theta}};
+  int info = solve_plasticity_reference(nc, M, q, eta, theta, cohesion, z_ref);
+  BlockSpec ref_block[1] = {{MIXED_MODEL_DRUCKER_PRAGER, 0, 3, nc, eta, theta, cohesion}};
   printf("  reference scaled residual = %.3e\n", mixed_residual(n, M, q, 1, ref_block, z_ref));
 
   BlockSpec blocks[2];
   int nb;
   if (cones_per_block == 1) {
     nb = 2;
-    blocks[0] = (BlockSpec){MIXED_MODEL_DRUCKER_PRAGER, 0, 3, 1, &eta[0], &theta[0]};
-    blocks[1] = (BlockSpec){MIXED_MODEL_DRUCKER_PRAGER, 3, 3, 1, &eta[1], &theta[1]};
+    blocks[0] = (BlockSpec){MIXED_MODEL_DRUCKER_PRAGER,    0, 3, 1, &eta[0], &theta[0],
+                            cohesion ? &cohesion[0] : NULL};
+    blocks[1] = (BlockSpec){MIXED_MODEL_DRUCKER_PRAGER,    3, 3, 1, &eta[1], &theta[1],
+                            cohesion ? &cohesion[1] : NULL};
   } else {
     nb = 1;
-    blocks[0] = (BlockSpec){MIXED_MODEL_DRUCKER_PRAGER, 0, 3, 2, eta, theta};
+    blocks[0] = (BlockSpec){MIXED_MODEL_DRUCKER_PRAGER, 0, 3, 2, eta, theta, cohesion};
   }
   double z[6] = {0.}, w[6] = {0.};
   int solver_info = solve_mixed(n, M, q, nb, blocks, z, w, NM_DENSE);
   info += check_solution(cones_per_block == 1 ? "coupled_nonsymmetric_1cone_per_block"
                                               : "coupled_nonsymmetric_2cones_1block",
-                         solver_info, n, M, q, nb, blocks, z, w, z_ref, 1e-6);
+                         solver_info, n, M, q, nb, blocks, z, w, z_ref, 1e-8);
   free(M);
   return info;
 }
 
 /* Footing problem of the Plasticity tests (100 cones, dense SPD M ~ 1e-7, eta = theta = 0.1).
  * Solved with one block per cone, then with one block holding all the cones: both must have a
- * small (scaled) residual and agree. The Plasticity NSGS solution is only printed: it stops
- * early (scaled residual ~0.5 for |z| ~ 2.5e4) and cannot be used as a reference. */
+ * small (scaled) residual, agree, and agree with the Plasticity NSGS solution. */
 static int test_footing(void) {
   printf("=== Mohr-Coulomb, footing problem (100 cones) ===\n");
   const char* filename = PLASTICITY_DATA_DIR "/plasticity_2d_footing_100.dat";
@@ -198,12 +207,19 @@ static int test_footing(void) {
   info += check_solution("footing_one_block", solver_info, n, Mdata, P->q, 1, one_block, z2, w,
                          z1, 1e-8);
 
-  printf("-- Plasticity NSGS solution (information only)\n");
+  printf("-- Plasticity NSGS solution\n");
   double* z_ref = (double*)calloc(n, sizeof(double));
-  solve_plasticity_reference(nc, Mdata, P->q, eta, theta, z_ref);
-  printf("  scaled residual = %.3e, |z_ref - z| / (1+|z|) = %.3e\n\n",
-         mixed_residual(n, Mdata, P->q, 1, one_block, z_ref),
-         dist2(n, z_ref, z1) / (1. + norm2(n, z1)));
+  solve_plasticity_reference(nc, Mdata, P->q, eta, theta, NULL, z_ref);
+  double d_ref = dist2(n, z_ref, z1) / (1. + norm2(n, z1));
+  printf("  scaled residual = %.3e, |z_ref - z| / (1+|z|) = %.3e\n",
+         mixed_residual(n, Mdata, P->q, 1, one_block, z_ref), d_ref);
+  if (!(d_ref <= 1e-7)) { /* the mixed solve stops at 1e-10 (relative to |q|) */
+    printf(
+        "  FAILURE: mixed and Plasticity NSGS solutions differ\nTest footing_reference: "
+        "FAILED\n\n");
+    info++;
+  } else
+    printf("Test footing_reference: PASSED\n\n");
 
   free(z1);
   free(z2);
@@ -241,8 +257,10 @@ int main(void) {
   int failures = 0;
   failures += test_identity_theta0();
   failures += test_identity_dilatancy();
-  failures += test_coupled_nonsymmetric(1);
-  failures += test_coupled_nonsymmetric(2);
+  failures += test_coupled_nonsymmetric(1, 0);
+  failures += test_coupled_nonsymmetric(2, 0);
+  failures += test_coupled_nonsymmetric(1, 1);
+  failures += test_coupled_nonsymmetric(2, 1);
   failures += test_footing();
   failures += test_friction2d_and_mohr_coulomb();
   printf("%d test(s) FAILED\n", failures);

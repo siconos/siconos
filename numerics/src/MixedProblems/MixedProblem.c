@@ -439,8 +439,32 @@ int mixedProblem_set_druckerprager_params(MixedProblem* problem, int block_index
 
   model->eta = eta;
   model->theta = theta;
+  model->cohesion = NULL;
   block->model.drucker_prager = model;
 
+  return 0;
+}
+
+int mixedProblem_set_druckerprager_cohesion(MixedProblem* problem, int block_index,
+                                            double* cohesion) {
+  if (problem == NULL) {
+    return numerics_error("mixedProblem_set_druckerprager_cohesion", "NULL problem pointer");
+  }
+  if (block_index < 0 || block_index >= problem->num_blocks) {
+    return numerics_error("mixedProblem_set_druckerprager_cohesion", "Invalid block index");
+  }
+  MixedProblemBlock* block = &problem->blocks[block_index];
+  if (block->model_type != MIXED_MODEL_DRUCKER_PRAGER || !block->model.drucker_prager) {
+    return numerics_error("mixedProblem_set_druckerprager_cohesion",
+                          "Block is not a Drucker-Prager model with parameters set");
+  }
+  if (cohesion) {
+    for (int e = 0; e < block->num_elements; e++)
+      if (cohesion[e] != 0.0 && !(block->model.drucker_prager->eta[e] > 0.0))
+        return numerics_error("mixedProblem_set_druckerprager_cohesion",
+                              "element %d: cohesion with eta <= 0", e);
+  }
+  block->model.drucker_prager->cohesion = cohesion;
   return 0;
 }
 

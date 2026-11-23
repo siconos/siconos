@@ -74,7 +74,7 @@ PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* probl
   switch (problem->model_type) {
     case PLASTICITY_MODEL_DRUCKER_PRAGER: {
       localproblem->model.drucker_prager =
-          (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+          (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
       localproblem->model.drucker_prager->theta = (double*)malloc(sizeof(double));
       localproblem->model.drucker_prager->eta = (double*)malloc(sizeof(double));
       break;

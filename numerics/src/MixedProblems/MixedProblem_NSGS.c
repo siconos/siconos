@@ -54,9 +54,9 @@
 #include "PlasticityProblem.h"
 #include "Plasticity_options.h"
 #include "plasticity_2d_compute_error.h"
-#include "plasticity_2d_projection.h"
+#include "plasticity_2d_druckerprager_projection.h"
 #include "plasticity_2d_solvers.h"
-#include "plasticity_2d_vonmises_projection.h"
+#include "plasticity_2d_vonmises.h"
 #include "rolling_friction_2d_compute_error.h"
 #include "rolling_friction_3d_compute_error.h"
 
@@ -310,20 +310,28 @@ static int mixedProblem_solve_element(MixedProblemBlock* block, int e, double* M
     }
     case MIXED_MODEL_DRUCKER_PRAGER: {
       Plasticity_DruckerPrager_model dp = {&block->model.drucker_prager->eta[e],
-                                           &block->model.drucker_prager->theta[e]};
+                                           &block->model.drucker_prager->theta[e], NULL};
+      /* cohesion c: the element problem is solved for sigma~ = sigma + a e_N, a = c / eta,
+       * with q~ = qe - M_ee a e_N (cone without cohesion) */
+      const double* c = block->model.drucker_prager->cohesion;
+      double a = (c && c[e] != 0.0) ? c[e] / block->model.drucker_prager->eta[e] : 0.0;
+      double qt[3] = {qe[0] - Me[0] * a, qe[1] - Me[1] * a, qe[2] - Me[2] * a};
       PlasticityProblem cone;
       cone.dimension = 3;
       cone.numberOfCones = 1;
       cone.M = &Me_nm;
-      cone.q = qe;
+      cone.q = qt;
       cone.model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
       cone.model.drucker_prager = &dp;
-      return plasticity_2d_projectionOnCone_solve(&cone, ze, options);
+      ze[0] += a;
+      int info = plasticity_2d_projectionOnCone_solve(&cone, ze, options);
+      ze[0] -= a;
+      return info;
     }
     case MIXED_MODEL_VON_MISES:
       /* exact solution of the one-element Von Mises (J2) problem */
-      return (plasticity_2d_vonMises_local_solve(Me, qe, block->model.von_mises->sigma_y[e],
-                                                 ze) == 1);
+      return (plasticity_2d_vonMises_return_mapping(Me, qe, block->model.von_mises->sigma_y[e],
+                                                    ze) == 1);
     default:
       return NUMERICS_ERR_INVALID_ARGUMENT;
   }
@@ -380,7 +388,7 @@ static void mixedProblem_element_q(MixedProblem* problem, int elem, size_t row, 
  *  - Friction 3D: fc3d_projectionOnCone_solve (one projection step);
  *  - Drucker-Prager (Mohr-Coulomb): plasticity_2d_projectionOnCone_solve (one projection step
  *    on K_eta with the dilatancy term theta);
- *  - Von Mises: plasticity_2d_vonMises_local_solve (exact).
+ *  - Von Mises: plasticity_2d_vonMises_return_mapping (exact).
  * first_elem is the global number of the first element of the block (block row number of a
  * sparse-block M, which must have one diagonal block per element).
  */
@@ -739,11 +747,16 @@ int mixedProblem_compute_error(MixedProblem* problem, double* z, double* w, doub
           plasticity_2d_vonmises_unitary_compute_and_add_error(
               ze, we, block->model.von_mises->sigma_y[e], &err, worktmp);
           break;
-        case MIXED_MODEL_DRUCKER_PRAGER:
+        case MIXED_MODEL_DRUCKER_PRAGER: {
+          /* cohesion c: error for sigma + c/eta e_N (cone without cohesion) */
+          const double* c = block->model.drucker_prager->cohesion;
+          double eta = block->model.drucker_prager->eta[e];
+          double r[3] = {ze[0], ze[1], ze[2]};
+          if (c && c[e] != 0.0) r[0] += c[e] / eta;
           plasticity_2d_unitary_compute_and_add_error(
-              ze, we, block->model.drucker_prager->eta[e],
-              block->model.drucker_prager->theta[e], &err, worktmp);
+              r, we, eta, block->model.drucker_prager->theta[e], &err, worktmp);
           break;
+        }
         default:
           return numerics_error("mixedProblem_compute_error", "unknown model type %d",
                                 block->model_type);

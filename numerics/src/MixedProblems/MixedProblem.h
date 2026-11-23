@@ -88,11 +88,14 @@ struct Mixed_VonMises_model {
 typedef struct Mixed_VonMises_model Mixed_VonMises_model;
 
 /**
- * Structure for Drucker-Prager plasticity model parameters.
+ * Structure for Drucker-Prager plasticity model parameters (see
+ * Plasticity_DruckerPrager_model): K = { ||sigma_T|| <= eta sigma_N + c } for each cone, theta
+ * the dilatancy coefficient. The arrays are not owned by the MixedProblem.
  */
 struct Mixed_DruckerPrager_model {
   double* eta;
   double* theta;
+  double* cohesion; /**< cohesion c per cone, NULL: no cohesion */
 };
 typedef struct Mixed_DruckerPrager_model Mixed_DruckerPrager_model;
 
@@ -275,6 +278,19 @@ int mixedProblem_set_vonmises_params(MixedProblem* problem, int block_index, dou
  */
 int mixedProblem_set_druckerprager_params(MixedProblem* problem, int block_index, double* eta,
                                           double* theta);
+
+/**
+ * Set the cohesion of a Drucker-Prager block (after mixedProblem_set_druckerprager_params).
+ * The cone of element e is then { ||sigma_T|| <= eta_e sigma_N + c_e } (eta_e > 0 if
+ * c_e != 0).
+ *
+ * \param[in,out] problem the mixed problem
+ * \param[in] block_index index of the block
+ * \param[in] cohesion array of cohesions (size: num_elements, not owned), NULL: no cohesion
+ * \return 0 if successful
+ */
+int mixedProblem_set_druckerprager_cohesion(MixedProblem* problem, int block_index,
+                                            double* cohesion);
 
 /**
  * Get the string representation of a model type.

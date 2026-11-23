@@ -13,7 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "NumericsMatrix.h"
 #include "PlasticityProblem.h"
+#include "SiconosBlas.h"
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -47,8 +49,8 @@ int plasticity_2d_checkTrivialCase(PlasticityProblem* problem, double* strainrat
  * Registration-Based Driver
  * =========================================================================== */
 
-int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double* strainrate,
-                         SolverOptions* options) {
+static int plasticity_2d_driver_without_cohesion(PlasticityProblem* problem, double* stress,
+                                                 double* strainrate, SolverOptions* options) {
   /* Input validation */
   if (!problem || !stress || !strainrate || !options) {
     numerics_error_log("plasticity_2d_driver", "null input argument");
@@ -116,4 +118,41 @@ int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double* str
   }
 
   return solve_status;
+}
+
+/* Drucker-Prager with cohesion c: with a = c/eta e_N for each cone, sigma~ = sigma + a is
+ * solution of the problem without cohesion with q~ = q - M a (w = M sigma + q is unchanged).
+ * The problem is translated, solved without cohesion, and translated back. */
+int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double* strainrate,
+                         SolverOptions* options) {
+  if (!problem || !stress || !strainrate || !options) {
+    numerics_error_log("plasticity_2d_driver", "null input argument");
+    return NUMERICS_ERR_NULL_POINTER;
+  }
+  double* shift = NULL;
+  int err = plasticity_DruckerPrager_cohesion_shift(problem, &shift);
+  if (err) return err;
+  if (!shift)
+    return plasticity_2d_driver_without_cohesion(problem, stress, strainrate, options);
+
+  int n = 3 * problem->numberOfCones;
+  double* q = problem->q;
+  double* cohesion = problem->model.drucker_prager->cohesion;
+  double* q_shifted = (double*)malloc((size_t)n * sizeof(double));
+  /* q~ = q - M a, sigma~ = sigma + a */
+  cblas_dcopy(n, q, 1, q_shifted, 1);
+  NM_gemv(-1.0, problem->M, shift, 1.0, q_shifted);
+  cblas_daxpy(n, 1.0, shift, 1, stress, 1);
+  problem->q = q_shifted;
+  problem->model.drucker_prager->cohesion = NULL; /* the solvers see the problem without
+                                                     cohesion (error computation included) */
+
+  int info = plasticity_2d_driver_without_cohesion(problem, stress, strainrate, options);
+
+  problem->q = q;
+  problem->model.drucker_prager->cohesion = cohesion;
+  cblas_daxpy(n, -1.0, shift, 1, stress, 1);
+  free(q_shifted);
+  free(shift);
+  return info;
 }

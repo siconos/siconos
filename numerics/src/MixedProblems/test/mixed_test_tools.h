@@ -39,7 +39,7 @@
 #include "fc2d_compute_error.h"
 #include "fc3d_compute_error.h"
 #include "plasticity_2d_compute_error.h"
-#include "plasticity_2d_vonmises_projection.h"
+#include "plasticity_2d_vonmises.h"
 #include "rolling_friction_2d_compute_error.h"
 #include "rolling_friction_3d_compute_error.h"
 
@@ -81,7 +81,8 @@ static inline double dist2(int n, const double* x, const double* y) {
 /* Description of a block: model, first row, dimension, number of elements and the
    per-element parameters:
      friction 2D/3D: p1 = mu;  rolling friction: p1 = mu, p2 = mu_r;
-     Mohr-Coulomb (Drucker-Prager): p1 = eta, p2 = theta;  Von Mises: p1 = sigma_y. */
+     Mohr-Coulomb (Drucker-Prager): p1 = eta, p2 = theta, p3 = cohesion (may be NULL);
+     Von Mises: p1 = sigma_y. */
 typedef struct {
   MixedModelType model;
   int start;
@@ -89,6 +90,7 @@ typedef struct {
   int ne;
   double* p1;
   double* p2;
+  double* p3;
 } BlockSpec;
 
 /* Natural-map residual |z - P_K(z - rho (w + De Saxce/dilatancy term))| of the whole
@@ -124,10 +126,13 @@ static inline double mixed_residual(int n, const double* M, const double* q, int
           rolling_friction_3d_unitary_compute_and_add_error(ze, we, B->p1[e], B->p2[e], &err,
                                                             worktmp);
           break;
-        case MIXED_MODEL_DRUCKER_PRAGER:
-          plasticity_2d_unitary_compute_and_add_error(ze, we, B->p1[e], B->p2[e], &err,
+        case MIXED_MODEL_DRUCKER_PRAGER: {
+          double r[3] = {ze[0], ze[1], ze[2]};
+          if (B->p3) r[0] += B->p3[e] / B->p1[e]; /* cohesion: cone translated by -c/eta */
+          plasticity_2d_unitary_compute_and_add_error(r, we, B->p1[e], B->p2[e], &err,
                                                       worktmp);
           break;
+        }
         case MIXED_MODEL_VON_MISES:
           plasticity_2d_vonmises_unitary_compute_and_add_error(ze, we, B->p1[e], &err,
                                                                worktmp);
@@ -167,6 +172,7 @@ static inline int solve_mixed(int n, double* M, double* q, int nb, const BlockSp
         break;
       case MIXED_MODEL_DRUCKER_PRAGER:
         mixedProblem_set_druckerprager_params(problem, b, B->p1, B->p2);
+        if (B->p3) mixedProblem_set_druckerprager_cohesion(problem, b, B->p3);
         break;
       case MIXED_MODEL_VON_MISES:
         mixedProblem_set_vonmises_params(problem, b, B->p1);

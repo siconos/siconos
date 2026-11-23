@@ -17,7 +17,7 @@
 #include "SiconosBlas.h"        // for cblas_dcopy, cblas_dnrm2
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "plasticity_2d_vonmises_projection.h"
+#include "plasticity_2d_vonmises.h"
 #include "projectionOnCone.h"  // for projectionOnCone
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -82,11 +82,16 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    if (drucker_prager)
+    if (drucker_prager) {
+      /* with a cohesion c, the error is computed for sigma + c/eta e_N (cone without
+       * cohesion, see Plasticity_DruckerPrager_model) */
+      const double* c = problem->model.drucker_prager->cohesion;
+      double eta = problem->model.drucker_prager->eta[ic];
+      double r[3] = {z[ic3], z[ic3 + 1], z[ic3 + 2]};
+      if (c && c[ic] != 0.0) r[0] += c[ic] / eta;
       plasticity_2d_unitary_compute_and_add_error(
-          z + ic3, w + ic3, problem->model.drucker_prager->eta[ic],
-          problem->model.drucker_prager->theta[ic], error, worktmp);
-    else
+          r, w + ic3, eta, problem->model.drucker_prager->theta[ic], error, worktmp);
+    } else
       plasticity_2d_vonmises_unitary_compute_and_add_error(
           z + ic3, w + ic3, problem->model.von_mises->sigma_y[ic], error, worktmp);
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/

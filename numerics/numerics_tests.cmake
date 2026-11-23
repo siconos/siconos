@@ -557,6 +557,8 @@ if(WITH_TESTING)
   new_test(SOURCES test_plasticity_2d_nsgs_generic.c)
   # Von Mises (J2) in cone coordinates: projection, exact local solver, NSGS solvers
   new_test(SOURCES plasticity_2d_vonmises_test.c)
+  # Drucker-Prager with cohesion (translation of the problem in plasticity_2d_driver)
+  new_test(SOURCES plasticity_2d_cohesion_test.c)
 
   # Collection tests using new infrastructure
   new_tests_collection(

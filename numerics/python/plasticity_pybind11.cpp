@@ -9,6 +9,9 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
+#include <cstring>
+#include <stdexcept>
+
 #include "NumericsMatrix.h"
 #include "PlasticityProblem.h"
 #include "Plasticity_options.h"
@@ -29,8 +32,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       "Drucker-Prager plasticity model parameters (eta, theta)")
       .def(py::init<>())
       .def_readwrite("eta", &Plasticity_DruckerPrager_model::eta, "Cone coefficients")
-      .def_readwrite("theta", &Plasticity_DruckerPrager_model::theta,
-                     "Dilatancy coefficients");
+      .def_readwrite("theta", &Plasticity_DruckerPrager_model::theta, "Dilatancy coefficients")
+      .def_readwrite("cohesion", &Plasticity_DruckerPrager_model::cohesion,
+                     "Cohesions (may be None)");
 
   // Plasticity_VonMises_model
   py::class_<Plasticity_VonMises_model, py::smart_holder>(
@@ -53,7 +57,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   m.def(
       "PlasticityProblem_new",
       [](int dim, py::array_t<double> M, py::array_t<double> q, py::array_t<double> eta,
-         py::array_t<double> theta) {
+         py::array_t<double> theta, py::object cohesion) {
         auto* problem = new PlasticityProblem();
         problem->dimension = dim;
         problem->numberOfCones = eta.size();
@@ -72,7 +76,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
         // Create Drucker-Prager model and copy eta/theta
         problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
         problem->model.drucker_prager =
-            (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+            (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
         py::buffer_info eta_info = eta.request();
         py::buffer_info theta_info = theta.request();
         problem->model.drucker_prager->eta =
@@ -83,11 +87,23 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
                     eta_info.shape[0] * sizeof(double));
         std::memcpy(problem->model.drucker_prager->theta, theta_info.ptr,
                     theta_info.shape[0] * sizeof(double));
+        // Optional cohesion (K = {|sigma_T| <= eta sigma_N + c})
+        if (!cohesion.is_none()) {
+          auto c =
+              cohesion.cast<py::array_t<double, py::array::c_style | py::array::forcecast>>();
+          if (c.size() != eta.size())
+            throw std::invalid_argument("cohesion must have the size of eta");
+          problem->model.drucker_prager->cohesion = (double*)malloc(c.size() * sizeof(double));
+          std::memcpy(problem->model.drucker_prager->cohesion, c.data(),
+                      c.size() * sizeof(double));
+        }
 
         return problem;
       },
       py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("eta"), py::arg("theta"),
-      "Create a PlasticityProblem with Drucker-Prager model",
+      py::arg("cohesion") = py::none(),
+      "Create a PlasticityProblem with Drucker-Prager model, K = {|sigma_T| <= eta sigma_N + "
+      "c}, cohesion c optional (handled by plasticity_2d_driver)",
       py::return_value_policy::take_ownership);
 
   // Backward compatibility alias
@@ -116,7 +132,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
         // Create Drucker-Prager model and copy eta/theta
         problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
         problem->model.drucker_prager =
-            (Plasticity_DruckerPrager_model*)malloc(sizeof(Plasticity_DruckerPrager_model));
+            (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
         py::buffer_info eta_info = eta.request();
         py::buffer_info theta_info = theta.request();
         problem->model.drucker_prager->eta =
@@ -203,8 +219,12 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .value("PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration",
              PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
              "Projection with local iteration")
-      .value("PLASTICITY_2D_ONECONE_VONMISES", PLASTICITY_2D_ONECONE_VONMISES,
-             "Von Mises radial return")
+      .value("PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING",
+             PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING, "Von Mises return mapping (exact)")
+      .value("PLASTICITY_2D_ONECONE_VONMISES_FP", PLASTICITY_2D_ONECONE_VONMISES_FP,
+             "Von Mises fixed point on the natural map")
+      .value("PLASTICITY_2D_ONECONE_VONMISES_NSN", PLASTICITY_2D_ONECONE_VONMISES_NSN,
+             "Von Mises semi-smooth Newton on the natural map")
       .export_values();
 
   // Also export as module attributes for convenience
@@ -217,6 +237,11 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       (int)PLASTICITY_2D_ONECONE_ProjectionOnCone;
   m.attr("PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration") =
       (int)PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration;
+  m.attr("PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING") =
+      (int)PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING;
+  m.attr("PLASTICITY_2D_ONECONE_VONMISES_FP") = (int)PLASTICITY_2D_ONECONE_VONMISES_FP;
+  m.attr("PLASTICITY_2D_ONECONE_VONMISES_NSN") = (int)PLASTICITY_2D_ONECONE_VONMISES_NSN;
+  // deprecated name of PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING
   m.attr("PLASTICITY_2D_ONECONE_VONMISES") = (int)PLASTICITY_2D_ONECONE_VONMISES;
 
   // Backward compatibility solver IDs

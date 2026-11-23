@@ -31,6 +31,14 @@ typedef enum PlasticityModelType PlasticityModelType;
     Drucker-Prager plasticity model parameters.
     This structure contains the model-specific parameters for Drucker-Prager
     plasticity (which includes Mohr-Coulomb as a special case).
+
+    For each cone, with sigma = (sigma_N, sigma_T), the yield set is
+      K = { ||sigma_T|| <= eta sigma_N + c },
+    c the cohesion (0 if cohesion == NULL). With a = c / eta (eta > 0), K is the cone
+    K_eta = { ||sigma_T|| <= eta sigma_N } translated by -a e_N: the problem in
+    sigma~ = sigma + a e_N is the problem without cohesion with q~ = q - M a (w is unchanged).
+    plasticity_2d_driver performs this translation (see
+    plasticity_DruckerPrager_cohesion_shift); the solvers themselves work without cohesion.
 */
 struct Plasticity_DruckerPrager_model {
   /** \f$ {\eta} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of cone coefficients
@@ -39,6 +47,9 @@ struct Plasticity_DruckerPrager_model {
   /** \f$ {\theta} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of dilatancy coefficients
       (\f$ n_c = \f$ numberOfCones) */
   double* theta;
+  /** \f$ c \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of cohesions (may be NULL: no
+      cohesion). Owned by the problem (freed by plasticityProblem_free). */
+  double* cohesion;
 };
 
 typedef struct Plasticity_DruckerPrager_model Plasticity_DruckerPrager_model;
@@ -107,6 +118,18 @@ extern "C" {
     \return a pointer to a new Plasticity_DruckerPrager_model structure
 */
 Plasticity_DruckerPrager_model* plasticity_DruckerPrager_model_new(double* eta, double* theta);
+
+/**
+    Shift of the stress due to the cohesion of a Drucker-Prager problem: a vector of size
+    3 n_c with a_N = c / eta and a_T = 0 for each cone, such that sigma + a is in the cone
+    without cohesion.
+
+    \param[in] problem the problem
+    \param[out] shift newly allocated vector (to be freed by the caller), NULL if the problem
+    has no (non-zero) cohesion
+    \return 0 if successful, an error code if a cone has eta <= 0 and c != 0
+*/
+int plasticity_DruckerPrager_cohesion_shift(const PlasticityProblem* problem, double** shift);
 
 /**
     Free a Drucker-Prager model.
