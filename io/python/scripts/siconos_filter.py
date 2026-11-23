@@ -63,7 +63,10 @@ class CopyVisitor:
             self.time_filter = np.vectorize(time_filter, otypes=[bool])
         self.object_filter = object_filter
         self.time_idx = None
+        self.times = None
         self.excluded_objects = None
+        # rows of the input kept in each table that has a step index
+        self.kept = {}
 
         def copy_attrs(obj_to, obj_from):
             for a in obj_from.attrs:
@@ -75,6 +78,11 @@ class CopyVisitor:
                 obj_to.attrs[a] = value
 
         self.copy_attrs = copy_attrs
+
+    def kept_steps(self, index):
+        """Steps (t, first_row, n_rows) of a step index whose time is kept."""
+        steps = index[:]
+        return steps[np.isin(steps[:, 0].astype(self.times.dtype), self.times)]
 
     def visitor(self, path, obj):
         gr = io_out
@@ -131,22 +139,39 @@ class CopyVisitor:
             shape = obj.shape
             time_idx = None
 
+            # Tables with a step index (data/step_index/<table>)
+            name = path[len("data/") :]
+            index = None
+            if path.startswith("data/") and "/" not in name:
+                index = io_in.get("data/step_index/" + name)
+
             # Filter current indexes
-            if path in ["data/cf", "data/dynamic", "data/velocities", "data/static"]:
+            tables = ["data/cf", "data/dynamic", "data/velocities", "data/static"]
+            if index is not None or path in tables:
                 if self.time_idx is not None:
                     # Get indexes of corresponding times in current dataset
-                    if path == "data/dynamic":
+                    if index is not None:
+                        # rows of the kept steps, also for the tables without time column
+                        steps = self.kept_steps(index)[:, 1:].astype(np.int64)
+                        time_idx = np.concatenate(
+                            [np.empty(0, np.int64)]
+                            + [np.arange(first, first + n) for first, n in steps]
+                        )
+                    elif path == "data/dynamic":
                         time_idx = self.time_idx
                     # Time-filter all but static objects
                     elif path != "data/static":
                         time_idx = np.isin(obj[:, 0], self.times).nonzero()[0]
 
                 # Additionally remove any lines referencing excluded objects
-                if self.excluded_objects is not None:
+                if self.excluded_objects is not None and path in tables:
                     ex_idx = np.isin(obj[:, 1], self.excluded_objects).nonzero()[0]
                     if time_idx is None:
                         time_idx = np.arange(obj.shape[0])
                     time_idx = np.setdiff1d(time_idx, ex_idx)
+
+                if index is not None and time_idx is not None:
+                    self.kept[name] = time_idx
 
             # Shape of filtered dataset
             if time_idx is not None:
@@ -196,6 +221,17 @@ class CopyVisitor:
 
         else:
             print(f'Unknown type "{path}": {obj.__class__!s}')
+
+    def rebuild_step_index(self):
+        """After the copy: data/step_index/<table> of the output for the rows kept in <table>."""
+        for name, rows in self.kept.items():
+            steps = self.kept_steps(io_in["data/step_index/" + name])
+            first = steps[:, 1].astype(np.int64)
+            end = first + steps[:, 2].astype(np.int64)
+            n_rows = np.searchsorted(rows, end) - np.searchsorted(rows, first)
+            index = io_out["data/step_index/" + name]
+            index.resize(len(steps), 0)
+            index[:] = np.column_stack([steps[:, 0], np.cumsum(n_rows) - n_rows, n_rows])
 
 
 if __name__ == "__main__":
@@ -272,10 +308,10 @@ if __name__ == "__main__":
             # attributes of the file: version_major, version_minor, dimension
             for a in io_in.attrs:
                 io_out.attrs[a] = io_in.attrs[a]
-            io_in.visititems(
-                CopyVisitor(
-                    time_filter=TimeFilter(),
-                    object_filter=lambda name, obj: not re_exclude(name),
-                    attr_filter=args.attr and AttrFilter(args.attr),
-                ).visitor
+            visitor = CopyVisitor(
+                time_filter=TimeFilter(),
+                object_filter=lambda name, obj: not re_exclude(name),
+                attr_filter=args.attr and AttrFilter(args.attr),
             )
+            io_in.visititems(visitor.visitor)
+            visitor.rebuild_step_index()
