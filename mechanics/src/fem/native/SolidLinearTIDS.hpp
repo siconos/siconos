@@ -18,7 +18,14 @@
  * stress relation.
  * - \f$M\dot v + K u +  B^T \sigma = F_{ext}(t,z) + p
  * v = \dot u
- * \dot \sigma = B v + \dot \epsilon_p \f$
+ * S \dot \sigma = B v - \dot \epsilon_p \f$
+ *
+ * with S the compliance (elasticityMatrix()) and B the strain operator (BMatrix()).
+ * Plasticity is enforced by StressLinearTIR interactions: their multipliers give the
+ * plastic deformation rate \f$ \dot\epsilon_p \f$ (plasticRate(), computed by
+ * fem::integrators::MoreauJeanOSI::updateInput, reset at each input update), integrated
+ * into the plastic deformation \f$ \epsilon_p \f$ (plasticDeformation()) in
+ * MoreauJeanOSI::updateState. See docs/devel/FEM_PLASTICITY_SCHEME.md.
  */
 namespace siconos::mechanics::fem {
 class SolidLinearTIDS : public FiniteElementLinearTIDS {
@@ -61,7 +68,8 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
   /** memory of previous coordinates of the system */
   siconos::algebra::SiconosMemory stressMemory_;
   //  siconos::algebra::SiconosMemory stressRateMemory_;
-  // siconos::algebra::SiconosMemory plasticDeformationMemory_;
+  /** memory of the plastic deformation (epsilon_p at the beginning of the step) */
+  siconos::algebra::SiconosMemory plasticDeformationMemory_;
   // siconos::algebra::SiconosMemory plasticRate_Memory_;
 
  public:
@@ -272,11 +280,24 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
 
   inline const siconos::algebra::SiconosMemory& stressMemory() { return stressMemory_; }
 
+  /** @return the memory of the plastic deformation */
+  inline const siconos::algebra::SiconosMemory& plasticDeformationMemory() {
+    return plasticDeformationMemory_;
+  }
+
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
    *  \todo Modify the function swapIn Memory with the new Object Memory
    */
   void swapInMemory() override;
+
+  /** reset the nonsmooth parts p[level] and the plastic deformation rate, which the
+   *  stress interactions fill by accumulation (one contribution per interaction) */
+  void resetAllNonSmoothParts() override;
+
+  /** reset the nonsmooth part p[level] and, for level 1, the plastic deformation rate
+   *  @param level the level */
+  void resetNonSmoothPart(siconos::algebra::blocks::size_type level) override;
 
   modeling::Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };

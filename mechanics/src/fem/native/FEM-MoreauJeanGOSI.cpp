@@ -98,8 +98,11 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     if (solid->hasBMatrix()) {
       // residufree += -h*B^T sigma_i
       free_rhs.noalias() -= time_step * solid->BMatrix().transpose() * sigmaold;
-      // residuSigmaFree = -h*B*v_i
-      residusigmafree.noalias() -= time_step * solid->BMatrix() * vold;
+      // stress row of W x = q + H r (W = [M h theta B^T; -h theta B S]):
+      // residuSigmaFree = S sigma_i - h theta B v_i + h B v_i
+      //                 = S sigma_i + h (1-theta) B v_i
+      // the plastic term -h epsdot_p is the reaction H r of the stress interactions.
+      residusigmafree.noalias() += time_step * solid->BMatrix() * vold;
     }
     if (solid->hasExternalForces()) {
       // double conditionningMagicCoeff = (time_step/solid->S()->normInf())/100000;

@@ -23,8 +23,14 @@ namespace siconos::mechanics::fem {
 
     \f$ p = [0 C]^t \lambda = [0 C^t \lambda] \f$
 
-    C will typically be identity for a StressLinearTIR. \lambda will be intepreted as the
-   plastic rate.
+    With \f$ y \geq 0 \f$ (yield function \f$ f = -y \f$), \f$ C^T\lambda \f$ is the
+    plastic increment that enters the stress rows of the iteration matrix
+    (see fem::integrators::MoreauJeanOSI::initializeIterationMatrix).
+    computeInput accumulates it in SolidLinearTIDS::plasticRate() (several interactions
+    may share a solid; the solid resets it before each input update), and
+    fem::integrators::MoreauJeanOSI::updateInput converts it into the plastic deformation
+    rate \f$ \dot\epsilon_p = -C^T\lambda / h \f$.
+    See docs/devel/FEM_PLASTICITY_SCHEME.md.
 
 */
 class StressLinearTIR : public siconos::modeling::LagrangianLinearTIR {

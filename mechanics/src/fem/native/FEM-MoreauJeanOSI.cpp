@@ -170,18 +170,17 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
 
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
-  /* For SolidLinearTIDS systems, we define W by blocks: W = [M h*theta*B^T; h*theta*B -S]
-   so that the discretised system is W v_{\sigma} = RHS:
-   $ \begin{bmatrix}
-        \boldsymbol M & h\theta {\boldsymbol B}^T \\
-        h\theta \boldsymbol B & - \boldsymbol S
-        \end{bmatrix}  \begin{bmatrix} v_{k+\theta} \\
-        \sigma_{k+\theta}
-        \end{bmatrix}}
-        = \begin{bmatrix}
-        \boldsymbol M v_{k} + h\theta F_{ext,k+\theta} + \theta \boldsymbol H p_{N,k+1}\\
-        -\boldsymbol S \sigma_{k} -h\theta z_{k+\theta}
-        \end{bmatrix}$
+  /* For SolidLinearTIDS systems, we define W by blocks: W = [M h*theta*B^T; -h*theta*B S]
+   (S: compliance, B: strain-displacement), so that the discretised system is W x = RHS
+   with x = [v_{k+1}; sigma_{k+1}]:
+     M v_{k+1} + h theta B^T sigma_{k+1} = M v_k - h(1-theta) B^T sigma_k + h F_ext + p
+     S sigma_{k+1} - h theta B v_{k+1}   = S sigma_k + h(1-theta) B v_k - h epsdot_p
+   The second row is the time-discretised constitutive law S sigma_dot = B v - epsdot_p,
+   written with a +S block so that the symmetric part of W is [M 0; 0 S] (positive
+   definite): the Delassus operator H^T W^{-1} H of a StressLinearTIR is then positive and
+   the plastic multiplier pushes sigma back into the elastic domain. With [h theta B, -S]
+   (former choice) it was negative and the plasticity problem had no physical solution.
+   See docs/devel/FEM_PLASTICITY_SCHEME.md.
   */
 
   auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
@@ -206,13 +205,13 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
   iterationMat->topLeftCorner(solid->dimension(), solid->dimension()) =
       conditionningMagicCoeff * solid->mass();
 
-  // W = [M 0; 0 -S]
+  // W = [M 0; 0 S]
   iterationMat->bottomRightCorner(solid->stressDimension(), solid->stressDimension()) =
-      -conditionningMagicCoeff * solid->elasticityMatrix();
+      conditionningMagicCoeff * solid->elasticityMatrix();
 
   iterationMat->bottomLeftCorner(solid->stressDimension(), solid->dimension()) =
-      htheta * solid->BMatrix();
-  // W = [M h*theta*B^T; h*theta*B -S]
+      -htheta * solid->BMatrix();
+  // W = [M h*theta*B^T; -h*theta*B S]
   iterationMat->topRightCorner(solid->dimension(), solid->stressDimension()) =
       htheta * solid->BMatrix().transpose();
   // LU factorization
@@ -315,7 +314,8 @@ double siconos::mechanics::fem::integrators::MoreauJeanOSI::computeResidu() {
 
     auto& residuSigfreed = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
     const auto& vold = solid->velocityMemory().getSiconosVector(0);  // vi
-    residuSigfreed = -time_step * solid->BMatrix() * vold;
+    // stress row (increment form): S dsigma - h theta B dv = h B v_k - h epsdot_p
+    residuSigfreed = time_step * solid->BMatrix() * vold;
 
     applyBoundaryConditions(*solid, residuFree, dsi, t, vold);
 
@@ -452,7 +452,8 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::integrate(double& tini
       *v -= time_step * solid->BMatrix().transpose() * sigmaOld;
 
       // sigma += -h*B*vi
-      *sigma -= time_step * solid->BMatrix() * vold;
+      // stress row: S dsigma - h theta B dv = h B v_k - h epsdot_p
+      *sigma += time_step * solid->BMatrix() * vold;
     }
 
     // -- No need to update W --
@@ -497,6 +498,34 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateState(const unsi
     *solid->q() = time_step * _theta * solid->velocity_read() +
                   time_step * (1. - _theta) * solid->velocityMemory().getSiconosVector(0) +
                   solid->qMemory().getSiconosVector(0);
+    // plastic deformation: eps_p_{k+1} = eps_p_k + h epsdot_p (epsdot_p is constant over
+    // the step, see updateInput). Computed from the memory, so that repeated calls in a
+    // Newton loop do not accumulate.
+    *solid->plasticDeformation() = solid->plasticDeformationMemory().getSiconosVector(0) +
+                                   time_step * solid->plasticRate_read();
+  }
+}
+
+void siconos::mechanics::fem::integrators::MoreauJeanOSI::updateInput(double time,
+                                                                      unsigned int level) {
+  // p[level] and the plastic rate have been reset by the simulation before this call
+  // (Simulation::updateAllInput / updateInput): the stress relations have accumulated
+  // their nonsmooth input C^T lambda (one contribution per interaction) in
+  // epsilon_p[level].
+  siconos::integrators::MoreauJeanOSI::updateInput(time, level);
+  if (level != 1) return;
+
+  // The input of a StressLinearTIR enters the stress row of W x = q + H r as H r = C^T lambda
+  // (an increment of S sigma over the step, cf. initializeIterationMatrix), while the
+  // constitutive law gives -h epsdot_p there. Convert it into the plastic deformation
+  // rate: epsdot_p = -C^T lambda / h.
+  auto time_step = simulation()->timeStep();
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!checkOSI(dsi)) continue;
+    auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(
+        _dynamicalSystemsGraph->bundle(*dsi));
+    if (solid && solid->plasticRate()) *solid->plasticRate() *= -1.0 / time_step;
   }
 }
 

@@ -48,7 +48,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(
   stress_[0] = std::make_shared<siconos::algebra::SiconosVector>(*sigma0_);
   stress_[1] = std::make_shared<siconos::algebra::SiconosVector>(*sigma0_);
   stress_[2] = std::make_shared<siconos::algebra::SiconosVector>(*sigma0_);
-  epsilon_p_[0] = std::make_shared<siconos::algebra::SiconosVector>(dimStress_);
+  epsilon_p_[0] = std::make_shared<siconos::algebra::SiconosVector>(*epsilon_p0_);
   epsilon_p_[1] = std::make_shared<siconos::algebra::SiconosVector>(*epsilon_p0_);
 
   // -- Initialize the elasticity matrix --
@@ -76,7 +76,7 @@ void siconos::mechanics::fem::SolidLinearTIDS::initMemory(
     siconos::algebra::blocks::size_type steps) {
   LagrangianSparseDS::initMemory(steps);
   stressMemory_.setMemorySize(steps, dimStress_);
-  // plasticDeformationMemory_.setMemorySize(steps, dimStress_);
+  plasticDeformationMemory_.setMemorySize(steps, dimStress_);
   // plasticRate_Memory_.setMemorySize(steps, dimStress_);
 }
 
@@ -84,8 +84,19 @@ void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
   LagrangianSparseDS::swapInMemory();
   stressMemory_.swap(*stress_[0]);
   // stressRateMemory_.swap(*stress_[1]);
-  // plasticDeformationMemory_.swap(*epsilon_p_[0]);
+  plasticDeformationMemory_.swap(*epsilon_p_[0]);
   // plasticRate_Memory_.swap(*epsilon_p_[1]);
+}
+
+void siconos::mechanics::fem::SolidLinearTIDS::resetAllNonSmoothParts() {
+  FiniteElementLinearTIDS::resetAllNonSmoothParts();
+  if (epsilon_p_[1]) epsilon_p_[1]->setZero();
+}
+
+void siconos::mechanics::fem::SolidLinearTIDS::resetNonSmoothPart(
+    siconos::algebra::blocks::size_type level) {
+  FiniteElementLinearTIDS::resetNonSmoothPart(level);
+  if (level == 1 && epsilon_p_[1]) epsilon_p_[1]->setZero();
 }
 
 void siconos::mechanics::fem::SolidLinearTIDS::display(bool brief) const {
