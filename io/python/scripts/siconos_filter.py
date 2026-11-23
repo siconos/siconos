@@ -248,7 +248,9 @@ class CopyVisitor:
             n_rows = np.searchsorted(rows, end) - np.searchsorted(rows, first)
             index = io_out["data/step_index/" + name]
             index.resize(len(steps), 0)
-            index[:] = np.column_stack([steps[:, 0], np.cumsum(n_rows) - n_rows, n_rows])
+            index[:] = np.column_stack(
+                [steps[:, 0], np.cumsum(n_rows) - n_rows, n_rows]
+            )
 
 
 if __name__ == "__main__":
@@ -317,9 +319,14 @@ if __name__ == "__main__":
 
     with h5py.File(args.fns_in[0], mode="r") as io_in:
         # a file without version attributes is a v1.0 file
-        version = (io_in.attrs.get("version_major", 1), io_in.attrs.get("version_minor", 0))
+        version = (
+            io_in.attrs.get("version_major", 1),
+            io_in.attrs.get("version_minor", 0),
+        )
         if version[0] != 1:
-            print(f'"{args.fns_in[0]}": format version {version[0]}.{version[1]}, only v1 is filtered')
+            print(
+                f'"{args.fns_in[0]}": format version {version[0]}.{version[1]}, only v1 is filtered'
+            )
             sys.exit(1)
         with h5py.File(args.fn_out[0], mode="w") as io_out:
             # attributes of the file: version_major, version_minor, dimension
