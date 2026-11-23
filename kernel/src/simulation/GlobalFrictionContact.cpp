@@ -14,6 +14,7 @@
 #endif
 #include "GlobalFrictionContactProblem.h"  // IWYU pragma: keep
 #include "Interaction.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "MoreauJeanGOSI.hpp"  // Numerics Header
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothDrivers.h"
@@ -186,6 +187,9 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::compute_nslaw_contr
     if (auto nslaw = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
             inter->nonSmoothLaw()))
       _mu->push_back(nslaw->mu());
+    else if (std::dynamic_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
+                 inter->nonSmoothLaw()))
+      _mu->push_back(0.0);  // phi not used yet, see updateMu
 
     // -- Dynamical systems of the current interaction
     auto ds1 = indexSet.properties(*ui).source;
@@ -493,10 +497,13 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu() {
       _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                          indexSet->bundle(*ui)->nonSmoothLaw())
                          ->mu());
-    // if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-    //     siconos::modeling::Type::MohrCoulombPlasticityNSL)
-    //   _mu->push_back(tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
-    //                          inter->nonSmoothLaw())
-    //                          ->phi()));
+    else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+             siconos::modeling::Type::MohrCoulombPlasticityNSL) {
+      // Plasticity (StressLinearTIR): the friction angle phi is not used yet, the law only
+      // bounds the first (normal) component of y by the cohesion c (b = c, see
+      // MoreauJeanOSI::_NSLEffectOnFreeOutput): mu = 0. A Mohr-Coulomb cone would use
+      // mu = tan(phi).
+      _mu->push_back(0.0);
+    }
   }
 }
