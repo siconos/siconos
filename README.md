@@ -6,9 +6,12 @@
 
 **A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and Python.**
 
+**Current release: 2026.rc3** (third release candidate of the 2026 series), see the
+[release notes](docs/devel/RELEASE_2026.rc3.md) and the [Changelog](Changelog).
+
 > 📚 **Examples and Tutorials**: Most examples and tutorials are in the separate **[siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials)** repository. Please ensure you use **consistent versions** of siconos and siconos-tutorials (e.g., both `main` branch or both same release version).
 
-> 📖 **Documentation**: check **[getting started, install, user or developer guides, complete (C++ and python) API reference ...](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos)**, getting started, user or developer guides, complete (C++ and python) API reference ...
+> 📖 **Documentation**: check **[getting started, install, user or developer guides, complete (C++ and python) API reference ...](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos)**
 
 [Homepage](http://siconos.org) |
 [Documentation](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos) |
@@ -68,8 +71,10 @@ cd siconos
 cmake -S . -B build
 cmake --build build -j$(nproc)
 
-# Or select components explicitly, e.g. only numerics and kernel:
-# cmake -S . -B build -DWITH_numerics=ON -DWITH_kernel=ON
+# Or select components with WITH_<component> options, e.g. only numerics and kernel:
+# cmake -S . -B build -DWITH_control=OFF -DWITH_mechanics=OFF -DWITH_io=OFF
+# (externals, numerics, kernel, control, mechanics and io are ON by default,
+#  mechanisms and vkernel are OFF; dependencies are added automatically)
 
 # Or use a configuration file:
 # cmake -S . -B build -DUSER_OPTIONS_FILE=config_samples/default.cmake
@@ -93,7 +98,10 @@ Each component can be used from C/C++ or Python.
 
 Low-level numerical algorithms for solving optimization problems:
 - **Complementarity problems**: LCP, MLCP, NCP
-- **Friction-contact problems**: 2D/3D with Coulomb friction, rolling friction
+- **Friction-contact problems**: 2D/3D with Coulomb friction, rolling friction, global
+  (sparse) formulations, cohesive zone models, plasticity
+- **Solvers**: projected/nonsmooth Gauss-Seidel, semi-smooth Newton, interior point methods,
+  optional parallel (OpenMP, PETSc) and GPU (CUDA) solvers
 - **Variational inequalities**: AVI, VI
 - **Second-order cone programming (SOCP)**
 - **Relay problems**
@@ -104,14 +112,25 @@ Low-level numerical algorithms for solving optimization problems:
 
 Core library for modeling and simulation:
 - Dynamical systems: Lagrangian, Newton-Euler, first-order formulations
-- Numerical integration: Event-driven and time-stepping schemes
+- Numerical integration: Event-driven and time-stepping schemes (Moreau-Jean, projected
+  Moreau-Jean, Schatzman-Paoli, D1MinusLinear, generalized-alpha, ...)
 - Nonsmooth laws: Impact, friction, complementarity, relay
 
 ### [siconos/mechanics](mechanics) (C++)
 
 Mechanical simulation with contact detection:
 - Collision detection (native and [Bullet3](https://github.com/bulletphysics/bullet3))
-- CAD integration ([Open CASCADE](https://github.com/tpaviot/oce))
+- CAD integration ([Open CASCADE](https://dev.opencascade.org))
+- Finite elements with contact, cohesive zones and plasticity
+
+### [siconos/mechanisms](mechanisms) (C++, optional)
+
+Multibody systems built from CAD models (Open CASCADE), `WITH_mechanisms=ON`.
+
+### [siconos/vkernel](vkernel) (C++, experimental, optional)
+
+Vectorized kernel for large-scale systems (structure-of-arrays storage, disks, polytopes and
+FEM bodies, several time-stepping schemes), `WITH_vkernel=ON`.
 
 ### [siconos/control](control) (C++)
 
@@ -120,8 +139,8 @@ Control systems with sliding mode control and implicit discretization.
 ### [siconos/io](io) (C++)
 
 Serialization and visualization:
-- HDF5 import/export
-- VTK visualization
+- HDF5 input/output with a versioned format, `siconos` runner for mechanics scenes
+- Visualization with `siconos_vview` (VTK) and VTKHDF export for ParaView
 
 ---
 
@@ -143,9 +162,11 @@ The [siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/si
 ## Example: Bouncing Ball
 
 ```python
-import siconos.modeling as sm
-import siconos.simulation as ss
 import numpy as np
+import siconos.integrators as si
+import siconos.modeling as sm
+import siconos.nonsmooth_formulations as snf
+import siconos.simulation as ss
 
 # Parameters
 t0, T, h = 0, 10, 0.005  # Time settings
@@ -153,34 +174,36 @@ r, g, m = 0.1, 9.81, 1  # Ball properties
 e = 0.9  # Restitution coefficient
 
 # Create dynamical system (ball)
-position = [1, 0, 0]
-velocity = [0, 0, 0]
-mass = np.eye(3) * m
+position = np.array([1.0, 0, 0])
+velocity = np.zeros(3)
+mass = m * np.eye(3, order="F")  # matrices in column-major order
 mass[2, 2] = 2.0 / 5 * r * r
 
-ball = sm.LagrangianLinearTIDS(position, velocity, mass)
-ball.set_constant_fext(np.array([-m * g, 0, 0]))
+ball = sm.LagrangianLinearTIDS(position, velocity, mass, sm.alias_t)
+ball.setConstantFext(np.array([-m * g, 0, 0]), sm.alias_t)
 
 # Interaction with floor
 nslaw = sm.NewtonImpactNSL(e)
-relation = sm.LagrangianLinearTIR(np.array([[1, 0, 0]]))
+relation = sm.LagrangianLinearTIR(np.array([[1.0, 0, 0]], order="F"))
 interaction = sm.Interaction(nslaw, relation)
 
 # Model
 model = sm.NonSmoothDynamicalSystem(t0, T)
-model.insert_dynamical_system(ball)
+model.insertDynamicalSystem(ball)
 model.link(interaction, ball)
 
 # Simulation
-osi = ss.MoreauJeanOSI(0.5)
+osi = si.MoreauJeanOSI(0.5)
 td = ss.TimeDiscretisation(t0, h)
-osnspb = ss.LCP()
+osnspb = snf.LCP()
 sim = ss.TimeStepping(model, td, osi, osnspb)
 
 # Run simulation
-while sim.has_next_event():
-    sim.compute_one_step()
-    sim.next_step()
+while sim.hasNextEvent():
+    sim.computeOneStep()
+    sim.nextStep()
+
+print(ball.q())
 ```
 
 ---
@@ -205,7 +228,8 @@ If you use Siconos in your research, please cite:
   title = {Siconos: A Software Package for Modeling and Simulation of Nonsmooth Dynamical Systems},
   author = {{Siconos Team}},
   url = {http://siconos.org},
-  year = {2024}
+  version = {2026.rc3},
+  year = {2026}
 }
 ```
 

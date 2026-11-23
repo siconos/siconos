@@ -13,6 +13,13 @@ Here's a list, more or less chronological:
 * Maurice Brémond, 2008 --
 * Olivier Huber, 2011 --
 * Stephen Sinclair, 2016 --
+* Hoang-Minh Nguyen, 2021--2024
+* Samuel Heidmann, 2023 --
+* Olivier Goury, 2023--2024
+* Paul Armand, 2023
+* Joël Chebassier, 2022--2023
+* Loris Megy, 2024 --
+* Michel Henry, 2026 --
 * Narandra Akakdhar, 2012 --
 * Charles-Edouard Ladari. 2015
 * Roger Pissard--Gibollet 2004--2013

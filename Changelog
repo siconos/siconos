@@ -23,6 +23,55 @@ of the file were added first, and each subsequent addition is placed on a line
 
 
 --------------------------------------------------------------------------------
+  v 2026.rc3
+--------------------------------------------------------------------------------
+
+Main changes (details in docs/devel/RELEASE_2026.rc3.md):
+	* [kernel] Lagrangian and Newton-Euler relations: descriptive names
+	  (contactMatrix H, constraintJacobian G), contact classes named after
+	  their output; deprecated function aliases kept, reference members removed
+	* [kernel] projected Moreau-Jean schemes: index set iterations fixed,
+	  exact projection option ProjectionUpdate::from_origin
+	* [kernel] fixes in SchatzmanPaoliOSI, D1MinusLinearOSI, EventDriven
+	  (acceleration at the end of the step), MoreauJeanOSI::updateInput,
+	  BlockVector::operator=, NewtonEulerVelocityAngularVelocityR
+	* [kernel] non-regression tests of the time-stepping schemes,
+	  platform-independent ZOH/Observer/Twisting tests
+	* [mechanics] FEM plasticity: well-posed iteration matrix, plastic rate
+	  and plastic deformation; TH4 stiffness/mass and GMSH2 reader fixes
+	* [numerics] GFC3D_NSN_AC: Alart-Curnier by default, Levenberg-Marquardt
+	  fallback (shared with GFC2D_NSN_AC, optional in FC3D_NSN_*)
+	* [numerics] sparse gemv overwrites y when beta == 0 (random NaN)
+	* [numerics] MLCP_ENUM: SVD second pass for singular cases
+	* [numerics] rfc2d exact ENUM local solver, cohesive NSGS improvements,
+	  parallel FC2D variants, API renaming (waves 1 and 2), memory leaks fixed
+	* [io] versioned HDF5 format (format_v1.json, format_v2.json,
+	  format_hdf5.py), VTKHDF export, vview glyphs for non-disk bodies
+	* [vkernel] installable component (siconos::vkernel), run-time schemes
+	  (Moreau-Jean, Fremond, Anitescu-Tasora, explicit DEM), polytope contacts,
+	  registry-only storage (see vkernel/ChangeLog)
+	* [mechanisms] build with OpenCASCADE 7.9
+	* [build] WITH_<component> options, Accelerate by default on macOS,
+	  Ubuntu 26.04 (GCC 15, Python 3.14, numpy 2.5), warnings and ASan fixes
+
+--------------------------------------------------------------------------------
+  v 2026.rc2
+--------------------------------------------------------------------------------
+
+Main changes (details in docs/devel/RELEASE_2026.rc2.md):
+	* [mechanics, kernel] cohesive zone models (CohesiveZoneModelNIFNSL,
+	  BinaryCohesiveNSL, CohesiveFrictionContact)
+	* [numerics] parallel PGS/Jacobi solvers (OpenMP, graph coloring), CUDA
+	  friction-contact solvers, PETSc integration
+	* [numerics] GFC2D solvers (NSN-AC, FPP, EG), user-provided rho for
+	  GFC3D_NSN_AC, NumericsMatrix copy/factorization hardening
+	* [kernel] NewtonEuler5DR renamed NewtonEulerVelocityAngularVelocityR,
+	  Lagrangian sparse scleronomous and rheonomous relations
+	* [vkernel] registry-backed storage, dynamic add/remove, FEM/disk contacts
+	* [python] boundary conditions, GPU and parallel solvers in pybind11
+	* [build] pre-commit hooks (clang-format, ruff, shellcheck), ASan in CI
+
+--------------------------------------------------------------------------------
   v 2026.rc1
 --------------------------------------------------------------------------------
 
