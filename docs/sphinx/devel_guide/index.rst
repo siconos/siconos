@@ -7,6 +7,7 @@ Developer guide
 .. toctree::
    :maxdepth: 3
 
+   architecture
    write_and_build_doc
    numerics/solvers
    modal_moreau_jean
