@@ -193,6 +193,132 @@ struct io : item {
       return result;
     }
 
+    // the mass matrix of each FEM system, by reference, as stiffness_matrices
+    // (the consistent mass of the FEM model, constant)
+    auto mass_matrices(auto step) {
+      using env_t = decltype(self()->env());
+      using indice = typename env_t::indice;
+      using scalar = typename env_t::scalar;
+      using mass_matrices_t =
+          std::map<indice, std::reference_wrapper<algebra::sparse_matrix<scalar>>>;
+      mass_matrices_t result;
+
+      if constexpr (!match::empty_item<dsystem>) {
+        auto& data = self()->data();
+        auto& ids = storage::prop_values<dsystem, "id", topology>(data, step);
+        auto& matrices = storage::attr_values<dsystem, "mass_matrix">(data, step);
+        for (auto [id, matrix] : view::zip(ids, matrices))
+          result.emplace(id, std::ref(matrix));
+      }
+
+      return result;
+    }
+
+    // the velocity of each FEM system at step (all its dofs), keyed by id as
+    // displacements
+    auto fem_velocities(auto step) {
+      using env_t = decltype(self()->env());
+      using indice = typename env_t::indice;
+      using scalar = typename env_t::scalar;
+      std::map<indice, algebra::unbounded_vector<scalar>> result;
+
+      if constexpr (!match::empty_item<dsystem>) {
+        auto& data = self()->data();
+        auto& ids = storage::prop_values<dsystem, "id", topology>(data, step);
+        auto& velocities = storage::attr_values<dsystem, "velocity">(data, step);
+        for (auto [id, v] : view::zip(ids, velocities)) result.emplace(id, v);
+      }
+
+      return result;
+    }
+
+    // the kinetic energy 1/2 v^T M v of each system at step, (id, K): the
+    // rigid systems (M diagonal, m, m and the inertia: the rotation is
+    // included), then the FEM systems (the sparse M)
+    auto kinetic_energies(auto step) {
+      auto& data = self()->data();
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+      using rows_t = algebra::unbounded_col_matrix<scalar, 2>;
+
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
+      auto& masses = storage::attr_values<system, "mass_matrix">(data, step);
+      auto& velocities = storage::attr_values<system, "velocity">(data, step);
+      std::size_t n = ids.size();
+      if constexpr (!match::empty_item<dsystem>) {
+        n += storage::prop_values<dsystem, "id", topology>(data, step).size();
+      }
+      rows_t result(n, 2);
+
+      std::size_t r = 0;
+      for (auto [id, m, v] : view::zip(ids, masses, velocities)) {
+        result(r, 0) = id;
+        result(r++, 1) = 0.5 * v.dot(m * v);
+      }
+
+      if constexpr (!match::empty_item<dsystem>) {
+        auto& d_ids = storage::prop_values<dsystem, "id", topology>(data, step);
+        auto& d_masses = storage::attr_values<dsystem, "mass_matrix">(data, step);
+        auto& d_velocities = storage::attr_values<dsystem, "velocity">(data, step);
+        for (auto [id, m, v] : view::zip(d_ids, d_masses, d_velocities)) {
+          algebra::unbounded_vector<scalar> mv = m * v;
+          result(r, 0) = id;
+          result(r++, 1) = 0.5 * v.dot(mv);
+        }
+      }
+
+      return result;
+    }
+
+    // the work of the forces over the step that ends at step, (id, W), as
+    // MoreauJeanOSI::computeWorkForces of the AOS kernel:
+    //   W = h f_theta . v_theta,  x_theta = theta x(step) + (1 - theta) x(step - 1)
+    // f the total forces: fext for a rigid system (constant over the step),
+    // fext - K q for a FEM system (the elastic force included). theta and h
+    // are those of the integrator. The rigid systems, then the FEM systems.
+    auto work_of_forces(auto step, auto theta, auto h) {
+      auto& data = self()->data();
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+      using rows_t = algebra::unbounded_col_matrix<scalar, 2>;
+
+      auto& ids = storage::prop_values<system, "id", topology>(data, step);
+      auto& fexts = storage::attr_values<system, "fext">(data, step);
+      auto& velocities = storage::attr_values<system, "velocity">(data, step);
+      auto& velocities_k = storage::attr_values<system, "velocity">(data, step - 1);
+      std::size_t n = ids.size();
+      if constexpr (!match::empty_item<dsystem>) {
+        n += storage::prop_values<dsystem, "id", topology>(data, step).size();
+      }
+      rows_t result(n, 2);
+
+      std::size_t r = 0;
+      for (auto [id, f, v, v_k] : view::zip(ids, fexts, velocities, velocities_k)) {
+        result(r, 0) = id;
+        result(r++, 1) = h * f.dot(theta * v + (1 - theta) * v_k);
+      }
+
+      if constexpr (!match::empty_item<dsystem>) {
+        auto& d_ids = storage::prop_values<dsystem, "id", topology>(data, step);
+        auto& d_fexts = storage::attr_values<dsystem, "fext">(data, step);
+        auto& d_ks = storage::attr_values<dsystem, "k_matrix">(data, step);
+        auto& d_qs = storage::attr_values<dsystem, "q">(data, step);
+        auto& d_qs_k = storage::attr_values<dsystem, "q">(data, step - 1);
+        auto& d_velocities = storage::attr_values<dsystem, "velocity">(data, step);
+        auto& d_velocities_k = storage::attr_values<dsystem, "velocity">(data, step - 1);
+        for (auto [id, f, k, q, q_k, v, v_k] :
+             view::zip(d_ids, d_fexts, d_ks, d_qs, d_qs_k, d_velocities, d_velocities_k)) {
+          algebra::unbounded_vector<scalar> q_theta = theta * q + (1 - theta) * q_k;
+          algebra::unbounded_vector<scalar> f_theta = f - k * q_theta;
+          algebra::unbounded_vector<scalar> v_theta = theta * v + (1 - theta) * v_k;
+          result(r, 0) = id;
+          result(r++, 1) = h * f_theta.dot(v_theta);
+        }
+      }
+
+      return result;
+    }
+
     decltype(auto) positions(auto step) {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
@@ -579,22 +705,15 @@ struct io : item {
       using env_t = decltype(self()->env());
       using scalar = typename env_t::scalar;
 
-      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
-      auto& ydot_ks = storage::attr_values<interaction, "ydot">(data, step - 1);
-      auto& ys = storage::attr_values<interaction, "y">(data, step);
-      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
-
-      auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
-      auto& activations =
-          storage::prop_values<interaction, "activation", topology>(data, step);
-
       attr<"work_info">(*self()).clear();
 
-      // active interactions only (index set 1), numbered as in contact_info
+      // active interactions only (index set 1), numbered as in contact_info:
+      // the rigid contacts, then the disk / fem contacts
       scalar k = 0;
-      for (auto [ydot, ydot_k, y, lambda, index_nslaw, activation] :
-           view::zip(ydots, ydot_ks, ys, lambdas, nslaws, activations)) {
-        if (!activation) continue;
+      // gap: the inelastic gap laws apply to the rigid contacts only, the disk /
+      // fem contacts keep the Newton impact law
+      auto add_contact_work = [&](const auto& ydot, const auto& ydot_k, const auto& y,
+                                  const auto& lambda, const auto& index_nslaw, bool gap) {
         handle nslaw = storage::make_handle(data, index_nslaw);
 
         scalar e = nslaw.e();
@@ -650,7 +769,7 @@ struct io : item {
         // vn_plus + e vn_minus, or, for the inelastic gap laws (quasi inelastic and
         // the Anitescu-Tasora stabilisation), vn_plus + g_pos / h
         const scalar normal_residual =
-            vn_plus + (gap_law ? std::max(scalar(0), y(0)) / h : e * vn_minus);
+            vn_plus + (gap ? std::max(scalar(0), y(0)) / h : e * vn_minus);
 
         scalar norm_pt = sqrt(pt_1 * pt_1);
         scalar norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
@@ -697,6 +816,32 @@ struct io : item {
 
         attr<"work_info">(*self()).push_back(
             {answer_0, answer_1, answer_2, answer_3, answer_4, answer_5, answer_6});
+      };
+
+      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
+      auto& ydot_ks = storage::attr_values<interaction, "ydot">(data, step - 1);
+      auto& ys = storage::attr_values<interaction, "y">(data, step);
+      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
+      auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
+      auto& activations =
+          storage::prop_values<interaction, "activation", topology>(data, step);
+      for (auto [ydot, ydot_k, y, lambda, index_nslaw, activation] :
+           view::zip(ydots, ydot_ks, ys, lambdas, nslaws, activations)) {
+        if (activation) add_contact_work(ydot, ydot_k, y, lambda, index_nslaw, gap_law);
+      }
+
+      if constexpr (!match::empty_item<dinteraction>) {
+        auto& d_ydots = storage::attr_values<dinteraction, "ydot">(data, step);
+        auto& d_ydot_ks = storage::attr_values<dinteraction, "ydot">(data, step - 1);
+        auto& d_ys = storage::attr_values<dinteraction, "y">(data, step);
+        auto& d_lambdas = storage::attr_values<dinteraction, "lambda">(data, step);
+        auto& d_nslaws = storage::attr_values<dinteraction, "nslaw">(data, step);
+        auto& d_activations =
+            storage::prop_values<dinteraction, "activation", topology>(data, step);
+        for (auto [ydot, ydot_k, y, lambda, index_nslaw, activation] :
+             view::zip(d_ydots, d_ydot_ks, d_ys, d_lambdas, d_nslaws, d_activations)) {
+          if (activation) add_contact_work(ydot, ydot_k, y, lambda, index_nslaw, false);
+        }
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 7>>(
@@ -715,6 +860,10 @@ struct io : item {
           method("positions", &interface<Handle>::positions<indice>),
           method("displacements", &interface<Handle>::displacements<indice>),
           method("stiffness_matrices", &interface<Handle>::stiffness_matrices<indice>),
+          method("mass_matrices", &interface<Handle>::mass_matrices<indice>),
+          method("fem_velocities", &interface<Handle>::fem_velocities<indice>),
+          method("kinetic_energies", &interface<Handle>::kinetic_energies<indice>),
+          method("work_of_forces", &interface<Handle>::work_of_forces<indice, scalar, scalar>),
           method("velocities", &interface<Handle>::velocities<indice>),
           method("contact_points", &interface<Handle>::contact_points<indice>),
           method("contact_info", &interface<Handle>::contact_info<indice>),

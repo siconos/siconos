@@ -979,11 +979,46 @@ class MechanicsIO(Stored):
     def contactInfo(self, nsds, output_contact_index_set):
         return self.handle().contact_info(self._simulation.handle().current_step())
 
+    def mass_matrices(self, nsds):
+        """the mass matrix of each FEM system (consistent, constant), by id"""
+        return self.handle().mass_matrices(self._simulation.handle().current_step())
+
+    def femVelocities(self, nsds):
+        """the velocity of each FEM system (all its dofs), by id"""
+        return self.handle().fem_velocities(self._simulation.handle().current_step())
+
+    def integratorTheta(self):
+        """the theta of the vkernel integrator (the theta_dem of a DEM osi),
+        not the theta of the run options"""
+        return self._simulation.handle().one_step_integrator().theta()
+
+    def kineticEnergies(self, nsds):
+        """(id, 1/2 v^T M v) of each system at the end of the step: the rigid
+        ones (rotation included), then the FEM ones"""
+        return self.handle().kinetic_energies(self._simulation.handle().current_step())
+
+    def workOfForces(self, nsds):
+        """(id, h f_theta . v_theta) of each system over the last step, as
+        MoreauJeanOSI.computeWorkForces of the AOS kernel: f the total forces
+        (fext, and - K q for a FEM system), theta and h of the integrator"""
+        simulation = self._simulation.handle()
+        return self.handle().work_of_forces(
+            simulation.current_step(),
+            self.integratorTheta(),
+            simulation.time_discretization().h(),
+        )
+
     def contactContactWork(
         self, nsds, output_contact_index_set, omega, tol=1e-8, gap_law=False, h=0.0
     ):
+        # omega: the theta of the run options, unused: the theta-weighted
+        # works are those of the integrator's theta (theta_dem for DEM)
         return self.handle().contact_work(
-            self._simulation.handle().current_step(), omega, tol, int(gap_law), h
+            self._simulation.handle().current_step(),
+            self.integratorTheta(),
+            tol,
+            int(gap_law),
+            h,
         )
 
 
