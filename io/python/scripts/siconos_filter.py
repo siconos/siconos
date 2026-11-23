@@ -157,9 +157,13 @@ class CopyVisitor:
             comp = (obj.compression is True or args.gzip) and chunks is not None
             if comp:
                 chunks = (4000,) + tuple(obj.shape[1:])
+            # --single: floats only, the step index (row numbers) stays f8
+            dtype = obj.dtype
+            if args.single and dtype.kind == "f" and "data/step_index/" not in path:
+                dtype = np.dtype("f4")
             ds = gr.create_dataset(
                 obj.name,
-                dtype=[obj.dtype, "f4"][args.single],
+                dtype=dtype,
                 shape=shape,
                 maxshape=obj.maxshape,
                 chunks=chunks,
