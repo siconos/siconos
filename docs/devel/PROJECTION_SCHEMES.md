@@ -301,6 +301,17 @@ With the Siconos conventions reproduced in Python, the two codes agree to round-
 
 ## 6. Validation
 
+hots-python: <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/hots-python>.
+The comparison of the `TimeSteppingSchemesTest` trajectories with hots-python is a ctest
+of the kernel, enabled with `-DWITH_HOTS_VALIDATION=ON` (hots-python is cloned at configure
+time; `-DHOTS_PYTHON_DIR=<clone>` uses an existing clone, `HOTS_PYTHON_GIT_REPOSITORY` /
+`HOTS_PYTHON_GIT_TAG` choose the repository and the version):
+
+```bash
+cmake -DWITH_HOTS_VALIDATION=ON .
+ctest -R "TimeSteppingSchemesTest_dump|TimeSteppingSchemes_vs_hots"
+```
+
 ### 6.1 Procedure
 
 hots-python is run on the time grid of the Siconos output, with a model built from the

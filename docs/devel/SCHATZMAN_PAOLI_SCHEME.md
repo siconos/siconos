@@ -101,6 +101,10 @@ Bugs 1 and 2 were found by comparing with hots-python. They were present on mast
 
 Python script: `kernel/src/simulation/test/validate_with_hots.py` (run the CppUnit test
 `TimeSteppingSchemesTest` with `SICONOS_TEST_DUMP_TRAJECTORIES=1` first).
+It is also the ctest `TimeSteppingSchemes_vs_hots` when the kernel is configured with
+`-DWITH_HOTS_VALIDATION=ON` (hots-python,
+<https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/hots-python>, is then cloned at
+configure time).
 
 | case | reference | max \|q − q_ref\| |
 |---|---|---|
