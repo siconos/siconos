@@ -164,14 +164,17 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
     }
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     switch (localsolver_options->solverId) {
+      /* Von Mises (J2): exact solution of the one-element problem, except for the single
+       * projection step (see plasticity_2d_vonmises_projection.h) */
       case PLASTICITY_2D_ONECONE_ProjectionOnCone:
         solver = &plasticity_2d_projectionOnVonMises_solve;
-        plasticity_2d_projection_initialize(problem, localproblem);
         break;
+      case PLASTICITY_2D_ONECONE_VONMISES:
       case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration:
-        solver = &plasticity_2d_projectionOnVonMises_solve;
-        plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
-                                                                    localsolver_options);
+      case PLASTICITY_2D_ONECONE_NSN:
+      case PLASTICITY_2D_ONECONE_NSN_GP:
+      case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID:
+        solver = &plasticity_2d_vonMises_exact_solve;
         break;
       default:
         plasticity_2d_local_problem_free(localproblem, problem);
@@ -366,7 +369,7 @@ void plasticity_2d_nsgs_generic(PlasticityProblem* problem, double* stress,
       .alloc_freezing = NULL, /* Use default allocation in nsgs_solve */
       .alloc_shuffled = NULL, /* Use default allocation in nsgs_solve */
       .localproblem = localproblem,
-      .verbose = 2,                                          /* Print every iteration */
+      .verbose = verbose, /* numerics verbosity level (2: print every iteration) */
       .user_tolerance = options->dparam[SICONOS_DPARAM_TOL], /* Store user tolerance */
       .error_eval_freq = 0, /* Full error every iteration (0=always) */
       .dimension = 3,
@@ -419,7 +422,9 @@ static int plasticity_2d_nsgs_generic_init_wrap(void* problem, SolverOptions* op
 
 static int plasticity_2d_nsgs_generic_solve_wrap(void* problem, double* reaction,
                                                  double* velocity, SolverOptions* options) {
-  int info = NUMERICS_OK;
+  /* not solved yet: nsgs_solve returns at once when *info == 0 on entry (trivial case
+   * already solved by the driver) */
+  int info = 1;
   plasticity_2d_nsgs_generic((PlasticityProblem*)problem, reaction, velocity, &info, options);
   return info;
 }

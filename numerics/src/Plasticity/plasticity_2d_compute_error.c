@@ -17,6 +17,7 @@
 #include "SiconosBlas.h"        // for cblas_dcopy, cblas_dnrm2
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
+#include "plasticity_2d_vonmises_projection.h"
 #include "projectionOnCone.h"  // for projectionOnCone
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -52,21 +53,19 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
   CHECK_NULL(w);
   CHECK_NULL(error);
 
-  /* Check model type - only Drucker-Prager supported for now */
-  if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER) {
+  if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER &&
+      problem->model_type != PLASTICITY_MODEL_VON_MISES) {
     *error = 0.0;
     DEBUG_END("plasticity_2d_compute_error(...)\n");
-    return numerics_error("plasticity_2d_compute_error",
-                          "Only Drucker-Prager model is currently supported");
-    ;
+    return numerics_error("plasticity_2d_compute_error", "unknown plasticity model %d",
+                          problem->model_type);
   }
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->numberOfCones;
   int n = nc * 3;
-  double* eta = problem->model.drucker_prager->eta;
-  double* theta = problem->model.drucker_prager->theta;
+  int drucker_prager = (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER);
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q
@@ -83,8 +82,13 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    plasticity_2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], theta[ic], error,
-                                                worktmp);
+    if (drucker_prager)
+      plasticity_2d_unitary_compute_and_add_error(
+          z + ic3, w + ic3, problem->model.drucker_prager->eta[ic],
+          problem->model.drucker_prager->theta[ic], error, worktmp);
+    else
+      plasticity_2d_vonmises_unitary_compute_and_add_error(
+          z + ic3, w + ic3, problem->model.von_mises->sigma_y[ic], error, worktmp);
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
   }
   *error = sqrt(*error);

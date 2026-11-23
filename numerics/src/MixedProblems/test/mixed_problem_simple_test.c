@@ -247,20 +247,11 @@ int main(int argc, char** argv) {
   /* Test 1: Friction 2D only */
   total_info += test_friction2d_only();
 
-  /* Tests 2 and 3 (Von Mises) are known failures: the Von Mises local solver
-   * (plasticity_2d_projectionOnVonMises_solve) projects w = M z + q instead of z - rho w and
-   * does not converge to a solution. They are run but not counted until the Von Mises model
-   * of the Plasticity component is fixed. */
-  int known_failures = 0;
-
   /* Test 2: Von Mises only */
-  known_failures += test_vonmises_only();
+  total_info += test_vonmises_only();
 
   /* Test 3: Friction 2D + Von Mises */
-  known_failures += test_friction2d_and_vonmises();
-
-  if (known_failures)
-    printf("\n%d known failure(s) (Von Mises local solver), not counted\n", known_failures);
+  total_info += test_friction2d_and_vonmises();
 
   printf("\n==================================================\n");
   printf("All tests %s\n", total_info == 0 ? "PASSED" : "FAILED");

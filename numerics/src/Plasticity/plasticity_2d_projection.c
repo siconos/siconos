@@ -390,36 +390,34 @@ REGISTER_SOLVER(PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration,
                 1);    /* is_local */
 
 /* ===========================================================================
- * Von Mises Projection Solver
- * ===========================================================================
- * Simple radial return algorithm for Von Mises plasticity
- */
+ * Von Mises (J2) local solvers, cone coordinates (see plasticity_2d_vonmises_projection.h)
+ * =========================================================================== */
 
 int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
                                              double* stress_local, SolverOptions* options) {
-  (void)options; /* Unused for now - simple projection doesn't need options */
-
+  (void)options;
+  /* one projection step: sigma <- P_C(sigma - rho (M sigma + q)), rho = 1 / M_NN */
   double* MLocal = localproblem->M->dense;
   double* qLocal = localproblem->q;
   double sigma_y = localproblem->model.von_mises->sigma_y[0];
-
-  /* Compute trial stress: sigma_trial = MLocal * stress_local + qLocal */
-  double trial_stress[3];
-  for (int i = 0; i < 3; i++) {
-    trial_stress[i] = MLocal[i + 0 * 3] * stress_local[0] + qLocal[i] +
-                      MLocal[i + 1 * 3] * stress_local[1] +
-                      MLocal[i + 2 * 3] * stress_local[2];
-  }
-
-  /* Project onto Von Mises yield surface */
-  plasticity_2d_projectionOnVonMises(trial_stress, sigma_y);
-
-  /* Update stress_local */
-  stress_local[0] = trial_stress[0];
-  stress_local[1] = trial_stress[1];
-  stress_local[2] = trial_stress[2];
-
+  double rho = 1.0 / MLocal[0];
+  double w[3];
+  for (int i = 0; i < 3; i++)
+    w[i] = qLocal[i] + MLocal[i] * stress_local[0] + MLocal[i + 3] * stress_local[1] +
+           MLocal[i + 6] * stress_local[2];
+  for (int i = 0; i < 3; i++) stress_local[i] -= rho * w[i];
+  plasticity_2d_projectionOnVonMises(stress_local, sigma_y);
   return 0;
+}
+
+int plasticity_2d_vonMises_exact_solve(PlasticityProblem* localproblem, double* stress_local,
+                                       SolverOptions* options) {
+  (void)options;
+  int status = plasticity_2d_vonMises_local_solve(localproblem->M->dense, localproblem->q,
+                                                  localproblem->model.von_mises->sigma_y[0],
+                                                  stress_local);
+  /* status 2: scalar equation solved to ~1e3 eps only, the solution is still usable */
+  return (status == 1) ? 1 : 0;
 }
 
 void plasticity_2d_vonmises_set_default(SolverOptions* options) { (void)options; }
@@ -436,12 +434,12 @@ static int plasticity_2d_projection_on_von_mises_solve_wrap(void* localproblem,
                                                             double* reaction, double* velocity,
                                                             SolverOptions* options) {
   (void)velocity; /* Local solvers don't use velocity parameter */
-  return plasticity_2d_projectionOnVonMises_solve((PlasticityProblem*)localproblem, reaction,
-                                                  options);
+  return plasticity_2d_vonMises_exact_solve((PlasticityProblem*)localproblem, reaction,
+                                            options);
 }
 
 REGISTER_SOLVER(PLASTICITY_2D_ONECONE_VONMISES, "PLASTICITY_2D_ONECONE_VONMISES",
-                "Radial return projection for Von Mises plasticity (one cone)",
+                "Exact solution of the one-element Von Mises (J2) problem",
                 plasticity_2d_projection_on_von_mises_init_wrap,
                 plasticity_2d_projection_on_von_mises_solve_wrap, NULL, NULL,
                 plasticity_2d_vonmises_set_default, 100, /* default_max_iter */

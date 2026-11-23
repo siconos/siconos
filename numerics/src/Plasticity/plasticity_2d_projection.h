@@ -94,14 +94,26 @@ void plasticity_2d_projection_free(PlasticityProblem* problem, PlasticityProblem
  * Von Mises Projection Solver
  * ============================================================================ */
 
-/** Solve a local problem using Von Mises radial return projection
- * \param localproblem the local problem to solve
+/** Von Mises (J2) one-element problem (cone coordinates, see
+ * plasticity_2d_vonmises_projection.h): one projection step
+ *   sigma <- P_C(sigma - rho (M sigma + q)),  rho = 1 / M_NN.
+ * \param localproblem the local problem (one element, model Von Mises)
  * \param stress_local the local stress (input/output)
- * \param options solver options
- * \return 0 if successfull
+ * \param options solver options (unused)
+ * \return 0
  */
 int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
                                              double* stress_local, SolverOptions* options);
+
+/** Von Mises (J2) one-element problem: exact solution
+ * (plasticity_2d_vonMises_local_solve).
+ * \param localproblem the local problem (one element, model Von Mises)
+ * \param stress_local the local stress (output)
+ * \param options solver options (unused)
+ * \return 0 if successful, 1 if the local matrix is not suitable (M_NN <= 0, S singular)
+ */
+int plasticity_2d_vonMises_exact_solve(PlasticityProblem* localproblem, double* stress_local,
+                                       SolverOptions* options);
 
 /** Set default solver options for Von Mises projection
  * \param options the solver options to set

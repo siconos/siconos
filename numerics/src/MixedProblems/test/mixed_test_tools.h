@@ -129,9 +129,8 @@ static inline double mixed_residual(int n, const double* M, const double* q, int
                                                       worktmp);
           break;
         case MIXED_MODEL_VON_MISES:
-          for (int i = 0; i < 3; i++) worktmp[i] = ze[i] - we[i];
-          plasticity_2d_projectionOnVonMises(worktmp, B->p1[e]);
-          for (int i = 0; i < 3; i++) err += (ze[i] - worktmp[i]) * (ze[i] - worktmp[i]);
+          plasticity_2d_vonmises_unitary_compute_and_add_error(ze, we, B->p1[e], &err,
+                                                               worktmp);
           break;
         default:
           err = NAN;

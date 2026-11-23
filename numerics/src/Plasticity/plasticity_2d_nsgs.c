@@ -193,28 +193,26 @@ static int plasticity_2d_nsgs_initialize_local_solver(
       }
     }
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
+    /* Von Mises (J2): the one-element problem has an exact solution, used for all the local
+     * solvers except the single projection step (see plasticity_2d_vonmises_projection.h) */
+    local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+    local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
     switch (localsolver_options->solverId) {
-      case PLASTICITY_2D_ONECONE_ProjectionOnCone: {
+      case PLASTICITY_2D_ONECONE_ProjectionOnCone:
         local_function_toolkit->local_solver = &plasticity_2d_projectionOnVonMises_solve;
-        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
-        local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
-        plasticity_2d_projection_initialize(problem, localproblem);
         break;
-      }
-      case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
-        local_function_toolkit->local_solver = &plasticity_2d_projectionOnVonMises_solve;
-        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
-        local_function_toolkit->free_local_solver =
-            &plasticity_2d_projectionOnConeWithLocalIteration_free;
-        plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
-                                                                    localsolver_options);
+      case PLASTICITY_2D_ONECONE_VONMISES:
+      case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration:
+      case PLASTICITY_2D_ONECONE_NSN:
+      case PLASTICITY_2D_ONECONE_NSN_GP:
+      case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID:
+        local_function_toolkit->local_solver = &plasticity_2d_vonMises_exact_solve;
         break;
-      }
       default: {
-        numerics_printf_verbose(1,
-                                "plasticity_2d_nsgs_initialize_local_solver, Numerics, "
-                                "plasticity_2d_nsgs failed. Unknown internal solver : %s.\n",
-                                solver_options_id_to_name(localsolver_options->solverId));
+        return numerics_error("plasticity_2d_nsgs_initialize_local_solver",
+                              "Numerics, plasticity_2d_nsgs failed. Unknown internal solver "
+                              "for Von Mises: %s.\n",
+                              solver_options_id_to_name(localsolver_options->solverId));
       }
     }
   } else {
@@ -792,7 +790,10 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
  */
 
 static int plasticity_2d_nsgs_init_wrap(void* problem, SolverOptions* options) {
-  plasticity_2d_nsgs_set_default(options);
+  /* set_default already called by solver_options_create: calling it again here reset the
+   * tolerance and replaced the internal solver chosen by the user at each driver call */
+  (void)problem;
+  (void)options;
   return NUMERICS_OK;
 }
 
