@@ -1,4 +1,5 @@
-# Copyright 2024 INRIA
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
 import siconos.numerics as sn
