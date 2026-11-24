@@ -125,18 +125,24 @@ with h5py.File("bench_fem_disks.hdf5", "r") as f:
 
 ## 5. Limits and known issues
 
-- **Clamped FEM bodies: the balance does not close, because of the step,
-  not of the outputs.** A Dirichlet condition zeroes the blocked velocities
-  *after* the unconstrained solve of the FEM free flight
-  (`theta_method.hpp`, `apply_boundary_conditions`), instead of a constrained
-  solve: the free dofs next to the clamp get spurious forces (up to ~4e3 N
-  for a 2e4 N load, measured on the clamped square). Clamped square, theta =
-  1/2: max |dK - force_work| 25 J and the energy drifts by 47 J against
-  4e-6 J and 4e-5 J for the same square free. On `bench_fem_disks.py` the
-  elastic energy of the clamped body reaches 587 J with an input of about
-  1 J. Pinned by the strict xfail `test_fem_clamped_energy`.
-- A cold restart restores the rigid bodies only: a FEM body starts again
-  from its initial state, and `energy_work` jumps at the restart.
+- Clamped FEM bodies: the energy_work columns first showed that the step
+  was wrong. A Dirichlet condition zeroed the blocked velocities *after* the
+  unconstrained solve of the FEM free flight, instead of a solve with the
+  operator of the free dofs: the free dofs next to the clamp got spurious
+  forces, the clamped square drifted by 47 J at theta = 1/2, and the elastic
+  energy of `bench_fem_disks.py` reached 587 J with an input of about 1 J.
+  Fixed: the FEM operators are factored and assembled with their Dirichlet
+  conditions (`algebra::constrain_dofs`); the clamped square now keeps its
+  energy to 3e-6 J, `bench_fem_disks.py` closes its balance to 3e-6 under MJ
+  and GOSI, and `fem_t3` matches the AOS kernel's `T3_square_200` to 1.3e-14
+  over the whole run (the divergence after the impact, taken for chaos, was
+  this defect).
+- A cold restart restarts a FEM body from its last output state
+  (`fem_displacements_`, `fem_velocities_`, `fem_dof_indices_`); the state
+  is read from the float32 displacements: the restarted trajectory is the
+  one of a single run to 9e-8 (velocities, scale 2). A file without
+  `fem_velocities_` (written before) restarts the FEM bodies from their
+  initial state, with a warning.
 - `energy_work` and `cf_work` are float32 (format_v1): the balance read
   from the file is good to ~1e-7 of K.
 - `fem_displacements_`, `fem_epsilon_`, `fem_sigma_` are declared f8 in

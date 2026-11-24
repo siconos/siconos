@@ -1028,6 +1028,34 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if gid1 >= 0 and gid2 >= 0:
                 self._interman.insertNonSmoothLaw(nslaw, gid1, gid2)
 
+    def fem_restart_state(self, ds_id, q0, v0):
+        """The state (q, v) of the FEM body ds_id: on a cold restart, q0 plus
+        the displacement and the velocity of the last output step of the
+        file (fem_displacements_, fem_velocities_, through fem_dof_indices_);
+        else (q0, v0)."""
+        names = [
+            f"fem_{what}_{ds_id}"
+            for what in ("displacements", "velocities", "dof_indices")
+        ]
+        rows = self._data.get(names[0]) if self._data is not None else None
+        if rows is None or rows.shape[0] == 0:
+            return q0, v0
+        if any(name not in self._data for name in names[1:]):
+            siconos.io.tools.warn(
+                f"FEM body {ds_id}: no {names[1]} or {names[2]} in the file, "
+                "it restarts from its initial state"
+            )
+            return q0, v0
+        dofs = self._data[names[2]][:]
+        q = np.array(q0, dtype=np.float64)
+        v = np.zeros_like(q)
+        q[dofs] += rows[-1, 2:]
+        v[dofs] = self._data[names[1]][-1, 2:]
+        self.print_verbose(
+            f"FEM body {ds_id}: restart from its state at t = {rows[-1, 0]:g}"
+        )
+        return q, v
+
     def import_native_object(
         self,
         name,
@@ -1239,10 +1267,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     body.handle().set_mass_matrix(fesolid.mass())
                     body.handle().set_k_matrix(fesolid.stiffnessMatrix())
-                    body.handle().set_q(fesolid.q())
+                    q, velocity = self.fem_restart_state(
+                        int(body.number()), fesolid.q(), fesolid.velocity()
+                    )
+                    body.handle().set_q(q)
                     body.handle().set_q0(fesolid.q())
                     body.handle().set_fext(fesolid.fext_vector())
-                    body.handle().set_velocity(fesolid.velocity())
+                    body.handle().set_velocity(velocity)
                     body.handle().set_bc_velocities_0(boundary_conditions)
 
                 elif self._shape.attributes(ctor.shape_name)["type"] == "convex":

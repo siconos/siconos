@@ -271,44 +271,52 @@ def test_fem_free_oscillation(tmp_path, theta):
         assert energy[-1] < energy[0] - 1e-3 * scale
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="vkernel: the blocked velocities of a Dirichlet condition are zeroed "
-    "after the unconstrained FEM solve (theta_method apply_boundary_conditions), "
-    "not a constrained solve: the free dofs near the clamp get spurious forces",
-)
-def test_fem_clamped_energy(tmp_path):
+@pytest.mark.parametrize("theta", [0.5, 0.6])
+def test_fem_clamped_energy(tmp_path, theta):
     """The same square clamped at its base (the Dirichlet nodes of the mesh):
-    the energy balance does not close (the step, not the outputs)."""
-    energy, force_work, dk, dissipation, scale = fem_energies(tmp_path, 0.5, None)
+    the free dofs are solved with the operator of the free dofs, and the
+    balance closes as for the free square (the blocked dofs do no work)."""
+    energy, force_work, dk, dissipation, scale = fem_energies(tmp_path, theta, None)
+    assert scale > 0
     assert force_work - dk == pytest.approx(dissipation, abs=1e-6 * scale)
+    if theta == 0.5:
+        assert np.abs(energy - energy[0]).max() < 1e-6 * scale
+    else:
+        assert np.all(np.diff(energy) < 1e-7 * scale)
+        assert energy[-1] < energy[0] - 1e-3 * scale
 
 
-def test_fem_restart_appends(tmp_path):
+def test_fem_restart(tmp_path):
     """A cold restart (run again to a later T) appends to energy_work,
-    fem_velocities_ and fem_displacements_, and keeps one fem_mass_,
-    fem_stiffness_, fem_dof_indices_ (their metadata checked). The FEM state
-    itself is not restored by a cold restart (rigid bodies only): not
-    tested here."""
-    filename = str(tmp_path / "restart.hdf5")
-    fem_scene(filename, 2500.0, np.array([1e4, -2e4]), [])
-    run(filename, 0.5, T=0.05, set_external_forces=no_forces)
-    run(filename, 0.5, T=0.1, set_external_forces=no_forces)
-    with h5py.File(filename, "r") as f:
-        d = f["data"]
-        groups = sorted(
-            k for k in d if k.startswith(("fem_mass_", "fem_stiffness_", "fem_dof"))
-        )
-        assert [g.rsplit("_", 1)[0] for g in groups] == [
-            "fem_dof_indices",
-            "fem_mass",
-            "fem_stiffness",
-        ]
-        (ds_id,) = {g.rsplit("_", 1)[1] for g in groups}
-        for name in (
-            f"fem_velocities_{ds_id}",
-            f"fem_displacements_{ds_id}",
-            "energy_work",
-        ):
-            assert d[name].shape[0] == 20
-            assert d[name][:, 0] == pytest.approx(H * np.arange(1, 21), rel=1e-6)
+    fem_velocities_ and fem_displacements_, keeps one fem_mass_,
+    fem_stiffness_, fem_dof_indices_ (their metadata checked), and the FEM
+    body goes on from its last output state: the same trajectory as one run,
+    up to the float32 of fem_displacements_ the restart reads."""
+    force = np.array([1e4, -2e4])
+    tables = {}
+    for name, ends in (("one_run", [0.1]), ("restarted", [0.05, 0.1])):
+        filename = str(tmp_path / f"{name}.hdf5")
+        fem_scene(filename, 2500.0, force, None)
+        for T in ends:
+            run(filename, 0.5, T=T, set_external_forces=no_forces)
+        with h5py.File(filename, "r") as f:
+            d = f["data"]
+            groups = sorted(
+                k for k in d if k.startswith(("fem_mass_", "fem_stiffness_", "fem_dof"))
+            )
+            assert [g.rsplit("_", 1)[0] for g in groups] == [
+                "fem_dof_indices",
+                "fem_mass",
+                "fem_stiffness",
+            ]
+            (ds_id,) = {g.rsplit("_", 1)[1] for g in groups}
+            tables[name] = {
+                what: d[f"{what}_{ds_id}" if what != "energy_work" else what][:]
+                for what in ("fem_velocities", "fem_displacements", "energy_work")
+            }
+    for what, one_run in tables["one_run"].items():
+        restarted = tables["restarted"][what]
+        assert restarted.shape == one_run.shape == (20, one_run.shape[1])
+        assert restarted[:, 0] == pytest.approx(H * np.arange(1, 21), rel=1e-6)
+        scale = np.abs(one_run[:, 1:]).max()
+        assert np.abs(restarted[:, 1:] - one_run[:, 1:]).max() < 1e-5 * scale
