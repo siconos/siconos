@@ -307,6 +307,24 @@ SCHEME_EXPLICIT_PENALTY = 4
 SCHEME_LOCAL_PROBLEM_FREMOND = 5
 SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC = 6
 SCHEME_CONE_COMPLEMENTARITY_INELASTIC = 7
+# the schemes whose normal shock law is on the gap: the quasi inelastic law
+# and the Anitescu-Tasora stabilisation (the contact status of contact_work)
+GAP_LAW_SCHEMES = (
+    SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC,
+    SCHEME_CONE_COMPLEMENTARITY_INELASTIC,
+)
+# the names of the schemes, as the --scheme of the siconos command line
+# (nonos/simoptions.py SCHEMES)
+SCHEME_NAMES = {
+    SCHEME_LOCAL_PROBLEM: "MoreauJean",
+    SCHEME_GLOBAL_PROBLEM: "MoreauJeanGOSI",
+    SCHEME_CONE_COMPLEMENTARITY: "AnitescuTasora",
+    SCHEME_CONE_COMPLEMENTARITY_APGD: "AnitescuTasoraAPGD",
+    SCHEME_EXPLICIT_PENALTY: "DEM",
+    SCHEME_LOCAL_PROBLEM_FREMOND: "MoreauJeanFremond",
+    SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC: "MoreauJeanQuasiInelastic",
+    SCHEME_CONE_COMPLEMENTARITY_INELASTIC: "AnitescuTasoraInelastic",
+}
 
 
 class Simulation(Stored):
@@ -369,16 +387,20 @@ class Simulation(Stored):
             vosi.set_tangential_stiffness(osi.tangential_stiffness)
         else:
             scheme = SCHEME_LOCAL_PROBLEM
+        self.setScheme(scheme, f"the osi is a {type(osi).__name__}")
+
+    def setScheme(self, scheme, origin):
+        """Set the scheme of the integrator, checked against the laws of the
+        storage (and changed to the Frémond scheme under Frémond laws).
+        origin: where the scheme comes from, for the messages (the osi of
+        the script, or the --scheme of the siconos command line)."""
         # the quasi inelastic shock law of the vnative Moreau-Jean local
         # problem: it replaces the restitution, so e must be 0 on the laws (e
         # multiplies ydot, the law divides the gap by h; they agree only for a
         # contact exactly at gap 0 and a fixed h), and it cannot be the Frémond
         # law (which writes friction on the theta-weighted velocity)
         laws = NewtonImpactFrictionNSL.laws
-        if type(osi).__name__ in (
-            "MoreauJeanQuasiInelasticOSI",
-            "AnitescuTasoraInelastic",
-        ):
+        if scheme in GAP_LAW_SCHEMES:
             if NewtonImpactFrictionNSL.max_en > 0:
                 raise ValueError(
                     "vnative: the inelastic gap law replaces the restitution, "
@@ -397,10 +419,9 @@ class Simulation(Stored):
                 raise ValueError(
                     "vnative: the Frémond and the Newton impact laws cannot be mixed"
                 )
-            if scheme != SCHEME_LOCAL_PROBLEM:
+            if scheme not in (SCHEME_LOCAL_PROBLEM, SCHEME_LOCAL_PROBLEM_FREMOND):
                 raise ValueError(
-                    f"vnative: the Frémond impact law needs a MoreauJeanOSI, "
-                    f"the osi is a {type(osi).__name__}"
+                    f"vnative: the Frémond impact law needs a MoreauJeanOSI, {origin}"
                 )
             scheme = SCHEME_LOCAL_PROBLEM_FREMOND
         # rolling resistance: no 2D global rolling friction solver, no
@@ -410,8 +431,7 @@ class Simulation(Stored):
             SCHEME_EXPLICIT_PENALTY,
         ):
             raise ValueError(
-                f"vnative: rolling resistance (mu_r > 0) is not supported "
-                f"with a {type(osi).__name__}"
+                f"vnative: rolling resistance (mu_r > 0) is not supported, {origin}"
             )
         self.handle().one_step_integrator().set_scheme(scheme)
 
@@ -987,6 +1007,13 @@ class MechanicsIO(Stored):
         """the velocity of each FEM system (all its dofs), by id"""
         return self.handle().fem_velocities(self._simulation.handle().current_step())
 
+    def integratorScheme(self):
+        """the name of the scheme the vkernel integrator runs (SCHEME_NAMES):
+        the osi of the script, a Frémond law or the --scheme of the siconos
+        command line decide it"""
+        scheme = self._simulation.handle().one_step_integrator().scheme()
+        return SCHEME_NAMES.get(scheme, str(scheme))
+
     def integratorTheta(self):
         """the theta of the vkernel integrator (the theta_dem of a DEM osi),
         not the theta of the run options"""
@@ -1012,13 +1039,17 @@ class MechanicsIO(Stored):
         self, nsds, output_contact_index_set, omega, tol=1e-8, gap_law=False, h=0.0
     ):
         # omega: the theta of the run options, unused: the theta-weighted
-        # works are those of the integrator's theta (theta_dem for DEM)
+        # works are those of the integrator's theta (theta_dem for DEM).
+        # gap_law and h, unused too: the scheme the integrator runs decides,
+        # not the osi of the script (a --scheme of the siconos command line
+        # changes it), and h is the integrator's
+        simulation = self._simulation.handle()
         return self.handle().contact_work(
-            self._simulation.handle().current_step(),
+            simulation.current_step(),
             self.integratorTheta(),
             tol,
-            int(gap_law),
-            h,
+            int(simulation.one_step_integrator().scheme() in GAP_LAW_SCHEMES),
+            simulation.time_discretization().h(),
         )
 
 

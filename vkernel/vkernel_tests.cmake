@@ -287,6 +287,8 @@ if(WITH_TESTING)
     new_python_test(NAME vkernel_python_quasi_inelastic_pile SCRIPT
                     quasi_inelastic_pile.py)
     new_python_test(NAME vkernel_python_rolling_friction SCRIPT rolling_friction.py)
+    # the options of the siconos command line: --scheme, --mu-r, --svg-*
+    new_python_test(NAME vkernel_python_siconos_options SCRIPT siconos_options.py)
     # the AOS kernel reference of rolling_friction_aos.py
     add_executable(disk_line_rolling_aos
                    src/siconos/vkernel/tests/disk_line_rolling_aos.cpp)

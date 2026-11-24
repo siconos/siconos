@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="365" viewBox="0 -22 800 365" font-family="sans-serif">
 <rect x="0" y="-22" width="100%" height="100%" fill="#fcfcfb"/>
-<text id="title" font-size="12" fill="#2b2b2b"><tspan x="6" y="-6">t = 1 s · MoreauJeanOSI · 2 bodies · 3 contacts · mu = 0.3 · arrows: reaction impulse, largest 0.0484 N s</tspan></text>
+<text id="title" font-size="12" fill="#2b2b2b"><tspan x="6" y="-6">t = 1 s · MoreauJean · 2 bodies · 3 contacts · mu = 0.3 · arrows: reaction impulse, largest 0.0484 N s</tspan></text>
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#c0392b"/></marker></defs>
 <g id="static" stroke-linecap="butt">
 <g id="s2"><path id="h2_0" d="M742.15,285.44l20.07,16.06M742.15,256.90l20.07,16.06M742.15,228.35l20.07,16.06M742.15,199.81l20.07,16.06M742.15,171.27l20.07,16.06M742.15,142.72l20.07,16.06M742.15,114.18l20.07,16.06M742.15,85.63l20.07,16.06M742.15,57.09l20.07,16.06" stroke="#8c8c8c" stroke-width="0.8" fill="none"/><line id="l2_0" x1="742.15" y1="285.44" x2="742.15" y2="57.09" stroke="#2b2b2b" stroke-width="1.5"/></g>

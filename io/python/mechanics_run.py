@@ -831,6 +831,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._vtkhdf_contacts_writer = None
         self._vtkhdf_fem_writer = None
         self._svg = None
+        self._svg_scheme_given = False
         self._static_rows = slice(0, 0)
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
@@ -3589,8 +3590,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # which is able to serialize python object.
 
         d["friction_contact_trace_params"] = "not serialized"  # fix it
-        # the class of the integrator, the scheme of the run
+        # the class of the integrator given by the script
         d["osi"] = siconos.io.svg.scheme_name(d["osi"])
+        # vnative: the scheme the integrator runs, which the osi alone does
+        # not tell (a Frémond law, the --scheme of the siconos command line)
+        integrator_scheme = getattr(self._io, "integratorScheme", None)
+        if integrator_scheme is not None:
+            d["scheme"] = integrator_scheme()
         d["time_stepping"] = "not serialized"  # fix it
 
         d["start_run_iteration_hook"] = "not serialized"  # fix it
@@ -4053,6 +4059,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if self._dimension != 2:
                 siconos.io.tools.warn("svg_output: 2D simulations only, ignored")
             else:
+                # the title: the scheme of svg_options, else the scheme that
+                # runs (set below, once the integrator is inserted)
+                self._svg_scheme_given = "scheme" in svg_options
                 svg_options.setdefault(
                     "scheme", siconos.io.svg.scheme_name(run_options["osi"])
                 )
@@ -4483,6 +4492,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self.config.backend == "vnative":
             self.output_fem_stiffness()
             self.output_fem_mass()
+
+        # vnative: the pictures titled with the scheme that runs, as the
+        # siconos_svg converter titles them from the run options
+        integrator_scheme = getattr(self._io, "integratorScheme", None)
+        if (
+            self._svg is not None
+            and not self._svg_scheme_given
+            and integrator_scheme is not None
+        ):
+            self._svg.picture.scheme = integrator_scheme()
 
         self.print_verbose("first output static and dynamic objects ...")
         self.init_step_index()

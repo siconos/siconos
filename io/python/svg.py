@@ -1686,6 +1686,8 @@ class RunPictures:
     def __init__(self, io_filename, shapes, requests, h, fem=None, **options):
         self.io_filename = io_filename
         self.directory = options.pop("directory", None)
+        if self.directory is not None:
+            os.makedirs(self.directory, exist_ok=True)
         self.coulomb = options.pop("coulomb", False)
         self.animate = options.pop("animate", False)
         self.strobe = options.pop("strobe", False)
@@ -1898,7 +1900,10 @@ def convert(
         data = f["data"]
         steps = FileSteps(data)
         run_options = _file_run_options(data)
-        options.setdefault("scheme", run_options.get("osi"))
+        # vnative: the scheme that ran, else the class of the integrator
+        options.setdefault(
+            "scheme", run_options.get("scheme") or run_options.get("osi")
+        )
         options.setdefault("length_unit", run_options.get("gravity_scale"))
         picture = Picture(
             vtkhdf.ShapeTable(data, dimension), vtkhdf.FemMeshes(data), **options
