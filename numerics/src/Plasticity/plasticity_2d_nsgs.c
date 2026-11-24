@@ -469,6 +469,14 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
+  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE) {
+    numerics_error_log("plasticity_2d_nsgs",
+                       "Cartesian stress coordinates: use plasticity_2d_driver, which "
+                       "writes the problem in cone coordinates");
+    *info = 1;
+    return;
+  }
+
   /* Number of cones */
   size_t nc = problem->numberOfCones;
 

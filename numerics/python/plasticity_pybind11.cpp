@@ -26,6 +26,17 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .value("VON_MISES", PLASTICITY_MODEL_VON_MISES, "Von Mises model")
       .export_values();
 
+  // PlasticityStressCoordinates enum
+  py::enum_<PlasticityStressCoordinates>(m, "PlasticityStressCoordinates",
+                                         "Coordinates of the stress (and strain rate)")
+      .value("CONE", PLASTICITY_STRESS_COORDINATES_CONE,
+             "Cone coordinates (sigma_N, sigma_T1, sigma_T2)")
+      .value("CARTESIAN_MANDEL", PLASTICITY_STRESS_COORDINATES_CARTESIAN_MANDEL,
+             "Cartesian, Mandel notation (sxx, syy, sqrt(2) sxy)")
+      .value("CARTESIAN_VOIGT", PLASTICITY_STRESS_COORDINATES_CARTESIAN_VOIGT,
+             "Cartesian, Voigt notation (sxx, syy, sxy), strain rate (exx, eyy, 2 exy)")
+      .export_values();
+
   // Plasticity_DruckerPrager_model
   py::class_<Plasticity_DruckerPrager_model, py::smart_holder>(
       m, "Plasticity_DruckerPrager_model",
@@ -51,7 +62,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .def_readwrite("M", &PlasticityProblem::M, "M matrix")
       .def_readwrite("q", &PlasticityProblem::q, "q vector")
       .def_readwrite("model_type", &PlasticityProblem::model_type, "Model type enum")
-      .def_readwrite("model", &PlasticityProblem::model, "Model parameters union");
+      .def_readwrite("model", &PlasticityProblem::model, "Model parameters union")
+      .def_readwrite("stress_coordinates", &PlasticityProblem::stress_coordinates,
+                     "Coordinates of the stress and strain rate (cone or Cartesian)");
 
   // Factory function for creating PlasticityProblem with Drucker-Prager model
   m.def(

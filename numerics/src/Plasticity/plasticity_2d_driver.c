@@ -22,6 +22,7 @@
 #include "numerics_verbose.h"
 #include "plasticity_2d_compute_error.h"
 #include "plasticity_2d_solvers.h"
+#include "plasticity_2d_stress_coordinates.h"
 #include "solver_registry.h"
 
 /* ===========================================================================
@@ -134,6 +135,29 @@ static int plasticity_2d_driver_without_cohesion(PlasticityProblem* problem, dou
   return solve_status;
 }
 
+/* Cartesian stresses: the problem is written once for all in cone coordinates,
+ * sigma_c = P s, M_c = P^{-T} M P^{-1}, q_c = P^{-T} q (the model parameters are the same),
+ * solved, and the solution mapped back, s = P^{-1} sigma_c, w_s = P^T w_c. */
+static int plasticity_2d_driver_cartesian(PlasticityProblem* problem, double* stress,
+                                          double* strainrate, SolverOptions* options) {
+  PlasticityStressCoordinates coordinates = problem->stress_coordinates;
+  int nc = problem->numberOfCones;
+  PlasticityProblem cone = *problem; /* shares the model parameters */
+  cone.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
+  cone.M = plasticity_2d_matrix_to_cone(coordinates, problem->M);
+  cone.q = (double*)malloc((size_t)(3 * nc) * sizeof(double));
+  plasticity_2d_strainrate_to_cone(coordinates, nc, problem->q, cone.q);
+  plasticity_2d_stress_to_cone(coordinates, nc, stress, stress);
+
+  int info = plasticity_2d_driver(&cone, stress, strainrate, options);
+
+  plasticity_2d_stress_from_cone(coordinates, nc, stress, stress);
+  plasticity_2d_strainrate_from_cone(coordinates, nc, strainrate, strainrate);
+  NM_free(cone.M);
+  free(cone.q);
+  return info;
+}
+
 /* Drucker-Prager with cohesion c: with a = c/eta e_N for each cone, sigma~ = sigma + a is
  * solution of the problem without cohesion with q~ = q - M a (w = M sigma + q is unchanged).
  * The problem is translated, solved without cohesion, and translated back. */
@@ -143,6 +167,8 @@ int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double* str
     numerics_error_log("plasticity_2d_driver", "null input argument");
     return NUMERICS_ERR_NULL_POINTER;
   }
+  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE)
+    return plasticity_2d_driver_cartesian(problem, stress, strainrate, options);
   double* shift = NULL;
   int err = plasticity_DruckerPrager_cohesion_shift(problem, &shift);
   if (err) return err;

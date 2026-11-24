@@ -137,6 +137,7 @@ void plasticity_display(PlasticityProblem* problem) {
   printf("dimension :%d \n", problem->dimension);
   printf("numberOfCones:%d \n", problem->numberOfCones);
   printf("model_type: %s\n", plasticity_model_type_to_string(problem->model_type));
+  printf("stress_coordinates: %d\n", problem->stress_coordinates);
 
   if (problem->M) {
     printf("M matrix:\n");
@@ -415,6 +416,7 @@ PlasticityProblem* plasticityProblem_new(void) {
   problem->q = NULL;
   problem->model_type = PLASTICITY_MODEL_UNKNOWN;
   problem->model.generic = NULL;
+  problem->stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
 
   return problem;
 }
@@ -428,6 +430,7 @@ PlasticityProblem* plasticityProblem_new_with_data(int dim, int nc, NumericsMatr
   problem->numberOfCones = nc;
   problem->M = M;
   problem->q = q;
+  problem->stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
   if (model) {
     problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
     problem->model.drucker_prager = model;
@@ -448,6 +451,7 @@ PlasticityProblem* plasticity_copy(PlasticityProblem* problem) {
   new_problem->dimension = problem->dimension;
   new_problem->numberOfCones = problem->numberOfCones;
   new_problem->model_type = problem->model_type;
+  new_problem->stress_coordinates = problem->stress_coordinates;
   new_problem->M = NM_copy(problem->M);
   new_problem->q = (double*)malloc(n * sizeof(double));
   memcpy(new_problem->q, problem->q, n * sizeof(double));

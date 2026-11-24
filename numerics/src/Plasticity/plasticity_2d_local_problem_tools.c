@@ -69,6 +69,7 @@ PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* probl
 
   /* Copy model type from parent problem */
   localproblem->model_type = problem->model_type;
+  localproblem->stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
 
   /* Allocate model-specific data based on model type */
   switch (problem->model_type) {
