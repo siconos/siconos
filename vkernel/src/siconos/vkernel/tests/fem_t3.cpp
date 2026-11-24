@@ -11,13 +11,12 @@
 // siconos-tutorials examples/mechanics/FEM/native/T3.cpp, whose output is
 // T3_square_200.ref.
 //
-// The two trajectories agree to rounding before the impact and then
-// decorrelate: 8 nodes hit the ground at once with e = 0, which amplifies a
-// rounding difference exponentially (a chaotic divergence, not an error).  So the AOS
-// reference is checked on the first steps only, the whole run on physical
-// bounds, and fem_t3.ref locks the current trajectory against regression: a
-// change of the floating point operations may require regenerating it, it does
-// not by itself point to a bug.
+// The two trajectories agree to rounding over the whole run, the impact
+// included (relative error 1.3e-14).  They used to decorrelate after the
+// impact: that was not chaos but the Dirichlet conditions of the vkernel,
+// whose blocked velocities were zeroed after the unconstrained solve instead
+// of a solve with the operator of the free dofs (algebra::constrain_dofs).
+// fem_t3.ref locks the trajectory against regression.
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -240,14 +239,13 @@ class FemT3Test : public CppUnit::TestFixture {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("1000 steps", Eigen::Index{1001}, dat.rows());
     CPPUNIT_ASSERT_MESSAGE("a finite trajectory", finite);
 
-    // the AOS kernel, before the impact: the same model, another code
+    // the AOS kernel: the same model, another code, the whole run
     const auto aos = siconos::vkernel::test::read_ref("T3_square_200.ref");
-    const auto early =
-        siconos::vkernel::test::relative_error(dat.topRows(aos_rows), aos.topRows(aos_rows));
-    std::print("first {} rows against the AOS reference: relative error {:.3e}\n", aos_rows,
-               early.relative);
-    CPPUNIT_ASSERT_MESSAGE("the AOS reference on the first steps",
-                           early.relative <= aos_tolerance);
+    const auto whole = siconos::vkernel::test::relative_error(dat, aos);
+    std::print("{} rows against the AOS reference: relative error {:.3e}\n", dat.rows(),
+               whole.relative);
+    CPPUNIT_ASSERT_MESSAGE("the AOS reference on the whole run",
+                           whole.relative <= aos_tolerance);
 
     // the ground holds the bottom nodes, up to the penetration of a
     // velocity-level scheme
@@ -258,8 +256,7 @@ class FemT3Test : public CppUnit::TestFixture {
   }
 
  private:
-  static constexpr Eigen::Index aos_rows = 6;
-  static constexpr double aos_tolerance = 1e-8;
+  static constexpr double aos_tolerance = 1e-12;
   static constexpr double penetration = 1e-4;
 };
 

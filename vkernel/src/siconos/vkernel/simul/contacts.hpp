@@ -15,6 +15,7 @@
 
 #include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/algebra/numerics_backend.hpp"
+#include "siconos/vkernel/algebra/sparse_factor.hpp"
 #include "siconos/vkernel/model/lagrangian_ds.hpp"
 #include "siconos/vkernel/model/lagrangian_r.hpp"
 // after the models
@@ -171,6 +172,29 @@ template <storage::pattern::string_literal Name>
 struct assemble_diagonal_block : kernel<involved<systems>, rank, in<Name>>, assembles {
   static void apply(auto& p, auto index, const auto& block) {
     set_value(p.matrix, p.at(index), p.at(index), block);
+  }
+};
+
+// a block of the assembled matrix of an involved FEM system with its
+// Dirichlet conditions: the attribute Name with the rows and the columns of
+// the blocked dofs zero and Diagonal on their diagonal (1 for M, 0 for K),
+// so that the assembled A = M + h^2 theta^2 K is the operator of the free
+// dofs (see algebra::constrain_dofs)
+template <storage::pattern::string_literal Name, int Diagonal>
+struct assemble_constrained_diagonal_block
+    : kernel<involved<systems>, rank, in<Name>, in<"bc_velocities_0", by_topology>>,
+      host_only,
+      assembles {
+  static void apply(auto& p, auto index, const auto& block, const auto& blocked) {
+    if (std::size(blocked) == 0) {
+      set_value(p.matrix, p.at(index), p.at(index), block);
+    } else {
+      auto constrained = block;
+      algebra::constrain_dofs(
+          constrained, blocked,
+          static_cast<typename std::decay_t<decltype(block)>::Scalar>(Diagonal));
+      set_value(p.matrix, p.at(index), p.at(index), constrained);
+    }
   }
 };
 

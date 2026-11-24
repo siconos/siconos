@@ -25,6 +25,27 @@
 
 namespace siconos::vkernel::algebra {
 
+// a Dirichlet condition on a FEM operator: the rows and the columns of the
+// blocked dofs set to zero, their diagonal entries to diagonal (1 for M or
+// A = M + h^2 theta^2 K, 0 for K). Solved with such an A, the free dofs see
+// A_ff, the operator of the free dofs, and not A with the blocked velocity
+// zeroed afterwards.
+template <typename Scalar, int Options, typename Index>
+void constrain_dofs(Eigen::SparseMatrix<Scalar, Options, Index>& m, const auto& blocked,
+                    Scalar diagonal) {
+  if (std::size(blocked) == 0) return;
+  std::vector<char> is_blocked(static_cast<std::size_t>(m.rows()), 0);
+  for (auto k : blocked) is_blocked[static_cast<std::size_t>(k)] = 1;
+  m.prune([&](const Index& row, const Index& col, const Scalar&) {
+    return !is_blocked[static_cast<std::size_t>(row)] &&
+           !is_blocked[static_cast<std::size_t>(col)];
+  });
+  if (diagonal != Scalar(0)) {
+    for (auto k : blocked) m.coeffRef(static_cast<Index>(k), static_cast<Index>(k)) = diagonal;
+  }
+  m.makeCompressed();
+}
+
 class sparse_factor {
  public:
   using matrix_t = Eigen::SparseMatrix<double>;

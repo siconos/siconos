@@ -18,6 +18,7 @@
 #include "siconos/vkernel/storage/get.hpp"
 #include "siconos/vkernel/storage/mp/mp.hpp"
 #include "siconos/vkernel/storage/schedule.hpp"
+#include "siconos/vkernel/storage/sparse_set.hpp"
 #include "siconos/vkernel/utils/variant.hpp"
 
 namespace siconos::vkernel::simul {
@@ -205,16 +206,23 @@ struct system_kind : item {
       simul::for_each_involved<system, topology>(self()->data(), step, f);
     }
 
+    // the FEM blocks with their Dirichlet conditions (the rigid ones: a
+    // diagonal M and zero columns of H suffice for the blocked components)
     void assemble_mass_matrix(auto step, auto& assembled) {
       // size may be 0
-      run<contacts::assemble_diagonal_block<"mass_matrix">>(
-          step, contacts::diagonal_blocks{mass_matrix_view(assembled), at()});
+      if constexpr (with_k_matrix()) {
+        run<contacts::assemble_constrained_diagonal_block<"mass_matrix", 1>>(
+            step, contacts::diagonal_blocks{mass_matrix_view(assembled), at()});
+      } else {
+        run<contacts::assemble_diagonal_block<"mass_matrix">>(
+            step, contacts::diagonal_blocks{mass_matrix_view(assembled), at()});
+      }
     }
 
     void assemble_k_matrix(auto step, auto& assembled) {
       if constexpr (with_k_matrix()) {
         // size may be 0
-        run<contacts::assemble_diagonal_block<"k_matrix">>(
+        run<contacts::assemble_constrained_diagonal_block<"k_matrix", 0>>(
             step, contacts::diagonal_blocks{k_matrix_view(assembled), at()});
       }
       // else the systems are rigid and the sparse k_matrix is not filled.
@@ -229,7 +237,20 @@ struct system_kind : item {
       return *op;
     }
 
-    // M + h^2 theta^2 K, refactorized only if h or theta change
+    // the blocked velocity components of the system i (its Dirichlet
+    // conditions), f(blocked); nothing if it has none
+    void with_blocked_dofs(auto step, std::size_t i, auto&& f) {
+      auto& values =
+          storage::prop_values<system, "bc_velocities_0", topology>(self()->data(), step);
+      if constexpr (storage::is_sparse_set_v<std::decay_t<decltype(values)>>) {
+        if (const auto* blocked = values.try_get(i)) f(*blocked);
+      } else {
+        f(values[i]);
+      }
+    }
+
+    // M + h^2 theta^2 K, refactorized only if h or theta change; with the
+    // Dirichlet conditions of the system (algebra::constrain_dofs)
     algebra::sparse_factor& fem_w_factor(auto step, std::size_t i, auto h, double theta) {
       auto& op = fem_operator(step, i);
       if (!op.w || op.h != h || op.theta != theta) {
@@ -238,6 +259,8 @@ struct system_kind : item {
         auto& k = storage::attr_values<system, "k_matrix">(data, step)[i];
         algebra::sparse_factor::matrix_t w = m;
         w += (h * h * theta * theta) * k;
+        with_blocked_dofs(
+            step, i, [&](const auto& blocked) { algebra::constrain_dofs(w, blocked, 1.); });
         w.makeCompressed();
         op.w = std::make_shared<algebra::sparse_factor>(w);
         op.h = h;
@@ -251,6 +274,8 @@ struct system_kind : item {
       if (!op.m) {
         algebra::sparse_factor::matrix_t m =
             storage::attr_values<system, "mass_matrix">(self()->data(), step)[i];
+        with_blocked_dofs(
+            step, i, [&](const auto& blocked) { algebra::constrain_dofs(m, blocked, 1.); });
         m.makeCompressed();
         op.m = std::make_shared<algebra::sparse_factor>(m);
       }
