@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # REGISTRY_PATH will be updated (sed) during kaniko call
 FROM gricad-registry.univ-grenoble-alpes.fr/REGISTRY_PATH/ubuntu18.04
 RUN apt update  && apt install -y -qq \

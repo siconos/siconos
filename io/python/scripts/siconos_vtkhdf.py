@@ -1,4 +1,12 @@
 #!/usr/bin/env @Python_EXECUTABLE@
+
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 """
 Description: Write the bodies of a Siconos mechanics-IO HDF5 file in a
 transient VTKHDF file, readable by ParaView, with the shapes of the bodies

@@ -1,10 +1,10 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
-// #include <H5Apublic.h>
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 #include "rolling_friction_3d_onecone_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
 
 #include <float.h>   // for DBL_EPSILON

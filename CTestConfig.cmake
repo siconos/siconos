@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 ## This file should be placed in the root directory of your project.
 ## Then modify the CMakeLists.txt file in the root directory of your
 ## project to incorporate the testing dashboard.

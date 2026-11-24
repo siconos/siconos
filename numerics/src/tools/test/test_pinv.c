@@ -1,3 +1,10 @@
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 #include <stdio.h>   // for printf, NULL, fclose, fopen, FILE
 #include <stdlib.h>  // for free, malloc
 #include <string.h>  // for memcpy

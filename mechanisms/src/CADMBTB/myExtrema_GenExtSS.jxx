@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
 #ifndef _TColgp_HArray2OfPnt_HeaderFile
 #include <TColgp_HArray2OfPnt.hxx>
 #endif

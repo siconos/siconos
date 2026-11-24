@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM archlinux/base
 WORKDIR /home
 ENV CI_PROJECT_DIR /home

@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2026 INRIA
+..
+.. SPDX-License-Identifier: Apache-2.0
+
 .. index::
    single: Mixed (Non Linear) Complementarity problem (MCP)
 

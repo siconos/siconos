@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Configuration for pre-commit : https://pre-commit.com
 # One conf for two runs:
 #  - locally --> up to current user (pre-commit and pre-push). Need to be activated
@@ -51,3 +55,10 @@ repos:
         args: [--fix]
       - id: ruff-format  # format
         exclude: ^externals/
+
+
+# - lint - Reuse for licensing stuff (https://reuse.software/tutorial/)
+  - repo: https://codeberg.org/fsfe/reuse-tool
+    rev: v6.3.0
+    hooks:
+      - id: reuse

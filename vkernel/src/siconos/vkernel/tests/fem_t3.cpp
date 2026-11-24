@@ -1,9 +1,9 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
 
 // A linear elastic square (T3 elements, square_200.msh) falls onto a fixed
 // ground: rt_rt interactions on its 8 bottom nodes, Moreau-Jean, theta = 1,

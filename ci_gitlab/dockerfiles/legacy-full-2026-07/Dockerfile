@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 ARG MAMBAIMAGE=mambaorg/micromamba:1.5.8@sha256:475730daef12ff9c0733e70092aeeefdf4c373a584c952dac3f7bdb739601990
 FROM $MAMBAIMAGE AS mamba-base
 ENV DEBIAN_FRONTEND=noninteractive

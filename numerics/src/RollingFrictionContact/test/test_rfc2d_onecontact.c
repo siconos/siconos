@@ -1,9 +1,10 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 /* One contact of 2D rolling friction, rolling_friction_2d_driver (NSGS)
    with the default local solver and with ONECONTACT_ENUM.
    1. Known answers: a disk (m = 1, R = 1, J = 1/2) on the line y = 0, one

@@ -1,9 +1,10 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 /*! \file NewtonEuler1DR.hpp
  *  \deprecated NewtonEuler1DR has been renamed NewtonEulerNormalVelocityR: include
  * NewtonEulerNormalVelocityR.hpp. This header is kept for one release.

@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # json and python files only.
 # This part is dedicated to the installation of oce renderer files (no build, only conf and installation).
 if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)

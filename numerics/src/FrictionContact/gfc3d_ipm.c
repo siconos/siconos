@@ -1,9 +1,9 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
 
 /* solver based on Interior Point Method (IPM) for friction-contact 3D problem based on an AVI
  * reformulation Vincent Acary, Paul Armand, Hoang Minh NGUYEN. High-accuracy computation of

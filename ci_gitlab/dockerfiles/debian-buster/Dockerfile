@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM debian:buster
 RUN apt update  && apt install -y -qq \
         git-core \

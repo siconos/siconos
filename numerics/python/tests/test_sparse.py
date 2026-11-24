@@ -1,9 +1,9 @@
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 from numpy import double, finfo
 from scipy.sparse import csc_matrix, csr_matrix, lil_matrix
 from siconos.numerics import (

@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # -- OpenCASCADE --
 # Must :
 # - check if OpenCASCADE is available on the system

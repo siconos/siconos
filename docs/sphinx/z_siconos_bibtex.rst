@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2026 INRIA
+..
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _siconos_manual_biblio:
 
 Bibliography

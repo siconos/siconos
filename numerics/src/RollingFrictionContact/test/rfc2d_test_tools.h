@@ -1,9 +1,10 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 /* Tools of the 2D rolling friction tests: random problems W = H M^-1 H^T
    of a chain of disks (contact c touches the disks c and c - 1, rows
    normal, tangent, rolling), and the check of the law independent of

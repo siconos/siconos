@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2026 INRIA
+..
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _beads_column_example:
 
 Tutorial: a column of beads

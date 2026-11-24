@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 @SICONOS_PYTHON_PACKAGE@, a Python package dedicated to
  nonsmooth systems modelisation and simulation.

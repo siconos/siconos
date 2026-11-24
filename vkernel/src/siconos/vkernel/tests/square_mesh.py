@@ -1,9 +1,9 @@
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 
 # The unit square as a gmsh 2.2 mesh of N x N cells, two T3 per cell, with
 # the physical groups of mesh_N5.msh (N = 5): the bulk material (1), the

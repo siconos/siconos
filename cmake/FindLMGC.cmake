@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # Find the LMGC includes and libraries.
 # The following variables are set if LMGC is found.  If LMGC is not
 # found, LMGC_FOUND is set to false.

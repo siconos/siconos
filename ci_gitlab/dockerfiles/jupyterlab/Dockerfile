@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 ##  - Prepare an image including (and starting) Jupyter lab
 ARG REGISTRY=gricad-registry.univ-grenoble-alpes.fr
 ARG PROJECT=nonsmooth/siconos

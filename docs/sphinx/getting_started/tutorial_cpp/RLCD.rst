@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2026 INRIA
+..
+.. SPDX-License-Identifier: Apache-2.0
+
 .. _RLCD_example:
 
 Simulation of an electrical oscillator supplying a resistor through a half-wave rectifier

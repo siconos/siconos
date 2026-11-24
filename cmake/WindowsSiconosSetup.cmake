@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 if(MSVC)
 	include(PlatForm/Windows)
 	if(CMAKE_SYSTEM_NAME MATCHES "Windows")

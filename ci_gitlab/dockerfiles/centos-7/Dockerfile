@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM centos:7
 RUN yum update -y && yum install -y -qq \
      https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm

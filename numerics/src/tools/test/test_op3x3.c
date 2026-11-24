@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
 
 /* random is POSIX but not C99...
  * we don't define _BSD_SOURCE but rather _XOPEN_SOURCE */

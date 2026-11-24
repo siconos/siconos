@@ -1,11 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#[=======================================================================[.rst
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
-#
-# SPDX-FileCopyrightText: INRIA
-# SPDX-License-Identifier: Apache-2.0
-#
-# --
-#[=======================================================================[.rst
 set_install_path
 ------------------
  --- Function to compute the install path/options ---

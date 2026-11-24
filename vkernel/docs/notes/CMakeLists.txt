@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # The studies of the notes of vkernel/docs/notes: one target each, not
 # part of all, writing their outputs (data, tables, figures) under
 # <build>/vkernel/notes/<study>. The figures of the documents are

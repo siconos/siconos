@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # =================================================================
 # siconos configuration file.
 # Check https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages

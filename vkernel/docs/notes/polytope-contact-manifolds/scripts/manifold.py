@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 """Python port of the vkernel 2D contact manifold (cxd_narrowphase.hpp).
 
 normal  : separated -> closest-feature direction A -> B (distance GJK)

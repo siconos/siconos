@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 have_bullet = "@SICONOS_HAS_BULLET@"
 have_bullet = have_bullet in [True, "ON", "1", "TRUE", "YES"]
 

@@ -15,11 +15,6 @@ License agreement is stated in the file, and reproduced below.
 Taken from https://lists.boost.org/MailArchives/ublas/att-2461/expm.hpp
 License agreement is stated in the file, and reproduced below.
 
-# determinant.hpp
-
-License agreement requested by email
-https://lists.boost.org/MailArchives/ublas/att-2984/det.cpp
-
 # bindings_utils.hpp
 
 Collection of functions put together by Vincent Acary for Siconos from
@@ -41,10 +36,6 @@ License: BOOST-1.0
 Files: externals/boost_contribs/expm.hpp
 Copyright: 2007 Dung-Bang Tsai <dbtsai@gmail.com>
 License: expm
-
-Files: externals/boost_contribs/determinant.hpp
-Copyright: 2008 Maik Beckmann
-License: WIP (email sent)
 
 Files: externals/boost_contribs/bindings_utils.hpp
 Copyright: 2008 Toon Knapen

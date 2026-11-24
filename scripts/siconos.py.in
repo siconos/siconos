@@ -1,4 +1,9 @@
 #!/usr/bin/env @Python_EXECUTABLE@
+
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Classes and functions used at runtime
 to configure, build and execute siconos examples
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM fedora:38 AS siconos-base
 RUN dnf --setopt=deltarpm=false install -y \
 	make \

@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 
 # siconos-tutorials GeometricPrimitives/convexhull2d_on_box.py, run with the
 # vnative backend (vkernel): two convex polygons falling on a Box2d ground.

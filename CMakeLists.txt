@@ -1,12 +1,9 @@
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
-#===============================================================================
-# cmake utility to compile and install siconos.
-#===============================================================================
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 
 # ============= Global 'standard' cmake Settings =============
 

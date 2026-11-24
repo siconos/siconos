@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 file(GLOB GPU_SOURCES CONFIGURE_DEPENDS "*.cu")
 
 # Convert relative paths to absolute paths so the parent can find them

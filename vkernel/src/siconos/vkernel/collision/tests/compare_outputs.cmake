@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # cmake -DA=<exe> -DB=<exe> -DWD=<dir> -P compare_outputs.cmake
 #
 # runs A then B in WD: both must succeed and print the same output. The

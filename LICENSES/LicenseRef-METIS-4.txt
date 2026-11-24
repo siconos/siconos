@@ -1,0 +1,11 @@
+METIS 4 License (LicenseRef-METIS-4)
+
+Copyright 1998, Regents of the University of Minnesota.
+METIS was written by George Karypis (karypis@cs.umn.edu).
+
+METIS is a software package for partitioning unstructured graphs,
+partitioning meshes, and computing fill-reducing orderings of sparse matrices.
+
+The full license text is provided by the University of Minnesota with the
+METIS 4 distribution (http://www.cs.umn.edu/~metis). This file serves as the
+REUSE license reference for the METIS 4 sources vendored under externals/lbl/metis4.

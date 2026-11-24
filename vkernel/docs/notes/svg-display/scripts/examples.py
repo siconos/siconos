@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
 # The figures of vkernel/docs/notes/svg-display.md: the scenes of the
 # time-integrators note (incline, sliding square, column, shear) and a
 # granular one, run with the vnative backend, then drawn with

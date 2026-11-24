@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # CI config (jobs) used to build documentation for siconos.
 # This file is included in main .gitlab-ci.yml only if the job build-doc is
 # executed (see trigger keyword).

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM ubuntu:22.04 AS siconos-base
 ENV TZ=Europe/Paris
 ENV DEBIAN_FRONTEND=noninteractive

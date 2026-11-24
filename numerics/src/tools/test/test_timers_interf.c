@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
 
 /* to be compared with :
    valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes

@@ -1,0 +1,10 @@
+QL license (LicenseRef-QL)
+
+Copyright 2005 Klaus Schittkowski.
+
+This license Agreement is a legal agreement between Klaus Schittkowski
+(the Author) and You, the user, for the software ql0001.f.
+
+The software is licensed for use by members or students of academic
+institutions. It is not a standard open-source license and may restrict
+commercial use. See the full text in externals/optim_misc/copyright.

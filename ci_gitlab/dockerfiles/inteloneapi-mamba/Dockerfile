@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM intel/oneapi-hpckit:latest
 RUN apt update  && apt upgrade -y &&  apt install -y -qq \
 libgl1

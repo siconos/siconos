@@ -1,3 +1,10 @@
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 // -*- compile-command: "make -C ~/projects/siconos/bld/mechanics && valgrind --leak-check=full
 // --suppressions=$HOME/projects/siconos/cmake/valgrind.supp
 // ~/projects/siconos/bld/mechanics/src/collision/bullet/test/testContact ContactTest" -*- make

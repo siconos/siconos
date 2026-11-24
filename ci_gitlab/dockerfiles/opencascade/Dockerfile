@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Build an image including opencascade
 # Req: opencascade-7.4.0.tgz available where docker is launched
 #### Mamba setup ###

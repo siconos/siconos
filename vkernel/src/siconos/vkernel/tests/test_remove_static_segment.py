@@ -1,9 +1,9 @@
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 
 """A static segment with a time of death, removed under the vnative backend:
 the other segments must still hold the disks.

@@ -1,4 +1,9 @@
 #!@PYTHON_EXECUTABLE@
+
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # -*- coding: utf-8 -*-
 #
 # Siconos documentation build configuration file, created by

@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2026 INRIA
+..
+.. SPDX-License-Identifier: Apache-2.0
+
 siconos-team@inria.fr - `INRIA - Tripop`_
 
 `Contributors`_

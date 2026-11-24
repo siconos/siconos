@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM debian:bookworm@sha256:9344f8b8992482f80cba753f323adeaf17690076c095ccff6cc9536be98185dc AS siconos-base
 ENV DEBIAN_FRONTEND=noninteractive
 ARG DEBIAN_SNAPSHOT=20260731T022227Z

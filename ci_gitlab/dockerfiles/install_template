@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
 FROM IMAGENAME
 WORKDIR /home
 ARG BUILD_DIR=build

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Templates for ci jobs
 # It defines workflow rules, templates to create docker images, to configure, build siconos and so on.
 include:
@@ -101,7 +105,7 @@ pre-commit:
   script:
     # to avoid "fatal: detected dubious ownership in repository "
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
-    - pip install prek pre-commit
+    - pip install prek pre-commit reuse
     - prek run --all-files
   cache:
     key: prek

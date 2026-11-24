@@ -1,0 +1,137 @@
+version = 1
+
+[[annotations]]
+path = ["LICENSES/README.md"]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 INRIA"
+
+[[annotations]]
+path = [
+        "**/*.dat",
+        "**/*.ref",
+        "**/*.eps",
+        "**/*.png",
+        "**/*.h5",
+        "**/*.hdf5",
+        "**/*.gms",
+        "**/*.md",
+        "**/*.sh",
+        "**/*.step",
+        "**/*.stp",
+        "**/*.json",
+        "**/*.toml",
+        "**/*.tex",
+        "**/*.pdf",
+        "**/*.msh",
+        "**/*.xml",
+        "**/*.gz",
+        "**/*.npz",
+        "**/*.jpg",
+        "**/*.svg",
+        "**/*.patch",
+        "**/*requirements*.txt",
+        "**/copyright"
+]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 INRIA"
+
+
+[[annotations]]
+path = [
+        ".channels.scm",
+        ".clang-format",
+        ".gitignore",
+        ".guix-channel",
+        "NEWS",
+        "VERSION",
+        "AUTHORS",
+        "cmake/valgrind.supp",
+        "vkernel/ChangeLog",
+]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 INRIA"
+
+
+[[annotations]]
+path = [
+        "docs/sphinx/figures/**",
+        "docs/sphinx/devel_guide/**",
+        "docs/sphinx/_static/**",
+]
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "2026 INRIA"
+
+[[annotations]]
+path = "externals/CompactNSearch/**"
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = "CompactNSearch authors"
+
+[[annotations]]
+path = "externals/cuNSearch/**"
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = "cuNSearch authors"
+
+[[annotations]]
+path = "externals/sort/**"
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = "sort authors"
+
+[[annotations]]
+path = "externals/cxd/**"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileCopyrightText = "cxd authors"
+
+[[annotations]]
+path = "externals/hairer/**"
+SPDX-License-Identifier = "BSD-3-Clause"
+SPDX-FileCopyrightText = "2004, Ernst Hairer"
+
+[[annotations]]
+path = "externals/SOL/**"
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = "1999 Michael Saunders <saunders@stanford.edu>"
+
+[[annotations]]
+path = "externals/numeric_bindings/**"
+SPDX-FileCopyrightText = "Boost bindings authors"
+SPDX-License-Identifier = "BSL-1.0"
+
+[[annotations]]
+path = ["externals/boost_hana_pfr/**", "externals/boost_serialization/**"]
+SPDX-FileCopyrightText = "Boost authors"
+SPDX-License-Identifier = "BSL-1.0"
+
+[[annotations]]
+path = "externals/PATH_SDK/**"
+SPDX-FileCopyrightText = "PATH SDK authors"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "externals/netlib/**"
+SPDX-FileCopyrightText = "netlib authors"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "externals/lbl/**"
+SPDX-FileCopyrightText = "1998 Regents of the University of Minnesota"
+SPDX-License-Identifier = "LicenseRef-METIS-4"
+
+[[annotations]]
+path = ["externals/boost_contribs/random.hpp"]
+SPDX-License-Identifier = "BSL-1.0"
+SPDX-FileCopyrightText = "Toon Knapen, Karl Meerbergen"
+
+[[annotations]]
+path = ["externals/boost_contribs/expm.hpp"]
+SPDX-License-Identifier = "LicenseRef-expm"
+SPDX-FileCopyrightText = "2007 Dung-Bang Tsai"
+
+[[annotations]]
+path = ["externals/boost_contribs/bindings_utils.hpp"]
+SPDX-License-Identifier = "BSL-1.0"
+SPDX-FileCopyrightText = "2008 Toon Knapen, Karl Meerbergen, Thomas Klimpel, Vincent Acary"
+
+[[annotations]]
+path = ["externals/optim_misc/ql0001/ql0001.f"]
+SPDX-License-Identifier = "LicenseRef-QL"
+SPDX-FileCopyrightText = "2005 Klaus Schittkowski"

@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # Find the Siconos ACEF includes and libraries.
 # The following variables are set if ACEF is found.  If ACEF is not
 # found, SiconosACEF_FOUND is set to false.

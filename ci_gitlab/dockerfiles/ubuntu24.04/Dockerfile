@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # 1.ubuntu 24.04 image where we add all Siconos-required ubuntu packages, as root
 #
 FROM ubuntu:24.04 AS siconos-base

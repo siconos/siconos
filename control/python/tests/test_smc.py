@@ -1,10 +1,9 @@
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
-# this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 
 import sys
 from math import ceil, sin

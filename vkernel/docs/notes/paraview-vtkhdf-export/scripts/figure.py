@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # The figures of paraview-vtkhdf-export.md: a screenshot of a ParaView state
 # written with the VTKHDF files, at a time, with or without the contacts.
 #

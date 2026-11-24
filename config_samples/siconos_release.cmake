@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # Release config based on siconos_asan.cmake
 # --- List of siconos components to build and install ---
 # Each component can be enabled/disabled with a WITH_<component> option.

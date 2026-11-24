@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+
 ##  - Prepare an image including Jupyter lab, based on mamba.
 # Note: the conf to start properly the image as a notebook is done
 # in the last step, after build, install, to avoid all the mess

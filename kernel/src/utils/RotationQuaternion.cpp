@@ -1,13 +1,10 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
-// #define DEBUG_NOCOLOR
-// #define DEBUG_BEGIN_END_ONLY
-//  #define DEBUG_STDOUT
-//  #define DEBUG_MESSAGES
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 #include "RotationQuaternion.hpp"
 
 #include <boost/math/quaternion.hpp>

@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 INRIA
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+
 # The tables and the plots of the comparisons of Moreau-Jean with the
 # Anitescu-Tasora and explicit DEM schemes, from the CSV files written by
 # nscd_comparisons (vkernel/src/siconos/vkernel/tests/nscd_comparisons.cpp).

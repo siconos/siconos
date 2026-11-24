@@ -1,12 +1,9 @@
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
+# SPDX-FileCopyrightText: 2026 INRIA
 #
-# SPDX-FileCopyrightText: INRIA
 # SPDX-License-Identifier: Apache-2.0
 #
-#====================================================================================
-# cmake utility to configure pybind11 (Python wrapper for C++) interface for Siconos.
-#====================================================================================
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 include(FindPythonModule)
 message(" ---- Start pybind11 configuration to generate python packages for Siconos ... ----")
 set(PYBIND11_FINDPYTHON ON) # Just to be sure. See https://pybind11.readthedocs.io/en/stable/cmake/index.html#modes

@@ -1,3 +1,9 @@
+! Siconos is a program dedicated to modeling, simulation and control
+! of non smooth dynamical systems.
+!
+! SPDX-FileCopyrightText: 2013 Claude Lemarechal, 2013 Eliane Panier,  2013 J. Charles Gilbert
+! SPDX-License-Identifier: Apache-2.0
+!
       subroutine n2qn1 (n, x, f, g, dxmin, df1, epsabs, imp, io,
      &mode, iter, nsim, binf, bsup, iz, rz, reverse)
       implicit double precision (a-h,o-z)
