@@ -40,7 +40,7 @@
  *
  * i.e. w_N = 0 (isochoric plastic flow, sigma_N is not constrained) and
  * w_T = -lambda sigma_T / R, lambda >= 0, lambda (R - ||sigma_T||) = 0.
- * See docs/devel/PLASTICITY_VON_MISES.md.
+ * See docs/devel/PLASTICITY.md.
  */
 
 #include "NumericsFwd.h"

@@ -29,7 +29,7 @@ typedef enum PlasticityModelType PlasticityModelType;
 
 /**
     Coordinates in which the stress sigma (and the strain rate w = M sigma + q) of each
-    element are given (see docs/devel/PLASTICITY_STRESS_COORDINATES.md).
+    element are given (see docs/devel/PLASTICITY.md).
 
     The solvers work in cone coordinates sigma_c = (sigma_N, sigma_T1, sigma_T2), with
     sigma_N = -(sxx + syy)/sqrt(2) (compression positive), sigma_T1 = (sxx - syy)/sqrt(2),

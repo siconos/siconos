@@ -21,7 +21,7 @@
 /*!\file plasticity_2d_stress_coordinates.h
   Change of variables between Cartesian stresses and the cone coordinates used by the
   Plasticity solvers (see PlasticityStressCoordinates and
-  docs/devel/PLASTICITY_STRESS_COORDINATES.md).
+  docs/devel/PLASTICITY.md).
 
   On each element, sigma_c = P s and w_c = P^{-T} w_s, with (Mandel notation, P orthogonal)
 
