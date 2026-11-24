@@ -1,18 +1,18 @@
 .. _non_smooth_laws:
 
-Non Smooth Laws
----------------
+Nonsmooth laws
+--------------
 
-A non-smooth law is an object used to define the behavior of the systems involved in an Interaction, when a non-smooth event occurs.
-For example, in the case of an impact, a Newton impact law will link the pre and post velocities at impact in something like "post-velocity = -e X pre-velocity".
+A nonsmooth law is an object that defines the behaviour of the systems involved in an Interaction when a nonsmooth event occurs.
+For example, for an impact, a Newton impact law links the pre- and post-impact velocities with a rule like "post-velocity = -e x pre-velocity".
 
 Each non-smooth law is characterized by:
 
-* a type (more or less the name of its class), i.e. what kind of law is required
-* the size of vectors involved in the law
+* a type (more or less the name of its class), i.e. what kind of law it is;
+* the size of the vectors involved in the law;
 * some specific variables depending on its type.
 
-Nonsmooth laws are defined in classes which name ends with "NSL". All of them are derived from an abstract class which defines a generic interface, *NonSmoothLaw*.
+Nonsmooth laws are defined in classes whose names end with "NSL". All of them derive from an abstract class, *NonSmoothLaw*, which defines a generic interface.
 
 *Available classes*: NonSmoothLaw, ComplementarityConditionNSL, EqualityConditionNSL, MixedComplementarityConditionNSL, MultipleImpactNSL,  NewtonImpactNSL, NewtonImpactFrictionNSL, RelayNSL, NormalConeNSL.
 
@@ -22,7 +22,8 @@ Complementarity Condition
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nsLawSize: 1.
-no specific parameters.
+
+No specific parameters.
 
 .. math::
 
@@ -42,11 +43,11 @@ parameter: *e*, the Newton normal coefficient of restitution.
 Newton Impact-Friction
 ^^^^^^^^^^^^^^^^^^^^^^
 
-nsLawSize: 2 or 3 (2 or 3 dimensional friction).
+nsLawSize: 2 or 3 (2D or 3D friction).
 
-parameters: en, et (Newton impact normal and tangential coefficients) and mu, friction coefficient.
+parameters: en, et (Newton impact normal and tangential coefficients) and mu, the friction coefficient.
 
-Newton Impact Law plus Coulomb Friction.
+Newton impact law plus Coulomb friction.
 
 In this case, y components are in the following order:
 
@@ -56,9 +57,9 @@ In this case, y components are in the following order:
 * relation n, normal part
 * relation n, tangential part
 
-and so on .
+and so on.
 
-Note also that usually only normal part definition is required for y[0].
+Note also that usually only the normal part needs to be defined for y[0].
 
 Relay
 ^^^^^

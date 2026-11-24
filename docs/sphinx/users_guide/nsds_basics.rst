@@ -1,9 +1,9 @@
 .. _nsds_basics:
 
-Modeling Principle
+Modeling principle
 ------------------
 
-A Non Smooth Dynamical System is mainly a set of Dynamical Systems that may interact together, through what we call some Non Smooth Interactions.
+A Nonsmooth Dynamical System is essentially a set of Dynamical Systems that may interact through what we call Nonsmooth Interactions.
 
 The figure below summarizes the modeling process inside Siconos:
 

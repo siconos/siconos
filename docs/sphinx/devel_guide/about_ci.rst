@@ -1,25 +1,25 @@
 .. _about_ci:
 
-Continuous integration for Siconos project
-==========================================
+Continuous integration for the Siconos project
+==============================================
 
-A git push into siconos github will launch travis (on github) and jenkins (ci-inria) process, as described in .travis.yml file (for both travis and jenkins).
+A git push to the Siconos GitHub repository launches the Travis (GitHub) and Jenkins (ci-inria) processes, as described in the .travis.yml file (for both Travis and Jenkins).
 
-The following process will be executed on a worker:
+The following process is executed on a worker:
 
-* git clone siconos from github
-* create build dir
-* run in build dir::
+* git clone siconos from GitHub
+* create a build directory
+* run in the build directory::
 
     ../CI/driver.py --run --root-dir=..
 
 
-For Travis, the 'worker' is the default one, provided by github-travis service.
-The task executed is 'default' defined in tasks.py.
-The ouput can be checked here : https://travis-ci.org/siconos/siconos
+For Travis, the 'worker' is the default one, provided by the GitHub-Travis service.
+The task executed is 'default', defined in tasks.py.
+The output can be checked here: https://travis-ci.org/siconos/siconos
 
-For Jenkins, the 'worker' is one of the 'nodes' available on Jenkins interface, e.g. siconos---vm0, siconos---vm1 ...
-The executed tasks are those listed in tasks.py in the dictionnary known_tasks, for the chosen hostname (i.e. node name).
+For Jenkins, the 'worker' is one of the 'nodes' available in the Jenkins interface, e.g. siconos---vm0, siconos---vm1, etc.
+The tasks executed are those listed in tasks.py in the dictionary known_tasks, for the chosen hostname (i.e. node name).
 For example, if
 
 .. code-block:: python
@@ -33,19 +33,19 @@ For example, if
                 siconos_numerics_only,
 
 
-then tasks siconos_fedora_latest and siconos_gcc_asan will be executed on node vm0, while siconos_documentation and siconos_numerics_only
-will be executed on vm1.
+then the tasks siconos_fedora_latest and siconos_gcc_asan are executed on node vm0, while siconos_documentation and siconos_numerics_only
+are executed on vm1.
 
 Example of output: https://ci.inria.fr/siconos--/job/continuous3/lastSuccessfulBuild/console
 
 
 
-Notice that this is equivalent to run, on another worker::
+Note that this is equivalent to running, on another worker::
 
    ./driver.py  --run --root-dir=.. --tasks=siconos_documentation,siconos_numerics_only
 
 
-To check what will be executed by the command above, just try::
+To check what the command above will execute, try::
 
    ./driver.py  --dry-run --run --root-dir=.. --tasks=siconos_documentation,siconos_numerics_only
 
@@ -65,12 +65,13 @@ The output will look like::
   both from path _ubuntu-16.10_no_cxx
 
 
-Which means that (for numerics_only), in dir _ubuntu-16.10_no_cxx
+This means that (for numerics_only), in the directory _ubuntu-16.10_no_cxx,
 
-* the 'cmake -DMODE ...' line will be executed to configure the ci project and its targets
+* the 'cmake -DMODE ...' line is executed to configure the CI project and its targets.
 
-The following targets will be executed:
-* make docker-build, to create a docker image, based on ubuntu 16.10 with packages gcc, ... will be created, with some associated volumes
-* make docker-ctest : call cmake, make, make test on Siconos sources inside a docker container, based on the image created with make docker-build.
+Then the following targets are executed:
 
-A report will be sent to siconos cdash.
+* make docker-build: creates a Docker image based on Ubuntu 16.10 with the packages gcc, etc., and some associated volumes;
+* make docker-ctest: runs cmake, make and make test on the Siconos sources inside a Docker container based on the image created by make docker-build.
+
+A report is sent to the Siconos CDash.

@@ -1,56 +1,56 @@
 .. _event_capturing:
 
-Event-Capturing schemes
+Event-capturing schemes
 =======================
 
-General Principle
+General principle
 -----------------
 
-Roughtly speaking, the event-capturing, a.k.a. time-stepping, method consists in the time-discretisation of the whole system (dynamics + relations + non-smooth laws),
-leading to a so-called one-step non smooth problem (OSNSP) solved at each time step.
+Roughly speaking, the event-capturing (a.k.a. time-stepping) method discretises in time the whole system (dynamics + relations + nonsmooth laws),
+which leads to a so-called one-step nonsmooth problem (OSNSP) solved at each time step.
 
-Indeed, the main stages of the process are:
+The main stages of the process are:
 
-* integrate the dynamics without constraints, to get some "free" solutions
-* formalize and solve a OSNSP (a LCP for example)
-* update the dynamics with the OSNSP solutions to get the full state.
+* integrate the dynamics without constraints, to get "free" solutions;
+* formulate and solve an OSNSP (an LCP, for example);
+* update the dynamics with the OSNSP solution to get the full state.
 
-The discretization process for different dynamical systems, relations and laws is described thereafter.
-A summary of all the results can be found in section :ref:`event_capturing_summary`
+The discretization of the different dynamical systems, relations and laws is described below.
+A summary of all the results can be found in section :ref:`event_capturing_summary`.
 
-**Notations**:
+**Notation**:
 
 In the following sections, the systems are integrated over a time step :math:`[t_i,t_{i+1}]` of constant size :math:`h`.
-The approximation of any function :math:`F(t,...)` at the time :math:`t_i` is denoted :math:`F_i`.
-Note that in the relations writings, upper case letters are used for all variables related to DynamicalSystem objects:
-:math:`X , Q, \ldots` are concatenation of :math:`x, q,\ldots` of the dynamical systems variables concerned by the relation.
+The approximation of any function :math:`F(t,...)` at time :math:`t_i` is denoted :math:`F_i`.
+Note that in the relations, upper-case letters are used for all the variables related to DynamicalSystem objects:
+:math:`X , Q, \ldots` are the concatenations of the variables :math:`x, q,\ldots` of the dynamical systems involved in the relation.
 
-First order systems
+First-order systems
 -------------------
 
-Time Discretisation of the Dynamics
+Time discretisation of the dynamics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First Order Non Linear Systems
-""""""""""""""""""""""""""""""
+First-order nonlinear systems
+"""""""""""""""""""""""""""""
 
 .. math::
 
    M\dot x(t) &= f(x,t,z) + r   \\
    x(t_0) &= x_0
 
-with :math:`r = r^d = \sum_{\alpha} r^{\alpha}, \alpha \in I_d`, :math:`I_d` being the set of all relations in which the current dynamical system, number :math:`d`, is involved.
-In the following, the index "d" will be omitted to lighten notations.
+with :math:`r = r^d = \sum_{\alpha} r^{\alpha}, \alpha \in I_d`, :math:`I_d` being the set of all the relations involving the current dynamical system, number :math:`d`.
+In the following, the index "d" is omitted to lighten the notation.
 
-The integration of the ODE over a time step :math:`[t_i,t_{i+1}]`  of length :math:`h`  is :
+The integration of the ODE over a time step :math:`[t_i,t_{i+1}]` of length :math:`h` is:
 
 .. math::
 
    M\int_{t_i}^{t_{i+1}}\dot x\,dt = \int_{t_i}^{t_{i+1}} f(t,x,z)dt + \int_{t_i}^{t_{i+1}}r\,dt
 
-The left-hand term is :math:`M(x(t_{i+1})-x(t_i)) \approx M(x_{i+1} - x_i)` .
+The left-hand term is :math:`M(x(t_{i+1})-x(t_i)) \approx M(x_{i+1} - x_i)`.
 
-Right-hand terms are approximated with a :math:`\theta`-method:
+The right-hand terms are approximated with a :math:`\theta`-method:
 
 .. math::
 
@@ -63,7 +63,7 @@ and the third integral is approximated with:
 
    \int_{t_i}^{t_{i+1}}r\,dt \approx h r(t_{i+1}) \approx hr_{i+1}
 
-Then, we get the following "residu"
+We then get the following residual:
 
 .. math::
 
@@ -72,7 +72,7 @@ Then, we get the following "residu"
 
 **Note**: We introduce the "free" notation for terms related to the smooth part of the system.
 
-A Newton method is used to solve :math:`\mathcal R(x_{k+1}) = 0`. The gradient of the residu according to :math:`x` is:
+A Newton method is used to solve :math:`\mathcal R(x_{i+1}) = 0`. The gradient of the residual with respect to :math:`x` is:
 
 .. math::
 
@@ -97,7 +97,7 @@ If we assume that :math:`W_{i+1}^k` is invertible, we get the solution at Newton
    x_{i+1}^{k+1} &= x_{i+1}^k - (W_{i+1}^k)^{-1}\mathcal R^{free}(x_{i+1}^{k}) + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1} \\
 	      &= x^{free,k}_{i+1} + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1}
 
-First Order Linear Systems
+First-order linear systems
 """"""""""""""""""""""""""
 
 .. math::
@@ -105,7 +105,7 @@ First Order Linear Systems
    M\dot x(t) &= A(t,z)x(t) + b(t) + r   \\
    x(t_0) &= x_0
 
-For the integration of the ODE over a time-step, we proceed as in the previous section for non-linear systems to get:
+To integrate the ODE over a time step, we proceed as in the previous section for nonlinear systems and get:
 
 .. math::
 
@@ -126,7 +126,7 @@ and assuming it is invertible, we get:
    x_{i+1} &= W_{i+1}^{-1}\left[(M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i\right] +  hW_{i+1}^{-1}r_{i+1}  \\
    &= x^{free}_{i+1}  +  hW_{i+1}^{-1}r_{i+1}
 
-First Order Linear Systems with time invariant coefficients
+First-order linear systems with time-invariant coefficients
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. math::
@@ -141,7 +141,7 @@ Using the results of the previous section, the discretisation is straightforward
    x_{i+1} &= x_i + h W^{-1}(A x_i + b) +  hW^{-1}r_{i+1} \\
    &= x^{free}_{i}  +  hW^{-1}r_{i+1}
 
-with a W that does not depend on time:
+with a time-independent W:
 
 .. math::
 
@@ -150,24 +150,24 @@ with a W that does not depend on time:
 Time discretization of the relations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the following, :math:`R` represents the concatenation of all :math:`r^{\alpha}` vectors for the DS involved in the present relation.
+In the following, :math:`R` is the concatenation of all the :math:`r^{\alpha}` vectors of the DS involved in the relation.
 
-First Order (non-linear) Relations
-""""""""""""""""""""""""""""""""""
+First-order (nonlinear) relations
+"""""""""""""""""""""""""""""""""
 
 .. math::
 
    y &= h(X,t,\lambda,Z)\\
    R &= g(X,t,\lambda,Z)\\
 
-Then, for the iteration :math:`k+1` of the Newton process, we get:
+For iteration :math:`k+1` of the Newton process, we get:
 
 .. math::
 
    y_{i+1}^{k+1} &= h(X_{i+1}^{k+1},t_{i+1},\lambda_{i+1}^{k+1})\\
    R_{i+1}^{k+1} &= g(X_{i+1}^{k+1},t_{i+1},\lambda_{i+1}^{k+1})
 
-These constraints are linearized around state :math:`(X_{i+1}^{k+1},\lambda_{i+1}^{k+1})`:
+These constraints are linearized around the state :math:`(X_{i+1}^{k},\lambda_{i+1}^{k})`:
 
 .. math::
 
@@ -175,7 +175,7 @@ These constraints are linearized around state :math:`(X_{i+1}^{k+1},\lambda_{i+1
    \\
    R_{i+1}^{k+1} &= R_{i+1}^k - G_0(S_{i+1}^k)X_{i+1}^{k} - G_1(S_{i+1}^k)\lambda_{i+1}^{k} + G_0(S_{i+1}^k)X_{i+1}^{k+1} + G_1(S_{i+1}^k)\lambda_{i+1}^{k+1}
 
-Where :math:`S_{i+1}^k` stands for :math:`(X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k})` and
+where :math:`S_{i+1}^k` stands for :math:`(X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k})` and
 
 .. math::
 
@@ -183,20 +183,20 @@ Where :math:`S_{i+1}^k` stands for :math:`(X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k}
    &\\
    G_0(X,t,\lambda)=\nabla_X g(X,t,\lambda)&, \ \  G_1(X,t,\lambda)=\nabla_{\lambda} g(X,t,\lambda) \\
 
-In the case where :
+In the case where
 
 .. math::
 
    x_{i+1}^{k+1} = x^{free,k}_{i+1} + (w_{i+1}^k)^{-1}r_{i+1}^{k+1}
 
-We can write
+we can write
 
 .. math::
 
    X_{i+1}^{k+1} = X^{free,k}_{i+1} + (W_{i+1}^k)^{-1}R_{i+1}^{k+1}
 
-where :math:`(W_{i+1}^k)^{-1}`, is a diagonal block matrix holding the :math:`(w_{i+1}^k)^{-1}`,
-then, if there is one and only one interaction we have:
+where :math:`(W_{i+1}^k)^{-1}` is a block-diagonal matrix holding the :math:`(w_{i+1}^k)^{-1}`.
+Then, if there is one and only one interaction, we have:
 
 .. math::
 
@@ -211,7 +211,7 @@ and finally:
    q_{lcp} &= y_{i+1} -H_{0,i+1}^k X_{i+1}^k - H_{1,i+1}^k \lambda_{i+1}^k + H_{0,i+1}^k (1-(W_{i+1}^k)^{-1} G_{0,i+1}^k)^{-1}
    [X_{i+1}^{free,k} + (W_{i+1}^k)^{-1} (R_{i+1}^k - G_{0,i+1}^k X_{i+1}^k - G_{1,i+1}^k \lambda_{i+1}^k)]
 
-First Order Linear Relations
+First-order linear relations
 """"""""""""""""""""""""""""
 
 .. math::
@@ -219,9 +219,9 @@ First Order Linear Relations
  y &= C(t,Z)X(t) + F(t,Z)Z + D(t,Z)\lambda + e(t,Z) \\
  R &= B(t,Z) \lambda
 
-**Note**: for time-invariant relations, B, C, F, D and e are constant vectors and matrices </em>
+**Note**: for time-invariant relations, B, C, F, D and e are constant vectors and matrices.
 
-The Time discretization of the relations is fully implicit and may be written as :
+The time discretization of the relations is fully implicit and can be written as:
 
 .. math::
 
@@ -229,10 +229,10 @@ The Time discretization of the relations is fully implicit and may be written as
    \\
    R_{i+1} &= B(t_{i+1})\lambda_{i+1}
 
-Discretisation of the non-smooth law
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Discretisation of the nonsmooth law
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Complementarity Condition
+Complementarity condition
 """""""""""""""""""""""""
 
 The complementarity condition reads:
@@ -250,13 +250,13 @@ and the discretisation is straightforward:
 Lagrangian systems
 ------------------
 
-Time Discretisation of the Dynamics
+Time discretisation of the dynamics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Lagrangian (second order) Non Linear Systems
-""""""""""""""""""""""""""""""""""""""""""""
+Lagrangian (second-order) nonlinear systems
+"""""""""""""""""""""""""""""""""""""""""""
 
-We provide in the following sections a time discretization method of the Lagrangian dynamical systems, consistent with the non smooth character of the solution.
+The following sections give a time discretization method for Lagrangian dynamical systems that is consistent with the nonsmooth character of the solution.
 
 .. math::
 
@@ -271,46 +271,46 @@ with
 
    q(t) = q_0 + \int_{t_0}^t v^+(t)dt
 
-*Remark*: recall that :math:`v^+(t)` means :math:`v(t^+)` ie right limit of :math:`v` in t.
+*Remark*: recall that :math:`v^+(t)` means :math:`v(t^+)`, i.e. the right limit of :math:`v` at t.
 
-Left hand side is discretised by assuming that:
+The left-hand side is discretised by assuming that:
 
 .. math::
 
    \int_{t_i}^{t_{i+1}} M(q(t),z)dv \approx M(q*,z)(v_{i+1}-v_{i})
 
-As for first order non-linear systems, we use a :math:`\theta`-method to integrate the other terms, and obtain:
+As for first-order nonlinear systems, we use a :math:`\theta`-method to integrate the other terms, and obtain:
 
 .. math::
 
    \int_{t_i}^{t_{i+1}} f_L(t, v^+(t), q(t), z) dt \approx  h\theta f_L(t_{i+1}, v_{i+1}, q_{i+1}, z) + h(1-\theta) f_L(t_{i}, v_{i}, q_{i}, z)
 
-and for the last term, we set a new variable :math:`p_{i+1}` such that:
+and, for the last term, we introduce a new variable :math:`p_{i+1}` such that:
 
 .. math::
 
    \int_{t_i}^{t_{i+1}} dr \approx p_{i+1}
 
-Finally the full system discretisation results in:
+Finally, the discretisation of the full system gives:
 
 .. math::
 
    \mathcal R(v_{i+1}, q_{i+1}) &= M(q*,z)(v_{i+1}-v_{i}) - h\theta {f_L}_{i+1} - h(1-\theta) {f_L}_{i} - p_{i+1} = 0 \\
    &= \mathcal R^{free}(v_{i+1},q_{i+1}) - p_{i+1}
 
-The "free" notation still stands for terms related to the smooth part of the system.
-The displacement is integrated through the velocity with :
+The "free" notation still denotes the terms related to the smooth part of the system.
+The displacement is integrated through the velocity with:
 
 .. math::
 
    q_{i+1} &\approx q_i + h\theta v_{i+1} + h(1 - \theta)v_{i}
 
-Substituing this into the residu leads to a function depending only on :math:`v_{i+1}`, since state "i" and "k" are supposed to be known.
+Substituting this into the residual gives a function of :math:`v_{i+1}` only, since the states "i" and "k" are assumed to be known.
 
-A Newton method will be applied to solve :math:`\mathcal R(v_{i+1}) = 0`.
+A Newton method is applied to solve :math:`\mathcal R(v_{i+1}) = 0`.
 
-That requires to compute the gradient of the residu;
-assuming that the mass matrix evolves slowly with the configuration in a single time step, we get:
+This requires the gradient of the residual;
+assuming that the mass matrix varies slowly with the configuration within a time step, we get:
 
 .. math::
 
@@ -336,7 +336,7 @@ with
 
    W(t,v,q) = M(q*,z) + h\theta C_t(t,v,q) + h^2\theta^2 K_t(t,v,q)
 
-As an approximation for :math:`q^*`, we choose:
+As an approximation of :math:`q^*`, we choose:
 
 .. math::
 
@@ -350,14 +350,14 @@ Moreover, if :math:`M` is evaluated at the first step of the Newton iteration, w
 
    M(q^*) \approx M(q_i + h\gamma v_i)
 
-Finally, if :math:`W` is invertible, the solution at iteration k+1 is given by,
+Finally, if :math:`W` is invertible, the solution at iteration k+1 is given by
 
 .. math::
 
    v_{i+1}^{k+1} &= v_{i+1}^k - (W_{i+1}^k)^{-1} \mathcal R^{free}(v_{i+1}^k) + (W_{i+1}^k)^{-1} p_{i+1}^{k+1} \\
    &= v^{free,k}_{i+1} + (W_{i+1}^k)^{-1} p_{i+1}^{k+1}
 
-Lagrangian (second order) Linear Systems with Time Invariant coefficients
+Lagrangian (second-order) linear systems with time-invariant coefficients
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. math::
@@ -366,13 +366,13 @@ Lagrangian (second order) Linear Systems with Time Invariant coefficients
    q(t_0) &= q0 \\
    \dot q(t_0^-) &= v_0
 
-Proceeding in the same way as in the previous section, with :math:`M` constant and :math:`f_L(t,v^+(t), q(t), z) = F_{ext}(t) - Cv^+(t) - Kq(t)`, integration is straightforward:
+Proceeding as in the previous section, with :math:`M` constant and :math:`f_L(t,v^+(t), q(t), z) = F_{ext}(t) - Cv^+(t) - Kq(t)`, the integration is straightforward:
 
 .. math::
 
    \mathcal R(v_{i+1}, q_{i+1}) &= M(v_{i+1}-v_{i}) - h\theta\left[ F_{ext}(t_{i+1}) - Cv_{i+1} - K q_{i+1}\right] - h(1-\theta)\left[ F_{ext}(t_{i}) - Cv_{i} - K q_{i}\right]  - p_{i+1} = 0
 
-Using the displacement integration through the velocity,
+Using the integration of the displacement through the velocity,
 
 
 .. math::
@@ -398,12 +398,12 @@ and if :math:`W` is invertible,
    v_{i+1} &= v_{i} + W^{-1}\left[(- hC - h^2\theta  K )v_{i} - h K q_{i}+  h\theta  F_{ext}(t_{i+1})+h(1-\theta)  F_{ext}(t_{i}) \right] + W^{-1} p_{i+1} \\
    &= v^{free}_i + W^{-1} p_{i+1}
 
-The free velocity :math:`v^{free}` correponds to the velocity of the system without any constraints.
+The free velocity :math:`v^{free}` is the velocity of the system without any constraint.
 
 Time discretization of the relations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Lagrangian Scleronomous Relations
+Lagrangian scleronomous relations
 """""""""""""""""""""""""""""""""
 
 .. math::
@@ -418,9 +418,9 @@ with
 
    G_0(Q) &= \nabla_Qh(Q) \\
 
-From now on, to lighten the notations, the parameter :math:`Z` will omitted.
+From now on, to lighten the notation, the parameter :math:`Z` is omitted.
 
-Considering the Newton process introduced above for Lagrangian non linear systems, the constraints write:
+With the Newton process introduced above for nonlinear Lagrangian systems, the constraints read:
 
 .. math::
 
@@ -441,8 +441,8 @@ Then we get:
    \\
    P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^{k+1}))\lambda_{i+1}^{k+1}
 
-These constraints are linearized around the point :math:`V_{i+1}^{k}` and we neglect the second order terms in the computation of the jacobians.
-It leads to:
+These constraints are linearized around the point :math:`V_{i+1}^{k}`, neglecting the second-order terms in the computation of the Jacobians.
+This gives:
 
 .. math::
 
@@ -450,13 +450,13 @@ It leads to:
    \\
    P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1}
 
-As for the evaluation of the mass, the prediction of the position, :math:`Q^*` can be evaluated at the first iteration of the Newton process,
+As for the mass, the predicted position :math:`Q^*` can be evaluated at the first iteration of the Newton process:
 
 .. math::
 
    Q^*(V_{i+1}^0) =  Q_i + h\gamma V_i
 
-Lagrangian Rheonomous Relations
+Lagrangian rheonomous relations
 """""""""""""""""""""""""""""""
 
 .. math::
@@ -476,7 +476,7 @@ As for scleronomous relations, we get:
    \\
    P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1}
 
-Lagrangian Compliant Relations
+Lagrangian compliant relations
 """"""""""""""""""""""""""""""
 
 .. math::
@@ -488,7 +488,7 @@ Lagrangian Compliant Relations
    G_0(Q,\lambda(t)) &= \nabla_Qh(Q,\lambda(t)) \\
    G_1(Q,\lambda(t)) &= \nabla_\lambda h(Q,\lambda(t)) \\
 
-Following the same process as in the paragraph above, it comes:
+Following the same process as above, we get:
 
 .. math::
 
@@ -496,7 +496,7 @@ Following the same process as in the paragraph above, it comes:
    \\
    P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1}
 
-Lagrangian Linear Relations
+Lagrangian linear relations
 """""""""""""""""""""""""""
 
 .. math::
@@ -513,22 +513,22 @@ The discretisation is straightforward:
    \\
    P_{i+1} &= H^t\lambda_{i+1}
 
-Time discretization of the Non Smooth laws
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Time discretization of the nonsmooth laws
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A natural way of discretizing the unilateral constraint  leads to the following implicit discretization :
+A natural way of discretizing the unilateral constraint leads to the following implicit discretization:
 
 .. math::
 
    0 \leq y_{i+1} \perp  \lambda_{i+1}  \geq 0
 
-In the Moreau's time--stepping, we use a reformulation of the unilateral constraints in terms of velocity:
+Moreau's time-stepping scheme uses a reformulation of the unilateral constraints in terms of velocity:
 
 .. math::
 
    If y(t) =0, \ then \ 0 \leq \dot y \perp  \lambda  \geq 0
 
-which leads to the following discretisation :
+which leads to the following discretisation:
 
 .. math::
 
@@ -536,13 +536,13 @@ which leads to the following discretisation :
 
 where :math:`y^{p}` is a prediction of the position at time :math:`t_{i+1}`, for instance, :math:`y^{p} = y_{i} + \frac{h}{2}  \dot y_i`.
 
-To introduce a Newton impact law, consider an equivalent velocity defined by
+To introduce a Newton impact law, we consider an equivalent velocity defined by
 
 .. math::
 
    \dot y^{e}_{i+1} = \dot y_{i+1} + e \dot y_{i}
 
-and apply the constraints directly on this velocity :
+and apply the constraints directly to this velocity:
 
 .. math::
 
@@ -553,10 +553,10 @@ and apply the constraints directly on this velocity :
 Summary of the time discretized equations
 -----------------------------------------
 
-First order systems
+First-order systems
 ^^^^^^^^^^^^^^^^^^^
 
-* Non Linear dynamics:
+* Nonlinear dynamics:
 
 .. math::
 
@@ -581,7 +581,7 @@ First order systems
    W &= (M - h\theta A) \\
    x^{free}_i &=  x_i + h W^{-1}(A x_i + b)
 
-* Non Linear Relations
+* Nonlinear relations:
 
 .. math::
 
@@ -595,7 +595,7 @@ First order systems
    \\
    G_0(X,t,\lambda)&=\nabla_X g(X,t,\lambda), \  G_1(X,t,\lambda)=\nabla_{\lambda} g(X,t,\lambda) \\
 
-* Linear Relations
+* Linear relations:
 
 .. math::
 
@@ -605,7 +605,7 @@ First order systems
 Lagrangian second-order systems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Non Linear Dynamics:
+* Nonlinear dynamics:
 
 .. math::
 
@@ -618,7 +618,7 @@ Lagrangian second-order systems
    C_t(t,v,q)&=-\left[\frac{\partial{f_L(t,v,q)}}{\partial{v}}\right] \\
    K_t(t,v,q)&=-\left[\frac{\partial{f_L(t,v,q)}}{\partial{q}}\right]
 
-* Linear Dynamics with and Time--Invariant Coefficients
+* Linear dynamics with time-invariant coefficients:
 
 .. math::
 
@@ -627,28 +627,28 @@ Lagrangian second-order systems
    v^{free}_i &= v_{i} + W^{-1}\left[(- hC - h^2\theta  K )v_{i} - h K q_{i}+  h\theta  F_{ext}(t_{i+1})+h(1-\theta)  F_{ext}(t_{i}) \right] \\
    W &=   \left[M + h\theta C + h^2 \theta^2 K \right]
 
-* Lagrangian Scleronomous Relations
+* Lagrangian scleronomous relations:
 
 .. math::
 
    \dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^k))V_{i+1}^{k+1} \\
    P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1}
 
-* Lagrangian Rheonomous Relations
+* Lagrangian rheonomous relations:
 
 .. math::
 
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),t_{i+1})V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, t_{i+1})) \\
    P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1}
 
-* Lagrangian Compliant Relations
+* Lagrangian compliant relations:
 
 .. math::
 
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),\lambda_{i+1}^k)V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, \lambda_{i+1}^k))\lambda_{i+1}^{k+1} \\
    P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1}
 
-* Lagrangian Linear Relations
+* Lagrangian linear relations:
 
 .. math::
 

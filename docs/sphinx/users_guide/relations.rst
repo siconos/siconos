@@ -3,23 +3,23 @@
 Relations
 ---------
 
-Relations are used to link local variables of the Interaction and global variables of the DynamicalSystems, and thus define constraints in the systems.
+Relations link the local variables of the Interaction to the global variables of the DynamicalSystems, and thus define the constraints of the system.
 
-:cpp:class:`Relation` is an abstract class which provides a generic interface for all types of relations.
-Each relation has a type which correspond to the types of dynamical systems they fit with (FirstOrder or Lagrangian), a sub-type, (linear, non linear, scleronomous...).
-Usually, "type+subtype" corresponds more or less to the name of the derived class.
-Then, depending on the sub-class, each relation holds some plug-in functions or operators used to define the constraints. They are listed below for each available type of relation.
+:cpp:class:`Relation` is an abstract class that provides a generic interface for all types of relations.
+Each relation has a type, which corresponds to the type of dynamical systems it applies to (FirstOrder or Lagrangian), and a subtype (linear, nonlinear, scleronomous...).
+Usually, "type+subtype" more or less gives the name of the derived class.
+Depending on the subclass, each relation holds plugin functions or operators that define the constraints. They are listed below for each type of relation.
 
 
 Available classes: :cpp:class:`FirstOrderR`, :cpp:class:`FirstOrderLinearR`, :cpp:class:`FirstOrderLinearTIR`, :cpp:class:`LagrangianR`, :cpp:class:`LagrangianRheonomousR`, :cpp:class:`LagrangianScleronomousR`, :cpp:class:`LagrangianCompliantR`, :cpp:class:`LagrangianLinearR`.
 
 .. image:: /figures/relation_classes.*
 
-First Order Relations
+First-order relations
 ^^^^^^^^^^^^^^^^^^^^^
 
-Non Linear
-""""""""""
+Nonlinear
+"""""""""
 
 Class :cpp:class:`FirstOrderR`
 
@@ -38,10 +38,10 @@ We denote:
    G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z)
    \end{array}
 
-:math:`h`, :math:`g` (and their jacobian according to :math:`X` and :math:`\lambda`) are defined with some plug-in functions. \n
-See the doxygen documentation of the class :cpp:class:`FirstOrderR` to have a list of the set/get/compute functions.
+:math:`h`, :math:`g` (and their Jacobians with respect to :math:`X` and :math:`\lambda`) are defined with plugin functions.
+See the Doxygen documentation of the class :cpp:class:`FirstOrderR` for the list of set/get/compute functions.
 
-Note: for the signification of :math:`X`, :math:`Z`, :math:`R` see :ref:`interactions`
+Note: for the meaning of :math:`X`, :math:`Z`, :math:`R`, see :ref:`interactions`.
 
 Linear
 """"""
@@ -53,9 +53,9 @@ Class: :cpp:class:`FirstOrderLinearR`
    y &= C(t,Z)X + F(t,Z)Z + D(t,Z) \lambda + e(t,Z) \\
    R &= B(t,Z) \lambda
 
-Plug-in functions are available for all operators.
+Plugin functions are available for all operators.
 
-Linear with Time Invariant Coefficients
+Linear with time-invariant coefficients
 """""""""""""""""""""""""""""""""""""""
 
 Class :cpp:class:`FirstOrderLinearTIR`
@@ -65,7 +65,7 @@ Class :cpp:class:`FirstOrderLinearTIR`
    y &= CX + FZ + D\lambda + e \\
    R &= B \lambda
 
-Lagrangian (second order) Relations
+Lagrangian (second-order) relations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Scleronomous
@@ -73,7 +73,7 @@ Scleronomous
 
 Class :cpp:class:`LagrangianScleronomousR`
 
-The constraints depend only on the state,
+The constraints depend only on the state:
 
 .. math::
 
@@ -92,7 +92,7 @@ Rheonomous
 
 Class :cpp:class:`LagrangianRheonomousR`
 
-The constraints depend on time and state,
+The constraints depend on time and state:
 
 .. math::
 
@@ -111,7 +111,7 @@ Compliant
 
 Class: :cpp:class:`LagrangianCompliantR`
 
-The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot\lambda(t)` makes sense.
+The constraints depend on the state and on :math:`\lambda`, a function of time for which :math:`\dot\lambda(t)` makes sense.
 
 .. math::
 
@@ -126,8 +126,8 @@ with
    G_0(Q,\lambda(t),Z) = \nabla_q h(Q,\lambda(t),Z) \\
    G_1(Q,\lambda(t),Z) = \nabla_{\lambda(t)}h(Q,\lambda(t),Z)
 
-Linear and Time Invariant Coefficients
-""""""""""""""""""""""""""""""""""""""
+Linear with time-invariant coefficients
+"""""""""""""""""""""""""""""""""""""""
 
 Class: :cpp:class:`LagrangianLinearR`
 
@@ -138,8 +138,8 @@ Lagrangian linear relations with time-invariant coefficients.
    y&= H Q + b + D\lambda +FZ \\
    P &= H^t \lambda
 
-Relations plug-in functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Plugin functions of the relations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * FirstOrderR: :math:`h(X,t,\lambda,Z), \ \ g(\lambda,t,Z)`
 * FirstOrderLinearR: :math:`C(t,Z), \ \ F(t,Z), \ \ , D(t,Z), \ \ e(t,Z), B(t,Z)`

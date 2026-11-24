@@ -3,76 +3,76 @@
 Quickstart
 ==========
 
-This manual aims at giving you a short overview of the software functionnalities and to provide some guidelines for your first steps with nonsmooth systems
-simulation with Siconos. There you will learn basics things to know to describe a nonsmooth problem or to run a simulation using siconos, for both APIs, C++ or Python.
-For a more detailed description of Siconos and its functionnalities please check the :ref:`full_documentation` table of content.
+This manual gives a short overview of the features of the software and some guidelines for your first steps in the simulation of nonsmooth systems
+with Siconos. You will learn the basics needed to describe a nonsmooth problem and run a simulation with Siconos, with both APIs, C++ and Python.
+For a more detailed description of Siconos and its features, see the :ref:`full_documentation` table of contents.
 
 
 What is Siconos?
 ----------------
 
-Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems :cite:`Acary.Brogliato2008`:
+Siconos is open-source scientific software primarily aimed at modeling and simulating nonsmooth dynamical systems :cite:`Acary.Brogliato2008`:
 
-* **Mechanical systems** (rigid or solid) with unilateral contact and Coulomb friction and impact
-  (Nonsmooth mechanics, contact dynamics, multibody systems dynamics or granular materials).
-* **Switched Electrical Circuits** such as electrical circuits with ideal and piecewise linear components: power converter, rectifier, Phase-Locked Loop (PLL) or Analog-to-Digital converter.
+* **Mechanical systems** (rigid or deformable) with unilateral contact, Coulomb friction and impacts
+  (nonsmooth mechanics, contact dynamics, multibody system dynamics, granular materials).
+* **Switched electrical circuits**, such as circuits with ideal and piecewise linear components: power converters, rectifiers, Phase-Locked Loops (PLL) or Analog-to-Digital converters.
 * Sliding mode control systems.
-* Biology Gene regulatory networks.
+* Gene regulatory networks in biology.
 
-Other applications are found in Systems and Control (hybrid systems, differential inclusions,
-optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities),
-Fluid Mechanics, Computer Graphics, ...
+Other applications are found in systems and control (hybrid systems, differential inclusions,
+optimal control with state constraints), optimization (complementarity systems and variational inequalities),
+fluid mechanics, computer graphics, etc.
 
-Check :ref:`siconos_examples` manual for an overview of the various problems handled with Siconos.
+See the :ref:`siconos_examples` for an overview of the many problems handled with Siconos.
 
 
 Try it
 ------
 
-You can use one of the end-user docker images available in `siconos-tutorials registry <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/container_registry>`_ .
+You can use one of the end-user Docker images available in the `siconos-tutorials registry <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/container_registry>`_.
 
-For example, start a jupyter container including siconos, all running examples and some tutorials notebooks,
+For example, start a Jupyter container with Siconos, all the working examples and some tutorial notebooks:
 
 .. code-block:: bash
 
 
    docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-main
 
-   # Then, access in your browser at http://localhost:8888/...
-   # The exact address will be printed on your screen as a result of the command above.
+   # Then open http://localhost:8888/... in your browser.
+   # The exact address is printed by the command above.
 
 
-Another possible (but unstable) way to start with Siconos, try the tutorial notebooks available here in the directory siconos-notebooks
+Another (less stable) way to get started with Siconos is to try the tutorial notebooks available in the siconos-notebooks directory:
 
 .. image:: https://plmbinder.math.cnrs.fr/binder/badge_logo.svg
    :target: https://plmbinder.math.cnrs.fr/binder/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorials.git/HEAD
 
-This page proposes a Python interactive interface (notebooks) to Siconos, that you can use through your web browser, online.
+This page provides an interactive Python interface (notebooks) to Siconos that you can use online, in your web browser.
 
 
 Siconos usage in a few steps
 ----------------------------
 
-#.  :ref:`download` software
+#.  :ref:`download` the software
 #.  :ref:`siconos_install_guide`
 #.  Write and run your first simulation.
 
-There are two ways to use Siconos
+There are two ways to use Siconos:
 
-* As a library (C++) : in that case you need to write a c++ file (driver) to describe and solve your problem,
+* As a library (C++): you write a C++ file (driver) that describes and solves your problem,
   and then run siconos to build and execute your program.
 * As a Python package.
 
-Python API is generated (pybind11) from C++ and thus both API are quite equivalent although C++ might be more complete.
+The Python API is generated (with pybind11) from the C++ code, so both APIs are nearly equivalent, although the C++ one may be more complete.
 
-Anyway, for new users we recommend the Python API which is easier to understand.
+For new users, we recommend the Python API, which is easier to understand.
 
-Below are two examples (Python and C++) of a Siconos process. We just build and print a first-order dynamical
-system (See :cpp:class:`siconos::modeling::siconos::modeling::FirstOrderLinearDS`).
+Below are two examples (Python and C++) of a Siconos program. They simply build and print a first-order dynamical
+system (see :cpp:class:`siconos::modeling::FirstOrderLinearDS`).
 
 .. admonition:: tip
 
-   have a look to the numerous `examples in siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/>`_ to inspire you and use the search bar to find details on all (Python, C or C++) objects)
+   Have a look at the many `examples in the siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/>`_ for inspiration, and use the search bar to find details on all (Python, C or C++) objects.
 
 **Example of Siconos Python API usage**
 
@@ -87,7 +87,7 @@ system (See :cpp:class:`siconos::modeling::siconos::modeling::FirstOrderLinearDS
    # Create a dynamical system
    size = 10
    x0 = np.random.random(size)
-   ds = sk.FirstOrderLinearDS(x0)
+   ds = sm.FirstOrderLinearDS(x0, sm.copy_t)
    print(ds)
 
 And:
@@ -95,11 +95,11 @@ And:
 .. code-block:: bash
 
    siconos run.py
-   # --> will call python and anything else required
+   # --> calls python and anything else required
 
 .. admonition:: tip
 
-   More on *siconos* script options, try:
+   For more on the *siconos* script options, try:
 
    .. code-block:: shell
 
@@ -108,7 +108,7 @@ And:
 
 **Example of Siconos C++ API usage**
 
-Write a c++ file, e.g. run.cpp
+Write a C++ file, e.g. run.cpp:
 
 .. code-block:: c++
 
@@ -118,28 +118,28 @@ Write a c++ file, e.g. run.cpp
    {
     unsigned int size = 10;
     auto x0 = std::make_shared<siconos::algebra::SiconosVector>(size);
-    auto A = std::make_shared<(siconos::algebra::SiconosDenseMatrix>(size, size);
+    auto A = std::make_shared<siconos::algebra::SiconosDenseMatrix>(size, size);
     A->randomize();
 
-    auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS(x0, A);
+    auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0, A);
     ds->display();
    }
 
-And, compile, link and execute (in one shot, thanks to siconos script)::
+Then compile, link and execute it (in one go, with the siconos script):
 
 .. code-block:: shell
 
    siconos run.cpp
 
-For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
-or try to mimic one of the examples available at https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git.
+For a new simulation, start from the :ref:`template for a C++ driver file <template_siconos_driver>`
+or adapt one of the examples available at https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git.
 
 
 More
 ----
 
 * :doc:`users_guide/index`
-* :doc:`reference/index``
+* :doc:`reference/index`
 * :doc:`tutorial_python/index`
 * :doc:`tutorial_cpp/siconos_tutorial`
 * :ref:`running_siconos`

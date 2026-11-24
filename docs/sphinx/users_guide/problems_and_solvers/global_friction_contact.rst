@@ -5,7 +5,7 @@
 
 .. _gfc_problem:
 
-Global-Friction-contact problems (2D or 3D)
+Global friction-contact problems (2D or 3D)
 *******************************************
 
 Problem statement
@@ -13,7 +13,7 @@ Problem statement
 
 Given
 
-* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
+* a symmetric positive semidefinite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
 * a matrix :math:`{H} \in {{\mathrm{I\!R}}}^{n \times {d\, n_c}}`
 
@@ -23,15 +23,15 @@ Given
 
 * a vector of coefficients of friction :math:`\mu \in{{\mathrm{I\!R}}}^{n_c}`
 
-the global frictional contact problem denoted by :math:`\mathrm{PFC}(M,H,q,b,\mu)` consists in finding three vectors,
+the global frictional contact problem, denoted by :math:`\mathrm{PFC}(M,H,q,b,\mu)`, consists in finding three vectors,
 
 * the global velocity :math:`v\in{{\mathrm{I\!R}}}^n`,
 
 * the relative local velocity :math:`u\in{{\mathrm{I\!R}}}^{d\,n_c}`,
 
-* the contact forces :math:`r\in {{\mathrm{I\!R}}}^{d,n_c}`,
+* the contact forces :math:`r\in {{\mathrm{I\!R}}}^{d\,n_c}`,
 
-such that :
+such that:
 
 .. math::
 
@@ -39,67 +39,67 @@ such that :
 
 where the Coulomb friction cone is defined by :math:`C_{\mu} = \prod\limits_{\alpha=1\ldots n_c} C^{\alpha}_{\mu^\alpha}`
 
-with :math:`C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\alpha_{n}|\}` , and the set :math:`C^{\alpha,\star}_{\mu^\alpha}` its dual.
+with :math:`C^{\alpha}_{\mu^\alpha} =\{ r^\alpha, \|r_{t}\| \leq \mu_{\alpha} |r^\alpha_{n}|\}`, and the set :math:`C^{\alpha,\star}_{\mu^\alpha}` is its dual.
 
-The modified local velocity :math:`\widehat u` is not considered as an unknown since it can be obtained uniquely from the local velocity :math:`u`.
+The modified local velocity :math:`\widehat u` is not considered as an unknown, since it is uniquely determined by the local velocity :math:`u`.
 
-Coulomb's friction law with Signorini's condition for the unilateral contact written in terms of second order complementarity condition
+Coulomb's friction law with Signorini's condition for the unilateral contact, written as a second-order cone complementarity condition
 
 .. math::
 
     \begin{eqnarray} C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu} \end{eqnarray}
 
-can be interpreted in a more usual form
+can be written in the more usual form
 
 .. math::
 
     \begin{eqnarray} \begin{cases} 0 \leq u_{N} \perp r_N \geq 0 \quad\quad\text{ Signorini condition}\\ u_T = 0 \Rightarrow \|r_T\| \leq \mu |r_n| \quad\quad\text{ Sticking mode} \\ u_T \neq 0 \Rightarrow r_T = - \mu |r_n| \frac{u_T }{\|u_T\|} \quad\quad\text{ Sliding mode} \end{cases} \end{eqnarray}
 
-This problem models any instance of discretized frictional contact problem obtained from
+This problem models any discretized frictional contact problem obtained from
 
-* the time-discretization of dynamics contact problems with event-capturing of event-tracking schemes,
+* the time discretization of dynamic contact problems with event-capturing or event-tracking schemes,
 
-* the time-discretization of quasi-static contact problems,
+* the time discretization of quasi-static contact problems,
 
-* the modeling of static contact problems. In this last case, :math:`u` plays the role of the relative displacement at contact
+* the modeling of static contact problems. In this last case, :math:`u` plays the role of the relative displacement at contact.
 
 Implementation in numerics
 ==========================
 
 Structure to define the problem: :cpp:class:`GlobalFrictionContactProblem`.
 
-Solvers list : :cpp:enum:`FRICTION_SOLVER`, id containing 'GLOBAL_FRICTION_3D'
+List of solvers: :cpp:enum:`FRICTION_SOLVER`, ids containing 'GLOBAL_FRICTION_3D'
 
-The generic drivers for global friction-contact problems is :cpp:func:`gfc3d_driver`.
+The generic driver for global friction-contact problems is :cpp:func:`gfc3d_driver`.
 
 .. _gfc_error:
 
 Error strategy
 ==============
 
-To set internal solver tolerance (when it makes sense!) use :cpp:func:`gfc3d_set_internalsolver_tolerance`.
+To set the tolerance of the internal solver (when it makes sense), use :cpp:func:`gfc3d_set_internalsolver_tolerance`.
 
-Check details in :ref:`fc_error`
+See the details in :ref:`fc_error`.
 
 
 .. _gfc3d_solvers:
 
-Global Friction 3D available solvers
+Available 3D global friction solvers
 ====================================
 
 NSGS (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Non-Smooth Gauss Seidel solver with reformulation.
+Nonsmooth Gauss-Seidel solver.
 
 **Driver:** :cpp:func:`gfc3d_nsgs`
 
 **Parameters:** same as :cpp:enumerator:`SICONOS_FRICTION_3D_NSGS`.
 
-Warning : default iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] is 0, which may lead to
-very expensive computation for error checking. Increase this value to improve performances.
+Warning: the default iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] is 0, which may make
+the error checks very expensive. Increase this value to improve performance.
 
-Nonsmooth Newton, Alart-Curnier, (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC`)
+Nonsmooth Newton, Alart-Curnier (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSN_AC`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 **Driver:** :cpp:func:`gfc3d_nonsmooth_Newton_AlartCurnier_wr`
@@ -116,7 +116,7 @@ Nonsmooth Newton, Alart-Curnier, (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NS
   * SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED
   * SICONOS_FRICTION_3D_NSN_FORMULATION_NULL
 
-* iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 0, 0 if memory for internal work arrays must be allocated, else 1.
+* iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 0: 0 if memory for the internal work arrays must be allocated, otherwise 1.
 
 * iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]
 
@@ -124,7 +124,7 @@ Nonsmooth Newton, Alart-Curnier, (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NS
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO
   * SICONOS_FRICTION_3D_NSN_LINESEARCH_NO
 
-* iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100  maximum number of iterations allowed for the line search.
+* iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100: maximum number of iterations allowed for the line search.
 * iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1
 
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
@@ -178,7 +178,7 @@ Internal solver: :cpp:enumerator:`SICONOS_CONVEXQP_ADMM`, see :ref:`convex_qp_so
 ADMM (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_ADMM`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
+Solver based on the `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 
 **Driver:** :cpp:func:`gfc3d_ADMM`
 
@@ -235,15 +235,15 @@ Solver based on `ADMM method <https://stanford.edu/~boyd/admm.html>`_.
 Solvers with reformulation
 --------------------------
 
-All solvers with id ending with '_WR' (which stands for With Reformulation)
-starts with a reformulation of the global problem into a local one, which is solved
+All solvers whose id ends with '_WR' (With Reformulation)
+start by reformulating the global problem as a local one, which is then solved
 with one of the fc3d solvers.
 
 
 NSGS, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS_WR`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Non-Smooth Gauss Seidel solver with reformulation.
+Nonsmooth Gauss-Seidel solver with reformulation.
 
 **Driver:** :cpp:func:`gfc3d_nsgs_wr`
 
@@ -252,7 +252,7 @@ Non-Smooth Gauss Seidel solver with reformulation.
 NSGS, velocity, with reformulation (:cpp:enumerator:`SICONOS_GLOBAL_FRICTION_3D_NSGS_WR`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Non-Smooth Gauss Seidel solver with reformulation.
+Nonsmooth Gauss-Seidel solver (velocity version) with reformulation.
 
 **Driver:** :cpp:func:`gfc3d_nsgs_velocity_wr`
 

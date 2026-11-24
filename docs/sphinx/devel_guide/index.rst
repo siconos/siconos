@@ -7,6 +7,7 @@ Developer guide
 .. toctree::
    :maxdepth: 3
 
+   architecture
    write_and_build_doc
    numerics/solvers
    modal_moreau_jean
@@ -17,6 +18,6 @@ Developer guide
 
 To do.
 
-`Unpolished developement notes`_.
+`Unpolished development notes`_.
 
-.. _Unpolished developement notes: ./notes/DevNotes.pdf
+.. _Unpolished development notes: ./notes/DevNotes.pdf

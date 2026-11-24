@@ -11,7 +11,7 @@ Affine Variational Inequalities (AVI)
 Problem statement
 =================
 
-The Affine Variational Inequality (AVI) is defined by
+The Affine Variational Inequality (AVI) is defined as follows.
 
 Given :math:`q\in\mathbb{R}^n` , :math:`M\in\mathbb{R}^{n\times n}` and a set :math:`K\in\mathbb{R}^n` , find :math:`z\in\mathbb{R}^n` such that:
 
@@ -29,26 +29,26 @@ where :math:`\mathcal{N}_K` is the normal cone to :math:`K` at :math:`z` .
 
 The AVI is a special case of a Variational Inequality (VI), where the function :math:`F` is affine. For VI solvers, see :ref:`vi_problem`.
 
-From more details on theory and analysis of AVI (and VI in general), we refer to :cite:`Facchinei.2003`
+For more details on the theory and analysis of AVI (and VI in general), we refer to :cite:`Facchinei.2003`.
 
 Implementation in numerics
 ==========================
 
 Structure to define the problem: :cpp:class:`AffineVariationalInequalities`.
 
-The generic driver for all VI is :cpp:func:`avi_driver()`.
+The generic driver for all AVI is :cpp:func:`avi_driver()`.
 
-solvers list  :cpp:enum:`AVI_SOLVER`
+List of solvers: :cpp:enum:`AVI_SOLVER`
 
 .. _avi_solvers:
 
-AVI Available solvers
+Available AVI solvers
 =====================
 
 Cao Ferris (:cpp:enumerator:`SICONOS_AVI_CAOFERRIS`)
 ----------------------------------------------------
 
-Direct solver for AVI based on pivoting method principle for degenerate problem. Choice of pivot variable is performed via lexicographic ordering
+Direct solver for AVI based on a pivoting method for degenerate problems. The pivot variable is chosen by lexicographic ordering.
 
 driver: :cpp:func:`avi_caoferris()`
 
@@ -60,7 +60,7 @@ parameters:
 Pathvi (:cpp:enumerator:`SICONOS_AVI_PATHAVI`)
 ----------------------------------------------
 
-Direct solver for VI based on pivoting method principle for degenerate problem.
+Direct solver for AVI based on a pivoting method for degenerate problems.
 
 Ref: "A structure-preserving Pivotal Method for Affine Variational Inequalities" Y. Kim, O. Huber, M.C. Ferris, Math Prog B (2017).
 

@@ -16,9 +16,9 @@ Implementation in numerics
 
 Structure to define the problem: :cpp:class:`GenericMechanicalProblem`.
 
-Solvers list  :cpp:enum:`GENERIC_MECHANICAL_SOLVER`
+List of solvers: :cpp:enum:`GENERIC_MECHANICAL_SOLVER`
 
-The driver for generic mechanical problem is :cpp:func:`gmp_driver`.
+The driver for generic mechanical problems is :cpp:func:`gmp_driver`.
 
 GMP available solvers
 =====================
@@ -26,7 +26,7 @@ GMP available solvers
 Nonsmooth Gauss-Seidel (:cpp:enumerator:`SICONOS_FRICTION_2D_NSGS`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-direct solver for LCP based on pivoting method principle for degenerate problem: the choice of pivot variable is performed via lexicographic ordering.
+Nonsmooth Gauss-Seidel solver over the blocks (one per interaction) of the problem.
 
 **Driver:** :cpp:func:`gmp_driver`
 
@@ -44,7 +44,7 @@ direct solver for LCP based on pivoting method principle for degenerate problem:
 * dparam[SICONOS_DPARAM_TOL] = 1e-4
 * dparam[SICONOS_DPARAM_GMP_COEFF_LS] = 1.
 
-There are 3 internal solvers :
+There are 3 internal solvers:
 
 * internalSolvers[0] = :cpp:enumerator:`SICONOS_LCP_LEMKE`
 * internalSolvers[1] = :cpp:enumerator:`SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration`
@@ -55,7 +55,7 @@ There are 3 internal solvers :
 
 * internalSolvers[2] = :cpp:enumerator:`SICONOS_RELAY_LEMKE`
 
-out :
+Output:
 
 * dparam[SICONOS_DPARAM_RESIDU]
 * dparam[SICONOS_DPARAM_GMP_ERROR_LS]

@@ -2,18 +2,18 @@
 
 
 
-Tutorial: A 4-diodes bridge wave rectifier
-==========================================
+Tutorial: a four-diode bridge wave rectifier
+============================================
 
 .. highlight:: python
 
-.. note:: the uptodate version of this tutorial is available as a Python notebook in `siconos tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/siconos-notebooks/st01_diode_bridge.ipynb>`_.
+.. note:: The up-to-date version of this tutorial is available as a Python notebook in the `siconos-tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/main/siconos-notebooks/st01_diode_bridge.ipynb>`_.
 
 Preamble
 --------
 
-This tutorial is dedicated to the simulation of the system shown on :ref:`fig_diode_bridge` below. We will describe the step-by-step building of its modelisation
-as a nonsmooth dynamical system and its time integration.
+This tutorial is dedicated to the simulation of the system shown in :ref:`fig_diode_bridge` below. We describe step by step how to model it
+as a nonsmooth dynamical system and how to integrate it in time.
 
 .. _fig_diode_bridge:
 
@@ -22,15 +22,15 @@ as a nonsmooth dynamical system and its time integration.
 
    fig 1: Diode bridge
 
-A LC oscillator initialized with a given voltage
-across the capacitor and a null current through the inductor provides
-the energy to a load resistance through a full-wave rectifier
-consisting of a 4 ideal diodes bridge. Both waves of the oscillating
-voltage across the LC are provided to the resistor with current
-flowing always in the same direction. The energy is dissipated in the
-resistor resulting in a damped oscillation.
+An LC oscillator, initialized with a given voltage
+across the capacitor and zero current through the inductor, supplies
+energy to a load resistor through a full-wave rectifier
+consisting of a bridge of four ideal diodes. Both half-waves of the oscillating
+voltage across the LC are applied to the resistor, with the current
+always flowing in the same direction. The energy is dissipated in the
+resistor, which results in a damped oscillation.
 
-The diode behavior is presented on :ref:`fig_diode`, the left-hand sketch displays the ideal diode characteristic and the right-hand sketch displays the usual exponential characteristic as stated by Shockley's law.
+The behaviour of the diode is shown in :ref:`fig_diode`: the left-hand sketch shows the ideal diode characteristic and the right-hand sketch the usual exponential characteristic given by Shockley's law.
 
 .. _fig_diode:
 
@@ -39,45 +39,45 @@ The diode behavior is presented on :ref:`fig_diode`, the left-hand sketch displa
 
    fig 2: diode characteristics
 
-The diodes, supposed to be ideal, lead to *complementarity* between voltage and intensity, introducing nonsmoothness into the system. This will be detailed later.
+The diodes, assumed to be ideal, lead to *complementarity* between voltage and current, which introduces nonsmoothness into the system. This is detailed later.
 
 
 Siconos driver file
 -------------------
 
-To run a simulation in siconos, it is necessary to write a "driver" file, either in C++ (this file must be compiled and link with siconos libraries)
-or in python and to execute it. In both cases, the whole process is handled by the 'siconos' script::
+To run a simulation in Siconos, you write a "driver" file, either in C++ (this file must be compiled and linked with the Siconos libraries)
+or in Python, and execute it. In both cases, the whole process is handled by the 'siconos' script::
 
   siconos DiodeBridge.cpp
 
-will compile, link and execute, while::
+compiles, links and executes the program, while::
 
   siconos DiodeBridge.py
 
-will execute your python script.
+executes your Python script.
 
-Siconos can obviously be used in an interactive python session or notebook. This is probably the easiest way to proceed with this tutorial.
+Siconos can of course be used in an interactive Python session or notebook. This is probably the easiest way to follow this tutorial.
 
 *Remarks:*
 
-    * *this example is available in siconos examples package under Electronics/DiodeBridge directory, in C++, python and as a notebook.
-      For the latter just run*::
+    * *this example is available in the Siconos examples, in the Electronics/DiodeBridge directory, in C++, in Python and as a notebook.
+      For the latter, run*::
 
 	ipython notebook DiodeBridge.ipynb
 
       *to interactively run this tutorial.*
 
-    * *In this tutorial, we assume that siconos is properly installed on you system, as explained in* :ref:`siconos_install_guide`.
+    * *In this tutorial, we assume that Siconos is properly installed on your system, as explained in* :ref:`siconos_install_guide`.
 
 Let us start with a short description of the three main steps always required to run a simulation.
 
-#. First of all, you will need to describe properly the system as a nonsmooth dynamical system, i.e. :
+#. First, describe the system as a nonsmooth dynamical system, i.e.:
 
-   * define the ordinary differential equations set (the **Dynamical Systems**) that represent the dynamics,
-   * define the 'nonsmooth' part of the system, through **nonsmooth laws**  and **relations** between variables that may constraint the state.
+   * define the set of ordinary differential equations (the **Dynamical Systems**) that represent the dynamics;
+   * define the 'nonsmooth' part of the system, through **nonsmooth laws** and **relations** between variables that may constrain the state.
 
-#. Then you will need to choose a simulation strategy, to define how the nonsmooth system will be integrated over a time step : which discretisation and integrators for the dynamics (**one-step integrators**), which formulation and solvers for the **nonsmooth problem** and so on.
-#. Finally, you will need to run your simulation and post-process the results.
+#. Then choose a simulation strategy, i.e. how the nonsmooth system is integrated over a time step: which discretisation and integrators for the dynamics (**one-step integrators**), which formulation and solvers for the **nonsmooth problem**, and so on.
+#. Finally, run the simulation and post-process the results.
 
 
 
@@ -90,8 +90,8 @@ Building a nonsmooth dynamical system
 Modeling the dynamics
 ^^^^^^^^^^^^^^^^^^^^^
 
-The considered oscillator is a linear dynamical system with time-invariant coefficients. Using the Kirchhoff current and voltage laws and
-branch constitutive equations, the dynamics of the system writes
+The oscillator is a linear dynamical system with time-invariant coefficients. Using Kirchhoff's current and voltage laws and the
+branch constitutive equations, the dynamics of the system read
 
 .. math::
 
@@ -124,8 +124,8 @@ and if we denote
 .. math::
 
    x = \left[\begin{array}{c}
-   \dot v_L\\
-   \dot i_L
+   v_L\\
+   i_L
    \end{array}\right], \
    \lambda = \left[\begin{array}{c}
    -v_{DR1}\\
@@ -140,7 +140,7 @@ and if we denote
    0 & 0 & 0 & 0
    \end{array}\right].\lambda
 
-we get a first order linear system
+we get a first-order linear system
 
 .. math::
 
@@ -148,8 +148,8 @@ we get a first order linear system
 
 with the unknowns :math:`x` and :math:`r`.
 
-To represent this kind of ordinary differential equations, siconos has a class :cpp:class:`siconos::modeling::FirstOrderLinearDS` (TIDS stands for time-invariant coefficients dynamical system)
-which inherits from :cpp:class:`siconos::modeling::DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.
+To represent this kind of ordinary differential equation, Siconos has the class :cpp:class:`siconos::modeling::FirstOrderLinearDS`,
+which inherits from :cpp:class:`siconos::modeling::DynamicalSystem`. See :ref:`dynamical_systems` for a complete review of the dynamical system formalisms available in the software.
 
 ::
 
@@ -173,23 +173,23 @@ which inherits from :cpp:class:`siconos::modeling::DynamicalSystem`. Check :ref:
 
 A few remarks:
 
-* in python you can use either lists or numpy arrays to build vectors or matrices used as siconos methods arguments.
-* help can be found on siconos objects with the standard python help function. For example, to find how
-  the system can be build::
+* in Python, you can use either lists or numpy arrays to build the vectors or matrices passed to Siconos methods;
+* help on Siconos objects is available with the standard Python help function. For example, to find how
+  the system can be built::
 
     help(sk.FirstOrderLinearDS)
 
- or by checking the :ref:`cpp_api` or :ref:`python_api` documention.
+  or in the :ref:`cpp_api` or :ref:`python_api` documentation.
 
 Modeling the interactions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now, the nonsmooth part of the system must be defined, namely what are the nonsmooth laws and constraints between the variables.
-In Siconos, the definition of a **nonsmooth law** and a **relation** between one or two dynamical systems is called an **Interaction**
+Now the nonsmooth part of the system must be defined, namely the nonsmooth laws and the constraints between the variables.
+In Siconos, a **nonsmooth law** together with a **relation** between one or two dynamical systems is called an **Interaction**
 (see :ref:`interactions`).
-Thus, the definition of a set of dynamical systems and of interactions between them will lead to the complete nonsmooth dynamical system.
+A set of dynamical systems and the interactions between them thus make up the complete nonsmooth dynamical system.
 
-For the oscillator of :ref:`fig_diode_bridge`, there exist some linear relations (constraints) between voltage and current inside the diode, given by
+For the oscillator of :ref:`fig_diode_bridge`, there are linear relations (constraints) between the voltages and currents of the diodes, given by
 
 .. math::
 
@@ -230,7 +230,7 @@ with
 
 .. math::
 
-   y=\left[ \begin{array}{c}i_{DR1}\\i_{DF2}\\-v_{DF1}\\-v_{DR2}\end{array} \right], C= \left[ \begin{array}{cccc}\frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\1 & 0 & 0 & 0\\0 & 1 & 0 & 0\end{array} \right], D=\left[ \begin{array}{c}-v_{DR1}\\-v_{DF2}\\i_{DF1}\\i_{DR2}\end{array} \right]
+   y=\left[ \begin{array}{c}i_{DR1}\\i_{DF2}\\-v_{DF1}\\-v_{DR2}\end{array} \right], C= \left[ \begin{array}{cc}0 & 0\\ 0 & 0\\ -1 & 0\\ 1 & 0\end{array} \right], D=\left[ \begin{array}{cccc}\frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\1 & 0 & 0 & 0\\0 & 1 & 0 & 0\end{array} \right]
 
 and recalling that
 
@@ -254,8 +254,8 @@ this is equivalent to the linear relation between :math:`(x, r)` and :math:`(y, 
 
    y = Cx + D\lambda, \ \ \ r = B\lambda
 
-To represent this kind of algebraic equations, siconos has a class :cpp:class:`siconos::modeling::FirstOrderLinearTIR` (TIR stands for time-invariant coefficients relations)
-which inherits from :cpp:class:`siconos::modeling::Relation`. Check :ref:`relations` to find a complete review of all the relations formalisms available in the software.
+To represent this kind of algebraic equation, Siconos has the class :cpp:class:`siconos::modeling::FirstOrderLinearTIR` (TIR stands for time-invariant relation),
+which inherits from :cpp:class:`siconos::modeling::Relation`. See :ref:`relations` for a complete review of the relation formalisms available in the software.
 
 ::
 
@@ -286,33 +286,33 @@ which inherits from :cpp:class:`siconos::modeling::Relation`. Check :ref:`relati
    # nslaw + relation == interaction
    interaction = sk.Interaction(nonsmooth_law, relation)
 
-Notice that a complete :cpp:class:`siconos::modeling::FirstOrderLinearTIR` writes
+Note that the complete form of a :cpp:class:`siconos::modeling::FirstOrderLinearTIR` is
 
 .. math::
 
    y &= Cx + D\lambda + Fz + e \\
    r &= B\lambda
 
-All components not set during build are considered to be zero (which is the case here for F and e).
+All the components not set at construction are zero (here F and e).
 
-Each diode of the bridge is supposed to be ideal, with the behavior shown on left-hand sketch of :ref:`fig_diode`.
-Such a behavior can be described with a **complementarity condition** between current and reverse voltage.
+Each diode of the bridge is assumed to be ideal, with the behaviour shown in the left-hand sketch of :ref:`fig_diode`.
+Such a behaviour can be described by a **complementarity condition** between the current and the reverse voltage.
 
-Complementarity between two variables :math:`y \in R^m, \lambda \in R^m` writes
+Complementarity between two variables :math:`y \in R^m, \lambda \in R^m` reads
 
 .. math::
 
-   \text{if} \ 0 \leq y \ \text{ then } \ \lambda = 0 \  \text{ and  if } \ \lambda \geq 0 \ \text{ then } \ y = 0
+   y \geq 0, \ \lambda \geq 0, \ \text{ and } \ y > 0 \ \Rightarrow \ \lambda = 0, \ \ \lambda > 0 \ \Rightarrow \ y = 0
 
-or, using ":math:`\perp`" symbol,
+or, using the ":math:`\perp`" symbol,
 
 .. math::
 
    0 \leq y\, \perp \, \lambda \geq 0\\
 
-The inequalities must be considered component-wise.
+The inequalities hold component-wise.
 
-Then, back to our circuit, the complementarity conditions, results of the ideal diodes characteristics are given by:
+Back to our circuit: the complementarity conditions given by the ideal diode characteristics are:
 
 .. math::
 
@@ -323,26 +323,26 @@ Then, back to our circuit, the complementarity conditions, results of the ideal 
    0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0\\
    \end{array} \ \ \ \ \ \ \text{ or } \ \ \ \ \ \  0 \leq y \, \perp \, \lambda \geq 0
 
-with the previously defined :math:`y` and :math:`\lambda`. Note that depending on the diode position in the bridge, :math:`y_i` stands for the reverse voltage across
-the diode or for the diode current.
+with :math:`y` and :math:`\lambda` defined above. Note that, depending on the position of the diode in the bridge, :math:`y_i` is either the reverse voltage across
+the diode or the diode current.
 
-To represent such a nonsmooth law siconos has a class :cpp:class:`ComplementarityConditionNSL` (you will find NSL in each class-name defining a nonsmooth law)
-which inherits from :cpp:class:`NonSmoothLaw`. Check :ref:`non_smooth_laws` to find a complete review of all available laws in the software.
+To represent such a nonsmooth law, Siconos has the class :cpp:class:`ComplementarityConditionNSL` (NSL appears in the name of every class defining a nonsmooth law),
+which inherits from :cpp:class:`NonSmoothLaw`. See :ref:`non_smooth_laws` for a complete review of the laws available in the software.
 
 ::
 
    nonsmooth_law = sk.ComplementarityConditionNSL(interaction_size)
 
-The interaction can be completely defined::
+The interaction can now be fully defined::
 
   interaction = sk.Interaction(nonsmooth_law, relation)
 
-Notice that this interaction just describe some relations and laws but is not connected to any real dynamical system, for the moment.
+Note that, for the moment, this interaction only describes relations and laws: it is not connected to any dynamical system yet.
 
 The modeling part is almost complete, since only one dynamical system and one interaction are needed to describe the problem.
 They must be gathered into a specific object, the :cpp:class:`NonSmoothDynamicalSystem`.
-The building of this object is quite simple: just
-set the time window for the simulation, include dynamical systems and link them to the correct interactions.
+Building this object is simple:
+set the time window of the simulation, insert the dynamical systems and link them to the right interactions.
 
 ::
 
@@ -350,7 +350,7 @@ set the time window for the simulation, include dynamical systems and link them 
    t0 = 0. # initial time
    T = 5.0e-3 # duration of the simulation
    DiodeBridge = sk.NonSmoothDynamicalSystem(t0, T)
-   # add the dynamical system in the non smooth dynamical system
+   # add the dynamical system to the nonsmooth dynamical system
    DiodeBridge.insertDynamicalSystem(ds)
 
    # link the interaction and the dynamical system
@@ -360,19 +360,19 @@ set the time window for the simulation, include dynamical systems and link them 
 Describing the simulation of the nonsmooth dynamical system
 -----------------------------------------------------------
 
-You need now to define how the nonsmooth dynamical system will be integrated over time. This is the role of the simulation, which must set:
+You now need to define how the nonsmooth dynamical system is integrated over time. This is the role of the simulation, which defines:
 
-* how dynamical systems are discretized and integrate over a time step
-* how the nonsmooth problem will be formalized and solved
+* how the dynamical systems are discretized and integrated over a time step;
+* how the nonsmooth problem is formulated and solved.
 
-Two different strategies are available : event-capturing (a.k.a time stepping) schemes and event-driven schemes. Check :ref:`simulation_nsds` for details
+Two strategies are available: event-capturing (a.k.a. time-stepping) schemes and event-driven schemes. See :ref:`simulation_nsds` for details,
 or :cite:`Acary.Brogliato2008` for even more details.
 
-For the Diode Bridge example, an event-capturing strategy will be used, with an Euler-Moreau integrator and a LCP (Linear Complementarity Problem)
+For the diode bridge example, we use an event-capturing strategy, with an Euler-Moreau integrator and an LCP (Linear Complementarity Problem)
 formulation.
 
-Let us start with the 'one-step integrator', i.e. the description of the discretisation and integration of the dynamics over a time step, between
-time :math:`t_i` and :math:`t_{i+1}`. The integration of the equation over the time step is based on a :math:`\theta` -method. The process is detailed in :ref:`event_capturing` and, for first-order systems, leads to
+Let us start with the 'one-step integrator', i.e. the discretisation and integration of the dynamics over a time step, between
+times :math:`t_i` and :math:`t_{i+1}`. The integration of the equation over the time step is based on a :math:`\theta`-method. The process is detailed in :ref:`event_capturing` and, for first-order systems, leads to
 
 .. math::
 
@@ -380,18 +380,18 @@ time :math:`t_i` and :math:`t_{i+1}`. The integration of the equation over the t
    W &= (M - h\theta A) \\
    x^{free}_i &=  x_i + h W^{-1}(A x_i + b)
 
-This corresponds to :cpp:class:`EulerMoreauOSI` integrators, which inherits from :class:`OneStepIntegrator`. Check :ref:`time_integrators` to find a complete review of integrators available in the software.
+This corresponds to the :cpp:class:`EulerMoreauOSI` integrator, which inherits from :class:`OneStepIntegrator`. See :ref:`time_integrators` for a complete review of the integrators available in the software.
 
 ::
 
   theta = 0.5
   osi = sk.EulerMoreauOSI(theta)
 
-Notice that each dynamical system of the model must be associated to one and only one one-step integrator.
+Note that each dynamical system of the model must be associated with one and only one one-step integrator.
 
-Next, based on the simulation strategy and the time-integration, a one-step nonsmooth problem must be formalized, see :ref:`simulation_nsds` and :ref:`osns_problems`.
+Next, depending on the simulation strategy and the time integration, a one-step nonsmooth problem must be formulated, see :ref:`simulation_nsds` and :ref:`osns_problems`.
 
-Considering the following discretization of the previously defined relations and nonsmooth law
+With the following discretization of the relations and nonsmooth law defined above
 
 .. math::
 
@@ -412,17 +412,17 @@ with
 
    q = Cx^{free}_{i+1},    M = hCW^{-1}B + D
 
-This is known as a Linear Complementarity Problem, written in siconos thanks to :cpp:class:`LCP` class, which inherits from :class:`OneStepNSProblem`.
-As usual, check :ref:`osns_problems` for a complete review of the nonsmooth problems formulations available in Siconos.
-To each formulation, one must associate a solver, picked from the list given in :ref:`lcp_solvers`::
+This is a Linear Complementarity Problem, represented in Siconos by the :cpp:class:`LCP` class, which inherits from :class:`OneStepNSProblem`.
+As usual, see :ref:`osns_problems` for a complete review of the nonsmooth problem formulations available in Siconos.
+Each formulation must be associated with a solver, picked from the list given in :ref:`lcp_solvers`::
 
   import siconos.numerics as sn
-  #  Non smooth problem
+  #  Nonsmooth problem
   osnspb = sk.LCP(sn.solver_ids.SICONOS_LCP_NSQP)
 
-Notice that solvers come from siconos numerics and are identified thanks to an id. The connection between ids and solvers is given in :ref:`lcp_solvers`.
+Note that the solvers come from Siconos numerics and are identified by an id. The correspondence between ids and solvers is given in :ref:`lcp_solvers`.
 
-Then the last step consists in the simulation creation, with its time discretisation::
+The last step is the creation of the simulation, with its time discretisation::
 
   # simulation and time discretisation
   time_step =  1.0e-6
@@ -430,17 +430,17 @@ Then the last step consists in the simulation creation, with its time discretisa
   simu = sk.TimeStepping(DiodeBridge, td, osi, osnspb)
 
 
-Leading the Simulation Process
-------------------------------
+Running the simulation
+----------------------
 
 The easiest way to run your simulation is to call::
 
   s->run()
 
-But after that you only have access to values computed at the last
-time step, which might not be enough ...
+But then you only have access to the values computed at the last
+time step, which may not be enough.
 
-For the present case, :math:`x, y \ and \ \lambda` at each time step are needed for postprocessing. Here is an example on how to get and save them in a numpy array::
+Here, :math:`x, y` and :math:`\lambda` are needed at each time step for post-processing. Here is how to get them and save them in a numpy array::
 
   N = int((T - t0) / simu.timeStep()) + 1
   data_plot = np.zeros((N, 8))
@@ -469,12 +469,12 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
       simu.nextStep()
 
 
-* :cpp:func:`Simulation::hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
-* :cpp:func:`Simulation::nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
-* :cpp:func:`Simulation::computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
-  obtain the so-called free-state, that is without non-smooth effects, then it will formalize and solve a LCP before re-integrate the dynamics using the LCP results.
+* :cpp:func:`Simulation::hasNextEvent()` is true as long as there are events to process, i.e. until T is reached;
+* :cpp:func:`Simulation::nextStep()` mainly increments the time step, saves the current state and prepares the initial values of the next step;
+* :cpp:func:`Simulation::computeOneStep()` performs the computation over the current time step. With Moreau's time-stepping scheme, it first integrates the dynamics to
+  get the so-called free state, i.e. without nonsmooth effects, then formulates and solves an LCP, and finally integrates the dynamics again with the LCP results.
 
-The results can now be postprocessed, with matplotlib for example::
+The results can now be post-processed, with matplotlib for example::
 
   import matplotlib.pyplot as plt
   plt.subplot(411)

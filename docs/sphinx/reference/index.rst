@@ -3,9 +3,9 @@
 API reference
 =============
 
-Writing and running a simulation with Siconos may be achieved either with C++ language or with the python interface.
-Although those two APIs are quite similar, two different documentations (both generated from sources) are available. Please pick the one corresponding to the interface you choose.
-Below you will find links to documentation for all classes and files in Siconos, sorted  by component or module name.
+A Siconos simulation can be written and run either in C++ or with the Python interface.
+The two APIs are quite similar, but each has its own documentation (both generated from the sources). Pick the one for the interface you use.
+Below are links to the documentation of all classes and files in Siconos, sorted by component or module name.
 
 
 .. toctree::
@@ -15,4 +15,4 @@ Below you will find links to documentation for all classes and files in Siconos,
    Siconos Python API<python_api>
 
 
-*If a file or a class you know does not appear in this page, it means it has not been (properly) documented or is not available in the high level API. Please contact us if you think it is an error.*
+*If a file or a class you know does not appear on this page, it has not been (properly) documented or is not available in the high-level API. Please contact us if you think this is an error.*

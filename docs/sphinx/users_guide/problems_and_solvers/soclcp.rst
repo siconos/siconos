@@ -13,13 +13,13 @@ Problem statement
 
 Given
 
-* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
+* a symmetric positive semidefinite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
 * a vector :math:`{q} \in {{\mathrm{I\!R}}}^n`
 
 * a vector of coefficients :math:`\mu \in{{\mathrm{I\!R}}}^{n_c}`
 
-the second order cone linear complementarity problem (SOCLCP) is to find two vectors :math:`u\in{{\mathrm{I\!R}}}^n` , and :math:`r\in {{\mathrm{I\!R}}}^n` , denoted by :math:`\mathrm{SOCCLP}(M,q,\mu)` such that
+the second-order cone linear complementarity problem (SOCLCP), denoted by :math:`\mathrm{SOCLCP}(M,q,\mu)`, is to find two vectors :math:`u\in{{\mathrm{I\!R}}}^n` and :math:`r\in {{\mathrm{I\!R}}}^n` such that
 
 .. math::
 
@@ -28,9 +28,9 @@ the second order cone linear complementarity problem (SOCLCP) is to find two vec
     \ C^\star_{\mu} \ni {u} \perp r \in C_{\mu}
     \end{cases} \end{eqnarray*}
 
-and the set :math:`C^{\alpha,\star}_{\mu^\alpha}` is its dual.
+where the set :math:`C^{\alpha,\star}_{\mu^\alpha}` is the dual of :math:`C^{\alpha}_{\mu^\alpha}`.
 
-The set C is the second order cone given by
+The set C is the second-order cone given by
 
 .. math::
 
@@ -53,7 +53,7 @@ Structure to define the problem: :cpp:class:`SecondOrderConeLinearComplementarit
 
 The generic driver for all SOCLCP problems is :cpp:func:`soclcp_driver()`.
 
-Solvers list  :cpp:enum:`SOCLCP_SOLVER`
+List of solvers: :cpp:enum:`SOCLCP_SOLVER`
 
 .. _soclcp_solvers:
 
@@ -70,17 +70,16 @@ driver: :cpp:func:`soclcp_nsgs()`
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-* iparam[SICONOS_IPARAM_ERROR_EVALUATION] : error computation method,
+* iparam[SICONOS_IPARAM_ERROR_EVALUATION]: error computation method,
 
-    * SICONOS_ERROR_FULL_EVALUATION Complete error computation with v computation (Default)
-    * SICONOS_ERROR_LIGHT_EVALUATION for Light error computation with incremental values on r verification of absolute error at the end
-    * SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE for light error computation, without update for v
+    * SICONOS_ERROR_FULL_EVALUATION: full error computation, including v (default)
+    * SICONOS_ERROR_LIGHT_EVALUATION: light error computation with incremental values on r, and a check of the absolute error at the end
+    * SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE: light error computation, without updating v
 
-* iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
-* iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] : method uses overrelaxation
-* iparam[SICONOS_IPARAM_NSGS_SHUFFLE] : if 1, shuffle the contact indices in the loop
+* iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0: if 1, use over-relaxation
+* iparam[SICONOS_IPARAM_NSGS_SHUFFLE]: if 1, shuffle the contact indices in the loop
 * dparam[SICONOS_DPARAM_TOL] = 1e-4;
-* dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1., relaxation parameter value
+* dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1.: relaxation parameter value
 
 internal solver: :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`.
 
@@ -88,11 +87,11 @@ internal solver: :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIterat
 VI, fixed-point (:cpp:enumerator:`SICONOS_SOCLCP_VI_FPP`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-VI formulation and fixed point projection.
+VI formulation and fixed-point projection.
 
 driver: :cpp:func:`soclcp_VI_FixedPointProjection()`
 
-parameters: same as :cpp:enumerator:`SICONO_VI_FPP`, see :ref:`vi_solvers`.
+parameters: same as :cpp:enumerator:`SICONOS_VI_FPP`, see :ref:`vi_solvers`.
 
 
 VI, Extra-gradient (:cpp:enumerator:`SICONOS_SOCLCP_VI_EG`)
@@ -102,21 +101,12 @@ VI formulation and extra-gradient solver.
 
 driver: :cpp:func:`soclcp_VI_ExtraGradient()`
 
-parameters: same as :cpp:enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
-
-VI, Extra-gradient (:cpp:enumerator:`SICONOS_SOCLCP_VI_EG`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-VI formulation and extra-gradient solver.
-
-driver: :cpp:func:`soclcp_VI_ExtraGradient()`
-
-parameters: same as :cpp:enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
+parameters: same as :cpp:enumerator:`SICONOS_VI_EG`, see :ref:`vi_solvers`.
 
 Projections
 """""""""""
 
-Used as internal solver for :cpp:enumerator:`SICONOS_SOCLCP_NSGS`.
+Used as internal solvers of :cpp:enumerator:`SICONOS_SOCLCP_NSGS`.
 
 ids: :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`,
 :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnCone`, :cpp:enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithRegularization`.

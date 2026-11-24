@@ -1,31 +1,31 @@
 .. _BulletIO_example:
 
-Collections of rigid bodies with Bullet based contact detection (Siconos/Mechanics)
+Collections of rigid bodies with Bullet-based contact detection (Siconos/Mechanics)
 -----------------------------------------------------------------------------------------
 
-Author: Maurice Bremond, Vincent Acary 2013--2016
+Authors: Maurice Bremond, Vincent Acary 2013--2016
 
-You may refer to the source code of this set of  examples, `found here <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/tree/main/examples/mechanics/GeometricPrimitives?ref_type=heads>`_.
+The source code of this set of examples is `available here <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/tree/main/examples/mechanics/GeometricPrimitives?ref_type=heads>`_.
 
 
-Description of the physical problems : rigid bodies collection with contact and Coulomb friction
-````````````````````````````````````````````````````````````````````````````````````````````````
+Description of the physical problems: collections of rigid bodies with contact and Coulomb friction
+```````````````````````````````````````````````````````````````````````````````````````````````````
 
 In this set of examples (cubes.py, n_cubes.py, ...), we model collections of rigid bodies
-associated with shapes (primitive (sphere, cube capsule, etc), convex hull, mesh) that interact
-with contact and friction.
+associated with shapes (primitives (sphere, cube, capsule, etc.), convex hulls, meshes) that interact
+through contact and friction.
 
-The example use extensively the mechanics_run python code that enable to create and manage the geometrical
-data and the results of the simulation in hdf5 file.
+The examples make extensive use of the mechanics_run Python code, which creates and manages the geometrical
+data and the results of the simulation in an HDF5 file.
 
-The results cab be viewed with the siconos_vview and the siconos_vexport python scripts
+The results can be viewed with the siconos_vview and siconos_vexport Python scripts.
 
-A brief description of examples is as follows :
+Brief description of the examples:
 
-* cube.py is  the simplest example with few cubes that fall down on a rigid fixed plane. The scene is built
-  using calls to mechanics_run methods such as
+* cube.py is the simplest example, with a few cubes falling onto a fixed rigid plane. The scene is built
+  with calls to mechanics_run methods such as
 
-  * addPrimitiveShape for creating a primitive shape
+  * addPrimitiveShape, to create a primitive shape
 
 
   .. code-block:: python
@@ -33,7 +33,7 @@ A brief description of examples is as follows :
       with Hdf5(mode='r+') as io:
 	io.addPrimitiveShape('Ground', 'Box', (100, 100, .5))
 
-  * addConvexShape for creating a convex shape addPrimitiveShape, addNewtonImpactFrictionNSL)
+  * addConvexShape, to create a convex shape (see also addPrimitiveShape, addNewtonImpactFrictionNSL)
 
   .. code-block:: python
 
@@ -48,7 +48,7 @@ A brief description of examples is as follows :
 	(1.0, -1.0, -1.0),
 	(1.0, -1.0, 1.0)])
 
-  * addObject for associating Newton Euler Dynamical System to a shape
+  * addObject, to associate a Newton-Euler dynamical system with a shape
 
   .. code-block:: python
 
@@ -57,7 +57,7 @@ A brief description of examples is as follows :
 	velocity=[10, 0, 0, 1, 1, 1],
 	mass=1)
 
-  The computation is launched using the method run() with default arguments
+  The computation is launched with the run() method, here with its default arguments:
 
   .. code-block:: python
 
@@ -83,21 +83,21 @@ A brief description of examples is as follows :
             numerics_verbose=False,
             output_frequency=None)
 
-* n_cubes.py . This is an extension of cubes.py where it is possible to build a reactangular pile of cubes
+* n_cubes.py: an extension of cubes.py that builds a rectangular pile of cubes.
 
-* cube_scene.py, cube_simulation.py n_cubes_scene.py n_cubes_simulation.py . These examples are a different treatment of the same example
-  but the construction of the scene and the simulation are separated into differents. In that way, it is possible to produce a scene file
-  and then to perfoms several simulations. Furthermore, if the result of the simulation is stored in the hdf5 file, we restart from the last
-  state of the system to continue the simulation. it is alo possible to concatenate in time several simulations in that way.
+* cube_scene.py, cube_simulation.py, n_cubes_scene.py, n_cubes_simulation.py: the same examples,
+  but the construction of the scene and the simulation are in separate files. This way, one scene file can be produced
+  and then used for several simulations. Furthermore, if the result of a simulation is stored in the HDF5 file, the next simulation restarts from the last
+  state of the system. Several simulations can thus be chained in time.
 
-* MultipleContactorsAndNSlaws.py . This  is an example where two shapes are fixed to the same mechanical system. It allows to build clusters and to get
-  some complex contact shapes.
+* MultipleContactorsAndNSlaws.py: two shapes are attached to the same mechanical system. This makes it possible to build clusters and to get
+  complex contact shapes.
 
-* bar.py, bar_contact.py  This simple example provides one with a simple simulation where the performance of Lie integrator are important for long term
-  simulation of rotating bodie in a stable way. It allows also to test large inertia ratio in the solver.
+* bar.py, bar_contact.py: simple simulations where the performance of the Lie integrator matters for the long-term, stable
+  simulation of rotating bodies. They also test large inertia ratios in the solver.
 
-* convexhull.py . This test shos how to build a collection of convexhull shapes
+* convexhull.py: shows how to build a collection of convex hull shapes.
 
-* PairWise_test_bullet.py . This test file performs the test of contacting pairs of various nature (primitive, convex hull). Meshes have to be added.
+* PairWise_test_bullet.py: tests contacts between pairs of shapes of various kinds (primitives, convex hulls). Meshes still have to be added.
 
-* chute.py. This example is a little more complex one where the a collection of polyhedra falls down into an hopper.
+* chute.py: a more complex example where a collection of polyhedra falls into a hopper.

@@ -3,24 +3,21 @@
 Siconos required and optional dependencies
 ==========================================
 
-.. note::
-
-   Dockerfiles available in
 .. warning::
 
-   This page might be outdated. To find an up to date list of siconos dependencies, please have a look to the configurations used for the continuous integration process.
-   Dockerfiles or requirements.txt files available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_
-   of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them.
+   This page might be outdated. For an up-to-date list of the Siconos dependencies, look at the configurations used for continuous integration.
+   The Dockerfiles and requirements.txt files in the `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_
+   of the Siconos sources show the list of required dependencies and how to install them.
 
 
 
-* a compiler suite, with c++, c and gfortran compilers.
+* a compiler suite, with C++, C and gfortran compilers.
 
- c++ 20 compatibility is required.
+  C++20 support is required.
 
 * cmake, version > 3.19 - https://cmake.org
 
-  cmake is very easy to install or update, whatever your system is, e.g.:
+  cmake is easy to install or update, whatever your system, e.g.:
 
   .. code-block:: bash
 
@@ -28,12 +25,12 @@ Siconos required and optional dependencies
 
 * Eigen https://libeigen.gitlab.io/
 
-* boost, version >= 1.75, http://www.boost.org)
+* boost, version >= 1.75 (http://www.boost.org)
 
-* blas and lapack (see :ref:`about_blas_lapack`)
+* BLAS and LAPACK (see :ref:`about_blas_lapack`)
 
 
-To generate the documentation, you will need :
+To generate the documentation, you need:
 
 * doxygen
 * sphinx
@@ -42,12 +39,12 @@ For the python bindings:
 
 * python (>= 3.8)
 
-  We strongly recommend to use Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
+  We strongly recommend using Python virtual environments (e.g. `Micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_...)
 
-  See details in :ref:`about_python`
+  See the details in :ref:`about_python`.
 
 
-  To run tests:
+To run the tests:
 
 * cppunit
 
@@ -57,7 +54,7 @@ For the python bindings:
 About Python
 ------------
 
-We strongly recommend to use Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
+We strongly recommend using Python virtual environments (e.g. `Micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_...)
 
 
 Siconos venv example
@@ -72,7 +69,7 @@ Installation:
    pip install -U -r requirements.txt
 
 
-A requirements.txt file for Siconos is available in the source directory in `ci_gitlab/dockerfiles <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_
+A requirements.txt file for Siconos is available in the source directory, in `ci_gitlab/dockerfiles <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/main/ci_gitlab/dockerfiles?ref_type=heads>`_
 
 Activation:
 
@@ -84,7 +81,7 @@ Activation:
 Siconos micromamba env example
 """"""""""""""""""""""""""""""
 
-Download the file `siconoslabenv.yml <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/ci_gitlab/sicolabenv.yml?ref_type=heads>`_ in Siconos source dir.
+Download the file `siconoslabenv.yml <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/main/ci_gitlab/sicolabenv.yml?ref_type=heads>`_ from the Siconos sources.
 
 Change the name "base" to sicoenv in this file.
 
@@ -104,7 +101,7 @@ Activation:
 
 
 .. warning::
-   To ensure a proper mamba conf and the right channel, it may be necessary to run the following commands beforehand
+   To get a proper mamba configuration and the right channel, you may need to run the following commands first:
 
    .. code-block::
 
@@ -116,7 +113,7 @@ Activation:
 
 .. _about_blas_lapack:
 
-About blas and Lapack
+About BLAS and LAPACK
 ---------------------
 
 The BLAS (Basic Linear Algebra Subprograms, http://www.netlib.org/blas/) are routines that provide standard building blocks for performing basic vector and matrix operations, while LAPACK (http://www.netlib.org/lapack/#_presentation) provides routines for solving systems of simultaneous linear equations, least-squares solutions of linear systems of equations, eigenvalue problems, and singular value problems.
@@ -124,23 +121,23 @@ Different implementations are available, such as:
 
 * openblas (http://www.openblas.net),
 * the one from MKL (https://software.intel.com/en-us/intel-mkl),
-* Accelerate framework on Macosx (https://developer.apple.com/library/prerelease/mac/documentation/Accelerate/Reference/BLAS_Ref/index.html) ...
+* the Accelerate framework on macOS (https://developer.apple.com/library/prerelease/mac/documentation/Accelerate/Reference/BLAS_Ref/index.html)...
 
-For siconos we recommand:
+For Siconos we recommend:
 
-* accelerate on Macosx
-* OpenBLAS + lapacke on linux systems
+* Accelerate on macOS,
+* OpenBLAS + LAPACKE on Linux.
 
-Warning : we do not provide support for atlas.
+Warning: we do not support ATLAS.
 
-Anyway, power users can still choose their favorite BLAS and LAPACK(E) vendor.
+Power users can still choose their favourite BLAS and LAPACK(E) vendor.
 
-Blas, lapack setup of your system will be checked during cmake call.
+The BLAS/LAPACK setup of your system is checked when cmake runs.
 
-If the process failed or if you need a specific implementation, the following variables may be provided to cmake to help the searching process (see :ref:`siconos_detailed_install`)
+If this fails, or if you need a specific implementation, the following variables can be given to cmake to help the search (see :ref:`siconos_detailed_install`):
 
-* BLA_VENDOR : Blas implementation type (used also as hint for lapack).
-  One of :
+* BLA_VENDOR: BLAS implementation type (also used as a hint for LAPACK),
+  one of:
   * OpenBLAS
   * Matlab
   * Intel10_32 (intel mkl v10 32 bit)
@@ -151,31 +148,31 @@ If the process failed or if you need a specific implementation, the following va
   * Apple
   * Generic
 
-* BLAS_ROOT : Blas implementation location.
-* LAPACK_ROOT : Lapack implementation location.
+* BLAS_ROOT: location of the BLAS implementation.
+* LAPACK_ROOT: location of the LAPACK implementation.
 
 
 About Boost
 -----------
 
-Boost provides a lot of useful C++ binaries, especially Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities
+Boost provides many useful C++ libraries, in particular uBLAS, a C++ template class library that provides BLAS level 1, 2 and 3 functionality
 for dense, packed and sparse matrices.
 
-Ublas is used in Siconos for matrices and vectors definition and implementation.
+uBLAS is used in Siconos to define and implement matrices and vectors.
 
 About Boost: http://www.boost.org/
 
 About Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
 
-Install (note that an adequate Boost version comes with most linux distributions and thus no more install is required.)
+Installation: a suitable Boost version comes with most Linux distributions, so no extra installation is usually required.
 
-To know how to get and install Boost, see
+To get and install Boost, see
 Boost Getting Started.
 
 Note that we also use boost-bindings:
 "Boost Bindings is a bindings library (not just) for Boost.Ublas. It offers an easy way of calling BLAS, LAPACK, UMFPACK, MUMPS and many other mature legacy numerical codes from within C++."
 
-They are distributed and installed with the Siconos but you can also get the last version here:
+They are distributed and installed with Siconos, but you can also get the latest version here:
 http://mathema.tician.de/software/boost-bindings
 
 GMP
@@ -183,4 +180,4 @@ GMP
 
 "GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating point numbers ... "
 
-This library usually comes with gcc. If not see http://gmplib.org/ for download and installation instructions.
+This library usually comes with gcc. If not, see http://gmplib.org/ for download and installation instructions.

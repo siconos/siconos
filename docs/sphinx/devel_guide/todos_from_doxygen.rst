@@ -12,34 +12,28 @@ Todo List
 
 * :cpp:struct:`LinearComplementarityProblem`
 
-  * Optimizing the memory allocation (Try to avoid the copy of JacH into A)
+  * Optimize the memory allocation (try to avoid copying JacH into A)
   * Add rules for the computation of the penalization rho
-  * Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
+  * Add a globalization strategy based on the decrease of a merit function (nonmonotone LCP). Reference: Ferris, Kanzow 2002
 
 * :cpp:struct:`LinearComplementarityProblem`
 
-  * Optimizing the memory allocation (Try to avoid the copy of JacH into A)
-  * Add rules for the computation of the penalization rho
-  * Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
+  * Use the relaxation parameter
+  * Add a test
+  * Add a vector of relaxation parameters with automatic sizing (see the SOR algorithm for linear solvers)
 
 * :cpp:struct:`LinearComplementarityProblem`
 
-  * use the relax parameter
-  * add test
-  * add a vector of relaxation parameter wtith an auto sizing (see SOR algorithm for linear solver.)
-
-* :cpp:struct:`LinearComplementarityProblem`
-
-  * Sizing the regularization paramter and apply it only on null diagnal term
+  * Size the regularization parameter and apply it only to zero diagonal terms
 
 *  :ref:`Matrix Storage in numerics component <numerics_matrix_storage>`
 
-   write proper doc for CSparse storage and complete the example above.
+   Write proper documentation for the CSparse storage and complete the example above.
 
 * :cpp:struct:`MixedLinearComplementarityProblem`
 
-  * Sizing the regularization parameter and apply it only on null diagnal term
+  * Size the regularization parameter and apply it only to zero diagonal terms
 
 *  ``NonSmoothDrivers.h``
 
-   * solve_qp does not exist
+   * solve_qp does not exist.

@@ -1,9 +1,9 @@
 .. _siconos_python_tutorials:
 
-Python interface : tutorials
-============================
+Python interface: tutorials
+===========================
 
-This part should be reviewed/cleaned/improved ...
+This part should be reviewed, cleaned up and improved.
 
 .. toctree::
    :maxdepth: 3

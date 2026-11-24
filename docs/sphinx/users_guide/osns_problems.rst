@@ -1,32 +1,32 @@
 .. _osns_problems:
 
-Nonsmooth problems formulation and solve
-========================================
+Formulation and solution of nonsmooth problems
+==============================================
 
-When dynamical systems and their interactions have been properly defined inside a model and its nonsmooth dynamical system,
-a proper formulation for the latter must be chosen, associated to a nonsmooth solver.
+Once the dynamical systems and their interactions have been defined in a model and its nonsmooth dynamical system,
+a formulation of the latter must be chosen, together with a nonsmooth solver.
 
 For details regarding the available formulations, see :ref:`problems_and_solvers`.
 
 
-The Simulation process
+The simulation process
 ----------------------
 
-As for Event-Driven, we introduce level index sets, with level = 0 for first order systems and level=1 for second order systems (this is related to the relative degrees but we won't get into details about that here).
+As for event-driven simulations, we introduce index sets for each level, with level = 0 for first-order systems and level = 1 for second-order systems (this is related to the relative degree, but we will not go into details here).
 
-:math:`I_0` is the set of all the potential UnitaryRelations (UR).
-For second order systems:
+:math:`I_0` is the set of all potential UnitaryRelations (UR).
+For second-order systems:
 :math:`I_1 = \{ ur_\alpha\in I_{0} , y^p_{\alpha} = 0 \}`.
-Thus, the LCP is built only for unitary relations that belongs to :math:`I_level`, level=0 for first order and level=1 for second order systems.
+The LCP is therefore built only for the unitary relations that belong to :math:`I_{level}`, with level = 0 for first-order and level = 1 for second-order systems.
 
-Then, the steps of a Moreau's Time-Stepping simulation will be:
+The steps of a Moreau time-stepping simulation are then:
 
 Knowing all values at the beginning of the time step :math:`[t_i,t_{i+1}]`,
 
--# compute the free solutions
--# for :math:`ur \in I_level` formalize and solve a LCP
--# update the state (according to the possibly LCP results)
--# go to next time step
+#. compute the free solutions;
+#. for :math:`ur \in I_{level}`, formulate and solve an LCP;
+#. update the state (using the LCP results, if any);
+#. go to the next time step.
 
 ::
 
@@ -42,7 +42,7 @@ Knowing all values at the beginning of the time step :math:`[t_i,t_{i+1}]`,
    {
    // compute xFree, or qFree,vFree
    s->computeFreeStep();
-   // Formalize and solve a LCP
+   // Formulate and solve an LCP
    computeOneStepNSProblem("timeStepping");
    // Update state, using last computed values
    s->update(level); //
@@ -50,20 +50,20 @@ Knowing all values at the beginning of the time step :math:`[t_i,t_{i+1}]`,
    s->nextStep();
    }
 
-Note that all time-independent operators are computed during simulation initialisation.
+Note that all time-independent operators are computed during the initialisation of the simulation.
 
 
 
-Customize simulation behavior
------------------------------
+Customize the simulation behaviour
+----------------------------------
 
-Each time :cpp:func:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
+Each call to the :cpp:func:`ComputeOneStepNS()` function, i.e. to the numerics solver, returns an int that gives information about the convergence of the solver:
 
-* output = 0 => solver succeeded,
-* else, the meaning of output depends on the solver called (see :ref:`problems_and_solvers`).
+* output = 0 => the solver succeeded,
+* otherwise, the meaning of the output depends on the solver (see :ref:`problems_and_solvers`).
 
-By default, when the convergence is not achieved, an exception is throwed and the process stops.
-Change this behavior is possible by defining a specific function of the form::
+By default, when the solver does not converge, an exception is thrown and the process stops.
+This behaviour can be changed by defining a function of the form::
 
   //
   // your inputFile.cpp
@@ -80,5 +80,5 @@ Change this behavior is possible by defining a specific function of the form::
   auto your_simulation = ...
   your_simulation->setCheckSolverFunction(&myF);
 
-Then after each call to your_simulation->computeOneStepNS(...), the function myF will be called.
-That may be usefull to change the solver type, the tolerance or whatever is needed.
+Then, after each call to your_simulation->computeOneStepNS(...), the function myF is called.
+This is useful to change the solver type, the tolerance or anything else.

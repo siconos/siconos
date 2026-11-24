@@ -2,8 +2,8 @@
 License
 *******
 
-Siconos is a program dedicated to modeling, simulation and control
-of non smooth dynamical systems.
+Siconos is a program dedicated to the modeling, simulation and control
+of nonsmooth dynamical systems.
 
 Copyright 2024 INRIA.
 

@@ -3,7 +3,7 @@
 Time integration of the dynamics
 ================================
 
-Dynamical systems integration over a time-step or between two events must be defined thanks to
+The integration of dynamical systems over a time step or between two events is defined by
 'one-step integrators'.
 
 * Euler-Moreau (:cpp:class:`EulerMoreauOSI`)
@@ -19,7 +19,7 @@ For first-order dynamical systems, in an 'event-capturing' simulation strategy.
 with a nonsmooth law linking :math:`y_{k+1}` and :math:`\lambda_{k+1}`,
 and :math:`\theta \in [0,1], \gamma \in [0,1]`.
 
-Another variant can also be used (FullThetaGamma scheme)
+Another variant can also be used (FullThetaGamma scheme):
 
 .. math::
 
@@ -41,8 +41,8 @@ For mechanical (second-order) systems, in an 'event-capturing' simulation strate
    0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\
    P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,\end{array}
 
-with  :math:`\theta \in [0,1]`. The index set :math:`\mathcal I_1` is the discrete equivalent
-to the rule that allows us to apply the Signorini  condition at the velocity level.
+with :math:`\theta \in [0,1]`. The index set :math:`\mathcal I_1` is the discrete equivalent
+of the rule that allows us to apply the Signorini condition at the velocity level.
 Numerically, this set is defined as
 
 .. math::
@@ -50,15 +50,15 @@ Numerically, this set is defined as
    \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and } U_k \leq 0 \}.
 
 * Schatzman-Paoli (:cpp:class:`SchatzmanPaoliOSI`)
-* zero-order  (:cpp:class:`ZeroOrderHoldOSI`)
+* Zero-order hold (:cpp:class:`ZeroOrderHoldOSI`)
 * Lsodar (:cpp:class:`LsodarOSI`)
 
-For 'event-driven' simulation strategy. Integrator based on LSODAR (https://computation.llnl.gov/casc/odepack/) rootfinding routine :
+For the 'event-driven' simulation strategy. Integrator based on the LSODAR (https://computation.llnl.gov/casc/odepack/) root-finding routine:
 "Lsodar solves problems dy/dt = f with full or banded Jacobian and automatic method selection, and at the same time, it finds the roots of any of a set of given functions of the form g(t,y). This is often useful for finding stop conditions or points at which switches are to be made in the function f".
-In Siconos, Lsodar is used for event-driven algorithm, to integrate the dynamics with stops at new non-smooth events (violation of a constraint)
+In Siconos, Lsodar is used by the event-driven algorithm to integrate the dynamics and stop at new nonsmooth events (violation of a constraint).
 
 * Hem5 (:cpp:class:`Hem5OSI`)
 
-For 'event-driven' simulation strategy. Based on Ernst Hairer HEM5 integrator (http://www.unige.ch/~hairer/software.html)
+For the 'event-driven' simulation strategy. Based on Ernst Hairer's HEM5 integrator (http://www.unige.ch/~hairer/software.html).
 
 * Newmark (:cpp:class:`NewMarkAlphaOSI`)

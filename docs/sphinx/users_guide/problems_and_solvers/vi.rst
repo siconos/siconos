@@ -13,13 +13,13 @@ Problem statement
 
 Given
 
-* an integer :math:`n` , the dimension of the ambient space,
+* an integer :math:`n`, the dimension of the ambient space,
 
-* a mapping :math:`F\colon \mathrm{I\!R}^n \rightarrow \mathrm{I\!R}^n`
+* a mapping :math:`F\colon \mathrm{I\!R}^n \rightarrow \mathrm{I\!R}^n`,
 
-* a set :math:`{X} \in {{\mathrm{I\!R}}}^n`
+* a set :math:`{X} \subset {{\mathrm{I\!R}}}^n`,
 
-the variational inequality problem consists in finding a vector :math:`z\in{{\mathrm{I\!R}}}^n` , such that
+the variational inequality problem consists in finding a vector :math:`z\in{{\mathrm{I\!R}}}^n` such that
 
 .. math::
 
@@ -31,9 +31,9 @@ or equivalently,
 
     \begin{equation*} - F(z) \in \mathcal{N}_X(z) \end{equation*}
 
-where :math:`\mathcal{N}_X` is the normal cone to :math:`X` at :math:`z` .
+where :math:`\mathcal{N}_X` is the normal cone to :math:`X` at :math:`z`.
 
-*References* : :cite:`Facchinei.2003`, :cite:`Acary.Brogliato2008`.
+*References*: :cite:`Facchinei.2003`, :cite:`Acary.Brogliato2008`.
 
 Implementation in numerics
 ==========================
@@ -42,17 +42,17 @@ Structure to define the problem: :struct:`VariationalInequality`.
 
 The generic driver for all VI is :cpp:func:`variationalInequality_driver()`.
 
-solvers list  :cpp::enum:`VI_SOLVER`
+List of solvers: :cpp:enum:`VI_SOLVER`
 
 .. _vi_solvers:
 
-VI Available solvers
+Available VI solvers
 ====================
 
 Extra gradient (:cpp:enumerator:`SICONOS_VI_EG`)
 -------------------------------------------------
 
-Extra Gradient solver forvariational inequality problem based on the De Saxce Formulation
+Extra-gradient solver for variational inequality problems.
 
 driver :cpp:func:`variationalInequality_ExtraGradient()`
 
@@ -63,17 +63,17 @@ parameters:
 * iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY] (set but not used)
 * iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO
 
-  allowed values :
+  allowed values:
 
-  * SICONOS_VI_LS_ARMIJO : Armijo rule with Khotbotov ratio (default)
-  * SICONOS_VI_LS_SOLODOV : Armijo rule with Solodov.Tseng ratio
-  * SICONOS_VI_LS_HANSUN : Armijo rule with Han.Sun ratio
+  * SICONOS_VI_LS_ARMIJO: Armijo rule with Khobotov ratio (default)
+  * SICONOS_VI_LS_SOLODOV: Armijo rule with Solodov-Tseng ratio
+  * SICONOS_VI_LS_HANSUN: Armijo rule with Han-Sun ratio
 
 * iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 0;
 * iparam[SICONOS_VI_IPARAM_DECREASE_RHO] = 0;
 
-* dparam[SICONOS_DPARAM_TOL] = 1e-3, in-out parameter
-* dparam[SICONOS_VI_DPARAM_RHO] = -1., in-out parameter
+* dparam[SICONOS_DPARAM_TOL] = 1e-3: in-out parameter
+* dparam[SICONOS_VI_DPARAM_RHO] = -1.: in-out parameter
 * dparam[SICONOS_VI_DPARAM_LS_TAU] = 2/3
 * dparam[SICONOS_VI_DPARAM_LS_TAUINV] = 3/2
 * dparam[SICONOS_VI_DPARAM_LS_L] = 0.9
@@ -83,7 +83,7 @@ parameters:
 Fixed-point  projection (:cpp:enumerator:`SICONOS_VI_FPP`)
 -----------------------------------------------------------
 
-Fixed Point Projection solver for variational inequality problem based on the De Saxce Formulation.
+Fixed-point projection solver for variational inequality problems.
 
 driver: :cpp:func:`variationalInequality_FixedPointProjection()`
 
@@ -106,19 +106,17 @@ parameters:
 
 * dparam[SICONOS_VI_DPARAM_SIGMA] = 0.8, sigma
 
-out :
+Output:
 
-* iparam[SICONOS_IPARAM_ITER_DONE] : number of iterations
+* iparam[SICONOS_IPARAM_ITER_DONE]: number of iterations
 
 
 SICONOS_VI_BOX_QI (:cpp:enumerator:`SICONOS_VI_BOX_QI`)
 --------------------------------------------------------
 
-Solver using the merit function proposed by Qi for box-constrained Newton QI LSA
+Newton solver with line search (QiLSA), using the merit function proposed by Qi for box-constrained VI.
 
-id:
-
-driver : :cpp:func:`variationalInequality_box_newton_QiLSA()`
+driver: :cpp:func:`variationalInequality_box_newton_QiLSA()`
 
 parameters:
 
@@ -139,7 +137,7 @@ parameters:
 SICONOS_VI_BOX_AVI_LSA (:cpp:enumerator:`SICONOS_VI_BOX_AVI_LSA`)
 ------------------------------------------------------------------
 
-driver : :cpp:func:`vi_box_AVI_LSA()`
+driver: :cpp:func:`vi_box_AVI_LSA()`
 
 parameters:
 
@@ -152,12 +150,12 @@ parameters:
 * dparam[SICONOS_DPARAM_TOL] = 1e-12
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16
 
-internal solver : :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`
+internal solver: :cpp:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`
 
 SICONOS_VI_BOX_PATH (:cpp:enumerator:`SICONOS_VI_BOX_PATH`)
 -----------------------------------------------------------
 
-driver : :cpp:func:`vi_box_path()`
+driver: :cpp:func:`vi_box_path()`
 
 parameters:
 
