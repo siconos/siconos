@@ -9,6 +9,7 @@
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
 
+#include "FrictionContact_options.h"             // for SICONOS_GLOBAL_FRICTION_3D_VI_*
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
 #include "NumericsFwd.h"                         // for VariationalInequality
@@ -17,7 +18,6 @@
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
-#include "fc3d_short_names.h"                    // for GFC3D_VI_EG
 #include "gfc3d_Solvers.h"
 #include "gfc3d_Solvers.h"        // for gfc3d_VI_ExtraGradient
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
@@ -114,7 +114,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* react
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC3D_VI_EG in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_3D_VI_EG in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -147,7 +147,7 @@ static void gfc3d_vi_eg_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC3D_VI_EG, "GFC3D_VI_EG",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_3D_VI_EG, "GFC3D_VI_EG",
                      "Variational Inequality Extra Gradient for 3D Global Friction Contact",
                      gfc3d_vi_eg_init_wrap, gfc3d_vi_eg_solve_wrap, gfc3d_vi_eg_free_wrap,
                      NULL,                                /* error function */

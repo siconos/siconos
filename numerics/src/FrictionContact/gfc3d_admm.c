@@ -17,9 +17,8 @@
 #include "NumericsSparseMatrix.h"     // for NSM_TRIPLET ...
 #include "SiconosBlas.h"              // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"            // for SolverOptions, solver_opti...
-#include "fc3d_short_names.h"
-#include "float.h"          // for DBL_EPSILON
-#include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
+#include "float.h"                    // for DBL_EPSILON
+#include "gfc3d_Solvers.h"            // for gfc3d_checkTrivialCaseGlobal
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "gfc3d_ipm.h"
@@ -35,8 +34,8 @@
 #include "siconos_debug.h"
 
 // Short name for solver ID
-#ifndef GFC3D_ADMM
-#define GFC3D_ADMM SICONOS_GLOBAL_FRICTION_3D_ADMM
+#ifndef SICONOS_GLOBAL_FRICTION_3D_ADMM
+#define SICONOS_GLOBAL_FRICTION_3D_ADMM SICONOS_GLOBAL_FRICTION_3D_ADMM
 #endif
 
 typedef struct {
@@ -1032,7 +1031,7 @@ void gfc3d_alternating_direction_method_of_multipliers_set_default(SolverOptions
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC3D_ADMM in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_3D_ADMM in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -1062,7 +1061,7 @@ static void gfc3d_admm_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER_3VAR(
-    GFC3D_ADMM, "GFC3D_ADMM",
+    SICONOS_GLOBAL_FRICTION_3D_ADMM, "GFC3D_ADMM",
     "Alternating Direction Method of Multipliers for 3D Global Friction Contact",
     gfc3d_admm_init_wrap, gfc3d_admm_solve_wrap, gfc3d_admm_free_wrap,
     NULL, /* error function */

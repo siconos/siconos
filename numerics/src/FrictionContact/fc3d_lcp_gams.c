@@ -26,7 +26,6 @@
 
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_lcp_gams_path, fc3d_lcp_gams_pathvi
-#include "fc3d_short_names.h"
 
 #if 0
 //#ifdef HAVE_GAMS_C_API

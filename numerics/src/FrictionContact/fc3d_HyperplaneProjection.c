@@ -17,7 +17,6 @@
 #include "SolverOptions.h"       // for SolverOptions, solver_options_nu...
 #include "fc3d_Solvers.h"        // for fc3d_HyperplaneProjection, fc3d_...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_HP
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionOnCone
 
@@ -223,8 +222,9 @@ static void fc3d_hp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_HP, "FC3D_HP", "Hyperplane Projection for 3D Friction Contact",
-                fc3d_hp_init_wrap, fc3d_hp_solve_wrap, fc3d_hp_free_wrap, NULL,
+REGISTER_SOLVER(SICONOS_FRICTION_3D_HP, "FC3D_HP",
+                "Hyperplane Projection for 3D Friction Contact", fc3d_hp_init_wrap,
+                fc3d_hp_solve_wrap, fc3d_hp_free_wrap, NULL,
                 fc3d_hyperplane_projection_set_default, /* set_default */
                 1000,                                   /* default_max_iter */
                 1e-3, /* default_tol - uses 1e-3 in set_default */

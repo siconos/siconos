@@ -23,7 +23,6 @@
 #include "SolverOptions.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
-#include "fc3d_short_names.h"  // for ComputeErrorPtr
 #include "gfc3d_ipm.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -991,7 +990,7 @@ static void fc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
   options->solverData = NULL;
 }
 
-REGISTER_SOLVER(FC3D_IPM_SNM, "FC3D_IPM_SNM",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_IPM_SNM, "FC3D_IPM_SNM",
                 "Interior Point Method with Smoothing and Newton for 3D Friction Contact",
                 fc3d_ipm_snm_init_wrap, fc3d_ipm_snm_solve_wrap, fc3d_ipm_snm_free_wrap, NULL,
                 fc3d_IPM_SNM_set_default, /* set_default */

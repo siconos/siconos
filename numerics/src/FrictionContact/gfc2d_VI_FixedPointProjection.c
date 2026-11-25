@@ -13,6 +13,7 @@
 #include <string.h>  // for memcpy
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem_compute_contact_status_2d
+#include "FrictionContact_options.h"
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
 #include "NumericsFwd.h"                         // for VariationalInequality
@@ -21,7 +22,6 @@
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
-#include "fc3d_short_names.h"                    // for GFC2D_VI_FPP
 #include "gfc2d_compute_error.h"                 // for gfc2d_compute_error
 #include "numerics_verbose.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_BEGIN
@@ -212,7 +212,7 @@ void gfc2d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC2D_VI_FPP in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_2D_VI_FPP in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -246,7 +246,7 @@ static void gfc2d_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER_3VAR(
-    GFC2D_VI_FPP, "GFC2D_VI_FPP",
+    SICONOS_GLOBAL_FRICTION_2D_VI_FPP, "GFC2D_VI_FPP",
     "Variational Inequality Fixed Point Projection for 2D Global Friction Contact",
     gfc2d_vi_fpp_init_wrap, gfc2d_vi_fpp_solve_wrap, gfc2d_vi_fpp_free_wrap,
     NULL,                     /* error function */

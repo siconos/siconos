@@ -14,7 +14,6 @@
 
 #include "FrictionContact_options.h"
 #include "fc2d_Solvers.h"
-#include "fc3d_short_names.h"
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -45,7 +44,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
 
   /* Handle sparse matrices - convert to dense for non-NSGS solvers */
   NumericsMatrix* M_original = NULL;
-  if (problem->M->storageType != NM_DENSE && options->solverId != FC2D_NSGS &&
+  if (problem->M->storageType != NM_DENSE && options->solverId != SICONOS_FRICTION_2D_NSGS &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI &&
       options->solverId != SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT &&

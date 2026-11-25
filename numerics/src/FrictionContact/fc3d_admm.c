@@ -22,7 +22,6 @@
 #include "SolverOptions.h"         // for SolverOptions, SICONOS_DPARAM_TOL
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionOnCone, projectionOnDu...
@@ -1130,7 +1129,7 @@ static void fc3d_admm_free_wrap(void* problem, SolverOptions* options) {
   fc3d_admm_free((FrictionContactProblem*)problem, options);
 }
 
-REGISTER_SOLVER(FC3D_ADMM, "FC3D_ADMM",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_ADMM, "FC3D_ADMM",
                 "Alternating Direction Method of Multipliers for 3D Friction Contact",
                 fc3d_admm_init_wrap, fc3d_admm_solve_wrap, fc3d_admm_free_wrap, NULL,
                 fc3d_admm_set_default, /* set_default */

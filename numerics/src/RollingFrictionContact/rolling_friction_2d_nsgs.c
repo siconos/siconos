@@ -14,8 +14,9 @@
 #include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_IP...
 #include "NumericsArrays.h"           // for uint_shuffle
 #include "NumericsFwd.h"              // for SolverOptions, Rolling...
-#include "SiconosBlas.h"              // for cblas_dnrm2
-#include "SolverOptions.h"            // for SolverOptions, SICONOS...
+#include "RollingFrictionContact_options.h"
+#include "SiconosBlas.h"    // for cblas_dnrm2
+#include "SolverOptions.h"  // for SolverOptions, SICONOS...
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"                         // for numerics_printf, numer...
@@ -24,8 +25,7 @@
 #include "rolling_friction_2d_enum.h"                 // for rolling_friction_2d_enum_solve
 #include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_3d_local_pro...
 #include "rolling_friction_2d_projection.h"           // for rolling_friction_3d_projectio...
-#include "rolling_friction_3d_short_names.h"
-#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_BEGIN
+#include "siconos_debug.h"                            // for DEBUG_PRINTF, DEBUG_BEGIN
 #include "solver_registry.h"
 
 // #define FCLIB_OUTPUT
@@ -586,7 +586,7 @@ static void rolling_friction_2d_nsgs_free_wrap(void* problem, SolverOptions* opt
   (void)options;
 }
 
-REGISTER_SOLVER(RFC2D_NSGS, "RFC2D_NSGS",
+REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_2D_NSGS, "RFC2D_NSGS",
                 "Non-smooth Gauss-Seidel for 2D Rolling Friction Contact",
                 rolling_friction_2d_nsgs_init_wrap, rolling_friction_2d_nsgs_solve_wrap,
                 rolling_friction_2d_nsgs_free_wrap, NULL,   /* error function */

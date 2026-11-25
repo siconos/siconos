@@ -21,7 +21,6 @@
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
 #include "SiconosBlas.h"
-#include "fc3d_short_names.h"
 #include "float.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_ipm.h"
@@ -2273,7 +2272,7 @@ static void gfc3d_ipm_snm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 REGISTER_SOLVER_3VAR(
-    GFC3D_IPM_SNM, "GFC3D_IPM_SNM",
+    SICONOS_GLOBAL_FRICTION_3D_IPM_SNM, "GFC3D_IPM_SNM",
     "Interior Point Method with Smoothing and Newton for Global 3D Friction Contact",
     gfc3d_ipm_snm_init_wrap, gfc3d_ipm_snm_solve_wrap, gfc3d_ipm_snm_free_wrap, NULL,
     gfc3d_IPM_SNM_set_default, /* set_default */

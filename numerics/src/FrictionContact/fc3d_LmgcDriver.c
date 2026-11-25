@@ -15,7 +15,6 @@
 #include "NumericsVerbose.h"          // for numerics_set_verbose
 #include "SolverOptions.h"            // for SolverOptions, SICONOS_IPARAM_IT...
 #include "SparseBlockMatrix.h"        // for SBCM_new_3x3, SBC...
-#include "fc3d_short_names.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES  */
@@ -49,10 +48,10 @@ int fc3d_LmgcDriver(double* reaction, double* velocity, double* q, double* mu, d
 
   SolverOptions* numerics_solver_options = solver_options_create(solver_id);
 
-  if (solver_id == FC3D_NSGS) {
+  if (solver_id == SICONOS_FRICTION_3D_NSGS) {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] =
         SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
-  } else if (solver_id == FC3D_NSN_AC) {
+  } else if (solver_id == SICONOS_FRICTION_3D_NSN_AC) {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] =
         SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =

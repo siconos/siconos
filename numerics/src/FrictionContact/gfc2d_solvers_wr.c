@@ -15,9 +15,8 @@
 #include "SiconosBlas.h"                   // for cblas_dnrm2
 #include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL
 #include "fc2d_Solvers.h"                  // for fc2d_nsgs, fc2d_nsgs_set_default
-#include "fc3d_short_names.h"
-#include "gfc2d_Solvers.h"        // for gfc2d_nsgs_wr
-#include "gfc2d_compute_error.h"  // for gfc2d_compute_error
+#include "gfc2d_Solvers.h"                 // for gfc2d_nsgs_wr
+#include "gfc2d_compute_error.h"           // for gfc2d_compute_error
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 /* Solver registration system */
@@ -76,7 +75,7 @@ void gfc2d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   DEBUG_END("gfc2d_nsgs_wr\n");
 }
 
-REGISTER_SOLVER_3VAR(GFC2D_NSGS_WR, "GFC2D_NSGS_WR",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_2D_NSGS_WR, "GFC2D_NSGS_WR",
                      "Non-smooth Gauss-Seidel for Global 2D Friction Contact with reduction",
                      NULL, NULL, NULL, NULL, /* error function */
                      fc2d_nsgs_set_default,  /* set_default */

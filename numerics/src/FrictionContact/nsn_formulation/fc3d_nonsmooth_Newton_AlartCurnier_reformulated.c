@@ -13,7 +13,6 @@
 #include <stdio.h>   // for size_t, NULL
 #include <stdlib.h>  // for free, calloc, malloc
 
-#include "../fc3d_short_names.h"
 #include "AlartCurnierGenerated.h"        // for fc3d_AlartCurnierFun...
 #include "FrictionContactProblem.h"       // IWYU pragma: keep
 #include "FrictionContact_options.h"      // for SICONOS_FRICTION_3D_...
@@ -164,7 +163,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier_reformulated(FrictionContactProblem* pro
 
   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==
       SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN) {
-    SolverOptions* options_vi_eg = solver_options_create(FC3D_VI_EG);
+    SolverOptions* options_vi_eg = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
     SOLVER_MAX_ITER(options_vi_eg) = 50;
     SOLVER_TOL(options_vi_eg) = sqrt(SOLVER_TOL(options));
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] =
@@ -232,7 +231,7 @@ static int fc3d_nsn_ac_new_solve_wrap(void* problem, double* reaction, double* v
 }
 
 REGISTER_SOLVER(
-    FC3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
+    SICONOS_FRICTION_3D_NSN_AC_NEW, "FC3D_NSN_AC_NEW",
     "Nonsmooth Newton method based on Alart-Curnier formulation (new implementation)",
     fc3d_nsn_ac_new_init_wrap, fc3d_nsn_ac_new_solve_wrap, NULL, NULL,
     fc3d_nonsmooth_newton_alart_curnier_reformulated_set_default, /* set_default */

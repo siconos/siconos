@@ -16,6 +16,7 @@
 #include "CohesiveFrictionContactProblem.h"
 #include "CohesiveFrictionContact_options.h"
 #include "FrictionContactProblem.h"
+#include "FrictionContact_options.h"
 #include "Friction_tools.h"
 #include "NonSmoothGaussSeidel_options.h"
 #include "NumericsArrays.h"
@@ -28,7 +29,6 @@
 #include "cohesive_friction_3d_projection.h"
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "fc3d_projection.h"
-#include "fc3d_short_names.h"
 #include "naming_conventions.h"
 #include "nsgs_generic.h"
 #include "numerics_errors.h"
@@ -319,14 +319,14 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
   /** Connect to local solver */
   switch (local_opts_contact->solverId) {
     /* Projection */
-    case OC_PROJ: {
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone: {
       local_function_toolkit->local_solver_contact = &fc3d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem = &cohesive_fc3d_nsgs_update;
       local_function_toolkit->free_local_solver_contact = &fc3d_projection_free;
       fc3d_projection_initialize(fc3d_problem);
       break;
     }
-    case OC_PROJ_LI: {
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
       local_function_toolkit->local_solver_contact =
           &fc3d_projectionOnConeWithLocalIteration_solve;
       local_function_toolkit->update_local_problem = &cohesive_fc3d_nsgs_update;
@@ -337,7 +337,7 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
     }
 
     /* Newton solver (Alart-Curnier) */
-    case OC_NSN: {
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN: {
       local_function_toolkit->local_solver_contact =
           &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem = &cohesive_fc3d_nsgs_update;
@@ -346,7 +346,7 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(fc3d_problem, local_opts_contact);
       break;
     }
-    case OC_NSN_GP: {
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP: {
       local_function_toolkit->local_solver_contact =
           &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem = &cohesive_fc3d_nsgs_update;
@@ -355,7 +355,7 @@ static int cohesive_fc3d_nsgs_initialize_local_solver(
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(fc3d_problem, local_opts_contact);
       break;
     }
-    case OC_NSN_GP_HYBRID: {
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID: {
       local_function_toolkit->local_solver_contact =
           &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem = &cohesive_fc3d_nsgs_update;
@@ -1085,7 +1085,8 @@ static void cohesive_friction_3d_nsgs_set_default(SolverOptions* options) {
     options->internalSolvers = calloc(2, sizeof(SolverOptions*));
   }
   assert(options->numberOfInternalSolvers == 2);
-  options->internalSolvers[0] = solver_options_create(OC_NSN_GP_HYBRID);
+  options->internalSolvers[0] =
+      solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
 
   // to be changed for the cohesion solver.
   options->internalSolvers[1] = solver_options_create(SICONOS_COHESIVE_FRICTION_3D_PROJECTION);

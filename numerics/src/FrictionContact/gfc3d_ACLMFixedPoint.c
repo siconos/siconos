@@ -18,7 +18,6 @@
 #include "NumericsMatrix.h"                            // for NM_clear, NM_tr...
 #include "SiconosBlas.h"                               // for cblas_dcopy
 #include "SolverOptions.h"                             // for SolverOptions
-#include "fc3d_short_names.h"                          // for GFC3D_ACLMFP
 #include "gfc3d_Solvers.h"                             // for gfc3d_set_inte...
 #include "gfc3d_compute_error.h"                       // for gfc3d_compute_...
 #include "numerics_errors.h"
@@ -176,7 +175,7 @@ void gfc3d_alart_curnier_lm_fixed_point_set_default(SolverOptions* options) {
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC3D_ACLMFP in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_3D_ACLMFP in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -201,7 +200,7 @@ static void gfc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC3D_ACLMFP, "GFC3D_ACLMFP",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_3D_ACLMFP, "GFC3D_ACLMFP",
                      "Alart-Curnier Lemke Fixed Point for 3D Global Friction Contact",
                      gfc3d_aclmfp_init_wrap, gfc3d_aclmfp_solve_wrap, gfc3d_aclmfp_free_wrap,
                      NULL,                                           /* error function */

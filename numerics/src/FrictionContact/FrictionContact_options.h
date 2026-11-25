@@ -429,18 +429,19 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM {
   SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED = 17,
   /** MPI communicator for distributed solving */
   SICONOS_FRICTION_3D_NSN_MPI_COM = 18,
-  /** Warm-start strategy for GFC3D_NSN_AC (see SICONOS_FRICTION_3D_NSN_WARM_START) */
+  /** Warm-start strategy for SICONOS_GLOBAL_FRICTION_3D_NSN_AC (see
+     SICONOS_FRICTION_3D_NSN_WARM_START) */
   SICONOS_FRICTION_3D_NSN_WARM_START_STRATEGY = 20,
-  /** Maximum number of warm-start iterations for GFC3D_NSN_AC */
+  /** Maximum number of warm-start iterations for SICONOS_GLOBAL_FRICTION_3D_NSN_AC */
   SICONOS_FRICTION_3D_NSN_WARM_START_MAX_ITER = 21,
-  /** Jacobian regularization strategy for GFC3D_NSN_AC
+  /** Jacobian regularization strategy for SICONOS_GLOBAL_FRICTION_3D_NSN_AC
    *  (see SICONOS_FRICTION_3D_NSN_REGULARIZATION)
    */
   SICONOS_FRICTION_3D_NSN_REGULARIZATION = 22,
-  /** Levenberg--Marquardt fallback of GFC3D_NSN_AC (default 1) and FC3D_NSN_AC/FB/NM
-   *  (default 0): 0 off, 1 on.
-   *  When the Newton iteration stalls (the residual decreases by less than 1% from one
-   *  iteration to the next), the direction of the iteration is computed from
+  /** Levenberg--Marquardt fallback of SICONOS_GLOBAL_FRICTION_3D_NSN_AC (default 1) and
+   * SICONOS_FRICTION_3D_NSN_AC/FB/NM (default 0): 0 off, 1 on. When the Newton iteration
+   * stalls (the residual decreases by less than 1% from one iteration to the next), the
+   * direction of the iteration is computed from
    *  \f$ (J^\top J + \lambda I) d = -J^\top \Psi \f$ with
    *  \f$ \lambda \f$ = SICONOS_FRICTION_3D_NSN_LM_COEF \f$ \times \|\Psi\| \f$
    *  instead of \f$ J d = -\Psi \f$ (see docs/devel/GFC3D_NSN_LM_FALLBACK.md).
@@ -451,7 +452,7 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM {
 
 /** Indices for global 2D NSN solver integer parameters */
 enum SICONOS_FRICTION_2D_NSN_IPARAM {
-  /** Warm-start strategy: run a few GFC2D_VI_FPP iterations before NSN
+  /** Warm-start strategy: run a few SICONOS_GLOBAL_FRICTION_2D_VI_FPP iterations before NSN
    *  (see SICONOS_FRICTION_2D_NSN_WARM_START)
    */
   SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY = 20,
@@ -463,37 +464,38 @@ enum SICONOS_FRICTION_2D_NSN_IPARAM {
    *  (see SICONOS_FRICTION_2D_NSN_FORMULATION_ENUM)
    */
   SICONOS_FRICTION_2D_NSN_FORMULATION = 23,
-  /** Levenberg--Marquardt fallback of GFC2D_NSN_AC (0: off, 1: on, default 0), as
-   *  SICONOS_FRICTION_3D_NSN_LM_FALLBACK (index 28: 24 to 26 are the error-scaling options)
+  /** Levenberg--Marquardt fallback of SICONOS_GLOBAL_FRICTION_2D_NSN_AC (0: off, 1: on,
+   * default 0), as SICONOS_FRICTION_3D_NSN_LM_FALLBACK (index 28: 24 to 26 are the
+   * error-scaling options)
    */
   SICONOS_FRICTION_2D_NSN_LM_FALLBACK = 28,
 };
 
-/** Warm-start strategy values for GFC2D_NSN_AC */
+/** Warm-start strategy values for SICONOS_GLOBAL_FRICTION_2D_NSN_AC */
 enum SICONOS_FRICTION_2D_NSN_WARM_START {
   /** No warm start: use the user-provided initial guess */
   SICONOS_FRICTION_2D_NSN_WARM_START_NO = 0,
-  /** Run GFC2D_VI_FPP for a few iterations to build the initial guess */
+  /** Run SICONOS_GLOBAL_FRICTION_2D_VI_FPP for a few iterations to build the initial guess */
   SICONOS_FRICTION_2D_NSN_WARM_START_YES = 1,
-  /** Run GFC2D_VI_FPP only if the first Newton linear solve fails */
+  /** Run SICONOS_GLOBAL_FRICTION_2D_VI_FPP only if the first Newton linear solve fails */
   SICONOS_FRICTION_2D_NSN_WARM_START_AUTO = 2,
   /** Compute rho from the diagonal approximation of the reduced problem */
   SICONOS_FRICTION_2D_NSN_WARM_START_RHO_FROM_DIAGONAL = 3,
 };
 
-/** Warm-start strategy values for GFC3D_NSN_AC */
+/** Warm-start strategy values for SICONOS_GLOBAL_FRICTION_3D_NSN_AC */
 enum SICONOS_FRICTION_3D_NSN_WARM_START {
   /** No warm start: use the user-provided initial guess */
   SICONOS_FRICTION_3D_NSN_WARM_START_NO = 0,
-  /** Run GFC3D_VI_FPP for a few iterations to build the initial guess */
+  /** Run SICONOS_GLOBAL_FRICTION_3D_VI_FPP for a few iterations to build the initial guess */
   SICONOS_FRICTION_3D_NSN_WARM_START_YES = 1,
-  /** Run GFC3D_VI_FPP only if the first Newton linear solve fails */
+  /** Run SICONOS_GLOBAL_FRICTION_3D_VI_FPP only if the first Newton linear solve fails */
   SICONOS_FRICTION_3D_NSN_WARM_START_AUTO = 2,
   /** Compute rho from the diagonal approximation of the reduced problem */
   SICONOS_FRICTION_3D_NSN_WARM_START_RHO_FROM_DIAGONAL = 3,
 };
 
-/** Jacobian regularization values for GFC3D_NSN_AC */
+/** Jacobian regularization values for SICONOS_GLOBAL_FRICTION_3D_NSN_AC */
 enum SICONOS_FRICTION_3D_NSN_REGULARIZATION {
   /** No Jacobian regularization */
   SICONOS_FRICTION_3D_NSN_REGULARIZATION_NO = 0,
@@ -501,7 +503,7 @@ enum SICONOS_FRICTION_3D_NSN_REGULARIZATION {
   SICONOS_FRICTION_3D_NSN_REGULARIZATION_YES = 1,
 };
 
-/** Jacobian regularization values for GFC2D_NSN_AC */
+/** Jacobian regularization values for SICONOS_GLOBAL_FRICTION_2D_NSN_AC */
 enum SICONOS_FRICTION_2D_NSN_REGULARIZATION {
   /** No Jacobian regularization */
   SICONOS_FRICTION_2D_NSN_REGULARIZATION_NO = 0,
@@ -529,7 +531,7 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM {
   SICONOS_FRICTION_3D_NSN_REGUL = 4,
   /** Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0) */
   SICONOS_FRICTION_3D_SCALING_ALPHA = 5,
-  /** Coefficient c of the Levenberg--Marquardt fallback of GFC3D_NSN_AC:
+  /** Coefficient c of the Levenberg--Marquardt fallback of SICONOS_GLOBAL_FRICTION_3D_NSN_AC:
    *  \f$ \lambda = c \|\Psi\| \f$ (default 1.0, see SICONOS_FRICTION_3D_NSN_LM_FALLBACK) */
   SICONOS_FRICTION_3D_NSN_LM_COEF = 6,
 };
@@ -540,7 +542,7 @@ enum SICONOS_FRICTION_2D_NSN_DPARAM {
   SICONOS_FRICTION_2D_NSN_REGUL = 4,
   /** Weight for SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED (default 1.0) */
   SICONOS_FRICTION_2D_SCALING_ALPHA = 5,
-  /** Coefficient c of the Levenberg--Marquardt fallback of GFC2D_NSN_AC:
+  /** Coefficient c of the Levenberg--Marquardt fallback of SICONOS_GLOBAL_FRICTION_2D_NSN_AC:
    *  \f$ \lambda = c \|\Psi\| \f$ (default 1.0, see SICONOS_FRICTION_2D_NSN_LM_FALLBACK) */
   SICONOS_FRICTION_2D_NSN_LM_COEF = 6,
 };
@@ -862,17 +864,5 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S {
   SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT
 #define SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_ENUM SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY
 #define SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_ENUM SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S
-
-/* ===========================================================================
- * Short Name Aliases (Optional)
- * ===========================================================================
- * For convenience, shorter macro aliases are available by including
- * fc3d_short_names.h. These provide shorter names like FC3D_NSGS instead of
- * SICONOS_FRICTION_3D_NSGS.
- *
- * Usage:
- *   #include "fc3d_short_names.h"
- *   // Or use the long names directly (backward compatible)
- */
 
 #endif

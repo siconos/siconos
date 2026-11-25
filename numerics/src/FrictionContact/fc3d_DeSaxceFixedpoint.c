@@ -17,7 +17,6 @@
 #include "SolverOptions.h"       // for SolverOptions, solver_options_nu...
 #include "fc3d_Solvers.h"        // for fc3d_DeSaxceFixedPoint, fc3d_DeS...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_DSFP
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"  // for projectionOnCone
 
@@ -146,8 +145,9 @@ static void fc3d_dsfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_DSFP, "FC3D_DSFP", "De Saxce Fixed Point for 3D Friction Contact",
-                fc3d_dsfp_init_wrap, fc3d_dsfp_solve_wrap, fc3d_dsfp_free_wrap, NULL,
+REGISTER_SOLVER(SICONOS_FRICTION_3D_DSFP, "FC3D_DSFP",
+                "De Saxce Fixed Point for 3D Friction Contact", fc3d_dsfp_init_wrap,
+                fc3d_dsfp_solve_wrap, fc3d_dsfp_free_wrap, NULL,
                 fc3d_de_saxce_fixed_point_set_default, /* set_default */
                 1000,                                  /* default_max_iter */
                 1e-4,                                  /* default_tol */

@@ -24,7 +24,6 @@
 #include "SolverOptions.h"                 // for SolverOptions, solve...
 #include "fc3d_Solvers.h"                  // for fc3d_set_internalsol...
 #include "fc3d_compute_error.h"            // for fc3d_compute_error
-#include "fc3d_short_names.h"              // for SICONOS_FRICTION_3D_...
 #include "lcp_cst.h"                       // for SICONOS_LCP_PGS, SIC...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -316,8 +315,9 @@ static void fc3d_pfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_PFP, "FC3D_PFP", "Panagiotopoulos Fixed Point for 3D Friction Contact",
-                fc3d_pfp_init_wrap, fc3d_pfp_solve_wrap, fc3d_pfp_free_wrap, NULL,
+REGISTER_SOLVER(SICONOS_FRICTION_3D_PFP, "FC3D_PFP",
+                "Panagiotopoulos Fixed Point for 3D Friction Contact", fc3d_pfp_init_wrap,
+                fc3d_pfp_solve_wrap, fc3d_pfp_free_wrap, NULL,
                 fc3d_panagiotopoulos_fixed_point_set_default, /* set_default */
                 1000,                                         /* default_max_iter */
                 1e-4,                                         /* default_tol */

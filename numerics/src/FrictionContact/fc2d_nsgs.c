@@ -19,7 +19,6 @@
 #include "SparseBlockMatrix.h"   // for SparseBlockStructuredMatrix
 #include "fc2d_Solvers.h"        // for fc2d_nsgs_sbm, fc2d_spa...
 #include "fc2d_compute_error.h"  // for fc2d_compute_error
-#include "fc3d_short_names.h"    // for FC2D_NSGS
 #include "naming_conventions.h"
 #include "nsgs_utils.h"
 #include "numerics_errors.h"
@@ -839,7 +838,7 @@ void fc2d_nsgs_set_default(SolverOptions* options) {
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_NSGS in the global solver registry, enabling:
+ * This registers SICONOS_FRICTION_2D_NSGS in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -866,10 +865,10 @@ static void fc2d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC2D_NSGS, "FC2D_NSGS", "Non-smooth Gauss-Seidel for 2D Friction Contact",
-                fc2d_nsgs_init_wrap, fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap,
-                NULL,                  /* error function */
-                fc2d_nsgs_set_default, /* set_default */
-                1000,                  /* default_max_iter */
-                1e-4,                  /* default_tol */
-                0);                    /* is_local_solver */
+REGISTER_SOLVER(SICONOS_FRICTION_2D_NSGS, "FC2D_NSGS",
+                "Non-smooth Gauss-Seidel for 2D Friction Contact", fc2d_nsgs_init_wrap,
+                fc2d_nsgs_solve_wrap, fc2d_nsgs_free_wrap, NULL, /* error function */
+                fc2d_nsgs_set_default,                           /* set_default */
+                1000,                                            /* default_max_iter */
+                1e-4,                                            /* default_tol */
+                0);                                              /* is_local_solver */

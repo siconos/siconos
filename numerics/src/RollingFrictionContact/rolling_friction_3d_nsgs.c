@@ -15,6 +15,7 @@
 #include "NumericsArrays.h"           // for uint_shuffle
 #include "NumericsFwd.h"              // for SolverOptions, Rolling...
 #include "NumericsMatrix.h"
+#include "RollingFrictionContact_options.h"
 #include "SiconosBlas.h"    // for cblas_dnrm2
 #include "SolverOptions.h"  // for SolverOptions, SICONOS...
 #include "SparseBlockMatrix.h"
@@ -27,7 +28,6 @@
 #include "rolling_friction_3d_local_problem_tools.h"  // for rolling_friction_3d_local_pro...
 #include "rolling_friction_3d_onecone_nonsmooth_Newton_solvers.h"  // for rolling_friction_3d_projectio...
 #include "rolling_friction_3d_projection.h"  // for rolling_friction_3d_projectio...
-#include "rolling_friction_3d_short_names.h"
 #include "safe_casts.h"
 #include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_BEGIN
 #include "solver_registry.h"
@@ -671,7 +671,7 @@ static void rolling_friction_3d_nsgs_free_wrap(void* problem, SolverOptions* opt
   (void)options;
 }
 
-REGISTER_SOLVER(RFC3D_NSGS, "RFC3D_NSGS",
+REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_3D_NSGS, "RFC3D_NSGS",
                 "Non-smooth Gauss-Seidel for 3D Rolling Friction Contact",
                 rolling_friction_3d_nsgs_init_wrap, rolling_friction_3d_nsgs_solve_wrap,
                 rolling_friction_3d_nsgs_free_wrap, NULL,   /* error function */

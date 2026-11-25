@@ -17,6 +17,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
+#include "RollingFrictionContact_options.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "cs.h"
@@ -26,7 +27,6 @@
 #include "global_rolling_friction_3d_compute_error.h"  // for global_rolling_friction_3d_compute_error
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "rolling_friction_3d_short_names.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_MESSAGES */
@@ -6001,8 +6001,8 @@ static int global_rolling_friction_3d_ipm_solve_wrap(void* problem, double* reac
                                                      double* velocity,
                                                      SolverOptions* options) {
   int info = NUMERICS_OK;
-  /* Note: GRFC3D_IPM requires globalVelocity as an additional argument.
-   * We allocate a temporary array for it here. */
+  /* Note: SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM requires globalVelocity as an additional
+   * argument. We allocate a temporary array for it here. */
   GlobalRollingFrictionContactProblem* p = (GlobalRollingFrictionContactProblem*)problem;
   size_t m = p->M->size0;
   double* globalVelocity = (double*)calloc(m, sizeof(double));
@@ -6020,7 +6020,7 @@ static void global_rolling_friction_3d_ipm_free_wrap(void* problem, SolverOption
   }
 }
 
-REGISTER_SOLVER(GRFC3D_IPM, "GRFC3D_IPM",
+REGISTER_SOLVER(SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM, "GRFC3D_IPM",
                 "Interior Point Method for Global 3D Rolling Friction Contact",
                 global_rolling_friction_3d_ipm_init_wrap,
                 global_rolling_friction_3d_ipm_solve_wrap,

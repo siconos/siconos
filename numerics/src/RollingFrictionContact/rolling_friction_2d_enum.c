@@ -15,11 +15,11 @@
 #include "FrictionContact_options.h"        // for SICONOS_FRICTION_3D_CURRENT_CON...
 #include "NumericsMatrix.h"                 // for NumericsMatrix
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactProblem
-#include "SolverOptions.h"                  // for SolverOptions, SICONOS_DPARAM_R...
+#include "RollingFrictionContact_options.h"
+#include "SolverOptions.h"  // for SolverOptions, SICONOS_DPARAM_R...
 #include "numerics_errors.h"
 #include "op3x3.h"                                    // for solve_3x3_gepp
 #include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_2d_local_pro...
-#include "rolling_friction_3d_short_names.h"          // for RFC2D_OC_ENUM
 #include "solver_registry.h"
 
 /* a case is accepted when its relative violation is below this value */
@@ -369,7 +369,7 @@ static void rolling_friction_2d_enum_free_wrap(void* problem, SolverOptions* opt
   (void)options;
 }
 
-REGISTER_SOLVER(RFC2D_OC_ENUM, "RFC2D_OC_ENUM",
+REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ENUM, "RFC2D_OC_ENUM",
                 "Enumeration of the cases of one contact for 2D Rolling Friction Contact",
                 rolling_friction_2d_enum_init_wrap, rolling_friction_2d_enum_solve_wrap,
                 rolling_friction_2d_enum_free_wrap, NULL, /* error function */

@@ -13,7 +13,6 @@
 #include "NumericsFwd.h"    // for SolverOptions, FrictionContactPr...
 #include "SolverOptions.h"  // for SolverOptions
 #include "fc3d_Solvers.h"   // for fc3d_set_internalsolver_tolerance
-#include "fc3d_short_names.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 

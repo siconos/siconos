@@ -14,7 +14,6 @@
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "rolling_fc_Solvers.h"  // for rolling_friction_3d_set_internal...
-#include "rolling_friction_3d_short_names.h"
 
 int rolling_friction_2d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
                                                      SolverOptions* options,

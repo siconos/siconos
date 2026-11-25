@@ -14,11 +14,11 @@
 #include "NumericsFwd.h"                          // for NumericsMatrix, Fric...
 #include "NumericsMatrix.h"                       // for NumericsMatrix, NM_gemv
 #include "RollingFrictionContactProblem.h"        // for GlobalFrictionContac...
-#include "SiconosBlas.h"                          // for cblas_dcopy, cblas_d...
+#include "RollingFrictionContact_options.h"
+#include "SiconosBlas.h"  // for cblas_dcopy, cblas_d...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "rolling_fc_Solvers.h"  // for fc3d_DeSaxceFixedPoint
-#include "rolling_friction_3d_short_names.h"
 // #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"  // for SICONOS_DPARAM_TOL
 /* Solver registration system */
@@ -73,7 +73,7 @@ void global_rolling_friction_3d_nsgs_wr(GlobalRollingFrictionContactProblem* pro
   DEBUG_END("global_rolling_friction_3d_nsgs_wr\n");
 }
 REGISTER_SOLVER_3VAR(
-    GRFC3D_NSGS_WR, "GRFC3D_NSGS_WR",
+    SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR, "GRFC3D_NSGS_WR",
     "Non-smooth Gauss-Seidel for Global 3D Rolling Friction Contact with reduction", NULL,
     NULL, NULL, NULL,                     /* error function */
     rolling_friction_3d_nsgs_set_default, /* set_default */

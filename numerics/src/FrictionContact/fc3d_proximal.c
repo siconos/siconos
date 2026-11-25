@@ -20,7 +20,6 @@
 #include "fc3d_compute_error.h"                       // for fc3d_compute_error
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"       // for fc3d_nonsmooth_...
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_nonsmooth_...
-#include "fc3d_short_names.h"                         // for SICONOS_FRICTIO...
 #include "numerics_verbose.h"
 
 /* #define DEBUG_STDOUT */
@@ -118,19 +117,19 @@ void fc3d_proximal(FrictionContactProblem* problem, double* reaction, double* ve
   options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE] = 0;
 
   if (internalsolver_options) {
-    if (internalsolver_options->solverId == FC3D_NSGS) {
+    if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS) {
       internalsolver = &fc3d_nsgs;
-    } else if (internalsolver_options->solverId == FC3D_DSFP) {
+    } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_DSFP) {
       internalsolver = &fc3d_DeSaxceFixedPoint;
-    } else if (internalsolver_options->solverId == FC3D_EG) {
+    } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_EG) {
       internalsolver = &fc3d_ExtraGradient;
-    } else if (internalsolver_options->solverId == FC3D_NSN_AC) {
+    } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC) {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier;
-    } else if (internalsolver_options->solverId == FC3D_NSN_AC_NEW) {
+    } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_AC_NEW) {
       internalsolver = &fc3d_nonsmooth_Newton_AlartCurnier_reformulated;
-    } else if (internalsolver_options->solverId == FC3D_NSN_FB) {
+    } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSN_FB) {
       internalsolver = &fc3d_nonsmooth_Newton_FischerBurmeister;
-    } else if (internalsolver_options->solverId == FC3D_IPM_SNM) {
+    } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_IPM_SNM) {
       internalsolver = &fc3d_IPM_SNM;
     } else {
       *info = numerics_error("fc3d_proximal", "unknown internal solver");
@@ -391,9 +390,9 @@ void fc3d_proximal_set_default(SolverOptions* options) {
     solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
-  // options->internalSolvers[0] = solver_options_create(FC3D_NSN_AC);
-  // options->internalSolvers[0] = solver_options_create(FC3D_IPM_SNM);
-  options->internalSolvers[0] = solver_options_create(FC3D_NSN_AC_NEW);
+  // options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+  // options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_IPM_SNM);
+  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_NEW);
 }
 
 /* ===========================================================================
@@ -421,9 +420,10 @@ static void fc3d_proximal_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_PROX, "FC3D_PROX", "Proximal method for 3D Friction Contact",
-                fc3d_proximal_init_wrap, fc3d_proximal_solve_wrap, fc3d_proximal_free_wrap,
-                NULL, fc3d_proximal_set_default, /* set_default */
-                100,                             /* default_max_iter */
-                1e-4,                            /* default_tol */
+REGISTER_SOLVER(SICONOS_FRICTION_3D_PROX, "FC3D_PROX",
+                "Proximal method for 3D Friction Contact", fc3d_proximal_init_wrap,
+                fc3d_proximal_solve_wrap, fc3d_proximal_free_wrap, NULL,
+                fc3d_proximal_set_default, /* set_default */
+                100,                       /* default_max_iter */
+                1e-4,                      /* default_tol */
                 0 /* is_local_solver */)

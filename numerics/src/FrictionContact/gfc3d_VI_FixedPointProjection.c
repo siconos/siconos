@@ -10,7 +10,8 @@
 #include <stdlib.h>  // for free, malloc, calloc
 #include <string.h>  // for memcpy
 
-#include "FrictionContactProblem.h"  // for FrictionContactProblem_compute_contact_status_3d
+#include "FrictionContactProblem.h"   // for FrictionContactProblem_compute_contact_status_3d
+#include "FrictionContact_options.h"  // for SICONOS_GLOBAL_FRICTION_3D_VI_*
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
 #include "NumericsFwd.h"                         // for VariationalInequality
@@ -19,7 +20,6 @@
 #include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
-#include "fc3d_short_names.h"                    // for GFC3D_VI_FPP
 #include "gfc3d_Solvers.h"
 #include "gfc3d_Solvers.h"        // for gfc3d_VI_FixedPointP...
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
@@ -228,7 +228,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC3D_VI_FPP in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_3D_VI_FPP in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -264,7 +264,7 @@ static void gfc3d_vi_fpp_free_wrap(void* problem, SolverOptions* options) {
 }
 
 REGISTER_SOLVER_3VAR(
-    GFC3D_VI_FPP, "GFC3D_VI_FPP",
+    SICONOS_GLOBAL_FRICTION_3D_VI_FPP, "GFC3D_VI_FPP",
     "Variational Inequality Fixed Point Projection for 3D Global Friction Contact",
     gfc3d_vi_fpp_init_wrap, gfc3d_vi_fpp_solve_wrap, gfc3d_vi_fpp_free_wrap,
     NULL,                                        /* error function */

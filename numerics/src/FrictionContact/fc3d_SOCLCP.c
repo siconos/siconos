@@ -19,7 +19,6 @@
 #include "SolverOptions.h"                                // for SolverOptions
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"  // for fc3d_comput...
-#include "fc3d_short_names.h"    // for fc3d_SOCLCP
 #include "numerics_verbose.h"
 
 /* Solver registration system */
@@ -128,10 +127,10 @@ static void fc3d_soclcp_set_default(SolverOptions* options) {
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }
 
-REGISTER_SOLVER(FC3D_SOCLCP, "FC3D_SOCLCP", "Second Order Cone LCP for 3D Friction Contact",
-                NULL,                          /* init_wrap */
-                fc3d_soclcp_solve_wrap, NULL,  /* free_wrap */
-                NULL,                          /* err_fn */
-                fc3d_soclcp_set_default, 1000, /* default_max_iter */
-                1e-4,                          /* default_tol */
-                0)                             /* is_local_solver */
+REGISTER_SOLVER(SICONOS_FRICTION_3D_SOCLCP, "FC3D_SOCLCP",
+                "Second Order Cone LCP for 3D Friction Contact", NULL, /* init_wrap */
+                fc3d_soclcp_solve_wrap, NULL,                          /* free_wrap */
+                NULL,                                                  /* err_fn */
+                fc3d_soclcp_set_default, 1000,                         /* default_max_iter */
+                1e-4,                                                  /* default_tol */
+                0)                                                     /* is_local_solver */

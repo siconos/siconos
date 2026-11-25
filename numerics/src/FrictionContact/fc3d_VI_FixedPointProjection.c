@@ -18,7 +18,6 @@
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Fix...
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"  // for fc3d_Tresca_compute_error
-#include "fc3d_short_names.h"    // for fc3d_VI_FixedPointProjection
 #include "numerics_verbose.h"
 
 /* Solver registration system */
@@ -148,7 +147,7 @@ static void fc3d_vi_fpp_set_default(SolverOptions* options) {
   variationalInequality_FixedPointProjection_set_default(options);
 }
 
-REGISTER_SOLVER(FC3D_VI_FPP, "FC3D_VI_FPP",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_VI_FPP, "FC3D_VI_FPP",
                 "VI Fixed Point Projection for 3D Friction Contact", NULL, /* init_wrap */
                 fc3d_vi_fpp_solve_wrap, NULL,                              /* free_wrap */
                 NULL,                                                      /* err_fn */
@@ -169,7 +168,7 @@ static void fc3d_vi_fpp_cyl_set_default(SolverOptions* options) {
   /* No special defaults needed - uses standard SolverOptions */
 }
 
-REGISTER_SOLVER(FC3D_VI_FPP_Cylinder, "FC3D_VI_FPP_Cylinder",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_VI_FPP_Cylinder, "FC3D_VI_FPP_Cylinder",
                 "VI Fixed Point Projection on Cylinder for 3D Friction Contact",
                 NULL,                              /* init_wrap */
                 fc3d_vi_fpp_cyl_solve_wrap, NULL,  /* free_wrap */

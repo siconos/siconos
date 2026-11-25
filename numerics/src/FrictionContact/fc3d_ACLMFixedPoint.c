@@ -11,14 +11,13 @@
 #include <stdlib.h>  // for free, malloc
 
 #include "FrictionContact_options.h"
-#include "Friction_tools.h"    //
-#include "NumericsFwd.h"       // for SolverOptions
-#include "SOCLCP_Solvers.h"    // for soclcp_VI_E...
-#include "SOCLCP_cst.h"        // for SICONOS_SOC...
-#include "SiconosBlas.h"       // for cblas_dnrm2
-#include "SolverOptions.h"     // for SolverOptions
-#include "VI_cst.h"            // for SICONOS_VI_...
-#include "fc3d_short_names.h"  // for SICONOS_FRI...
+#include "Friction_tools.h"  //
+#include "NumericsFwd.h"     // for SolverOptions
+#include "SOCLCP_Solvers.h"  // for soclcp_VI_E...
+#include "SOCLCP_cst.h"      // for SICONOS_SOC...
+#include "SiconosBlas.h"     // for cblas_dnrm2
+#include "SolverOptions.h"   // for SolverOptions
+#include "VI_cst.h"          // for SICONOS_VI_...
 #include "safe_casts.h"
 
 #define DEBUG_MESSAGES
@@ -197,7 +196,7 @@ static void fc3d_aclmfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_ACLMFP, "FC3D_ACLMFP",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_ACLMFP, "FC3D_ACLMFP",
                 "Augmented Cone Linear Mapping Fixed Point for 3D Friction Contact",
                 fc3d_aclmfp_init_wrap, fc3d_aclmfp_solve_wrap, fc3d_aclmfp_free_wrap, NULL,
                 fc3d_alart_curnier_lm_fixed_point_set_default, /* set_default */

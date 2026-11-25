@@ -26,7 +26,6 @@
 #include "NumericsSparseMatrix.h"  // for NSM_linearSolve...
 #include "SolverOptions.h"         // for SolverOptions
 #include "SparseBlockMatrix.h"     // for SparseBlockStru...
-#include "fc3d_short_names.h"      // for SICONOS_FRICTIO...
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "SiconosBlas.h"                              // for cblas_dcopy
@@ -779,7 +778,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   }
 }
 
-/* Wrappers and registration for FC3D_NSN_AC */
+/* Wrappers and registration for SICONOS_FRICTION_3D_NSN_AC */
 static int fc3d_nsn_ac_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -794,13 +793,13 @@ static int fc3d_nsn_ac_solve_wrap(void* problem, double* reaction, double* veloc
   return info;
 }
 
-REGISTER_SOLVER(FC3D_NSN_AC, "FC3D_NSN_AC",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_NSN_AC, "FC3D_NSN_AC",
                 "Nonsmooth Newton method based on Alart-Curnier formulation",
                 fc3d_nsn_ac_init_wrap, fc3d_nsn_ac_solve_wrap, NULL, NULL,
                 fc3d_nonsmooth_newton_alart_curnier_set_default, /* set_default */
                 200, 1e-6, 0);
 
-/* Wrappers and registration for FC3D_NSN_FB */
+/* Wrappers and registration for SICONOS_FRICTION_3D_NSN_FB */
 static int fc3d_nsn_fb_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -815,13 +814,13 @@ static int fc3d_nsn_fb_solve_wrap(void* problem, double* reaction, double* veloc
   return info;
 }
 
-REGISTER_SOLVER(FC3D_NSN_FB, "FC3D_NSN_FB",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_NSN_FB, "FC3D_NSN_FB",
                 "Nonsmooth Newton method based on Fischer-Burmeister formulation",
                 fc3d_nsn_fb_init_wrap, fc3d_nsn_fb_solve_wrap, NULL, NULL,
                 fc3d_nonsmooth_newton_fischer_burmeister_set_default, /* set_default */
                 200, 1e-6, 0);
 
-/* Wrappers and registration for FC3D_NSN_NM */
+/* Wrappers and registration for SICONOS_FRICTION_3D_NSN_NM */
 static int fc3d_nsn_nm_init_wrap(void* problem, SolverOptions* options) {
   (void)problem;
   (void)options;
@@ -836,7 +835,7 @@ static int fc3d_nsn_nm_solve_wrap(void* problem, double* reaction, double* veloc
   return info;
 }
 
-REGISTER_SOLVER(FC3D_NSN_NM, "FC3D_NSN_NM",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_NSN_NM, "FC3D_NSN_NM",
                 "Nonsmooth Newton method based on Natural Map formulation",
                 fc3d_nsn_nm_init_wrap, fc3d_nsn_nm_solve_wrap, NULL, NULL,
                 fc3d_nonsmooth_newton_jean_moreau_set_default, /* set_default */

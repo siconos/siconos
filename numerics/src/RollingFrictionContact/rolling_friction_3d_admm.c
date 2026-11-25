@@ -16,14 +16,14 @@
 #include "NumericsFwd.h"              // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"           // for NM_gemv, NM_clear, NM_copy, NM_new
 #include "NumericsSparseMatrix.h"     // for NSM_diag_indices
-#include "SiconosBlas.h"              // for cblas_dcopy, cblas_daxpy, cblas_...
-#include "SolverOptions.h"            // for SolverOptions, SICONOS_DPARAM_TOL
+#include "RollingFrictionContact_options.h"
+#include "SiconosBlas.h"    // for cblas_dcopy, cblas_daxpy, cblas_...
+#include "SolverOptions.h"  // for SolverOptions, SICONOS_DPARAM_TOL
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "projectionOnRollingCone.h"            // for projectionOnRollingCone
 #include "rolling_fc_Solvers.h"                 // for RollingComputeErrorPtr
 #include "rolling_friction_3d_compute_error.h"  // for rolling_friction_3d_compute_e...
-#include "rolling_friction_3d_short_names.h"
 #include "solver_registry.h"
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -1103,9 +1103,10 @@ static void rolling_friction_3d_admm_free_wrap(void* problem, SolverOptions* opt
   }
 }
 
-REGISTER_SOLVER(RFC3D_ADMM, "RFC3D_ADMM", "ADMM for 3D Rolling Friction Contact",
-                rolling_friction_3d_admm_init_wrap, rolling_friction_3d_admm_solve_wrap,
-                rolling_friction_3d_admm_free_wrap, NULL,    /* error function */
+REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_3D_ADMM, "RFC3D_ADMM",
+                "ADMM for 3D Rolling Friction Contact", rolling_friction_3d_admm_init_wrap,
+                rolling_friction_3d_admm_solve_wrap, rolling_friction_3d_admm_free_wrap,
+                NULL,                                        /* error function */
                 rolling_friction_3d_admm_set_default, 20000, /* default_max_iter */
                 1e-6,                                        /* default_tol */
                 0 /* is_local_solver */);

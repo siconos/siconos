@@ -15,7 +15,6 @@
 #include "NumericsMatrix.h"
 #include "NumericsVector.h"
 #include "SiconosBlas.h"
-#include "fc3d_short_names.h"
 #include "gfc3d_ipm.h"
 #include "safe_casts.h"
 

@@ -29,7 +29,6 @@
 #include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
 #include "fc3d_projection.h"                           // for fc3d_projectio...
-#include "fc3d_short_names.h"                          // Short names for solver IDs
 #include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
 #include "gfc3d_ipm.h"
 #include "graph_tools.h"
@@ -115,7 +114,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
   /** Connect to local solver */
   switch (local_opts->solverId) {
     /* Projection */
-    case OC_PROJ_DIAG: {
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization: {
       local_function_toolkit->local_solver = &fc3d_projectionWithDiagonalization_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_projectionWithDiagonalization_update;
@@ -123,14 +122,14 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       fc3d_projection_initialize(problem);
       break;
     }
-    case OC_PROJ: {
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone: {
       local_function_toolkit->local_solver = &fc3d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update_parallel;
       local_function_toolkit->free_local_solver = &fc3d_projection_free;
       fc3d_projection_initialize(problem);
       break;
     }
-    case OC_PROJ_LI: {
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
       local_function_toolkit->local_solver = &fc3d_projectionOnConeWithLocalIteration_solve;
       local_function_toolkit->update_local_problem = &fc3d_nsgs_update_parallel;
       local_function_toolkit->free_local_solver =
@@ -138,7 +137,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       fc3d_projectionOnConeWithLocalIteration_initialize(problem, local_opts);
       break;
     }
-    case OC_PROJ_REG: {
+    case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization: {
       local_function_toolkit->local_solver = &fc3d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_projection_update_with_regularization_parallel;
@@ -147,7 +146,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       break;
     }
     /* Newton solver (Alart-Curnier) */
-    case OC_NSN: {
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_onecontact_nonsmooth_Newton_AC_update_parallel;
@@ -156,7 +155,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
       break;
     }
-    case OC_NSN_GP: {
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_onecontact_nonsmooth_Newton_AC_update_parallel;
@@ -165,7 +164,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
       fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, local_opts);
       break;
     }
-    case OC_NSN_GP_HYBRID: {
+    case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID: {
       local_function_toolkit->local_solver = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       local_function_toolkit->update_local_problem =
           &fc3d_onecontact_nonsmooth_Newton_AC_update_parallel;
@@ -195,7 +194,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(
     }
 
     /* Fixed Point solver (Glocker Formulation) */
-    case FC3D_NCPG_FP: {
+    case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint: {
       local_function_toolkit->local_solver = &fc3d_fixed_point_solve;
       local_function_toolkit->update_local_problem = &NCPGlocker_update;
       local_function_toolkit->free_local_solver = &fc3d_fixed_point_free;

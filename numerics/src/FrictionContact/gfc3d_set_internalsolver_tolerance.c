@@ -9,8 +9,7 @@
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SolverOptions.h"                 // for SolverOptions
-#include "fc3d_short_names.h"
-#include "gfc3d_Solvers.h"  // for gfc3d_set_internalsolver_t...
+#include "gfc3d_Solvers.h"                 // for gfc3d_set_internalsolver_t...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 

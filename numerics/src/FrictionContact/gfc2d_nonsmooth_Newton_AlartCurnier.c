@@ -31,7 +31,6 @@
 #include "SolverOptions.h"                  // for SolverOptions, SICON...
 #include "VI_cst.h"                         // for SICONOS_VI_DPARAM_RHO
 #include "fc2d_AlartCurnier_functions.h"    // for computeAlartCurnier2D
-#include "fc3d_short_names.h"               // for GFC2D_NSN_AC
 #include "friction_error_toolkit.h"         // for friction_error_toolkit_...
 #include "gfc2d_VI_FixedPointProjection.h"  // for warm-start
 #include "gfc2d_compute_error.h"            // for gfc2d_compute_error
@@ -412,7 +411,7 @@ static int gfc2d_nsn_ac_warm_start_internal(GlobalFrictionContactProblem* proble
                           "---- GFC2D - NSN_AC - Warm start with GFC2D_VI_FPP (%d iterations)",
                           warm_start_max_iter);
 
-  SolverOptions* vi_options = solver_options_create(GFC2D_VI_FPP);
+  SolverOptions* vi_options = solver_options_create(SICONOS_GLOBAL_FRICTION_2D_VI_FPP);
   if (!vi_options) {
     numerics_printf_verbose(1,
                             "---- GFC2D - NSN_AC - Warm start skipped: "
@@ -447,7 +446,7 @@ static int gfc2d_nsn_ac_warm_start_internal(GlobalFrictionContactProblem* proble
 }
 
 /**
- * \brief Run a VI-FPP warm start for GFC2D_NSN_AC.
+ * \brief Run a VI-FPP warm start for SICONOS_GLOBAL_FRICTION_2D_NSN_AC.
  *
  * This can be used as a standalone fallback/preconditioner, or it is called
  * automatically by gfc2d_nonsmooth_Newton_AlartCurnier when the warm-start
@@ -539,7 +538,7 @@ void gfc2d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
   assert((int)num_global_dofs == problem->H->size0);
 
   /* ====================================================================== *
-   * Optional warm start with GFC2D_VI_FPP
+   * Optional warm start with SICONOS_GLOBAL_FRICTION_2D_VI_FPP
    * ====================================================================== */
   gfc2d_nsn_ac_warm_start(problem, reaction, velocity, globalVelocity, options);
 
@@ -1024,7 +1023,7 @@ static void gfc2d_nsn_ac_print_contact_status(GlobalFrictionContactProblem* prob
 }
 
 /**
- * \brief Set default solver options for GFC2D_NSN_AC.
+ * \brief Set default solver options for SICONOS_GLOBAL_FRICTION_2D_NSN_AC.
  */
 void gfc2d_nsn_ac_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
@@ -1038,7 +1037,7 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
 
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.; /* default rho */
 
-  /* Warm start with GFC2D_VI_FPP before launching the Newton solver.
+  /* Warm start with SICONOS_GLOBAL_FRICTION_2D_VI_FPP before launching the Newton solver.
    * By default the warm start is automatic: it is triggered only if the
    * first Newton Jacobian factorization fails. */
   options->iparam[SICONOS_FRICTION_2D_NSN_WARM_START_STRATEGY] =
@@ -1064,7 +1063,7 @@ void gfc2d_nsn_ac_set_default(SolverOptions* options) {
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC2D_NSN_AC in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_2D_NSN_AC in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -1091,7 +1090,7 @@ static void gfc2d_nsn_ac_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC2D_NSN_AC, "GFC2D_NSN_AC",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_2D_NSN_AC, "GFC2D_NSN_AC",
                      "Non-smooth Newton Alart-Curnier for 2D Global Friction Contact",
                      gfc2d_nsn_ac_init_wrap, gfc2d_nsn_ac_solve_wrap, gfc2d_nsn_ac_free_wrap,
                      NULL,                     /* error function */

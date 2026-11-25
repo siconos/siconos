@@ -10,12 +10,11 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for free, malloc
 
-#include "NumericsFwd.h"       // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"    // for NumericsMatrix, RawNumericsMatrix
-#include "SiconosBlas.h"       // for cblas_dcopy, cblas_ddot, cblas_d...
-#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RE...
-#include "fc2d_Solvers.h"      // for fc2d_projf, fc2d_projc, fc2d_cpg
-#include "fc3d_short_names.h"  // for FC2D_CPG
+#include "NumericsFwd.h"     // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"  // for NumericsMatrix, RawNumericsMatrix
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_ddot, cblas_d...
+#include "SolverOptions.h"   // for SolverOptions, SICONOS_DPARAM_RE...
+#include "fc2d_Solvers.h"    // for fc2d_projf, fc2d_projc, fc2d_cpg
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -249,7 +248,7 @@ void fc2d_cpg(FrictionContactProblem* problem, double* reaction, double* velocit
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers FC2D_CPG in the global solver registry, enabling:
+ * This registers SICONOS_FRICTION_2D_CPG in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -278,10 +277,10 @@ static void fc2d_cpg_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC2D_CPG, "FC2D_CPG", "Conjugated Projected Gradient for 2D Friction Contact",
-                fc2d_cpg_init_wrap, fc2d_cpg_solve_wrap, fc2d_cpg_free_wrap,
-                NULL,                 /* error function */
-                fc2d_cpg_set_default, /* set_default */
-                1000,                 /* default_max_iter */
-                1e-6,                 /* default_tol */
+REGISTER_SOLVER(SICONOS_FRICTION_2D_CPG, "FC2D_CPG",
+                "Conjugated Projected Gradient for 2D Friction Contact", fc2d_cpg_init_wrap,
+                fc2d_cpg_solve_wrap, fc2d_cpg_free_wrap, NULL, /* error function */
+                fc2d_cpg_set_default,                          /* set_default */
+                1000,                                          /* default_max_iter */
+                1e-6,                                          /* default_tol */
                 0 /* is_local_solver */);

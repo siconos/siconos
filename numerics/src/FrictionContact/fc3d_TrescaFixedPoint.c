@@ -17,7 +17,6 @@
 #include "SolverOptions.h"       // for SolverOptions, solver_options_cr...
 #include "fc3d_Solvers.h"        // for fc3d_set_internalsolver_tolerance
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "fc3d_short_names.h"    // for SICONOS_FRICTION_3D_NSGS, SICONO...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "safe_casts.h"
@@ -61,19 +60,19 @@ int fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double* reaction, dou
   // Warning : same dwork for current and internal solver !!
   internalsolver_options->dWork = mu;
 
-  if (internalsolver_options->solverId == FC3D_NSGS) {
+  if (internalsolver_options->solverId == SICONOS_FRICTION_3D_NSGS) {
     if (verbose > 0)
       printf(
           " ========================== Call NSGS solver for Friction-Contact 3D problem "
           "==========================\n");
     internalsolver = &fc3d_nsgs;
-  } else if (internalsolver_options->solverId == FC3D_CONVEXQP_PG_CYLINDER) {
+  } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER) {
     if (verbose > 0)
       printf(
           " ========================== Call ConvexQP PG solver for Friction-Contact 3D "
           "problem ==========================\n");
     internalsolver = &fc3d_ConvexQP_ProjectedGradient_Cylinder;
-  } else if (internalsolver_options->solverId == FC3D_VI_FPP_Cylinder) {
+  } else if (internalsolver_options->solverId == SICONOS_FRICTION_3D_VI_FPP_Cylinder) {
     if (verbose > 0)
       printf(
           " ========================== Call VI FPP solver for Friction-Contact 3D problem "
@@ -139,7 +138,7 @@ void fc3d_tresca_fixed_point_set_default(SolverOptions* options) {
   }
   // internal solver
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(FC3D_NSGS);
+  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSGS);
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 
   // internal solver of the internal solver
@@ -176,8 +175,9 @@ static void fc3d_tfp_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_TFP, "FC3D_TFP", "Tresca Fixed Point for 3D Friction Contact",
-                fc3d_tfp_init_wrap, fc3d_tfp_solve_wrap, fc3d_tfp_free_wrap, NULL,
+REGISTER_SOLVER(SICONOS_FRICTION_3D_TFP, "FC3D_TFP",
+                "Tresca Fixed Point for 3D Friction Contact", fc3d_tfp_init_wrap,
+                fc3d_tfp_solve_wrap, fc3d_tfp_free_wrap, NULL,
                 fc3d_tresca_fixed_point_set_default, /* set_default */
                 1000,                                /* default_max_iter */
                 1e-4,                                /* default_tol */

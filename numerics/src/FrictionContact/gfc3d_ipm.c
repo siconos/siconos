@@ -25,7 +25,6 @@
 #include "NumericsVector.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
-#include "fc3d_short_names.h"
 #include "float.h"
 #include "gfc3d_Solvers.h"
 #include "numerics_errors.h"
@@ -5437,7 +5436,7 @@ void gfc3d_ipm_set_default(SolverOptions* options) {
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC3D_IPM in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_3D_IPM in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -5464,7 +5463,7 @@ static void gfc3d_ipm_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC3D_IPM, "GFC3D_IPM",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_3D_IPM, "GFC3D_IPM",
                      "Interior Point Method for 3D Global Friction Contact",
                      gfc3d_ipm_init_wrap, gfc3d_ipm_solve_wrap, gfc3d_ipm_free_wrap,
                      NULL,                  /* error function */

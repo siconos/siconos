@@ -17,10 +17,10 @@
 #include "NonSmoothDrivers.h"                     // for global_rolling_friction_3d_driver
 #include "NumericsFwd.h"                          // for GlobalRollingFrictionContactPro...
 #include "NumericsVerbose.h"                      // for numerics_set_verbose
-#include "SolverOptions.h"                        // for SolverOptions, SICONOS_DPA...
-#include "frictionContact_test_utils.h"           // for globalRollingFrictionContact_te...
-#include "rolling_friction_3d_short_names.h"
-#include "test_utils.h"  // for TestCase
+#include "RollingFrictionContact_options.h"
+#include "SolverOptions.h"               // for SolverOptions, SICONOS_DPA...
+#include "frictionContact_test_utils.h"  // for globalRollingFrictionContact_te...
+#include "test_utils.h"                  // for TestCase
 
 int globalRollingFrictionContact_test_function(TestCase* current) {
   int k;
@@ -109,7 +109,7 @@ int globalRollingFrictionContact_test_function(TestCase* current) {
   else
     printf("test: failure\n");
 
-  if (current->options->solverId == GRFC3D_IPM) {
+  if (current->options->solverId == SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM) {
     // Take projerr value from test
     double* projerr_ptr = current->options->solverData;
     printf("\nsumry: %d  %.2e  %.2e   %5i %5i    %.6f   %s\n", info,

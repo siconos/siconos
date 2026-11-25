@@ -8,12 +8,11 @@
 #include <assert.h>  // for assert
 #include <stdio.h>   // for NULL, fprintf, stderr
 
-#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "NonSmoothDrivers.h"              // for gfc3d_driver
-#include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "fc2d_Solvers.h"                  // for fc2d_nsgs
-#include "fc3d_short_names.h"
+#include "GlobalFrictionContactProblem.h"         // for GlobalFrictionContactProblem
+#include "NonSmoothDrivers.h"                     // for gfc3d_driver
+#include "NumericsFwd.h"                          // for SolverOptions, GlobalFrict...
+#include "SolverOptions.h"                        // for SolverOptions, solver_opti...
+#include "fc2d_Solvers.h"                         // for fc2d_nsgs
 #include "gfc2d_Solvers.h"                        // for gfc2d_nsgs_wr
 #include "gfc2d_VI_ExtraGradient.h"               // for gfc2d_VI_ExtraGradient
 #include "gfc2d_VI_FixedPointProjection.h"        // for gfc2d_VI_FixedPointProjection
@@ -117,25 +116,25 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
 
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId) {
-    case GFC2D_NSN_AC: {
+    case SICONOS_GLOBAL_FRICTION_2D_NSN_AC: {
       gfc2d_nonsmooth_Newton_AlartCurnier(problem, reaction, velocity, globalVelocity, &info,
                                           options);
       break;
     }
-    case GFC2D_VI_FPP: {
+    case SICONOS_GLOBAL_FRICTION_2D_VI_FPP: {
       gfc2d_VI_FixedPointProjection(problem, reaction, velocity, globalVelocity, &info,
                                     options);
       break;
     }
-    case GFC2D_VI_EG: {
+    case SICONOS_GLOBAL_FRICTION_2D_VI_EG: {
       gfc2d_VI_ExtraGradient(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
-    case GFC2D_NSGS_WR: {
+    case SICONOS_GLOBAL_FRICTION_2D_NSGS_WR: {
       gfc2d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
-    case FC2D_NSGS: {
+    case SICONOS_FRICTION_2D_NSGS: {
       numerics_printf_verbose(
           1,
           " ========================== Call NSGS solver with reformulation into "

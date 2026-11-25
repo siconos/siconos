@@ -10,12 +10,12 @@
 #include <stdio.h>   // for fprintf, NULL, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "NumericsFwd.h"     // for GlobalFrictionContactProblem
-#include "NumericsMatrix.h"  // for NumericsMatrix, NM_gemv
-#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dnrm2
-#include "SolverOptions.h"   // for SolverOptions, SICONOS_DPA...
-#include "fc3d_Solvers.h"    // for fc3d_nsgs_set_default
-#include "fc3d_short_names.h"
+#include "FrictionContact_options.h"
+#include "NumericsFwd.h"             // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"          // for NumericsMatrix, NM_gemv
+#include "SiconosBlas.h"             // for cblas_dcopy, cblas_dnrm2
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPA...
+#include "fc3d_Solvers.h"            // for fc3d_nsgs_set_default
 #include "friction_error_toolkit.h"  // for friction_error_toolkit_...
 #include "gfc3d_Solvers.h"
 #include "gfc3d_Solvers.h"        // for ComputeErrorGlobalPtr, gfc...
@@ -177,7 +177,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 /* ===========================================================================
  * Solver Registration
  * ===========================================================================
- * This registers GFC3D_NSGS in the global solver registry, enabling:
+ * This registers SICONOS_GLOBAL_FRICTION_3D_NSGS in the global solver registry, enabling:
  * - Dynamic solver lookup by ID
  * - Runtime solver introspection
  * - Elimination of giant switch statements in drivers
@@ -214,7 +214,7 @@ static void gfc3d_nsgs_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER_3VAR(GFC3D_NSGS, "GFC3D_NSGS",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_3D_NSGS, "GFC3D_NSGS",
                      "Non-smooth Gauss-Seidel for 3D Global Friction Contact",
                      gfc3d_nsgs_init_wrap, gfc3d_nsgs_solve_wrap, gfc3d_nsgs_free_wrap,
                      NULL,                   /* error function */

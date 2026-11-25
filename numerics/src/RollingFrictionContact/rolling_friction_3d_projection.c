@@ -15,7 +15,8 @@
 #include "FrictionContact_options.h"  // for SICONOS_FRICTION_3D_NS...
 #include "NumericsFwd.h"              // for SolverOptions, Rolling...
 #include "NumericsMatrix.h"           // IWYU pragma: keep
-#include "SolverOptions.h"            // for SolverOptions, solver_...
+#include "RollingFrictionContact_options.h"
+#include "SolverOptions.h"  // for SolverOptions, solver_...
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
@@ -23,8 +24,7 @@
 #include "projectionOnRollingCone.h"  // for projectionOnRollingCone
 #include "rolling_fc_Solvers.h"
 #include "rolling_friction_3d_local_problem_tools.h"  // for rolling_friction_3d_local_pro...
-#include "rolling_friction_3d_short_names.h"
-#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_END
+#include "siconos_debug.h"                            // for DEBUG_PRINTF, DEBUG_END
 #include "solver_registry.h"
 
 #ifdef DEBUG_MESSAGES
@@ -438,7 +438,7 @@ static void rolling_friction_3d_poc_free_wrap(void* problem, SolverOptions* opti
   (void)options;
 }
 
-REGISTER_SOLVER(RFC3D_OC_PROJ, "RFC3D_OC_PROJ",
+REGISTER_SOLVER(SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone, "RFC3D_OC_PROJ",
                 "Projection on Rolling Cone for 3D Rolling Friction Contact",
                 rolling_friction_3d_poc_init_wrap, rolling_friction_3d_poc_solve_wrap,
                 rolling_friction_3d_poc_free_wrap, NULL,  /* error function */
@@ -469,7 +469,8 @@ static void rolling_friction_3d_poc_li_free_wrap(void* problem, SolverOptions* o
 }
 
 REGISTER_SOLVER(
-    RFC3D_OC_PROJ_LI, "RFC3D_OC_PROJ_LI",
+    SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+    "RFC3D_OC_PROJ_LI",
     "Projection on Rolling Cone with Local Iteration for 3D Rolling Friction Contact",
     rolling_friction_3d_poc_li_init_wrap, rolling_friction_3d_poc_li_solve_wrap,
     rolling_friction_3d_poc_li_free_wrap, NULL,                   /* error function */

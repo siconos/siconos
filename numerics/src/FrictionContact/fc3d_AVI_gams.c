@@ -24,9 +24,9 @@
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
+#include "FrictionContact_options.h"
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_AVI_gams_path, fc3d_AVI_gams_pathvi
-#include "fc3d_short_names.h"
 
 /* Solver registration system */
 #include "numerics_errors.h"
@@ -1186,7 +1186,7 @@ static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* ve
   return info;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATH, "FC3D_GAMS_PATH",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_GAMS_PATH, "FC3D_GAMS_PATH",
                 "GAMS PATH solver for 3D Friction Contact (AVI formulation)",
                 NULL,                             /* init_wrap */
                 fc3d_gams_path_solve_wrap, NULL,  /* free_wrap */
@@ -1202,7 +1202,7 @@ static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* 
   return info;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATHVI, "FC3D_GAMS_PATHVI",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_GAMS_PATHVI, "FC3D_GAMS_PATHVI",
                 "GAMS PATHVI solver for 3D Friction Contact (AVI formulation)",
                 NULL,                               /* init_wrap */
                 fc3d_gams_pathvi_solve_wrap, NULL,  /* free_wrap */
@@ -1224,7 +1224,7 @@ static int fc3d_gams_path_solve_wrap(void* problem, double* reaction, double* ve
   return NUMERICS_ERR_UNKNOWN;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATH, "FC3D_GAMS_PATH",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_GAMS_PATH, "FC3D_GAMS_PATH",
                 "GAMS PATH solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
                 NULL,                             /* init_wrap */
                 fc3d_gams_path_solve_wrap, NULL,  /* free_wrap */
@@ -1243,7 +1243,7 @@ static int fc3d_gams_pathvi_solve_wrap(void* problem, double* reaction, double* 
   return NUMERICS_ERR_UNKNOWN;
 }
 
-REGISTER_SOLVER(FC3D_GAMS_PATHVI, "FC3D_GAMS_PATHVI",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_GAMS_PATHVI, "FC3D_GAMS_PATHVI",
                 "GAMS PATHVI solver for 3D Friction Contact (AVI formulation) - NOT AVAILABLE",
                 NULL,                               /* init_wrap */
                 fc3d_gams_pathvi_solve_wrap, NULL,  /* free_wrap */

@@ -17,7 +17,6 @@
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
-#include "fc3d_short_names.h"    // for fc3d_VI_ExtraGradient
 #include "numerics_verbose.h"
 
 /* Solver registration system */
@@ -85,10 +84,10 @@ static void fc3d_vi_eg_set_default(SolverOptions* options) {
   variationalInequality_ExtraGradient_set_default(options);
 }
 
-REGISTER_SOLVER(FC3D_VI_EG, "FC3D_VI_EG", "VI Extra Gradient for 3D Friction Contact",
-                NULL,                         /* init_wrap */
-                fc3d_vi_eg_solve_wrap, NULL,  /* free_wrap */
-                NULL,                         /* err_fn */
-                fc3d_vi_eg_set_default, 1000, /* default_max_iter */
-                1e-4,                         /* default_tol */
-                0)                            /* is_local_solver */
+REGISTER_SOLVER(SICONOS_FRICTION_3D_VI_EG, "FC3D_VI_EG",
+                "VI Extra Gradient for 3D Friction Contact", NULL, /* init_wrap */
+                fc3d_vi_eg_solve_wrap, NULL,                       /* free_wrap */
+                NULL,                                              /* err_fn */
+                fc3d_vi_eg_set_default, 1000,                      /* default_max_iter */
+                1e-4,                                              /* default_tol */
+                0)                                                 /* is_local_solver */

@@ -16,7 +16,6 @@
 #include "SiconosBlas.h"                    // for cblas_dcopy
 #include "numerics_errors.h"
 #include "projectionOnRollingCone.h"  // for projectionOnRollingCone
-#include "rolling_friction_3d_short_names.h"
 
 // #define DEBUG_MESSAGES                                       //
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_PRINTF

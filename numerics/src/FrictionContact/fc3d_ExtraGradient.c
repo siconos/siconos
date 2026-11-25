@@ -11,10 +11,9 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "FrictionContact_options.h"
-#include "NumericsFwd.h"       // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"    // for NM_gemv
-#include "SolverOptions.h"     // for SolverOptions, solver_options_nu...
-#include "fc3d_short_names.h"  // for SICONOS_FRICTION_3D_EG
+#include "NumericsFwd.h"     // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"  // for NM_gemv
+#include "SolverOptions.h"   // for SolverOptions, solver_options_nu...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"         // for cblas_dcopy, cblas_dnrm2, cblas_...
@@ -327,7 +326,7 @@ static void fc3d_eg_free_wrap(void* problem, SolverOptions* options) {
   (void)options;
 }
 
-REGISTER_SOLVER(FC3D_EG, "FC3D_EG", "Extra Gradient for 3D Friction Contact",
+REGISTER_SOLVER(SICONOS_FRICTION_3D_EG, "FC3D_EG", "Extra Gradient for 3D Friction Contact",
                 fc3d_eg_init_wrap, fc3d_eg_solve_wrap, fc3d_eg_free_wrap, NULL,
                 fc3d_extra_gradient_set_default, /* set_default */
                 1000,                            /* default_max_iter */
