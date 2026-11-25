@@ -28,6 +28,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
+#include "VonMisesPlasticityNSL.hpp"
 //  #define DEBUG_BEGIN_END_ONLY
 //   #define DEBUG_STDOUT
 //   #define DEBUG_NOCOLOR
@@ -246,7 +247,11 @@ struct siconos::modeling::Interaction::SetLevels
     }
   }
 
-  void visit(const MohrCoulombPlasticityNSL& nslaw) override {
+  void visit(const MohrCoulombPlasticityNSL& nslaw) override { set_plasticity_levels(); }
+  void visit(const VonMisesPlasticityNSL& nslaw) override { set_plasticity_levels(); }
+
+  /** stress interactions (fem::StressLinearTIR): output and input at level 0 */
+  void set_plasticity_levels() {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::LagrangianSparse ||

@@ -464,16 +464,15 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
             size_t sizeDS = ds->dimension();
             auto sods = dynamic_cast<siconos::modeling::SecondOrderDS*>(ds.get());
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
-            if (sods && sods->boundaryConditions()) {
+            // The velocity boundary conditions remove the constrained velocity columns of
+            // H; a StressLinearTIR acts on the stresses only and is not concerned (zeroing
+            // its columns at the velocity indices removed unrelated stress components).
+            if (sods && sods->boundaryConditions() &&
+                relationSubType != modeling::RelationSubType::StressLinearTIR) {
               auto bc = sods->boundaryConditions();
 
               siconos::algebra::SiconosDenseMatrix inter_block =
                   inter.getLeftInteractionBlock();
-              if (relationSubType == modeling::RelationSubType::StressLinearTIR) {
-                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied
-                                       // after the velocity dimension
-                sizeDS = ds->real_size() - ds->dimension();
-              }
               for (auto idcol : bc->velocityIndices()) {
                 inter_block.col(posBlock + idcol).setZero();
               }

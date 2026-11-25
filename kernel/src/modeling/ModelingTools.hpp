@@ -36,3 +36,4 @@ Include files related to modeling part of Siconos.
 #include "NormalConeNSL.hpp"
 #include "RelationType.hpp"
 #include "RelayNSL.hpp"
+#include "VonMisesPlasticityNSL.hpp"
