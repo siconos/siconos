@@ -228,29 +228,9 @@ static double vonmises_norm3(const double a[3]) {
   return sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
 }
 
-/* ||M||_2 (largest singular value) by power iteration on M^T M */
-static double vonmises_spectral_norm(const double M[9]) {
-  double v[3] = {1.0 / sqrt(3.0), 1.0 / sqrt(3.0), 1.0 / sqrt(3.0)}, Mv[3], MtMv[3];
-  double lambda = 0.0;
-  for (int k = 0; k < 200; k++) {
-    for (int i = 0; i < 3; i++) Mv[i] = M[i] * v[0] + M[i + 3] * v[1] + M[i + 6] * v[2];
-    for (int j = 0; j < 3; j++)
-      MtMv[j] = M[3 * j] * Mv[0] + M[3 * j + 1] * Mv[1] + M[3 * j + 2] * Mv[2];
-    double nl = vonmises_norm3(MtMv);
-    if (nl == 0.0) return 0.0;
-    for (int i = 0; i < 3; i++) v[i] = MtMv[i] / nl;
-    if (fabs(nl - lambda) <= 1e-15 * nl) {
-      lambda = nl;
-      break;
-    }
-    lambda = nl;
-  }
-  return sqrt(lambda);
-}
-
 /* default rho = 1 / ||M||_2 */
 static double vonmises_default_rho(const double M[9]) {
-  double n2 = vonmises_spectral_norm(M);
+  double n2 = plasticity_2d_local_spectral_norm(M);
   return (n2 > 0.0) ? 1.0 / n2 : 1.0;
 }
 
@@ -367,80 +347,50 @@ static void vonmises_projection_jacobian(int ball, const double y[3], double sig
   }
 }
 
-int plasticity_2d_vonMises_semismooth_newton(const double M[9], const double q[3],
-                                             double sigma_y, double stress[3],
-                                             Plasticity2DVonMisesLocalParameters* p) {
-  double rho0 = vonmises_default_rho(M);
-  double rho = rho0;
-  if (p->rho_strategy == PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_CONSTANT && p->rho > 0.0)
-    rho = p->rho;
-  int ls_max = (p->linesearch_max_iter > 0) ? p->linesearch_max_iter : 20;
+/* natural map and generalized Jacobian of the Von Mises problem (shared Newton) */
+typedef struct {
+  const double* M;
+  const double* q;
+  double sigma_y;
+  int ball;
+} VonMisesData;
 
-  double Phi[3], y[3];
-  double res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
-  int it = 0;
-  while (res > p->tol * (1.0 + vonmises_norm3(stress)) && it < p->max_iter) {
-    it++;
-    double nPhi = vonmises_natural_map(p->ball, M, q, sigma_y, rho, stress, Phi, y);
+static double vonmises_newton_map(void* data, double rho, const double s[3], double Phi[3],
+                                  double H[9]) {
+  VonMisesData* d = (VonMisesData*)data;
+  double y[3];
+  double nPhi = vonmises_natural_map(d->ball, d->M, d->q, d->sigma_y, rho, s, Phi, y);
+  if (H) {
     /* H = I - J_P(y) (I - rho M) */
-    double J[9], A[9], H[9];
-    vonmises_projection_jacobian(p->ball, y, sigma_y, J);
-    for (int i = 0; i < 9; i++) A[i] = -rho * M[i];
+    double J[9], A[9];
+    vonmises_projection_jacobian(d->ball, y, d->sigma_y, J);
+    for (int i = 0; i < 9; i++) A[i] = -rho * d->M[i];
     A[0] += 1.0;
     A[4] += 1.0;
     A[8] += 1.0;
     for (int i = 0; i < 3; i++)
       for (int j = 0; j < 3; j++) {
-        double s = 0.0;
-        for (int k = 0; k < 3; k++) s += J[i + 3 * k] * A[k + 3 * j];
-        H[i + 3 * j] = (i == j ? 1.0 : 0.0) - s;
+        double sum = 0.0;
+        for (int k = 0; k < 3; k++) sum += J[i + 3 * k] * A[k + 3 * j];
+        H[i + 3 * j] = (i == j ? 1.0 : 0.0) - sum;
       }
-    double d[3] = {-Phi[0], -Phi[1], -Phi[2]};
-    if (solve_3x3_gepp(H, d)) {
-      DEBUG_PRINT("Von Mises NSN: singular generalized Jacobian\n");
-      break;
-    }
-    /* line search on m = 1/2 |Phi|^2; slope of m along d: -|Phi|^2 */
-    double m0 = 0.5 * nPhi * nPhi, slope = -nPhi * nPhi, t = 1.0, st[3], Phit[3], yt[3];
-    if (p->linesearch == PLASTICITY_NSN_LINESEARCH_ARMIJO) {
-      for (int ls = 0; ls < ls_max; ls++) {
-        for (int i = 0; i < 3; i++) st[i] = stress[i] + t * d[i];
-        double nt = vonmises_natural_map(p->ball, M, q, sigma_y, rho, st, Phit, yt);
-        if (0.5 * nt * nt <= m0 + 1e-4 * t * slope) break;
-        t *= 0.5;
-      }
-    } else if (p->linesearch == PLASTICITY_NSN_LINESEARCH_GOLDSTEINPRICE) {
-      /* m0 + (1-c) t slope <= m(t) <= m0 + c t slope, c = 0.1 */
-      const double c = 0.1;
-      double tl = 0.0, tu = INFINITY;
-      for (int ls = 0; ls < ls_max; ls++) {
-        for (int i = 0; i < 3; i++) st[i] = stress[i] + t * d[i];
-        double nt = vonmises_natural_map(p->ball, M, q, sigma_y, rho, st, Phit, yt);
-        double mt = 0.5 * nt * nt;
-        if (mt > m0 + c * t * slope)
-          tu = t;
-        else if (mt < m0 + (1.0 - c) * t * slope && t < 1.0)
-          tl = t;
-        else
-          break;
-        t = isinf(tu) ? fmin(2.0 * t, 1.0) : 0.5 * (tl + tu);
-      }
-    }
-    for (int i = 0; i < 3; i++) stress[i] += t * d[i];
-    res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
-    DEBUG_PRINTF("Von Mises NSN: it %d, t = %e, residual = %e\n", it, t, res);
   }
-  p->iter_done = it;
-  if (res > p->tol * (1.0 + vonmises_norm3(stress)) && p->hybrid) {
-    DEBUG_PRINT("Von Mises NSN: fall back to the return mapping\n");
-    if (p->ball)
-      plasticity_2d_vonMises_ball_return_mapping(M, q, sigma_y, stress);
-    else
-      plasticity_2d_vonMises_return_mapping(M, q, sigma_y, stress);
-    res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
-  }
-  p->residual = res;
-  return (res > p->tol * (1.0 + vonmises_norm3(stress))) ? 1 : 0;
+  return nPhi;
+}
+
+static int vonmises_newton_exact(void* data, double s[3]) {
+  VonMisesData* d = (VonMisesData*)data;
+  int status = d->ball ? plasticity_2d_vonMises_ball_return_mapping(d->M, d->q, d->sigma_y, s)
+                       : plasticity_2d_vonMises_return_mapping(d->M, d->q, d->sigma_y, s);
+  return (status == 1) ? 1 : 0;
+}
+
+int plasticity_2d_vonMises_semismooth_newton(const double M[9], const double q[3],
+                                             double sigma_y, double stress[3],
+                                             Plasticity2DVonMisesLocalParameters* p) {
+  VonMisesData data = {M, q, sigma_y, p->ball};
+  return plasticity_2d_local_semismooth_newton(vonmises_newton_map, vonmises_newton_exact,
+                                               &data, M, stress, p);
 }
 
 /* ===========================================================================

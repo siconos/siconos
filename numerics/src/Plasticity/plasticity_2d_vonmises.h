@@ -54,6 +54,7 @@
 #include "NumericsFwd.h"
 #include "PlasticityProblem.h"
 #include "SiconosConfig.h"
+#include "plasticity_2d_local_newton.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -160,22 +161,9 @@ int plasticity_2d_vonMises_return_mapping(const double M[9], const double q[3], 
 int plasticity_2d_vonMises_ball_return_mapping(const double M[9], const double q[3],
                                                double sigma_y, double stress[3]);
 
-/** Parameters and results of the iterative one-element solvers (fixed point and
- *  semi-smooth Newton on the natural map). */
-typedef struct {
-  int max_iter;            /**< maximum number of iterations */
-  double tol;              /**< tolerance on the natural-map residual (rho = 1 / ||M||_2) */
-  int rho_strategy;        /**< PLASTICITY_NSN_RHO_STRATEGY values (constant, spectral norm,
-                                adaptive) */
-  double rho;              /**< rho for the constant strategy (<= 0: 1 / ||M||_2) */
-  int linesearch;          /**< PLASTICITY_NSN_LINESEARCH values (Newton) */
-  int linesearch_max_iter; /**< maximum number of line-search / rho-adaptation steps */
-  int hybrid;              /**< Newton: if not 0, fall back to the return mapping on failure */
-  int ball; /**< yield set: 0 cylinder ||sigma_T|| <= sqrt(2/3) sigma_y (plane strain), 1 ball
-                 ||sigma|| <= sigma_y (plane stress, scaled variables) */
-  int iter_done;   /**< (out) number of iterations */
-  double residual; /**< (out) natural-map residual, rho = 1 / ||M||_2 */
-} Plasticity2DVonMisesLocalParameters;
+/** Parameters and results of the iterative one-element solvers (see
+ *  plasticity_2d_local_newton.h). */
+typedef Plasticity2DLocalParameters Plasticity2DVonMisesLocalParameters;
 
 /** Natural-map residual |sigma - P_C(sigma - rho (M sigma + q))| of one element.
  *  \param[in] M local matrix (3x3, column-major)

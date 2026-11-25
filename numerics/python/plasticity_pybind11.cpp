@@ -251,6 +251,12 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
              "Von Mises fixed point on the natural map")
       .value("PLASTICITY_2D_ONECONE_VONMISES_NSN", PLASTICITY_2D_ONECONE_VONMISES_NSN,
              "Von Mises semi-smooth Newton on the natural map")
+      .value("PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING",
+             PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING,
+             "Drucker-Prager, one cone: return mapping (exact enumeration)")
+      .value("PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN",
+             PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN,
+             "Drucker-Prager, one cone: semi-smooth Newton on the natural map")
       .export_values();
 
   // Also export as module attributes for convenience
@@ -267,6 +273,10 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       (int)PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING;
   m.attr("PLASTICITY_2D_ONECONE_VONMISES_FP") = (int)PLASTICITY_2D_ONECONE_VONMISES_FP;
   m.attr("PLASTICITY_2D_ONECONE_VONMISES_NSN") = (int)PLASTICITY_2D_ONECONE_VONMISES_NSN;
+  m.attr("PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING") =
+      (int)PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING;
+  m.attr("PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN") =
+      (int)PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN;
   // deprecated name of PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING
   m.attr("PLASTICITY_2D_ONECONE_VONMISES") = (int)PLASTICITY_2D_ONECONE_VONMISES;
 

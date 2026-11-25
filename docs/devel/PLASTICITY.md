@@ -12,7 +12,8 @@ coordinates.
 | `plasticity_2d_driver.c` | driver: Cartesian → cone change of variables, cohesion translation, trivial case, registry |
 | `plasticity_2d_stress_coordinates.{h,c}` | Cartesian ↔ cone maps of stresses, strain rates, M and problems |
 | `plasticity_2d_compute_error.{h,c}` | natural-map error (both models, cohesion, coordinates), `plasticity_2d_DruckerPrager_zero_is_solution` |
-| `plasticity_2d_druckerprager.{h,c}` | Drucker–Prager projection local solvers |
+| `plasticity_2d_druckerprager.{h,c}` | Drucker–Prager local solvers: projection, projection with local iterations, return mapping, semi-smooth Newton |
+| `plasticity_2d_local_newton.{h,c}` | semi-smooth Newton on the natural map of one element (line searches, rho, fallback), shared by Drucker–Prager and Von Mises |
 | `plasticity_2d_onecone_nonsmooth_Newton_solvers.c` | Drucker–Prager semi-smooth Newton local solvers |
 | `plasticity_2d_vonmises.{h,c}` | Von Mises domain, projection, error, return mapping, fixed point and semi-smooth Newton local solvers, their SolverOptions and registration |
 | `plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c` | NSGS (and generic NSGS) |
@@ -189,6 +190,60 @@ and N_K(sigma) = N_{K_eta}(sigma~): sigma~ solves the problem without cohesion w
 * Python: `PlasticityProblem_new(dim, M, q, eta, theta, cohesion=None)`.
 * The data files do not store the cohesion.
 
+### Return mapping: exact one-cone solver (`plasticity_2d_DruckerPrager_return_mapping`)
+
+For a 3x3 local matrix M (any, not necessarily symmetric) and any dilatancy theta, the
+solver enumerates the three possible cases:
+
+* **elastic**: w = 0, sigma = −M^{-1} q, if it lies in K;
+* **apex**: sigma = 0, if q + theta ||q_T|| e_N is in the dual cone;
+* **sliding**: sigma on the boundary, sigma = sigma_N (1, eta t) with t = (cos phi, sin phi)
+  and sigma_N > 0. The normality rule gives w_T = −lambda t and w_N = lambda (eta − theta),
+  lambda >= 0, so
+
+      sigma_N M a(phi) − lambda b(phi) = −q,   a = (1, eta cos phi, eta sin phi),
+                                               b = (eta − theta, −cos phi, −sin phi).
+
+  These 3 equations in (sigma_N, lambda, phi) are solvable only if det[M a, b, q] = 0:
+
+  * this determinant is bilinear in a and b, i.e. a trigonometric polynomial of degree 2 in
+    phi;
+  * with tau = tan(phi/2), (1 + tau²)² det is a quartic in tau, solved by `BIQUADROOTS`
+    (`utils/quartic.h`; lower degree when the leading coefficients vanish, phi = pi added);
+  * for each real root: least-squares (sigma_N, lambda), then Newton's method on
+    (sigma_N, lambda, phi) to round-off.
+
+The solutions are the candidates with a zero natural-map residual (up to round-off).
+
+* For a symmetric positive definite M and theta = eta (associated flow), the solution is
+  unique: the closest-point projection of the trial stress −M^{-1} q on K in the M-norm.
+* Otherwise (non-associated flow, non-symmetric M) there may be several solutions. The one
+  closest to the input stress is returned, for continuity of the Gauss–Seidel iterations.
+
+### Semi-smooth Newton (`plasticity_2d_DruckerPrager_semismooth_newton`)
+
+The method works on the natural map
+
+    Phi(sigma) = sigma − P_K(sigma − rho v),   v = w + theta ||w_T|| e_N,
+
+with the generalized Jacobian H = I − J_P(y)(I − rho J_v):
+
+* J_v = (I + theta e_N [0, n^T]) M, with n = w_T/||w_T|| (0 if w_T = 0);
+* J_P is the Jacobian of the projection on K, with the same cases as `projectionOnCone`:
+  * 0 in the polar cone;
+  * I inside K;
+  * on the boundary, with P = alpha (1, eta u), alpha = (y_N + eta ||y_T||)/(1 + eta²) and
+    u = y_T/||y_T||, the derivative of this formula.
+
+The line searches, the rho strategy, the stopping test and the fallback to the return mapping
+are those of the Von Mises Newton (`plasticity_2d_local_semismooth_newton`). The existing
+`PLASTICITY_2D_ONECONE_NSN*` solvers (Alart–Curnier or natural map, ported from fc3d) remain:
+they use a rho per component, static state, no line search by default, and a hybrid
+projection loop.
+
+On the random local problems of `plasticity_2d_druckerprager_test`, without fallback, the
+Newton method takes 2.0 iterations on average and never fails.
+
 ## Von Mises (J2)
 
 ### Yield domain
@@ -353,15 +408,32 @@ MixedProblems Von Mises blocks are plane strain only.
 
 | internal solver id | Drucker–Prager | Von Mises |
 |---|---|---|
-| `PLASTICITY_2D_ONECONE_NSN`, `..._NSN_GP`, `..._NSN_GP_HYBRID` (default of the NSGS) | semi-smooth Newton | semi-smooth Newton |
-| `PLASTICITY_2D_ONECONE_VONMISES_NSN` | — | semi-smooth Newton |
+| `PLASTICITY_2D_ONECONE_NSN`, `..._NSN_GP`, `..._NSN_GP_HYBRID` (default of the NSGS) | semi-smooth Newton (Alart–Curnier / natural map, fc3d port) | semi-smooth Newton |
+| `PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN` | semi-smooth Newton (shared implementation) | semi-smooth Newton |
+| `PLASTICITY_2D_ONECONE_VONMISES_NSN` | semi-smooth Newton (shared implementation) | semi-smooth Newton |
 | `PLASTICITY_2D_ONECONE_ProjectionOnCone` | projection step | one projection step sigma <- P_C(sigma − rho w), rho = 1/M_NN |
 | `PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration` | projection with local iterations | fixed point |
-| `PLASTICITY_2D_ONECONE_VONMISES_FP` | — | fixed point |
-| `PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING` (`PLASTICITY_2D_ONECONE_VONMISES`, deprecated) | — | return mapping |
+| `PLASTICITY_2D_ONECONE_VONMISES_FP` | projection with local iterations | fixed point |
+| `PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING` | return mapping | return mapping |
+| `PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING` (`PLASTICITY_2D_ONECONE_VONMISES`, deprecated) | return mapping | return mapping |
 
-The Drucker–Prager ids select the Von Mises solver of the same family, so the default options
-of the NSGS work for both models. MixedProblems Von Mises blocks use the return mapping.
+Each id selects the solver of the same family for the other model, so the default options of
+the NSGS work for both models.
+
+On the footing problems (100 cones, tolerance 1e-10), all the Drucker–Prager local solvers
+converge in 2300–2400 NSGS iterations:
+
+| local solver | time per footing problem |
+|---|---|
+| default `NSN_GP_HYBRID` | ~5.7 s |
+| return mapping | 0.7 s |
+| new semi-smooth Newton | 0.6 s |
+| `ONECONE_NSN` | 0.7 s |
+| one-step projection | 0.07 s |
+
+The error of `plasticity_2d_compute_error` is absolute and |sigma| ~ 5e3 there, so a
+tolerance of 1e-12 is at round-off (relative 5e-16): the NSGS then stalls at ~2e-12 with
+every local solver; only the default reaches it, by chance. MixedProblems Von Mises blocks use the return mapping.
 
 ## Bugs fixed (2026-11-23)
 
@@ -442,7 +514,20 @@ of the NSGS work for both models. MixedProblems Von Mises blocks use the return 
     * results: the solution equals s (~1e-16), sigma_eq = sigma_y on the plastic elements,
       and `plasticity_2d_compute_error` gives ~1e-15;
   * `plasticity_2d_problem_change_of_variables`: the ball problem gives s = T y.
-* Python, `numerics/python/tests/test_plasticity_2d.py` (44 cases, through
+* `plasticity_2d_druckerprager_test`:
+  * return mapping on 3000 manufactured solutions (non-symmetric and symmetric M,
+    theta in {0, eta/2, eta, 1.5 eta}):
+    * elastic: sigma inside K, w = 0;
+    * apex: sigma = 0, v strictly in the dual cone;
+    * sliding: sigma on K, w from the flow rule;
+    * all recovered to ~1e-15;
+  * 2000 random local problems:
+    * the return mapping has a residual < 4e-15;
+    * the Newton method without fallback always converges (2.0 iterations);
+    * both agree where the solution is unique (theta = eta, M symmetric);
+  * NSGS on the three footing problems with five local solvers: same solution (see the
+    timings above).
+* Python, `numerics/python/tests/test_plasticity_2d.py` (48 cases, through
   `plasticity_2d_driver` and `plasticity_2d_compute_error`). The coordinate maps and the plane
   stress formula are written again in the test:
   * creation, invalid sizes, layout of M (C or Fortran order), default options;

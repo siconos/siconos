@@ -143,6 +143,7 @@ static int plasticity_2d_nsgs_initialize_local_solver(
         plasticity_2d_projection_initialize(problem, localproblem);
         break;
       }
+      case PLASTICITY_2D_ONECONE_VONMISES_FP:
       case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
         local_function_toolkit->local_solver =
             &plasticity_2d_projectionOnConeWithLocalIteration_solve;
@@ -153,6 +154,21 @@ static int plasticity_2d_nsgs_initialize_local_solver(
                                                                     localsolver_options);
         break;
       }
+      /* return mapping and semi-smooth Newton (plasticity_2d_druckerprager.h); the Von
+       * Mises ids select the Drucker-Prager solver of the same family */
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING:
+      case PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING:
+        local_function_toolkit->local_solver =
+            &plasticity_2d_DruckerPrager_return_mapping_solve;
+        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+        local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
+        break;
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN:
+      case PLASTICITY_2D_ONECONE_VONMISES_NSN:
+        local_function_toolkit->local_solver = &plasticity_2d_DruckerPrager_nsn_solve;
+        local_function_toolkit->update_local_problem = &plasticity_2d_nsgs_update;
+        local_function_toolkit->free_local_solver = &plasticity_2d_projection_free;
+        break;
       /* Newton solver (Alart-Curnier) */
       case PLASTICITY_2D_ONECONE_NSN: {
         local_function_toolkit->local_solver =
@@ -204,6 +220,7 @@ static int plasticity_2d_nsgs_initialize_local_solver(
         local_function_toolkit->local_solver = &plasticity_2d_projectionOnVonMises_solve;
         break;
       case PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING:
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING:
         local_function_toolkit->local_solver = &plasticity_2d_vonMises_return_mapping_solve;
         break;
       case PLASTICITY_2D_ONECONE_VONMISES_FP:
@@ -211,6 +228,7 @@ static int plasticity_2d_nsgs_initialize_local_solver(
         local_function_toolkit->local_solver = &plasticity_2d_vonMises_fixed_point_solve;
         break;
       case PLASTICITY_2D_ONECONE_VONMISES_NSN:
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN:
       case PLASTICITY_2D_ONECONE_NSN:
       case PLASTICITY_2D_ONECONE_NSN_GP:
       case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID:

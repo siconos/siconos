@@ -142,6 +142,15 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
           localsolver_options->dWork[i] = 1.0;
         }
         break;
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING:
+      case PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING:
+        solver = &plasticity_2d_DruckerPrager_return_mapping_solve;
+        break;
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN:
+      case PLASTICITY_2D_ONECONE_VONMISES_NSN:
+        solver = &plasticity_2d_DruckerPrager_nsn_solve;
+        break;
+      case PLASTICITY_2D_ONECONE_VONMISES_FP:
       case PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration:
         solver = &plasticity_2d_projectionOnConeWithLocalIteration_solve;
         plasticity_2d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,
@@ -171,6 +180,7 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
         solver = &plasticity_2d_projectionOnVonMises_solve;
         break;
       case PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING:
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING:
         solver = &plasticity_2d_vonMises_return_mapping_solve;
         break;
       case PLASTICITY_2D_ONECONE_VONMISES_FP:
@@ -178,6 +188,7 @@ static PlasticityProblem* plasticity_2d_nsgs_local_problem_new(PlasticityProblem
         solver = &plasticity_2d_vonMises_fixed_point_solve;
         break;
       case PLASTICITY_2D_ONECONE_VONMISES_NSN:
+      case PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN:
       case PLASTICITY_2D_ONECONE_NSN:
       case PLASTICITY_2D_ONECONE_NSN_GP:
       case PLASTICITY_2D_ONECONE_NSN_GP_HYBRID:

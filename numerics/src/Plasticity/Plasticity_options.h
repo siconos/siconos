@@ -40,6 +40,12 @@ enum PLASTICITY_SOLVER {
   /** Von Mises (J2), one element: semi-smooth Newton on the natural map
       sigma - P_C(sigma - rho (M sigma + q)) = 0, with line search */
   PLASTICITY_2D_ONECONE_VONMISES_NSN = 20072,
+  /** Drucker-Prager, one cone: return mapping (exact solution by enumeration: elastic,
+      apex, sliding with a quartic equation), any M and dilatancy */
+  PLASTICITY_2D_ONECONE_DRUCKERPRAGER_RETURN_MAPPING = 20080,
+  /** Drucker-Prager, one cone: semi-smooth Newton on the natural map with line search and
+      fallback to the return mapping */
+  PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN = 20081,
   /** deprecated name of PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING */
   PLASTICITY_2D_ONECONE_VONMISES = PLASTICITY_2D_ONECONE_VONMISES_RETURN_MAPPING
 };
