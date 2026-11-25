@@ -1,10 +1,9 @@
-// SPDX-FileCopyrightText: 2026 INRIA
+// SPDX-FileCopyrightText: INRIA
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
-
 
 // AOS kernel reference: a regular polygon (N vertices, circumradius
 // Rc, m = 1, g = 9.81) on the line y = 0, exact geometry: one interaction

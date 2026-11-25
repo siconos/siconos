@@ -1,6 +1,6 @@
 #include <stdio.h>  // for printf, fclose, fopen, FILE, NULL
 
-// SPDX-FileCopyrightText: 2026 INRIA
+// SPDX-FileCopyrightText: INRIA
 //
 // SPDX-License-Identifier: Apache-2.0
 //

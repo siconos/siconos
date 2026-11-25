@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 INRIA
+# SPDX-FileCopyrightText: INRIA
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -61,4 +61,4 @@ repos:
   - repo: https://codeberg.org/fsfe/reuse-tool
     rev: v6.3.0
     hooks:
-      - id: reuse
+      - id: reuse-lint-file

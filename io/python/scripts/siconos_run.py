@@ -1,6 +1,6 @@
 #!/usr/bin/env @Python_EXECUTABLE@
 
-# SPDX-FileCopyrightText: 2026 INRIA
+# SPDX-FileCopyrightText: INRIA
 #
 # SPDX-License-Identifier: Apache-2.0
 #

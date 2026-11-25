@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 INRIA
+# SPDX-FileCopyrightText: INRIA
 #
 # SPDX-License-Identifier: Apache-2.0
 # Use the targets in this file to build a siconos-ready image that can be run as a

@@ -1,5 +1,5 @@
 // Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
-// SPDX-FileCopyrightText: 2026 INRIA
+// SPDX-FileCopyrightText: INRIA
 //
 // SPDX-License-Identifier: Apache-2.0
 //

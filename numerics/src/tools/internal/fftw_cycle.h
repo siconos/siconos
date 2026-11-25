@@ -1,6 +1,6 @@
 // Copyright (c) 2003, 2007 Massachusetts Institute of Technology
 // Copyright (c) 2003, 2007 Matteo Frigo
-// SPDX-FileCopyrightText: 2026 INRIA
+// SPDX-FileCopyrightText: INRIA
 //
 // SPDX-License-Identifier: Apache-2.0
 //

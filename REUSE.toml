@@ -3,7 +3,7 @@ version = 1
 [[annotations]]
 path = ["LICENSES/README.md"]
 SPDX-License-Identifier = "Apache-2.0"
-SPDX-FileCopyrightText = "2026 INRIA"
+SPDX-FileCopyrightText = "INRIA"
 
 [[annotations]]
 path = [
@@ -33,7 +33,7 @@ path = [
         "**/copyright"
 ]
 SPDX-License-Identifier = "Apache-2.0"
-SPDX-FileCopyrightText = "2026 INRIA"
+SPDX-FileCopyrightText = "INRIA"
 
 
 [[annotations]]
@@ -49,7 +49,7 @@ path = [
         "vkernel/ChangeLog",
 ]
 SPDX-License-Identifier = "Apache-2.0"
-SPDX-FileCopyrightText = "2026 INRIA"
+SPDX-FileCopyrightText = "INRIA"
 
 
 [[annotations]]
@@ -59,7 +59,7 @@ path = [
         "docs/sphinx/_static/**",
 ]
 SPDX-License-Identifier = "Apache-2.0"
-SPDX-FileCopyrightText = "2026 INRIA"
+SPDX-FileCopyrightText = "INRIA"
 
 [[annotations]]
 path = "externals/CompactNSearch/**"
