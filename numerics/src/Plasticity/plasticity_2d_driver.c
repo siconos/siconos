@@ -135,26 +135,35 @@ static int plasticity_2d_driver_without_cohesion(PlasticityProblem* problem, dou
   return solve_status;
 }
 
-/* Cartesian stresses: the problem is written once for all in cone coordinates,
- * sigma_c = P s, M_c = P^{-T} M P^{-1}, q_c = P^{-T} q (the model parameters are the same),
- * solved, and the solution mapped back, s = P^{-1} sigma_c, w_s = P^T w_c. */
-static int plasticity_2d_driver_cartesian(PlasticityProblem* problem, double* stress,
-                                          double* strainrate, SolverOptions* options) {
-  PlasticityStressCoordinates coordinates = problem->stress_coordinates;
+/* Change of variables s = T y on each element (Cartesian coordinates, plane stress Von Mises
+ * scaled to a ball, see plasticity_2d_change_of_variables): the problem is written once for
+ * all in the variables y, M_y = T^T M T, q_y = T^T q (the model parameters are the same; the
+ * plane stress ellipsoid becomes the ball of radius sigma_y), solved, and the solution
+ * mapped back, s = T y, w = T^{-T} w_y. */
+static int plasticity_2d_driver_change_of_variables(PlasticityProblem* problem, double* stress,
+                                                    double* strainrate, SolverOptions* options,
+                                                    const double T[9], const double Tinv[9]) {
   int nc = problem->numberOfCones;
-  PlasticityProblem cone = *problem; /* shares the model parameters */
-  cone.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
-  cone.M = plasticity_2d_matrix_to_cone(coordinates, problem->M);
-  cone.q = (double*)malloc((size_t)(3 * nc) * sizeof(double));
-  plasticity_2d_strainrate_to_cone(coordinates, nc, problem->q, cone.q);
-  plasticity_2d_stress_to_cone(coordinates, nc, stress, stress);
+  PlasticityProblem solved = *problem; /* shares the model parameters */
+  Plasticity_VonMises_model von_mises;
+  solved.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
+  if (problem->model_type == PLASTICITY_MODEL_VON_MISES &&
+      problem->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRESS) {
+    von_mises = *problem->model.von_mises;
+    von_mises.hypothesis = PLASTICITY_VONMISES_BALL;
+    solved.model.von_mises = &von_mises;
+  }
+  solved.M = plasticity_2d_matrix_change_of_variables(T, problem->M);
+  solved.q = (double*)malloc((size_t)(3 * nc) * sizeof(double));
+  plasticity_2d_block_map(T, 1, nc, problem->q, solved.q);
+  plasticity_2d_block_map(Tinv, 0, nc, stress, stress);
 
-  int info = plasticity_2d_driver(&cone, stress, strainrate, options);
+  int info = plasticity_2d_driver(&solved, stress, strainrate, options);
 
-  plasticity_2d_stress_from_cone(coordinates, nc, stress, stress);
-  plasticity_2d_strainrate_from_cone(coordinates, nc, strainrate, strainrate);
-  NM_free(cone.M);
-  free(cone.q);
+  plasticity_2d_block_map(T, 0, nc, stress, stress);
+  plasticity_2d_block_map(Tinv, 1, nc, strainrate, strainrate);
+  NM_free(solved.M);
+  free(solved.q);
   return info;
 }
 
@@ -167,8 +176,10 @@ int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double* str
     numerics_error_log("plasticity_2d_driver", "null input argument");
     return NUMERICS_ERR_NULL_POINTER;
   }
-  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE)
-    return plasticity_2d_driver_cartesian(problem, stress, strainrate, options);
+  double T[9], Tinv[9];
+  if (plasticity_2d_change_of_variables(problem, T, Tinv))
+    return plasticity_2d_driver_change_of_variables(problem, stress, strainrate, options, T,
+                                                    Tinv);
   double* shift = NULL;
   int err = plasticity_DruckerPrager_cohesion_shift(problem, &shift);
   if (err) return err;

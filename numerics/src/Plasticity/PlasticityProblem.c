@@ -115,7 +115,7 @@ void plasticity_DruckerPrager_model_free(Plasticity_DruckerPrager_model* model) 
 
 Plasticity_VonMises_model* plasticity_VonMises_model_new(double* sigma_y) {
   Plasticity_VonMises_model* model =
-      (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+      (Plasticity_VonMises_model*)calloc(1, sizeof(Plasticity_VonMises_model));
   model->sigma_y = sigma_y;
   return model;
 }
@@ -311,7 +311,7 @@ PlasticityProblem* plasticity_newFromFile(FILE* file) {
     }
     case PLASTICITY_MODEL_VON_MISES: {
       Plasticity_VonMises_model* model =
-          (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+          (Plasticity_VonMises_model*)calloc(1, sizeof(Plasticity_VonMises_model));
       model->sigma_y = (double*)malloc(nc * sizeof(double));
       for (size_t i = 0; i < nc; i++) {
         check_io(fscanf(file, "%lf ", &(model->sigma_y[i])));
@@ -481,9 +481,10 @@ PlasticityProblem* plasticity_copy(PlasticityProblem* problem) {
       Plasticity_VonMises_model* model = GET_VON_MISES(problem);
       if (model) {
         new_problem->model.von_mises =
-            (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+            (Plasticity_VonMises_model*)calloc(1, sizeof(Plasticity_VonMises_model));
         new_problem->model.von_mises->sigma_y = (double*)malloc(nc * sizeof(double));
         memcpy(new_problem->model.von_mises->sigma_y, model->sigma_y, nc * sizeof(double));
+        new_problem->model.von_mises->hypothesis = model->hypothesis;
       } else {
         new_problem->model.von_mises = NULL;
       }

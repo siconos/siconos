@@ -132,12 +132,8 @@ static int sbm_blocks_multiple_of_3(const SparseBlockStructuredMatrix* B) {
   return 1;
 }
 
-NumericsMatrix* plasticity_2d_matrix_to_cone(PlasticityStressCoordinates coordinates,
-                                             NumericsMatrix* M) {
-  const double* A = get_map(coordinates, MAP_P_INV_T);
-  const double* B = get_map(coordinates, MAP_P_INV);
-  if (!A) return NM_copy(M);
-
+/* A M B, A and B block diagonal with the 3x3 blocks A and B (row-major) */
+static NumericsMatrix* matrix_transform(const double* A, const double* B, NumericsMatrix* M) {
   if (M->storageType == NM_DENSE) {
     NumericsMatrix* Mc = NM_copy(M);
     transform_dense(A, B, Mc->dense, (size_t)Mc->size0, (size_t)Mc->size1);
@@ -167,6 +163,75 @@ NumericsMatrix* plasticity_2d_matrix_to_cone(PlasticityStressCoordinates coordin
   NM_free(TA);
   NM_free(TB);
   return Mc;
+}
+
+NumericsMatrix* plasticity_2d_matrix_to_cone(PlasticityStressCoordinates coordinates,
+                                             NumericsMatrix* M) {
+  const double* A = get_map(coordinates, MAP_P_INV_T);
+  const double* B = get_map(coordinates, MAP_P_INV);
+  if (!A) return NM_copy(M);
+  return matrix_transform(A, B, M);
+}
+
+/* ---------------------------------------------------------------------------------------- */
+/* General change of variables s = T y                                                       */
+/* ---------------------------------------------------------------------------------------- */
+
+static void product3(const double* A, const double* B, double* C) {
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      C[3 * i + j] = A[3 * i] * B[j] + A[3 * i + 1] * B[3 + j] + A[3 * i + 2] * B[6 + j];
+}
+
+static void transpose3(const double* A, double* At) {
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++) At[3 * j + i] = A[3 * i + j];
+}
+
+int plasticity_2d_change_of_variables(const PlasticityProblem* problem, double T[9],
+                                      double Tinv[9]) {
+  static const double I3[9] = {1., 0., 0., 0., 1., 0., 0., 0., 1.};
+  const double* Pinv = get_map(problem->stress_coordinates, MAP_P_INV);
+  const double* P = get_map(problem->stress_coordinates, MAP_P);
+  int plane_stress =
+      (problem->model_type == PLASTICITY_MODEL_VON_MISES && problem->model.von_mises &&
+       problem->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRESS);
+  /* plane stress: sigma_c = D y, D = diag(sqrt2, sqrt(2/3), sqrt(2/3)) */
+  const double c = sqrt(2.0 / 3.0);
+  const double D[9] = {M_SQRT2, 0., 0., 0., c, 0., 0., 0., c};
+  const double Dinv[9] = {M_SQRT1_2, 0., 0., 0., 1.0 / c, 0., 0., 0., 1.0 / c};
+  /* T = P^{-1} D, T^{-1} = D^{-1} P */
+  product3(Pinv ? Pinv : I3, plane_stress ? D : I3, T);
+  product3(plane_stress ? Dinv : I3, P ? P : I3, Tinv);
+  return (Pinv || plane_stress) ? 1 : 0;
+}
+
+void plasticity_2d_block_map(const double A[9], int transpose, int nc, const double* x,
+                             double* y) {
+  double At[9];
+  if (transpose) transpose3(A, At);
+  apply_map(transpose ? At : A, nc, x, y);
+}
+
+NumericsMatrix* plasticity_2d_matrix_change_of_variables(const double T[9],
+                                                         NumericsMatrix* M) {
+  double Tt[9];
+  transpose3(T, Tt);
+  return matrix_transform(Tt, T, M);
+}
+
+PlasticityProblem* plasticity_2d_problem_change_of_variables(PlasticityProblem* problem) {
+  PlasticityProblem* solved = plasticity_copy(problem);
+  double T[9], Tinv[9];
+  if (!plasticity_2d_change_of_variables(problem, T, Tinv)) return solved;
+  NM_free(solved->M);
+  solved->M = plasticity_2d_matrix_change_of_variables(T, problem->M);
+  plasticity_2d_block_map(T, 1, problem->numberOfCones, problem->q, solved->q);
+  solved->stress_coordinates = PLASTICITY_STRESS_COORDINATES_CONE;
+  if (solved->model_type == PLASTICITY_MODEL_VON_MISES &&
+      solved->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRESS)
+    solved->model.von_mises->hypothesis = PLASTICITY_VONMISES_BALL;
+  return solved;
 }
 
 PlasticityProblem* plasticity_2d_problem_to_cone(PlasticityProblem* problem) {

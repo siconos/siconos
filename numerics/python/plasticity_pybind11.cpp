@@ -26,6 +26,16 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .value("VON_MISES", PLASTICITY_MODEL_VON_MISES, "Von Mises model")
       .export_values();
 
+  // PlasticityVonMisesHypothesis enum
+  py::enum_<PlasticityVonMisesHypothesis>(m, "PlasticityVonMisesHypothesis",
+                                          "Von Mises yield set")
+      .value("PLANE_STRAIN", PLASTICITY_VONMISES_PLANE_STRAIN,
+             "Plane strain, szz = (sxx + syy)/2: cylinder ||sigma_T|| <= sqrt(2/3) sigma_y")
+      .value("PLANE_STRESS", PLASTICITY_VONMISES_PLANE_STRESS,
+             "Plane stress, szz = 0: ellipsoid sigma_N^2/2 + 3/2 ||sigma_T||^2 <= sigma_y^2")
+      .value("BALL", PLASTICITY_VONMISES_BALL, "Ball ||sigma|| <= sigma_y")
+      .export_values();
+
   // PlasticityStressCoordinates enum
   py::enum_<PlasticityStressCoordinates>(m, "PlasticityStressCoordinates",
                                          "Coordinates of the stress (and strain rate)")
@@ -51,7 +61,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   py::class_<Plasticity_VonMises_model, py::smart_holder>(
       m, "Plasticity_VonMises_model", "Von Mises plasticity model parameters (yield stress)")
       .def(py::init<>())
-      .def_readwrite("sigma_y", &Plasticity_VonMises_model::sigma_y, "Yield stress");
+      .def_readwrite("sigma_y", &Plasticity_VonMises_model::sigma_y, "Yield stress")
+      .def_readwrite("hypothesis", &Plasticity_VonMises_model::hypothesis,
+                     "Yield set: plane strain cylinder, plane stress ellipsoid or ball");
 
   // PlasticityProblem - use a wrapper approach similar to friction contact
   py::class_<PlasticityProblem, py::smart_holder>(m, "PlasticityProblem",
@@ -166,7 +178,8 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   // Factory function for creating PlasticityProblem with Von Mises model
   m.def(
       "PlasticityProblem_new_VonMises",
-      [](int dim, py::array_t<double> M, py::array_t<double> q, py::array_t<double> sigma_y) {
+      [](int dim, py::array_t<double> M, py::array_t<double> q, py::array_t<double> sigma_y,
+         PlasticityVonMisesHypothesis hypothesis) {
         auto* problem = new PlasticityProblem();
         problem->dimension = dim;
         problem->numberOfCones = sigma_y.size();
@@ -185,16 +198,18 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
 
         // Create Von Mises model and copy sigma_y
         problem->model.von_mises =
-            (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+            (Plasticity_VonMises_model*)calloc(1, sizeof(Plasticity_VonMises_model));
         py::buffer_info sigma_y_info = sigma_y.request();
         problem->model.von_mises->sigma_y =
             (double*)malloc(sigma_y_info.shape[0] * sizeof(double));
         std::memcpy(problem->model.von_mises->sigma_y, sigma_y_info.ptr,
                     sigma_y_info.shape[0] * sizeof(double));
+        problem->model.von_mises->hypothesis = hypothesis;
 
         return problem;
       },
       py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("sigma_y"),
+      py::arg("hypothesis") = PLASTICITY_VONMISES_PLANE_STRAIN,
       "Create a PlasticityProblem with Von Mises model",
       py::return_value_policy::take_ownership);
 

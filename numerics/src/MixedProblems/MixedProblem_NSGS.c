@@ -54,7 +54,7 @@
 #include "PlasticityProblem.h"
 #include "Plasticity_options.h"
 #include "plasticity_2d_compute_error.h"
-#include "plasticity_2d_druckerprager_projection.h"
+#include "plasticity_2d_druckerprager.h"
 #include "plasticity_2d_solvers.h"
 #include "plasticity_2d_vonmises.h"
 #include "rolling_friction_2d_compute_error.h"

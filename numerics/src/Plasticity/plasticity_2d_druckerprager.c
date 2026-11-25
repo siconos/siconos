@@ -5,7 +5,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 
-#include "plasticity_2d_druckerprager_projection.h"
+#include "plasticity_2d_druckerprager.h"
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON

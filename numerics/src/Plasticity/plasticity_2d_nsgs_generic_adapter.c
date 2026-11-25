@@ -20,7 +20,7 @@
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "plasticity_2d_compute_error.h"
-#include "plasticity_2d_druckerprager_projection.h"
+#include "plasticity_2d_druckerprager.h"
 #include "plasticity_2d_local_problem_tools.h"
 #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"
 #include "plasticity_2d_solvers.h"
@@ -313,6 +313,7 @@ static int plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
     localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[cone];
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     localproblem->model.von_mises->sigma_y[0] = problem->model.von_mises->sigma_y[cone];
+    localproblem->model.von_mises->hypothesis = problem->model.von_mises->hypothesis;
   }
   return 0;
 }
@@ -323,6 +324,14 @@ void plasticity_2d_nsgs_generic(PlasticityProblem* problem, double* stress,
                                 SolverOptions* options) {
   if (!problem || !stress || !info || !options) {
     *info = numerics_error("plasticity_2d_nsgs_generic", "Invalid input arguments");
+    return;
+  }
+  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE ||
+      (problem->model_type == PLASTICITY_MODEL_VON_MISES &&
+       problem->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRESS)) {
+    *info = numerics_error("plasticity_2d_nsgs_generic",
+                           "Cartesian stress coordinates or plane stress Von Mises: use "
+                           "plasticity_2d_driver, which performs the change of variables");
     return;
   }
 

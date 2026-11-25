@@ -82,7 +82,7 @@ PlasticityProblem* plasticity_2d_local_problem_allocate(PlasticityProblem* probl
     }
     case PLASTICITY_MODEL_VON_MISES: {
       localproblem->model.von_mises =
-          (Plasticity_VonMises_model*)malloc(sizeof(Plasticity_VonMises_model));
+          (Plasticity_VonMises_model*)calloc(1, sizeof(Plasticity_VonMises_model));
       localproblem->model.von_mises->sigma_y = (double*)malloc(sizeof(double));
       break;
     }

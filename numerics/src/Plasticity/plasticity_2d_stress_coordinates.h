@@ -82,6 +82,38 @@ NumericsMatrix* plasticity_2d_matrix_to_cone(PlasticityStressCoordinates coordin
 */
 PlasticityProblem* plasticity_2d_problem_to_cone(PlasticityProblem* problem);
 
+/** Change of variables of the problem solved by plasticity_2d_driver: on every element,
+    s = T y, s the stress in the coordinates of the problem and y the unknown of the solved
+    problem, with T = P^{-1} D:
+    - P the Cartesian -> cone map (identity in cone coordinates);
+    - D = diag(sqrt(2), sqrt(2/3), sqrt(2/3)) for the plane stress Von Mises model, which maps
+      the ellipsoid sigma_N^2/2 + 3/2 ||sigma_T||^2 <= sigma_y^2 to the ball
+      ||y|| <= sigma_y (identity otherwise).
+    The solved problem is M_y = T^T M T, q_y = T^T q, w_y = T^T w.
+    \param problem the problem
+    \param[out] T the 3x3 map (row-major)
+    \param[out] Tinv its inverse (row-major)
+    \return 0 if T = I (nothing to do), 1 otherwise
+*/
+int plasticity_2d_change_of_variables(const PlasticityProblem* problem, double T[9],
+                                      double Tinv[9]);
+
+/** y_e = A x_e (or A^T x_e if transpose) on nc elements, A 3x3 row-major (in place allowed).
+ */
+void plasticity_2d_block_map(const double A[9], int transpose, int nc, const double* x,
+                             double* y);
+
+/** T^T M T, T block diagonal with the 3x3 block T (row-major); same storage rules as
+    plasticity_2d_matrix_to_cone.
+    \return a new matrix (to be freed with NM_free) */
+NumericsMatrix* plasticity_2d_matrix_change_of_variables(const double T[9], NumericsMatrix* M);
+
+/** The problem solved by plasticity_2d_driver (deep copy): cone coordinates and, for the
+    plane stress Von Mises model, the scaled variables y (model PLASTICITY_VONMISES_BALL),
+    M_y = T^T M T, q_y = T^T q (see plasticity_2d_change_of_variables).
+    \return a new problem (to be freed with plasticityProblem_free) */
+PlasticityProblem* plasticity_2d_problem_change_of_variables(PlasticityProblem* problem);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

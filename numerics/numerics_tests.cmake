@@ -561,6 +561,8 @@ if(WITH_TESTING)
   new_test(SOURCES plasticity_2d_cohesion_test.c)
   # Cartesian stress coordinates (change of variables in plasticity_2d_driver)
   new_test(SOURCES plasticity_2d_cartesian_test.c)
+  # plane stress Von Mises (ellipsoid rewritten as a ball by plasticity_2d_driver)
+  new_test(SOURCES plasticity_2d_plane_stress_test.c)
 
   # Collection tests using new infrastructure
   new_tests_collection(

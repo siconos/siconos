@@ -26,7 +26,7 @@
 #include "numerics_verbose.h"
 #include "op3x3.h"
 #include "plasticity_2d_compute_error.h"                     // for fc3d_compute_e..
-#include "plasticity_2d_druckerprager_projection.h"          // for fc3d_projectio...
+#include "plasticity_2d_druckerprager.h"                     // for fc3d_projectio...
 #include "plasticity_2d_local_problem_tools.h"               // for fc3d_local_pro..
 #include "plasticity_2d_onecone_nonsmooth_Newton_solvers.h"  //
 #include "plasticity_2d_solvers.h"
@@ -115,6 +115,7 @@ static void plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
     localproblem->model.drucker_prager->theta[0] = problem->model.drucker_prager->theta[cone];
   } else if (problem->model_type == PLASTICITY_MODEL_VON_MISES) {
     localproblem->model.von_mises->sigma_y[0] = problem->model.von_mises->sigma_y[cone];
+    localproblem->model.von_mises->hypothesis = problem->model.von_mises->hypothesis;
   }
 }
 
@@ -469,10 +470,12 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   int* iparam = options->iparam;
   double* dparam = options->dparam;
 
-  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE) {
+  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE ||
+      (problem->model_type == PLASTICITY_MODEL_VON_MISES &&
+       problem->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRESS)) {
     numerics_error_log("plasticity_2d_nsgs",
-                       "Cartesian stress coordinates: use plasticity_2d_driver, which "
-                       "writes the problem in cone coordinates");
+                       "Cartesian stress coordinates or plane stress Von Mises: use "
+                       "plasticity_2d_driver, which performs the change of variables");
     *info = 1;
     return;
   }
@@ -764,10 +767,12 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   /* Full criterium */
   if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+    /* the full error is compared with the required tolerance: tolerance may have been
+     * lowered in the loop (incremental precision of the light error) */
     error = calculate_full_error_final(problem, options, computeError, stress, strainrate,
-                                       tolerance, norm_q);
+                                       SOLVER_TOL(options), norm_q);
 
-    hasNotConverged = determine_convergence(error, tolerance, iter, options);
+    hasNotConverged = determine_convergence(error, SOLVER_TOL(options), iter, options);
   }
 
   *info = hasNotConverged;

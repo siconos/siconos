@@ -40,6 +40,14 @@
  *
  * i.e. w_N = 0 (isochoric plastic flow, sigma_N is not constrained) and
  * w_T = -lambda sigma_T / R, lambda >= 0, lambda (R - ||sigma_T||) = 0.
+ *
+ * This cylinder is the plane strain hypothesis (PLASTICITY_VONMISES_PLANE_STRAIN). In plane
+ * stress (PLASTICITY_VONMISES_PLANE_STRESS) the yield set is the ellipsoid
+ * sigma_N^2/2 + 3/2 ||sigma_T||^2 <= sigma_y^2; plasticity_2d_driver rewrites it as the ball
+ * ||y|| <= sigma_y with sigma = D y, D = diag(sqrt2, sqrt(2/3), sqrt(2/3))
+ * (PLASTICITY_VONMISES_BALL). The functions below with "Ball" / "ball" in their name, and the
+ * solvers with Plasticity2DVonMisesLocalParameters::ball = 1 or a local problem with the BALL
+ * hypothesis, work on this ball.
  * See docs/devel/PLASTICITY.md.
  */
 
@@ -78,6 +86,27 @@ int plasticity_2d_vonMises_check_yield(const double stress[3], double sigma_y);
  */
 int plasticity_2d_projectionOnVonMises(double stress[3], double sigma_y);
 
+/** Euclidean projection on the ball B = { ||stress|| <= sigma_y } (plane stress Von Mises in
+ *  the scaled variables, see PLASTICITY_VONMISES_BALL).
+ *  \param[in,out] stress stress (3 components)
+ *  \param[in] sigma_y radius of the ball
+ *  \return 1 if the stress was in B (unchanged), 0 if it has been projected
+ */
+int plasticity_2d_projectionOnVonMisesBall(double stress[3], double sigma_y);
+
+/** Add to *error the squared natural-map residual |r - P_B(r - u)|^2 of one element, B the
+ *  ball of radius sigma_y.
+ *  \param[in] r stress of the element
+ *  \param[in] u w = M sigma + q of the element
+ *  \param[in] sigma_y radius of the ball
+ *  \param[in,out] error accumulated squared residual
+ *  \param worktmp work array of size 3
+ */
+void plasticity_2d_vonmises_ball_unitary_compute_and_add_error(const double r[3],
+                                                               const double u[3],
+                                                               double sigma_y, double* error,
+                                                               double worktmp[3]);
+
 /** Add to *error the squared natural-map residual |r - P_C(r - u)|^2 of one element.
  *  \param[in] r stress of the element
  *  \param[in] u w = M sigma + q of the element
@@ -113,6 +142,24 @@ void plasticity_2d_vonmises_unitary_compute_and_add_error(const double r[3], con
 int plasticity_2d_vonMises_return_mapping(const double M[9], const double q[3], double sigma_y,
                                           double stress[3]);
 
+/** Return mapping on the ball B = { ||sigma|| <= sigma_y } (plane stress Von Mises in the
+ *  scaled variables): exact solution of sigma in B, -(M sigma + q) in N_B(sigma) for a 3x3
+ *  matrix M (column-major, not necessarily symmetric).
+ *  Elastic case: sigma = -M^{-1} q if ||sigma|| <= sigma_y. Plastic case:
+ *  (M + mu I) sigma = -q, ||sigma|| = sigma_y, mu = lambda / sigma_y > 0, found by the same
+ *  safeguarded Newton / bisection method as plasticity_2d_vonMises_return_mapping (here in
+ *  dimension 3, without Schur complement). For a symmetric positive definite M, this is the
+ *  closest point projection in the M-norm of -M^{-1} q on B (plane stress return mapping).
+ *  \param[in] M local matrix (3x3, column-major)
+ *  \param[in] q local vector
+ *  \param[in] sigma_y radius of the ball
+ *  \param[out] stress solution
+ *  \return 0 if successful, 1 if M or M + mu I is singular, 2 if the scalar equation was not
+ *  solved to machine precision
+ */
+int plasticity_2d_vonMises_ball_return_mapping(const double M[9], const double q[3],
+                                               double sigma_y, double stress[3]);
+
 /** Parameters and results of the iterative one-element solvers (fixed point and
  *  semi-smooth Newton on the natural map). */
 typedef struct {
@@ -124,8 +171,10 @@ typedef struct {
   int linesearch;          /**< PLASTICITY_NSN_LINESEARCH values (Newton) */
   int linesearch_max_iter; /**< maximum number of line-search / rho-adaptation steps */
   int hybrid;              /**< Newton: if not 0, fall back to the return mapping on failure */
-  int iter_done;           /**< (out) number of iterations */
-  double residual;         /**< (out) natural-map residual, rho = 1 / ||M||_2 */
+  int ball; /**< yield set: 0 cylinder ||sigma_T|| <= sqrt(2/3) sigma_y (plane strain), 1 ball
+                 ||sigma|| <= sigma_y (plane stress, scaled variables) */
+  int iter_done;   /**< (out) number of iterations */
+  double residual; /**< (out) natural-map residual, rho = 1 / ||M||_2 */
 } Plasticity2DVonMisesLocalParameters;
 
 /** Natural-map residual |sigma - P_C(sigma - rho (M sigma + q))| of one element.
@@ -147,7 +196,8 @@ double plasticity_2d_vonMises_natural_map_residual(const double M[9], const doub
  *  (PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE, default: rho is decreased until
  *  rho ||w(sigma+) - w(sigma)|| <= 0.9 ||sigma+ - sigma||, increased when the ratio is
  *  below 0.3, as in the friction solvers). Converges when M is positive definite (any
- *  symmetric part) and rho is small enough.
+ *  symmetric part) and rho is small enough. C is the cylinder, or the ball of radius sigma_y
+ *  if p->ball.
  *  \param[in] M local matrix (3x3, column-major)
  *  \param[in] q local vector
  *  \param[in] sigma_y uniaxial yield stress
@@ -163,9 +213,10 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
  *    Phi(sigma) = sigma - P_C(sigma - rho (M sigma + q)) = 0,
  *  with the generalized Jacobian H = I - J_P(y) (I - rho M), y = sigma - rho w, J_P the
  *  Jacobian of the projection (identity inside C, (R/||y_T||)(I - n n^T) on the deviatoric
- *  part outside, n = y_T/||y_T||), and a line search on 1/2 ||Phi||^2 (Armijo,
- *  Goldstein-Price or none). rho = 1/||M||_2 unless the constant strategy is chosen. If the
- *  method fails and p->hybrid != 0, the return mapping is used.
+ *  part outside, n = y_T/||y_T||; for the ball, (sigma_y/||y||)(I - u u^T), u = y/||y||,
+ * outside), and a line search on 1/2 ||Phi||^2 (Armijo, Goldstein-Price or none). rho =
+ * 1/||M||_2 unless the constant strategy is chosen. If the method fails and p->hybrid != 0,
+ * the return mapping is used.
  *  \param[in] M local matrix (3x3, column-major)
  *  \param[in] q local vector
  *  \param[in] sigma_y uniaxial yield stress

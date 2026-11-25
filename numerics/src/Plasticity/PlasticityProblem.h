@@ -85,6 +85,25 @@ struct Plasticity_DruckerPrager_model {
 typedef struct Plasticity_DruckerPrager_model Plasticity_DruckerPrager_model;
 
 /**
+    Von Mises (J2) yield set of the elements, in cone (hydrostatic-deviatoric) coordinates
+    (sigma_N, sigma_T), sigma_y the uniaxial yield stress (see docs/devel/PLASTICITY.md).
+*/
+enum PlasticityVonMisesHypothesis {
+  /** plane strain with szz = (sxx + syy)/2 (incompressible flow): cylinder
+      ||sigma_T|| <= sqrt(2/3) sigma_y (default) */
+  PLASTICITY_VONMISES_PLANE_STRAIN = 0,
+  /** plane stress (szz = 0): ellipsoid sigma_N^2/2 + 3/2 ||sigma_T||^2 <= sigma_y^2.
+      plasticity_2d_driver rewrites it once for all as a BALL problem with
+      sigma = D y, D = diag(sqrt(2), sqrt(2/3), sqrt(2/3)) (M_y = D M D, q_y = D q,
+      w_y = D w); the solvers called directly do not accept it. */
+  PLASTICITY_VONMISES_PLANE_STRESS = 1,
+  /** ball ||sigma|| <= sigma_y (plane stress in the scaled variables y) */
+  PLASTICITY_VONMISES_BALL = 2
+};
+
+typedef enum PlasticityVonMisesHypothesis PlasticityVonMisesHypothesis;
+
+/**
     Von Mises plasticity model parameters.
     This structure contains the model-specific parameters for Von Mises
     plasticity (J2 plasticity with associative flow rule).
@@ -93,6 +112,9 @@ struct Plasticity_VonMises_model {
   /** \f$ {\sigma_y} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of yield stresses
       (\f$ n_c = \f$ numberOfCones) */
   double* sigma_y;
+  /** yield set: plane strain cylinder (default), plane stress ellipsoid or ball. Not saved
+      by plasticity_printInFile. */
+  PlasticityVonMisesHypothesis hypothesis;
 };
 
 typedef struct Plasticity_VonMises_model Plasticity_VonMises_model;

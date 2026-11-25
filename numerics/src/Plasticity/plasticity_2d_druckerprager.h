@@ -5,10 +5,10 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 
-#ifndef PLASTICITY_2D_DRUCKERPRAGER_PROJECTION_H
-#define PLASTICITY_2D_DRUCKERPRAGER_PROJECTION_H
+#ifndef PLASTICITY_2D_DRUCKERPRAGER_H
+#define PLASTICITY_2D_DRUCKERPRAGER_H
 
-/*!\file plasticity_2d_druckerprager_projection.h
+/*!\file plasticity_2d_druckerprager.h
   \brief Projection local solvers for the Drucker-Prager (Mohr-Coulomb) model (one cone).
   The Von Mises local solvers are in plasticity_2d_vonmises.h.
 

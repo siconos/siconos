@@ -102,9 +102,26 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
       if (c && c[ic] != 0.0) r[0] += c[ic] / eta;
       plasticity_2d_unitary_compute_and_add_error(
           r, v, eta, problem->model.drucker_prager->theta[ic], error, worktmp);
-    } else
-      plasticity_2d_vonmises_unitary_compute_and_add_error(
-          r, v, problem->model.von_mises->sigma_y[ic], error, worktmp);
+    } else {
+      double sigma_y = problem->model.von_mises->sigma_y[ic];
+      PlasticityVonMisesHypothesis hypothesis = problem->model.von_mises->hypothesis;
+      if (hypothesis == PLASTICITY_VONMISES_PLANE_STRESS) {
+        /* error in the scaled variables y = D^{-1} sigma, w_y = D w,
+         * D = diag(sqrt2, sqrt(2/3), sqrt(2/3)): the ellipsoid becomes the ball */
+        const double c = sqrt(2.0 / 3.0);
+        r[0] *= M_SQRT1_2;
+        r[1] /= c;
+        r[2] /= c;
+        v[0] *= M_SQRT2;
+        v[1] *= c;
+        v[2] *= c;
+      }
+      if (hypothesis == PLASTICITY_VONMISES_PLANE_STRAIN)
+        plasticity_2d_vonmises_unitary_compute_and_add_error(r, v, sigma_y, error, worktmp);
+      else
+        plasticity_2d_vonmises_ball_unitary_compute_and_add_error(r, v, sigma_y, error,
+                                                                  worktmp);
+    }
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
   }
   *error = sqrt(*error);

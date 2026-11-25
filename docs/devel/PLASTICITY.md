@@ -12,7 +12,7 @@ coordinates.
 | `plasticity_2d_driver.c` | driver: Cartesian → cone change of variables, cohesion translation, trivial case, registry |
 | `plasticity_2d_stress_coordinates.{h,c}` | Cartesian ↔ cone maps of stresses, strain rates, M and problems |
 | `plasticity_2d_compute_error.{h,c}` | natural-map error (both models, cohesion, coordinates), `plasticity_2d_DruckerPrager_zero_is_solution` |
-| `plasticity_2d_druckerprager_projection.{h,c}` | Drucker–Prager projection local solvers |
+| `plasticity_2d_druckerprager.{h,c}` | Drucker–Prager projection local solvers |
 | `plasticity_2d_onecone_nonsmooth_Newton_solvers.c` | Drucker–Prager semi-smooth Newton local solvers |
 | `plasticity_2d_vonmises.{h,c}` | Von Mises domain, projection, error, return mapping, fixed point and semi-smooth Newton local solvers, their SolverOptions and registration |
 | `plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c` | NSGS (and generic NSGS) |
@@ -48,9 +48,6 @@ N/T indices. They come from the second-order cone of the Drucker–Prager model 
 notation shared with the solvers. The coordinates themselves do not depend on the model: the
 Von Mises yield set is a cylinder.
 
-The name "Jordan coordinates" would be misleading. In the second-order cone literature,
-x = (x0, x̄) comes from the Jordan algebra, but the "Jordan frame" refers to the spectral
-decomposition, which is a different thing.
 
 With w = M sigma + q (the strain rate, dual of the stress), the problem on each element is the
 variational inequality
@@ -94,26 +91,39 @@ with the same model parameters (eta, theta, cohesion, sigma_y) in cone coordinat
 
 ### Implementation: once and for all in the driver
 
-When `stress_coordinates != CONE`, `plasticity_2d_driver`:
+The driver performs a general change of variables s = T y on every element
+(`plasticity_2d_change_of_variables`), y being the unknown of the solved problem:
 
-1. builds M_c = P^{-T} M P^{-1} once (`plasticity_2d_matrix_to_cone`):
+    T = P^{-1} D,   M_y = T^T M T,   q_y = T^T q,   w_y = T^T w,
+
+with P the Cartesian → cone map (identity in cone coordinates) and D the plane stress
+Von Mises scaling (identity otherwise, see "Plane stress: the ball model" below). Both are
+composed into one 3x3 map, so M is transformed only once.
+
+When T != I, `plasticity_2d_driver`:
+
+1. builds M_y = T^T M T once (`plasticity_2d_matrix_change_of_variables`):
    * dense M: 3x3 blocks transformed in place in a copy;
    * sparse-block M with block sizes multiple of 3: each block of a copy is transformed, and
      the structure is kept;
    * otherwise (NM_SPARSE): products with sparse block-diagonal matrices, giving an NM_SPARSE
      result;
-2. computes q_c = P^{-T} q, and sigma_c = P s for the initial guess;
-3. solves the cone problem, a shallow copy of the problem that shares the model parameters, so
-   the cohesion translation and the trivial-case tests apply unchanged;
-4. maps the solution back: s = P^{-1} sigma_c, w_s = P^T w_c.
+2. computes q_y = T^T q, and y = T^{-1} s for the initial guess;
+3. solves the problem in y, a shallow copy of the problem that shares the model parameters
+   (with the plane stress hypothesis replaced by the ball), so the cohesion translation and
+   the trivial-case tests apply unchanged;
+4. maps the solution back: s = T y, w = T^{-T} w_y.
 
 The other entry points:
 
 * The solvers and local solvers are not changed.
-* `plasticity_2d_nsgs` called directly on a Cartesian problem returns an error (`info = 1`).
+* `plasticity_2d_nsgs` and `plasticity_2d_nsgs_generic` called directly on a Cartesian or
+  plane stress problem return an error (`info = 1`).
 * `plasticity_2d_compute_error` accepts both coordinates. It computes w = M s + q in the given
   coordinates, then the natural-map error element by element on (P s, P^{-T} w).
-* `plasticity_2d_problem_to_cone` returns a deep copy in cone coordinates.
+* `plasticity_2d_problem_to_cone` returns a deep copy in cone coordinates;
+  `plasticity_2d_problem_change_of_variables` returns a deep copy of the problem in y (the one
+  the driver solves).
 * `plasticity_printInFile` does not save the coordinates.
 
 ### Mechanical meaning in Cartesian coordinates
@@ -126,13 +136,11 @@ The other entry points:
   szz = (sxx + syy)/2, i.e. plane strain with incompressible (rigid-plastic) flow:
   * pure shear yields at sxy = sigma_y/sqrt3;
   * plane strain uniaxial loading yields at sxx − syy = 2 sigma_y/sqrt3.
-* **Not covered**:
-  * elasto-plastic plane strain with nu < 1/2, where szz is an independent unknown
-    (4 stress components);
-  * plane stress (szz = 0), where sigma_eq² = sigma_N²/2 + (3/2)||sigma_T||² is an ellipsoid.
-    A linear change of variables of the same kind, D = diag(sqrt2, sqrt(2/3), sqrt(2/3))
-    sigma_y, maps it to the unit ball, but this needs a ball model (projection and local
-    solvers).
+  This is the default hypothesis, `PLASTICITY_VONMISES_PLANE_STRAIN`.
+* **Von Mises, plane stress** (szz = 0, `PLASTICITY_VONMISES_PLANE_STRESS`): see "Plane
+  stress: the ball model" below.
+* **Not covered**: elasto-plastic plane strain with nu < 1/2, where szz is an independent
+  unknown (4 stress components).
 
 ## Drucker–Prager (Mohr–Coulomb)
 
@@ -184,8 +192,19 @@ and N_K(sigma) = N_{K_eta}(sigma~): sigma~ solves the problem without cohesion w
 
 ### Yield domain
 
-With the 3D J2 convention sigma_eq = sqrt(3/2) ||dev sigma||, the Von Mises domain is the
-cylinder
+`Plasticity_VonMises_model::hypothesis` (`PlasticityVonMisesHypothesis`) selects the yield set:
+
+| hypothesis | yield set in cone coordinates | meaning |
+|---|---|---|
+| `PLASTICITY_VONMISES_PLANE_STRAIN` (default) | cylinder ‖sigma_T‖ ≤ sqrt(2/3) sigma_y | plane strain, szz = (sxx + syy)/2 |
+| `PLASTICITY_VONMISES_PLANE_STRESS` | ellipsoid sigma_N²/2 + (3/2)‖sigma_T‖² ≤ sigma_y² | plane stress, szz = 0 |
+| `PLASTICITY_VONMISES_BALL` | ball ‖sigma‖ ≤ sigma_y | plane stress in the scaled variables |
+
+The rest of this section first describes the plane strain cylinder. The plane stress model is
+described after the iterative solvers.
+
+With the 3D J2 convention sigma_eq = sqrt(3/2) ||dev sigma||, the plane strain Von Mises domain
+is the cylinder
 
     C = { sigma : ||sigma_T|| <= R },   R = sqrt(2/3) sigma_y,
 
@@ -279,6 +298,56 @@ Default: 50 iterations, tol 1e-14.
   * `iparam[PLASTICITY_NSN_HYBRID_STRATEGY]`: any value other than `NO` (the default is one of
     them) falls back to the return mapping when the Newton method does not converge.
 
+### Plane stress: the ball model
+
+**Yield set.** In plane stress (szz = 0), with p = (sxx + syy)/2 and d = (sxx − syy)/2,
+
+    sigma_eq² = sxx² + syy² − sxx syy + 3 sxy² = p² + 3 (d² + sxy²)
+              = sigma_N²/2 + (3/2) ||sigma_T||²   <= sigma_y²
+
+This is an ellipsoid with semi-axes sqrt2 sigma_y along N and sqrt(2/3) sigma_y along T. The
+hydrostatic part is bounded:
+
+* equibiaxial tension sxx = syy = sigma_y is on the surface (sigma_N = −sqrt2 sigma_y);
+* uniaxial tension sxx = sigma_y is on the surface;
+* pure shear yields at sxy = sigma_y/sqrt3, as in plane strain.
+
+The flow is normal to the ellipsoid, so w_N ≠ 0: in plane stress the in-plane flow is not
+isochoric, because ezz is free.
+
+**Change of variables.** With
+
+    sigma = D y,   D = diag(sqrt2, sqrt(2/3), sqrt(2/3)),
+
+the ellipsoid becomes the ball ||y|| <= sigma_y (D does not depend on sigma_y, so it is the
+same for all the elements). The strain rate is mapped with the dual map, w_y = D w, so the
+power is preserved. The driver composes D with the Cartesian map (T = P^{-1} D), solves the
+problem in y with the hypothesis `PLASTICITY_VONMISES_BALL`, and maps the solution back. The
+solution of the problem is the same as with a projection on the ellipsoid in the
+sigma-metric: only the metric of the natural map changes (the error is measured in y).
+
+`plasticity_2d_compute_error` on a plane stress problem computes the error in y:
+y = D^{-1} sigma, w_y = D w, error of the ball.
+
+**Ball local solvers** (`plasticity_2d_vonmises.c`, selected by the hypothesis of the local
+problem, with the same solver ids as the cylinder):
+
+* projection: P_B(y) = y min(1, sigma_y/||y||) (`plasticity_2d_projectionOnVonMisesBall`);
+* return mapping (`plasticity_2d_vonMises_ball_return_mapping`):
+  * elastic trial y = −M^{-1} q;
+  * plastic case: (M + mu I) y = −q with ||y|| = sigma_y, mu = lambda/sigma_y > 0;
+  * the scalar equation 1/||y(mu)|| = 1/sigma_y is solved by the same safeguarded Newton as
+    for the cylinder (`vonmises_shifted_norm_equation`, here in dimension 3 and without the
+    Schur complement on N);
+  * this is the classical plane stress closest-point return mapping, in the M-metric;
+* fixed point and semi-smooth Newton on the natural map
+  (`Plasticity2DVonMisesLocalParameters::ball = 1`): J_P = I inside the ball and
+  (sigma_y/||y||)(I − u u^T), u = y/||y||, outside;
+* one projection step (`PLASTICITY_2D_ONECONE_ProjectionOnCone`): y <- P_B(y − rho w),
+  rho = 1/M_NN.
+
+MixedProblems Von Mises blocks are plane strain only.
+
 ## NSGS and local solvers (`plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c`)
 
 | internal solver id | Drucker–Prager | Von Mises |
@@ -306,6 +375,11 @@ of the NSGS work for both models. MixedProblems Von Mises blocks use the return 
   `test_plasticity_2d_nsgs_generic` did not check the result. The adapter also printed every
   iteration (`verbose = 2` hard coded); it now follows the numerics verbosity.
 * `plasticity_2d_compute_error` rejected the Von Mises model.
+* (2026-11-25) The final full-error test of the NSGS (`LIGHT_WITH_FULL_FINAL`, the default)
+  compared the error with the incremental tolerance, which the loop may have lowered, instead
+  of the required tolerance. The NSGS then returned `info = 1` with a residual below the
+  tolerance (seen with the one-step projection local solver on the plane stress problems). The
+  friction and rolling-friction NSGS already used `SOLVER_TOL(options)`.
 * Trivial-solution tests (the driver and the Newton local solver) returned sigma = 0 whenever
   q_N >= 0; see the correct conditions above.
   * With the default Newton local solver, the NSGS stalled on
@@ -345,12 +419,29 @@ of the NSGS work for both models. MixedProblems Von Mises blocks use the return 
     * `plasticity_2d_problem_to_cone` gives back the cone problem;
   * footing problem rewritten in Voigt coordinates: same solution (relative difference 5e-11
     at tolerance 1e-12) and same number of iterations.
+* `plasticity_2d_plane_stress_test`:
+  * ball local solvers on 1000 pseudo-random non-symmetric local problems (959 plastic):
+    * the return mapping has a residual < 4e-16;
+    * the fixed point (adaptive rho, 22 iterations on average) and the semi-smooth Newton
+      (3.4 iterations) agree with it to ~5e-14;
+  * manufactured solutions (the plane stress formula and its gradient are written again in
+    the test, in Voigt, Mandel and cone coordinates):
+    * target stresses: uniaxial tension and compression, equibiaxial tension and compression,
+      pure shear, random points of the yield surface, an interior point;
+    * a coupled non-symmetric M with a positive definite symmetric part, and
+      q = −M s − lambda grad(f²/2)(s), so that the solution is unique and equal to s;
+    * dense, sparse-block and sparse M; default, return mapping, fixed point and one-step
+      projection local solvers;
+    * results: the solution equals s (~1e-16), sigma_eq = sigma_y on the plastic elements,
+      and `plasticity_2d_compute_error` gives ~1e-15;
+  * `plasticity_2d_problem_change_of_variables`: the ball problem gives s = T y.
 * MixedProblems: `mixed_problem_mohr_coulomb_test` (coupled cones with cohesion, mixed NSGS
   vs Plasticity NSGS).
 
 ## Known problems
 
 * `plasticity_2d_footing_10.dat` is in an old format (no model type line) and cannot be read.
-* Neither the cohesion nor the stress coordinates are saved in the data files.
-* Not covered: plane stress Von Mises (needs a ball model) and elasto-plastic plane strain with
-  szz as an unknown.
+* Neither the cohesion, the stress coordinates nor the Von Mises hypothesis are saved in the
+  data files.
+* Not covered: elasto-plastic plane strain with szz as an unknown; plane stress in
+  MixedProblems.

@@ -55,6 +55,23 @@ int plasticity_2d_projectionOnVonMises(double stress[3], double sigma_y) {
   return 0;
 }
 
+int plasticity_2d_projectionOnVonMisesBall(double stress[3], double sigma_y) {
+  double n = sqrt(stress[0] * stress[0] + stress[1] * stress[1] + stress[2] * stress[2]);
+  if (n <= sigma_y) return 1;
+  double scale = (sigma_y > 0.0) ? sigma_y / n : 0.0;
+  for (int i = 0; i < 3; i++) stress[i] *= scale;
+  return 0;
+}
+
+void plasticity_2d_vonmises_ball_unitary_compute_and_add_error(const double r[3],
+                                                               const double u[3],
+                                                               double sigma_y, double* error,
+                                                               double worktmp[3]) {
+  for (int i = 0; i < 3; i++) worktmp[i] = r[i] - u[i];
+  plasticity_2d_projectionOnVonMisesBall(worktmp, sigma_y);
+  for (int i = 0; i < 3; i++) *error += (r[i] - worktmp[i]) * (r[i] - worktmp[i]);
+}
+
 void plasticity_2d_vonmises_unitary_compute_and_add_error(const double r[3], const double u[3],
                                                           double sigma_y, double* error,
                                                           double worktmp[3]) {
@@ -71,6 +88,82 @@ static int vonmises_solve2(const double S[4], double mu, const double b[2], doub
   x[0] = -(d * b[0] - S[2] * b[1]) / det;
   x[1] = -(-S[1] * b[0] + a * b[1]) / det;
   return 0;
+}
+
+/* x = -(S + mu I)^{-1} b, S (dim x dim, column-major), dim = 2 or 3 */
+static int vonmises_shifted_solve(int dim, const double* S, double mu, const double* b,
+                                  double* x) {
+  if (dim == 2) return vonmises_solve2(S, mu, b, x);
+  double A[9];
+  for (int i = 0; i < 9; i++) A[i] = S[i];
+  A[0] += mu;
+  A[4] += mu;
+  A[8] += mu;
+  for (int i = 0; i < 3; i++) x[i] = -b[i];
+  return solve_3x3_gepp(A, x) ? 1 : 0;
+}
+
+static double vonmises_normd(int dim, const double* x) {
+  double s = 0.0;
+  for (int i = 0; i < dim; i++) s += x[i] * x[i];
+  return sqrt(s);
+}
+
+/* Plastic case of the return mapping on the ball of radius R > 0 of R^dim: x on input is the
+ * elastic trial -S^{-1} b with ||x|| > R; on output x(mu) = -(S + mu I)^{-1} b with mu > 0
+ * and ||x|| = R. g(mu) = 1/||x(mu)|| - 1/R is increasing (and concave for a symmetric S):
+ * Newton from the left of the root, safeguarded by bisection on the bracket [lo, hi].
+ * Returns 0, 1 (singular shifted matrix) or 2 (solved to ~1e3 eps only). */
+static int vonmises_shifted_norm_equation(int dim, const double* S, const double* b, double R,
+                                          double* x) {
+  int status = 0;
+  double nx = vonmises_normd(dim, x);
+  double lo = 0.0, hi = vonmises_normd(dim, b) / R;
+  double xt[3];
+  int k = 0;
+  /* ||x(mu)|| <= ||b|| / mu when the symmetric part of S is positive semi-definite; in
+   * general, enlarge hi until ||x(hi)|| <= R */
+  while (k++ < 100 &&
+         (vonmises_shifted_solve(dim, S, hi, b, xt) || vonmises_normd(dim, xt) > R)) {
+    lo = hi;
+    hi *= 2.0;
+  }
+  double mu = lo;
+  double f = nx - R;
+  for (int it = 0; it < 100; it++) {
+    if (vonmises_shifted_solve(dim, S, mu, b, x)) {
+      status = 1;
+      break;
+    }
+    nx = vonmises_normd(dim, x);
+    f = nx - R;
+    DEBUG_PRINTF("  it %d, mu = %.17e, ||x|| - R = %e\n", it, mu, f);
+    if (fabs(f) <= 4.0 * DBL_EPSILON * R) break;
+    if (f > 0.0)
+      lo = mu;
+    else
+      hi = mu;
+    if (hi - lo <= 2.0 * DBL_EPSILON * hi) break;
+    /* Newton step on g: dx/dmu = -(S + mu I)^{-1} x */
+    double dx[3];
+    if (vonmises_shifted_solve(dim, S, mu, x, dx)) {
+      mu = 0.5 * (lo + hi);
+      continue;
+    }
+    double dnx = 0.0; /* d||x||/dmu */
+    for (int i = 0; i < dim; i++) dnx += x[i] * dx[i];
+    dnx /= nx;
+    double g = 1.0 / nx - 1.0 / R, dg = -dnx / (nx * nx);
+    double mu_new = (dg != 0.0) ? mu - g / dg : 0.5 * (lo + hi);
+    if (!(mu_new > lo && mu_new < hi)) mu_new = 0.5 * (lo + hi);
+    mu = mu_new;
+  }
+  if (status == 0 && fabs(f) > 1e3 * DBL_EPSILON * R) status = 2;
+  /* on the yield surface */
+  nx = vonmises_normd(dim, x);
+  if (nx > 0.0)
+    for (int i = 0; i < dim; i++) x[i] *= R / nx;
+  return status;
 }
 
 int plasticity_2d_vonMises_return_mapping(const double M[9], const double q[3], double sigma_y,
@@ -97,56 +190,29 @@ int plasticity_2d_vonMises_return_mapping(const double M[9], const double q[3], 
     if (R <= 0.0) {
       x[0] = x[1] = 0.0;
     } else {
-      /* plastic: find mu > 0 with ||x(mu)|| = R, x(mu) = -(S + mu I)^{-1} q~.
-       * g(mu) = 1/||x(mu)|| - 1/R is increasing (and concave for a symmetric S): Newton from
-       * the left of the root, safeguarded by bisection on the bracket [lo, hi]. */
-      double lo = 0.0, hi = hypot(qt[0], qt[1]) / R;
-      double xt[2];
-      int k = 0;
-      /* ||x(mu)|| <= ||q~|| / mu when the symmetric part of S is positive semi-definite; in
-       * general, enlarge hi until ||x(hi)|| <= R */
-      while (k++ < 100 && (vonmises_solve2(S, hi, qt, xt) || hypot(xt[0], xt[1]) > R)) {
-        lo = hi;
-        hi *= 2.0;
-      }
-      double mu = lo;
-      double f = nx - R;
-      for (int it = 0; it < 100; it++) {
-        if (vonmises_solve2(S, mu, qt, x)) {
-          status = 1;
-          break;
-        }
-        nx = hypot(x[0], x[1]);
-        f = nx - R;
-        DEBUG_PRINTF("  it %d, mu = %.17e, ||x|| - R = %e\n", it, mu, f);
-        if (fabs(f) <= 4.0 * DBL_EPSILON * R) break;
-        if (f > 0.0)
-          lo = mu;
-        else
-          hi = mu;
-        if (hi - lo <= 2.0 * DBL_EPSILON * hi) break;
-        /* Newton step on g: dx/dmu = -(S + mu I)^{-1} x */
-        double dx[2];
-        vonmises_solve2(S, mu, x, dx);
-        double dnx = (x[0] * dx[0] + x[1] * dx[1]) / nx; /* d||x||/dmu */
-        double g = 1.0 / nx - 1.0 / R, dg = -dnx / (nx * nx);
-        double mu_new = (dg != 0.0) ? mu - g / dg : 0.5 * (lo + hi);
-        if (!(mu_new > lo && mu_new < hi)) mu_new = 0.5 * (lo + hi);
-        mu = mu_new;
-      }
-      if (status == 0 && fabs(f) > 1e3 * DBL_EPSILON * R) status = 2;
-      /* on the yield surface */
-      nx = hypot(x[0], x[1]);
-      if (nx > 0.0) {
-        x[0] *= R / nx;
-        x[1] *= R / nx;
-      }
+      status = vonmises_shifted_norm_equation(2, S, qt, R, x);
     }
   }
   stress[1] = x[0];
   stress[2] = x[1];
   /* w_N = 0 */
   stress[0] = -(q[0] + mNT[0] * x[0] + mNT[1] * x[1]) / m;
+  return status;
+}
+
+int plasticity_2d_vonMises_ball_return_mapping(const double M[9], const double q[3],
+                                               double sigma_y, double stress[3]) {
+  double x[3];
+  /* elastic trial: M x = -q */
+  if (vonmises_shifted_solve(3, M, 0.0, q, x)) return 1;
+  int status = 0;
+  if (vonmises_normd(3, x) > sigma_y) {
+    if (sigma_y <= 0.0)
+      x[0] = x[1] = x[2] = 0.0;
+    else
+      status = vonmises_shifted_norm_equation(3, M, q, sigma_y, x);
+  }
+  for (int i = 0; i < 3; i++) stress[i] = x[i];
   return status;
 }
 
@@ -188,13 +254,22 @@ static double vonmises_default_rho(const double M[9]) {
   return (n2 > 0.0) ? 1.0 / n2 : 1.0;
 }
 
+/* projection on the cylinder (plane strain) or on the ball */
+static void vonmises_project(int ball, double s[3], double sigma_y) {
+  if (ball)
+    plasticity_2d_projectionOnVonMisesBall(s, sigma_y);
+  else
+    plasticity_2d_projectionOnVonMises(s, sigma_y);
+}
+
 /* Phi = s - P_C(s - rho w); returns |Phi|, y = s - rho w (before projection) */
-static double vonmises_natural_map(const double M[9], const double q[3], double sigma_y,
-                                   double rho, const double s[3], double Phi[3], double y[3]) {
+static double vonmises_natural_map(int ball, const double M[9], const double q[3],
+                                   double sigma_y, double rho, const double s[3],
+                                   double Phi[3], double y[3]) {
   double w[3];
   vonmises_w(M, q, s, w);
   for (int i = 0; i < 3; i++) Phi[i] = y[i] = s[i] - rho * w[i];
-  plasticity_2d_projectionOnVonMises(Phi, sigma_y);
+  vonmises_project(ball, Phi, sigma_y);
   for (int i = 0; i < 3; i++) Phi[i] = s[i] - Phi[i];
   return vonmises_norm3(Phi);
 }
@@ -203,7 +278,13 @@ double plasticity_2d_vonMises_natural_map_residual(const double M[9], const doub
                                                    double sigma_y, double rho,
                                                    const double stress[3]) {
   double Phi[3], y[3];
-  return vonmises_natural_map(M, q, sigma_y, rho, stress, Phi, y);
+  return vonmises_natural_map(0, M, q, sigma_y, rho, stress, Phi, y);
+}
+
+static double vonmises_residual(int ball, const double M[9], const double q[3], double sigma_y,
+                                double rho, const double stress[3]) {
+  double Phi[3], y[3];
+  return vonmises_natural_map(ball, M, q, sigma_y, rho, stress, Phi, y);
 }
 
 int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], double sigma_y,
@@ -217,7 +298,7 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
   int adaptive = (p->rho_strategy == PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE);
   int ls_max = (p->linesearch_max_iter > 0) ? p->linesearch_max_iter : 10;
 
-  double res = plasticity_2d_vonMises_natural_map_residual(M, q, sigma_y, rho0, stress);
+  double res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
   int it = 0;
   while (res > p->tol * (1.0 + vonmises_norm3(stress)) && it < p->max_iter) {
     it++;
@@ -231,7 +312,7 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
         rho_k *= tau;
         double w_new[3], dw[3], ds[3];
         for (int i = 0; i < 3; i++) s_new[i] = stress[i] - rho_k * w[i];
-        plasticity_2d_projectionOnVonMises(s_new, sigma_y);
+        vonmises_project(p->ball, s_new, sigma_y);
         vonmises_w(M, q, s_new, w_new);
         for (int i = 0; i < 3; i++) {
           dw[i] = w_new[i] - w[i];
@@ -244,10 +325,10 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
       rho = (rho_k * a1 < Lmin * a2) ? rho_k * tauinv : rho_k;
     } else {
       for (int i = 0; i < 3; i++) s_new[i] = stress[i] - rho * w[i];
-      plasticity_2d_projectionOnVonMises(s_new, sigma_y);
+      vonmises_project(p->ball, s_new, sigma_y);
     }
     for (int i = 0; i < 3; i++) stress[i] = s_new[i];
-    res = plasticity_2d_vonMises_natural_map_residual(M, q, sigma_y, rho0, stress);
+    res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
     DEBUG_PRINTF("Von Mises FP: it %d, rho = %e, residual = %e\n", it, rho, res);
   }
   p->iter_done = it;
@@ -255,8 +336,23 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
   return (res > p->tol * (1.0 + vonmises_norm3(stress))) ? 1 : 0;
 }
 
-/* generalized Jacobian of the projection on C at y */
-static void vonmises_projection_jacobian(const double y[3], double sigma_y, double J[9]) {
+/* generalized Jacobian of the projection on C at y (column-major) */
+static void vonmises_projection_jacobian(int ball, const double y[3], double sigma_y,
+                                         double J[9]) {
+  if (ball) {
+    double n = vonmises_norm3(y);
+    for (int i = 0; i < 9; i++) J[i] = 0.0;
+    if (n <= sigma_y) {
+      J[0] = J[4] = J[8] = 1.0;
+    } else {
+      /* (r/||y||) (I - u u^T), u = y/||y|| */
+      double f = sigma_y / n;
+      for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+          J[i + 3 * j] = f * ((i == j ? 1.0 : 0.0) - y[i] * y[j] / (n * n));
+    }
+    return;
+  }
   double R = plasticity_2d_vonMises_radius(sigma_y);
   double nT = hypot(y[1], y[2]);
   for (int i = 0; i < 9; i++) J[i] = 0.0;
@@ -281,14 +377,14 @@ int plasticity_2d_vonMises_semismooth_newton(const double M[9], const double q[3
   int ls_max = (p->linesearch_max_iter > 0) ? p->linesearch_max_iter : 20;
 
   double Phi[3], y[3];
-  double res = plasticity_2d_vonMises_natural_map_residual(M, q, sigma_y, rho0, stress);
+  double res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
   int it = 0;
   while (res > p->tol * (1.0 + vonmises_norm3(stress)) && it < p->max_iter) {
     it++;
-    double nPhi = vonmises_natural_map(M, q, sigma_y, rho, stress, Phi, y);
+    double nPhi = vonmises_natural_map(p->ball, M, q, sigma_y, rho, stress, Phi, y);
     /* H = I - J_P(y) (I - rho M) */
     double J[9], A[9], H[9];
-    vonmises_projection_jacobian(y, sigma_y, J);
+    vonmises_projection_jacobian(p->ball, y, sigma_y, J);
     for (int i = 0; i < 9; i++) A[i] = -rho * M[i];
     A[0] += 1.0;
     A[4] += 1.0;
@@ -309,7 +405,7 @@ int plasticity_2d_vonMises_semismooth_newton(const double M[9], const double q[3
     if (p->linesearch == PLASTICITY_NSN_LINESEARCH_ARMIJO) {
       for (int ls = 0; ls < ls_max; ls++) {
         for (int i = 0; i < 3; i++) st[i] = stress[i] + t * d[i];
-        double nt = vonmises_natural_map(M, q, sigma_y, rho, st, Phit, yt);
+        double nt = vonmises_natural_map(p->ball, M, q, sigma_y, rho, st, Phit, yt);
         if (0.5 * nt * nt <= m0 + 1e-4 * t * slope) break;
         t *= 0.5;
       }
@@ -319,7 +415,7 @@ int plasticity_2d_vonMises_semismooth_newton(const double M[9], const double q[3
       double tl = 0.0, tu = INFINITY;
       for (int ls = 0; ls < ls_max; ls++) {
         for (int i = 0; i < 3; i++) st[i] = stress[i] + t * d[i];
-        double nt = vonmises_natural_map(M, q, sigma_y, rho, st, Phit, yt);
+        double nt = vonmises_natural_map(p->ball, M, q, sigma_y, rho, st, Phit, yt);
         double mt = 0.5 * nt * nt;
         if (mt > m0 + c * t * slope)
           tu = t;
@@ -331,14 +427,17 @@ int plasticity_2d_vonMises_semismooth_newton(const double M[9], const double q[3
       }
     }
     for (int i = 0; i < 3; i++) stress[i] += t * d[i];
-    res = plasticity_2d_vonMises_natural_map_residual(M, q, sigma_y, rho0, stress);
+    res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
     DEBUG_PRINTF("Von Mises NSN: it %d, t = %e, residual = %e\n", it, t, res);
   }
   p->iter_done = it;
   if (res > p->tol * (1.0 + vonmises_norm3(stress)) && p->hybrid) {
     DEBUG_PRINT("Von Mises NSN: fall back to the return mapping\n");
-    plasticity_2d_vonMises_return_mapping(M, q, sigma_y, stress);
-    res = plasticity_2d_vonMises_natural_map_residual(M, q, sigma_y, rho0, stress);
+    if (p->ball)
+      plasticity_2d_vonMises_ball_return_mapping(M, q, sigma_y, stress);
+    else
+      plasticity_2d_vonMises_return_mapping(M, q, sigma_y, stress);
+    res = vonmises_residual(p->ball, M, q, sigma_y, rho0, stress);
   }
   p->residual = res;
   return (res > p->tol * (1.0 + vonmises_norm3(stress))) ? 1 : 0;
@@ -356,28 +455,33 @@ int plasticity_2d_projectionOnVonMises_solve(PlasticityProblem* localproblem,
   double* qLocal = localproblem->q;
   double sigma_y = localproblem->model.von_mises->sigma_y[0];
   double rho = 1.0 / MLocal[0];
+  int ball = (localproblem->model.von_mises->hypothesis == PLASTICITY_VONMISES_BALL);
   double w[3];
   for (int i = 0; i < 3; i++)
     w[i] = qLocal[i] + MLocal[i] * stress_local[0] + MLocal[i + 3] * stress_local[1] +
            MLocal[i + 6] * stress_local[2];
   for (int i = 0; i < 3; i++) stress_local[i] -= rho * w[i];
-  plasticity_2d_projectionOnVonMises(stress_local, sigma_y);
+  vonmises_project(ball, stress_local, sigma_y);
   return 0;
 }
 
 int plasticity_2d_vonMises_return_mapping_solve(PlasticityProblem* localproblem,
                                                 double* stress_local, SolverOptions* options) {
-  int status = plasticity_2d_vonMises_return_mapping(localproblem->M->dense, localproblem->q,
-                                                     localproblem->model.von_mises->sigma_y[0],
-                                                     stress_local);
+  double sigma_y = localproblem->model.von_mises->sigma_y[0];
+  int status = (localproblem->model.von_mises->hypothesis == PLASTICITY_VONMISES_BALL)
+                   ? plasticity_2d_vonMises_ball_return_mapping(
+                         localproblem->M->dense, localproblem->q, sigma_y, stress_local)
+                   : plasticity_2d_vonMises_return_mapping(
+                         localproblem->M->dense, localproblem->q, sigma_y, stress_local);
   if (options) SET_SOLVER_ITER_DONE(options, 1);
   /* status 2: scalar equation solved to ~1e3 eps only, the solution is still usable */
   return (status == 1) ? 1 : 0;
 }
 
 /* parameters of the iterative Von Mises local solvers from the local solver options */
-static void vonmises_parameters(SolverOptions* options,
+static void vonmises_parameters(PlasticityProblem* localproblem, SolverOptions* options,
                                 Plasticity2DVonMisesLocalParameters* p) {
+  p->ball = (localproblem->model.von_mises->hypothesis == PLASTICITY_VONMISES_BALL);
   p->max_iter = SOLVER_MAX_ITER(options);
   p->tol = SOLVER_TOL(options);
   p->rho_strategy = options->iparam[PLASTICITY_NSN_RHO_STRATEGY];
@@ -393,7 +497,7 @@ static void vonmises_parameters(SolverOptions* options,
 int plasticity_2d_vonMises_fixed_point_solve(PlasticityProblem* localproblem,
                                              double* stress_local, SolverOptions* options) {
   Plasticity2DVonMisesLocalParameters p;
-  vonmises_parameters(options, &p);
+  vonmises_parameters(localproblem, options, &p);
   int info = plasticity_2d_vonMises_fixed_point(localproblem->M->dense, localproblem->q,
                                                 localproblem->model.von_mises->sigma_y[0],
                                                 stress_local, &p);
@@ -405,7 +509,7 @@ int plasticity_2d_vonMises_fixed_point_solve(PlasticityProblem* localproblem,
 int plasticity_2d_vonMises_nsn_solve(PlasticityProblem* localproblem, double* stress_local,
                                      SolverOptions* options) {
   Plasticity2DVonMisesLocalParameters p;
-  vonmises_parameters(options, &p);
+  vonmises_parameters(localproblem, options, &p);
   int info = plasticity_2d_vonMises_semismooth_newton(
       localproblem->M->dense, localproblem->q, localproblem->model.von_mises->sigma_y[0],
       stress_local, &p);
