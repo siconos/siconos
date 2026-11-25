@@ -60,10 +60,14 @@ class CopyVisitor:
     def __init__(self, time_filter=None, object_filter=None, attr_filter=None):
         self.time_filter = None
         if time_filter is not None:
-            self.time_filter = np.vectorize(time_filter)
+            self.time_filter = np.vectorize(time_filter, otypes=[bool])
         self.object_filter = object_filter
         self.time_idx = None
+        self.times = None
         self.excluded_objects = None
+        self.excluded_names = []
+        # rows of the input kept in each table that has a step index
+        self.kept = {}
 
         def copy_attrs(obj_to, obj_from):
             for a in obj_from.attrs:
@@ -76,6 +80,11 @@ class CopyVisitor:
 
         self.copy_attrs = copy_attrs
 
+    def kept_steps(self, index):
+        """Steps (t, first_row, n_rows) of a step index whose time is kept."""
+        steps = index[:]
+        return steps[np.isin(steps[:, 0].astype(self.times.dtype), self.times)]
+
     def visitor(self, path, obj):
         gr = io_out
         names = path.split("/")
@@ -84,10 +93,11 @@ class CopyVisitor:
         if self.excluded_objects is None and self.object_filter is not None:
             if self.object_filter is not None:
                 inp = obj.file["data/input"]
+                self.excluded_names = [
+                    name for name, x in inp.items() if not self.object_filter(name, x)
+                ]
                 self.excluded_objects = [
-                    x.attrs["id"]
-                    for name, x in inp.items()
-                    if not self.object_filter(name, x)
+                    inp[name].attrs["id"] for name in self.excluded_names
                 ]
                 print(f"Excluding object IDs {self.excluded_objects}")
 
@@ -98,6 +108,16 @@ class CopyVisitor:
             else:
                 id = obj.attrs["id"]
             if id in self.excluded_objects:
+                return
+
+        # Joints, permanent interactions, boundary conditions and external
+        # functions that name an excluded object are not copied either
+        for ref in ("object1", "object2", "body1_name", "body2_name", "body_name"):
+            value = obj.attrs.get(ref)
+            if isinstance(value, bytes):
+                value = value.decode()
+            if value is not None and value in self.excluded_names:
+                print(f'Excluding "{path}" ({ref} = {value})')
                 return
 
         # Get indexes of filtered times in data/dynamic
@@ -131,23 +151,44 @@ class CopyVisitor:
             shape = obj.shape
             time_idx = None
 
+            # Tables with a step index (data/step_index/<table>)
+            name = path[len("data/") :]
+            index = None
+            if path.startswith("data/") and "/" not in name:
+                index = io_in.get("data/step_index/" + name)
+
             # Filter current indexes
-            if path in ["data/cf", "data/dynamic", "data/velocities", "data/static"]:
+            tables = ["data/cf", "data/dynamic", "data/velocities", "data/static"]
+            # columns of the objects of a row: ds_id, in cf and cf_info: ds1, ds2
+            objects = {table: slice(1, 2) for table in tables}
+            objects.update({"data/cf": slice(-2, None), "data/cf_info": slice(2, 4)})
+            if index is not None or path in objects:
                 if self.time_idx is not None:
                     # Get indexes of corresponding times in current dataset
-                    if path == "data/dynamic":
+                    if index is not None:
+                        # rows of the kept steps, also for the tables without time column
+                        steps = self.kept_steps(index)[:, 1:].astype(np.int64)
+                        time_idx = np.concatenate(
+                            [np.empty(0, np.int64)]
+                            + [np.arange(first, first + n) for first, n in steps]
+                        )
+                    elif path == "data/dynamic":
                         time_idx = self.time_idx
-                    # Time-filter all but static objects
-                    elif path != "data/static":
-                        time_idx = np.in1d(obj[:, 0], self.times).nonzero()[0]
+                    # Time-filter cf and velocities (static objects are not)
+                    elif path in ["data/cf", "data/velocities"]:
+                        time_idx = np.isin(obj[:, 0], self.times).nonzero()[0]
 
                 # Additionally remove any lines referencing excluded objects
-                if self.excluded_objects is not None:
-                    exclude = np.vectorize(lambda i: i in self.excluded_objects)
-                    ex_idx = exclude(obj[:, 1]).nonzero()[0]
+                if self.excluded_objects is not None and path in objects:
+                    ids = obj[:, objects[path]]
+                    excluded = np.isin(ids, self.excluded_objects).any(axis=1)
+                    ex_idx = excluded.nonzero()[0]
                     if time_idx is None:
                         time_idx = np.arange(obj.shape[0])
                     time_idx = np.setdiff1d(time_idx, ex_idx)
+
+                if index is not None and time_idx is not None:
+                    self.kept[name] = time_idx
 
             # Shape of filtered dataset
             if time_idx is not None:
@@ -158,9 +199,13 @@ class CopyVisitor:
             comp = (obj.compression is True or args.gzip) and chunks is not None
             if comp:
                 chunks = (4000,) + tuple(obj.shape[1:])
+            # --single: floats only, the step index (row numbers) stays f8
+            dtype = obj.dtype
+            if args.single and dtype.kind == "f" and "data/step_index/" not in path:
+                dtype = np.dtype("f4")
             ds = gr.create_dataset(
                 obj.name,
-                dtype=[obj.dtype, "f4"][args.single],
+                dtype=dtype,
                 shape=shape,
                 maxshape=obj.maxshape,
                 chunks=chunks,
@@ -172,7 +217,9 @@ class CopyVisitor:
             self.copy_attrs(ds, obj)
 
             # Copy the filtered or unfiltered dataset
-            if time_idx is not None:
+            if obj.shape == ():  # scalar datasets: /format, data/script/source
+                ds[()] = obj[()]
+            elif time_idx is not None:
                 if len(time_idx) == 0:
                     pass
                 elif len(time_idx) == 1:
@@ -191,6 +238,19 @@ class CopyVisitor:
 
         else:
             print(f'Unknown type "{path}": {obj.__class__!s}')
+
+    def rebuild_step_index(self):
+        """After the copy: data/step_index/<table> of the output for the rows kept in <table>."""
+        for name, rows in self.kept.items():
+            steps = self.kept_steps(io_in["data/step_index/" + name])
+            first = steps[:, 1].astype(np.int64)
+            end = first + steps[:, 2].astype(np.int64)
+            n_rows = np.searchsorted(rows, end) - np.searchsorted(rows, first)
+            index = io_out["data/step_index/" + name]
+            index.resize(len(steps), 0)
+            index[:] = np.column_stack(
+                [steps[:, 0], np.cumsum(n_rows) - n_rows, n_rows]
+            )
 
 
 if __name__ == "__main__":
@@ -258,11 +318,24 @@ if __name__ == "__main__":
                     return v
 
     with h5py.File(args.fns_in[0], mode="r") as io_in:
-        with h5py.File(args.fn_out[0], mode="w") as io_out:
-            io_in.visititems(
-                CopyVisitor(
-                    time_filter=TimeFilter(),
-                    object_filter=lambda name, obj: not re_exclude(name),
-                    attr_filter=args.attr and AttrFilter(args.attr),
-                ).visitor
+        # a file without version attributes is a v1.0 file
+        version = (
+            io_in.attrs.get("version_major", 1),
+            io_in.attrs.get("version_minor", 0),
+        )
+        if version[0] != 1:
+            print(
+                f'"{args.fns_in[0]}": format version {version[0]}.{version[1]}, only v1 is filtered'
             )
+            sys.exit(1)
+        with h5py.File(args.fn_out[0], mode="w") as io_out:
+            # attributes of the file: version_major, version_minor, dimension
+            for a in io_in.attrs:
+                io_out.attrs[a] = io_in.attrs[a]
+            visitor = CopyVisitor(
+                time_filter=TimeFilter(),
+                object_filter=lambda name, obj: not re_exclude(name),
+                attr_filter=args.attr and AttrFilter(args.attr),
+            )
+            io_in.visititems(visitor.visitor)
+            visitor.rebuild_step_index()
