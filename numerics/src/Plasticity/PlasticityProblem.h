@@ -34,13 +34,19 @@ typedef enum PlasticityModelType PlasticityModelType;
     The solvers work in cone coordinates sigma_c = (sigma_N, sigma_T1, sigma_T2), with
     sigma_N = -(sxx + syy)/sqrt(2) (compression positive), sigma_T1 = (sxx - syy)/sqrt(2),
     sigma_T2 = sqrt(2) sxy (orthonormal basis of the 2x2 symmetric tensors).
+    In mechanics terms these are hydrostatic-deviatoric coordinates: sigma_N is the
+    hydrostatic (spherical) part, (sigma_T1, sigma_T2) the components of the deviator; the
+    basis is the 2D Cartesian form of the Haigh-Westergaard frame. The name "cone" comes from
+    the second-order cone of the Drucker-Prager model (N/T as in friction); the coordinates
+    themselves do not depend on the model (the Von Mises yield set is a cylinder).
     With Cartesian coordinates, sigma_c = P s on each element and the strain rate is mapped
     with the dual map, w_c = P^{-T} w_s (the power s.w_s = sigma_c.w_c is preserved):
     plasticity_2d_driver solves once for all the problem in cone coordinates,
     M_c = P^{-T} M P^{-1}, q_c = P^{-T} q, and maps the solution back.
 */
 enum PlasticityStressCoordinates {
-  /** cone coordinates (sigma_N, sigma_T1, sigma_T2) (default) */
+  /** cone coordinates (sigma_N, sigma_T1, sigma_T2), i.e. hydrostatic-deviatoric
+      coordinates (default) */
   PLASTICITY_STRESS_COORDINATES_CONE = 0,
   /** Cartesian, Mandel notation: s = (sxx, syy, sqrt(2) sxy), w = (exx, eyy, sqrt(2) exy);
       P is orthogonal (M_c = P M P^T) */

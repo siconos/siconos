@@ -21,7 +21,9 @@
 /*!\file plasticity_2d_stress_coordinates.h
   Change of variables between Cartesian stresses and the cone coordinates used by the
   Plasticity solvers (see PlasticityStressCoordinates and
-  docs/devel/PLASTICITY.md).
+  docs/devel/PLASTICITY.md). Cone coordinates are hydrostatic-deviatoric coordinates:
+  sigma_N = -(sxx + syy)/sqrt2 is the hydrostatic part (compression positive),
+  (sigma_T1, sigma_T2) = ((sxx - syy)/sqrt2, sqrt2 sxy) the deviator.
 
   On each element, sigma_c = P s and w_c = P^{-T} w_s, with (Mandel notation, P orthogonal)
 

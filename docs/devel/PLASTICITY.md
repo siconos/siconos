@@ -36,6 +36,22 @@ so that:
 * ||sigma_T|| = ||dev sigma|| (the in-plane deviator) = sqrt2 × (radius of the Mohr circle);
 * sigma_N = −sqrt2 × (in-plane mean stress).
 
+In mechanics terms, cone coordinates are **hydrostatic–deviatoric coordinates**:
+
+* sigma_N is the hydrostatic (spherical) part of the stress;
+* (sigma_T1, sigma_T2) are the components of the deviator in an orthonormal basis;
+* the basis is the 2D Cartesian form of the Haigh–Westergaard frame. The Haigh–Westergaard
+  (or Lode) coordinates (xi, rho, theta) are its cylindrical version.
+
+The code keeps the name "cone" (`PLASTICITY_STRESS_COORDINATES_CONE`, `*_to_cone`) and the
+N/T indices. They come from the second-order cone of the Drucker–Prager model and the friction
+notation shared with the solvers. The coordinates themselves do not depend on the model: the
+Von Mises yield set is a cylinder.
+
+The name "Jordan coordinates" would be misleading. In the second-order cone literature,
+x = (x0, x̄) comes from the Jordan algebra, but the "Jordan frame" refers to the spectral
+decomposition, which is a different thing.
+
 With w = M sigma + q (the strain rate, dual of the stress), the problem on each element is the
 variational inequality
 
