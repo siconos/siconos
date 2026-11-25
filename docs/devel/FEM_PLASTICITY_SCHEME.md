@@ -9,11 +9,13 @@ physical solution).
 
 - Dynamical system: `SolidLinearTIDS` (unknowns `x = [v; σ]`, `real_size() = ndof + nσ`).
 - Relation: `StressLinearTIR`, `y = C σ + e`, input `Cᵀλ`.
-- Law: `MohrCoulombPlasticityNSL(c, φ, 3)`: `b = c` on the first component of `y`, μ = 0
-  (φ not used yet).
+- Laws: `MohrCoulombPlasticityNSL(c, φ, 3)`: `b = c` on the first component of `y`, μ = 0
+  (φ not used yet); `VonMisesPlasticityNSL(σ_y, hypothesis)` (§7).
 - Integrators: `fem::integrators::MoreauJeanGOSI` (global, used by the examples) and
   `fem::integrators::MoreauJeanOSI` (non-global; untested with plasticity).
-- One-step problem: `fem::nonsmooth_formulations::GlobalFrictionContact`.
+- One-step problems: `fem::nonsmooth_formulations::GlobalFrictionContact` (box bounds of
+  `MohrCoulombPlasticityNSL`) and `fem::nonsmooth_formulations::Plasticity` (Von Mises,
+  condensation on the stresses and numerics `PlasticityProblem`, §7).
 
 ---
 
@@ -156,8 +158,130 @@ Non-regression: `bernoulliBeam`, `ballAgainstBernoulliBeam`, `TH4`, `T3`, `T3-GO
 bit-identical results (without plasticity, negating a row and its right-hand side does
 not change the solution).
 
-## 7. Open points
+## 7. Von Mises plasticity: condensed one-step problem
+
+### Law and relation
+
+`VonMisesPlasticityNSL(σ_y, hypothesis)` (kernel): the output y of a size-3 interaction is a
+stress in Voigt notation (σxx, σyy, σxy) that must stay in the elastic domain K, and the
+multiplier is in the opposite of the normal cone (associated flow rule):
+
+    0 ∈ λ + N_K(y),   Cᵀλ = −h ε̇_p
+
+- plane stress: K = {σxx² + σyy² − σxx σyy + 3 σxy² ≤ σ_y²};
+- plane strain (incompressible plastic flow, σzz = (σxx + σyy)/2):
+  K = {(σxx − σyy)²/4 + σxy² ≤ σ_y²/3}.
+
+One interaction per element, relation `StressLinearTIR(C_e)` with
+`C_e = SolidLinearTIDS::elementStressSelection(e)` (the 3 stresses of the element divided by
+`sqrt(A_e t)`, §5): y is then the physical stress and one law with the physical σ_y serves
+all the elements. `b = 0` (no contribution of the law to the output).
+
+### Condensation (`fem::nonsmooth_formulations::Plasticity`)
+
+The friction solvers cannot be used: in `GlobalFrictionContact` the cone constrains the
+multiplier (and the De Saxcé term modifies the condition on y), whereas plasticity constrains
+the output y. The problem assembled by `GlobalFrictionContact::preCompute` (W of
+`MoreauJeanGOSI`, boundary conditions included),
+
+    W x = q + H z,   y = Hᵀ x + b,   0 ∈ z + N_K(y),   x = [v; σ],
+
+is condensed on the constrained unknowns c (rows of x touched by H; r the others: velocities,
+unconstrained stresses). H_c (H restricted to c) must be square and invertible (each
+constrained stress belongs to exactly one interaction):
+
+    W_red = W_cc − W_cr W_rr⁻¹ W_rc,   q̃ = q_c − W_cr W_rr⁻¹ q_r,   W_red x_c = q̃ + H_c z,
+
+and with `x_c = H_c⁻ᵀ (y − b)`:
+
+    z = M_p y + q_p,   M_p = H_c⁻¹ W_red H_c⁻ᵀ,   q_p = −M_p b − H_c⁻¹ q̃.
+
+This is the numerics `PlasticityProblem` `0 ∈ M_p y + q_p + N_K(y)` (Von Mises model,
+`PLASTICITY_STRESS_COORDINATES_CARTESIAN_VOIGT`, hypothesis of the laws), solved by
+`plasticity_2d_driver` (default `PLASTICITY_2D_NSGS`). Then `x_r = W_rr⁻¹(q_r − W_rc x_c)`,
+`_globalVelocities = x`, `_z = z` (λ of the interactions), `_w = y` (warm start of the next
+step). When W_rr is diagonal (lumped mass and every stress constrained: W_rr = M with the
+boundary rows) it is inverted entry-wise and W_red = S + h²θ² B M⁻¹ Bᵀ (restricted) is
+sparse; otherwise a sparse LU of W_rr is used (the result W_rr⁻¹ W_rc is dense in general).
+For the lumped T3 case, M_p is pytripopfem's W (up to the scaling of the stresses).
+
+### Prescribed velocities in `fem::integrators::MoreauJeanGOSI`
+
+The global integrator solves for x_{k+1} itself. The right-hand side is now computed from the
+unmodified blocks,
+
+    q_v = M v_k − h(1−θ) Bᵀσ_k + h F_ext,θ,   q_σ = S σ_k + h(1−θ) B v_k,
+
+and a prescribed velocity v_j = g_j(t_{k+1}) is eliminated with the original column of W
+(stored in `iterationMatrixBoundaryConditions` before its row and column are zeroed):
+`q −= g_j W(:, j)` in the velocity **and stress** rows (−hθB(:, j) g_j), then
+`q_j = W_jj g_j`. Before November 2026 the increment formula of `MoreauJeanOSI`
+(Δv = g − v_k) was used and the stress rows were not corrected: a non-zero prescribed
+velocity was added at every step (velocity growing linearly) with the wrong sign, and the
+stress equation lagged one step. Zero prescribed velocities (all the existing examples) are
+not affected (results equal up to round-off: `ballAgainstBernoulliBeam` 2e-10 on a column of
+order 1e5, its comparison is now relative).
+
+### H of stress interactions with boundary conditions (`OSNSMatrix::fillH`)
+
+`fillH` zeroed the columns of an interaction block at the constrained **velocity** indices.
+For a `StressLinearTIR` the block acts on the stresses: unrelated stress components were
+removed from H (15 on the strip below, element 0 of a clamped beam). Stress interactions
+are now skipped.
+
+### Validation: strip with a circular hole (pytripopfem)
+
+Quarter of a strip (x ∈ [0, 0.5], y ∈ [0, 1], hole of radius 0.25), mesh
+`strip_with_circular_hole_72.msh` (41 nodes, 60 T3), plane stress, E = 210e3, ν = 0.3,
+ρ = 7.8e-9, σ_y = 210, lumped mass, symmetry conditions on the bottom and left edges, top edge
+pulled at v = 100, h = 1e-6, 100 steps, θ = 1. Reference: pytripopfem native T3 backend
+(`examples/Strip_with_hole`, ipopt tolerance 1e-10, fenicsx-siconos-0.10 container).
+
+| NSGS tolerance | sweeps (total / max per step) | max rel. diff u | σ | top reaction R |
+|---|---|---|---|---|
+| 1e-12 | ≈ 1e7 / 1e5 (cap reached at steps 1–10) | 4.0e-6 | 2.2e-4 | 4.4e-6 |
+| 1e-8 | 5.4e6 / 7.3e4 | 2.8e-5 | 3.5e-4 | 7.1e-6 |
+
+The reaction of the top edge rises linearly (7.997 at step 1) and saturates at 56.511
+(pytripopfem 56.511; net-section limit load σ_y · 0.25 = 52.5, overestimated by the coarse
+mesh); 23 elements are plastic at the end in both codes; ‖σ‖_vm ≤ σ_y to 4e-16. The ipopt
+solutions of the reference have a natural-map error of 1e-7–2e-6 (Siconos NSGS: the
+tolerance), which bounds the stress agreement. The step problems of pytripopfem, re-solved
+by `plasticity_2d_driver` (M = W, q = −q_σ, per-element σ_y scaled by sqrt(A_e)), give the
+same stresses (relative difference ≤ 1e-4, ipopt accuracy).
+
+Unit test `SolidLinearTIDSTest::testVonMisesTension`: plane stress uniaxial tension of
+`square_6.msh`, σxx = E ε then σ_y in every element (exact for T3), σyy = σxy = 0, to 2e-7
+outside the dynamic transients (start of the loading, onset of yield: 6e-4, decaying in
+3 steps); von Mises stress ≤ σ_y.
+
+### Cost
+
+The NSGS of numerics needs 4e4–1e5 sweeps per step on the strip (about 20 µs per sweep for
+60 elements). The cost is in the solver, not in the condensation: NSGS needs as many sweeps on
+pytripopfem's W directly. In this quasi-static regime (h = 1e-6 ≫ wave transit time 2e-8 s
+through an element) W_red is dominated by the rank-deficient term h² B M⁻¹ Bᵀ (≈ 1e-2 against
+S ≈ 5e-6), condition number ≳ 1e4, and Gauss–Seidel needs O(κ) sweeps. The NSGS relaxation
+option does not help: it relaxes after the exact local solve, σ ← ω σ_loc + (1 − ω) σ_old,
+which leaves the (strictly convex) elastic domain for ω > 1 (no convergence for ω ≥ 1.8);
+ω = 1.5 gives no gain. A tolerance of 1e-8 instead of 1e-12 saves 40 % (reaction within
+1.3e-6).
+
+## 8. Open points
 
 - The non-global `MoreauJeanOSI` path with stress interactions is untested.
 - φ (Mohr–Coulomb cone) is not used.
 - Energy balance of `ballAgainstPlasticBernoulliBeam`.
+- A global solver for the condensed plasticity problem (semi-smooth Newton on the natural
+  map, interior point on the second-order cone reformulation, accelerated projected
+  gradient): NSGS needs O(κ) sweeps in the quasi-static regime (§7).
+- NSGS relaxation of the Plasticity solvers: relax before the projection (projected SOR) or
+  forbid ω > 1.
+- `StressLinearTIR` takes a dense C of size 3 × nσ per element (memory O(n_el²)); a sparse
+  or offset-based relation is needed for large meshes.
+- Drucker–Prager / Mohr–Coulomb with the condensed problem (numerics supports
+  Drucker–Prager with cohesion; a law, the cone coordinates of the elements and the
+  footing example are missing).
+- `MoreauJeanOSI::computeIterationMatrixBoundaryConditions` prints a warning (W not
+  symmetric) for every SolidLinearTIDS with boundary conditions; the elimination uses
+  columns only and is valid for a non-symmetric W.

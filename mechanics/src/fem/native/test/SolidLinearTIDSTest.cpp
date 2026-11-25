@@ -7,12 +7,20 @@
 
 #include "SolidLinearTIDSTest.hpp"
 
+#include "FEM-MoreauJeanGOSI.hpp"
+#include "FEM-Plasticity.hpp"
 #include "FENode.hpp"
 #include "FemTools.hpp"
 #include "FiniteElementModel.hpp"
+#include "Interaction.hpp"
 #include "Material.hpp"
 #include "MeshUtils.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 #include "SolidLinearTIDS.hpp"
+#include "StressLinearTIR.hpp"
+#include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
+#include "VonMisesPlasticityNSL.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -132,4 +140,67 @@ void SolidLinearTIDSTest::testLumpedMass() {
   CPPUNIT_ASSERT_MESSAGE("total mass",
                          std::abs(total - 2 * rho * thickness * area) <= 1e-12 * total);
   std::cout << "✅ lumped mass test ended with success." << std::endl;
+}
+
+// Plane stress uniaxial tension of square_6.msh (left edge: u_x = 0, right edge: v_x = v)
+// with Von Mises plasticity solved by fem::nonsmooth_formulations::Plasticity. With T3
+// elements the uniform uniaxial state is exact: sigma_xx = E eps while elastic, then
+// sigma_xx = sigma_y in every element, sigma_yy = sigma_xy = 0.
+void SolidLinearTIDSTest::testVonMisesTension() {
+  std::cout << "--> Test: Von Mises uniaxial tension." << std::endl;
+  using namespace siconos::mechanics::fem;
+  const double E = 210e3, nu = 0.3, rho = 7.8e-9, sigma_y = 210., v = 100., h = 1e-6;
+  const int n_steps = 20;  // yield at eps = sigma_y / E = 1e-3, i.e. step 10
+  std::map<int, const Material> materials = {
+      {1, Material(rho, E, nu, AnalysisType2D::plane_stress)}};
+  auto solid = std::make_shared<SolidLinearTIDS>(mesh, materials, MassType::lumped);
+  solid->applyDirichletBoundaryConditions(2, {0});
+  solid->applyDirichletBoundaryConditions(3, {0}, v);
+  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., n_steps * h);
+  nsds->insertDynamicalSystem(solid);
+  auto nslaw = std::make_shared<siconos::modeling::VonMisesPlasticityNSL>(sigma_y);
+  auto nel = solid->FEModel()->elements().size();
+  std::vector<siconos::algebra::SiconosMatrix> C(nel);
+  for (size_t e = 0; e < nel; e++) {
+    C[e] = solid->elementStressSelection(e);
+    auto inter = std::make_shared<siconos::modeling::Interaction>(
+        nslaw, std::make_shared<StressLinearTIR>(C[e]));
+    nsds->link(inter, solid);
+  }
+  auto osi = std::make_shared<integrators::MoreauJeanGOSI>(1.0);
+  auto td = std::make_shared<siconos::simulation::TimeDiscretisation>(0., h);
+  auto osnspb = std::make_shared<nonsmooth_formulations::Plasticity>();
+  osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+  auto s = std::make_shared<siconos::simulation::TimeStepping>(nsds, td, osi, osnspb);
+
+  // The prescribed velocity jumps from 0 to v at the first step, and the yield starts at
+  // step 10: the inertia gives transients (relative error ~1e-3) that decay in 3 steps.
+  auto sigma = solid->stress_read();
+  int k = 0;
+  double max_err = 0.0, max_err_transient = 0.0, max_vm = 0.0;
+  while (s->hasNextEvent()) {
+    s->computeOneStep();
+    k++;
+    double sxx_expected = std::min(E * v * k * h, sigma_y);  // length 1
+    double step_err = 0.0;
+    for (size_t e = 0; e < nel; e++) {
+      Eigen::Vector3d se = sigma.segment<3>(3 * e) / solid->elementStressScaling(e);
+      step_err = std::max(step_err, std::abs(se(0) - sxx_expected) / sigma_y);
+      step_err = std::max(step_err, std::max(std::abs(se(1)), std::abs(se(2))) / sigma_y);
+      double vm = std::sqrt(se(0) * se(0) + se(1) * se(1) - se(0) * se(1) + 3 * se(2) * se(2));
+      max_vm = std::max(max_vm, vm / sigma_y);
+    }
+    bool transient = (k <= 3) || (k >= 11 && k <= 13);
+    (transient ? max_err_transient : max_err) =
+        std::max(transient ? max_err_transient : max_err, step_err);
+    s->nextStep();
+  }
+  std::cout << "max relative error on the stresses: " << max_err
+            << " (transients: " << max_err_transient << "), max VM / sigma_y: " << max_vm
+            << std::endl;
+  CPPUNIT_ASSERT_MESSAGE("uniaxial Von Mises tension", max_err <= 1e-6);
+  CPPUNIT_ASSERT_MESSAGE("uniaxial Von Mises tension, transients", max_err_transient <= 1e-3);
+  CPPUNIT_ASSERT_MESSAGE("yield condition", max_vm <= 1.0 + 1e-10);
+  std::cout << "✅ Von Mises uniaxial tension test ended with success." << std::endl;
 }

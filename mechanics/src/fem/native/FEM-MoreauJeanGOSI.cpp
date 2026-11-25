@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "BoundaryCondition.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
@@ -56,56 +57,23 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
     DEBUG_PRINT(
         "siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
         "Type::SolidLinearTIDS\n");
-    // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
-    // This formulae is only valid for the first computation of the residual for v = v_i
-    // otherwise the complete formulae must be applied, that is
-    // ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v +
-    // K(q_i+h(1-theta)v_i+h theta v)))
-    //                     +hFext_theta     (2)
-    // for v != vi, the formulae (1) is wrong.
-    // in the sequel, only the equation (1) is implemented
-
-    // Get state i (previous time step) from Memories -> var. indexed with "Old"
-
-    const auto& sigma = solid->stress();  // sigmaf
-
-    DEBUG_EXPR(qold.display(););
-    DEBUG_EXPR(vold.display(););
-    DEBUG_EXPR(d->q()->display(););
-    DEBUG_EXPR(d->velocity()->display(););
-
-    // --- ResiduFree computation Equation (1) ---
-    // auto& residu = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_free)];
-    // residu.setZero();
-
     auto& residusigmafree = *ds_work_vectors[tools::enum_to_index(wk_ds::residu_sigma_free)];
-
-    siconos::algebra::SiconosVector qSigmaold{solid->dimension() + solid->stressDimension()};
     const auto& vold = solid->velocityMemory().getSiconosVector(0);    // vi
     const auto& sigmaold = solid->stressMemory().getSiconosVector(0);  // sigmai
-    // q_sigma = [v; sigma] at the beginning of the time step
-    qSigmaold.head(solid->dimension()) = vold;
-    qSigmaold.tail(solid->stressDimension()) = sigmaold;
 
-    // Get buffer and compute full-free rhs
+    // Right-hand side q of W x = q + H r, x = [v_{k+1}; sigma_{k+1}],
+    // W = [M h theta B^T; -h theta B S] (unconstrained blocks):
+    //   q_v     = M v_i - h (1-theta) B^T sigma_i + h F_ext,theta
+    //   q_sigma = S sigma_i + h (1-theta) B v_i
+    // (the plastic term -h epsdot_p is the reaction H r of the stress interactions).
     auto& free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::vfree)];
-    auto& full_free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)];
-    auto& iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
-    full_free_rhs.noalias() = iteration_matrix * qSigmaold;
-    free_rhs.noalias() = full_free_rhs.head(solid->dimension());
-    residusigmafree.noalias() = full_free_rhs.tail(solid->stressDimension());
-
+    solid->use_mass([&](const auto& M) { free_rhs.noalias() = M * vold; });
+    residusigmafree.noalias() = solid->elasticityMatrix() * sigmaold;
     if (solid->hasBMatrix()) {
-      // residufree += -h*B^T sigma_i
-      free_rhs.noalias() -= time_step * solid->BMatrix().transpose() * sigmaold;
-      // stress row of W x = q + H r (W = [M h theta B^T; -h theta B S]):
-      // residuSigmaFree = S sigma_i - h theta B v_i + h B v_i
-      //                 = S sigma_i + h (1-theta) B v_i
-      // the plastic term -h epsdot_p is the reaction H r of the stress interactions.
-      residusigmafree.noalias() += time_step * solid->BMatrix() * vold;
+      free_rhs.noalias() -= time_step * (1 - _theta) * solid->BMatrix().transpose() * sigmaold;
+      residusigmafree.noalias() += time_step * (1 - _theta) * solid->BMatrix() * vold;
     }
     if (solid->hasExternalForces()) {
-      // double conditionningMagicCoeff = (time_step/solid->S()->normInf())/100000;
       // computes Fext(ti)
       solid->computeFext(told);
       auto coeff = time_step * (1 - _theta);
@@ -118,24 +86,38 @@ double siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu() {
       free_rhs.noalias() += coeff * solid->fext();
     }
 
-    applyBoundaryConditions(*solid, free_rhs, dsi, tend, vold);
-    qSigmaold.head(solid->dimension()) = free_rhs;
-    qSigmaold.tail(solid->stressDimension()) = residusigmafree;
-    // q_sigma = [v; sigma]
+    // Prescribed velocities v_j = g_j (t_{k+1}): the rows and columns j of W have been
+    // zeroed (diagonal kept) and the original columns stored in
+    // iterationMatrixBoundaryConditions. The known unknowns are moved to the right-hand
+    // side, in the velocity AND stress rows (-h theta B(:, j) g_j), and row j gives
+    // W_jj v_j = W_jj g_j. Unlike MoreauJeanOSI::applyBoundaryConditions (increment
+    // formulation, Delta v = g - v_i), the global formulation solves for v_{k+1} itself.
+    if (solid->boundaryConditions()) {
+      auto& bc = *solid->boundaryConditions();
+      bc.computePrescribedVelocity(tend);
+      auto g = bc.prescribedVelocity();
+      const auto& Wbc =
+          *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions;
+      auto ndof = solid->dimension();
+      auto nsigma = solid->stressDimension();
+      siconos::algebra::Index j = 0;
+      for ([[maybe_unused]] auto idx : bc.velocityIndices()) {
+        free_rhs.noalias() -= g(j) * Wbc.col(j).head(ndof);
+        residusigmafree.noalias() -= g(j) * Wbc.col(j).segment(ndof, nsigma);
+        j++;
+      }
+      j = 0;
+      for (auto idx : bc.velocityIndices()) {
+        free_rhs(idx) = Wbc(idx, j) * g(j);
+        j++;
+      }
+    }
+
+    auto& full_free_rhs = *ds_work_vectors[tools::enum_to_index(wk_ds::q_sigma_free)];
+    full_free_rhs.head(solid->dimension()) = free_rhs;
+    full_free_rhs.tail(solid->stressDimension()) = residusigmafree;
 
     DEBUG_EXPR(free_rhs.display());
-    //        applyBoundaryConditions(*d, free_rhs, dsi, t);
-
-    //      if (d->boundaryConditions()) {
-    //        THROW_EXCEPTION(
-    //            "siconos::mechanics::fem::integrators::MoreauJeanGOSI::computeResidu -
-    //            boundary conditions not " "yet implemented for this type of Dynamical
-    //            system\n");
-    //      }
-
-    // normResidu = 0.0;  // we assume that v_sigma = vfree_sigma + W^(-1)  [ p ; z]
-
-    // if (normResidu > maxResidu) maxResidu = normResidu;
   }
   return 0.;  // maxResidu;
 }

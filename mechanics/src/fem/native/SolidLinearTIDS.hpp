@@ -274,6 +274,23 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
 
   inline siconos::algebra::Index stressDimension() const { return dimStress_; }
 
+  /** @brief selection of the physical stress of a 2D continuum element (T3)
+   *
+   *  The stress unknowns are scaled, sigma~_e = sqrt(A_e t) sigma_e (see BMatrix()). The
+   *  returned 3 x stressDimension() matrix C gives C sigma~ = sigma_e, the physical stress
+   *  (Voigt order) of the element: the matrix of a StressLinearTIR whose output is the
+   *  physical stress.
+   *  @param element index of the element (order of FEModel()->elements())
+   *  @return C (dense)
+   */
+  siconos::algebra::SiconosMatrix elementStressSelection(size_t element) const;
+
+  /** @return sqrt(A_e t), the scaling of the stress unknowns of the 2D continuum element
+   *  (T3) e
+   *  @param element index of the element (order of FEModel()->elements())
+   */
+  double elementStressScaling(size_t element) const;
+
   /** initialize the internal memory buffers
    *
    *  @param size the size of the siconos::algebra::SiconosMemory. must be >= 0

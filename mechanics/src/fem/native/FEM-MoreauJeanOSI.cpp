@@ -128,7 +128,6 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
     if (relation) {
       // Notice: this is the only place in this method where there is a difference with kernel
       // MJGOSI
-      std::cout << "StressLinearTIR !!! " << std::endl;
       inter_block_work[label_xfree]->setVectorPtr(
           0, workVds1[tools::enum_to_index(wk_ds::q_sigma_free)]);
 
@@ -144,7 +143,6 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeWorkVectorsF
     if (relation) {
       // Notice: this is the only place in this method where there is a difference with kernel
       // MJGOSI
-      std::cout << "StressLinearTIR !!! " << std::endl;
       inter_block_work[label_xfree]->setVectorPtr(
           1, workVds2[tools::enum_to_index(wk_ds::q_sigma_free)]);
 
@@ -628,7 +626,6 @@ bool siconos::mechanics::fem::integrators::MoreauJeanOSI::addInteractionInIndexS
   auto relation =
       std::dynamic_pointer_cast<siconos::mechanics::fem::StressLinearTIR>(inter->relation());
   if (relation) {
-    std::cout << "Stress interaction !!!  " << std::endl;
     return true;
   } else {
     return siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(inter, i);
