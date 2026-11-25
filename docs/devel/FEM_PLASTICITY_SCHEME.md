@@ -250,6 +250,10 @@ tolerance), which bounds the stress agreement. The step problems of pytripopfem,
 by `plasticity_2d_driver` (M = W, q = −q_σ, per-element σ_y scaled by sqrt(A_e)), give the
 same stresses (relative difference ≤ 1e-4, ipopt accuracy).
 
+Tutorial: `siconos-tutorials/examples/mechanics/FEM/Plasticity/StripWithHole`
+(`strip_with_hole.cpp`, NSGS tolerance 1e-8; 20 steps in the tests, about 25 s on an M-series
+Mac; 100 steps, about 2 min, when run directly).
+
 Unit test `SolidLinearTIDSTest::testVonMisesTension`: plane stress uniaxial tension of
 `square_6.msh`, σxx = E ε then σ_y in every element (exact for T3), σyy = σxy = 0, to 2e-7
 outside the dynamic transients (start of the loading, onset of yield: 6e-4, decaying in
