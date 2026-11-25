@@ -82,11 +82,11 @@ enum PLASTICITY_IPARAM {
 enum PLASTICITY_SCALING_RHO_ENUM {
   /** rho = 1 (as in fc3d) */
   PLASTICITY_SCALING_RHO_ONE = 0,
-  /** rho_e = 1/||M_ee||_2 for each element (diagonal block in the variables of the solvers):
+  /** rho_e = 1/||M_ee||_F for each element (diagonal block in the variables of the solvers):
       the error does not depend on the units of the strain rate (default of the Plasticity
       NSGS) */
   PLASTICITY_SCALING_RHO_ELEMENT = 1,
-  /** rho = 1/max_e ||M_ee||_2 for all the elements */
+  /** rho = 1/max_e ||M_ee||_F for all the elements */
   PLASTICITY_SCALING_RHO_GLOBAL = 2,
 };
 

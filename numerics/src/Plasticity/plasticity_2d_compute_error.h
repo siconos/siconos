@@ -30,7 +30,7 @@ extern "C" {
     (w + theta ||w_T|| e_N for Drucker-Prager, w for Von Mises), the natural-map residual
     F_e = r_e - P_K(r_e - rho_e v_e) is divided by a scale s computed from r_e and rho_e v_e.
     rho balances the stress and the strain rate (options->iparam[PLASTICITY_SCALING_RHO]):
-    rho_e = 1/||M_ee||_2 per element (default), 1/max_e ||M_ee||_2, or 1 (as in fc3d); the
+    rho_e = 1/||M_ee||_F per element (default), 1/max_e ||M_ee||_F, or 1 (as in fc3d); the
     diagonal blocks are taken in the variables of the solvers. Then:
     - PER_CONE scope (default): error = sqrt(sum_e ||F_e||^2 / s_e^2), s_e from r_e, v_e;
     - PER_VECTOR scope: error = ||F|| / s, s from the whole vectors r, v.
@@ -53,6 +53,22 @@ extern "C" {
     \param[in,out] error value
     \return 0 if error <= tolerance, 1 otherwise
  */
+/** Error of one Drucker-Prager cone with the default scaling of plasticity_2d_compute_error
+ *  (MIXED, rho = 1/||M||_F): ||r - P_K(r - rho v)|| / max(1, ||r|| + rho ||v||),
+ *  v = w + theta ||w_T|| e_N, w = M r + q. Used by the local solvers
+ *  (PLASTICITY_2D_ONECONE_NSN*, projection with local iterations) for their stopping tests,
+ *  so that the local tolerance has the meaning of the global one.
+ *  \param M local matrix (3x3, column-major)
+ *  \param q local vector
+ *  \param eta cone coefficient
+ *  \param theta dilatancy coefficient
+ *  \param r stress
+ *  \return the scaled error
+ */
+double plasticity_2d_DruckerPrager_local_scaled_error(const double M[9], const double q[3],
+                                                      double eta, double theta,
+                                                      const double r[3]);
+
 /** Scale of the error (see plasticity_2d_compute_error): combination of the norms of r and v
  *  (m elements of dimension 3), each safeguarded by max(1, .).
  *  \param norm_id PLASTICITY_SCALING norm

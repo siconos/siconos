@@ -145,7 +145,7 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
   /* int incx = 1, incy = 1; */
   int i;
 
-  double strainrate_local[3], strainrate_k[3], stress_k[3], worktmp[3];
+  double strainrate_local[3], strainrate_k[3], stress_k[3];
   double normUT;
   double localerror = 1.0;
   // printf ("localerror = %14.7e\n",localerror );
@@ -254,9 +254,9 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
      * localerror); */
 
     /* compute local error */
-    localerror = 0.0;
-    plasticity_2d_unitary_compute_and_add_error(stress_local, strainrate_local, eta_i, theta_i,
-                                                &localerror, worktmp);
+    /* scaled as the global error (it was the squared absolute residual) */
+    localerror = plasticity_2d_DruckerPrager_local_scaled_error(MLocal, qLocal, eta_i, theta_i,
+                                                                stress_local);
 
     /*Update rho*/
     if ((rho_k * a1 < Lmin * a2) && (localerror < localerror_k)) {

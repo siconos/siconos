@@ -891,5 +891,7 @@ void plasticity_2d_nsgs_set_default(SolverOptions* options) {
     solver_options_delete(options->internalSolvers[0]);
   }
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(PLASTICITY_2D_ONECONE_NSN_GP_HYBRID);
+  /* semi-smooth Newton on the natural map with line search and fallback to the return
+   * mapping (Drucker-Prager; the Von Mises Newton for Von Mises problems) */
+  options->internalSolvers[0] = solver_options_create(PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN);
 }

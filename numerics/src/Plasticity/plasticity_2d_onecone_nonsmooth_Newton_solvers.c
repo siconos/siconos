@@ -47,29 +47,14 @@ static NewtonFunctionPtr jacobianF = NULL;
 /* size of a block */
 static int Fsize;
 
+/* local error with the default scaling of the global error (relative to the stress, strain
+ * rate balanced by rho = 1/||M_loc||): before, ||F|| / ||q_loc|| with rho = 1, which could not
+ * reach the local tolerance when the strain rate is small (compliance) */
 static double plasticity_2d_compute_local_error(PlasticityProblem* localproblem,
                                                 double* local_reaction) {
-  double* local_q = localproblem->q;
-  double norm_q = cblas_dnrm2(3, localproblem->q, 1);
-  double* local_M = localproblem->M->dense;
-  double worktmp[3];
-  double local_velocity[3] = {0., 0., 0.};
-  cpy3(local_q, local_velocity);
-  mvp3x3(local_M, local_reaction, local_velocity);
-  DEBUG_EXPR(NV_display(local_q, 3););
-  DEBUG_EXPR(NV_display(local_velocity, 3););
-  DEBUG_EXPR(NV_display(local_reaction, 3););
-
-  double current_error = 0.0;
-
-  plasticity_2d_unitary_compute_and_add_error(
-      local_reaction, local_velocity, localproblem->model.drucker_prager->eta[0],
-      localproblem->model.drucker_prager->theta[0], &current_error, worktmp);
-  current_error = sqrt(current_error);
-  DEBUG_PRINTF("absolute local error = %e", current_error);
-  if (fabs(norm_q) > DBL_EPSILON) current_error /= norm_q;
-  DEBUG_PRINTF("relative local error = %e", current_error);
-  return current_error;
+  return plasticity_2d_DruckerPrager_local_scaled_error(
+      localproblem->M->dense, localproblem->q, localproblem->model.drucker_prager->eta[0],
+      localproblem->model.drucker_prager->theta[0], local_reaction);
 }
 
 static int plasticity_2d_onecone_nonsmooth_newton_initialize(PlasticityProblem* problem,

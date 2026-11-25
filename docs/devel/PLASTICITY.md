@@ -485,23 +485,28 @@ have different magnitudes, `Error_SOC_natural_map.tex`) is removed by rho_e. `PE
 `MIXED` + `ELEMENT`, the default since 2026-11-25, gives an error relative to the stress of
 each element.
 
-With the default error and tolerance 1e-12, on the footing problems:
+With the default error, all the Drucker–Prager local solvers converge at tolerances 1e-10
+and 1e-12 on the footing problems (see the table of the next section). The floor of the
+default error is ~1e-14.
 
-| local solver | footing_100 | footing_100_theta0 |
-|---|---|---|
-| `DRUCKERPRAGER_NSN` | converges, 3323 iterations, 0.8 s | converges, 3239 iterations, 0.8 s |
-| default `NSN_GP_HYBRID` | converges, 5699 iterations, 11 s | stalls at 2.2e-12 (20000 iterations, 38 s) |
+**Local errors.** The local solvers measure their error with the same scaling, through
+`plasticity_2d_DruckerPrager_local_scaled_error`: ||F|| / max(1, ||r|| + rho ||v||), with
+rho = 1/||M_loc||_F. This is used by the old Newton solvers (`plasticity_2d_compute_local_error`)
+and by the projection with local iterations. The local tolerance (1e-14 by default) is thus
+relative, like the global one. Before, the old Newton solvers used ||F|| / ||q_loc||, which
+on compliance problems (|q_loc| ~ 1e-4) could not reach the local tolerance. The projection
+with local iterations used the squared absolute residual.
 
-At 1e-10 both converge (0.7 s and 6.5 s). The floor of the default error is ~1e-14. The
-hybrid solver stalls because its own local error is absolute, with a local tolerance of 1e-14
-(see "Known problems").
+The Frobenius norm is used for rho (local and global errors): it is cheap and within a factor
+sqrt(3) of ||M||_2. With a power iteration at every evaluation, the old Newton solvers were
+15 times slower.
 
 ## NSGS and local solvers (`plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c`)
 
 | internal solver id | Drucker–Prager | Von Mises |
 |---|---|---|
-| `PLASTICITY_2D_ONECONE_NSN`, `..._NSN_GP`, `..._NSN_GP_HYBRID` (default of the NSGS) | semi-smooth Newton (Alart–Curnier / natural map, fc3d port) | semi-smooth Newton |
-| `PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN` | semi-smooth Newton (shared implementation) | semi-smooth Newton |
+| `PLASTICITY_2D_ONECONE_DRUCKERPRAGER_NSN` (default of the NSGS since 2026-11-25) | semi-smooth Newton (shared implementation) | semi-smooth Newton |
+| `PLASTICITY_2D_ONECONE_NSN`, `..._NSN_GP`, `..._NSN_GP_HYBRID` (`NSN_GP_HYBRID` was the default) | semi-smooth Newton (Alart–Curnier / natural map, fc3d port) | semi-smooth Newton |
 | `PLASTICITY_2D_ONECONE_VONMISES_NSN` | semi-smooth Newton (shared implementation) | semi-smooth Newton |
 | `PLASTICITY_2D_ONECONE_ProjectionOnCone` | projection step | one projection step sigma <- P_C(sigma − rho w), rho = 1/M_NN |
 | `PLASTICITY_2D_ONECONE_ProjectionOnConeWithLocalIteration` | projection with local iterations | fixed point |
@@ -512,23 +517,27 @@ hybrid solver stalls because its own local error is absolute, with a local toler
 Each id selects the solver of the same family for the other model, so the default options of
 the NSGS work for both models.
 
-On the footing problems (100 cones, tolerance 1e-10), all the Drucker–Prager local solvers
-converge in 2300–2400 NSGS iterations:
+On the footing problems (100 cones, default error), all the Drucker–Prager local solvers
+converge in the same number of NSGS iterations:
 
-| local solver | time per footing problem |
-|---|---|
-| default `NSN_GP_HYBRID` | ~5.7 s |
-| return mapping | 0.7 s |
-| new semi-smooth Newton | 0.6 s |
-| `ONECONE_NSN` | 0.7 s |
-| one-step projection | 0.07 s |
+| local solver | tol 1e-10 | tol 1e-12 |
+|---|---|---|
+| `DRUCKERPRAGER_NSN` (default) | 0.68 s | 0.83 s |
+| `DRUCKERPRAGER_RETURN_MAPPING` | 0.80 s | 0.98 s |
+| `ONECONE_NSN` | 0.75 s | 0.93 s |
+| `ProjectionOnConeWithLocalIteration` | 0.73 s | 0.79 s |
+| `ONECONE_NSN_GP`, `ONECONE_NSN_GP_HYBRID` | 4.0 s | 5.0 s |
+| `ProjectionOnCone` (one step) | 0.08 s | |
+
+Iterations on footing_100: 2655 at 1e-10, 3275 at 1e-12; footing_100_theta0 is similar.
+Before the scaled local error, `NSN_GP_HYBRID` took 6.5–11 s and stalled on
+footing_100_theta0 at 1e-12.
 
 MixedProblems Von Mises blocks use the return mapping.
 
-With the absolute error (or the default scaling, see "Error and scaling") and |sigma| ~ 5e3,
-a tolerance of 1e-12 is at round-off (relative 5e-16): the NSGS then stalls at ~2e-12 with
-every local solver, and only the default local solver reaches it, by chance. With the MIXED
-scaling the footing problem converges down to a tolerance of 1e-14.
+With the former absolute error (or the fc3d scaling, see "Error and scaling") and
+|sigma| ~ 5e3, a tolerance of 1e-12 is at round-off (relative 5e-16): the NSGS stalls at
+~2e-12 with every local solver.
 
 ## Bugs fixed (2026-11-23)
 
@@ -660,10 +669,11 @@ scaling the footing problem converges down to a tolerance of 1e-14.
 * `plasticity_2d_footing_10.dat` is in an old format (no model type line) and cannot be read.
 * Neither the cohesion, the stress coordinates nor the Von Mises hypothesis are saved in the
   data files.
-* `PLASTICITY_2D_ONECONE_NSN*` (default local solver `NSN_GP_HYBRID`): the local error
-  (`plasticity_2d_compute_local_error`, keep/discard of the hybrid loop) is absolute, and the
-  local tolerance is 1e-14. On problems with large stresses it is never reached, so each
-  local solve runs the whole hybrid loop: 5.7–11 s instead of 0.7 s on footing_100, and a
-  stall on footing_100_theta0 at 1e-12 with the relative error.
+* `PLASTICITY_2D_ONECONE_NSN_GP` (damped Newton, Goldstein–Price line search, rho per
+  component) and the hybrid solver built on it: on the footing problems, the scaled local
+  error does not go below ~1e-12 on some cones, so the local solves run to their iteration
+  limit with local tolerances <= 1e-12. They take 4–5 s, against 0.44 s with a local
+  tolerance of 1e-10. `ONECONE_NSN` (no line search), with the same functions, reaches 1e-14.
+  Not investigated further: the default local solver is now `DRUCKERPRAGER_NSN`.
 * Not covered: elasto-plastic plane strain with szz as an unknown; plane stress in
   MixedProblems.

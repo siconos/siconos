@@ -21,7 +21,6 @@
 #include "SolverOptions.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "plasticity_2d_local_newton.h"
 #include "plasticity_2d_stress_coordinates.h"
 #include "plasticity_2d_vonmises.h"
 #include "projectionOnCone.h"  // for projectionOnCone
@@ -87,6 +86,27 @@ double plasticity_2d_scaling(int norm_id, int reduction, const double* r, const 
   }
   /* safeguard, as in fc3d (the mixed scales are not safeguarded by SOC_scaling) */
   return (s > 1.0) ? s : 1.0;
+}
+
+double plasticity_2d_DruckerPrager_local_scaled_error(const double M[9], const double q[3],
+                                                      double eta, double theta,
+                                                      const double r[3]) {
+  double w[3], v[3], P[3];
+  for (int i = 0; i < 3; i++) w[i] = q[i] + M[i] * r[0] + M[i + 3] * r[1] + M[i + 6] * r[2];
+  double nM = 0.0; /* Frobenius norm: cheap, within a factor sqrt(3) of ||M||_2 */
+  for (int i = 0; i < 9; i++) nM += M[i] * M[i];
+  nM = sqrt(nM);
+  double rho = (nM > 0.0) ? 1.0 / nM : 1.0;
+  v[0] = rho * (w[0] + theta * sqrt(w[1] * w[1] + w[2] * w[2]));
+  v[1] = rho * w[1];
+  v[2] = rho * w[2];
+  for (int i = 0; i < 3; i++) P[i] = r[i] - v[i];
+  projectionOnCone(P, eta);
+  double F = sqrt((r[0] - P[0]) * (r[0] - P[0]) + (r[1] - P[1]) * (r[1] - P[1]) +
+                  (r[2] - P[2]) * (r[2] - P[2]));
+  double nr = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+  double nv = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  return F / fmax(1.0, nr + nv);
 }
 
 int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
@@ -162,7 +182,9 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
             sum = B[i + 3 * j];
           By[i + 3 * j] = sum;
         }
-      double nB = plasticity_2d_local_spectral_norm(By);
+      double nB = 0.0; /* Frobenius norm (as in the local error of the local solvers) */
+      for (int i = 0; i < 9; i++) nB += By[i] * By[i];
+      nB = sqrt(nB);
       rho[ic] = (nB > 0.0) ? 1.0 / nB : 1.0;
       rho_min = fmin(rho_min, rho[ic]);
     }
