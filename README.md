@@ -6,8 +6,9 @@
 
 **A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and Python.**
 
-**Current release: 2026.rc3** (third release candidate of the 2026 series), see the
-[release notes](docs/devel/RELEASE_2026.rc3.md) and the [Changelog](Changelog).
+**Current release: 2026-11** (version 2026.11), see the [release notes](RELEASE_NOTES.md) and
+the [Changelog](Changelog). Use the same version of
+[siconos-tutorials](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials).
 
 > 📚 **Examples and Tutorials**: Most examples and tutorials are in the separate **[siconos-tutorials](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-tutorials)** repository. Please ensure you use **consistent versions** of siconos and siconos-tutorials (e.g., both `main` branch or both same release version).
 
@@ -228,7 +229,7 @@ If you use Siconos in your research, please cite:
   title = {Siconos: A Software Package for Modeling and Simulation of Nonsmooth Dynamical Systems},
   author = {{Siconos Team}},
   url = {http://siconos.org},
-  version = {2026.rc3},
+  version = {2026-11},
   year = {2026}
 }
 ```

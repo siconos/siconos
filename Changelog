@@ -12,6 +12,41 @@ of the file were added first, and each subsequent addition is placed on a line
 
 
 --------------------------------------------------------------------------------
+  v 2026-11
+--------------------------------------------------------------------------------
+
+Official release of the 2026 series (release candidates 2026.rc1, 2026.rc2,
+2026.rc3), details in RELEASE_NOTES.md. Calendar versioning: tag 2026-11,
+version number 2026.11 in the VERSION file. Use siconos-tutorials 2026-11.
+
+Main changes since 2026.rc3:
+	* [numerics] Plasticity: Von Mises (J2, plane stress) and Drucker-Prager
+	  criteria, return mapping and semi-smooth Newton local solvers, relative
+	  local errors; new MixedProblems module (friction and plasticity,
+	  element-wise NSGS)
+	* [numerics] friction solvers keep the user options, parallel fc2d fixes,
+	  rfc2d ENUM fast path
+	* [numerics] short-name macros of the friction solver IDs removed
+	* [io] siconos_filter for v1 files, siconos_svg (2D scenes)
+	* [io] MechanicsIO: contact rows width from the contacts (joints and
+	  contacts in the same index set gave rows of width 0)
+	* [vkernel] rolling friction (disks, polytopes), Jean quasi-inelastic
+	  shock law, FEM Dirichlet conditions, cold restart, energy outputs
+	* [all] SPDX license headers, REUSE compliance, calendar versioning
+	  (VERSION file), prek hooks at commit
+	* [kernel] optional validation of the time-stepping schemes against
+	  hots-python (WITH_HOTS_VALIDATION)
+
+Known issues:
+	* siconos-tutorials: the python control examples (examples/control/*/*.py)
+	  and the jupyter notebooks (siconos-notebooks, examples/**/*.ipynb) are
+	  not updated to the pybind11 bindings; the C++ control examples run but
+	  some references are old (TwoLinkManipulator)
+	* siconos-tutorials: FEM plasticity examples removed for this release
+	* mechanisms: no python bindings; OCC examples using C plugins by name
+	* EventDriven default tolerance close to round-off
+
+--------------------------------------------------------------------------------
   v 2026.rc3
 --------------------------------------------------------------------------------
 
