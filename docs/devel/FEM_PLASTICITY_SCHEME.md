@@ -205,6 +205,12 @@ boundary rows) it is inverted entry-wise and W_red = S + h²θ² B M⁻¹ Bᵀ (
 sparse; otherwise a sparse LU of W_rr is used (the result W_rr⁻¹ W_rc is dense in general).
 For the lumped T3 case, M_p is pytripopfem's W (up to the scaling of the stresses).
 
+`Plasticity::setProblemDump(prefix, steps)` writes the numerics problem passed to the driver
+(numerics `.dat` format, with the coordinates and the hypothesis) into `<prefix>_<n>.dat` for
+the chosen calls n of `compute` (time steps). The problems of the strip below (steps 1, 4, 10,
+100) are the numerics test data `plasticity_2d_vonmises_strip_<n>.dat`
+(`plasticity_2d_strip_test`, see `docs/devel/PLASTICITY.md`).
+
 ### Prescribed velocities in `fem::integrators::MoreauJeanGOSI`
 
 The global integrator solves for x_{k+1} itself. The right-hand side is now computed from the

@@ -8,6 +8,8 @@
 #include "FEM-Plasticity.hpp"
 
 #include <Eigen/SparseLU>
+#include <algorithm>
+#include <cstdio>
 #include <iostream>  // DEBUG_EXPR
 #include <memory>
 #include <string>
@@ -214,6 +216,18 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
   problem.model_type = PLASTICITY_MODEL_VON_MISES;
   problem.model.von_mises = &von_mises;
   problem.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CARTESIAN_VOIGT;
+
+  _n_compute++;
+  if (!_dump_prefix.empty() &&
+      (_dump_steps.empty() ||
+       std::find(_dump_steps.begin(), _dump_steps.end(), _n_compute) != _dump_steps.end())) {
+    std::string filename = _dump_prefix + "_" + std::to_string(_n_compute) + ".dat";
+    FILE* file = fopen(filename.c_str(), "w");
+    if (!file)
+      THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: cannot open " + filename);
+    plasticity_printInFile(&problem, file);
+    fclose(file);
+  }
 
   // warm start with the previous y
   Vec y = (_w->size() == m_size) ? Vec(*_w) : Vec::Zero(m_size);

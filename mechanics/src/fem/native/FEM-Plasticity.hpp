@@ -13,6 +13,9 @@
 #ifndef FEMPlasticity_H
 #define FEMPlasticity_H
 
+#include <string>
+#include <vector>
+
 #include "FEM-GlobalFrictionContact.hpp"
 #include "Plasticity_options.h"  // for PLASTICITY_2D_NSGS
 
@@ -64,6 +67,15 @@ class Plasticity : public GlobalFrictionContact {
    */
   int solve_condensed();
 
+  /** number of calls of compute with a non-empty problem (one per time step) */
+  unsigned int _n_compute{0};
+
+  /** prefix of the files of the dumped numerics problems (no dump if empty) */
+  std::string _dump_prefix{};
+
+  /** calls of compute (1, 2, ...) whose problem is dumped (all if empty) */
+  std::vector<unsigned int> _dump_steps{};
+
  public:
   /** constructor
    *  \param numericsSolverId id of the numerics plasticity solver
@@ -72,6 +84,17 @@ class Plasticity : public GlobalFrictionContact {
 
   /** destructor */
   virtual ~Plasticity() noexcept = default;
+
+  /** write the numerics PlasticityProblem passed to plasticity_2d_driver (numerics .dat
+   *  format, plasticity_printInFile) into <prefix>_<n>.dat, n being the number of the call
+   *  of compute (1 for the first time step)
+   *  \param prefix prefix of the file names (empty: no dump)
+   *  \param steps the calls whose problem is written (all if empty)
+   */
+  void setProblemDump(const std::string& prefix, const std::vector<unsigned int>& steps = {}) {
+    _dump_prefix = prefix;
+    _dump_steps = steps;
+  }
 
   /** compute the one-step problem (assembly by GlobalFrictionContact::preCompute,
    *  condensation, numerics solve, postCompute)

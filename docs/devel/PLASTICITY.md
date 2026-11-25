@@ -126,7 +126,8 @@ The other entry points:
 * `plasticity_2d_problem_to_cone` returns a deep copy in cone coordinates;
   `plasticity_2d_problem_change_of_variables` returns a deep copy of the problem in y (the one
   the driver solves).
-* `plasticity_printInFile` does not save the coordinates.
+* `plasticity_printInFile` saves the coordinates, the Von Mises hypothesis and the cohesion
+  (see "Data file format").
 
 ### Mechanical meaning in Cartesian coordinates
 
@@ -578,6 +579,26 @@ With the former absolute error (or the fc3d scaling, see "Error and scaling") an
     apex.
   * It now converges with all local solvers (~2300 iterations, error ~2e-12).
 
+## Data file format (`plasticity_printInFile`, `plasticity_newFromFile`)
+
+    dimension
+    numberOfCones
+    model_type                       (PlasticityModelType)
+    M                                (NM_write_in_file)
+    q                                (dimension * numberOfCones values)
+    eta, then theta (Drucker-Prager) | sigma_y (Von Mises)   (one line each)
+    [stress_coordinates <int>]       (if not PLASTICITY_STRESS_COORDINATES_CONE)
+    [vonmises_hypothesis <int>]      (if not PLASTICITY_VONMISES_PLANE_STRAIN)
+    [cohesion <numberOfCones values>] (Drucker-Prager with cohesion)
+
+The keyword lines (November 2026) are optional and written only when different from the
+defaults: the files of default problems are unchanged, and older files are read as before
+(defaults). Before, these three fields were lost (a plane stress / Voigt problem was read
+back as a plane strain problem in cone coordinates). Sparse matrices are written with 17
+significant digits (`CSparseMatrix_print_in_file`, `%.17g`, was `%g`: 6 digits).
+`plasticity_2d_read_write_test` checks the round trip of a plane stress Voigt Von Mises
+problem and of a Drucker–Prager problem with cohesion in Mandel coordinates.
+
 ## Tests (`numerics/src/Plasticity/test`)
 
 * `plasticity_2d_simple_solve_test`: example1 (theta, theta = 0) and footing_1 with the NSGS
@@ -661,14 +682,22 @@ With the former absolute error (or the fc3d scaling, see "Error and scaling") an
     tension (on the plane stress surface, inside the plane strain cylinder);
   * Cartesian Drucker–Prager problems equal to the cone problem mapped back (power
     preserved).
+* `plasticity_2d_strip_test`: NSGS and generic NSGS (tolerance 1e-8) on the problems of the
+  FEM strip with a circular hole (siconos-tutorials `mechanics/FEM/Plasticity/StripWithHole`,
+  60 T3 elements, plane stress, Voigt coordinates, yield stress 210),
+  `data/plasticity_2d_vonmises_strip_<n>.dat` for the time steps n = 1 (elastic), 4 (first
+  plastic element), 10 (18 plastic elements) and 100 (plateau, 23 plastic elements), written
+  by `fem::nonsmooth_formulations::Plasticity::setProblemDump`. Checks: convergence, error
+  recomputed by `plasticity_2d_compute_error`, Von Mises stress ≤ yield stress, same stresses
+  for the two solvers. These problems come from a quasi-static regime where M is
+  ill-conditioned (condition number ≳ 1e4): NSGS needs 1e4–1e5 sweeps; they are the
+  reference problems for global solvers.
 * MixedProblems: `mixed_problem_mohr_coulomb_test` (coupled cones with cohesion, mixed NSGS
   vs Plasticity NSGS).
 
 ## Known problems
 
 * `plasticity_2d_footing_10.dat` is in an old format (no model type line) and cannot be read.
-* Neither the cohesion, the stress coordinates nor the Von Mises hypothesis are saved in the
-  data files.
 * `PLASTICITY_2D_ONECONE_NSN_GP` (damped Newton, Goldstein–Price line search, rho per
   component) and the hybrid solver built on it: on the footing problems, the scaled local
   error does not go below ~1e-12 on some cones, so the local solves run to their iteration
