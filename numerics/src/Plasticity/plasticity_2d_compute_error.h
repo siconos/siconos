@@ -16,6 +16,8 @@
 #include "NumericsFwd.h"  // for PlasticityProblem, SolverOptions
 
 #if defined(__cplusplus)
+#undef restrict
+#define restrict __restrict
 extern "C" {
 #endif
 

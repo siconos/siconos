@@ -10,13 +10,55 @@
 #include <pybind11/pybind11.h>
 
 #include <cstring>
+#include <memory>
 #include <stdexcept>
+#include <string>
 
+#include "NonSmoothDrivers.h"
 #include "NumericsMatrix.h"
 #include "PlasticityProblem.h"
 #include "Plasticity_options.h"
+#include "SolverOptions.h"
+#include "plasticity_2d_compute_error.h"
 
 namespace py = pybind11;
+
+namespace {
+struct PlasticityProblemDeleter {
+  void operator()(PlasticityProblem* problem) const {
+    if (problem) plasticityProblem_free(problem);
+  }
+};
+using PlasticityProblemPtr = std::unique_ptr<PlasticityProblem, PlasticityProblemDeleter>;
+
+/* malloc'ed copy of a vector of the expected size */
+double* copy_vector(const py::array_t<double>& v, ssize_t size, const char* name) {
+  auto a = py::array_t<double, py::array::c_style | py::array::forcecast>::ensure(v);
+  if (!a || a.size() != size)
+    throw std::invalid_argument(std::string(name) + " must have size " + std::to_string(size));
+  double* data = (double*)malloc((size_t)size * sizeof(double));
+  std::memcpy(data, a.data(), (size_t)size * sizeof(double));
+  return data;
+}
+
+/* problem with dimension, number of cones, M (dense, column-major copy) and q */
+PlasticityProblemPtr new_problem(int dim, int nc, const py::array_t<double>& M,
+                                 const py::array_t<double>& q) {
+  ssize_t n = (ssize_t)dim * nc;
+  auto Mf = py::array_t<double, py::array::f_style | py::array::forcecast>::ensure(M);
+  if (!Mf || Mf.ndim() != 2 || Mf.shape(0) != n || Mf.shape(1) != n)
+    throw std::invalid_argument("M must be a " + std::to_string(n) + "x" + std::to_string(n) +
+                                " matrix");
+  PlasticityProblemPtr problem(plasticityProblem_new());
+  problem->dimension = dim;
+  problem->numberOfCones = nc;
+  double* data = (double*)malloc((size_t)(n * n) * sizeof(double));
+  std::memcpy(data, Mf.data(), (size_t)(n * n) * sizeof(double));
+  problem->M = NM_create_with_data(NM_DENSE, (int)n, (int)n, data);
+  problem->q = copy_vector(q, n, "q");
+  return problem;
+}
+}  // namespace
 
 void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_ids) {
   // PlasticityModelType enum
@@ -68,7 +110,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   // PlasticityProblem - use a wrapper approach similar to friction contact
   py::class_<PlasticityProblem, py::smart_holder>(m, "PlasticityProblem",
                                                   "Generic plasticity problem structure")
-      .def(py::init<>())
+      .def(py::init([]() { return PlasticityProblemPtr(plasticityProblem_new()); }))
       .def_readwrite("dimension", &PlasticityProblem::dimension, "Dimension of stress space")
       .def_readwrite("numberOfCones", &PlasticityProblem::numberOfCones, "Number of cones")
       .def_readwrite("M", &PlasticityProblem::M, "M matrix")
@@ -78,58 +120,30 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .def_readwrite("stress_coordinates", &PlasticityProblem::stress_coordinates,
                      "Coordinates of the stress and strain rate (cone or Cartesian)");
 
-  // Factory function for creating PlasticityProblem with Drucker-Prager model
+  // Factory functions. The problems are allocated by plasticityProblem_new and freed by
+  // plasticityProblem_free (unique_ptr deleter kept by the smart holder). M is copied in
+  // column-major order (NM_DENSE), whatever the order of the numpy array.
   m.def(
       "PlasticityProblem_new",
       [](int dim, py::array_t<double> M, py::array_t<double> q, py::array_t<double> eta,
          py::array_t<double> theta, py::object cohesion) {
-        auto* problem = new PlasticityProblem();
-        problem->dimension = dim;
-        problem->numberOfCones = eta.size();
-
-        // Create M matrix from numpy array
-        py::buffer_info M_info = M.request();
-        double* M_data = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        std::memcpy(M_data, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        problem->M = NM_create_with_data(NM_DENSE, M_info.shape[0], M_info.shape[1], M_data);
-
-        // Copy q vector
-        py::buffer_info q_info = q.request();
-        problem->q = (double*)malloc(q_info.shape[0] * sizeof(double));
-        std::memcpy(problem->q, q_info.ptr, q_info.shape[0] * sizeof(double));
-
-        // Create Drucker-Prager model and copy eta/theta
+        int nc = (int)eta.size();
+        PlasticityProblemPtr problem = new_problem(dim, nc, M, q);
         problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
         problem->model.drucker_prager =
             (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
-        py::buffer_info eta_info = eta.request();
-        py::buffer_info theta_info = theta.request();
-        problem->model.drucker_prager->eta =
-            (double*)malloc(eta_info.shape[0] * sizeof(double));
-        problem->model.drucker_prager->theta =
-            (double*)malloc(theta_info.shape[0] * sizeof(double));
-        std::memcpy(problem->model.drucker_prager->eta, eta_info.ptr,
-                    eta_info.shape[0] * sizeof(double));
-        std::memcpy(problem->model.drucker_prager->theta, theta_info.ptr,
-                    theta_info.shape[0] * sizeof(double));
+        problem->model.drucker_prager->eta = copy_vector(eta, nc, "eta");
+        problem->model.drucker_prager->theta = copy_vector(theta, nc, "theta");
         // Optional cohesion (K = {|sigma_T| <= eta sigma_N + c})
-        if (!cohesion.is_none()) {
-          auto c =
-              cohesion.cast<py::array_t<double, py::array::c_style | py::array::forcecast>>();
-          if (c.size() != eta.size())
-            throw std::invalid_argument("cohesion must have the size of eta");
-          problem->model.drucker_prager->cohesion = (double*)malloc(c.size() * sizeof(double));
-          std::memcpy(problem->model.drucker_prager->cohesion, c.data(),
-                      c.size() * sizeof(double));
-        }
-
+        if (!cohesion.is_none())
+          problem->model.drucker_prager->cohesion =
+              copy_vector(cohesion.cast<py::array_t<double>>(), nc, "cohesion");
         return problem;
       },
       py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("eta"), py::arg("theta"),
       py::arg("cohesion") = py::none(),
       "Create a PlasticityProblem with Drucker-Prager model, K = {|sigma_T| <= eta sigma_N + "
-      "c}, cohesion c optional (handled by plasticity_2d_driver)",
-      py::return_value_policy::take_ownership);
+      "c}, cohesion c optional (handled by plasticity_2d_driver)");
 
   // Backward compatibility alias
   m.attr("Plasticity2DProblem") = m.attr("PlasticityProblem");
@@ -139,85 +153,73 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       "Plasticity2DProblem_new",
       [](int dim, py::array_t<double> M, py::array_t<double> q, py::array_t<double> eta,
          py::array_t<double> theta) {
-        auto* problem = new PlasticityProblem();
-        problem->dimension = dim;
-        problem->numberOfCones = eta.size();
-
-        // Create M matrix from numpy array
-        py::buffer_info M_info = M.request();
-        double* M_data = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        std::memcpy(M_data, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        problem->M = NM_create_with_data(NM_DENSE, M_info.shape[0], M_info.shape[1], M_data);
-
-        // Copy q vector
-        py::buffer_info q_info = q.request();
-        problem->q = (double*)malloc(q_info.shape[0] * sizeof(double));
-        std::memcpy(problem->q, q_info.ptr, q_info.shape[0] * sizeof(double));
-
-        // Create Drucker-Prager model and copy eta/theta
+        int nc = (int)eta.size();
+        PlasticityProblemPtr problem = new_problem(dim, nc, M, q);
         problem->model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
         problem->model.drucker_prager =
             (Plasticity_DruckerPrager_model*)calloc(1, sizeof(Plasticity_DruckerPrager_model));
-        py::buffer_info eta_info = eta.request();
-        py::buffer_info theta_info = theta.request();
-        problem->model.drucker_prager->eta =
-            (double*)malloc(eta_info.shape[0] * sizeof(double));
-        problem->model.drucker_prager->theta =
-            (double*)malloc(theta_info.shape[0] * sizeof(double));
-        std::memcpy(problem->model.drucker_prager->eta, eta_info.ptr,
-                    eta_info.shape[0] * sizeof(double));
-        std::memcpy(problem->model.drucker_prager->theta, theta_info.ptr,
-                    theta_info.shape[0] * sizeof(double));
-
+        problem->model.drucker_prager->eta = copy_vector(eta, nc, "eta");
+        problem->model.drucker_prager->theta = copy_vector(theta, nc, "theta");
         return problem;
       },
       py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("eta"), py::arg("theta"),
-      "Create a PlasticityProblem (backward compatibility)",
-      py::return_value_policy::take_ownership);
+      "Create a PlasticityProblem (backward compatibility)");
 
   // Factory function for creating PlasticityProblem with Von Mises model
   m.def(
       "PlasticityProblem_new_VonMises",
       [](int dim, py::array_t<double> M, py::array_t<double> q, py::array_t<double> sigma_y,
          PlasticityVonMisesHypothesis hypothesis) {
-        auto* problem = new PlasticityProblem();
-        problem->dimension = dim;
-        problem->numberOfCones = sigma_y.size();
+        int nc = (int)sigma_y.size();
+        PlasticityProblemPtr problem = new_problem(dim, nc, M, q);
         problem->model_type = PLASTICITY_MODEL_VON_MISES;
-
-        // Create M matrix from numpy array
-        py::buffer_info M_info = M.request();
-        double* M_data = (double*)malloc(M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        std::memcpy(M_data, M_info.ptr, M_info.shape[0] * M_info.shape[1] * sizeof(double));
-        problem->M = NM_create_with_data(NM_DENSE, M_info.shape[0], M_info.shape[1], M_data);
-
-        // Copy q vector
-        py::buffer_info q_info = q.request();
-        problem->q = (double*)malloc(q_info.shape[0] * sizeof(double));
-        std::memcpy(problem->q, q_info.ptr, q_info.shape[0] * sizeof(double));
-
-        // Create Von Mises model and copy sigma_y
         problem->model.von_mises =
             (Plasticity_VonMises_model*)calloc(1, sizeof(Plasticity_VonMises_model));
-        py::buffer_info sigma_y_info = sigma_y.request();
-        problem->model.von_mises->sigma_y =
-            (double*)malloc(sigma_y_info.shape[0] * sizeof(double));
-        std::memcpy(problem->model.von_mises->sigma_y, sigma_y_info.ptr,
-                    sigma_y_info.shape[0] * sizeof(double));
+        problem->model.von_mises->sigma_y = copy_vector(sigma_y, nc, "sigma_y");
         problem->model.von_mises->hypothesis = hypothesis;
-
         return problem;
       },
       py::arg("dim"), py::arg("M"), py::arg("q"), py::arg("sigma_y"),
       py::arg("hypothesis") = PLASTICITY_VONMISES_PLANE_STRAIN,
-      "Create a PlasticityProblem with Von Mises model",
-      py::return_value_policy::take_ownership);
+      "Create a PlasticityProblem with Von Mises model");
 
-  // Driver function (forward declaration - actual implementation is in the driver)
-  // We need to declare it here to make it available in Python
-  // The driver function signature is:
-  // int plasticity_2d_driver(PlasticityProblem* problem, double* stress, double*
-  // plastic_strain_rate, SolverOptions* options);
+  // Driver: stress (initial guess / solution) and strainrate are modified in place
+  m.def(
+      "plasticity_2d_driver",
+      [](PlasticityProblem* problem, py::array_t<double, py::array::c_style> stress,
+         py::array_t<double, py::array::c_style> strainrate, SolverOptions* options) {
+        ssize_t n = 3 * problem->numberOfCones;
+        if (stress.size() != n || strainrate.size() != n)
+          throw std::invalid_argument("stress and strainrate must have size 3 numberOfCones");
+        SolverOptions* opts = options ? options : solver_options_create(PLASTICITY_2D_NSGS);
+        int info = plasticity_2d_driver(problem, stress.mutable_data(),
+                                        strainrate.mutable_data(), opts);
+        if (!options) solver_options_delete(opts);
+        return info;
+      },
+      py::arg("problem"), py::arg("stress"), py::arg("strainrate"),
+      py::arg("options") = nullptr,
+      "Solve the problem (default solver: PLASTICITY_2D_NSGS). stress (initial guess) and "
+      "strainrate (float64, contiguous, size 3 numberOfCones) are modified in place. "
+      "Returns info (0: converged).");
+
+  // Error: strainrate is set to M stress + q
+  m.def(
+      "plasticity_2d_compute_error",
+      [](PlasticityProblem* problem, py::array_t<double, py::array::c_style> stress,
+         py::array_t<double, py::array::c_style> strainrate, double tolerance) {
+        ssize_t n = 3 * problem->numberOfCones;
+        if (stress.size() != n || strainrate.size() != n)
+          throw std::invalid_argument("stress and strainrate must have size 3 numberOfCones");
+        double error = 0.0;
+        int info = plasticity_2d_compute_error(problem, stress.mutable_data(),
+                                               strainrate.mutable_data(), tolerance, nullptr,
+                                               0.0, &error);
+        return py::make_tuple(info, error);
+      },
+      py::arg("problem"), py::arg("stress"), py::arg("strainrate"), py::arg("tolerance"),
+      "Natural-map error of the problem (cohesion, coordinates and Von Mises hypothesis taken "
+      "into account); strainrate is set to M stress + q. Returns (info, error).");
 
   // Display functions
   m.def("plasticity_display", &plasticity_display, "Display plasticity problem",
@@ -227,10 +229,6 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   m.def(
       "mohrCoulomb2D_display", [](PlasticityProblem* problem) { plasticity_display(problem); },
       "Display plasticity problem (backward compatibility)", py::arg("problem"));
-
-  // Note: plasticity_2d_driver is not exposed in Python bindings because
-  // it requires numpy array handling for stress and plastic_strain_rate.
-  // Users should use the C API or implement a custom wrapper.
 
   // Solver IDs enum
   py::enum_<PLASTICITY_SOLVER>(solver_ids, "PLASTICITY_SOLVER", "Plasticity solver IDs")

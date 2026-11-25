@@ -16,6 +16,7 @@ coordinates.
 | `plasticity_2d_onecone_nonsmooth_Newton_solvers.c` | Drucker–Prager semi-smooth Newton local solvers |
 | `plasticity_2d_vonmises.{h,c}` | Von Mises domain, projection, error, return mapping, fixed point and semi-smooth Newton local solvers, their SolverOptions and registration |
 | `plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c` | NSGS (and generic NSGS) |
+| `numerics/python/plasticity_pybind11.cpp` | Python: problems (`PlasticityProblem_new`, `PlasticityProblem_new_VonMises`), enums, `plasticity_2d_driver`, `plasticity_2d_compute_error` |
 | `Plasticity_options.h` | solver ids and options |
 | `test/plasticity_2d_{simple_solve,vonmises,cohesion,cartesian}_test.c` | tests (see below) |
 
@@ -375,6 +376,12 @@ of the NSGS work for both models. MixedProblems Von Mises blocks use the return 
   `test_plasticity_2d_nsgs_generic` did not check the result. The adapter also printed every
   iteration (`verbose = 2` hard coded); it now follows the numerics verbosity.
 * `plasticity_2d_compute_error` rejected the Von Mises model.
+* (2026-11-25) Python bindings: the problems were freed with `delete` (M, q and the model
+  parameters leaked), and M was copied from a C-ordered numpy array into the column-major
+  dense storage, i.e. transposed for a non-symmetric M. The problems are now created by
+  `plasticityProblem_new` and freed by `plasticityProblem_free`, and M is converted to
+  Fortran order. `plasticity_2d_driver` was not exposed, so no Python test solved a
+  problem.
 * (2026-11-25) The final full-error test of the NSGS (`LIGHT_WITH_FULL_FINAL`, the default)
   compared the error with the incremental tolerance, which the loop may have lowered, instead
   of the required tolerance. The NSGS then returned `info = 1` with a residual below the
@@ -435,6 +442,18 @@ of the NSGS work for both models. MixedProblems Von Mises blocks use the return 
     * results: the solution equals s (~1e-16), sigma_eq = sigma_y on the plastic elements,
       and `plasticity_2d_compute_error` gives ~1e-15;
   * `plasticity_2d_problem_change_of_variables`: the ball problem gives s = T y.
+* Python, `numerics/python/tests/test_plasticity_2d.py` (44 cases, through
+  `plasticity_2d_driver` and `plasticity_2d_compute_error`). The coordinate maps and the plane
+  stress formula are written again in the test:
+  * creation, invalid sizes, layout of M (C or Fortran order), default options;
+  * Drucker–Prager: M = I analytic cases with cohesion, a non-trivial case with q_N >= 0,
+    and a coupled problem with dilatancy and cohesion (all the local solvers agree);
+  * Von Mises plane strain: pure shear and uniaxial loading (Voigt, Mandel);
+  * Von Mises plane stress: the manufactured solutions of the C test (non-symmetric M;
+    Voigt, Mandel and cone coordinates; all the Von Mises local solvers), and equibiaxial
+    tension (on the plane stress surface, inside the plane strain cylinder);
+  * Cartesian Drucker–Prager problems equal to the cone problem mapped back (power
+    preserved).
 * MixedProblems: `mixed_problem_mohr_coulomb_test` (coupled cones with cohesion, mixed NSGS
   vs Plasticity NSGS).
 
