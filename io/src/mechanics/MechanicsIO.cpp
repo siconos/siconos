@@ -612,7 +612,9 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
   siconos::algebra::SiconosMatrix result =
       siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 25);
 
-  int data_size = 0;
+  // Width of the rows, taken from the contacts only: the last interaction of the
+  // graph may be a joint (no data), whose size must not truncate the rows.
+  siconos::algebra::Index columns = 0;  // (0, 0) without contact, as before
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
@@ -632,7 +634,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
     inspector.inter = graph.bundle(*vi);
     graph.bundle(*vi)->relation()->accept(inspector);
     siconos::algebra::SiconosVector& data = inspector.answer;
-    data_size = data.size();
+    const auto data_size = data.size();
 
     if (data_size == 0) {
       // Nothing is done since the relation does not appear as a relation
@@ -651,10 +653,10 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
                                   data.size());
       }
       result.row(current_row++) = data;
-      data_size += 2;
+      columns = result.cols();
     }
   }
-  result.conservativeResize(current_row, data_size);
+  result.conservativeResize(current_row, columns);
   DEBUG_EXPR(siconos::algebra::print(result));
   return result;  // RVO
 }
@@ -749,7 +751,9 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
   siconos::algebra::SiconosMatrix result =
       siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 4);
 
-  int data_size = 0;
+  // Width of the rows, taken from the contacts only: the last interaction of the
+  // graph may be a joint (no data), whose size must not truncate the rows.
+  siconos::algebra::Index columns = 0;  // (0, 0) without contact, as before
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
@@ -765,7 +769,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
     inspector.inter = graph.bundle(*vi);
     graph.bundle(*vi)->relation()->accept(inspector);
     auto& data = inspector.answer;
-    data_size = data.size();
+    const auto data_size = data.size();
 
     if (data_size == 0) {
       // Nothing is done since the relation does not appear as a relation
@@ -777,16 +781,15 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
       auto& ds2 = *graph.properties(*vi).target;
       data(1) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds1.number());
       data(2) = static_cast<siconos::algebra::SiconosVector::Scalar>(ds2.number());
+      if (result.cols() != data.size()) {
+        result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
+                                  data.size());
+      }
+      result.row(current_row++) = data;
+      columns = result.cols();
     }
-    if (result.cols() != data.size()) {
-      result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
-                                data.size());
-    }
-    result.row(current_row++) = data;
   }
-  // result.resize(current_row, data_size);
-  // Why do we need a resize? If result is too small, the line 748 will fail anyway.
-  // Note FP: warning resize with eigen may lead to reset
+  result.conservativeResize(current_row, columns);
   DEBUG_EXPR(siconos::algebra::print(result););
   return result;  // RVO, no copy
 
@@ -1073,7 +1076,9 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
   siconos::algebra::SiconosMatrix result =
       siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 25);
 
-  int data_size = 0;
+  // Width of the rows, taken from the contacts only: the last interaction of the
+  // graph may be a joint (no data), whose size must not truncate the rows.
+  siconos::algebra::Index columns = 0;  // (0, 0) without contact, as before
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
@@ -1097,20 +1102,21 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     inspector.omega = omega;
     graph.bundle(*vi)->relation()->accept(inspector);
     auto& data = inspector.answer;
-    data_size = data.size();
+    const auto data_size = data.size();
 
     if (data_size == 0) {
       // Nothing is done since the relation does not appear as a relation
       // related to a contact points (perhaps a joint)
     } else {
+      if (result.cols() != data.size()) {
+        result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
+                                  data.size());
+      }
+      result.row(current_row++) = data;
+      columns = result.cols();
     }
-    if (result.cols() != data.size()) {
-      result.conservativeResize(siconos::algebra::to_index(graph.vertices_number()),
-                                data.size());
-    }
-    result.row(current_row++) = data;
   }
-  result.conservativeResize(current_row, data_size);
+  result.conservativeResize(current_row, columns);
   DEBUG_EXPR(siconos::algebra::print(*result));
   ;
   return result;  // RVO
@@ -1220,7 +1226,9 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactInternalVariabl
   siconos::algebra::SiconosMatrix result =
       siconos::algebra::SiconosMatrix::Zero(graph.vertices_number(), 25);
 
-  int data_size = 0;
+  // Width of the rows, taken from the contacts only: the last interaction of the
+  // graph may be a joint (no data), whose size must not truncate the rows.
+  siconos::algebra::Index columns = 0;  // (0, 0) without contact, as before
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
@@ -1235,7 +1243,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactInternalVariabl
     inspector.inter = graph.bundle(*vi);
     graph.bundle(*vi)->relation()->accept(inspector);
     siconos::algebra::SiconosVector& data = inspector.answer;
-    data_size = data.size();
+    const auto data_size = data.size();
 
     if (data_size == 0) {
       // Nothing is done since the relation does not appear as a relation
@@ -1254,10 +1262,10 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactInternalVariabl
                                   data.size());
       }
       result.row(current_row++) = data;
-      data_size += 2;
+      columns = result.cols();
     }
   }
-  result.conservativeResize(current_row, data_size);
+  result.conservativeResize(current_row, columns);
   DEBUG_EXPR(siconos::algebra::print(result));
   DEBUG_END("siconos::io::MechanicsIO::contactInternalVariable");
 
