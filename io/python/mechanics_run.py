@@ -1,19 +1,9 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2025 INRIA.
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
 
@@ -32,6 +22,7 @@ import siconos.io as sio
 # Siconos imports
 import siconos.io.mechanics_hdf5
 import siconos.io.shape_collection
+import siconos.io.svg
 import siconos.io.vtkhdf
 
 # Siconos Mechanics imports
@@ -584,6 +575,30 @@ class MechanicsHdf5Runner_run_options(dict):
                       bodies as disks (BODIES_AS_DISKS), much lighter than
                       their shapes for the large cases""",
         )
+        create_option(
+            d,
+            "svg_output",
+            "string or list, optional",
+            None,
+            """SVG pictures of the scene (2D) at these times, "0.5,1.0":
+                      a value with a decimal point is a time, an int a
+                      simulation step number; the step at or before each
+                      time is drawn, in <io_filename>_svg_<time>.svg (see
+                      siconos.io.svg and the siconos_svg converter)""",
+        )
+        create_option(
+            d,
+            "svg_options",
+            "dict, optional",
+            None,
+            """the options of the SVG pictures (siconos.io.svg.Picture:
+                      mode, arrows, chains, cones, scale, colour,
+                      material_sides, labels) and of the run: directory,
+                      coulomb (the Coulomb plot of each picture), animate
+                      and strobe (of the output steps, written at the end
+                      of the run), window (t0, t1: their output steps),
+                      uniform, discrete, speed, controls""",
+        )
 
         # default verbose and debug  options
         create_option(
@@ -815,6 +830,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._vtkhdf_static_writer = None
         self._vtkhdf_contacts_writer = None
         self._vtkhdf_fem_writer = None
+        self._svg = None
+        self._svg_scheme_given = False
         self._static_rows = slice(0, 0)
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
@@ -1011,6 +1028,34 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             gid2 = int(self._format_adaptor["nslaws"][name].attrs["gid2"])
             if gid1 >= 0 and gid2 >= 0:
                 self._interman.insertNonSmoothLaw(nslaw, gid1, gid2)
+
+    def fem_restart_state(self, ds_id, q0, v0):
+        """The state (q, v) of the FEM body ds_id: on a cold restart, q0 plus
+        the displacement and the velocity of the last output step of the
+        file (fem_displacements_, fem_velocities_, through fem_dof_indices_);
+        else (q0, v0)."""
+        names = [
+            f"fem_{what}_{ds_id}"
+            for what in ("displacements", "velocities", "dof_indices")
+        ]
+        rows = self._data.get(names[0]) if self._data is not None else None
+        if rows is None or rows.shape[0] == 0:
+            return q0, v0
+        if any(name not in self._data for name in names[1:]):
+            siconos.io.tools.warn(
+                f"FEM body {ds_id}: no {names[1]} or {names[2]} in the file, "
+                "it restarts from its initial state"
+            )
+            return q0, v0
+        dofs = self._data[names[2]][:]
+        q = np.array(q0, dtype=np.float64)
+        v = np.zeros_like(q)
+        q[dofs] += rows[-1, 2:]
+        v[dofs] = self._data[names[1]][-1, 2:]
+        self.print_verbose(
+            f"FEM body {ds_id}: restart from its state at t = {rows[-1, 0]:g}"
+        )
+        return q, v
 
     def import_native_object(
         self,
@@ -1223,10 +1268,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     body.handle().set_mass_matrix(fesolid.mass())
                     body.handle().set_k_matrix(fesolid.stiffnessMatrix())
-                    body.handle().set_q(fesolid.q())
+                    q, velocity = self.fem_restart_state(
+                        int(body.number()), fesolid.q(), fesolid.velocity()
+                    )
+                    body.handle().set_q(q)
                     body.handle().set_q0(fesolid.q())
                     body.handle().set_fext(fesolid.fext_vector())
-                    body.handle().set_velocity(fesolid.velocity())
+                    body.handle().set_velocity(velocity)
                     body.handle().set_bc_velocities_0(boundary_conditions)
 
                 elif self._shape.attributes(ctor.shape_name)["type"] == "convex":
@@ -2667,41 +2715,55 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._format_adaptor["p0s"].resize(current_line + p0s.shape[0], 0)
             self._format_adaptor["p0s"][current_line:, :] = p0s
 
+    def _output_fem_dofs(self, prefix, values_by_id, dtype=None):
+        """One row per FEM system in <prefix>_<ds_id>: t, ds_id, then the
+        dofs in spatial order (self._fem_dof_mappings); dtype None: the h5py
+        default, float32 (fem_displacements_, as it always was)."""
+        for ds_id, values in values_by_id.items():
+            mapping = self._fem_dof_mappings.get(ds_id)
+            if mapping is None:
+                continue
+
+            spatial_values = values[mapping["dof_indices"]]
+
+            dataset_name = f"{prefix}_{ds_id}"
+            nbcolumns = 2 + len(spatial_values)
+            if dataset_name not in self._data:
+                dataset = self._data.create_dataset(
+                    dataset_name,
+                    (0, nbcolumns),
+                    maxshape=(None, nbcolumns),
+                    dtype=dtype,
+                    chunks=True,
+                    compression="gzip",
+                )
+                dataset.attrs["dof_count"] = len(spatial_values)
+                dataset.attrs["spatial_order"] = True
+            else:
+                dataset = self._data[dataset_name]
+
+            current_line = dataset.shape[0]
+            dataset.resize(current_line + 1, 0)
+            dataset[current_line, 0] = self.current_time()
+            dataset[current_line, 1] = ds_id
+            dataset[current_line, 2 : 2 + len(spatial_values)] = spatial_values
+
     def output_displacements(self):
         """
         Outputs displacements of fem objects.
         """
         disp_map = self._io.displacements(self._nsds)
         if disp_map is not None:
-            for ds_id, displacements in disp_map.items():
-                mapping = self._fem_dof_mappings.get(ds_id)
-                if mapping is None:
-                    continue
+            self._output_fem_dofs("fem_displacements", disp_map)
 
-                spatial_displacements = displacements[mapping["dof_indices"]]
-
-                dataset_name = f"fem_displacements_{ds_id}"
-                nbcolumns = 2 + len(spatial_displacements)
-                if dataset_name not in self._data:
-                    dataset = self._data.create_dataset(
-                        dataset_name,
-                        (0, nbcolumns),
-                        maxshape=(None, nbcolumns),
-                        chunks=True,
-                        compression="gzip",
-                    )
-                    dataset.attrs["dof_count"] = len(spatial_displacements)
-                    dataset.attrs["spatial_order"] = True
-                else:
-                    dataset = self._data[dataset_name]
-
-                current_line = dataset.shape[0]
-                dataset.resize(current_line + 1, 0)
-                dataset[current_line, 0] = self.current_time()
-                dataset[current_line, 1] = ds_id
-                dataset[current_line, 2 : 2 + len(spatial_displacements)] = (
-                    spatial_displacements
-                )
+    def output_fem_velocities(self):
+        """
+        Outputs the velocities of the nodes of the fem objects (vnative), in
+        the layout of the displacements.
+        """
+        self._output_fem_dofs(
+            "fem_velocities", self._io.femVelocities(self._nsds), dtype=np.float64
+        )
 
     def output_fem_epsilon(self):
         """
@@ -2779,11 +2841,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             dataset[current_line, 1] = ds_id
             dataset[current_line, 2 : 2 + len(sigma)] = sigma
 
-    def output_fem_stiffness(self):
-        """Write each vnative linear-FEM stiffness matrix once in CSC form."""
-        matrices = self._io.stiffness_matrices(self._nsds)
+    def _output_fem_matrices(self, prefix, matrices, what, **attrs):
+        """Write each FEM matrix once in CSC form, in the group <prefix>_<ds_id>
+        (outer, inner, values; attrs format, rows, cols, nnz and attrs); on a
+        restart, check the metadata of the existing group."""
         for ds_id, matrix in matrices.items():
-            name = f"fem_stiffness_{ds_id}"
+            name = f"{prefix}_{ds_id}"
             rows, cols = matrix.shape
             outer = np.asarray(matrix.indptr, dtype=np.int64)
             inner = np.asarray(matrix.indices, dtype=np.int64)
@@ -2800,7 +2863,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
                 if actual != expected:
                     raise RuntimeError(
-                        f"Existing {name} has incompatible stiffness metadata: "
+                        f"Existing {name} has incompatible {what} metadata: "
                         f"expected {expected}, found {actual}"
                     )
                 continue
@@ -2810,9 +2873,27 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             group.attrs["rows"] = rows
             group.attrs["cols"] = cols
             group.attrs["nnz"] = len(values)
+            for key, value in attrs.items():
+                group.attrs[key] = value
             group.create_dataset("outer", data=outer)
             group.create_dataset("inner", data=inner)
             group.create_dataset("values", data=values)
+
+    def output_fem_stiffness(self):
+        """Write each vnative linear-FEM stiffness matrix once in CSC form."""
+        self._output_fem_matrices(
+            "fem_stiffness", self._io.stiffness_matrices(self._nsds), "stiffness"
+        )
+
+    def output_fem_mass(self):
+        """Write each vnative linear-FEM mass matrix once in CSC form: the
+        matrix the integrator uses, the consistent mass of the FEM model."""
+        self._output_fem_matrices(
+            "fem_mass",
+            self._io.mass_matrices(self._nsds),
+            "mass",
+            mass="consistent",
+        )
 
     def output_dynamic_objects(self, initial=False):
         """
@@ -2948,6 +3029,50 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             ),
         )
 
+    def output_svg(self, output_step=False):
+        """
+        Counts the contacts of an output step for the sides of the segments
+        and draws the SVG pictures due at this step (svg_output), from the
+        rows the hdf5 tables have.
+        """
+        time = self.current_time()
+        due = self._svg.due(time)
+        if not (output_step or due):
+            return
+        positions = self.get_io_array(self._io.positions(self._nsds))
+        velocities = self.get_io_array(self._io.velocities(self._nsds))
+        points, point_data = siconos.io.vtkhdf.bodies_point_data(positions, velocities)
+        bodies, velocities = siconos.io.vtkhdf.siconos_rows(time, points, point_data)
+        columns = self._contact_points_columns()
+        contacts = np.zeros((0, columns))
+        if not self._initializing and self._nsds.topology().indexSetsSize() > 1:
+            contacts = self._io.contactPoints(
+                self._nsds, self._output_contact_index_set
+            )
+        # the FEM displacements in spatial order, as output_displacements
+        fem = {}
+        if self._fem_dof_mappings:
+            for ds_id, displacements in self._io.displacements(self._nsds).items():
+                mapping = self._fem_dof_mappings.get(ds_id)
+                if mapping is not None:
+                    fem[ds_id] = np.asarray(
+                        displacements[mapping["dof_indices"]], dtype=np.float32
+                    ).astype(np.float64)
+        step = siconos.io.svg.Step(
+            time,
+            siconos.io.svg.as_table(bodies[:, 1:], 8),
+            siconos.io.svg.as_table(velocities[:, 1:], 7),
+            siconos.io.svg.as_table(
+                self._format_adaptor["static"][self._static_rows, 1:], 8
+            ),
+            siconos.io.svg.as_table(np.asarray(contacts)[:, :columns], columns),
+            fem,
+        )
+        if output_step:
+            self._svg.output_step(step)
+        if due:
+            self._svg.draw(step)
+
     def output_bodies(self, with_timer=False, initial=False):
         """
         Outputs the dynamic objects in the format(s) given by output_format.
@@ -2977,15 +3102,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if initial and self._vtkhdf_contacts_writer is not None:
                 self._vtkhdf_contacts_writer.write_step(
                     self.current_time(),
-                    *siconos.io.vtkhdf.contacts_point_data(np.zeros((0, 25))),
+                    *siconos.io.vtkhdf.contacts_point_data(
+                        np.zeros((0, self._contact_points_columns()))
+                    ),
                 )
+
+    def _contact_points_columns(self):
+        """the columns of the contact points of the backend: 25, 31 with the
+        rolling columns (see "cf" in format_v1.json)"""
+        columns = getattr(self._io, "contactPointsColumns", None)
+        return columns() if columns is not None else 25
 
     def output_contact_forces(self):
         """
         Outputs contact forces
         _output_contact_index_set default value is 1.
         """
-        rows = np.zeros((0, 26))
+        rows = np.zeros((0, 1 + self._contact_points_columns()))
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
 
@@ -3036,6 +3169,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     rows = np.concatenate((times, new_contact_points), axis=1)
 
             if rows.shape[0] > 0 and self._output_format != "vtkhdf":
+                if self._format_adaptor["cf"].shape[1] != rows.shape[1]:
+                    # the rolling columns: the table is still empty
+                    self._format_adaptor.set_columns("cf", rows.shape[1])
                 current_line = self._format_adaptor["cf"].shape[0]
                 # Increase the number of lines in cf_data
                 # (h5 dataset with chunks)
@@ -3093,6 +3229,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._nsds,
                 self._output_contact_index_set,
                 omega=self._run_options.get("theta"),
+                gap_law=type(getattr(self, "_osi", None)).__name__
+                in ("MoreauJeanQuasiInelasticOSI", "AnitescuTasoraInelastic"),
+                h=self._run_options.get("h"),
             )
 
             # print(contact_work)
@@ -3167,25 +3306,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             external_forces_work_sum = 0.0
             energy_contact_work = np.zeros(8)
 
-            positions = self.get_io_array(self._io.positions(self._nsds))
             nsds = self._nsds
-            if positions is not None:
-                ds_idx = positions[:, 0]
-                for i in ds_idx:
-                    n_ds = int(i)
-                    neds = nsds.dynamicalSystem(n_ds)
-                    kinetic = neds.computeKineticEnergy()
-                    kinetic_sum = kinetic + kinetic_sum
+            if self.config.backend == "vnative":
+                # one column per quantity, computed by the vkernel io: the
+                # rigid and the FEM systems, theta and h of the integrator
+                kinetic_sum = np.sum(np.asarray(self._io.kineticEnergies(nsds))[:, 1])
+                external_forces_work_sum = np.sum(
+                    np.asarray(self._io.workOfForces(nsds))[:, 1]
+                )
+            else:
+                positions = self.get_io_array(self._io.positions(self._nsds))
+                if positions is not None:
+                    ds_idx = positions[:, 0]
+                    for i in ds_idx:
+                        n_ds = int(i)
+                        neds = nsds.dynamicalSystem(n_ds)
+                        kinetic = neds.computeKineticEnergy()
+                        kinetic_sum = kinetic + kinetic_sum
 
-            work_forces = self._osi.computeWorkForces()
-            if work_forces is not None:
-                # print(work_forces)
-                external_forces_work_sum = np.sum(work_forces[:, 1])
+                work_forces = self._osi.computeWorkForces()
+                if work_forces is not None:
+                    # print(work_forces)
+                    external_forces_work_sum = np.sum(work_forces[:, 1])
 
             cf_work = self._io.contactContactWork(
                 self._nsds,
                 self._output_contact_index_set,
                 omega=self._run_options.get("theta"),
+                gap_law=type(getattr(self, "_osi", None)).__name__
+                in ("MoreauJeanQuasiInelasticOSI", "AnitescuTasoraInelastic"),
+                h=self._run_options.get("h"),
             )
             # print('cf_work', cf_work)
 
@@ -3303,6 +3453,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self.config.backend == "vnative":
             self.log(self.output_displacements, with_timer)()
+            self.log(self.output_fem_velocities, with_timer)()
             self.log(self.output_fem_epsilon, with_timer)()
             self.log(self.output_fem_sigma, with_timer)()
             self.log(self.output_p0s, with_timer)()
@@ -3439,7 +3590,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # which is able to serialize python object.
 
         d["friction_contact_trace_params"] = "not serialized"  # fix it
-        d["osi"] = "not serialized"  # fix it
+        # the class of the integrator given by the script
+        d["osi"] = siconos.io.svg.scheme_name(d["osi"])
+        # vnative: the scheme the integrator runs, which the osi alone does
+        # not tell (a Frémond law, the --scheme of the siconos command line)
+        integrator_scheme = getattr(self._io, "integratorScheme", None)
+        if integrator_scheme is not None:
+            d["scheme"] = integrator_scheme()
         d["time_stepping"] = "not serialized"  # fix it
 
         d["start_run_iteration_hook"] = "not serialized"  # fix it
@@ -3475,20 +3632,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             if isinstance(obj, enum_types):
                 return obj.value
-            elif isinstance(obj, (str, int, float, bool, list, dict, type(None))):
-                return obj
-            elif hasattr(obj, "__class__") and hasattr(obj, "__dir__"):
-                return {
-                    key: serialize_enum(getattr(obj, key))
-                    for key in dir(obj)
-                    if not key.startswith("_") and hasattr(obj, key)
-                }
+            if isinstance(obj, (np.integer, np.floating, np.bool_)):
+                return obj.item()
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            # the other objects (vnative options, callables): their type only
+            return f"not serialized ({type(obj).__name__})"
 
-            raise TypeError(
-                f"Object of type {obj.__class__.__name__} is not JSON serializable"
-            )
-
-        dict_json = json.dumps(d)
+        dict_json = json.dumps(d, default=serialize_enum)
         self._format_adaptor["siconos_mechanics_run_options"].attrs["options"] = (
             dict_json
         )
@@ -3899,6 +4050,34 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     append=self._vtkhdf_append,
                 )
 
+        svg_options = dict(run_options.get("svg_options") or {})
+        if (
+            run_options.get("svg_output")
+            or svg_options.get("animate")
+            or (svg_options.get("strobe"))
+        ):
+            if self._dimension != 2:
+                siconos.io.tools.warn("svg_output: 2D simulations only, ignored")
+            else:
+                # the title: the scheme of svg_options, else the scheme that
+                # runs (set below, once the integrator is inserted)
+                self._svg_scheme_given = "scheme" in svg_options
+                svg_options.setdefault(
+                    "scheme", siconos.io.svg.scheme_name(run_options["osi"])
+                )
+                svg_options.setdefault("length_unit", run_options["gravity_scale"])
+                self._svg = siconos.io.svg.RunPictures(
+                    self._io_filename,
+                    siconos.io.vtkhdf.ShapeTable(self._data, self._dimension),
+                    siconos.io.svg.parse_times(run_options.get("svg_output") or ()),
+                    h,
+                    siconos.io.vtkhdf.FemMeshes(self._data),
+                    **svg_options,
+                )
+                if len(times) > 0:
+                    # a restart: the votes of the steps of the file
+                    self._svg.preload(self._data)
+
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
         # SiconosBulletOptions if one is provided.
@@ -4302,21 +4481,41 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 coord_name = f"fem_coords_{ds_id}"
                 if coord_name not in self._data:
                     self._data.create_dataset(coord_name, data=coords)
+                # the dof of M and K (fem_mass_, fem_stiffness_) of each
+                # column of the spatial-order tables, once
+                dof_name = f"fem_dof_indices_{ds_id}"
+                if dof_name not in self._data:
+                    self._data.create_dataset(
+                        dof_name, data=dof_indices.astype(np.int64)
+                    )
 
         if self.config.backend == "vnative":
             self.output_fem_stiffness()
+            self.output_fem_mass()
+
+        # vnative: the pictures titled with the scheme that runs, as the
+        # siconos_svg converter titles them from the run options
+        integrator_scheme = getattr(self._io, "integratorScheme", None)
+        if (
+            self._svg is not None
+            and not self._svg_scheme_given
+            and integrator_scheme is not None
+        ):
+            self._svg.picture.scheme = integrator_scheme()
 
         self.print_verbose("first output static and dynamic objects ...")
         self.init_step_index()
         self.begin_output_step()
         self.output_static_objects()
         self.output_bodies(initial=True)
+        if self._svg is not None:
+            self.output_svg(output_step=True)
 
         if self._should_output_domains:
             self.log(self.output_domains, run_options["with_timer"])()
         self.end_output_step(self.current_time())
 
-        # self.output_run_options()
+        self.output_run_options()
 
         self.print_verbose("start simulation ...")
         self._initializing = False
@@ -4543,6 +4742,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 self.log(self.output_results, with_timer)()
 
+            if self._svg is not None:
+                self.log(self.output_svg, with_timer)(cond or self._k == 1)
+
             if (
                 self._output_backup
                 and (self._k % self._output_backup_frequency == 0)
@@ -4623,6 +4825,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         try:
             info = self.log(self.run_initialize, with_timer)()
             info = self.log(self.run_loop, with_timer)()
+            if self._svg is not None:
+                self._svg.finish()
         finally:
             for writer in (
                 self._vtkhdf_writer,

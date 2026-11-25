@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -29,31 +18,13 @@
 #include "NumericsSparseMatrix.h"
 #include "numerics_errors.h"   // NUMERICS_OK
 #include "numerics_verbose.h"  // CHECK_RETURN
-#include "siconos/vkernel/algebra/algebra.hpp"
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/algebra/linear_algebra.hpp"
 #include "siconos/vkernel/algebra/sparse_factor.hpp"
 #include "siconos/vkernel/storage/pattern/pattern.hpp"
 #include "siconos/vkernel/storage/traits/traits.hpp"
 
-namespace siconos::vkernel::storage::pattern::match {
-template <typename T>
-concept vec = requires { typename std::decay_t<T>::vec_t; };
-
-template <typename T>
-concept any_mat = !vec<T> && requires { typename std::decay_t<T>::any_mat_t; };
-
-template <typename T>
-concept mat = any_mat<T> && requires { typename std::decay_t<T>::mat_t; };
-
-template <typename T>
-concept diag_mat = any_mat<T> && requires { typename std::decay_t<T>::diag_mat_t; };
-
-}  // namespace siconos::vkernel::storage::pattern::match
-
 namespace siconos::vkernel::algebra {
-
-namespace match = siconos::vkernel::storage::pattern::match;
 
 using indice_t = std::size_t;
 

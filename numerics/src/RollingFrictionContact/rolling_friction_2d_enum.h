@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef ROLLINGFRICTIONCONTACT2DEnum_H
 #define ROLLINGFRICTIONCONTACT2DEnum_H
@@ -37,6 +26,11 @@
   every case is checked against the whole law in a fixed order: the first
   accepted is the solution; if round-off rejects every case, the case of
   smallest violation is kept and the violation is the local residual.
+
+  A block without rolling row (zero third row and column: a contact whose
+  relation has no rolling row) is a 2D Coulomb contact: r_r = 0, the
+  inverse is the one of its normal and tangent block, and the same cases
+  are solved on the normal and tangent rows.
 
   In rolling_friction_2d_nsgs, the diagonal blocks of W and their inverses
   are extracted once per solve (rolling_friction_2d_enum_initialize, into

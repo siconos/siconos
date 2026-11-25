@@ -5,19 +5,8 @@ to configure, build and execute siconos examples
 Siconos is a program dedicated to modeling, simulation and control
 of non smooth dynamical systems.
 
-Copyright 2024 INRIA.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-FileCopyrightText: INRIA
+SPDX-License-Identifier: Apache-2.0
 """
 
 import argparse
@@ -44,6 +33,7 @@ SIM_OPTION_DESTS = (
     "T",
     "h",
     "output_format",
+    "svg_output",
     "scheme",
     "theta",
     "gamma",
@@ -54,6 +44,7 @@ SIM_OPTION_DESTS = (
     "dem_kn",
     "dem_cn",
     "dem_kt",
+    "mu_r",
     "timings",
     "dataflow",
     "resume",
@@ -69,6 +60,8 @@ SIM_SCHEMES = (
     "AnitescuTasoraAPGD",
     "DEM",
     "MoreauJeanFremond",
+    "MoreauJeanQuasiInelastic",
+    "AnitescuTasoraInelastic",
 )
 SIM_SCHEME_ALIASES = {
     "mj": "MoreauJean",
@@ -77,12 +70,50 @@ SIM_SCHEME_ALIASES = {
     "at-apgd": "AnitescuTasoraAPGD",
     "dem": "DEM",
     "mjf": "MoreauJeanFremond",
+    "mji": "MoreauJeanQuasiInelastic",
+    "quasi-inelastic": "MoreauJeanQuasiInelastic",
+    "at-inelastic": "AnitescuTasoraInelastic",
+}
+
+# the options of the SVG pictures: the dests of the --svg-* arguments (but
+# --svg-output) and their keys in run_options["svg_options"] (see
+# siconos.io.svg.RunPictures and Picture, and the siconos_svg converter)
+SVG_OPTION_KEYS = {
+    "svg_dir": "directory",
+    "svg_mode": "mode",
+    "svg_arrows": "arrows",
+    "svg_chains": "chains",
+    "svg_cones": "cones",
+    "svg_scale": "scale",
+    "svg_colour": "colour",
+    "svg_material_side": "material_sides",
+    "svg_labels": "labels",
+    "svg_view": "view",
+    "svg_coulomb": "coulomb",
+    "svg_animate": "animate",
+    "svg_strobe": "strobe",
+    "svg_uniform": "uniform",
+    "svg_discrete": "discrete",
+    "svg_speed": "speed",
+    "svg_controls": "controls",
 }
 
 
 def sim_scheme(value):
     """a scheme of the vnative integrator, old short names included"""
     return SIM_SCHEME_ALIASES.get(value, value)
+
+
+def material_side(text):
+    """ID=+1 or ID=-1, as siconos_svg --material-side"""
+    key, _, value = text.partition("=")
+    try:
+        ident = int(key)
+    except ValueError:
+        ident = None
+    if ident is None or value not in ("+1", "1", "-1"):
+        raise argparse.ArgumentTypeError(f"{text}: ID=+1 or ID=-1")
+    return [ident, int(value)]
 
 
 def collect_sim_options(args):
@@ -92,6 +123,18 @@ def collect_sim_options(args):
         value = getattr(args, dest)
         if value is not None and value is not False:
             options[dest] = value
+    svg_options = {}
+    for dest, key in SVG_OPTION_KEYS.items():
+        value = getattr(args, dest)
+        # None: not given; False: a flag not given, but --no-svg-arrows,
+        # --no-svg-chains and --no-svg-cones
+        if value is None or (value is False and key not in ("arrows", "chains", "cones")):
+            continue
+        svg_options[key] = value
+    if args.svg_from is not None or args.svg_to is not None:
+        svg_options["window"] = [args.svg_from, args.svg_to]
+    if svg_options:
+        options["svg_options"] = svg_options
     return options
 
 
@@ -187,7 +230,7 @@ def main():
 
     if sim_options and not args.is_python:
         print(
-            "siconos: the simulation options (--t0 --T --h --output-format "
+            "siconos: the simulation options (--t0 --T --h --output-format --svg-output "
             "--scheme ... --resume) need a python driver",
             file=sys.stderr,
         )
@@ -568,8 +611,9 @@ def parse_command_line(with_remainder=True):
 
     # -- Simulation options (python drivers) --
     # Override what the driver script chose, before it runs (see
-    # nonos/simoptions.py). The run options (t0, T, h, output-format) are
-    # shared by all the backends; the rest are the vnative backend only.
+    # nonos/simoptions.py). The run options (t0, T, h, output-format, svg-output
+    # and the --svg-* options) are shared by all the backends; the rest are the
+    # vnative backend only.
     sim_group = parser.add_argument_group(
         "Simulation options (python drivers, override the driver's choices)"
     )
@@ -589,6 +633,113 @@ def parse_command_line(with_remainder=True):
         "(run option)",
     )
     sim_group.add_argument(
+        "--svg-output",
+        metavar="TIME,...",
+        help="SVG pictures of the scene at these times (a value with a decimal "
+        "point) or simulation step numbers (an int), 2D only, "
+        "<file>_svg_<time>.svg beside the hdf5 file (run option, see "
+        "siconos_svg)",
+    )
+    svg_group = parser.add_argument_group(
+        "SVG options (python drivers, run_options[\"svg_options\"], 2D only; the "
+        "options of the siconos_svg converter)"
+    )
+    svg_group.add_argument(
+        "--svg-dir", metavar="DIR", help="the directory of the pictures"
+    )
+    svg_group.add_argument(
+        "--svg-mode",
+        choices=("auto", "circle", "use", "bins"),
+        help="one element per body (circle), one <use> of its shape (use), the "
+        "bodies merged by colour (bins); auto by the number of bodies",
+    )
+    for name, what in (
+        ("arrows", "the reaction impulse arrows"),
+        ("chains", "the force chains"),
+        ("cones", "the Coulomb cones"),
+    ):
+        svg_group.add_argument(
+            f"--svg-{name}",
+            action=argparse.BooleanOptionalAction,
+            help=f"draw {what} or not (default: by the number of contacts)",
+        )
+    svg_group.add_argument(
+        "--svg-scale",
+        choices=("proportional", "fixed", "log"),
+        help="the length of the arrows: proportional to the impulse, fixed (the "
+        "direction only) or log (3 decades)",
+    )
+    svg_group.add_argument(
+        "--svg-colour",
+        choices=("speed", "omega", "none"),
+        help="the colouring of the bodies: |v|, |omega| or none",
+    )
+    svg_group.add_argument(
+        "--svg-material-side",
+        type=material_side,
+        action="append",
+        metavar="ID=+1|-1",
+        help="the material side of the segments of the static object ID, over "
+        "the side inferred from the contacts; repeatable",
+    )
+    svg_group.add_argument("--svg-labels", action="store_true", help="the body ids")
+    svg_group.add_argument(
+        "--svg-view",
+        type=float,
+        nargs=4,
+        metavar=("X0", "X1", "Y0", "Y1"),
+        help="crop the pictures to this window (said in their title)",
+    )
+    svg_group.add_argument(
+        "--svg-coulomb",
+        action="store_true",
+        help="the Coulomb plot (r_n, r_t) of each picture",
+    )
+    svg_group.add_argument(
+        "--svg-animate",
+        action="store_true",
+        help="<file>_svg_animation.svg, the output steps animated (SMIL), "
+        "written at the end of the run",
+    )
+    svg_group.add_argument(
+        "--svg-strobe",
+        action="store_true",
+        help="<file>_svg_strobe.svg, the output steps superimposed, written at "
+        "the end of the run",
+    )
+    svg_group.add_argument(
+        "--svg-from",
+        type=float,
+        metavar="TIME",
+        help="the animation and the strobe from this time",
+    )
+    svg_group.add_argument(
+        "--svg-to",
+        type=float,
+        metavar="TIME",
+        help="the animation and the strobe to this time",
+    )
+    svg_group.add_argument(
+        "--svg-uniform",
+        action="store_true",
+        help="one frame per output step, instead of the physical times",
+    )
+    svg_group.add_argument(
+        "--svg-discrete",
+        action="store_true",
+        help="no interpolation between the steps of the animation",
+    )
+    svg_group.add_argument(
+        "--svg-speed",
+        type=float,
+        help="the playback speed of the animation, 1: real time",
+    )
+    svg_group.add_argument(
+        "--svg-controls",
+        action="store_true",
+        help="buttons under the animation: pause, step, seek (a script)",
+    )
+    sim_group.add_argument(
         "--scheme",
         type=sim_scheme,
         choices=SIM_SCHEMES,
@@ -599,8 +750,13 @@ def parse_command_line(with_remainder=True):
         "(explicit penalty springs), MoreauJeanFremond (Moreau-Jean on the "
         "local problem with the Fremond impact law: Coulomb friction on the "
         "theta-weighted velocity, energy-consistent for 1/2 <= theta <= "
-        "1/(1+e)). The short names mj, gosi, at, at-apgd, dem and mjf are "
-        "accepted too",
+        "1/(1+e)), MoreauJeanQuasiInelastic (Moreau-Jean on the local problem "
+        "with the quasi inelastic shock law of Jean 1999, Eq 25, on the "
+        "rigid contacts: the gap closed in one step, then an inelastic "
+        "shock; e = 0 on the laws), AnitescuTasoraInelastic (AnitescuTasora "
+        "with the stabilisation of Anitescu-Tasora, the signed gap over h; "
+        "e = 0 on the laws). The short names mj, gosi, at, at-apgd, dem, "
+        "mjf, mji (or quasi-inelastic) and at-inelastic are accepted too",
     )
     sim_group.add_argument("--theta", type=float, help="theta of the vnative integrator")
     sim_group.add_argument("--gamma", type=float, help="gamma of the vnative integrator")
@@ -629,6 +785,14 @@ def parse_command_line(with_remainder=True):
     )
     sim_group.add_argument(
         "--dem-kt", type=float, help="tangential stiffness k_t of the explicit DEM penalty law"
+    )
+    sim_group.add_argument(
+        "--mu-r",
+        type=float,
+        help="the rolling resistance mu_r (a length) of every friction law of "
+        "the scene, over the driver's (0: no rolling resistance); the "
+        "contacts of disks resist rolling; refused under MoreauJeanGOSI and "
+        "DEM (vnative)",
     )
     sim_group.add_argument(
         "--timings",

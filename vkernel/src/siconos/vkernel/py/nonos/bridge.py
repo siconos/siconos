@@ -1,19 +1,8 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright INRIA.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 #
 
 import nonos as vkernel
@@ -42,6 +31,8 @@ class Stored:
         BodyBase.shapes().clear()
         # no law of a previous storage
         NewtonImpactFrictionNSL.laws.clear()
+        NewtonImpactFrictionNSL.rolling_resistance = False
+        NewtonImpactFrictionNSL.max_en = 0.0
 
     @classmethod
     def data(cls):
@@ -217,16 +208,38 @@ class SpaceFilter(Stored):
 
 
 class NewtonImpactFrictionNSL(Stored):
-    # the class names of the laws of the storage: the scheme of the
-    # integrator depends on them (see Simulation.insertIntegrator)
+    # the class names of the laws of the storage, and whether one of them
+    # resists rolling: the scheme of the integrator depends on them (see
+    # Simulation.insertIntegrator)
     laws = set()
+    rolling_resistance = False
+    # the largest normal restitution e of the laws of the storage: the quasi
+    # inelastic shock law replaces the restitution (see insertIntegrator)
+    max_en = 0.0
 
     def __init__(self, e, not_used, mu, dimension):
         self._handle = vkernel.disks.add_nslaw(self.data())
         self._handle.set_e(e)
         self._handle.set_mu(mu)
+        # the law of the vkernel has a rolling resistance, none here
+        self._handle.set_mu_r(0.0)
         # self._handle.set_dimension(dimension)
         NewtonImpactFrictionNSL.laws.add(type(self).__name__)
+        NewtonImpactFrictionNSL.max_en = max(NewtonImpactFrictionNSL.max_en, abs(e))
+
+
+class NewtonImpactRollingFrictionNSL(NewtonImpactFrictionNSL):
+    """The Newton impact law with Coulomb friction and rolling resistance
+    mu_r, a length (model::newton_impact_rolling_friction): the signature of
+    the AOS kernel law (en, et, mu, mu_r, size), et and size not used (no
+    tangential restitution, size 3 in 2D). Only the contacts of disks
+    resist rolling; with mu_r = 0 it is NewtonImpactFrictionNSL."""
+
+    def __init__(self, e, not_used, mu, mu_r, size=3):
+        super().__init__(e, not_used, mu, size)
+        self._handle.set_mu_r(mu_r)
+        if mu_r > 0:
+            NewtonImpactFrictionNSL.rolling_resistance = True
 
 
 class FremondImpactFrictionNSL(NewtonImpactFrictionNSL):
@@ -292,6 +305,26 @@ SCHEME_CONE_COMPLEMENTARITY = 2
 SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
 SCHEME_LOCAL_PROBLEM_FREMOND = 5
+SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC = 6
+SCHEME_CONE_COMPLEMENTARITY_INELASTIC = 7
+# the schemes whose normal shock law is on the gap: the quasi inelastic law
+# and the Anitescu-Tasora stabilisation (the contact status of contact_work)
+GAP_LAW_SCHEMES = (
+    SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC,
+    SCHEME_CONE_COMPLEMENTARITY_INELASTIC,
+)
+# the names of the schemes, as the --scheme of the siconos command line
+# (nonos/simoptions.py SCHEMES)
+SCHEME_NAMES = {
+    SCHEME_LOCAL_PROBLEM: "MoreauJean",
+    SCHEME_GLOBAL_PROBLEM: "MoreauJeanGOSI",
+    SCHEME_CONE_COMPLEMENTARITY: "AnitescuTasora",
+    SCHEME_CONE_COMPLEMENTARITY_APGD: "AnitescuTasoraAPGD",
+    SCHEME_EXPLICIT_PENALTY: "DEM",
+    SCHEME_LOCAL_PROBLEM_FREMOND: "MoreauJeanFremond",
+    SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC: "MoreauJeanQuasiInelastic",
+    SCHEME_CONE_COMPLEMENTARITY_INELASTIC: "AnitescuTasoraInelastic",
+}
 
 
 class Simulation(Stored):
@@ -342,6 +375,10 @@ class Simulation(Stored):
             scheme = SCHEME_CONE_COMPLEMENTARITY
         elif type(osi).__name__ == "AnitescuTasoraAPGDOSI":
             scheme = SCHEME_CONE_COMPLEMENTARITY_APGD
+        elif type(osi).__name__ == "MoreauJeanQuasiInelasticOSI":
+            scheme = SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC
+        elif type(osi).__name__ == "AnitescuTasoraInelastic":
+            scheme = SCHEME_CONE_COMPLEMENTARITY_INELASTIC
         elif type(osi).__name__ == "ExplicitDEMOSI":
             scheme = SCHEME_EXPLICIT_PENALTY
             vosi.set_theta(osi.theta_dem)
@@ -350,21 +387,52 @@ class Simulation(Stored):
             vosi.set_tangential_stiffness(osi.tangential_stiffness)
         else:
             scheme = SCHEME_LOCAL_PROBLEM
+        self.setScheme(scheme, f"the osi is a {type(osi).__name__}")
+
+    def setScheme(self, scheme, origin):
+        """Set the scheme of the integrator, checked against the laws of the
+        storage (and changed to the Frémond scheme under Frémond laws).
+        origin: where the scheme comes from, for the messages (the osi of
+        the script, or the --scheme of the siconos command line)."""
+        # the quasi inelastic shock law of the vnative Moreau-Jean local
+        # problem: it replaces the restitution, so e must be 0 on the laws (e
+        # multiplies ydot, the law divides the gap by h; they agree only for a
+        # contact exactly at gap 0 and a fixed h), and it cannot be the Frémond
+        # law (which writes friction on the theta-weighted velocity)
+        laws = NewtonImpactFrictionNSL.laws
+        if scheme in GAP_LAW_SCHEMES:
+            if NewtonImpactFrictionNSL.max_en > 0:
+                raise ValueError(
+                    "vnative: the inelastic gap law replaces the restitution, "
+                    "set e = 0 on the interaction laws"
+                )
+            if "FremondImpactFrictionNSL" in laws:
+                raise ValueError(
+                    "vnative: the inelastic gap law and the Frémond impact "
+                    "law cannot be mixed"
+                )
         # the Frémond impact law is a scheme of the vkernel, on all the
         # interactions: it cannot be mixed with the Newton law, and only
         # Moreau-Jean on the local problem implements it
-        laws = NewtonImpactFrictionNSL.laws
         if "FremondImpactFrictionNSL" in laws:
-            if "NewtonImpactFrictionNSL" in laws:
+            if laws & {"NewtonImpactFrictionNSL", "NewtonImpactRollingFrictionNSL"}:
                 raise ValueError(
                     "vnative: the Frémond and the Newton impact laws cannot be mixed"
                 )
-            if scheme != SCHEME_LOCAL_PROBLEM:
+            if scheme not in (SCHEME_LOCAL_PROBLEM, SCHEME_LOCAL_PROBLEM_FREMOND):
                 raise ValueError(
-                    f"vnative: the Frémond impact law needs a MoreauJeanOSI, "
-                    f"the osi is a {type(osi).__name__}"
+                    f"vnative: the Frémond impact law needs a MoreauJeanOSI, {origin}"
                 )
             scheme = SCHEME_LOCAL_PROBLEM_FREMOND
+        # rolling resistance: no 2D global rolling friction solver, no
+        # rolling spring in the DEM scheme
+        if NewtonImpactFrictionNSL.rolling_resistance and scheme in (
+            SCHEME_GLOBAL_PROBLEM,
+            SCHEME_EXPLICIT_PENALTY,
+        ):
+            raise ValueError(
+                f"vnative: rolling resistance (mu_r > 0) is not supported, {origin}"
+            )
         self.handle().one_step_integrator().set_scheme(scheme)
 
     def insertNonSmoothProblem(self, osnspb):
@@ -736,11 +804,29 @@ class TraceParams(Stored):
         self.handle().set_math_info(tp_args._mathInfo)
 
 
+# the 2D rolling friction solvers of numerics (RollingFrictionContact_options.h)
+_ROLLING_FRICTION_2D_IDS = range(4000, 4100)
+
+
 class OSNSPB(Stored):
     def __init__(self, dim, solvopts):
         self._so = vkernel.disks.add_solver_options(self.data())
 
-        if solvopts is not None:
+        if solvopts is not None and solvopts.solverId in _ROLLING_FRICTION_2D_IDS:
+            # the options of a 2D rolling friction solver: the 2D friction
+            # NSGS with their tolerance and maximum number of iterations. The
+            # problem with rolling resistance is solved by the 2D rolling
+            # NSGS with these two (one_step_nonsmooth_problem::solve_rolling)
+            self._so.create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+            self._so.set_iparam(
+                sn.params.SICONOS_IPARAM_MAX_ITER,
+                solvopts.iparam[sn.params.SICONOS_IPARAM_MAX_ITER],
+            )
+            self._so.set_dparam(
+                sn.params.SICONOS_DPARAM_TOL,
+                solvopts.dparam[sn.params.SICONOS_DPARAM_TOL],
+            )
+        elif solvopts is not None:
             self._so.create(solvopts.solverId)
             for i, v in enumerate(solvopts.iparam):
                 self._so.set_iparam(i, v)
@@ -793,6 +879,17 @@ SICONOS_TS_NONLINEAR = "SICONOS_TS_NONLINEAR"
 MoreauJeanOSI = Osi
 
 
+class MoreauJeanQuasiInelasticOSI(Osi):
+    """run_options["osi"] for the quasi inelastic shock law of Jean 1999
+    (CMAME 177, Eq 25) of the vnative backend (simul/moreau_jean.hpp,
+    local_problem_quasi_inelastic): a MoreauJeanOSI whose normal shock law is
+    the positive part of the gap over h instead of the restitution.  The law
+    replaces the restitution, so the interaction laws must have e = 0
+    (refused otherwise), and it acts on the rigid-rigid contacts only (the FEM
+    contacts keep the Newton law).  Only its type is read by
+    Simulation.insertIntegrator."""
+
+
 class Unimplemented:
     def __init__(self, *args):
         assert False
@@ -809,6 +906,16 @@ class AnitescuTasoraOSI(siconos_integrators.MoreauJeanOSI):
 
 class AnitescuTasoraAPGDOSI(siconos_integrators.MoreauJeanOSI):
     """the same, the cone complementarity problem solved by APGD"""
+
+
+class AnitescuTasoraInelastic(siconos_integrators.MoreauJeanOSI):
+    """run_options["osi"] for the Anitescu-Tasora scheme with the stabilisation
+    of Anitescu-Tasora as Chrono implements it (simul/anitescu_tasora.hpp,
+    cone_complementarity_inelastic): the normal RHS is the signed gap over h,
+    clamped at the contact recovery speed (0.6).  A separation may close by the
+    end of the step, an overlap is pushed out: this is NOT Jean's quasi
+    inelastic law, which the comparison must not confuse it with.  Only its
+    type is read by Simulation.insertIntegrator."""
 
 
 class ExplicitDEMOSI(siconos_integrators.MoreauJeanOSI):
@@ -840,8 +947,12 @@ class ExplicitDEMOSI(siconos_integrators.MoreauJeanOSI):
 TimeSteppingDirectProjection = Unimplemented
 
 FrictionContact = OSNSPB
+# the same: the problem with rolling resistance is solved when a contact
+# resists rolling (one_step_nonsmooth_problem::solve_rolling)
+RollingFrictionContact = OSNSPB
 # the same: the problem itself is chosen by the scheme of the integrator
 GlobalFrictionContact = OSNSPB
+GlobalRollingFrictionContact = OSNSPB
 
 
 class MechanicsIO(Stored):
@@ -874,14 +985,71 @@ class MechanicsIO(Stored):
         return self.handle().velocities(self._simulation.handle().current_step())
 
     def contactPoints(self, nsds, output_contact_index_set):
-        return self.handle().contact_points(self._simulation.handle().current_step())
+        points = self.handle().contact_points(self._simulation.handle().current_step())
+        # the rolling columns only if a law resists rolling: the cf table of
+        # the other runs is unchanged
+        return points[:, : self.contactPointsColumns()]
+
+    def contactPointsColumns(self):
+        """the columns of contactPoints: 25, 31 with rolling resistance (the
+        rolling rows of the relative velocity and of the reaction, two
+        3-vectors, see io::contact_points)"""
+        return 31 if NewtonImpactFrictionNSL.rolling_resistance else 25
 
     def contactInfo(self, nsds, output_contact_index_set):
         return self.handle().contact_info(self._simulation.handle().current_step())
 
-    def contactContactWork(self, nsds, output_contact_index_set, omega, tol=1e-8):
+    def mass_matrices(self, nsds):
+        """the mass matrix of each FEM system (consistent, constant), by id"""
+        return self.handle().mass_matrices(self._simulation.handle().current_step())
+
+    def femVelocities(self, nsds):
+        """the velocity of each FEM system (all its dofs), by id"""
+        return self.handle().fem_velocities(self._simulation.handle().current_step())
+
+    def integratorScheme(self):
+        """the name of the scheme the vkernel integrator runs (SCHEME_NAMES):
+        the osi of the script, a Frémond law or the --scheme of the siconos
+        command line decide it"""
+        scheme = self._simulation.handle().one_step_integrator().scheme()
+        return SCHEME_NAMES.get(scheme, str(scheme))
+
+    def integratorTheta(self):
+        """the theta of the vkernel integrator (the theta_dem of a DEM osi),
+        not the theta of the run options"""
+        return self._simulation.handle().one_step_integrator().theta()
+
+    def kineticEnergies(self, nsds):
+        """(id, 1/2 v^T M v) of each system at the end of the step: the rigid
+        ones (rotation included), then the FEM ones"""
+        return self.handle().kinetic_energies(self._simulation.handle().current_step())
+
+    def workOfForces(self, nsds):
+        """(id, h f_theta . v_theta) of each system over the last step, as
+        MoreauJeanOSI.computeWorkForces of the AOS kernel: f the total forces
+        (fext, and - K q for a FEM system), theta and h of the integrator"""
+        simulation = self._simulation.handle()
+        return self.handle().work_of_forces(
+            simulation.current_step(),
+            self.integratorTheta(),
+            simulation.time_discretization().h(),
+        )
+
+    def contactContactWork(
+        self, nsds, output_contact_index_set, omega, tol=1e-8, gap_law=False, h=0.0
+    ):
+        # omega: the theta of the run options, unused: the theta-weighted
+        # works are those of the integrator's theta (theta_dem for DEM).
+        # gap_law and h, unused too: the scheme the integrator runs decides,
+        # not the osi of the script (a --scheme of the siconos command line
+        # changes it), and h is the integrator's
+        simulation = self._simulation.handle()
         return self.handle().contact_work(
-            self._simulation.handle().current_step(), omega, tol
+            simulation.current_step(),
+            self.integratorTheta(),
+            tol,
+            int(simulation.one_step_integrator().scheme() in GAP_LAW_SCHEMES),
+            simulation.time_discretization().h(),
         )
 
 

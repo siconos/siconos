@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -225,7 +214,9 @@ struct ref_remap {
 
   std::size_t operator()(std::size_t k) const {
     if (old_to_new) {
-      return k < old_to_new->size() ? (*old_to_new)[k] : k;
+      // the table covers the rows that existed before the removal: a ref past
+      // it (a stale index kept outside the storage) refers to no row
+      return k < old_to_new->size() ? (*old_to_new)[k] : invalid;
     }
     if (k == removed) return invalid;
     if (k == last) return removed;
@@ -243,8 +234,19 @@ void remap(V& v, std::size_t kind, const ref_remap& r) {
   if constexpr (!holds_refs_v<v_t>) {
     return;
   } else if constexpr (index_like<v_t>) {
-    if (KindId<typename v_t::type>::get() == kind && v.value() != ref_remap::invalid) {
-      v.value() = static_cast<typename v_t::value_t>(r(v.value()));
+    if (KindId<typename v_t::type>::get() == kind) {
+      const std::size_t next = r(v.value());
+      if (next == ref_remap::invalid) {
+        // the invalid of the index's own value type, not a truncation of
+        // ref_remap::invalid: valid() must say no item for a narrow indice too
+        if constexpr (requires { v_t::invalid; }) {
+          v.value() = v_t::invalid;
+        } else {
+          v.value() = static_cast<typename v_t::value_t>(next);
+        }
+      } else {
+        v.value() = static_cast<typename v_t::value_t>(next);
+      }
     }
   } else if constexpr (is_variant<v_t>::value) {
     std::visit([&](auto& alt) { remap<KindId>(alt, kind, r); }, v);

@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -45,6 +34,17 @@ struct handle;
 
 /**
  * @brief Index class for uniquely identifying items in storage
+ *
+ * An index is the dense row of its item, in the columns of the item kind. It
+ * is not an identifier with a lifetime: storage::remove is swap and pop, so
+ * an index held across a removal is stale, and reading it gives the item that
+ * moved into the row, or a row past the end (no bound check). Keep indices for
+ * the length of a step, or resolve the handle again after a removal.
+ *
+ * The refs the storage keeps for you are the exception: an item_ref column
+ * written through storage::add, or a reference in a relation's attributes, is
+ * rewritten by remove and permute, to index::invalid for a removed row, which
+ * valid() reports.
  *
  * @tparam T The item type this index refers to
  * @tparam R The underlying value type for the index
@@ -87,7 +87,8 @@ struct index {
    */
   index(R ref) : _value{ref} {}
 
-  /// @brief Default constructor
+  /// @brief Default constructor: 0, the first item. An index is a row, not a
+  /// maybe-item: only invalid says "no item".
   index() : _value{} {};
 
   /**
@@ -279,8 +280,14 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @brief Construct handle from rvalue data and rvalue reference
    * @param data Data storage
    * @param ref Index value
+   *
+   * A reference handle stores a reference to its index: from a temporary it
+   * would dangle (see make_ref_handle(D&, index&&)), so a handle_ref has no
+   * such constructor.
    */
-  explicit handle(D&& data, R&& ref) : base_t{data, ref} {};
+  explicit handle(D&& data, R&& ref)
+    requires(!std::is_reference_v<decltype(base_t::_index)>)
+      : base_t{data, ref} {}
 
   /**
    * @brief Construct handle from lvalue data and lvalue reference
@@ -307,8 +314,12 @@ struct handle : B<T, R, D>, T::template interface<handle<B, T, R, D>> {
    * @brief Construct handle from data and rvalue index
    * @param data Data storage
    * @param indx Index object (moved)
+   *
+   * As for (D&&, R&&): a handle_ref would store a reference to this temporary.
    */
-  explicit handle(D& data, index_t&& indx) : base_t{data, indx} {};
+  explicit handle(D& data, index_t&& indx)
+    requires(!std::is_reference_v<decltype(base_t::_index)>)
+      : base_t{data, indx} {}
 
   /// @brief Default constructor
   handle() : base_t{} {};
@@ -463,9 +474,6 @@ static auto handles =
 
 // Concept check for __init__ member function presence
 static constexpr auto has_init = mp::is_valid([](auto&& x) -> decltype(x.__init__()) {});
-
-// Concept check for __del__ member function presence
-static constexpr auto has_del = mp::is_valid([](auto&& x) -> decltype(x.__del__()) {});
 
 /**
  * @brief Concept for checking if a handle's item type derives from B

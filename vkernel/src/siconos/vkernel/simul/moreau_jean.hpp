@@ -1,26 +1,16 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
 
+#include <cstdio>
 #include <stdexcept>
 
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/simul/contacts.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/theta_method.hpp"
@@ -98,10 +88,35 @@ struct apply_fremond_impact_law
   }
 };
 
+// the quasi inelastic shock law of Jean 1999 (CMAME 177:235-257), Eq 25, on
+// the free output derivative: the normal row of q is shifted by the positive
+// part of the gap over h, so that the normal velocity at step + 1 is no more
+// negative than -g_pos/h and an overlap (y <= 0) gives the plain inelastic
+// condition u_N >= 0.  Not a new friction law and not a restitution: e is not
+// used.
+//   q_N = H_N v_free + max(0, y(0)) / h
+// The condition is on the velocity u_N(k + 1) at the step, as the Moreau-Jean
+// contact law always is, so it does not carry theta: theta weights the smooth
+// dynamics and the position update, not the contact condition.  (The
+// theta-weighted form ( g_pos + h (1 - theta) ydot ) / (h theta) that makes
+// g(k + 1) >= 0 exact under q(k+1) = q(k) + h (theta v(k+1) + (1-theta) v(k)) is
+// NOT used: for theta < 1 it forces the new normal velocity to reverse to
+// compensate the old one, i.e. it ejects a falling contact - measured, see the
+// design note.)
+struct apply_quasi_inelastic_shock_law
+    : kernel<all<interactions>, in<"y">, inout<"ydot", next>> {
+  static void apply(const auto& p, const auto& y, auto& ydot_next) {
+    using scalar = std::decay_t<decltype(y(0))>;
+    const scalar g_pos = y(0) > scalar(0) ? y(0) : scalar(0);
+    ydot_next(0) += g_pos / p.h;
+  }
+};
+
 // the free output derivative of an active interaction in q of the problem
 struct assemble_free_output : kernel<active<interactions>, rank, in<"ydot", next>>, assembles {
   static void apply(auto& p, auto row, const auto& ydot_next) {
-    set_value(p.vector, row, ydot_next);
+    set_value(p.vector, row,
+              contacts::assembled_rows<contacts::rows_of<decltype(p.vector)>()>(ydot_next));
   }
 };
 
@@ -152,11 +167,40 @@ struct apply_newton_impact_law
   }
 };
 
+// the quasi inelastic shock law of Jean 1999 on the rigid-rigid kinds; the
+// FEM kinds keep the Newton impact law (for a deformable body the Signorini
+// condition is self-correcting, Jean sec 4.2)
+struct apply_quasi_inelastic_shock_law
+    : stage<"Apply the quasi inelastic shock law on the free ydot at step + 1"> {
+  static void run(auto& c) {
+    if constexpr (std::decay_t<decltype(c.kind)>::between_rigid_systems()) {
+      c.kind.template run<moreau_jean::apply_quasi_inelastic_shock_law>(
+          c.step, theta_method::stages::parameters(c.kind, c.h, c.integrator.theta()));
+    } else {
+      // the law is for rigid-rigid contacts (Jean sec 4.2): a deformable body
+      // keeps the Newton impact law. Warn once when the world mixes them.
+      if (c.kind.number_of_interactions() > 0) {
+        static bool warned = false;
+        if (!warned) {
+          std::fprintf(stderr,
+                       "vkernel: the quasi inelastic shock law applies to the rigid-rigid "
+                       "contacts only; the FEM contacts keep the Newton impact law\n");
+          warned = true;
+        }
+      }
+      c.kind.template run<moreau_jean::apply_newton_impact_law>(c.step, nullptr);
+    }
+  }
+};
+
 struct assemble_free_velocity_output
     : stage<"Assemble q = H v_free, the free output derivatives"> {
   static void run(auto& c) {
-    c.kind.template run<assemble_free_output>(
-        c.step, block_vector{c.kind.lambda_view(c.integrator.q_nsp_vector_assembled())});
+    contacts::stages::with_assembled_rows(c, [&](auto rows) {
+      c.kind.template run<assemble_free_output>(
+          c.step,
+          block_vector{c.kind.lambda_view(c.integrator.q_nsp_vector_assembled(), rows)});
+    });
   }
 };
 
@@ -185,19 +229,21 @@ void delassus_of_rigid_systems(auto osi) {
   auto rigid_systems = std::get<0>(osi.systems());
   auto rigid_interactions = std::get<0>(osi.interactions());
 
-  auto tmp_matrix = rigid_interactions.transposed_h_matrix();
-  auto h_mat =
-      rigid_interactions.h_matrix_view(osi.h_matrix_assembled(), rigid_systems.ds_offset());
-  auto m_mat = rigid_systems.mass_matrix_view(osi.mass_matrix_assembled());
-  auto w_mat = rigid_interactions.w_matrix_view(osi.w_matrix_assembled());
+  rigid_interactions.with_assembled_rows(osi.rolling_contacts(), [&](auto rows) {
+    auto tmp_matrix = rigid_interactions.transposed_h_matrix(rows);
+    auto h_mat = rigid_interactions.h_matrix_view(osi.h_matrix_assembled(),
+                                                  rigid_systems.ds_offset(), rows);
+    auto m_mat = rigid_systems.mass_matrix_view(osi.mass_matrix_assembled());
+    auto w_mat = rigid_interactions.w_matrix_view(osi.w_matrix_assembled(), rows);
 
-  resize(tmp_matrix, size1(h_mat), size0(h_mat));
-  if constexpr (osi.with_k_matrix()) {
-    solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat, tmp_matrix);
-  } else {
-    solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
-  }
-  prod(h_mat, tmp_matrix, w_mat);
+    resize(tmp_matrix, size1(h_mat), size0(h_mat));
+    if constexpr (osi.with_k_matrix()) {
+      solve_linear_system_with_transpose(cast_to_diag_mat(m_mat), h_mat, tmp_matrix);
+    } else {
+      solve_linear_system_with_transpose(m_mat, h_mat, tmp_matrix);
+    }
+    prod(h_mat, tmp_matrix, w_mat);
+  });
 }
 
 // W = H A^-1 H^T
@@ -303,6 +349,13 @@ using time_step_schedule = time_step_schedule_with<"Moreau-Jean time step", mj::
 // interaction, chosen when the simulation is set up (see selectable_scheme.hpp)
 using fremond_time_step_schedule =
     time_step_schedule_with<"Moreau-Jean-Frémond time step", mj::apply_fremond_impact_law>;
+
+// the Moreau-Jean time step with the quasi inelastic shock law (Jean 1999,
+// Eq 25) on the rigid kinds, the Newton impact law on the FEM kinds: chosen
+// by local_problem_quasi_inelastic (see selectable_scheme.hpp)
+using quasi_inelastic_time_step_schedule =
+    time_step_schedule_with<"Moreau-Jean quasi-inelastic time step",
+                            mj::apply_quasi_inelastic_shock_law>;
 
 // the state before the first step
 using initial_schedule =

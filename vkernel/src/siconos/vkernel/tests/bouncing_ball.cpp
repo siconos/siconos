@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <cppunit/TestAssert.h>
@@ -52,9 +41,37 @@ namespace {
 class BouncingBallTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(BouncingBallTest);
   CPPUNIT_TEST(testBouncingBall);
+  CPPUNIT_TEST(testIntegratorsOwnTheirKinds);
   CPPUNIT_TEST_SUITE_END();
 
  public:
+  // each integrator adds its own system and interaction kinds and keeps the
+  // refs to them: the second one's refs are 1, not the first one's 0
+  void testIntegratorsOwnTheirKinds() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+    using siconos::vkernel::storage::handle;
+
+    config::data_t data;
+
+    handle osi0 = storage::add<config::osi>(data);
+    handle osi1 = storage::add<config::osi>(data);
+
+    auto check_kind_rows = [](auto osi, std::size_t row) {
+      auto check = [&](auto& kinds) {
+        std::apply(
+            [&](const auto&... kind) {
+              (CPPUNIT_ASSERT_EQUAL(row, std::size_t(kind.value())), ...);
+            },
+            kinds);
+      };
+      check(storage::attr<"systems">(osi));
+      check(storage::attr<"interactions">(osi));
+    };
+    check_kind_rows(osi0, 0);
+    check_kind_rows(osi1, 1);
+  }
+
   void testBouncingBall() {
     namespace storage = siconos::vkernel::storage;
     namespace config = siconos::vkernel::config;

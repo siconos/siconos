@@ -1,8 +1,38 @@
 # --- set siconos current version ---
-set(MAJOR_VERSION 4)
-set(MINOR_VERSION 5)
-set(PATCH_VERSION 0)
-set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
+#
+# The release number is written in ONE place: the file VERSION at the root of
+# the sources. Calendar versioning YEAR.MONTH[.PATCH] (e.g. 2026.11, then
+# 2026.11.1 for a bug-fix release). Use dots, not '-': CMake and Python
+# (PEP 440, where 2026-11 means 2026.post11) need a dotted numeric version.
+#
+# Everything else (libraries, siconos-config-version.cmake, python package,
+# scripts, doxygen, sphinx) uses the variables below. codemeta.json (read by
+# Software Heritage) is static and is only checked here.
+set(_siconos_root "${CMAKE_CURRENT_LIST_DIR}/..")
+file(STRINGS "${_siconos_root}/VERSION" _siconos_version LIMIT_COUNT 1)
+string(STRIP "${_siconos_version}" _siconos_version)
+if(NOT _siconos_version MATCHES "^([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$")
+  message(FATAL_ERROR "VERSION file: '${_siconos_version}' is not YEAR.MONTH[.PATCH]")
+endif()
+set(MAJOR_VERSION ${CMAKE_MATCH_1})
+set(MINOR_VERSION ${CMAKE_MATCH_2})
+if("${CMAKE_MATCH_4}" STREQUAL "")
+  set(PATCH_VERSION 0)
+else()
+  set(PATCH_VERSION ${CMAKE_MATCH_4})
+endif()
+set(SICONOS_VERSION "${_siconos_version}")
+
+get_property(_codemeta_checked GLOBAL PROPERTY SICONOS_CODEMETA_CHECKED)
+if(EXISTS "${_siconos_root}/codemeta.json" AND NOT _codemeta_checked)
+  set_property(GLOBAL PROPERTY SICONOS_CODEMETA_CHECKED TRUE)
+  file(READ "${_siconos_root}/codemeta.json" _codemeta)
+  string(JSON _codemeta_version ERROR_VARIABLE _codemeta_err GET "${_codemeta}" version)
+  if(NOT _codemeta_err STREQUAL "NOTFOUND" OR NOT _codemeta_version STREQUAL SICONOS_VERSION)
+    message(WARNING "codemeta.json version '${_codemeta_version}' differs from VERSION "
+      "'${SICONOS_VERSION}': update codemeta.json (version, dateModified) before the release.")
+  endif()
+endif()
 
 ### SOVERSION
 #
@@ -32,7 +62,7 @@ set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 # If any interfaces have been removed since the last public release, then set
 # age to 0.
 
-set(SO_current 7)
+set(SO_current 8)
 set(SO_revision 0)
 set(SO_age 0)
 

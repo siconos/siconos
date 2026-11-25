@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "rolling_friction_2d_enum.h"
@@ -36,6 +25,14 @@
 /* a case is accepted when its relative violation is below this value */
 #define RFC2D_ENUM_TOLERANCE 1e-12
 
+/* a block without rolling row (a contact whose relation has none: zero
+   third row and column of W, W being SPD): its rolling reaction does not
+   act, it is taken 0 */
+static inline int no_rolling_row(const double* W) {
+  const double wmax = fmax(W[0], W[4]);
+  return !(W[8] > 1e-14 * wmax);
+}
+
 /* the reaction of a closed case with at least one row on the boundary of
    the cone (st or sr not 0, see closed_case): r_n from u_n = 0, and the
    other unknown, if any, from the u = 0 of its sticking row, in closed form;
@@ -44,6 +41,12 @@ static int boundary_case_reaction(const double* W, const double* q, double mu, d
                                   int st, int sr, double r[3]) {
 #define W_(i, j) W[(i) + 3 * (j)]
   const double wmax = fmax(fmax(W_(0, 0), W_(1, 1)), W_(2, 2)); /* W is SPD */
+  if (no_rolling_row(W)) {
+    /* u_r = 0 whatever r_r: r_r = 0, the cases with the rolling row on the
+       boundary at mu_r = 0 */
+    mur = 0.;
+    if (!sr) sr = 1;
+  }
   if (st && sr) {
     /* one unknown: r_n */
     double d = W_(0, 0) + st * mu * W_(0, 1) + sr * mur * W_(0, 2);
@@ -92,6 +95,10 @@ static double closed_case(const double* W, const double* q, double mu, double mu
   } else if (!boundary_case_reaction(W, q, mu, mur, st, sr, r)) {
     return DBL_MAX;
   }
+  /* solve_3x3_gepp does not test its last pivot: a block without rolling
+     row (zero third row and column, mu_r = 0) gives a reaction that is not
+     finite, which fmax below would not see */
+  if (!(isfinite(r[0]) && isfinite(r[1]) && isfinite(r[2]))) return DBL_MAX;
 
   double u[3], wr = 0.;
   for (int i = 0; i < 3; ++i) {
@@ -251,6 +258,24 @@ int rolling_friction_2d_enum_solve(RollingFrictionContactProblem* localproblem,
    inverse[0] if B is numerically singular */
 static void invert_block(const double* B, double* inverse) {
 #define B_(i, j) B[(i) + 3 * (j)]
+  if (no_rolling_row(B)) {
+    /* the inverse of the normal and tangent block, zero on the rolling row
+       and column: the stick case gives r_r = 0 */
+    double det2 = B_(0, 0) * B_(1, 1) - B_(0, 1) * B_(1, 0);
+    double bmax2 =
+        fmax(fmax(fabs(B_(0, 0)), fabs(B_(1, 1))), fmax(fabs(B_(0, 1)), fabs(B_(1, 0))));
+    if (!(fabs(det2) > 1e-14 * bmax2 * bmax2)) {
+      inverse[0] = NAN;
+      return;
+    }
+    inverse[0 + 3 * 0] = B_(1, 1) / det2;
+    inverse[1 + 3 * 0] = -B_(1, 0) / det2;
+    inverse[0 + 3 * 1] = -B_(0, 1) / det2;
+    inverse[1 + 3 * 1] = B_(0, 0) / det2;
+    inverse[2 + 3 * 0] = inverse[2 + 3 * 1] = 0.;
+    inverse[0 + 3 * 2] = inverse[1 + 3 * 2] = inverse[2 + 3 * 2] = 0.;
+    return;
+  }
   double c00 = B_(1, 1) * B_(2, 2) - B_(1, 2) * B_(2, 1);
   double c01 = B_(1, 2) * B_(2, 0) - B_(1, 0) * B_(2, 2);
   double c02 = B_(1, 0) * B_(2, 1) - B_(1, 1) * B_(2, 0);

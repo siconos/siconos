@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 // storage::remove keeps the dynamic properties of the items consistent.
@@ -61,6 +50,36 @@ struct data_t : decltype(storage()
                              .build_runtime_database()){};
 }  // namespace siconos::vkernel::config
 
+// a per-item storage that cannot grow (a fixed-size array), and an item with
+// no dense column at all (a dynamic property only): adding either invents an
+// item, so storage::add refuses them
+namespace siconos::vkernel::config {
+struct fixed_row : storage::pattern::item {
+  using attributes =
+      storage::pattern::gather<storage::pattern::attribute<"v", storage::some::scalar>>;
+};
+
+template <typename... Ts>
+struct one_array_helper;
+template <typename T>
+struct one_array_helper<T> {
+  using type = storage::some::array<T, storage::some::indice_value<1>>;
+};
+template <typename... Ts>
+using one_array = typename one_array_helper<Ts...>::type;
+
+struct fixed_rows_t : storage::make_runtime_database<
+                          standard_environment, fixed_row,
+                          storage::with_properties<storage::wrapped<fixed_row, one_array>>> {};
+
+struct sparse_row : storage::pattern::item {};
+struct sparse_rows_t
+    : storage::make_runtime_database<
+          standard_environment, sparse_row,
+          storage::with_properties<storage::dynamic_storage<storage::attached<
+              sparse_row, storage::pattern::symbol<"weight">, storage::some::scalar>>>> {};
+}  // namespace siconos::vkernel::config
+
 // items without attributes: one counted through its attached storage, one
 // without any column
 namespace siconos::vkernel::config {
@@ -81,6 +100,20 @@ static_assert(match::not_removable<siconos::vkernel::config::osi>);
 static_assert(!match::not_removable<siconos::vkernel::config::ball>);
 static_assert(!match::not_removable<siconos::vkernel::config::interaction>);
 
+// a reference handle holds a reference to its index: built from a temporary
+// index it would dangle, so that construction must not exist (the same reason
+// make_ref_handle(D&, index&&) is deleted)
+using ball_ref_handle =
+    siconos::vkernel::storage::handle<siconos::vkernel::storage::handle_ref,
+                                      siconos::vkernel::config::ball, std::size_t,
+                                      siconos::vkernel::config::data_t>;
+using ball_ref_index =
+    siconos::vkernel::storage::index<siconos::vkernel::config::ball, std::size_t>;
+static_assert(!std::constructible_from<ball_ref_handle, siconos::vkernel::config::data_t&,
+                                       ball_ref_index&&>);
+static_assert(!std::constructible_from<ball_ref_handle, siconos::vkernel::config::data_t,
+                                       ball_ref_index&&>);
+
 namespace {
 
 class RegistryRemoveTest : public CppUnit::TestFixture {
@@ -89,11 +122,17 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testReadCreatesNoEntry);
   CPPUNIT_TEST(testRemovePastTheEnd);
   CPPUNIT_TEST(testPermuteChecks);
+  CPPUNIT_TEST(testPermuteRejectsNonBijection);
+  CPPUNIT_TEST(testRefInvalidOfItsOwnType);
+  CPPUNIT_TEST(testTableRemapPastTheTable);
   CPPUNIT_TEST(testRemoveRemapsRefs);
   CPPUNIT_TEST(testPermuteRemapsRefs);
   CPPUNIT_TEST(testRemoveManyRemapsRefs);
   CPPUNIT_TEST(testRemapWalker);
   CPPUNIT_TEST(testHandlesWithoutAttributes);
+  CPPUNIT_TEST(testFixedSizePerItemStorageIsRefused);
+  CPPUNIT_TEST(testSparseOnlyItemIsRefused);
+  CPPUNIT_TEST(testConstAccess);
   CPPUNIT_TEST_SUITE_END();
 
  public:
@@ -213,6 +252,39 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
     CPPUNIT_ASSERT_MESSAGE("swapped", qs[0](0) == 1. && qs[1](0) == 0.);
   }
 
+  // storage::permute takes a permutation of the items, in every build: a
+  // duplicated index must be refused, not silently applied
+  void testPermuteRejectsNonBijection() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::data_t data;
+    storage::add<config::ball>(data);
+    storage::add<config::ball>(data);
+
+    CPPUNIT_ASSERT_THROW(storage::permute<config::ball>(data, {0, 0}), std::invalid_argument);
+  }
+
+  // a ref to a removed row becomes the invalid of its own index type, not a
+  // truncation of ref_remap::invalid (SIZE_MAX): with an indice narrower than
+  // size_t, valid() must still say no item
+  void testRefInvalidOfItsOwnType() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+    using small_ref = storage::index<config::ball, int>;
+
+    const auto kind = storage::kind_id<config::ball>::get();
+    const auto r = storage::ref_remap::swap_and_pop(0, 1);  // 0 dies, 1 -> 0
+
+    std::vector<small_ref> refs{small_ref(0), small_ref(1)};
+    storage::refs_detail::remap<storage::kind_id>(refs, kind, r);
+
+    CPPUNIT_ASSERT_MESSAGE("the moved ref follows its row", refs[1].value() == 0);
+    CPPUNIT_ASSERT_MESSAGE("the removed ref is the index type's invalid",
+                           refs[0].value() == small_ref::invalid);
+    CPPUNIT_ASSERT_MESSAGE("and valid() says it refers to no item", !refs[0].valid());
+  }
+
   // interactions between balls: inter k links balls a[k] and b[k]
   template <typename Data, typename Balls>
   static auto link(Data& data, Balls& balls,
@@ -227,6 +299,21 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
       inters.push_back(inter);
     }
     return inters;
+  }
+
+  // a table remap covers the rows that existed before the removal: a ref past
+  // the table refers to no row, it does not keep its value
+  void testTableRemapPastTheTable() {
+    namespace storage = siconos::vkernel::storage;
+
+    const std::vector<std::size_t> old_to_new{storage::ref_remap::invalid, 0};
+    const auto r = storage::ref_remap::table(old_to_new);
+
+    CPPUNIT_ASSERT_MESSAGE("a row of the table maps to its new row", r(1) == 0);
+    CPPUNIT_ASSERT_MESSAGE("a removed row maps to no row",
+                           r(0) == storage::ref_remap::invalid);
+    CPPUNIT_ASSERT_MESSAGE("a row past the table refers to no row",
+                           r(5) == storage::ref_remap::invalid);
   }
 
   using ends_t = std::pair<std::size_t, std::size_t>;
@@ -318,6 +405,62 @@ class RegistryRemoveTest : public CppUnit::TestFixture {
                            std::ranges::distance(storage::handles<config::marker>(data)) == 2);
     CPPUNIT_ASSERT_MESSAGE("an item without any column has no handle",
                            std::ranges::distance(storage::handles<config::bare>(data)) == 0);
+    // a placeholder item (no column at all: an interaction's relation) may be
+    // added; its index is the meaningless 0, and removing it is a no-op
+    CPPUNIT_ASSERT_NO_THROW(storage::add<config::bare>(data));
+    storage::remove(data, *storage::handles<config::marker>(data).begin());
+  }
+
+  // a per-item storage that cannot grow would hold every item in slot 0:
+  // refuse the add instead of inventing one item
+  void testFixedSizePerItemStorageIsRefused() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::fixed_rows_t data;
+    CPPUNIT_ASSERT_THROW(storage::add<config::fixed_row>(data), std::logic_error);
+    CPPUNIT_ASSERT_MESSAGE(
+        "nothing was added",
+        std::ranges::distance(storage::handles<config::fixed_row>(data)) == 0);
+  }
+
+  // an item whose only column is a dynamic property has no row count: a
+  // removal could not follow it, so the add is refused
+  void testSparseOnlyItemIsRefused() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::sparse_rows_t data;
+    CPPUNIT_ASSERT_THROW(storage::add<config::sparse_row>(data), std::logic_error);
+  }
+
+  // a store that is only read can be const: the attribute and property
+  // columns are then read through const references, which is what a
+  // serializer or a read-only view needs
+  void testConstAccess() {
+    namespace storage = siconos::vkernel::storage;
+    namespace config = siconos::vkernel::config;
+
+    config::data_t data;
+    auto ball0 = storage::add<config::ball>(data);
+    ball0.q() = {1., 2., 3.};
+    auto& bc0 = storage::prop<"bc_velocities_0", config::topo>(ball0);
+    bc0.resize(1);
+    bc0[0] = 7;
+
+    const config::data_t& cdata = data;
+
+    const auto& qs = storage::attr_values<config::ball, "q">(cdata, 0);
+    CPPUNIT_ASSERT_MESSAGE("a const store reads q", qs[0](1) == 2.);
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(qs[0])>>,
+                  "a const store gives const attribute values");
+
+    const auto& bcs =
+        storage::prop_values<config::ball, "bc_velocities_0", config::topo>(cdata, 0);
+    CPPUNIT_ASSERT_MESSAGE("a const store reads a dynamic property",
+                           bcs.contains(0) && bcs.at(0)[0] == 7);
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(bcs)>>,
+                  "a const store gives a const sparse set");
   }
 
   // the walker on the shapes a column may take: only the refs of the moved

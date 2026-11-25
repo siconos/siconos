@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -35,6 +24,27 @@
 #include <vector>
 
 namespace siconos::vkernel::algebra {
+
+// a Dirichlet condition on a FEM operator: the rows and the columns of the
+// blocked dofs set to zero, their diagonal entries to diagonal (1 for M or
+// A = M + h^2 theta^2 K, 0 for K). Solved with such an A, the free dofs see
+// A_ff, the operator of the free dofs, and not A with the blocked velocity
+// zeroed afterwards.
+template <typename Scalar, int Options, typename Index>
+void constrain_dofs(Eigen::SparseMatrix<Scalar, Options, Index>& m, const auto& blocked,
+                    Scalar diagonal) {
+  if (std::size(blocked) == 0) return;
+  std::vector<char> is_blocked(static_cast<std::size_t>(m.rows()), 0);
+  for (auto k : blocked) is_blocked[static_cast<std::size_t>(k)] = 1;
+  m.prune([&](const Index& row, const Index& col, const Scalar&) {
+    return !is_blocked[static_cast<std::size_t>(row)] &&
+           !is_blocked[static_cast<std::size_t>(col)];
+  });
+  if (diagonal != Scalar(0)) {
+    for (auto k : blocked) m.coeffRef(static_cast<Index>(k), static_cast<Index>(k)) = diagonal;
+  }
+  m.makeCompressed();
+}
 
 class sparse_factor {
  public:

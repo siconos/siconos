@@ -1,19 +1,8 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2026 INRIA.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 #
 """Transient VTKHDF output of the bodies of a mechanics simulation.
 
@@ -1447,16 +1436,22 @@ _CF = {
     "interaction": 22,
     "ds1": 23,
     "ds2": 24,
+    # with rolling resistance
+    "rolling_velocity": slice(25, 28),
+    "reaction_rolling": slice(28, 31),
 }
 
 
 def contacts_point_data(rows):
     """Points and point arrays of the contacts.
 
-    rows : (N, 25) the rows of the cf table without the time column. A
-    contact is drawn at the middle of its points A and B.
+    rows : (N, 25) the rows of the cf table without the time column, or (N,
+    31) with the rolling columns (rolling resistance), drawn as the arrays
+    rolling_velocity and reaction_rolling. A contact is drawn at the middle
+    of its points A and B.
     """
-    rows = np.asarray(rows, dtype=np.float64).reshape(-1, 25)
+    rows = np.asarray(rows, dtype=np.float64)
+    rows = rows.reshape(-1, rows.shape[-1] if rows.ndim == 2 else 25)
     points = 0.5 * (rows[:, _CF["point_a"]] + rows[:, _CF["point_b"]])
     local = rows[:, _CF["reaction_local"]]
     point_data = {
@@ -1470,6 +1465,9 @@ def contacts_point_data(rows):
     }
     for name in ("interaction", "ds1", "ds2"):
         point_data[name] = rows[:, _CF[name]].astype(np.int64)
+    if rows.shape[1] == 31:
+        point_data["rolling_velocity"] = rows[:, _CF["rolling_velocity"]]
+        point_data["reaction_rolling"] = rows[:, _CF["reaction_rolling"]]
     return points, point_data
 
 

@@ -1,19 +1,9 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2025 INRIA.
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import json
 import os
 import re
@@ -231,13 +221,16 @@ class FormatAdaptor:
             data_hdf5.attrs.update(dataset_kwargs)
         return current_group[dataset]
 
-    def get_dataset(self, dataset):
+    def get_dataset(self, dataset, ncols=None):
+        """The table dataset of /data, created if missing (writable file) with
+        the columns of the format, or ncols."""
         if dataset in self.data:
             return self.data[dataset]
         if not self.writable:
             return None
         spec = self._spec(dataset)
-        ncols = spec["shape"][-1]
+        if ncols is None:
+            ncols = spec["shape"][-1]
         comp = self.compression and ncols > 0
         chunks = (
             tuple(spec["chunks"])
@@ -258,6 +251,14 @@ class FormatAdaptor:
         if "layout" in spec:
             table.attrs["info"] = info(spec["layout"])
         return table
+
+    def set_columns(self, dataset, ncols):
+        """The empty table dataset of /data again, with ncols columns (a table
+        of variable width, see "cf")."""
+        if self.data[dataset].shape[0] > 0:
+            raise ValueError(f"{dataset}: not empty, its columns cannot change")
+        del self.data[dataset]
+        return self.get_dataset(dataset, ncols)
 
     def get_group(self, group):
         if group in self.data:

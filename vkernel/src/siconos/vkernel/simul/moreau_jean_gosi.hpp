@@ -1,26 +1,15 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
 
 #include <stdexcept>
 
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/simul/contacts.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/moreau_jean.hpp"
@@ -64,7 +53,8 @@ struct assemble_impact_term
   static void apply(auto& p, auto row, const auto& ydot, const auto& e) {
     std::decay_t<decltype(ydot)> b = std::decay_t<decltype(ydot)>::Zero();
     b(0) = e * ydot(0);
-    set_value(p.vector, row, b);
+    set_value(p.vector, row,
+              contacts::assembled_rows<contacts::rows_of<decltype(p.vector)>()>(b));
   }
 };
 
@@ -106,8 +96,10 @@ struct assemble_impact_terms : stage<"Assemble b = e ydot at step, the impact te
         throw std::runtime_error("moreau_jean_gosi: the Frémond impact law is not supported");
       }
     }
-    c.kind.template run<moreau_jean_gosi::assemble_impact_term>(
-        c.step, block_vector{c.kind.lambda_view(c.integrator.b_vector_assembled())});
+    contacts::stages::with_assembled_rows(c, [&](auto rows) {
+      c.kind.template run<moreau_jean_gosi::assemble_impact_term>(
+          c.step, block_vector{c.kind.lambda_view(c.integrator.b_vector_assembled(), rows)});
+    });
   }
 };
 
@@ -156,6 +148,8 @@ struct solve_global_problem
           "Solve the global frictional contact problem (A, H^T, A v_free, b, mu): v, lambda">,
       host_code {
   static void run(auto& c) {
+    // no global 2D rolling friction solver in numerics
+    contacts::stages::refuse_rolling_resistance(c, "moreau_jean_gosi");
     auto osi = c.integrator;
     auto osnsp = c.time_stepping.one_step_nonsmooth_problem();
     if constexpr (osi.with_k_matrix()) {

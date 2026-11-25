@@ -2,19 +2,8 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright INRIA.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 #
 
 # Usage: bench-dambreak.py <size> [options]   (vnative backend)
@@ -71,6 +60,11 @@ p = argparse.ArgumentParser(add_help=False)
 # the liquid
 p.add_argument("--unit", type=float, default=0.005, help="disk radius, m")
 p.add_argument("--mu-liquid", type=float, default=0.1)
+# the rolling resistance of the contacts of the liquid disks, a length in disk
+# radii (NewtonImpactRollingFrictionNSL; 0: Coulomb friction only): the
+# liquid-liquid, liquid-rock and liquid-terrain contacts resist rolling, the
+# rock-rock and rock-terrain ones do not.
+p.add_argument("--mu-r", type=float, default=0.0)
 # the rocks: circumdiameters as multiples of the disk diameter, and the area
 # fraction of the material made of rocks. Each class gets the same total
 # area, so the count of a class goes like 1 / diameter**2.
@@ -135,7 +129,9 @@ rock_diameters = [s * d_d for s in args.rock_sizes if s * d_d <= W / 4]
 if not rock_diameters:
     sys.exit("bench-dambreak: size too small for the smallest rock class")
 
-io_filename = "bench-dambreak-{}.hdf5".format(size)
+io_filename = "bench-dambreak-{}{}.hdf5".format(
+    size, "-mur{:g}".format(args.mu_r) if args.mu_r > 0 else ""
+)
 
 
 # --- terrain --------------------------------------------------------------
@@ -390,9 +386,19 @@ with MechanicsHdf5Runner(io_filename=io_filename, config=runner_config) as io:
         ("rock-rock", args.mu_rock, ROCK, ROCK),
         ("rock-terrain", args.mu_rock, ROCK, TERRAIN),
     ):
-        io.add_Newton_impact_friction_nsl(
-            name, mu=mu, e=0, collision_group1=g1, collision_group2=g2
-        )
+        if args.mu_r > 0 and LIQUID in (g1, g2):
+            io.add_Newton_impact_rolling_friction_nsl(
+                name,
+                mu=mu,
+                mu_r=args.mu_r,
+                e=0,
+                collision_group1=g1,
+                collision_group2=g2,
+            )
+        else:
+            io.add_Newton_impact_friction_nsl(
+                name, mu=mu, e=0, collision_group1=g1, collision_group2=g2
+            )
 
 # --- run ------------------------------------------------------------------
 options = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)

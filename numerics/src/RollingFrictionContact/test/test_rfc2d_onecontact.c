@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 /* One contact of 2D rolling friction, rolling_friction_2d_driver (NSGS)
    with the default local solver and with ONECONTACT_ENUM.
@@ -25,7 +14,9 @@
          r_t = -(2/3) mu_r r_n;
       B. separating (q_n > 0): r = 0;
       C. sliding without rotation (v = (v0, 0, 0)): r_n = h g,
-         r_t = -mu r_n, r_r = mu_r r_n.
+         r_t = -mu r_n, r_r = mu_r r_n;
+      D. without rolling row (zero rolling row of H, mu_r = 0), sliding and
+         sticking: r_r = 0.
    2. Random problems: the law checked by rfc2d_law_violation, no failure
       with ENUM, at most 1% with the default local solver. */
 #include <math.h>
@@ -96,6 +87,40 @@ int main(void) {
              use_enum ? "enum" : "default", r[0], r[1], r[2], err, ok ? "ok" : "FAILED");
     }
 
+  /* D. a contact without rolling row (zero third row and column of W,
+     mu_r = 0), as assembled for a body without rotational resistance:
+     sliding (v = (v0, 0, 0)) and sticking (v = (vs, 0, 0), |r_t| < mu r_n) */
+  {
+    const double H0[3][3] = {{0., 1., 0.}, {1., 0., R}, {0., 0., 0.}};
+    double W0[9];
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j) {
+        double s = 0.;
+        for (int l = 0; l < 3; ++l) s += H0[i][l] * Minv[l] * H0[j][l];
+        W0[i + 3 * j] = s;
+      }
+    const double vs = 0.03; /* r_t = -vs / W_tt = -vs / 3 */
+    double vD[2][3] = {{v0, -h * g, 0.}, {vs, -h * g, 0.}};
+    double expectedD[2][3] = {{rn, -mu * rn, 0.}, {rn, -vs / W0[1 + 3 * 1], 0.}};
+    const char* namesD[2] = {"D sliding", "D sticking"};
+    for (int use_enum = 0; use_enum <= 1; ++use_enum)
+      for (int k = 0; k < 2; ++k) {
+        double q[3], r[3], Wc[9];
+        for (int i = 0; i < 9; ++i) Wc[i] = W0[i];
+        for (int i = 0; i < 3; ++i)
+          q[i] = H0[i][0] * vD[k][0] + H0[i][1] * vD[k][1] + H0[i][2] * vD[k][2];
+        int info = solve(Wc, q, mu, 0., use_enum, r);
+        double err = 0.;
+        for (int i = 0; i < 3; ++i) err = fmax(err, fabs(r[i] - expectedD[k][i]));
+        err /= rn;
+        /* fmax drops a NaN: the reaction is checked finite on its own */
+        int ok = info == 0 && err < 1e-10 && isfinite(r[0] + r[1] + r[2]);
+        failures += !ok;
+        printf("%-14s %-8s r = (% .10e, % .10e, % .10e) relative error %.2e %s\n", namesD[k],
+               use_enum ? "enum" : "default", r[0], r[1], r[2], err, ok ? "ok" : "FAILED");
+      }
+  }
+
   /* random one-contact problems */
   srand(1);
   for (int use_enum = 0; use_enum <= 1; ++use_enum) {
@@ -116,6 +141,31 @@ int main(void) {
     int ok = use_enum ? bad == 0 : bad <= 20;
     printf("random one contact, %-8s: 2000 problems, %d failures, worst violation %.2e %s\n",
            use_enum ? "enum" : "default", bad, worst, ok ? "ok" : "FAILED");
+    failures += !ok;
+  }
+
+  /* random one-contact problems without rolling row (third row and column
+     of W and q_r zeroed, mu_r random or 0): r_r = 0 */
+  for (int use_enum = 0; use_enum <= 1; ++use_enum) {
+    double worst = 0.;
+    int bad = 0;
+    for (int k = 0; k < 2000; ++k) {
+      double Wr[9], q[3], mu_k, mur_k, r[3];
+      rfc2d_random_chain(1, k % 2, Wr, q, &mu_k, &mur_k);
+      Wr[2] = Wr[5] = Wr[6] = Wr[7] = Wr[8] = 0.;
+      q[2] = 0.;
+      double Wc[9];
+      for (int i = 0; i < 9; ++i) Wc[i] = Wr[i];
+      int info = solve(Wc, q, mu_k, mur_k, use_enum, r);
+      double v = rfc2d_law_violation(1, Wr, q, &mu_k, &mur_k, r);
+      worst = fmax(worst, v);
+      if (info || v > 1e-8 || !isfinite(r[0] + r[1] + r[2])) bad++;
+    }
+    int ok = use_enum ? bad == 0 : bad <= 20;
+    printf(
+        "random without rolling row, %-8s: 2000 problems, %d failures, worst violation %.2e "
+        "%s\n",
+        use_enum ? "enum" : "default", bad, worst, ok ? "ok" : "FAILED");
     failures += !ok;
   }
   return failures ? 1 : 0;

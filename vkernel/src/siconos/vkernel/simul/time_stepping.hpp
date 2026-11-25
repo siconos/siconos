@@ -1,24 +1,13 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
 
-#include "siconos/vkernel/algebra/eigen.hpp"
+#include "siconos/vkernel/algebra/eigen_backend.hpp"
 #include "siconos/vkernel/model/nslaws.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/simul_head.hpp"
@@ -162,6 +151,16 @@ struct time_stepping : item {
       //      resize(osi.lambda_vector_assembled(), ninter);
       //      resize(osi.ydot_vector_assembled(), ninter);
 
+      // with the rolling rows: the problem with rolling resistance
+      if constexpr (osi.with_rolling_friction()) {
+        if (osi.rolling_contacts()) {
+          self()->one_step_nonsmooth_problem().solve_rolling(
+              osi.w_matrix_assembled(), osi.q_nsp_vector_assembled(),
+              osi.lambda_vector_assembled(), osi.ydot_vector_assembled(),
+              osi.mu_vector_assembled(), osi.mu_r_vector_assembled());
+          return;
+        }
+      }
       self()->one_step_nonsmooth_problem().template solve<Formulation>(
           osi.w_matrix_assembled(),       // M
           osi.q_nsp_vector_assembled(),   // q

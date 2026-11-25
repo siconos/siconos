@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -69,6 +58,11 @@ struct column_base {
   /// k), in every kept step
   virtual void permute(const std::vector<std::size_t>& perm,
                        const std::vector<std::size_t>& inverse) = 0;
+
+  /// whether storage::add can append an item to this column: a per-item
+  /// storage that cannot grow would hold every item in the same slot, and a
+  /// column that numbers no item at all gives the item no row
+  virtual bool can_push_items() const = 0;
 
   /// number of items stored, or no_index for columns that do not number them
   virtual std::size_t item_count() const = 0;
@@ -137,6 +131,16 @@ struct column final : column_base {
     refs_detail::remap<kind_id>(value, kind, r);
   }
 
+  bool can_push_items() const override {
+    if constexpr (registry_detail::is_sparse_set<Memory>) {
+      return true;  // sparse: no row to append, and none to count
+    } else {
+      // a fixed-size per-item storage cannot hold more than the items it
+      // already has (see storage::add)
+      return match::push_back<typename Memory::value_type>;
+    }
+  }
+
   std::size_t item_count() const override {
     if constexpr (registry_detail::is_sparse_set<Memory>) {
       return no_index;
@@ -145,7 +149,7 @@ struct column final : column_base {
       if constexpr (match::push_back<storage_t>) {
         return value.empty() ? 0 : std::size(value[0]);
       } else {
-        return 1;
+        return no_index;  // a storage that cannot grow counts no item
       }
     }
   }
@@ -229,6 +233,13 @@ inline const std::size_t slot_plus_one = slot_id<Key>() + 1;
  *
  * Not templated on the items: it is a vector of type-erased columns indexed by
  * slot_id<Key>, created lazily on first access.
+ *
+ * Not thread safe for structural changes: create_column, push_item,
+ * remove_item, remove_items and permute resize the slot table and the
+ * columns. Read and write access to the values (registry::column) is what the
+ * kernels do in parallel; adding, removing or permuting items is a
+ * single-threaded host operation (the space filter, the start of a step).
+ * Only slot_id's counter is atomic.
  */
 struct registry {
   std::vector<std::unique_ptr<column_base>> slots;
@@ -292,6 +303,13 @@ struct registry {
 #endif
   }
 
+  /// The same column, read-only: a const store can be read (a serializer, a
+  /// read-only view). The lookup itself mutates nothing, hence the cast.
+  template <typename Key, typename Memory>
+  const Memory& column() const {
+    return const_cast<registry*>(this)->template column<Key, Memory>();
+  }
+
   /// Create the column of Key with its memory depth (time_levels<>), and list it
   /// among the columns of Item; done once per column and item, when the world
   /// registers its columns.
@@ -324,12 +342,35 @@ struct registry {
     return kinds[k];
   }
 
-  /// storage::add: a default value in every column of Item; the new index
+  /// storage::add: a default value in every column of Item; the new index.
+  /// A per-item storage that cannot grow is refused: it would hold every item
+  /// in the same row.  An item kind with columns but none that numbers its
+  /// items (dynamic properties only) is refused too: storage::remove would
+  /// leave its sparse entries behind.  A kind without any column is allowed:
+  /// it is a placeholder whose index is meaningless (an interaction's
+  /// relation, see collision/diskdisk_r.hpp), and remove is a no-op for it.
   template <typename Item>
   std::size_t push_item() {
+    const auto& columns = registered_kind<Item>();
+    for (std::size_t id : columns) {
+      if (!slots[id]->can_push_items()) [[unlikely]] {
+        throw std::logic_error(
+            "storage::add: a per-item storage of this item cannot grow (fixed-size "
+            "container)");
+      }
+    }
+    bool counted = false;
     std::size_t index = 0;
-    for (std::size_t id : registered_kind<Item>()) {
-      if (std::size_t i = slots[id]->push_default(); i != column_base::no_index) index = i;
+    for (std::size_t id : columns) {
+      if (std::size_t i = slots[id]->push_default(); i != column_base::no_index) {
+        index = i;
+        counted = true;
+      }
+    }
+    if (!counted && !columns.empty()) [[unlikely]] {
+      throw std::logic_error("storage::add: the item kind " +
+                             std::string(mp::type_name<Item>()) +
+                             " has only dynamic properties, none numbering its items");
     }
     return index;
   }
@@ -397,8 +438,9 @@ struct registry {
   }
 
   /// storage::permute: item k of Item becomes the item perm[k]. perm must be
-  /// a permutation of the items: its size is checked, its bijectivity in a
-  /// debug build only
+  /// a permutation of the items: its size and its bijectivity are checked in
+  /// every build (a wrong permutation would duplicate rows and rewrite the
+  /// refs with a non-bijective table)
   template <typename Item>
   void permute_item(const std::vector<std::size_t>& perm,
                     const std::vector<std::size_t>& inverse) {
@@ -407,11 +449,14 @@ struct registry {
       throw std::invalid_argument("storage::permute: " + std::to_string(perm.size()) +
                                   " indices for " + std::to_string(count) + " items");
     }
-#ifndef NDEBUG
-    for (std::size_t k = 0; k < perm.size(); ++k) {
-      assert(perm[k] < perm.size() && inverse[perm[k]] == k && "not a permutation");
+    if (inverse.size() != perm.size()) [[unlikely]] {
+      throw std::invalid_argument("storage::permute: the inverse is not of the same size");
     }
-#endif
+    for (std::size_t k = 0; k < perm.size(); ++k) {
+      if (perm[k] >= perm.size() || inverse[perm[k]] != k) [[unlikely]] {
+        throw std::invalid_argument("storage::permute: not a permutation");
+      }
+    }
     for (std::size_t id : registered_kind<Item>()) slots[id]->permute(perm, inverse);
     remap_refs<Item>(ref_remap::table(inverse));
   }
@@ -576,9 +621,23 @@ struct world {
   registry _registry;
 
   world& store() { return *this; }
+  /// the same world, read-only: its columns are then read through const
+  /// references
+  const world& store() const { return *this; }
 
   template <typename K>
   decltype(auto) column() {
+    if constexpr (std::is_same_v<K, info>) {
+      return Info{};
+    } else if constexpr (requires { typename K::dynamic_storage_t; }) {
+      return _registry.template column<K, typename dynamic_column_of<Info, K>::type>();
+    } else {
+      return _registry.template column<K, typename column_of<Info, K>::type>();
+    }
+  }
+
+  template <typename K>
+  decltype(auto) column() const {
     if constexpr (std::is_same_v<K, info>) {
       return Info{};
     } else if constexpr (requires { typename K::dynamic_storage_t; }) {

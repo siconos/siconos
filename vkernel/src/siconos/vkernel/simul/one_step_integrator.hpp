@@ -1,25 +1,14 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
 
 #include "interaction.hpp"
-#include "siconos/vkernel/algebra/numerics.hpp"
+#include "siconos/vkernel/algebra/numerics_backend.hpp"
 #include "siconos/vkernel/model/lagrangian_r.hpp"
 #include "siconos/vkernel/simul/kinds.hpp"
 #include "siconos/vkernel/simul/moreau_jean.hpp"
@@ -139,7 +128,9 @@ struct one_step_integrator {
       some::scalar normal_stiffness;
       some::scalar normal_damping;
       some::scalar tangential_stiffness;
-      // the assembled problem
+      // the assembled problem: with the rolling rows if an active contact
+      // resists rolling (see interaction_kind::with_assembled_rows)
+      some::boolean rolling_contacts;
       assembled_matrix mass_matrix_assembled;
       assembled_matrix iteration_matrix_assembled;
       assembled_matrix k_matrix_assembled;
@@ -151,6 +142,7 @@ struct one_step_integrator {
       assembled_vector p0_vector_assembled;
       assembled_vector q_nsp_vector_assembled;
       assembled_vector mu_vector_assembled;
+      assembled_vector mu_r_vector_assembled;
       assembled_vector b_vector_assembled;
       // the kinds
       decltype(refs(system_kinds_t{})) systems;
@@ -163,11 +155,18 @@ struct one_step_integrator {
       using default_interface<Handle>::self;
 
       void __init__() {
-        auto add = [&]<typename Kind>(Kind kind) {
-          kind = storage::add<typename Kind::type>(self()->data());
+        // through references: the kinds are stored in the integrator, a copy
+        // taken per element would leave their refs at their default value
+        auto add_kinds = [&]<typename Kinds>(Kinds& kinds) {
+          std::apply(
+              [&]<typename... Kind>(Kind&... kind) {
+                ((kind = storage::add<typename std::decay_t<Kind>::type>(self()->data())),
+                 ...);
+              },
+              kinds);
         };
-        mp::for_each(systems(), add);
-        mp::for_each(interactions(), add);
+        add_kinds(storage::attr<"systems">(*self()));
+        add_kinds(storage::attr<"interactions">(*self()));
 
         // the gap at the middle of the step for the active set
         gamma() = 0.5;
@@ -226,6 +225,10 @@ struct one_step_integrator {
       decltype(auto) mu_vector_assembled() {
         return storage::attr<"mu_vector_assembled">(*self());
       }
+      decltype(auto) mu_r_vector_assembled() {
+        return storage::attr<"mu_r_vector_assembled">(*self());
+      }
+      decltype(auto) rolling_contacts() { return storage::attr<"rolling_contacts">(*self()); }
       decltype(auto) b_vector_assembled() {
         return storage::attr<"b_vector_assembled">(*self());
       }
@@ -269,6 +272,24 @@ struct one_step_integrator {
         });
       }
 
+      static constexpr auto with_rolling_friction() {
+        return mp::any_of(interaction_kinds_t{}, []<typename Kind>(Kind) {
+          return typename Kind::template interface<Handle>{}.rolling_rows() > 0;
+        });
+      }
+
+      // does an active interaction resist rolling: one problem has one
+      // contact dimension, the rolling rows are assembled for every contact
+      // or for none
+      bool resists_rolling(auto step) {
+        bool rolling = false;
+        if constexpr (with_rolling_friction()) {
+          mp::for_each(interactions(),
+                       [&](auto kind) { rolling = kind.resists_rolling(step) || rolling; });
+        }
+        return rolling;
+      }
+
       // the sizes of the assembled problem, the offsets of the kinds in it
       void assemble_setup(auto step) {
         using indice_t = typename decltype(self()->env())::indice;
@@ -283,9 +304,13 @@ struct one_step_integrator {
           ods += kind.total_dofs();
         });
 
-        mp::for_each(interactions(), [&ointer, &num_fric](auto kind) {
+        rolling_contacts() = resists_rolling(step);
+
+        mp::for_each(interactions(), [&](auto kind) {
           kind.inter_offset() = ointer;
-          ointer += kind.number_of_interactions() * kind.nslaw_size();
+          kind.with_assembled_rows(rolling_contacts(), [&](auto rows) {
+            ointer += kind.number_of_interactions() * rows;
+          });
           if constexpr (kind.nslaw_with_friction()) {
             num_fric += kind.number_of_interactions();
           }
@@ -311,6 +336,9 @@ struct one_step_integrator {
         if constexpr (with_friction()) {
           if (num_fric > 0) {
             algebra::resize(mu_vector_assembled(), num_fric);
+            if (rolling_contacts()) {
+              algebra::resize(mu_r_vector_assembled(), num_fric);
+            }
           }
         }
       }
@@ -339,12 +367,13 @@ struct one_step_integrator {
         return involved;
       }
 
-      // the blocks of H of the active interactions of a kind
-      void assemble_h_matrix(auto step, auto kind) {
+      // the blocks of H of the active interactions of a kind, rows per
+      // interaction
+      void assemble_h_matrix(auto step, auto kind, auto rows) {
         using kind_t = typename decltype(kind)::type;
         kind.assemble_h_matrix(step, h_matrix_assembled(),
                                systems_of<typename kind_t::systems1>(),
-                               systems_of<typename kind_t::systems2>());
+                               systems_of<typename kind_t::systems2>(), rows);
       }
 
       // the involved FEM systems as factored diagonal blocks of the assembled

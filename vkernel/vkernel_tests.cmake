@@ -84,6 +84,8 @@ if(WITH_TESTING)
   new_test(NAME vkernel_fremond_disk SOURCES fremond_disk.cpp ${SIMPLE_TEST_MAIN}
            DEPS "${COMPACTNSEARCH}")
   new_test(NAME vkernel_fremond_rigid SOURCES fremond_rigid.cpp ${SIMPLE_TEST_MAIN})
+  new_test(NAME vkernel_quasi_inelastic_disk SOURCES quasi_inelastic_disk.cpp
+           ${SIMPLE_TEST_MAIN})
   new_test(NAME vkernel_registry_remove SOURCES registry_remove.cpp
            ${SIMPLE_TEST_MAIN})
   # a FEM square falling on the ground (rt_rt interactions). square_200.msh and
@@ -199,6 +201,7 @@ if(WITH_TESTING)
       vkernel_bouncing_disk_line
       vkernel_fremond_disk
       vkernel_fremond_rigid
+      vkernel_quasi_inelastic_disk
       vkernel_fem_t3
       vkernel_bouncing_disks
       vkernel_fixed_disks
@@ -277,10 +280,34 @@ if(WITH_TESTING)
     endfunction()
 
     new_python_test(NAME vkernel_python_fremond_oblique_disk SCRIPT fremond_oblique_disk.py)
+    # Jean 1999 quasi inelastic shock law (local_problem_quasi_inelastic)
+    new_python_test(NAME vkernel_python_quasi_inelastic SCRIPT quasi_inelastic.py)
+    new_python_test(NAME vkernel_python_quasi_inelastic_fem_mix SCRIPT
+                    quasi_inelastic_fem_mix.py)
+    new_python_test(NAME vkernel_python_quasi_inelastic_pile SCRIPT
+                    quasi_inelastic_pile.py)
+    new_python_test(NAME vkernel_python_rolling_friction SCRIPT rolling_friction.py)
+    # the options of the siconos command line: --scheme, --mu-r, --svg-*
+    new_python_test(NAME vkernel_python_siconos_options SCRIPT siconos_options.py)
+    # the AOS kernel reference of rolling_friction_aos.py
+    add_executable(disk_line_rolling_aos
+                   src/siconos/vkernel/tests/disk_line_rolling_aos.cpp)
+    target_link_libraries(disk_line_rolling_aos PRIVATE kernel numerics)
+    new_python_test(NAME vkernel_python_rolling_friction_aos SCRIPT
+                    rolling_friction_aos.py ARGS $<TARGET_FILE:disk_line_rolling_aos>)
+    # the AOS kernel reference of rolling_friction_polytope_aos.py
+    add_executable(polygon_line_rolling_aos
+                   src/siconos/vkernel/tests/polygon_line_rolling_aos.cpp)
+    target_link_libraries(polygon_line_rolling_aos PRIVATE kernel numerics)
+    new_python_test(NAME vkernel_python_rolling_friction_polytope_aos SCRIPT
+                    rolling_friction_polytope_aos.py ARGS
+                    $<TARGET_FILE:polygon_line_rolling_aos>)
     new_python_test(NAME vkernel_python_sliding_square_schemes SCRIPT sliding_square_schemes.py)
     new_python_test(NAME vkernel_python_add_objects SCRIPT test_add_objects.py PYTEST)
     new_python_test(NAME vkernel_python_contact_work SCRIPT test_contact_work.py PYTEST)
+    new_python_test(NAME vkernel_python_energy_work SCRIPT test_energy_work.py PYTEST)
     new_python_test(NAME vkernel_python_nonos SCRIPT test_nonos.py PYTEST)
+    new_python_test(NAME vkernel_python_svg SCRIPT test_svg.py PYTEST)
     new_python_test(NAME vkernel_python_remove_static_segment SCRIPT test_remove_static_segment.py
                     PYTEST)
     # fem.py and fem_tensor_analytical.py

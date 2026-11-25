@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -24,90 +13,7 @@
 
 #include "siconos/vkernel/algebra/linear_algebra.hpp"
 
-// concepts
-namespace siconos::vkernel::storage::pattern::match {
-
-template <typename T>
-concept matrix = requires(T m) { m(0, 0); };
-
-template <typename T>
-concept vector_raw = matrix<T> && T::ColsAtCompileTime == 1;
-
-template <typename T>
-concept vector = vector_raw<std::decay_t<T>>;
-
-// general sparse case
-template <typename T>
-concept sparse_matrix_raw = requires(T m) {
-  typename T::Scalar;
-  { m.rows() } -> std::convertible_to<std::size_t>;
-  { m.cols() } -> std::convertible_to<std::size_t>;
-  { m.nonZeros() } -> std::convertible_to<std::size_t>;
-  { m.makeCompressed() } -> std::same_as<void>;
-  // data pointers
-  { m.innerIndexPtr() } -> std::convertible_to<void*>;
-  { m.valuePtr() } -> std::convertible_to<typename T::Scalar*>;
-} && !requires {
-  // exclude fixed-size dense matrices
-  requires T::RowsAtCompileTime != Eigen::Dynamic&& T::ColsAtCompileTime != Eigen::Dynamic;
-};
-
-template <typename T>
-concept sparse_matrix = sparse_matrix_raw<std::decay_t<T>>;
-
-// Is there a better way to check if a matrix from the Eigen C++ library  is
-// diagonal :
-template <typename T>
-concept diagonal_matrix_raw =
-    !matrix<T> && !sparse_matrix<T> && requires(T m) { m.diagonal()[0]; };
-
-template <typename T>
-concept diagonal_matrix = diagonal_matrix_raw<std::decay_t<T>>;
-
-template <typename T>
-concept any_matrix_raw = (diagonal_matrix<T> || matrix<T> || sparse_matrix<T>);
-
-template <typename T>
-concept any_matrix = any_matrix_raw<std::decay_t<T>>;
-
-template <typename T>
-concept fixed_size_matrix_raw = requires(T matrix) {
-  // Check if the matrix has fixed rows and columns
-  { matrix.rows() } -> std::convertible_to<std::size_t>;
-  { matrix.cols() } -> std::convertible_to<std::size_t>;
-} && (T::RowsAtCompileTime != Eigen::Dynamic) && (T::ColsAtCompileTime != Eigen::Dynamic);
-
-template <typename T>
-concept fixed_size_matrix = fixed_size_matrix_raw<std::decay_t<T>>;
-
-template <typename T>
-concept matrix_1x1_raw = matrix<T> && T::RowsAtCompileTime == 1 && T::ColsAtCompileTime == 1;
-
-template <typename T>
-concept matrix_1x1 = matrix_1x1_raw<std::decay_t<T>>;
-
-template <typename T>
-concept diagonal_or_1x1_raw = diagonal_matrix<T> || matrix_1x1<T>;
-
-template <typename T>
-concept diagonal_or_1x1 = diagonal_or_1x1_raw<std::decay_t<T>>;
-
-template <typename T>
-concept variable_size_matrix = !fixed_size_matrix<T>;
-
-template <typename T>
-concept fixed_size_vector = fixed_size_matrix<T> && vector<T>;
-
-template <typename T>
-concept variable_size_vector = vector<T> && !fixed_size_matrix<T>;
-
-template <typename T>
-concept unbounded = variable_size_vector<T> || variable_size_matrix<T>;
-
-}  // namespace siconos::vkernel::storage::pattern::match
-
 namespace siconos::vkernel::algebra {
-namespace match = siconos::vkernel::storage::pattern::match;
 
 template <typename T, typename M>
 decltype(auto) cast(T, M&& m) {

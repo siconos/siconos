@@ -1,19 +1,8 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright INRIA.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: INRIA
+# SPDX-License-Identifier: Apache-2.0
 #
 
 """Simulation options, applied to a driver script that runs in-process.
@@ -26,16 +15,19 @@ patches). Nothing is given, nothing is changed.
 Two groups of options:
 
   - the run options of siconos.io.mechanics_run.MechanicsHdf5Runner, shared
-    by all the backends: t0, T, h, output_format. They are forced in
-    run_options before run_initialize reads them.
+    by all the backends: t0, T, h, output_format, svg_output and svg_options
+    (the keys given are merged into the svg_options of the driver). They are
+    forced in run_options before run_initialize reads them.
   - the objects of nonos.bridge, the vnative backend only: the scheme of the
     integrator (MoreauJean, MoreauJeanGOSI, AnitescuTasora,
-    AnitescuTasoraAPGD, DEM, MoreauJeanFremond) and its theta, gamma and
-    constraint activation threshold, the solver and its tolerance and maximum
-    number of iterations, the penalty law of the explicit DEM scheme (dem_kn,
-    dem_cn, dem_kt), and the observers: the timings of the stages of the time
-    steps (timings) and the dataflow of the schedule (dataflow), reported on
-    stderr at exit.
+    AnitescuTasoraAPGD, DEM, MoreauJeanFremond, MoreauJeanQuasiInelastic,
+    AnitescuTasoraInelastic), checked against the laws of the scene as the
+    osi of a script is, and its theta, gamma and constraint activation
+    threshold, the solver and its tolerance and maximum number of
+    iterations, the penalty law of the explicit DEM scheme (dem_kn, dem_cn,
+    dem_kt), the rolling resistance mu_r of every friction law (mu_r), and
+    the observers: the timings of the stages of the time steps (timings) and
+    the dataflow of the schedule (dataflow), reported on stderr at exit.
 
 The vnative options import nonos.bridge lazily: they are only available when
 the vnative backend is installed, and applying them on another backend
@@ -57,6 +49,8 @@ SCHEME_CONE_COMPLEMENTARITY = 2
 SCHEME_CONE_COMPLEMENTARITY_APGD = 3
 SCHEME_EXPLICIT_PENALTY = 4
 SCHEME_LOCAL_PROBLEM_FREMOND = 5
+SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC = 6
+SCHEME_CONE_COMPLEMENTARITY_INELASTIC = 7
 
 SCHEMES = {
     "MoreauJean": SCHEME_LOCAL_PROBLEM,
@@ -65,6 +59,8 @@ SCHEMES = {
     "AnitescuTasoraAPGD": SCHEME_CONE_COMPLEMENTARITY_APGD,
     "DEM": SCHEME_EXPLICIT_PENALTY,
     "MoreauJeanFremond": SCHEME_LOCAL_PROBLEM_FREMOND,
+    "MoreauJeanQuasiInelastic": SCHEME_LOCAL_PROBLEM_QUASI_INELASTIC,
+    "AnitescuTasoraInelastic": SCHEME_CONE_COMPLEMENTARITY_INELASTIC,
 }
 # short aliases of the scheme names, also accepted
 SCHEME_ALIASES = {
@@ -74,11 +70,14 @@ SCHEME_ALIASES = {
     "at-apgd": "AnitescuTasoraAPGD",
     "dem": "DEM",
     "mjf": "MoreauJeanFremond",
+    "mji": "MoreauJeanQuasiInelastic",
+    "quasi-inelastic": "MoreauJeanQuasiInelastic",
+    "at-inelastic": "AnitescuTasoraInelastic",
 }
 SCHEME_NAMES = {v: k for k, v in SCHEMES.items()}
 
 # the run options of MechanicsHdf5Runner, the backends all
-CROSS_BACKEND_OPTIONS = ("t0", "T", "h", "output_format")
+CROSS_BACKEND_OPTIONS = ("t0", "T", "h", "output_format", "svg_output", "svg_options")
 # the objects of nonos.bridge, vnative only
 VNATIVE_OPTIONS = (
     "scheme",
@@ -91,6 +90,7 @@ VNATIVE_OPTIONS = (
     "dem_kn",
     "dem_cn",
     "dem_kt",
+    "mu_r",
     "timings",
     "dataflow",
     "resume",
@@ -145,22 +145,29 @@ def apply(options):
         # None and False (the timings/dataflow flags not given) are not set
         return value is not None and value is not False
 
+    vnative = {key: options.get(key) for key in VNATIVE_OPTIONS}
+    if vnative["scheme"] is not None:
+        # the short aliases are also accepted
+        vnative["scheme"] = SCHEME_ALIASES.get(vnative["scheme"], vnative["scheme"])
+        if vnative["scheme"] not in SCHEMES:
+            _error(f"unknown scheme {vnative['scheme']}, one of " + ", ".join(SCHEMES))
+
     cross = {key: options.get(key) for key in CROSS_BACKEND_OPTIONS}
+    if cross["svg_options"] and "material_sides" in cross["svg_options"]:
+        # (id, side) pairs (json has no int keys): {static id: side}
+        cross["svg_options"]["material_sides"] = {
+            int(ident): int(side)
+            for ident, side in cross["svg_options"]["material_sides"]
+        }
     if any(set(value) for value in cross.values()):
         _patch_run_options(cross)
 
-    vnative = {key: options.get(key) for key in VNATIVE_OPTIONS}
     if vnative.get("resume"):
         _patch_resume()
 
     # the other vnative options (scheme, theta, gamma, ...): "resume" is
     # handled above and does not need nonos.bridge
     others = {k: v for k, v in vnative.items() if k != "resume"}
-    if others["scheme"] is not None:
-        # the short aliases are also accepted
-        others["scheme"] = SCHEME_ALIASES.get(others["scheme"], others["scheme"])
-        if others["scheme"] not in SCHEMES:
-            _error(f"unknown scheme {others['scheme']}, one of " + ", ".join(SCHEMES))
     if any(set(value) for value in others.values()):
         _patch_vnative(others)
 
@@ -173,7 +180,13 @@ def _patch_run_options(cross):
 
     def run_options_run_initialize(self):
         for key, value in cross.items():
-            if value is not None:
+            if key == "svg_options" and value:
+                # the keys given over those of the driver
+                self._run_options[key] = {
+                    **(self._run_options.get(key) or {}),
+                    **value,
+                }
+            elif value is not None:
                 self._run_options[key] = value
         return run_initialize(self)
 
@@ -241,11 +254,40 @@ def _patch_vnative(v):
 
     bridge.OSNSPB.__init__ = osnspb
 
+    # the rolling resistance of every friction law, over the mu_r of the
+    # script (0 for a NewtonImpactFrictionNSL), before the integrator checks
+    # the laws
+    if v["mu_r"] is not None:
+        if v["mu_r"] < 0:
+            _error(f"--mu-r {v['mu_r']}: the rolling resistance is >= 0")
+        nslaw_init = bridge.NewtonImpactFrictionNSL.__init__
+        rolling_init = bridge.NewtonImpactRollingFrictionNSL.__init__
+
+        def set_mu_r(law):
+            law._handle.set_mu_r(v["mu_r"])
+            bridge.NewtonImpactFrictionNSL.rolling_resistance = v["mu_r"] > 0
+
+        def nslaw(self, *args, **kwargs):
+            nslaw_init(self, *args, **kwargs)
+            set_mu_r(self)
+
+        def rolling(self, *args, **kwargs):
+            rolling_init(self, *args, **kwargs)
+            set_mu_r(self)
+
+        bridge.NewtonImpactFrictionNSL.__init__ = nslaw
+        bridge.NewtonImpactRollingFrictionNSL.__init__ = rolling
+
     # the integrator: the options over what the script chose
     def set_integrator(simulation, osi):
         vosi = simulation.handle().one_step_integrator()
         if v["scheme"] is not None:
-            vosi.set_scheme(SCHEMES[v["scheme"]])
+            # the checks of an osi of the script (the laws: e, Frémond,
+            # rolling resistance)
+            try:
+                simulation.setScheme(SCHEMES[v["scheme"]], f"--scheme {v['scheme']}")
+            except ValueError as e:
+                _error(str(e))
         if v["scheme"] == "DEM" and type(osi).__name__ != "ExplicitDEMOSI":
             # the defaults of bridge.ExplicitDEMOSI
             kn = 1e5 if v["dem_kn"] is None else v["dem_kn"]

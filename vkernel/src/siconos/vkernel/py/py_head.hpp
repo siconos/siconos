@@ -1,19 +1,8 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright INRIA.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * SPDX-FileCopyrightText: INRIA
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #pragma once
@@ -63,7 +52,9 @@ struct fem : model::elastic_lagrangian_ds {
   using without_batch_bindings = void;
 };
 
-struct nslaw : model::newton_impact_friction {};
+// the law of every interaction, with rolling resistance (mu_r = 0: Coulomb
+// friction, the rolling rows are then left out of the problem)
+struct nslaw : model::newton_impact_rolling_friction {};
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
 using diskfsegment_r = collision::diskfsegment_r;
