@@ -3218,6 +3218,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             return 0
         return 0
 
+    def _contact_contact_work(self, nsds, index_set, omega, gap_law=False, h=0.0):
+        """contactContactWork of the io of the backend.
+
+        gap_law and h are only known by the io of the vkernel (vnative
+        backend): for the other backends (the MechanicsIO of siconos.io),
+        the call is made without them.
+        """
+        if self.config.backend == "vnative":
+            return self._io.contactContactWork(
+                nsds, index_set, omega=omega, gap_law=gap_law, h=h
+            )
+        return self._io.contactContactWork(nsds, index_set, omega=omega)
+
     def output_contact_work(self):
         """
         Outputs contact contact_work
@@ -3225,7 +3238,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_work = self._io.contactContactWork(
+            contact_work = self._contact_contact_work(
                 self._nsds,
                 self._output_contact_index_set,
                 omega=self._run_options.get("theta"),
@@ -3329,7 +3342,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     # print(work_forces)
                     external_forces_work_sum = np.sum(work_forces[:, 1])
 
-            cf_work = self._io.contactContactWork(
+            cf_work = self._contact_contact_work(
                 self._nsds,
                 self._output_contact_index_set,
                 omega=self._run_options.get("theta"),
