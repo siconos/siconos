@@ -877,6 +877,12 @@ void plasticity_2d_nsgs_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   SOLVER_TOL(options) = 1e-4;
   options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
+  /* error of plasticity_2d_compute_error: relative to the stress of each element, the strain
+   * rate being balanced by rho_e = 1/||M_ee|| (see docs/devel/PLASTICITY.md) */
+  options->iparam[PLASTICITY_SCALING_NORM] = PLASTICITY_SCALING_EUCLIDEAN;
+  options->iparam[PLASTICITY_SCALING_SCOPE] = PLASTICITY_SCALING_SCOPE_PER_CONE;
+  options->iparam[PLASTICITY_SCALING_REDUCTION] = PLASTICITY_SCALING_REDUCTION_MIXED;
+  options->iparam[PLASTICITY_SCALING_RHO] = PLASTICITY_SCALING_RHO_ELEMENT;
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;

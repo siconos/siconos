@@ -404,6 +404,98 @@ problem, with the same solver ids as the cylinder):
 
 MixedProblems Von Mises blocks are plane strain only.
 
+## Error and scaling (`plasticity_2d_compute_error`)
+
+The error is scaled as in `fc3d_compute_error`, with the same option indices and values.
+
+For each element e, the quantities are computed in the variables of the solvers (cone
+coordinates, cohesion shift, plane stress scaling):
+
+* r_e, the stress;
+* v_e, the modified strain rate: w + theta ||w_T|| e_N for Drucker–Prager, w for Von Mises;
+* F_e = r_e − P_K(r_e − rho_e v_e), the natural-map residual. rho_e balances the stress and
+  the strain rate, which have different units: see "Balancing rho" below.
+
+The error is then:
+
+* scope `PLASTICITY_SCALING_SCOPE_PER_CONE` (default): sqrt(sum_e ||F_e||² / s_e²), where s_e
+  is computed from r_e and v_e;
+* scope `PLASTICITY_SCALING_SCOPE_PER_VECTOR`: ||F|| / s, where s is computed from the whole
+  vectors.
+
+The scale combines the norms of r and v, each safeguarded by max(1, ·):
+
+| option | values |
+|---|---|
+| `iparam[PLASTICITY_SCALING_NORM]` (24) | `EUCLIDEAN` (default); `NO` (no scaling); `CONE` \|x_N\| + \|\|x_T\|\|; `CONE_ETA` \|x_N\| + eta \|\|x_T\|\| (Von Mises: eta = 1); `CONE_WEIGHTED` sqrt(x_N² + alpha \|\|x_T\|\|²) |
+| `iparam[PLASTICITY_SCALING_REDUCTION]` (26) | `MIXED` (default): \|r\| + \|v\|; `MAX`: min(max(1, \|r\|), max(1, \|v\|)), named as in fc3d (its default); `MEAN`: geometric mean |
+| `iparam[PLASTICITY_SCALING_SCOPE]` (25) | `PER_CONE` (default), `PER_VECTOR` |
+| `iparam[PLASTICITY_SCALING_RHO]` (27) | `ELEMENT` (default): rho_e = 1/\|\|M_ee\|\|_2; `GLOBAL`: rho = 1/max_e \|\|M_ee\|\|_2; `ONE`: rho = 1 (as in fc3d) |
+| `dparam[PLASTICITY_SCALING_ALPHA]` (5) | alpha of `CONE_WEIGHTED` |
+
+**Defaults.** `plasticity_2d_nsgs_set_default` (used by `PLASTICITY_2D_NSGS` and
+`PLASTICITY_2D_NSGS_GENERIC`) sets `EUCLIDEAN`, `PER_CONE`, `MIXED` and `ELEMENT`, and
+`options == NULL` gives the same defaults. The error is then relative to the stress of each
+element, and it does not depend on the units of the strain rate. The NSGS passes its options
+to the error, so these options are set on the NSGS options. The enum values are those of
+fc3d: options created for another solver (zero-initialized) give the fc3d scaling (`MAX`,
+rho = 1). `NO` with `ONE` gives the former absolute error. Python: `sn.params.PLASTICITY_SCALING_*`, and
+`plasticity_2d_compute_error(problem, stress, w, tol, options=None)`.
+
+**Scaling on the footing problems.** There, |sigma_e| ~ 3e2–5e3 while |w_e| < 4e-4 (M is a
+compliance, ~1e-6). The default scaling (min of the safeguarded norms) is then 1, so the
+error stays absolute. With the new Drucker–Prager Newton local solver:
+
+| scaling | tol 1e-10 | tol 1e-12 | tol 1e-14 |
+|---|---|---|---|
+| `NO` (absolute) | ok (error 2e-12) | stalls at 2e-12 | stalls |
+| default (`EUCLIDEAN`, `PER_CONE`, `MAX`) | ok (2e-12) | stalls at 2e-12 | stalls |
+| `PER_CONE`, `MEAN` | ok (5e-14) | ok, 3016 iterations | stalls at 4e-14 |
+| `PER_CONE`, `MIXED` | ok (1e-15) | ok, 3016 iterations | ok, 3636 iterations (8e-16) |
+| `PER_VECTOR`, `MIXED` | ok (9e-17) | ok, 3016 iterations | ok, 3636 iterations |
+
+At tolerance 1e-10 the NSGS stops after the same number of iterations (2388) with every
+scaling: the stop is decided by the light (incremental, relative) error, and the final
+full-error check passes.
+
+**Balancing rho.** The natural map with rho = 1 compares a stress with a strain rate. The
+scales of r and v (and the reductions) are then meaningful only if both have comparable
+magnitudes, which is not the case for compliance problems (|sigma| ~ 5e3, |w| < 4e-4 on the
+footing problems). With rho_e = 1/||M_ee||_2, computed on the diagonal block T^T M_ee T in
+the variables of the solvers, rho_e v_e is a stress. The solutions are the same (zero of the
+natural map for any rho > 0), and the error no longer depends on the units of the strain
+rate: (kappa M, kappa q) gives the same error, which is checked by the test.
+
+The choice of the reduction still matters with rho_e. In each element one of the two
+variables usually vanishes: w = 0 for an elastic element (sticking contacts in fc3d). Then
+the per-cone `MAX` scale min(max(1, |r_e|), max(1, |rho_e v_e|)) is 1, and the error of the
+element stays absolute in stress units (floor eps |sigma_e|). On the footing problem, with
+rho_e and the new Drucker–Prager Newton local solver:
+
+| scaling (rho_e) | tol 1e-12 | tol 1e-14 |
+|---|---|---|
+| `PER_CONE`, `MAX` | stalls at 4e-12 | stalls |
+| `PER_CONE`, `MEAN` | ok, 3600 iterations | stalls at 1e-13 |
+| `PER_CONE`, `MIXED` | ok, 3323 iterations | 1.06e-14 (floor ~1e-14) |
+| `PER_VECTOR`, `MAX` | ok, 3296 iterations | 1.01e-14 |
+| `PER_VECTOR`, `MIXED` | ok, 3016 iterations | ok, 3636 iterations (8e-15) |
+
+The objection to `MIXED` (it under-reports the error of the smaller variable when the two
+have different magnitudes, `Error_SOC_natural_map.tex`) is removed by rho_e. `PER_CONE` +
+`MIXED` + `ELEMENT`, the default since 2026-11-25, gives an error relative to the stress of
+each element.
+
+With the default error and tolerance 1e-12, on the footing problems:
+
+| local solver | footing_100 | footing_100_theta0 |
+|---|---|---|
+| `DRUCKERPRAGER_NSN` | converges, 3323 iterations, 0.8 s | converges, 3239 iterations, 0.8 s |
+| default `NSN_GP_HYBRID` | converges, 5699 iterations, 11 s | stalls at 2.2e-12 (20000 iterations, 38 s) |
+
+At 1e-10 both converge (0.7 s and 6.5 s). The floor of the default error is ~1e-14. The
+hybrid solver stalls because its own local error is absolute, with a local tolerance of 1e-14
+(see "Known problems").
+
 ## NSGS and local solvers (`plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c`)
 
 | internal solver id | Drucker–Prager | Von Mises |
@@ -431,9 +523,12 @@ converge in 2300–2400 NSGS iterations:
 | `ONECONE_NSN` | 0.7 s |
 | one-step projection | 0.07 s |
 
-The error of `plasticity_2d_compute_error` is absolute and |sigma| ~ 5e3 there, so a
-tolerance of 1e-12 is at round-off (relative 5e-16): the NSGS then stalls at ~2e-12 with
-every local solver; only the default reaches it, by chance. MixedProblems Von Mises blocks use the return mapping.
+MixedProblems Von Mises blocks use the return mapping.
+
+With the absolute error (or the default scaling, see "Error and scaling") and |sigma| ~ 5e3,
+a tolerance of 1e-12 is at round-off (relative 5e-16): the NSGS then stalls at ~2e-12 with
+every local solver, and only the default local solver reaches it, by chance. With the MIXED
+scaling the footing problem converges down to a tolerance of 1e-14.
 
 ## Bugs fixed (2026-11-23)
 
@@ -448,6 +543,14 @@ every local solver; only the default reaches it, by chance. MixedProblems Von Mi
   `test_plasticity_2d_nsgs_generic` did not check the result. The adapter also printed every
   iteration (`verbose = 2` hard coded); it now follows the numerics verbosity.
 * `plasticity_2d_compute_error` rejected the Von Mises model.
+* (2026-11-25) The error of `plasticity_2d_compute_error` was absolute, whatever the scale of
+  the problem (the `norm` argument was unused). It is now scaled as in fc3d (see "Error and
+  scaling"); `PLASTICITY_SCALING_NO` gives the former error.
+* (2026-11-25) Generic NSGS (`NonSmoothSolvers/nsgs_generic.h`, `nsgs_generic_instrumented.h`,
+  shared with the friction generic solvers): after the final check of the full error against
+  the user tolerance, info was set again by comparing the error with the working tolerance,
+  which may have been lowered during the iterations. The solver then returned `info = 1`
+  with an error below the user tolerance. With a full error, the final check now decides.
 * (2026-11-25) Python bindings: the problems were freed with `delete` (M, q and the model
   parameters leaked), and M was copied from a C-ordered numpy array into the column-major
   dense storage, i.e. transposed for a non-symmetric M. The problems are now created by
@@ -527,7 +630,17 @@ every local solver; only the default reaches it, by chance. MixedProblems Von Mi
     * both agree where the solution is unique (theta = eta, M symmetric);
   * NSGS on the three footing problems with five local solvers: same solution (see the
     timings above).
-* Python, `numerics/python/tests/test_plasticity_2d.py` (48 cases, through
+* `plasticity_2d_compute_error_test`:
+  * the unscaled, default, MIXED per-cone and MIXED per-vector errors, computed again in the
+    test (Drucker–Prager with dilatancy and cohesion, Von Mises);
+  * homogeneity: with (M, 1e4 q) and 1e4 sigma, the absolute error is multiplied by 1e4 and
+    the MIXED error is unchanged;
+  * rho_e: the error is unchanged for (kappa M, kappa q), kappa = 1e-6 (per element and
+    global rho); with rho = 1 it changes;
+  * footing problem with rho_e and the MIXED scaling: converges at tolerance 1e-13, with an
+    absolute error at round-off (2.5e-12).
+* Python, `numerics/python/tests/test_plasticity_2d.py` (49 cases, including the error
+  scaling; through
   `plasticity_2d_driver` and `plasticity_2d_compute_error`). The coordinate maps and the plane
   stress formula are written again in the test:
   * creation, invalid sizes, layout of M (C or Fortran order), default options;
@@ -547,5 +660,10 @@ every local solver; only the default reaches it, by chance. MixedProblems Von Mi
 * `plasticity_2d_footing_10.dat` is in an old format (no model type line) and cannot be read.
 * Neither the cohesion, the stress coordinates nor the Von Mises hypothesis are saved in the
   data files.
+* `PLASTICITY_2D_ONECONE_NSN*` (default local solver `NSN_GP_HYBRID`): the local error
+  (`plasticity_2d_compute_local_error`, keep/discard of the hybrid loop) is absolute, and the
+  local tolerance is 1e-14. On problems with large stresses it is never reached, so each
+  local solve runs the whole hybrid loop: 5.7–11 s instead of 0.7 s on footing_100, and a
+  stall on footing_100_theta0 at 1e-12 with the relative error.
 * Not covered: elasto-plastic plane strain with szz as an unknown; plane stress in
   MixedProblems.

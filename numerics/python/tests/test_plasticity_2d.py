@@ -185,6 +185,43 @@ def test_matrix_layout():
         assert np.allclose(w, M @ s + q, rtol=0, atol=1e-14)
 
 
+def test_error_scaling():
+    """Scaling of the error as in fc3d: the MIXED scaling makes it relative, homogeneous of
+    degree 0 in (q, stress)."""
+    rng = np.random.default_rng(4)
+    M = random_coupled_matrix(3, rng)
+    q = rng.uniform(-1, 1, 9)
+    stress = rng.uniform(4, 6, 9)
+    P = sn.params
+    mixed = sn.SolverOptions(int(IDS.PLASTICITY_2D_NSGS))
+    mixed.iparam[P.PLASTICITY_SCALING_REDUCTION] = int(
+        P.PLASTICITY_SCALING_REDUCTION_MIXED
+    )
+    absolute = sn.SolverOptions(int(IDS.PLASTICITY_2D_NSGS))
+    absolute.iparam[P.PLASTICITY_SCALING_NORM] = int(P.PLASTICITY_SCALING_NO)
+    errors = {}
+    for lam in (1.0, 1e4):
+        problem = sn.PlasticityProblem_new(3, M, lam * q, np.full(3, 0.4), np.zeros(3))
+        for name, opt in (("mixed", mixed), ("absolute", absolute)):
+            w = np.zeros(9)
+            _, errors[name, lam] = sn.plasticity_2d_compute_error(
+                problem, lam * stress, w, 1e-12, opt
+            )
+    assert abs(errors["absolute", 1e4] / errors["absolute", 1.0] - 1e4) < 1e-6
+    assert abs(errors["mixed", 1e4] / errors["mixed", 1.0] - 1.0) < 1e-10
+    # rho_e = 1/||M_ee||: the error does not depend on the units of the strain rate
+    rho = sn.SolverOptions(int(IDS.PLASTICITY_2D_NSGS))
+    rho.iparam[P.PLASTICITY_SCALING_RHO] = int(P.PLASTICITY_SCALING_RHO_ELEMENT)
+    for kappa in (1.0, 1e-6):
+        problem = sn.PlasticityProblem_new(
+            3, kappa * M, kappa * q, np.full(3, 0.4), np.zeros(3)
+        )
+        _, errors["rho", kappa] = sn.plasticity_2d_compute_error(
+            problem, stress.copy(), np.zeros(9), 1e-12, rho
+        )
+    assert abs(errors["rho", 1e-6] / errors["rho", 1.0] - 1.0) < 1e-10
+
+
 def test_default_options():
     problem = sn.PlasticityProblem_new(3, M1, q1, eta1, theta1)
     stress, w = np.zeros(3), np.zeros(3)

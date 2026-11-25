@@ -361,11 +361,8 @@ static inline void nsgs_solve_instrumented(void* problem, double* var_z, double*
     hasNotConverged = final_converged ? 0 : 1;
   }
 
-  if (error <= tolerance) {
-    *info = 0;
-  } else {
-    *info = 1;
-  }
+  /* with a full error, info has been set by the final check against the user tolerance */
+  if (!toolkit->compute_error) *info = (error <= tolerance) ? 0 : 1;
 
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   dparam[SICONOS_DPARAM_RESIDU] = error;

@@ -734,12 +734,10 @@ static inline void nsgs_solve(void* problem, double* var_z, double* var_x, int* 
     hasNotConverged = final_converged ? 0 : 1;
   }
 
-  /* Set output info */
-  if (error <= tolerance) {
-    *info = 0;
-  } else {
-    *info = 1;
-  }
+  /* Set output info. With a full error, info has been set by the final check against the
+   * user tolerance: the working tolerance may have been lowered during the iterations (it
+   * then made info = 1 with a full error below the user tolerance). */
+  if (!toolkit->compute_error) *info = (error <= tolerance) ? 0 : 1;
 
   /* Store iteration info */
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
@@ -1063,12 +1061,10 @@ static inline void nsgs_solve_4stage(void* problem, double* var_z, double* var_x
     hasNotConverged = final_converged ? 0 : 1;
   }
 
-  /* Set output info */
-  if (error <= tolerance) {
-    *info = 0;
-  } else {
-    *info = 1;
-  }
+  /* Set output info. With a full error, info has been set by the final check against the
+   * user tolerance: the working tolerance may have been lowered during the iterations (it
+   * then made info = 1 with a full error below the user tolerance). */
+  if (!toolkit->compute_error) *info = (error <= tolerance) ? 0 : 1;
 
   /* Store iteration info */
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;

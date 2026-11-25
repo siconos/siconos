@@ -565,6 +565,8 @@ if(WITH_TESTING)
   new_test(SOURCES plasticity_2d_plane_stress_test.c)
   # Drucker-Prager one-cone return mapping and semi-smooth Newton
   new_test(SOURCES plasticity_2d_druckerprager_test.c)
+  # scaling of the error (as in fc3d_compute_error)
+  new_test(SOURCES plasticity_2d_compute_error_test.c)
 
   # Collection tests using new infrastructure
   new_tests_collection(

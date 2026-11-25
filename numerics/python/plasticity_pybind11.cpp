@@ -207,19 +207,23 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   m.def(
       "plasticity_2d_compute_error",
       [](PlasticityProblem* problem, py::array_t<double, py::array::c_style> stress,
-         py::array_t<double, py::array::c_style> strainrate, double tolerance) {
+         py::array_t<double, py::array::c_style> strainrate, double tolerance,
+         SolverOptions* options) {
         ssize_t n = 3 * problem->numberOfCones;
         if (stress.size() != n || strainrate.size() != n)
           throw std::invalid_argument("stress and strainrate must have size 3 numberOfCones");
         double error = 0.0;
         int info = plasticity_2d_compute_error(problem, stress.mutable_data(),
-                                               strainrate.mutable_data(), tolerance, nullptr,
+                                               strainrate.mutable_data(), tolerance, options,
                                                0.0, &error);
         return py::make_tuple(info, error);
       },
       py::arg("problem"), py::arg("stress"), py::arg("strainrate"), py::arg("tolerance"),
+      py::arg("options") = nullptr,
       "Natural-map error of the problem (cohesion, coordinates and Von Mises hypothesis taken "
-      "into account); strainrate is set to M stress + q. Returns (info, error).");
+      "into account), scaled according to options.iparam[params.PLASTICITY_SCALING_*] "
+      "(default scaling if options is None); strainrate is set to M stress + q. Returns "
+      "(info, error).");
 
   // Display functions
   m.def("plasticity_display", &plasticity_display, "Display plasticity problem",
@@ -229,6 +233,38 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   m.def(
       "mohrCoulomb2D_display", [](PlasticityProblem* problem) { plasticity_display(problem); },
       "Display plasticity problem (backward compatibility)", py::arg("problem"));
+
+  // Scaling of the error of plasticity_2d_compute_error (indices in iparam / dparam of the
+  // NSGS options, same as the fc3d ones)
+  params.attr("PLASTICITY_SCALING_NORM") = (int)PLASTICITY_SCALING_NORM;
+  params.attr("PLASTICITY_SCALING_SCOPE") = (int)PLASTICITY_SCALING_SCOPE;
+  params.attr("PLASTICITY_SCALING_REDUCTION") = (int)PLASTICITY_SCALING_REDUCTION;
+  params.attr("PLASTICITY_SCALING_ALPHA") = (int)PLASTICITY_SCALING_ALPHA;
+  params.attr("PLASTICITY_SCALING_RHO") = (int)PLASTICITY_SCALING_RHO;
+  py::enum_<PLASTICITY_SCALING_RHO_ENUM>(params, "PLASTICITY_SCALING_RHO_enum",
+                                         "rho of the natural map of the error")
+      .value("PLASTICITY_SCALING_RHO_ONE", PLASTICITY_SCALING_RHO_ONE)
+      .value("PLASTICITY_SCALING_RHO_ELEMENT", PLASTICITY_SCALING_RHO_ELEMENT)
+      .value("PLASTICITY_SCALING_RHO_GLOBAL", PLASTICITY_SCALING_RHO_GLOBAL)
+      .export_values();
+  py::enum_<PLASTICITY_SCALING>(params, "PLASTICITY_SCALING", "Norm of the error scaling")
+      .value("PLASTICITY_SCALING_EUCLIDEAN", PLASTICITY_SCALING_EUCLIDEAN)
+      .value("PLASTICITY_SCALING_NO", PLASTICITY_SCALING_NO)
+      .value("PLASTICITY_SCALING_CONE", PLASTICITY_SCALING_CONE)
+      .value("PLASTICITY_SCALING_CONE_ETA", PLASTICITY_SCALING_CONE_ETA)
+      .value("PLASTICITY_SCALING_CONE_WEIGHTED", PLASTICITY_SCALING_CONE_WEIGHTED)
+      .export_values();
+  py::enum_<enum PLASTICITY_SCALING_SCOPE>(params, "PLASTICITY_SCALING_SCOPE_enum",
+                                           "Scope of the error scaling")
+      .value("PLASTICITY_SCALING_SCOPE_PER_CONE", PLASTICITY_SCALING_SCOPE_PER_CONE)
+      .value("PLASTICITY_SCALING_SCOPE_PER_VECTOR", PLASTICITY_SCALING_SCOPE_PER_VECTOR)
+      .export_values();
+  py::enum_<enum PLASTICITY_SCALING_REDUCTION>(params, "PLASTICITY_SCALING_REDUCTION_enum",
+                                               "Reduction of the error scaling")
+      .value("PLASTICITY_SCALING_REDUCTION_MAX", PLASTICITY_SCALING_REDUCTION_MAX)
+      .value("PLASTICITY_SCALING_REDUCTION_MEAN", PLASTICITY_SCALING_REDUCTION_MEAN)
+      .value("PLASTICITY_SCALING_REDUCTION_MIXED", PLASTICITY_SCALING_REDUCTION_MIXED)
+      .export_values();
 
   // Solver IDs enum
   py::enum_<PLASTICITY_SOLVER>(solver_ids, "PLASTICITY_SOLVER", "Plasticity solver IDs")
