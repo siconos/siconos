@@ -9,6 +9,8 @@
 
 minimum_pre_commit_version: "3.2.0"
 default_install_hook_types: [pre-commit, pre-push]
+# hooks run at commit; hooks with 'stages: [pre-push]' (reuse) run only at push
+default_stages: [pre-commit]
 
 
 exclude: \.(dat|ref|supp|stp|step|h5|hdf5)$
@@ -21,13 +23,16 @@ repos:
     hooks:
       - id: trailing-whitespace
         exclude: ^externals/
+        stages: [pre-commit]   # these three declare their own stages: pin them
       - id: end-of-file-fixer
         exclude: ^externals/
+        stages: [pre-commit]
       - id: check-yaml
       - id: check-json
       - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
+        stages: [pre-commit]
       - id: mixed-line-ending
 
   # ---- clang format C/C++ (rules: .clang-format) ----
@@ -62,3 +67,4 @@ repos:
     rev: v6.3.0
     hooks:
       - id: reuse-lint-file
+        stages: [pre-push]   # only when pushing (prek run --hook-stage pre-push to run it by hand)

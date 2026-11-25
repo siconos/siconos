@@ -106,7 +106,8 @@ pre-commit:
     # to avoid "fatal: detected dubious ownership in repository "
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
     - pip install prek pre-commit reuse
-    - prek run --all-files
+    - prek run --all-files                          # commit hooks
+    - prek run --all-files --hook-stage pre-push    # push hooks (reuse)
   cache:
     key: prek
     paths:
