@@ -1,9 +1,10 @@
-/* Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.
- *
- * SPDX-FileCopyrightText: INRIA
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: 2026 INRIA
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+// Siconos is a program dedicated to modeling, simulation and control
+// of non smooth dynamical systems.
+
 #ifndef PLASTICITY_2D_LOCAL_NEWTON_H
 #define PLASTICITY_2D_LOCAL_NEWTON_H
 
