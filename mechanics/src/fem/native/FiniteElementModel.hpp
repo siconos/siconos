@@ -47,6 +47,12 @@ constexpr double I_TET2_W[] = {0.04166666666666666, 0.04166666666666666, 0.04166
                                0.04166666666666666};
 
 /** a finite element model */
+/** 2D elasticity tensor D (sigma = D epsilon, Voigt notation (xx, yy, xy) with the
+ * engineering shear strain) of an isotropic material, for its analysis type (plane strain
+ * or plane stress). Throws for other analysis types.
+ */
+siconos::algebra::SiconosMatrix33 elasticityTensor2D(const Material& mat);
+
 class FiniteElementModel {
  protected:
   /** a mesh */
@@ -127,9 +133,15 @@ class FiniteElementModel {
                                    const FiniteElement& fe, size_t elem_cnt);
 
   /** compute Mass Matrix
+   * In 2D, the mass density is multiplied by the thickness of the material.
+   * @param[out] mass the assembled mass matrix
+   * @param[in] mat materials (one per element tag)
+   * @param[in] massType consistent (default) or lumped (row sums of the consistent
+   *            elementary matrices; throws for beam elements or a non-positive diagonal)
    **/
   void computeMassMatrix(siconos::algebra::SiconosSparseMatrix& mass,
-                         const std::map<int, const Material>& mat);
+                         const std::map<int, const Material>& mat,
+                         MassType massType = MassType::consistent);
 
   /** compute elementary Mass Matrix
    **/
@@ -195,6 +207,11 @@ class FiniteElementModel {
   void computeBMatrix(siconos::algebra::SiconosSparseMatrix& B,
                       const std::map<int, const Material>& mat);
 
+  /** compute the compliance matrix S (block diagonal, one block per element): D^{-1} for
+   * the continuum elements (D = elasticityTensor2D, plane strain or plane stress
+   * according to the material), the beam compliance for B2/B3. With B scaled by
+   * sqrt(area * thickness), K = B^T S^{-1} B.
+   **/
   void computeElasticityMatrix(siconos::algebra::SiconosSparseMatrix& S,
                                const std::map<int, const Material>& mat);
 

@@ -22,8 +22,9 @@
 #include "siconos_debug.h"
 
 siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(
-    std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials)
-    : FiniteElementLinearTIDS(mesh, materials) {
+    std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials,
+    MassType massType)
+    : FiniteElementLinearTIDS(mesh, materials, massType) {
   DEBUG_BEGIN("SolidLinearTIDS::SolidLinearTIDS(...)\n");
 
   auto nElements = FEModel_->elements().size();

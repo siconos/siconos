@@ -103,7 +103,34 @@ rhs = [ −h Bᵀσ_k + F_ext,θ + p ;  h B v_k − h ε̇_p ]
 Before, nothing was pushed and the solver read an empty `_mu` vector (uninitialised
 memory). A Mohr–Coulomb cone would use μ = tan φ together with the cone `b`, not done.
 
-## 5. Validation (macOS arm64, release)
+## 5. Discrete operators of continuum elements (T3)
+
+For a 2D continuum element e of area A_e and thickness t (`Material` thickness):
+
+- `BMatrix()`: the strain–displacement matrix scaled by `sqrt(A_e t)`, so that the stress
+  unknowns are `σ̃_e = sqrt(A_e t) σ_e` (σ_e the physical stress, Voigt order
+  (σxx, σyy, σxy), engineering shear strain).
+- `elasticityMatrix()`: block diagonal, `S_e = D⁻¹` with D the plane strain or plane stress
+  tensor of the material (`elasticityTensor2D`). With this scaling, `K = Bᵀ S⁻¹ B` (checked in
+  `SolidLinearTIDSTest::testPlaneStressCompliance`). A yield criterion `f(σ) ≤ 0` written on
+  the unknowns becomes `f(σ̃_e / sqrt(A_e t)) ≤ 0`; for a positively homogeneous criterion (von
+  Mises, Drucker–Prager without cohesion) the yield stress of element e is
+  `sqrt(A_e t) σ_y`.
+- Mass: integral of `ρ t Nᵀ N` (consistent, default) or its row-sum lumping
+  (`MassType::lumped`, constructor argument of `SolidLinearTIDS`). The lumped mass is
+  diagonal, which keeps the stress Schur complement `S + h²θ² B M⁻¹ Bᵀ` sparse.
+
+The analysis type is a constructor argument of `Material`:
+`Material(ρ, E, ν, AnalysisType2D::plane_stress, t)` (the 3-argument constructor keeps plane
+strain, t = 1). Before November 2026 the compliance was always the plane strain one (the
+stiffness already used the analysis type) and the thickness did not enter the mass.
+
+These operators are identical to those of the pytripopfem code (native T3 backend, one Gauss
+point, `scaling_sigma_vector = sqrt(weight det J)`, lumped mass) to round-off on the strip with
+a circular hole (`strip_with_circular_hole_72.msh`, plane stress): relative differences
+6.7e-16 (B), 1.4e-16 (S), 4.5e-16 (M).
+
+## 6. Validation (macOS arm64, release)
 
 `plasticBernoulliBeam` (h = 1e−5, 1000 steps, c = 2e9):
 
@@ -129,7 +156,7 @@ Non-regression: `bernoulliBeam`, `ballAgainstBernoulliBeam`, `TH4`, `T3`, `T3-GO
 bit-identical results (without plasticity, negating a row and its right-hand side does
 not change the solution).
 
-## 6. Open points
+## 7. Open points
 
 - The non-global `MoreauJeanOSI` path with stress interactions is untested.
 - φ (Mohr–Coulomb cone) is not used.

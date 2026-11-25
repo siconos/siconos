@@ -23,11 +23,15 @@ class SolidLinearTIDSTest : public CppUnit::TestFixture {
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildSolidLinearTIDS1);
+  CPPUNIT_TEST(testPlaneStressCompliance);
+  CPPUNIT_TEST(testLumpedMass);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildSolidLinearTIDS1();
+  void testPlaneStressCompliance();
+  void testLumpedMass();
 
   // Members
 

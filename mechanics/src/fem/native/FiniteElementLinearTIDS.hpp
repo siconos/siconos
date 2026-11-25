@@ -9,6 +9,7 @@
 #ifndef FINITEELEMENTLAGRANGIANTIDS_H
 #define FINITEELEMENTLAGRANGIANTIDS_H
 
+#include "FETypes.hpp"  // MassType
 #include "LagrangianSparseLinearTIDS.hpp"
 #include "Material.hpp"
 
@@ -38,9 +39,11 @@ class FiniteElementLinearTIDS : public modeling::LagrangianSparseLinearTIDS {
    * \param mesh the mesh that defined the spatial discretization
    * \param materials a list of all materials associated with the system
    *  (map between some tags and single material)
+   * \param massType consistent (default) or lumped (diagonal) mass matrix
    */
   FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh,
-                          const std::map<int, const Material>& materials);
+                          const std::map<int, const Material>& materials,
+                          MassType massType = MassType::consistent);
 
   /** destructor */
   ~FiniteElementLinearTIDS() noexcept = default;

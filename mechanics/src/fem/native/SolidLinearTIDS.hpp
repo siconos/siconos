@@ -76,8 +76,10 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
   /** @brief Standard constructor from FE mesh and material description
    *  @param[in] mesh the mesh that defined the spatial discretization
    *  @param[in] materials map describing the different material properties
+   *  @param[in] massType consistent (default) or lumped (diagonal) mass matrix
    */
-  SolidLinearTIDS(std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials);
+  SolidLinearTIDS(std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials,
+                  MassType massType = MassType::consistent);
 
   /** destructor */
   ~SolidLinearTIDS() noexcept = default;
