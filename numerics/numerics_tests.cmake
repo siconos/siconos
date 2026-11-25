@@ -567,6 +567,8 @@ if(WITH_TESTING)
   new_test(SOURCES plasticity_2d_druckerprager_test.c)
   # scaling of the error (as in fc3d_compute_error)
   new_test(SOURCES plasticity_2d_compute_error_test.c)
+  # NSGS on Von Mises problems dumped from the FEM strip with a hole (siconos-tutorials)
+  new_test(SOURCES plasticity_2d_strip_test.c)
 
   # Collection tests using new infrastructure
   new_tests_collection(

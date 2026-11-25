@@ -247,6 +247,25 @@ int plasticity_printInFile(PlasticityProblem* problem, FILE* file) {
     default:
       break;
   }
+
+  /* Optional keyword lines (written only when different from the defaults, so that the
+   * files of the default problems are unchanged; older readers ignore what follows the
+   * model parameters):
+   *   stress_coordinates <int>         (default PLASTICITY_STRESS_COORDINATES_CONE)
+   *   vonmises_hypothesis <int>        (default PLASTICITY_VONMISES_PLANE_STRAIN)
+   *   cohesion <nc doubles>            (Drucker-Prager, default: no cohesion) */
+  if (problem->stress_coordinates != PLASTICITY_STRESS_COORDINATES_CONE)
+    fprintf(file, "stress_coordinates %d\n", (int)problem->stress_coordinates);
+  if (problem->model_type == PLASTICITY_MODEL_VON_MISES && GET_VON_MISES(problem) &&
+      GET_VON_MISES(problem)->hypothesis != PLASTICITY_VONMISES_PLANE_STRAIN)
+    fprintf(file, "vonmises_hypothesis %d\n", (int)GET_VON_MISES(problem)->hypothesis);
+  if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER && GET_DRUCKER_PRAGER(problem) &&
+      GET_DRUCKER_PRAGER(problem)->cohesion) {
+    fprintf(file, "cohesion ");
+    for (i = 0; i < nc; i++)
+      fprintf(file, "%32.24e ", GET_DRUCKER_PRAGER(problem)->cohesion[i]);
+    fprintf(file, "\n");
+  }
   return 0;
 }
 
@@ -322,6 +341,39 @@ PlasticityProblem* plasticity_newFromFile(FILE* file) {
     default:
       problem->model.generic = NULL;
       break;
+  }
+
+  /* Optional keyword lines (see plasticity_printInFile) */
+  char key[64];
+  while (fscanf(file, " %63s", key) == 1) {
+    if (strcmp(key, "stress_coordinates") == 0) {
+      int value = 0;
+      check_io(fscanf(file, "%d", &value));
+      problem->stress_coordinates = (PlasticityStressCoordinates)value;
+    } else if (strcmp(key, "vonmises_hypothesis") == 0) {
+      int value = 0;
+      check_io(fscanf(file, "%d", &value));
+      if (problem->model_type != PLASTICITY_MODEL_VON_MISES || !problem->model.von_mises) {
+        numerics_error_log("plasticity_newFromFile",
+                           "vonmises_hypothesis given for a non Von Mises problem");
+        continue;
+      }
+      problem->model.von_mises->hypothesis = (PlasticityVonMisesHypothesis)value;
+    } else if (strcmp(key, "cohesion") == 0) {
+      if (problem->model_type != PLASTICITY_MODEL_DRUCKER_PRAGER ||
+          !problem->model.drucker_prager) {
+        numerics_error_log("plasticity_newFromFile",
+                           "cohesion given for a non Drucker-Prager problem");
+        break;
+      }
+      double* cohesion = (double*)malloc(nc * sizeof(double));
+      for (size_t i = 0; i < nc; i++) check_io(fscanf(file, "%lf", &cohesion[i]));
+      free(problem->model.drucker_prager->cohesion);
+      problem->model.drucker_prager->cohesion = cohesion;
+    } else {
+      numerics_error_log("plasticity_newFromFile", "unknown keyword %s, ignored", key);
+      break;
+    }
   }
 
   DEBUG_PRINT(
