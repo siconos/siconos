@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "FEM-GlobalFrictionContact.hpp"
-#include "Plasticity_options.h"  // for PLASTICITY_2D_NSGS
+#include "Plasticity_options.h"  // for PLASTICITY_2D_NSN
 
 namespace siconos::mechanics::fem::nonsmooth_formulations {
 
@@ -46,7 +46,8 @@ namespace siconos::mechanics::fem::nonsmooth_formulations {
         q_p = -M_p b - H_c^{-1}\tilde q, \f]
 
     which is the numerics PlasticityProblem \f$ 0 \in M_p y + q_p + N_K(y) \f$ (y plays
-    the role of the stress, z of the strain rate). When \f$ W_{rr} \f$ is diagonal (lumped
+    the role of the stress, z of the strain rate), solved by default by the global
+    semi-smooth Newton PLASTICITY_2D_NSN. When \f$ W_{rr} \f$ is diagonal (lumped
     mass and all stresses constrained) it is inverted entry-wise and \f$ W_{red} \f$ is
     sparse; otherwise a sparse LU of \f$ W_{rr} \f$ is used.
 
@@ -78,9 +79,12 @@ class Plasticity : public GlobalFrictionContact {
 
  public:
   /** constructor
-   *  \param numericsSolverId id of the numerics plasticity solver
+   *  \param numericsSolverId id of the numerics plasticity solver: PLASTICITY_2D_NSN
+   *  (global semi-smooth Newton, default: tens of iterations whatever the conditioning of
+   *  the condensed matrix) or PLASTICITY_2D_NSGS (cost O(cond) sweeps in quasi-static
+   *  regimes)
    */
-  Plasticity(int numericsSolverId = PLASTICITY_2D_NSGS);
+  Plasticity(int numericsSolverId = PLASTICITY_2D_NSN);
 
   /** destructor */
   virtual ~Plasticity() noexcept = default;

@@ -277,14 +277,34 @@ which leaves the (strictly convex) elastic domain for ω > 1 (no convergence for
 ω = 1.5 gives no gain. A tolerance of 1e-8 instead of 1e-12 saves 40 % (reaction within
 1.3e-6).
 
+The global semi-smooth Newton of numerics (`PLASTICITY_2D_NSN`, see `docs/devel/PLASTICITY.md`)
+is the default solver of `fem::nonsmooth_formulations::Plasticity`. With tolerance 1e-10 it runs
+the 100 steps of the strip in 0.33 s (NSGS: ~100 s), with 4–9 iterations per plastic step and a
+better agreement with pytripopfem (displacements 4.0e-6, reaction 4.5e-6, stresses 2.2e-4 —
+ipopt's accuracy). Finer meshes of pytripopfem (same data):
+
+| mesh (T3 elements, stresses) | NSN iterations per plastic step (mean / max) | time | memory | final reaction |
+|---|---|---|---|---|
+| 60, 180 | 8 / 9 | 0.33 s | | 56.51 |
+| 636, 1 908 | 13 / 18 | 24 s | 0.3 GB | 53.33 |
+| 1 446, 4 338 | 19 / 30 | 167 s | 1.6 GB | 52.94 |
+
+The reaction converges to the limit load σ_y · 0.25 = 52.5 from above. On the 1446-element
+mesh the kernel takes ~70 s of the 167 s: initialization (~40 s: dense LU of the
+(n_v + n_σ)² iteration matrix of `fem::MoreauJeanOSI::initializeIterationMatrix`,
+`Topology::setProperties`), and at each step `updateIndexSets`, `OSNSMatrix::fillW` (scan of
+the dense iteration matrix) and `fillH` (scan of the dense C of each `StressLinearTIR`). The
+memory comes from these dense matrices.
+
 ## 8. Open points
 
 - The non-global `MoreauJeanOSI` path with stress interactions is untested.
 - φ (Mohr–Coulomb cone) is not used.
 - Energy balance of `ballAgainstPlasticBernoulliBeam`.
-- A global solver for the condensed plasticity problem (semi-smooth Newton on the natural
-  map, interior point on the second-order cone reformulation, accelerated projected
-  gradient): NSGS needs O(κ) sweeps in the quasi-static regime (§7).
+- Kernel costs for large meshes (§7, Cost): dense iteration matrix of SolidLinearTIDS and
+  its dense LU, assembly of W and H at each step from dense matrices, dense C of
+  `StressLinearTIR`; a sparse iteration matrix and a sparse/offset relation are needed.
+- `PLASTICITY_2D_NSN`: new LU of H at each iteration (reuse the symbolic factorization).
 - NSGS relaxation of the Plasticity solvers: relax before the projection (projected SOR) or
   forbid ω > 1.
 - `StressLinearTIR` takes a dense C of size 3 × nσ per element (memory O(n_el²)); a sparse

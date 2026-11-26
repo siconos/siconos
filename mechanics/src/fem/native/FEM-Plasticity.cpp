@@ -7,6 +7,7 @@
 
 #include "FEM-Plasticity.hpp"
 
+#include <Eigen/Dense>
 #include <Eigen/SparseLU>
 #include <algorithm>
 #include <cstdio>
@@ -69,6 +70,54 @@ bool is_invertible_diagonal(const SpMat& A) {
   for (bool d : has_diag)
     if (!d) return false;
   return true;
+}
+/* inverse of H_c, a permutation of a block-diagonal matrix with 3x3 blocks (each group of 3
+   columns, one interaction, has its non-zeros in 3 rows not shared with the other groups):
+   inverted block by block. Otherwise (general C), sparse LU with an identity right-hand
+   side (expensive: dense columns). */
+SpMat block_inverse(const SpMat& Hc) {
+  int m = static_cast<int>(Hc.cols());
+  std::vector<Eigen::Triplet<double, int>> t;
+  t.reserve(static_cast<size_t>(3 * m));
+  bool blocks = (m % 3 == 0);
+  for (int k = 0; blocks && k < m / 3; k++) {
+    std::vector<int> rows;
+    for (int j = 3 * k; j < 3 * k + 3; j++)
+      for (SpMat::InnerIterator it(Hc, j); it; ++it)
+        if (it.value() != 0.0 && std::find(rows.begin(), rows.end(), it.row()) == rows.end())
+          rows.push_back(static_cast<int>(it.row()));
+    if (rows.size() != 3) {
+      blocks = false;
+      break;
+    }
+    Eigen::Matrix3d B = Eigen::Matrix3d::Zero();
+    for (int j = 0; j < 3; j++)
+      for (SpMat::InnerIterator it(Hc, 3 * k + j); it; ++it)
+        for (int i = 0; i < 3; i++)
+          if (it.row() == rows[static_cast<size_t>(i)]) B(i, j) = it.value();
+    Eigen::FullPivLU<Eigen::Matrix3d> lu(B);
+    if (!lu.isInvertible())
+      THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: H_c is not invertible");
+    Eigen::Matrix3d Binv = lu.inverse();
+    // Hc(rows, cols_k) = B  =>  Hc^{-1}(cols_k, rows) = B^{-1}
+    for (int a = 0; a < 3; a++)
+      for (int i = 0; i < 3; i++)
+        if (Binv(a, i) != 0.0)
+          t.emplace_back(3 * k + a, rows[static_cast<size_t>(i)], Binv(a, i));
+  }
+  if (blocks) {
+    SpMat Hinv(m, m);
+    Hinv.setFromTriplets(t.begin(), t.end());
+    return Hinv;
+  }
+  Eigen::SparseLU<SpMat> lu_h(Hc);
+  if (lu_h.info() != Eigen::Success)
+    THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: H_c is not invertible");
+  SpMat I(m, m);
+  I.setIdentity();
+  SpMat Hinv = lu_h.solve(I);
+  Hinv.prune(0.0);
+  return Hinv;
 }
 }  // namespace
 
@@ -175,13 +224,7 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
   Vec qt = qc - Wcr * Wrr_inv_qr;
 
   // --- Change of variables x_c = Hc^{-T} (y - b)
-  Eigen::SparseLU<SpMat> lu_h(Hc);
-  if (lu_h.info() != Eigen::Success)
-    THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: H_c is not invertible");
-  SpMat I(m_size, m_size);
-  I.setIdentity();
-  SpMat Hc_inv = lu_h.solve(I);
-  Hc_inv.prune(0.0);
+  SpMat Hc_inv = block_inverse(Hc);
   SpMat Mp = Hc_inv * Wred * SpMat(Hc_inv.transpose());
   Mp.prune(0.0);
   Vec qp = -(Mp * b) - Hc_inv * qt;
