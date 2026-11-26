@@ -12,6 +12,7 @@ Include files related to modeling part of Siconos.
 
 #include "BoundaryCondition.hpp"
 #include "ComplementarityConditionNSL.hpp"
+#include "DruckerPragerPlasticityNSL.hpp"
 #include "EqualityConditionNSL.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "FirstOrderType1R.hpp"

@@ -14,6 +14,7 @@
 
 #include "BlockVector.hpp"
 #include "ComplementarityConditionNSL.hpp"
+#include "DruckerPragerPlasticityNSL.hpp"
 #include "DynamicalSystem.hpp"
 #include "FirstOrderR.hpp"
 #include "FremondImpactFrictionNSL.hpp"
@@ -249,6 +250,7 @@ struct siconos::modeling::Interaction::SetLevels
 
   void visit(const MohrCoulombPlasticityNSL& nslaw) override { set_plasticity_levels(); }
   void visit(const VonMisesPlasticityNSL& nslaw) override { set_plasticity_levels(); }
+  void visit(const DruckerPragerPlasticityNSL& nslaw) override { set_plasticity_levels(); }
 
   /** stress interactions (fem::StressLinearTIR): output and input at level 0 */
   void set_plasticity_levels() {
