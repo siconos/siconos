@@ -67,6 +67,10 @@ PYBIND11_MODULE(modeling, m) {
            py::return_value_policy::reference_internal)
       .def("relation", &siconos::modeling::Interaction::relation,
            py::return_value_policy::reference_internal)
+      .def_static("resetCount", &siconos::modeling::Interaction::resetCount,
+                  py::arg("new_count") = 0,
+                  "Resets the counter that numbers the interactions; returns its previous "
+                  "value")
       .def("computeInput", &siconos::modeling::Interaction::computeInput,
            "Computes input lambda")
       .def("computeOutput", &siconos::modeling::Interaction::computeOutput,

@@ -2464,8 +2464,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
 
         # Ensure we count up from zero for implicit DS numbering
+        # and for the interactions (their number is the contact id of the outputs):
+        # the same numbers whatever was run before in the process
         if self.config.backend != "vnative":
             sm.DynamicalSystem.resetCount(0)
+            sm.Interaction.resetCount(0)
 
         # import dynamical systems
         if self._interman is not None and "input" in self._data:
