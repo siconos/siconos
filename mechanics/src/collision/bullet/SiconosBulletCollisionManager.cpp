@@ -153,11 +153,20 @@ siconos::collision::bullet::SiconosBulletCollisionManager::
   if (_impl && _impl->_collisionWorld) {
     _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(nullptr);
   }
-  // unlink() will be called on all remaining
-  // contact points when world is destroyed
+  // The world releases its remaining contact points when destroyed: their
+  // interactions are not unlinked (gSimulation is the simulation that ran last,
+  // possibly another one, or this one being destroyed), only their stored
+  // pointer (see bulletContactClear) is freed. The callback of a manager still
+  // alive is restored after.
+  auto contact_destroyed = gContactDestroyedCallback;
+  gContactDestroyedCallback = [](void* userPersistentData) -> bool {
+    delete static_cast<std::shared_ptr<siconos::modeling::Interaction>*>(userPersistentData);
+    return false;
+  };
 
   // must be the first de-allocated, otherwise segfault
   _impl->_collisionWorld.reset();
+  gContactDestroyedCallback = contact_destroyed;
 }
 
 std::shared_ptr<siconos::collision::StaticBody>
