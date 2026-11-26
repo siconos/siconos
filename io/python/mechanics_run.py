@@ -2456,9 +2456,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self.config.backend != "vnative":
             sm.DynamicalSystem.resetCount(0)
 
-        for _ in self._format_adaptor["ref"]:
-            self._number_of_shapes += 1
-
         # import dynamical systems
         if self._interman is not None and "input" in self._data:
             # We map the boundary conditions with the object into

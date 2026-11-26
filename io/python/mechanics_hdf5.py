@@ -215,6 +215,14 @@ class MechanicsHdf5:
             self._format_adaptor.data,
             self._format_adaptor.dimension,
         )
+        # the ids go on from the ones of the file (append and r+ modes, reopening)
+        self._number_of_shapes = max(self._ids_in("ref"), default=-1) + 1
+        self._number_of_permanent_interactions = (
+            max(self._ids_in("permanent_interactions"), default=-1) + 1
+        )
+        objects = self._ids_in("input")
+        self._number_of_dynamic_objects = max((i for i in objects if i > 0), default=0)
+        self._number_of_static_objects = max((-i for i in objects if i < 0), default=0)
         # the script that writes the file, kept once (the one that created it)
         script = os.path.abspath(sys.argv[0]) if sys.argv and sys.argv[0] else ""
         if (
@@ -229,6 +237,17 @@ class MechanicsHdf5:
                 filename=script,
             )
         return self
+
+    def _ids_in(self, group):
+        """The id attributes of the entries of a group of the file."""
+        entries = self._format_adaptor[group]
+        if entries is None:
+            return []
+        return [
+            int(entries[name].attrs["id"])
+            for name in entries
+            if "id" in entries[name].attrs
+        ]
 
     def __exit__(self, type_, value, traceback):
         self._format_adaptor.close()
