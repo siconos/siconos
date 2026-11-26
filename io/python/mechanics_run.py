@@ -1660,15 +1660,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     body = body_class(self._q0[-1], self._v0[-1], mass, inertia)
                     body.setUseContactorInertia(True)
 
-                self.fext.append(
-                    self._format_adaptor["input"][name].get("allow_self_collide", None)
-                )
-                if self.fext[-1] is not None:
-                    body.setConstantFext(self.fext[-1], siconos.modeling.alias_t)
-
-                self_collide = self._format_adaptor["input"][name].get(
-                    "allow_self_collide", None
-                )
+                # attributes of the body (not child datasets); the fext is set below,
+                # after _set_external_forces, which would overwrite it
+                body_attrs = self._format_adaptor["input"][name].attrs
+                self.fext.append(body_attrs.get("fext", None))
+                self_collide = body_attrs.get("allow_self_collide", None)
                 if self_collide is not None:
                     body.setAllowSelfCollide(bool(self_collide))
 
@@ -1691,8 +1687,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if number is not None:
                     body.setNumber(int(number))
 
-                # set external forces
+                # set external forces; the fext of the scene replaces them (as
+                # setConstantFext: give the weight in it to keep it)
                 self._set_external_forces(body)
+                if self.fext[-1] is not None:
+                    body.setConstantFext(self.fext[-1], siconos.modeling.alias_t)
 
                 # add the dynamical system to the non smooth
                 # dynamical system

@@ -213,6 +213,9 @@ PYBIND11_MODULE(_collision, m) {
           },
           py::arg("contactors"))
 
+      .def("setAllowSelfCollide", &siconos::collision::RigidBodyDS::setAllowSelfCollide,
+           py::arg("allowSelfCollide"),
+           "If false, the bodies connected to this body by a joint do not collide")
       .def("contactors", &siconos::collision::RigidBodyDS::contactors);
 
   py::class_<siconos::collision::RigidBody2dDS, siconos::modeling::LagrangianLinearTIDS,

@@ -765,7 +765,7 @@ class MechanicsHdf5:
         time_of_birth=-1,
         time_of_death=-1,
         fext=None,
-        allow_self_collide=False,
+        allow_self_collide=True,
     ):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
