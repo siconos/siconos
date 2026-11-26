@@ -103,6 +103,13 @@ class SiconosGraph {
 
   int _stamp;
   VMap vertex_descriptor;
+  /* the vertex (edge) indices must be recomputed: set by every structural change, reset by
+     update_vertices_indices (update_edges_indices). The renumbering is O(V) (O(E)) and is
+     requested at each step and each Newton iteration by the simulation, while the graphs
+     rarely change: with many interactions sharing a dynamical system (FEM elements), the
+     interaction graphs have O(n^2) edges. */
+  bool _vertices_indices_dirty = true;
+  bool _edges_indices_dirty = true;
 
  protected:
   template <typename Archive>
@@ -331,6 +338,7 @@ class SiconosGraph {
 
     if (current_vertex_iterator == vertex_descriptor.end()) {
       new_vertex_descriptor = boost::add_vertex(g);
+      _vertices_indices_dirty = true;
 
       assert(vertex(size() - 1, g) == new_vertex_descriptor);
       assert(size() == vertex_descriptor.size() + 1);
@@ -399,6 +407,7 @@ class SiconosGraph {
     VDescriptor vd = descriptor(vertex_bundle);
     assert(adjacent_vertices_ok());
     boost::clear_vertex(vd, g);
+    _vertices_indices_dirty = _edges_indices_dirty = true;
     assert(adjacent_vertices_ok());
     assert(!adjacent_vertex_exists(vd));
     boost::remove_vertex(vd, g);
@@ -427,6 +436,7 @@ class SiconosGraph {
     assert(!is_edge(vd1, vd2, e_bundle));
 
     std::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
+    _edges_indices_dirty = true;
 
     // During a gdb session, I saw that inserted is always going to be true ...
     // This check is therefore unnecessary.
@@ -521,6 +531,7 @@ class SiconosGraph {
     assert(adjacent_vertex_exists(source(ed)));
 
     boost::remove_edge(ed, g);
+    _edges_indices_dirty = true;
     assert(state_assert());
   }
 
@@ -553,6 +564,7 @@ class SiconosGraph {
     BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
 
     boost::remove_out_edge_if(vd, pred, g);
+    _edges_indices_dirty = true;
     /* workaround on multisetS (tested on Disks : ok)
        multiset allows for member removal without invalidating iterators
 
@@ -580,6 +592,7 @@ class SiconosGraph {
     BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
 
     boost::remove_in_edge_if(vd, pred, g);
+    _edges_indices_dirty = true;
     assert(state_assert());
   }
 
@@ -595,12 +608,15 @@ class SiconosGraph {
     BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
 
     boost::remove_edge_if(pred, g);
+    _edges_indices_dirty = true;
     assert(state_assert());
   }
 
   int stamp() const { return _stamp; }
 
   void update_vertices_indices() {
+    if (!_vertices_indices_dirty) return;
+    _vertices_indices_dirty = false;
     VIterator vi, viend;
     size_t i;
     for (std::tie(vi, viend) = boost::vertices(g), i = 0; vi != viend; ++vi, ++i) {
@@ -610,6 +626,8 @@ class SiconosGraph {
   };
 
   void update_edges_indices() {
+    if (!_edges_indices_dirty) return;
+    _edges_indices_dirty = false;
     EIterator ei, eiend;
     size_t i;
     for (std::tie(ei, eiend) = boost::edges(g), i = 0; ei != eiend; ++ei, ++i) {
@@ -621,6 +639,7 @@ class SiconosGraph {
   void clear() {
     g.clear();
     vertex_descriptor.clear();
+    _vertices_indices_dirty = _edges_indices_dirty = true;
   };
 
   VMap vertex_descriptor_map() const { return vertex_descriptor; };

@@ -1031,8 +1031,7 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
             *ds_vars[siconos::modeling::FirstOrderR::Xxx], *inter.lambda(level), hAlpha);
       else
         static_cast<siconos::modeling::FirstOrderNonLinearR&>(rel).computeh(
-            *ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
-            hAlpha);
+            *ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level), hAlpha);
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(siconos::algebra::print(hAlpha));
     } else
