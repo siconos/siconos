@@ -294,9 +294,17 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
           auto ds = DSG.bundle(*dsi);
-          auto W = DSG.properties(*dsi).iterationMatrix.get();
           pos = DSG.properties(*dsi).absolute_position;
-          siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
+          if (auto Ws = DSG.properties(*dsi).iterationMatrixSparse)
+            siconos::algebra::fillTriplet(*Ws, Mtriplet, pos, pos);
+          else {
+            auto W = DSG.properties(*dsi).iterationMatrix.get();
+            if (!W)
+              THROW_EXCEPTION(
+                  "siconos:simulation::OSNSMatrix::fillW: no iteration matrix for a "
+                  "dynamical system");
+            siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
+          }
           DEBUG_PRINTF("pos = %u \n", pos);
         }
         _triplet_nzmax = NM_nnz(&M_NM);

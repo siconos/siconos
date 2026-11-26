@@ -1175,6 +1175,8 @@ void siconos::integrators::MoreauJeanOSI::prepareNewtonIteration(double time) {
   auto time_step = sim->timeStep();
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
+    // no dense iteration matrix (sparse one only, time-invariant: FEM MoreauJeanGOSI)
+    if (!_dynamicalSystemsGraph->properties(*dsi).iterationMatrix) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       moreau_jean::computeIterationMatrix_Lagrangian_T(

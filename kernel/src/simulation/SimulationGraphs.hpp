@@ -126,6 +126,10 @@ struct DynamicalSystemProperties {
       osi_; /**< Integrator used for the given DynamicalSystem */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix{
       nullptr}; /**< Matrix for integration */
+  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> iterationMatrixSparse{
+      nullptr}; /**< sparse iteration matrix: when set, used instead of iterationMatrix by
+                   the global one-step problems (OSNSMatrix::fillW); the integrator may then
+                   leave iterationMatrix null (FEM MoreauJeanGOSI) */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixBoundaryConditions{
       nullptr}; /**< Matrix for integration of boundary conditions*/
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse{
