@@ -18,9 +18,10 @@ namespace siconos::modeling {
 
 /** Drucker-Prager plasticity law for 2D stresses, with cohesion and dilatancy.
  *
- * The output y of the interaction is a stress in Voigt notation, y = (σxx, σyy, σxy)
+ * The output y of the interaction is a stress in Mandel notation, y = (σxx, σyy, √2 σxy)
  * (tension positive). With σ_N = -(σxx + σyy)/√2 and σ_T = ((σxx - σyy)/√2, √2 σxy)
- * (the cone coordinates of the numerics PlasticityProblem), the elastic domain is the cone
+ * (the cone coordinates of the numerics PlasticityProblem, an orthogonal change of basis
+ * of y), the elastic domain is the cone
  *
  *   K = { ‖σ_T‖ ≤ η σ_N + c },
  *
@@ -34,7 +35,7 @@ namespace siconos::modeling {
  * angle ψ (non-associated, ψ < φ).
  *
  * Solved by fem::nonsmooth_formulations::Plasticity with the numerics PlasticityProblem
- * (Drucker-Prager model, Voigt coordinates). See docs/devel/FEM_PLASTICITY_SCHEME.md.
+ * (Drucker-Prager model, Mandel coordinates). See docs/devel/FEM_PLASTICITY_SCHEME.md.
  */
 class DruckerPragerPlasticityNSL : public NonSmoothLaw {
  private:
@@ -58,7 +59,7 @@ class DruckerPragerPlasticityNSL : public NonSmoothLaw {
    *  \param eta slope of the cone (> 0)
    *  \param theta dilatancy parameter (0: associated flow)
    *  \param cohesion cohesion in the cone coordinates
-   *  \param size size of the law (3: Voigt components of a 2D stress)
+   *  \param size size of the law (3: Mandel components of a 2D stress)
    */
   DruckerPragerPlasticityNSL(double eta, double theta, double cohesion, unsigned int size = 3)
       : NonSmoothLaw(size), _eta(eta), _theta(theta), _cohesion(cohesion) {};

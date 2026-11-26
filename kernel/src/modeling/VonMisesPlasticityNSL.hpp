@@ -18,16 +18,17 @@ namespace siconos::modeling {
 
 /** Von Mises (J2) plasticity law with associated flow rule, for 2D stresses.
  *
- * The output y of the interaction is a stress in Voigt notation, y = (σxx, σyy, σxy), and
- * must stay in the elastic domain K; the multiplier λ is (minus h times) a plastic strain
- * rate in the normal cone (associated flow rule): 0 ∈ λ + N_K(y).
+ * The output y of the interaction is a stress in Mandel notation, y = (σxx, σyy, √2 σxy),
+ * and must stay in the elastic domain K; the multiplier λ is (minus h times) a plastic
+ * strain rate in the normal cone (associated flow rule): 0 ∈ λ + N_K(y), also in Mandel
+ * notation (ε̇xx, ε̇yy, √2 ε̇xy).
  *
  * - plane stress (σzz = 0): K = {σxx² + σyy² − σxx σyy + 3 σxy² ≤ σ_y²};
  * - plane strain (incompressible plastic flow, σzz = (σxx + σyy)/2):
  *   K = {(σxx − σyy)²/4 + σxy² ≤ σ_y²/3}.
  *
  * Solved by fem::nonsmooth_formulations::Plasticity with the numerics PlasticityProblem
- * (Von Mises model, Voigt coordinates). See docs/devel/FEM_PLASTICITY_SCHEME.md.
+ * (Von Mises model, Mandel coordinates). See docs/devel/FEM_PLASTICITY_SCHEME.md.
  */
 class VonMisesPlasticityNSL : public NonSmoothLaw {
  public:
@@ -51,7 +52,7 @@ class VonMisesPlasticityNSL : public NonSmoothLaw {
    *
    *  \param sigma_y yield stress (> 0)
    *  \param hypothesis plane stress (default) or plane strain
-   *  \param size size of the law (3: Voigt components of a 2D stress)
+   *  \param size size of the law (3: Mandel components of a 2D stress)
    */
   VonMisesPlasticityNSL(double sigma_y, Hypothesis hypothesis = Hypothesis::plane_stress,
                         unsigned int size = 3)
