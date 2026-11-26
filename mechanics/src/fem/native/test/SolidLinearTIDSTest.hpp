@@ -26,6 +26,7 @@ class SolidLinearTIDSTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testPlaneStressCompliance);
   CPPUNIT_TEST(testLumpedMass);
   CPPUNIT_TEST(testVonMisesTension);
+  CPPUNIT_TEST(testDruckerPragerLaw);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -34,6 +35,7 @@ class SolidLinearTIDSTest : public CppUnit::TestFixture {
   void testPlaneStressCompliance();
   void testLumpedMass();
   void testVonMisesTension();
+  void testDruckerPragerLaw();
 
   // Members
 

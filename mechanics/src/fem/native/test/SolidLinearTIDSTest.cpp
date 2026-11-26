@@ -7,6 +7,7 @@
 
 #include "SolidLinearTIDSTest.hpp"
 
+#include "DruckerPragerPlasticityNSL.hpp"
 #include "FEM-MoreauJeanGOSI.hpp"
 #include "FEM-Plasticity.hpp"
 #include "FENode.hpp"
@@ -203,4 +204,29 @@ void SolidLinearTIDSTest::testVonMisesTension() {
   CPPUNIT_ASSERT_MESSAGE("uniaxial Von Mises tension, transients", max_err_transient <= 1e-3);
   CPPUNIT_ASSERT_MESSAGE("yield condition", max_vm <= 1.0 + 1e-10);
   std::cout << "✅ Von Mises uniaxial tension test ended with success." << std::endl;
+}
+
+// DruckerPragerPlasticityNSL::mohrCoulombPlaneStrain: the cone ||sigma_T|| <= eta sigma_N + c'
+// of the numerics (sigma_N = -(sxx + syy)/sqrt2, sigma_T = ((sxx - syy)/sqrt2, sqrt2 sxy)) is
+// the Mohr-Coulomb criterion R <= -p sin(phi) + c cos(phi) of the plane
+void SolidLinearTIDSTest::testDruckerPragerLaw() {
+  std::cout << "--> Test: Drucker-Prager / Mohr-Coulomb law." << std::endl;
+  const double c = 2e3, phi = 0.4363323129985824, psi = 0.17453292519943295;
+  auto law =
+      siconos::modeling::DruckerPragerPlasticityNSL::mohrCoulombPlaneStrain(c, phi, psi);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(std::sin(phi), law->eta(), 1e-15);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(std::sin(phi) - std::sin(psi), law->theta(), 1e-15);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(std::sqrt(2.0) * c * std::cos(phi), law->cohesion(), 1e-9);
+  // random stresses: both criteria give the same yield function up to the factor sqrt2
+  for (int k = 0; k < 100; k++) {
+    double sxx = 5e3 * std::sin(1.0 + 3 * k), syy = 5e3 * std::cos(2.0 + 5 * k),
+           sxy = 3e3 * std::sin(0.5 + 7 * k);
+    double sN = -(sxx + syy) / std::sqrt(2.0);
+    double sT = std::hypot((sxx - syy) / std::sqrt(2.0), std::sqrt(2.0) * sxy);
+    double f_cone = sT - law->eta() * sN - law->cohesion();
+    double p = 0.5 * (sxx + syy), R = std::hypot(0.5 * (sxx - syy), sxy);
+    double f_mc = R + p * std::sin(phi) - c * std::cos(phi);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(std::sqrt(2.0) * f_mc, f_cone, 1e-9 * c);
+  }
+  std::cout << "✅ Drucker-Prager / Mohr-Coulomb law test ended with success." << std::endl;
 }

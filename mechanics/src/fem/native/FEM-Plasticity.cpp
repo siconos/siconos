@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "CSparseMatrix.h"
+#include "DruckerPragerPlasticityNSL.hpp"
 #include "Interaction.hpp"
 #include "NonSmoothDrivers.h"  // plasticity_2d_driver
 #include "NumericsMatrix.h"
@@ -136,36 +137,47 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::compute(double 
 int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed() {
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  // --- Interactions: law, yield stresses, hypothesis
+  // --- Interactions: law and its parameters (one model for all the interactions)
   auto m_size = static_cast<int>(_sizeOutput);
-  std::vector<double> sigma_y;
+  enum class Model { none, von_mises, drucker_prager } model = Model::none;
+  std::vector<double> sigma_y, eta, theta, cohesion;  // per interaction
   std::vector<int> column_of_cone;  // first column of H (position in z) of each cone
-  bool first = true;
   auto hypothesis = siconos::modeling::VonMisesPlasticityNSL::Hypothesis::plane_stress;
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
     auto inter = indexSet.bundle(*ui);
-    auto nslaw = std::dynamic_pointer_cast<siconos::modeling::VonMisesPlasticityNSL>(
-        inter->nonSmoothLaw());
-    if (!nslaw || inter->dimension() != 3)
-      THROW_EXCEPTION(
-          "fem::nonsmooth_formulations::Plasticity: only VonMisesPlasticityNSL interactions "
-          "of size 3 are supported");
+    if (inter->dimension() != 3)
+      THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: interactions of size 3 only");
     if (inter->relation()->getSubType() != siconos::modeling::RelationSubType::StressLinearTIR)
       THROW_EXCEPTION(
           "fem::nonsmooth_formulations::Plasticity: only StressLinearTIR relations are "
           "supported");
-    if (first)
-      hypothesis = nslaw->hypothesis();
-    else if (nslaw->hypothesis() != hypothesis)
+    auto vm = std::dynamic_pointer_cast<siconos::modeling::VonMisesPlasticityNSL>(
+        inter->nonSmoothLaw());
+    auto dp = std::dynamic_pointer_cast<siconos::modeling::DruckerPragerPlasticityNSL>(
+        inter->nonSmoothLaw());
+    Model m = vm ? Model::von_mises : dp ? Model::drucker_prager : Model::none;
+    if (m == Model::none)
       THROW_EXCEPTION(
-          "fem::nonsmooth_formulations::Plasticity: all the Von Mises laws must have the "
-          "same hypothesis");
-    first = false;
-    sigma_y.push_back(nslaw->sigma_y());
+          "fem::nonsmooth_formulations::Plasticity: only VonMisesPlasticityNSL and "
+          "DruckerPragerPlasticityNSL are supported");
+    if (model == Model::none) {
+      model = m;
+      if (vm) hypothesis = vm->hypothesis();
+    } else if (m != model || (vm && vm->hypothesis() != hypothesis))
+      THROW_EXCEPTION(
+          "fem::nonsmooth_formulations::Plasticity: all the interactions must have the same "
+          "model (and the same Von Mises hypothesis)");
+    if (vm) {
+      sigma_y.push_back(vm->sigma_y());
+    } else {
+      eta.push_back(dp->eta());
+      theta.push_back(dp->theta());
+      cohesion.push_back(dp->cohesion());
+    }
     column_of_cone.push_back(static_cast<int>(indexSet.properties(*ui).absolute_position));
   }
-  int nc = static_cast<int>(sigma_y.size());
+  int nc = static_cast<int>(column_of_cone.size());
   if (3 * nc != m_size)
     THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: inconsistent problem size");
   if (nc == 0) {
@@ -236,28 +248,44 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
     for (SpMat::InnerIterator it(Mp, j); it; ++it)
       NM_zentry(nm, static_cast<int>(it.row()), j, it.value(), 0.0);
 
-  // cones are ordered as the columns of H (z) : reorder sigma_y accordingly
-  std::vector<double> sigma_y_by_column(static_cast<size_t>(nc));
-  for (int k = 0; k < nc; k++) {
-    if (column_of_cone[k] % 3 != 0 || column_of_cone[k] >= m_size)
-      THROW_EXCEPTION(
-          "fem::nonsmooth_formulations::Plasticity: unexpected interaction position");
-    sigma_y_by_column[static_cast<size_t>(column_of_cone[k] / 3)] = sigma_y[k];
-  }
+  // cones are ordered as the columns of H (z): reorder the parameters accordingly
+  auto by_column = [&](const std::vector<double>& values) {
+    std::vector<double> ordered(values.size());
+    for (int k = 0; k < static_cast<int>(values.size()); k++) {
+      if (column_of_cone[k] % 3 != 0 || column_of_cone[k] >= m_size)
+        THROW_EXCEPTION(
+            "fem::nonsmooth_formulations::Plasticity: unexpected interaction position");
+      ordered[static_cast<size_t>(column_of_cone[k] / 3)] = values[static_cast<size_t>(k)];
+    }
+    return ordered;
+  };
+  std::vector<double> sigma_y_c = by_column(sigma_y), eta_c = by_column(eta),
+                      theta_c = by_column(theta), cohesion_c = by_column(cohesion);
+  bool has_cohesion =
+      std::any_of(cohesion_c.begin(), cohesion_c.end(), [](double c) { return c != 0.0; });
   Vec qp_copy = qp;
   Plasticity_VonMises_model von_mises{};
-  von_mises.sigma_y = sigma_y_by_column.data();
-  von_mises.hypothesis =
-      (hypothesis == siconos::modeling::VonMisesPlasticityNSL::Hypothesis::plane_stress)
-          ? PLASTICITY_VONMISES_PLANE_STRESS
-          : PLASTICITY_VONMISES_PLANE_STRAIN;
+  Plasticity_DruckerPrager_model drucker_prager{};
   PlasticityProblem problem{};
   problem.dimension = 3;
   problem.numberOfCones = nc;
   problem.M = nm;
   problem.q = qp_copy.data();
-  problem.model_type = PLASTICITY_MODEL_VON_MISES;
-  problem.model.von_mises = &von_mises;
+  if (model == Model::von_mises) {
+    von_mises.sigma_y = sigma_y_c.data();
+    von_mises.hypothesis =
+        (hypothesis == siconos::modeling::VonMisesPlasticityNSL::Hypothesis::plane_stress)
+            ? PLASTICITY_VONMISES_PLANE_STRESS
+            : PLASTICITY_VONMISES_PLANE_STRAIN;
+    problem.model_type = PLASTICITY_MODEL_VON_MISES;
+    problem.model.von_mises = &von_mises;
+  } else {
+    drucker_prager.eta = eta_c.data();
+    drucker_prager.theta = theta_c.data();
+    drucker_prager.cohesion = has_cohesion ? cohesion_c.data() : nullptr;
+    problem.model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
+    problem.model.drucker_prager = &drucker_prager;
+  }
   problem.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CARTESIAN_VOIGT;
 
   _n_compute++;
