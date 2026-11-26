@@ -7,7 +7,8 @@
 
 /* Global semi-smooth Newton (PLASTICITY_2D_NSN) on the data files of the Plasticity tests:
    Drucker-Prager footing problems (dilatancy theta > 0: natural-map merit; theta = 0: QP
-   merit), Von Mises footing, small examples, FEM strip problems. Both globalizations:
+   merit), Von Mises footing, small examples, FEM strip and footing problems. Both
+   globalizations (default only for the FEM footing):
    full Newton steps with watchdog (default; the one-cone footing_1 problem cycles and
    needs the watchdog) and merit function only. Checks the convergence at 1e-10 from a zero
    initial guess, and the error recomputed by plasticity_2d_compute_error. */
@@ -67,6 +68,14 @@ int main(void) {
     failed += test_file(files[i], PLASTICITY_NSN_GLOBALIZATION_WATCHDOG);
     failed += test_file(files[i], PLASTICITY_NSN_GLOBALIZATION_MERIT);
   }
+  /* FEM footing (siconos-tutorials mechanics/FEM/Plasticity/Footing, 639 T3, plane strain
+     Mohr-Coulomb, step 40; associated and dilatancy angle 10 degrees): default
+     globalization only (the merit function alone does not converge in 300 iterations,
+     NSGS reaches 3e-4 in 20000 sweeps) */
+  const char* fem_files[] = {"./data/plasticity_2d_druckerprager_footing_fem_40.dat",
+                             "./data/plasticity_2d_druckerprager_footing_fem_psi10_40.dat"};
+  for (size_t i = 0; i < sizeof(fem_files) / sizeof(fem_files[0]); i++)
+    failed += test_file(fem_files[i], PLASTICITY_NSN_GLOBALIZATION_WATCHDOG);
   printf("failures: %d\n", failed);
   return failed ? 1 : 0;
 }
