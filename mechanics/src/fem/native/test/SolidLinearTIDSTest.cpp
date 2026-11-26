@@ -7,6 +7,8 @@
 
 #include "SolidLinearTIDSTest.hpp"
 
+#include <cmath>
+
 #include "DruckerPragerPlasticityNSL.hpp"
 #include "FEM-MoreauJeanGOSI.hpp"
 #include "FEM-Plasticity.hpp"
@@ -54,9 +56,15 @@ void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
       "testBuildSolidLinearTIDS1 : ", solid.FEModel()->elements().size() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", solid.stress_read()(0) == 0.0,
                                true);
-  auto norm = (solid.elasticityMatrix() - S).norm();
+  // S.dat and B.dat are in Voigt notation; the solid uses the Mandel notation:
+  // S_M = T^-1 S_V T^-1, B_M = T^-1 B_V, T = diag(1, 1, sqrt2) per element
+  Eigen::VectorXd tinv = Eigen::VectorXd::Ones(solid.stressDimension());
+  for (Eigen::Index i = 2; i < tinv.size(); i += 3) tinv(i) = M_SQRT1_2;
+  siconos::algebra::SiconosSparseMatrix S_M = tinv.asDiagonal() * S * tinv.asDiagonal();
+  siconos::algebra::SiconosSparseMatrix B_M = tinv.asDiagonal() * B;
+  auto norm = (solid.elasticityMatrix() - S_M).norm();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testS : ", norm < 1.0e-16, true);
-  norm = (solid.BMatrix() - B).norm();
+  norm = (solid.BMatrix() - B_M).norm();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testB: ", norm < 1.0e-16, true);
   std::cout << "✅ Basic constructor test ended with success." << std::endl;
 }
@@ -80,7 +88,9 @@ void SolidLinearTIDSTest::testPlaneStressCompliance() {
       D << c, c * nu, 0, c * nu, c, 0, 0, 0, c * (1 - nu) / 2;
     }
     Eigen::MatrixXd S_dense(solid.elasticityMatrix());
-    Eigen::Matrix3d Dinv = D.inverse();
+    // Mandel notation: D_M = T D T, T = diag(1, 1, sqrt2)
+    const Eigen::Vector3d T{1.0, 1.0, std::sqrt(2.0)};
+    Eigen::Matrix3d Dinv = (T.asDiagonal() * D * T.asDiagonal()).inverse();
     auto nel = static_cast<Eigen::Index>(solid.FEModel()->elements().size());
     double err = 0.0;
     for (Eigen::Index e = 0; e < nel; e++)
@@ -189,7 +199,9 @@ void SolidLinearTIDSTest::testVonMisesTension() {
       Eigen::Vector3d se = sigma.segment<3>(3 * e) / solid->elementStressScaling(e);
       step_err = std::max(step_err, std::abs(se(0) - sxx_expected) / sigma_y);
       step_err = std::max(step_err, std::max(std::abs(se(1)), std::abs(se(2))) / sigma_y);
-      double vm = std::sqrt(se(0) * se(0) + se(1) * se(1) - se(0) * se(1) + 3 * se(2) * se(2));
+      // Mandel notation: se(2) = sqrt2 sxy
+      double vm =
+          std::sqrt(se(0) * se(0) + se(1) * se(1) - se(0) * se(1) + 1.5 * se(2) * se(2));
       max_vm = std::max(max_vm, vm / sigma_y);
     }
     bool transient = (k <= 3) || (k >= 11 && k <= 13);

@@ -21,6 +21,10 @@
  * S \dot \sigma = B v - \dot \epsilon_p \f$
  *
  * with S the compliance (elasticityMatrix()) and B the strain operator (BMatrix()).
+ * For the continuum (T3) elements, the stresses and strains are in Mandel notation,
+ * sigma = (sxx, syy, sqrt2 sxy), epsilon = (exx, eyy, sqrt2 exy) (orthonormal: the
+ * Euclidean product and norm are the tensor ones), and the stress unknowns of element e
+ * are scaled by sqrt(A_e t) (see elementStressSelection()).
  * Plasticity is enforced by StressLinearTIR interactions: their multipliers give the
  * plastic deformation rate \f$ \dot\epsilon_p \f$ (plasticRate(), computed by
  * fem::integrators::MoreauJeanOSI::updateInput, reset at each input update), integrated
@@ -278,7 +282,8 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
    *
    *  The stress unknowns are scaled, sigma~_e = sqrt(A_e t) sigma_e (see BMatrix()). The
    *  returned 3 x stressDimension() matrix C gives C sigma~ = sigma_e, the physical stress
-   *  (Voigt order) of the element: the matrix of a StressLinearTIR whose output is the
+   *  of the element in Mandel notation (sxx, syy, sqrt2 sxy): the matrix of a
+   *  StressLinearTIR whose output is the
    *  physical stress.
    *  @param element index of the element (order of FEModel()->elements())
    *  @return C (dense)

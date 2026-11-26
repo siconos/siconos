@@ -799,13 +799,16 @@ problem and of a Drucker–Prager problem with cohesion in Mandel coordinates.
   `plasticity_2d_druckerprager_footing_fem_40.dat` (associated) and
   `plasticity_2d_druckerprager_footing_fem_psi10_40.dat` (dilatancy angle 10°, θ = 0.249):
   siconos-tutorials `mechanics/FEM/Plasticity/Footing`, 639 T3, plane strain Mohr–Coulomb
-  (η = sin 25°, cohesion √2 c cos φ, Voigt coordinates), step 40, written by `setProblemDump`.
+  (η = sin 25°, cohesion √2 c cos φ, Voigt coordinates), step 40, written by `setProblemDump`
+  (before the FEM stresses switched to the Mandel notation, 2026-11-26: the problems dumped
+  now declare `stress_coordinates` Mandel; these files keep the Voigt ones).
   NSN: 12 and 13 iterations (default globalization; the merit function alone does not
   converge in 300 iterations; NSGS: error 3e-4 after 2e4 sweeps). Python: NSN = NSGS on a coupled non-symmetric Drucker–Prager problem with
   dilatancy and cohesion, NSN = exact solution of the manufactured plane stress problem.
 * `plasticity_2d_strip_test`: NSGS, generic NSGS (tolerance 1e-8) and NSN (1e-10) on the problems of the
   FEM strip with a circular hole (siconos-tutorials `mechanics/FEM/Plasticity/StripWithHole`,
-  60 T3 elements, plane stress, Voigt coordinates, yield stress 210),
+  60 T3 elements, plane stress, Voigt coordinates (dumped before the switch of the FEM to the
+  Mandel notation), yield stress 210),
   `data/plasticity_2d_vonmises_strip_<n>.dat` for the time steps n = 1 (elastic), 4 (first
   plastic element), 10 (18 plastic elements) and 100 (plateau, 23 plastic elements), written
   by `fem::nonsmooth_formulations::Plasticity::setProblemDump`. Checks: convergence, error

@@ -283,7 +283,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::Plasticity::assemble() {
   Mp = cond->Hc_inv * Wred * cond->Hc_inv_t;
   Mp.prune(0.0);
 
-  // --- numerics problem 0 in Mp y + qp + N_K(y), y in Voigt coordinates
+  // --- numerics problem 0 in Mp y + qp + N_K(y), y in Mandel coordinates
   NumericsMatrix* nm = NM_create(NM_SPARSE, m_size, m_size);
   cond->nm = nm;
   NM_triplet_alloc(nm, Mp.nonZeros());
@@ -331,7 +331,7 @@ void siconos::mechanics::fem::nonsmooth_formulations::Plasticity::assemble() {
     problem.model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
     problem.model.drucker_prager = &drucker_prager;
   }
-  problem.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CARTESIAN_VOIGT;
+  problem.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CARTESIAN_MANDEL;
 }
 
 int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed() {

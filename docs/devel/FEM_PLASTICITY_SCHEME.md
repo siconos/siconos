@@ -110,11 +110,24 @@ memory). A Mohr–Coulomb cone would use μ = tan φ together with the cone `b`,
 
 For a 2D continuum element e of area A_e and thickness t (`Material` thickness):
 
-- `BMatrix()`: the strain–displacement matrix scaled by `sqrt(A_e t)`, so that the stress
-  unknowns are `σ̃_e = sqrt(A_e t) σ_e` (σ_e the physical stress, Voigt order
-  (σxx, σyy, σxy), engineering shear strain).
-- `elasticityMatrix()`: block diagonal, `S_e = D⁻¹` with D the plane strain or plane stress
-  tensor of the material (`elasticityTensor2D`). With this scaling, `K = Bᵀ S⁻¹ B` (checked in
+- Notation: Mandel, σ = (σxx, σyy, √2 σxy), ε = (εxx, εyy, √2 εxy) (since 2026-11-26; Voigt
+  with the engineering shear strain γxy = 2 εxy before). The basis is orthonormal: the
+  Euclidean product and norm of these vectors are the tensor ones (σ·ε is the work, ‖ε_p‖
+  the tensor norm), and the cone coordinates of the numerics are an orthogonal change of
+  basis (`PLASTICITY_STRESS_COORDINATES_CARTESIAN_MANDEL`). With T = diag(1, 1, √2),
+  σ_M = T σ_V, ε_M = T⁻¹ ε_V, B_M = T⁻¹ B_V, D_M = T D_V T (D_M(2,2) = 2G): the iteration
+  matrix of the Voigt formulation becomes diag(I, T⁻¹) W diag(I, T⁻¹), a congruence, so the
+  velocities, the reaction and the invariants (von Mises stress, yield function, ‖ε_p‖) are
+  the same up to round-off (tutorials: relative differences ≤ 2e-12 against the Voigt
+  references). `elasticityTensor2D` (Voigt) and the displacement-based
+  `computeStrainTensor`/`computeStressTensor` of `FiniteElementLinearTIDS` stay in Voigt
+  notation.
+- `BMatrix()`: the strain–displacement matrix (Mandel rows) scaled by `sqrt(A_e t)`, so that
+  the stress unknowns are `σ̃_e = sqrt(A_e t) σ_e` (σ_e the physical stress, Mandel
+  notation). The scaling is a positive scalar per element, independent of the notation.
+- `elasticityMatrix()`: block diagonal, `S_e = D_M⁻¹` with D the plane strain or plane stress
+  tensor of the material (`elasticityTensor2D`, D_M = T D T). The scaling cancels in S:
+  `D_M⁻¹ σ̃̇_e = sqrt(A_e t) B_e v = B̃_e v`. With this scaling, `K = Bᵀ S⁻¹ B` (checked in
   `SolidLinearTIDSTest::testPlaneStressCompliance`). A yield criterion `f(σ) ≤ 0` written on
   the unknowns becomes `f(σ̃_e / sqrt(A_e t)) ≤ 0`; for a positively homogeneous criterion (von
   Mises, Drucker–Prager without cohesion) the yield stress of element e is
@@ -164,7 +177,7 @@ not change the solution).
 ### Law and relation
 
 `VonMisesPlasticityNSL(σ_y, hypothesis)` (kernel): the output y of a size-3 interaction is a
-stress in Voigt notation (σxx, σyy, σxy) that must stay in the elastic domain K, and the
+stress in Mandel notation (σxx, σyy, √2 σxy) that must stay in the elastic domain K, and the
 multiplier is in the opposite of the normal cone (associated flow rule):
 
     0 ∈ λ + N_K(y),   Cᵀλ = −h ε̇_p
@@ -336,8 +349,8 @@ each). The interaction edges are only used by the Delassus assembly of `LinearOS
 
 ### Law
 
-`DruckerPragerPlasticityNSL(η, θ, c')` (kernel): y = (σxx, σyy, σxy) (tension positive) in the
-cone of the numerics `PlasticityProblem` in Voigt coordinates,
+`DruckerPragerPlasticityNSL(η, θ, c')` (kernel): y = (σxx, σyy, √2 σxy) (tension positive,
+Mandel notation) in the cone of the numerics `PlasticityProblem` in Mandel coordinates,
 
     ‖σ_T‖ ≤ η σ_N + c',   σ_N = −(σxx + σyy)/√2,   σ_T = ((σxx − σyy)/√2, √2 σxy),
 
@@ -351,8 +364,8 @@ plane strain when σzz is the intermediate principal stress), R ≤ −p sin φ 
 (The dilatancy: on the yield surface the plastic strain rate ε̇_p = −w has
 ε̇_N = (θ − η) ‖ε̇_T‖ = −sin ψ ‖ε̇_T‖.) The condensed problem `fem::nonsmooth_formulations::
 Plasticity` passes the Drucker–Prager model (η, θ, c' per interaction) to the numerics; the
-driver removes the cohesion by a translation and maps the Voigt coordinates to the cone
-coordinates. pytripopfem writes the same criterion c₀ cos φ − (sin φ/2) I − J ≥ 0 (I = σxx + σyy,
+driver removes the cohesion by a translation and maps the Mandel coordinates to the cone
+coordinates (orthogonal map). pytripopfem writes the same criterion c₀ cos φ − (sin φ/2) I − J ≥ 0 (I = σxx + σyy,
 J = R): its η is sin φ / 2 and its dilatancy sin ψ / 2.
 
 ### Validation: half footing (pytripopfem `examples/Footing/half_footing.py`)

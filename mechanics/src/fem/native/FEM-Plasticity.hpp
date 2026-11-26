@@ -54,7 +54,8 @@ struct PlasticityCondensation;
     mass and all stresses constrained) it is inverted entry-wise and \f$ W_{red} \f$ is
     sparse; otherwise a sparse LU of \f$ W_{rr} \f$ is used.
 
-    Supported laws (one model for all the interactions; numerics Voigt coordinates):
+    Supported laws (one model for all the interactions; y in Mandel notation, numerics
+    PLASTICITY_STRESS_COORDINATES_CARTESIAN_MANDEL):
     VonMisesPlasticityNSL (the hypothesis of the law, shared by all the interactions) and
     DruckerPragerPlasticityNSL (cone slope, dilatancy and cohesion per interaction). y is the
    physical stress when C is the selection of the element stresses divided by sqrt(area *

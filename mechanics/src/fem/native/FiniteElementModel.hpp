@@ -185,6 +185,9 @@ class FiniteElementModel {
                                            siconos::algebra::SiconosDenseMatrix& Be,
                                            const std::map<int, const Material>& materials);
 
+  /** @brief strain operator of a T3 element for the stress unknowns of SolidLinearTIDS:
+   * scaled by sqrt(Area * thickness), in Mandel notation (exx, eyy, sqrt2 exy)
+   **/
   void computeElementaryBMatrix_direct(FiniteElement& fe,
                                        siconos::algebra::SiconosDenseMatrix& Be,
                                        double thickness);
@@ -193,10 +196,10 @@ class FiniteElementModel {
    * element, i.e. epsilon = B * u with no additional area/thickness scaling.
    *
    * Unlike computeElementaryBMatrix_direct(), which scales its result by
-   * sqrt(Area * thickness) for use in the global sparse B/S assembly
-   * (K = B^T * S * B), this returns the physical strain-displacement matrix
-   * directly, suitable for evaluating element strain/stress from a nodal
-   * displacement vector.
+   * sqrt(Area * thickness) and uses the Mandel notation for the global sparse B/S
+   * assembly (K = B^T * S^{-1} * B), this returns the physical strain-displacement matrix
+   * in Voigt notation (exx, eyy, gamma_xy), suitable for evaluating element strain/stress
+   * from a nodal displacement vector.
    *
    * @param[in] fe the (T3) finite element
    * @param[out] Be the 3x6 strain-displacement matrix
@@ -207,10 +210,11 @@ class FiniteElementModel {
   void computeBMatrix(siconos::algebra::SiconosSparseMatrix& B,
                       const std::map<int, const Material>& mat);
 
-  /** compute the compliance matrix S (block diagonal, one block per element): D^{-1} for
-   * the continuum elements (D = elasticityTensor2D, plane strain or plane stress
-   * according to the material), the beam compliance for B2/B3. With B scaled by
-   * sqrt(area * thickness), K = B^T S^{-1} B.
+  /** compute the compliance matrix S (block diagonal, one block per element): D_M^{-1}
+   * for the continuum elements, with D_M = T D T, T = diag(1, 1, sqrt2), the elasticity
+   * tensor in Mandel notation (D = elasticityTensor2D, Voigt notation, plane strain or plane
+   * stress according to the material), the beam compliance for B2/B3. With B scaled by
+   * sqrt(area * thickness) (Mandel notation for the continuum elements), K = B^T S^{-1} B.
    **/
   void computeElasticityMatrix(siconos::algebra::SiconosSparseMatrix& S,
                                const std::map<int, const Material>& mat);

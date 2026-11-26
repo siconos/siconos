@@ -7,6 +7,7 @@
 
 #include "FiniteElementModel.hpp"
 
+#include <cmath>
 #include <iostream>
 #include <memory>
 
@@ -1119,6 +1120,9 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direc
   B = 1.0 / twoA * B;
   double coeff = sqrt(twoA / 2.0 * thickness);
   B = coeff * B;
+  // Mandel notation for the stress unknowns of SolidLinearTIDS: the strain is
+  // (exx, eyy, sqrt2 exy) = (exx, eyy, gamma_xy / sqrt2)
+  B.row(2) *= M_SQRT1_2;
 }
 
 void siconos::mechanics::fem::FiniteElementModel::
@@ -1216,8 +1220,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
         assembleElementary_S_Matrix(S, Dinv, *fe, elem_cnt);
 
       } else {  // Other types of 2D elements
+        // compliance in Mandel notation: D_M = T D T, T = diag(1, 1, sqrt2) (D in Voigt
+        // notation with the engineering shear strain), i.e. D_M(2, 2) = 2 G
+        const Eigen::Vector3d T{1.0, 1.0, M_SQRT2};
         siconos::algebra::SiconosMatrix33 Dmat =
-            elasticityTensor2D(mat).inverse();  // We need the inverse
+            (T.asDiagonal() * elasticityTensor2D(mat) * T.asDiagonal()).inverse();
         assembleElementary_S_Matrix(S, Dmat, *fe, elem_cnt);
       }
       elem_cnt++;
