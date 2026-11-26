@@ -2600,7 +2600,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # of the object has a time of birth this will fail.
 
             self.print_verbose("import joints ...")
-            for name in self.joints():
+            # the joints that refer to other joints (CouplerJointR) after them
+            joints = self.joints()
+            for name in sorted(joints, key=lambda n: "references" in joints[n].attrs):
                 self.import_joint(name)
 
             self.print_verbose("import permanent interactions ...")
