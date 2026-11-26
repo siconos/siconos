@@ -4,7 +4,7 @@
 **Tag:** `2026-11` (version number `2026.11` in the `VERSION` file)
 **Previous Release:** 4.5.0 (March 2024)
 **Release candidates:** 2026.rc1, 2026.rc2, 2026.rc3
-**Commits:** about 2000 since 4.5.0 (about 80 since 2026.rc3)
+**Commits:** about 2000 since 4.5.0 (about 110 since 2026.rc3)
 
 ---
 
@@ -57,6 +57,9 @@ The details are in the notes of the release candidates:
 
 ### Mechanics and IO
 - Cohesive zone models, FEM (native T3/TH4 elements, contact, plasticity).
+- FEM plasticity with Von Mises (plane stress, plane strain) and Drucker-Prager
+  (Mohr-Coulomb in the plane) laws, solved by a global semi-smooth Newton method and
+  validated against pytripopfem (strip with a hole, footing).
 - Versioned HDF5 format (`format_v1.json`, `format_v2.json`), VTKHDF export for ParaView,
   `siconos_filter`, `siconos_svg`, `vview` improvements.
 
@@ -78,7 +81,44 @@ The details are in the notes of the release candidates:
 
 ## What's New Since 2026.rc3
 
+### Kernel
+- **Plasticity laws**: `VonMisesPlasticityNSL(sigma_y, hypothesis)` (J2, plane stress or
+  plane strain) and `DruckerPragerPlasticityNSL(eta, theta, cohesion)` with
+  `mohrCoulombPlaneStrain(c, phi, psi)`, in Mandel notation (documented in the headers).
+- `OSNSMatrix::fillH` no longer zeroes the stress columns of a `StressLinearTIR` at the
+  indices of the prescribed velocities (stress interactions are not concerned by velocity
+  boundary conditions).
+- Sparse iteration matrix property of the dynamical systems
+  (`DynamicalSystemProperties::iterationMatrixSparse`), used by `OSNSMatrix::fillW` for the
+  global one-step problems.
+- `SiconosGraph`: vertices and edges renumbered only after a structural change (the
+  renumbering is O(V + E) and was done at each step and each Newton iteration; FEM elements
+  sharing one dynamical system give O(n²) edges).
+
+### Mechanics: FEM plasticity
+Documentation in `docs/devel/FEM_PLASTICITY_SCHEME.md`.
+- `Material(rho, E, nu, AnalysisType2D, thickness)`: plane stress or plane strain, thickness;
+  the compliance `S = D⁻¹` follows the analysis type (it was always plane strain);
+  lumped mass (`MassType::lumped`).
+- `fem::nonsmooth_formulations::Plasticity`: one-step problem of the FEM plasticity, condensed
+  on the constrained stresses (built once at the first step), solved by the numerics
+  plasticity driver with `PLASTICITY_2D_NSN` by default; Von Mises or Drucker-Prager laws;
+  `setProblemDump` writes the numerics problems of chosen steps.
+- `SolidLinearTIDS`: stress and strain unknowns in Mandel notation
+  (`sxx, syy, √2 sxy`); `elementStressSelection` gives the physical stress of an element.
+- `fem::MoreauJeanGOSI`: non-zero prescribed velocities fixed (they grew at every step with
+  the wrong sign), sparse iteration matrix, no LU of the iteration matrix (unused).
+  Memory and time on the strip with 1446 T3: 1.14 → 0.92 GB, 167 s → 104 s.
+- Validated against pytripopfem: strip with a circular hole (Von Mises, plane stress) and
+  half footing (Drucker-Prager, associated and non-associated flow) to round-off.
+
 ### Numerics
+- **`PLASTICITY_2D_NSN`**: global semi-smooth Newton on the natural map of the whole
+  plasticity problem (generalized Jacobian with the sparsity of M, sparse LU), full Newton
+  steps with a watchdog by default, merit-function globalization as an option. NSGS needs
+  O(cond) sweeps in quasi-static regimes.
+- Plasticity `.dat` files keep the stress coordinates, the Von Mises hypothesis and the
+  cohesion; matrices written with 17 digits; FEM strip and footing problems as test data.
 - **Plasticity** (`numerics/src/Plasticity`, documentation in `docs/devel/PLASTICITY.md`):
   2D plasticity in Cartesian stress coordinates, Von Mises (J2, including the plane stress
   model) and Drucker-Prager criteria with cohesion, local solvers by return mapping and
@@ -137,8 +177,10 @@ The migration tables are in the rc notes; in short:
    arguments, matrices in column-major order.
 5. `GFC3D_NSN_AC` uses Alart-Curnier by default; sparse gemv overwrites `y` when
    `beta == 0`; FEM plasticity sign convention changed.
-6. HDF5: a file of another format version is refused by `mechanics_hdf5`.
-7. CMake: `WITH_<component>` options, version `2026.11` (CMake package `siconos-2026.11`).
+6. FEM: `SolidLinearTIDS` stress and strain unknowns in Mandel notation (`√2 sxy`); results
+   with non-zero prescribed velocities in `fem::MoreauJeanGOSI` change (they were wrong).
+7. HDF5: a file of another format version is refused by `mechanics_hdf5`.
+8. CMake: `WITH_<component>` options, version `2026.11` (CMake package `siconos-2026.11`).
 
 ---
 
@@ -154,14 +196,16 @@ The migration tables are in the rc notes; in short:
   call constructors without `copy_t`/`alias_t`, `advanced_01_impacting_bar` and
   `DiodeBridge.ipynb` import `siconos.kernel`, `advanced_02_guitar_string` needs
   `numpywrappers`). The Python scripts of the same examples are up to date.
-- siconos-tutorials: the FEM plasticity examples are removed for this release.
 - `mechanisms`: no Python bindings (MBTB/CADMBTB); the OCC examples using C plugins loaded
   by name (`occ_watch_escapement`, `occ_slider_crank`) cannot run.
 - `EventDriven`: the default tolerance (`DEFAULT_TOL_ED ≈ 2.2e-12`, absolute) is close to
   round-off; examples near Zeno accumulation set `setToleranceED(1e-8)`.
 - Mass-weighted projection (`_useMassNormalization`) in the projected schemes is
   inconsistent.
-- FEM plasticity: the non-global `fem::MoreauJeanOSI` path is untested.
+- FEM plasticity: on fine meshes the kernel dominates the cost (interaction graph with
+  O(n²) edges, dense matrix `C` of `StressLinearTIR`); the relaxation option of NSGS is
+  wrong for plasticity (applied after the projection); the non-global
+  `fem::MoreauJeanOSI` path is untested.
 - `lp_solve` 5.5 leaks on macOS (`realloc(p, 0)` in `LUSOL_free`).
 
 ---
@@ -172,7 +216,9 @@ The migration tables are in the rc notes; in short:
   build and leak checks done for 2026.rc3.
 - Ubuntu 26.04 x86_64 (GCC 15, OpenBLAS): all ctest tests passed for 2026.rc3, except
   timeouts under emulation.
-- siconos-tutorials 2026-11: the 332 tests (C++ and Python examples) pass on macOS arm64.
+- siconos-tutorials 2026-11: the 332 tests (C++ and Python examples) pass on macOS arm64;
+  FEM plasticity examples `Plasticity/StripWithHole` and `Plasticity/Footing` compared with
+  pytripopfem.
 
 ---
 
