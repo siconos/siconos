@@ -4758,10 +4758,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if self._svg is not None:
                 self.log(self.output_svg, with_timer)(cond or self._k == 1)
 
-            if (
-                self._output_backup
-                and (self._k % self._output_backup_frequency == 0)
-                or (self._k == 1)
+            if self._output_backup and (
+                self._k % self._output_backup_frequency == 0 or self._k == 1
             ):
                 # close io file, hdf5 memory is cleaned
                 self._out.close()
@@ -4769,8 +4767,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     shutil.copyfile(self._io_filename, self._io_filename_backup)
                 except shutil.Error as e:
                     siconos.io.tools.warn(str(e))
-                # open the file again
+                # open the file again: it exists, "w" would truncate it
                 finally:
+                    if self._mode == "w":
+                        self._mode = "r+"
                     self.__enter__()
 
             self.log(self._simulation.clearNSDSChangeLog, with_timer)()
