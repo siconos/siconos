@@ -312,11 +312,25 @@ Before 2026-11-26 the 1446-element mesh took 167 s (636: 24 s), ~70 s of them in
 - `OSNSMatrix::fillW`/`fillH` (scan of the dense W and of the dense C of each
   `StressLinearTIR`) and the condensation at each step: done once (see above).
 
-The initialization of the 1446-element mesh takes 1 s, and the kernel ~3 % of a step: the
+- the dense iteration matrix (n_v + n_σ)²: `fem::MoreauJeanGOSI` assembles W sparse
+  (`MoreauJeanOSI::initializeSparseIterationMatrix`, graph property
+  `iterationMatrixSparse`, read by `OSNSMatrix::fillW` instead of the dense
+  `iterationMatrix`, left null), with the boundary conditions applied on the sparse matrix
+  (columns of the prescribed velocities kept in `iterationMatrixBoundaryConditions`, rows and
+  columns removed except the diagonal; no O(n²) symmetry check, W is not symmetric). The
+  non-global `fem::MoreauJeanOSI` keeps the dense W and its LU.
+
+The initialization of the 1446-element mesh takes 0.9 s, and the kernel ~3 % of a step: the
 rest is the numerics NSN, 90 % of it in the sparse LU of the Newton matrix (CSparse `cs_lu`,
-no supernodes). The memory is still quadratic in the number of elements (1.1 GB at
-initialization for 1446 elements, 3.5 GB for 2612): dense iteration matrix (n_v + n_σ)²,
-dense 3 × n_σ C of each `StressLinearTIR`, and the n_el²/2 edges of the interaction graphs.
+no supernodes). The memory is still quadratic in the number of elements: 0.92 GB at
+initialization for 1446 elements, 2.85 GB for 2612 (3.5 GB with the dense W), 4.7 GB for
+3372. On 2612 elements (heap of the running process): 2.2 GB are the edges of the interaction
+graphs (one per pair of interactions, 2612² blocks of 256 B + 2 × 2612² of 32 B: every
+element interaction is attached to the same solid, and the topology links the interactions
+sharing a dynamical system), 0.5 GB the dense 3 × n_σ C of the `StressLinearTIR` (192 KB
+each). The interaction edges are only used by the Delassus assembly of `LinearOSNS`
+(extra-diagonal blocks, `OSNSMatrix::fillM`); the global problems (`GlobalFrictionContact`,
+`Plasticity`) use W and H.
 
 ## 8. Drucker–Prager (Mohr–Coulomb) plasticity: footing
 

@@ -12,6 +12,10 @@
 
 #include "MoreauJeanOSI.hpp"
 
+namespace siconos::mechanics::fem {
+class SolidLinearTIDS;
+}
+
 namespace siconos::mechanics::fem::integrators {
 
 /**
@@ -86,6 +90,17 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    *  integrate and computeIteration solve with it); false for the global integrator, where
    *  the one-step problem holds W */
   virtual bool needsIterationMatrixLU() const { return true; }
+
+  /** W = [M hθBᵀ; −hθB S] assembled sparse into the iterationMatrixSparse property of the
+   *  graph (no dense W, no LU), with the boundary conditions applied (columns of the
+   *  prescribed velocities in iterationMatrixBoundaryConditions); used when
+   *  needsIterationMatrixLU() is false (global integrator)
+   *  \param solid the dynamical system
+   *  \param dsv its descriptor in the graph
+   */
+  void initializeSparseIterationMatrix(
+      const siconos::mechanics::fem::SolidLinearTIDS& solid,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) const;
 
   virtual void initializeIterationMatrix(
       double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) const override;

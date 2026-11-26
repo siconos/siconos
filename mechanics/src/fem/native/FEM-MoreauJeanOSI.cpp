@@ -184,6 +184,12 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
   auto solid = std::dynamic_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
   assert(solid);
 
+  if (!needsIterationMatrixLU()) {
+    // global integrator: W is only given to the one-step problem, kept sparse
+    initializeSparseIterationMatrix(*solid, dsv);
+    return;
+  }
+
   // Allocate iteration matrix (in the graph)
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
   auto size_iteration_mat = solid->real_size();
@@ -220,6 +226,69 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
 
   // Apply BC
   if (solid->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*solid, dsv);
+}
+
+void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeSparseIterationMatrix(
+    const siconos::mechanics::fem::SolidLinearTIDS& solid,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) const {
+  using SpMat = siconos::algebra::SiconosSparseMatrix;
+  auto& props = _dynamicalSystemsGraph->properties(dsv);
+  assert(!props.iterationMatrix && !props.iterationMatrixSparse);
+  auto nv = solid.dimension();
+  auto ns = solid.stressDimension();
+  auto n = solid.real_size();
+  double htheta = simulation()->timeStep() * _theta;
+
+  // W = [M h*theta*B^T; -h*theta*B S] (see initializeIterationMatrix)
+  std::vector<Eigen::Triplet<double>> triplets;
+  auto add = [&triplets](const SpMat& A, siconos::algebra::Index row_off,
+                         siconos::algebra::Index col_off, double coef, bool transpose) {
+    for (int k = 0; k < A.outerSize(); ++k)
+      for (SpMat::InnerIterator it(A, k); it; ++it) {
+        auto r = static_cast<siconos::algebra::Index>(it.row());
+        auto c = static_cast<siconos::algebra::Index>(it.col());
+        if (transpose) std::swap(r, c);
+        triplets.emplace_back(row_off + r, col_off + c, coef * it.value());
+      }
+  };
+  SpMat M = solid.mass(), B = solid.BMatrix(), S = solid.elasticityMatrix();
+  triplets.reserve(static_cast<size_t>(M.nonZeros() + 2 * B.nonZeros() + S.nonZeros()));
+  add(M, 0, 0, 1.0, false);
+  add(B, 0, nv, htheta, true);
+  add(B, nv, 0, -htheta, false);
+  add(S, nv, nv, 1.0, false);
+  auto W = std::make_shared<SpMat>(n, n);
+  W->setFromTriplets(triplets.begin(), triplets.end());
+  W->prune(0.0);
+  W->makeCompressed();
+  assert(S.rows() == ns);
+  (void)ns;
+
+  // Boundary conditions: the columns of W at the prescribed velocities are kept (they move
+  // the known velocities to the right-hand side, MoreauJeanGOSI::computeResidu), then their
+  // rows and columns are removed from W except the diagonal (as
+  // siconos::integrators::MoreauJeanOSI::computeIterationMatrixBoundaryConditions, without
+  // its O(n^2) symmetry check)
+  if (solid.boundaryConditions()) {
+    auto indices = solid.boundaryConditions()->velocityIndices();
+    props.iterationMatrixBoundaryConditions =
+        std::make_shared<siconos::algebra::SiconosDenseMatrix>(
+            n, static_cast<siconos::algebra::Index>(indices.size()));
+    auto& Wbc = *props.iterationMatrixBoundaryConditions;
+    Wbc.setZero();
+    std::vector<char> prescribed(static_cast<size_t>(n), 0);
+    siconos::algebra::Index column = 0;
+    for (auto i : indices) {
+      Wbc.col(column++) = W->col(i);
+      prescribed[static_cast<size_t>(i)] = 1;
+    }
+    W->prune([&prescribed](const siconos::algebra::Index& r, const siconos::algebra::Index& c,
+                           const double&) {
+      return r == c ||
+             (!prescribed[static_cast<size_t>(r)] && !prescribed[static_cast<size_t>(c)]);
+    });
+  }
+  props.iterationMatrixSparse = W;
 }
 
 void siconos::mechanics::fem::integrators::MoreauJeanOSI::computeInitialNewtonState() {
