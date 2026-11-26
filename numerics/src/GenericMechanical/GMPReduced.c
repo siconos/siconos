@@ -202,7 +202,7 @@ static int buildReducedGMP(GenericMechanicalProblem* problem, double* Me, double
   size_t numberOfBlockColumns = m->blocknumber1;
   size_t* newIndexOfCol = (size_t*)malloc(numberOfBlockColumns * sizeof(size_t));
   if (!newIndexOfCol) {
-    (void)numerics_error("buildReducedGMP", "memory allocation failed");
+    numerics_error_log("buildReducedGMP", "memory allocation failed");
     return 1;
   }
 
@@ -367,7 +367,7 @@ static int _GMPReducedEquality(GenericMechanicalProblem* problem, double* reduce
       (*Mi_size) ? (double*)malloc((*Mi_size) * numberOfColumns * sizeof(double)) : NULL;
   double* Qi = (double*)malloc(numberOfRows * sizeof(double));
   if ((*Me_size && !Me) || (*Mi_size && !Mi) || !Qi) {
-    (void)numerics_error("_GMPReducedEquality", "memory allocation failed");
+    numerics_error_log("_GMPReducedEquality", "memory allocation failed");
     free(Me);
     free(Mi);
     free(Qi);
@@ -443,7 +443,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* problem, double* react
   Vreduced = (double*)calloc(numberOfRows, sizeof(double));
   if (!reducedProb || !Qreduced || !Rreduced || !Vreduced) {
     *info = 1;
-    (void)numerics_error("gmp_reduced_equality_solve", "memory allocation failed");
+    numerics_error_log("gmp_reduced_equality_solve", "memory allocation failed");
     goto cleanup;
   }
 
@@ -460,7 +460,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* problem, double* react
   _pnumerics_GMP = gmp_build_reduced_gs_problem(problem, Me_size);
   if (!_pnumerics_GMP) {
     *info = 1;
-    (void)numerics_error("gmp_reduced_equality_solve", "failed to build reduced problem");
+    numerics_error_log("gmp_reduced_equality_solve", "failed to build reduced problem");
     goto cleanup;
   }
 
@@ -570,7 +570,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, doub
   Qi = (double*)malloc(numberOfRows * sizeof(double));
   if (!Me || !Qe || !Mi || !Qi) {
     *info = 1;
-    (void)numerics_error("gmp_reduced_solve", "memory allocation failed");
+    numerics_error_log("gmp_reduced_solve", "memory allocation failed");
     goto cleanup;
   }
 
@@ -594,7 +594,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, doub
   Vreduced = (double*)malloc(Mi_size * sizeof(double));
   if (!pseudoInvMe1 || !reducedProb || !Mi1pseudoInvMe1 || !Rreduced || !Vreduced) {
     *info = 1;
-    (void)numerics_error("gmp_reduced_solve", "memory allocation failed");
+    numerics_error_log("gmp_reduced_solve", "memory allocation failed");
     goto cleanup;
   }
 
@@ -658,7 +658,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, doub
   _pnumerics_GMP = gmp_build_reduced_gs_problem(problem, 0);
   if (!_pnumerics_GMP) {
     *info = 1;
-    (void)numerics_error("gmp_reduced_solve", "failed to build reduced problem");
+    numerics_error_log("gmp_reduced_solve", "failed to build reduced problem");
     goto cleanup;
   }
 
@@ -690,7 +690,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* problem, double* reaction, doub
     Rbuf = (double*)malloc(Me_size * sizeof(double));
     if (!Re || !Rbuf) {
       *info = 1;
-      (void)numerics_error("gmp_reduced_solve", "memory allocation failed");
+      numerics_error_log("gmp_reduced_solve", "memory allocation failed");
       goto cleanup;
     }
     memcpy(Rbuf, Qe, Me_size * sizeof(double));
@@ -814,7 +814,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* problem, double* reaction, double* ve
       case SICONOS_NUMERICS_PROBLEM_LCP:
         break;
       case SICONOS_NUMERICS_PROBLEM_FC3D: {
-        (void)numerics_error("gmp_as_mlcp", "gmp_as_mlcp doesn't deal with FC3D");
+        numerics_error_log("gmp_as_mlcp", "gmp_as_mlcp doesn't deal with FC3D");
         *info = 1;
         return;
       }
@@ -834,7 +834,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* problem, double* reaction, double* ve
   double* Qreduced = (double*)malloc(numberOfRows * sizeof(double));
   if (!reducedProb || !Qreduced) {
     *info = 1;
-    (void)numerics_error("gmp_as_mlcp", "memory allocation failed");
+    numerics_error_log("gmp_as_mlcp", "memory allocation failed");
     free(reducedProb);
     free(Qreduced);
     return;

@@ -733,6 +733,8 @@ typedef struct {
 /* ---- per-linear-system-formulation step helpers ---- */
 static void gfc3d_ipm_snm_step_noscal(gfc3d_IPM_SNM_workspace* ws) {
   /* locals not carried in the workspace struct */
+  /* -Wunused-variable is ignored up to the end of the function: gcc emits it at the end of
+     the scope (clang at the declaration) */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
   int jacobian_is_nan = 0;
@@ -829,7 +831,6 @@ static void gfc3d_ipm_snm_step_noscal(gfc3d_IPM_SNM_workspace* ws) {
   FILE* iterates = ws->iterates;
   char fws = ws->fws;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -1206,6 +1207,7 @@ static void gfc3d_ipm_snm_step_noscal(gfc3d_IPM_SNM_workspace* ws) {
   ws->subdiff_u = subdiff_u;
   ws->Qp2 = Qp2;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_snm_step_qp2(gfc3d_IPM_SNM_workspace* ws) {
   /* locals not carried in the workspace struct */
@@ -1314,7 +1316,6 @@ static void gfc3d_ipm_snm_step_qp2(gfc3d_IPM_SNM_workspace* ws) {
   size_t H_nzmax = ws->H_nzmax;
   size_t M_nzmax = ws->M_nzmax;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -1610,6 +1611,7 @@ static void gfc3d_ipm_snm_step_qp2(gfc3d_IPM_SNM_workspace* ws) {
   ws->subdiff_u = subdiff_u;
   ws->Qp2 = Qp2;
 }
+#pragma GCC diagnostic pop
 
 /*
  * Implementation contains the following functions:

@@ -1386,6 +1386,8 @@ typedef struct {
 } gfc3d_IPM_workspace;
 
 /* ---- per-linear-system-formulation step helpers ---- */
+/* Each helper unpacks the whole workspace: -Wunused-variable is ignored up to the end of the
+   function, since gcc emits it at the end of the scope (clang at the declaration). */
 
 static void gfc3d_ipm_predictor_3x3_noscal(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -1500,7 +1502,6 @@ static void gfc3d_ipm_predictor_3x3_noscal(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -1603,6 +1604,7 @@ static void gfc3d_ipm_predictor_3x3_noscal(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_predictor_3x3_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -1717,7 +1719,6 @@ static void gfc3d_ipm_predictor_3x3_qp2(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -1799,6 +1800,7 @@ static void gfc3d_ipm_predictor_3x3_qp2(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_predictor_3x3_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -1913,7 +1915,6 @@ static void gfc3d_ipm_predictor_3x3_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -2013,6 +2014,7 @@ static void gfc3d_ipm_predictor_3x3_qph(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_predictor_2x2_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -2127,7 +2129,6 @@ static void gfc3d_ipm_predictor_2x2_qp2(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -2212,6 +2213,7 @@ static void gfc3d_ipm_predictor_2x2_qp2(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_predictor_2x2_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -2326,7 +2328,6 @@ static void gfc3d_ipm_predictor_2x2_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -2422,6 +2423,7 @@ static void gfc3d_ipm_predictor_2x2_qph(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_predictor_1x1_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -2536,7 +2538,6 @@ static void gfc3d_ipm_predictor_1x1_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -2647,6 +2648,7 @@ static void gfc3d_ipm_predictor_1x1_qph(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_corrector_3x3_noscal(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -2761,7 +2763,6 @@ static void gfc3d_ipm_corrector_3x3_noscal(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -2842,6 +2843,7 @@ static void gfc3d_ipm_corrector_3x3_noscal(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_corrector_3x3_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -2956,7 +2958,6 @@ static void gfc3d_ipm_corrector_3x3_qp2(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -3041,6 +3042,7 @@ static void gfc3d_ipm_corrector_3x3_qp2(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_corrector_3x3_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -3155,7 +3157,6 @@ static void gfc3d_ipm_corrector_3x3_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -3235,6 +3236,7 @@ static void gfc3d_ipm_corrector_3x3_qph(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_corrector_2x2_qp2(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -3349,7 +3351,6 @@ static void gfc3d_ipm_corrector_2x2_qp2(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -3439,6 +3440,7 @@ static void gfc3d_ipm_corrector_2x2_qp2(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_corrector_2x2_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -3553,7 +3555,6 @@ static void gfc3d_ipm_corrector_2x2_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -3659,6 +3660,7 @@ static void gfc3d_ipm_corrector_2x2_qph(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 static void gfc3d_ipm_corrector_1x1_qph(gfc3d_IPM_workspace* ws) {
   /* problem dimensions, handles, matrices, vectors and scalars */
@@ -3773,7 +3775,6 @@ static void gfc3d_ipm_corrector_1x1_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (0) {
     case 0: {
@@ -3869,6 +3870,7 @@ static void gfc3d_ipm_corrector_1x1_qph(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                double* restrict velocity, double* restrict globalVelocity, int* restrict info,
@@ -4123,12 +4125,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   FILE* iterates = NULL;
   // FILE* matrixH;
 
-  char* str = (char*)malloc(200);
-  if (problem->name) {
-    strcpy(str, problem->name);
-  } else {
-    strcpy(str, "foo_");
-  }
+  /* strToken points into str: str is freed at the end, after the last use of strToken */
+  char* str = strdup(problem->name ? problem->name : "foo_");
 
   const char* separators = "/";
   char* strToken = strtok(str, separators);
@@ -4144,7 +4142,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   char matlab_name[100];
   snprintf(matlab_name, sizeof(matlab_name), "iterates.m");
-  free(str);
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) {
     iterates = fopen(matlab_name, "w");
@@ -4766,6 +4763,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cd.d_reaction = d_reaction;
 
   gfc3d_ipm_cleanup(&cd, info);
+  free(str);
 }
 
 static void gfc3d_ipm_fixed_step(gfc3d_IPM_workspace* ws) {
@@ -4881,7 +4879,6 @@ static void gfc3d_ipm_fixed_step(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-#pragma GCC diagnostic pop
 
   switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]) {
     case SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_EXTERNAL: {
@@ -5006,6 +5003,7 @@ static void gfc3d_ipm_fixed_step(gfc3d_IPM_workspace* ws) {
   ws->nub = nub;
   ws->unitur = unitur;
 }
+#pragma GCC diagnostic pop
 
 void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                      double* restrict velocity, double* restrict globalVelocity,
@@ -5136,8 +5134,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
 
   FILE* iterates = NULL;
 
-  char* str = (char*)malloc(200);
-  strcpy(str, problem_name);
+  char* str = strdup(problem_name);
   const char* separators = "/";
   char* strToken = strtok(str, separators);
   for (int i = 0; i < 5; i++) {
@@ -5387,6 +5384,7 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   cd.restore_scaling = 0;
 
   gfc3d_ipm_cleanup(&cd, info);
+  free(str);
 }
 
 /* Solver registration system */

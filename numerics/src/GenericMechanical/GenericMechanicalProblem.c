@@ -77,7 +77,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem* problem, unsigned i
 void* gmp_add(GenericMechanicalProblem* problem, SICONOS_NUMERICS_PROBLEM_TYPE problemType,
               size_t size) {
   if (!problem) {
-    (void)numerics_error("gmp_add", "NULL GenericMechanicalProblem");
+    numerics_error_log("gmp_add", "NULL GenericMechanicalProblem");
     return NULL;
   }
 
@@ -159,7 +159,7 @@ void* gmp_add(GenericMechanicalProblem* problem, SICONOS_NUMERICS_PROBLEM_TYPE p
       break;
     }
     default:
-      (void)numerics_error("gmp_add", "unknown problem type");
+      numerics_error_log("gmp_add", "unknown problem type");
       free(newProblem);
       return NULL;
   }
@@ -208,7 +208,7 @@ int genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE
 
 GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
   if (!file) {
-    (void)numerics_error("genericMechanical_newFromFile", "NULL file descriptor");
+    numerics_error_log("genericMechanical_newFromFile", "NULL file descriptor");
     return NULL;
   }
 
@@ -247,13 +247,13 @@ GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file) {
 
 GenericMechanicalProblem* genericMechanical_new_from_filename(const char* filename) {
   if (!filename) {
-    (void)numerics_error("genericMechanical_new_from_filename", "NULL filename");
+    numerics_error_log("genericMechanical_new_from_filename", "NULL filename");
     return NULL;
   }
 
   FILE* file = fopen(filename, "r");
   if (file == NULL) {
-    (void)numerics_error("genericMechanical_new_from_filename", "could not open file");
+    numerics_error_log("genericMechanical_new_from_filename", "could not open file");
     return NULL;
   }
 
