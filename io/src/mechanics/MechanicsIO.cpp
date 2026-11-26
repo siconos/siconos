@@ -676,7 +676,7 @@ struct ContactInfoVisitor : public siconos::modeling::relations::Visitor {
 template <>
 void ContactInfoVisitor::operator()(const siconos::modeling::NewtonEulerVelocityR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
-  answer.resize(10);
+  answer.setZero(4);  // the columns of the other contacts
   // answer[0]= id;
   // answer[1]= 0; // reserve for ds1.number
   // answer[2]= 0; // reserve for ds2.number
@@ -812,10 +812,7 @@ struct ContactContactWorkVisitor : public siconos::modeling::relations::Visitor 
 
 /* then specializations : */
 template <>
-void ContactContactWorkVisitor::operator()(
-    const siconos::modeling::NewtonEulerVelocityR& rel) {
-  answer.resize(7);
-}
+void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEulerVelocityR& rel);
 
 static void compute_contact_work_and_status(
     std::shared_ptr<siconos::modeling::Interaction> inter, double theta, double tol,
@@ -1024,9 +1021,18 @@ static void compute_contact_work_and_status_2d(
 
 template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
+    const siconos::modeling::NewtonEulerVelocityR& rel) {
+  auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
+  answer.setZero(7);
+  answer(0) = id;
+  compute_contact_work_and_status(inter, omega, tol, answer);
+}
+
+template <>
+void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::ContactR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
-  answer.resize(7);
+  answer.setZero(7);
   answer(0) = id;
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
@@ -1035,7 +1041,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::ContactVelocityAngularVelocityR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
-  answer.resize(7);
+  answer.setZero(7);
   answer(0) = id;
 
   compute_contact_work_and_status(inter, omega, tol, answer);
@@ -1045,7 +1051,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2dR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
-  answer.resize(7);
+  answer.setZero(7);
   answer(0) = id;
 
   compute_contact_work_and_status_2d(inter, omega, tol, answer);
@@ -1055,7 +1061,7 @@ template <>
 void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2d3DR& rel) {
   auto id = static_cast<siconos::algebra::SiconosVector::Scalar>(inter->number());
-  answer.resize(7);
+  answer.setZero(7);
   answer(0) = id;
 
   compute_contact_work_and_status_2d(inter, omega, tol, answer);
