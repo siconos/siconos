@@ -56,6 +56,7 @@ pytestmark = [
 
 T, h = 1.5, 5e-3
 OBJECTS_TABLES = ("dynamic", "velocities", "static")  # ds_id in column 1
+INTERACTION_COLUMN = {"cf": 23, "cf_info": 1, "cf_work": 1}  # interaction id
 
 
 @pytest.fixture(scope="module")
@@ -115,7 +116,7 @@ def object_ids(name, rows):
     if name == "cf":
         return rows[:, -2:]  # ds1, ds2
     if name == "cf_info":
-        return rows[:, 2:4]  # ds1, ds2
+        return rows[:, 2:5]  # ds1, ds2, static_body
     if name in OBJECTS_TABLES:
         return rows[:, 1:2]
     return None
@@ -131,6 +132,13 @@ def check(fin, fout, kept_times=None, excluded_ids=(), single=False):
         fa_out.open()
         assert dict(fa_in.hdf5.attrs) == dict(fa_out.hdf5.attrs)
         indexed = "step_index" in fa_in.data
+        # the interactions of the excluded objects (cf_info names the fixed body)
+        info = fa_in.data["cf_info"][:] if "cf_info" in fa_in.data else None
+        excluded_interactions = (
+            info[np.isin(info[:, 2:5], excluded_ids).any(axis=1), 1]
+            if info is not None and info.shape[0] and len(excluded_ids)
+            else []
+        )
         for name, spec in fa_in.data_format.items():
             if "<" in name or "dtype" not in spec or name not in fa_in.data:
                 continue
@@ -159,6 +167,10 @@ def check(fin, fout, kept_times=None, excluded_ids=(), single=False):
             left = np.ones(table_in.shape[0], dtype=bool)
             if ids is not None and len(excluded_ids):
                 left = ~np.isin(ids, excluded_ids).any(axis=1)
+            if name in INTERACTION_COLUMN and table_in.shape[0]:
+                left &= ~np.isin(
+                    table_in[:, INTERACTION_COLUMN[name]], excluded_interactions
+                )
             if not indexed:  # steps from column t: a step left empty disappears
                 keep &= [left[s:e].any() for s, e in zip(starts_in, ends_in)]
 
@@ -224,6 +236,20 @@ def test_exclude(pendulum, tmp_path):
         assert "ball" not in f["data/input"]
         assert "pivot" not in f["data/joints"]  # names the ball
         assert f["data/cf"].shape[0] == 0
+
+
+def test_exclude_fixed(pendulum, tmp_path):
+    """A fixed body excluded: its contacts go with it (ds2 = ds1 in cf, the fixed
+    body is the static_body of cf_info)."""
+    with h5py.File(pendulum, "r") as f:
+        wall = f["data/input/wall"].attrs["id"]
+        assert f["data/cf"].shape[0] > 0
+    fout = filtered(pendulum, tmp_path, "--exclude", "wall")
+    check(pendulum, fout, excluded_ids=[wall])
+    with h5py.File(fout, "r") as f:
+        assert "wall" not in f["data/input"]
+        for table in ("cf", "cf_info", "cf_work"):
+            assert f["data"][table].shape[0] == 0, table
 
 
 def test_attr(pendulum, tmp_path):
