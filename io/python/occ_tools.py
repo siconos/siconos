@@ -44,13 +44,20 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
     """
 
     system = GProp_GProps()
+    # the shapes of the scene: the collection of a runner, else one built from the
+    # scene (a MechanicsHdf5 has no collection of its own)
+    shape_collection = getattr(io, "_shape", None)
+    if io is not None and shape_collection is None:
+        from siconos.io.shape_collection import ShapeCollection
+
+        shape_collection = ShapeCollection(io=io, backend="occ")
 
     for shape in shapes:
         iprops = GProp_GProps()
 
         if shape.data is None:
             if io is not None:
-                shape.data = io._shape.get(shape.shape_name, new_instance=True)
+                shape.data = shape_collection.get(shape.shape_name, new_instance=True)
             else:
                 siconos.io.tools.warn(f"cannot get shape {shape.shape_name}")
                 return None

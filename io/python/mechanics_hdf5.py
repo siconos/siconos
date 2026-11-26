@@ -180,6 +180,7 @@ class MechanicsHdf5:
         self._format_adaptor = None
         self._out = None
         self._data = None
+        self._keep = []  # objects kept alive for the C++ side (OCC shapes)
         self._number_of_shapes = 0
         self._number_of_permanent_interactions = 0
         self._number_of_dynamic_objects = 0
