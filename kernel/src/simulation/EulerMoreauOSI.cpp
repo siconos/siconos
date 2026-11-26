@@ -975,7 +975,9 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
     auto relationSubType = inter.relation()->getSubType();
     if (relationSubType == siconos::modeling::RelationSubType::Type2R ||
         relationSubType == siconos::modeling::RelationSubType::NonLinearR) {
-      auto& rel = static_cast<siconos::modeling::FirstOrderNonLinearR&>(*inter.relation());
+      // FirstOrderType2R and FirstOrderNonLinearR are siblings: only their common base is
+      // used here, computeh is dispatched on the actual type below.
+      auto& rel = static_cast<siconos::modeling::FirstOrderR&>(*inter.relation());
       // compute the new y obtained by linearisation (see DevNotes)
       // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
       //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
@@ -1024,8 +1026,13 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
 
       auto& hAlpha = *inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA];
 
-      rel.computeh(*ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
-                   hAlpha);
+      if (relationSubType == siconos::modeling::RelationSubType::Type2R)
+        static_cast<siconos::modeling::FirstOrderType2R&>(rel).computeh(
+            *ds_vars[siconos::modeling::FirstOrderR::Xxx], *inter.lambda(level), hAlpha);
+      else
+        static_cast<siconos::modeling::FirstOrderNonLinearR&>(rel).computeh(
+            *ds_vars[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
+            hAlpha);
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(siconos::algebra::print(hAlpha));
     } else

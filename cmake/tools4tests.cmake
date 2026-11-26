@@ -540,7 +540,14 @@ function(build_python_tests)
         COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libasan.so
         OUTPUT_VARIABLE LIBASAN_PATH
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-      set(ASAN_PYTHON_ENV "LD_PRELOAD=${LIBASAN_PATH};ASAN_OPTIONS=detect_leaks=1;LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
+      # The python interpreter does not link libstdc++: without it in LD_PRELOAD, asan cannot
+      # resolve the real __cxa_throw at startup and aborts on the first C++ exception
+      # ("CHECK failed: ... real___cxa_throw != 0").
+      execute_process(
+        COMMAND ${CMAKE_CXX_COMPILER} --print-file-name=libstdc++.so
+        OUTPUT_VARIABLE LIBSTDCXX_PATH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      set(ASAN_PYTHON_ENV "LD_PRELOAD=${LIBASAN_PATH}:${LIBSTDCXX_PATH};ASAN_OPTIONS=detect_leaks=1;LSAN_OPTIONS=suppressions=${LSAN_SUPPRESSIONS_FILE}:verbosity=0")
     endif()
 
 
