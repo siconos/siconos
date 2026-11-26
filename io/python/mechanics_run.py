@@ -3601,15 +3601,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         sop = d["solver_options_pos"]
         if sop:
             d["solver_options_pos"] = {}
-            d["solver_options_pos"]["solverId"] = so.solverId
-            d["solver_options_pos"]["solver name"] = so.solverId
-            d["solver_options_pos"]["iparam size"] = so.iSize
-            for i in range(so.iSize):
-                d["solver_options_pos"]["iparam[" + str(i) + "]"] = int(so.iparam[i])
-            for i in range(so.dSize):
-                if so.dparam[i] <= 1e24:
+            d["solver_options_pos"]["solverId"] = sop.solverId
+            d["solver_options_pos"]["solver name"] = sop.solverId
+            d["solver_options_pos"]["iparam size"] = sop.iSize
+            for i in range(sop.iSize):
+                d["solver_options_pos"]["iparam[" + str(i) + "]"] = int(sop.iparam[i])
+            for i in range(sop.dSize):
+                if sop.dparam[i] <= 1e24:
                     d["solver_options_pos"]["dparam[" + str(i) + "]"] = float(
-                        so.dparam[i]
+                        sop.dparam[i]
                     )
             # d['solver_options_pos']['numberOfInternalSolvers']=so.numberOfInternalSolvers
             # fix it
