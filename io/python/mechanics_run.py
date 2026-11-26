@@ -89,6 +89,17 @@ def rotate_point(x, y, alpha):
     return x_new, y_new
 
 
+def _relative_translation(translation, center_of_mass):
+    """translation - center_of_mass, a translation of 2 values (2D contactor, kept
+    as given by the writer) completed with z = 0."""
+
+    def pad3(values):
+        v = np.asarray(values, dtype=np.float64).ravel()
+        return np.concatenate([v, np.zeros(3 - v.size)]) if v.size < 3 else v
+
+    return pad3(translation) - pad3(center_of_mass)
+
+
 def _addons_directory():
     """The directory of the addons of the run (as the siconos command: the one of the
     script, <script dir>/addons), else the working directory."""
@@ -2158,8 +2169,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         collision_group=ctr.attrs["group"].astype(int),
                         contact_type=ctr.attrs["type"],
                         contact_index=ctr.attrs["contact_index"].astype(int),
-                        relative_translation=np.subtract(
-                            ctr.attrs["translation"].astype(float), center_of_mass
+                        relative_translation=_relative_translation(
+                            ctr.attrs["translation"], center_of_mass
                         ),
                         relative_orientation=ctr.attrs["orientation"].astype(float),
                     )
@@ -2174,8 +2185,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         instance_name=ctr.attrs["instance_name"],
                         shape_name=ctr.attrs["shape_name"],
                         collision_group=ctr.attrs["group"].astype(int),
-                        relative_translation=np.subtract(
-                            ctr.attrs["translation"].astype(float), center_of_mass
+                        relative_translation=_relative_translation(
+                            ctr.attrs["translation"], center_of_mass
                         ),
                         relative_orientation=ctr.attrs["orientation"].astype(float),
                     )
@@ -2188,8 +2199,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     siconos.mechanics.collision.tools.Shape(
                         instance_name=ctr.attrs["instance_name"],
                         shape_name=ctr.attrs["shape_name"],
-                        relative_translation=np.subtract(
-                            ctr.attrs["translation"].astype(float), center_of_mass
+                        relative_translation=_relative_translation(
+                            ctr.attrs["translation"], center_of_mass
                         ),
                         relative_orientation=ctr.attrs["orientation"].astype(float),
                     )
