@@ -21,6 +21,9 @@
 
 namespace siconos::mechanics::fem::nonsmooth_formulations {
 
+/** condensed problem, built once and reused (FEM-Plasticity.cpp) */
+struct PlasticityCondensation;
+
 /** One-step plasticity problem of solids with stress unknowns.
 
     The global problem assembled by GlobalFrictionContact (iteration matrix W of
@@ -69,6 +72,14 @@ class Plasticity : public GlobalFrictionContact {
    */
   int solve_condensed();
 
+  /** build the condensed problem from the assembled W, H (GlobalFrictionContact::preCompute):
+   *  selections, Schur complement, M_p, numerics problem (model parameters) */
+  void assemble();
+
+  /** the condensed problem, built once (the iteration matrix and the relations are
+   *  time-invariant); rebuilt when the number of interactions changes */
+  std::shared_ptr<PlasticityCondensation> _condensation{nullptr};
+
   /** number of calls of compute with a non-empty problem (one per time step) */
   unsigned int _n_compute{0};
 
@@ -88,7 +99,14 @@ class Plasticity : public GlobalFrictionContact {
   Plasticity(int numericsSolverId = PLASTICITY_2D_NSN);
 
   /** destructor */
-  virtual ~Plasticity() noexcept = default;
+  virtual ~Plasticity() noexcept;
+
+  /** assembly: the full problem (W, H, q, b) and its condensation at the first call (or when
+   *  the interactions change), then only the right-hand sides q and b at each step
+   *  \param time current time
+   *  \return false if there is nothing to solve
+   */
+  bool preCompute(double time) override;
 
   /** write the numerics PlasticityProblem passed to plasticity_2d_driver (numerics .dat
    *  format, plasticity_printInFile) into <prefix>_<n>.dat, n being the number of the call

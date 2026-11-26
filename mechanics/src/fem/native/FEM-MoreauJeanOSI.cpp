@@ -212,9 +212,11 @@ void siconos::mechanics::fem::integrators::MoreauJeanOSI::initializeIterationMat
   // W = [M h*theta*B^T; -h*theta*B S]
   iterationMat->topRightCorner(solid->dimension(), solid->stressDimension()) =
       htheta * solid->BMatrix().transpose();
-  // LU factorization
-  _dynamicalSystemsGraph->properties(dsv).LUW =
-      std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
+  // LU factorization (dense, full pivoting: O(n^3), the main cost of the initialization of
+  // large meshes), only for the integrators that solve with W themselves
+  if (needsIterationMatrixLU())
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
 
   // Apply BC
   if (solid->boundaryConditions()) initializeIterationMatrixBoundaryConditions(*solid, dsv);

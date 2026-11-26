@@ -82,6 +82,11 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    *  @param time
    *  @param ds a pointer to DynamicalSystem
    */
+  /** \return true if the LU factorization of the iteration matrix is needed (computeFreeState,
+   *  integrate and computeIteration solve with it); false for the global integrator, where
+   *  the one-step problem holds W */
+  virtual bool needsIterationMatrixLU() const { return true; }
+
   virtual void initializeIterationMatrix(
       double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) const override;
 

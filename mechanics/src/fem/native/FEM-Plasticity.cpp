@@ -127,6 +127,49 @@ siconos::mechanics::fem::nonsmooth_formulations::Plasticity::Plasticity(int nume
           3, std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
                                             solver_options_delete)) {}
 
+/* Condensation of the global problem, built once (the iteration matrix and the relations
+   are time-invariant) and reused at each step: only q and b change. */
+struct siconos::mechanics::fem::nonsmooth_formulations::PlasticityCondensation {
+  int n = 0, m_size = 0, nc = 0;
+  size_t n_interactions = 0;
+  SpMat Pc, Pr, Wcr, Wrc, Wrr_inv_Wrc, Hc_inv, Hc_inv_t, Mp;
+  bool diagonal_rr = false;
+  Vec dinv;  // inverse diagonal of W_rr (diagonal case)
+  Eigen::SparseLU<SpMat> lu_rr;
+  NumericsMatrix* nm = nullptr;  // Mp for the numerics
+  PlasticityProblem problem{};
+  Plasticity_VonMises_model von_mises{};
+  Plasticity_DruckerPrager_model drucker_prager{};
+  std::vector<double> sigma_y, eta, theta, cohesion;  // per cone (column order of H)
+  Vec qp;
+  ~PlasticityCondensation() {
+    if (nm) NM_free(nm);
+  }
+  Vec Wrr_solve(const Vec& v) const {
+    if (diagonal_rr) return dinv.cwiseProduct(v);
+    if (v.size() == 0) return Vec(0);
+    return lu_rr.solve(v);
+  }
+};
+
+siconos::mechanics::fem::nonsmooth_formulations::Plasticity::~Plasticity() noexcept = default;
+
+bool siconos::mechanics::fem::nonsmooth_formulations::Plasticity::preCompute(double time) {
+  if (indexSetLevel() == siconos::internal::LEVELMAX) return false;
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
+  // full assembly (W, H, q, b) and condensation at the first call or when the interactions
+  // change; afterwards only the right-hand sides q and b
+  if (!_condensation || _condensation->n_interactions != indexSet.size()) {
+    _condensation.reset();
+    if (!GlobalFrictionContact::preCompute(time)) return false;
+    assemble();
+    return true;
+  }
+  compute_q();
+  compute_nslaw_contribution(indexSet);
+  return true;
+}
+
 int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::compute(double time) {
   if (!preCompute(time)) return 0;
   int info = solve_condensed();
@@ -134,7 +177,7 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::compute(double 
   return info;
 }
 
-int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed() {
+void siconos::mechanics::fem::nonsmooth_formulations::Plasticity::assemble() {
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
   // --- Interactions: law and its parameters (one model for all the interactions)
@@ -180,17 +223,18 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
   int nc = static_cast<int>(column_of_cone.size());
   if (3 * nc != m_size)
     THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: inconsistent problem size");
-  if (nc == 0) {
-    _globalVelocities->setZero();
-    return 0;
-  }
+  auto cond = std::make_shared<PlasticityCondensation>();
+  cond->n_interactions = indexSet.size();
+  cond->m_size = m_size;
+  cond->nc = nc;
+  _condensation = cond;
+  if (nc == 0) return;
 
   // --- Global problem W x = q + H z, y = H^T x + b
   SpMat W = to_eigen(_W->numericsMatrix().get());
   SpMat H = to_eigen(_H->numericsMatrix().get());
   int n = static_cast<int>(W.rows());
-  Vec q = *_q;
-  Vec b = _b->head(m_size);
+  cond->n = n;
 
   // rows of x touched by H (constrained) and the others
   std::vector<char> constrained(static_cast<size_t>(n), 0);
@@ -207,42 +251,41 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
         std::to_string(c_idx.size()) + " constrained unknowns for " + std::to_string(m_size) +
         " interaction components");
 
-  SpMat Pc = selection(c_idx, n), Pr = selection(r_idx, n);
-  SpMat Wcc = Pc * W * Pc.transpose(), Wcr = Pc * W * Pr.transpose();
-  SpMat Wrc = Pr * W * Pc.transpose(), Wrr = Pr * W * Pr.transpose();
+  SpMat& Pc = cond->Pc;
+  SpMat& Pr = cond->Pr;
+  Pc = selection(c_idx, n);
+  Pr = selection(r_idx, n);
+  SpMat Wcc = Pc * W * Pc.transpose();
+  cond->Wcr = Pc * W * Pr.transpose();
+  cond->Wrc = Pr * W * Pc.transpose();
+  SpMat Wrr = Pr * W * Pr.transpose();
   SpMat Hc = Pc * H;
-  Vec qc = Pc * q, qr = Pr * q;
 
   // --- Schur complement on the constrained stresses
-  SpMat Wrr_inv_Wrc;
-  Vec Wrr_inv_qr;
-  Eigen::SparseLU<SpMat> lu_rr;
-  bool diagonal_rr = is_invertible_diagonal(Wrr);
-  if (diagonal_rr) {
-    Vec dinv = Wrr.diagonal().cwiseInverse();
-    Wrr_inv_Wrc = dinv.asDiagonal() * Wrc;
-    Wrr_inv_qr = dinv.cwiseProduct(qr);
+  cond->diagonal_rr = is_invertible_diagonal(Wrr);
+  if (cond->diagonal_rr) {
+    cond->dinv = Wrr.diagonal().cwiseInverse();
+    cond->Wrr_inv_Wrc = cond->dinv.asDiagonal() * cond->Wrc;
   } else if (Wrr.rows() > 0) {
-    lu_rr.compute(Wrr);
-    if (lu_rr.info() != Eigen::Success)
+    cond->lu_rr.compute(Wrr);
+    if (cond->lu_rr.info() != Eigen::Success)
       THROW_EXCEPTION("fem::nonsmooth_formulations::Plasticity: LU of W_rr failed");
-    Wrr_inv_Wrc = lu_rr.solve(Wrc);
-    Wrr_inv_qr = lu_rr.solve(qr);
+    cond->Wrr_inv_Wrc = cond->lu_rr.solve(cond->Wrc);
   } else {
-    Wrr_inv_Wrc = SpMat(0, m_size);
-    Wrr_inv_qr = Vec(0);
+    cond->Wrr_inv_Wrc = SpMat(0, m_size);
   }
-  SpMat Wred = Wcc - Wcr * Wrr_inv_Wrc;
-  Vec qt = qc - Wcr * Wrr_inv_qr;
+  SpMat Wred = Wcc - cond->Wcr * cond->Wrr_inv_Wrc;
 
   // --- Change of variables x_c = Hc^{-T} (y - b)
-  SpMat Hc_inv = block_inverse(Hc);
-  SpMat Mp = Hc_inv * Wred * SpMat(Hc_inv.transpose());
+  cond->Hc_inv = block_inverse(Hc);
+  cond->Hc_inv_t = cond->Hc_inv.transpose();
+  SpMat& Mp = cond->Mp;
+  Mp = cond->Hc_inv * Wred * cond->Hc_inv_t;
   Mp.prune(0.0);
-  Vec qp = -(Mp * b) - Hc_inv * qt;
 
   // --- numerics problem 0 in Mp y + qp + N_K(y), y in Voigt coordinates
   NumericsMatrix* nm = NM_create(NM_SPARSE, m_size, m_size);
+  cond->nm = nm;
   NM_triplet_alloc(nm, Mp.nonZeros());
   for (int j = 0; j < Mp.outerSize(); ++j)
     for (SpMat::InnerIterator it(Mp, j); it; ++it)
@@ -259,20 +302,22 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
     }
     return ordered;
   };
-  std::vector<double> sigma_y_c = by_column(sigma_y), eta_c = by_column(eta),
-                      theta_c = by_column(theta), cohesion_c = by_column(cohesion);
-  bool has_cohesion =
-      std::any_of(cohesion_c.begin(), cohesion_c.end(), [](double c) { return c != 0.0; });
-  Vec qp_copy = qp;
-  Plasticity_VonMises_model von_mises{};
-  Plasticity_DruckerPrager_model drucker_prager{};
-  PlasticityProblem problem{};
+  cond->sigma_y = by_column(sigma_y);
+  cond->eta = by_column(eta);
+  cond->theta = by_column(theta);
+  cond->cohesion = by_column(cohesion);
+  bool has_cohesion = std::any_of(cond->cohesion.begin(), cond->cohesion.end(),
+                                  [](double c) { return c != 0.0; });
+  cond->qp = Vec::Zero(m_size);
+  auto& von_mises = cond->von_mises;
+  auto& drucker_prager = cond->drucker_prager;
+  auto& problem = cond->problem;
   problem.dimension = 3;
   problem.numberOfCones = nc;
   problem.M = nm;
-  problem.q = qp_copy.data();
+  problem.q = cond->qp.data();
   if (model == Model::von_mises) {
-    von_mises.sigma_y = sigma_y_c.data();
+    von_mises.sigma_y = cond->sigma_y.data();
     von_mises.hypothesis =
         (hypothesis == siconos::modeling::VonMisesPlasticityNSL::Hypothesis::plane_stress)
             ? PLASTICITY_VONMISES_PLANE_STRESS
@@ -280,13 +325,32 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
     problem.model_type = PLASTICITY_MODEL_VON_MISES;
     problem.model.von_mises = &von_mises;
   } else {
-    drucker_prager.eta = eta_c.data();
-    drucker_prager.theta = theta_c.data();
-    drucker_prager.cohesion = has_cohesion ? cohesion_c.data() : nullptr;
+    drucker_prager.eta = cond->eta.data();
+    drucker_prager.theta = cond->theta.data();
+    drucker_prager.cohesion = has_cohesion ? cond->cohesion.data() : nullptr;
     problem.model_type = PLASTICITY_MODEL_DRUCKER_PRAGER;
     problem.model.drucker_prager = &drucker_prager;
   }
   problem.stress_coordinates = PLASTICITY_STRESS_COORDINATES_CARTESIAN_VOIGT;
+}
+
+int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed() {
+  auto& cond = *_condensation;
+  int m_size = cond.m_size;
+  if (cond.nc == 0) {
+    _globalVelocities->setZero();
+    return 0;
+  }
+  // right-hand sides of the step: q_tilde = q_c - W_cr W_rr^{-1} q_r, q_p = -M_p b - H_c^{-1}
+  // q_tilde
+  Vec q = *_q;
+  Vec b = _b->head(m_size);
+  Vec qc = cond.Pc * q, qr = cond.Pr * q;
+  Vec Wrr_inv_qr = cond.Wrr_solve(qr);
+  Vec qt = qc - cond.Wcr * Wrr_inv_qr;
+  cond.qp = -(cond.Mp * b) - cond.Hc_inv * qt;
+  auto& problem = cond.problem;
+  problem.q = cond.qp.data();
 
   _n_compute++;
   if (!_dump_prefix.empty() &&
@@ -304,13 +368,12 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
   Vec y = (_w->size() == m_size) ? Vec(*_w) : Vec::Zero(m_size);
   Vec z = Vec::Zero(m_size);
   int info = plasticity_2d_driver(&problem, y.data(), z.data(), &*_numerics_solver_options);
-  NM_free(nm);
 
-  // --- back to the global unknowns
-  Vec xc = SpMat(Hc_inv.transpose()) * (y - b);
-  Vec xr = diagonal_rr ? Vec(Wrr_inv_qr - Wrr_inv_Wrc * xc)
-                       : (Wrr.rows() > 0 ? Vec(lu_rr.solve(Vec(qr - Wrc * xc))) : Vec(0));
-  Vec x = Pc.transpose() * xc + Pr.transpose() * xr;
+  // --- back to the global unknowns: x_c = H_c^{-T} (y - b), x_r = W_rr^{-1}(q_r - W_rc x_c)
+  Vec xc = cond.Hc_inv_t * (y - b);
+  Vec xr = Wrr_inv_qr - cond.Wrr_inv_Wrc * xc;
+  Vec x = cond.Pc.transpose() * xc + cond.Pr.transpose() * xr;
+  int n = cond.n;
   if (_globalVelocities->size() != n) _globalVelocities->resize(n);
   *_globalVelocities = x;
   _z->resize(m_size);
@@ -318,9 +381,5 @@ int siconos::mechanics::fem::nonsmooth_formulations::Plasticity::solve_condensed
   _w->resize(m_size);
   *_w = y;
 
-  DEBUG_EXPR({
-    Vec res = W * x - q - H * z;
-    std::cout << "Plasticity: |W x - q - H z| = " << res.norm() << std::endl;
-  });
   return info;
 }
