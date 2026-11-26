@@ -394,7 +394,8 @@ static void dp_w(const double M[9], const double q[3], const double s[3], double
 
 /* generalized Jacobian (column-major) of the projection on K at y, same cases as
  * projectionOnCone: polar cone (0), inside (I), boundary */
-static void dp_projection_jacobian(const double y[3], double eta, double J[9]) {
+void plasticity_2d_DruckerPrager_projection_jacobian(const double y[3], double eta,
+                                                     double J[9]) {
   double n = sqrt(y[1] * y[1] + y[2] * y[2]);
   for (int i = 0; i < 9; i++) J[i] = 0.0;
   if (eta * n <= -y[0]) return;
@@ -434,7 +435,7 @@ static double dp_natural_map(const double M[9], const double q[3], double eta, d
       double n1 = w[1] / nwT, n2 = w[2] / nwT;
       for (int j = 0; j < 3; j++) Jv[3 * j] += theta * (n1 * M[1 + 3 * j] + n2 * M[2 + 3 * j]);
     }
-    dp_projection_jacobian(y, eta, J);
+    plasticity_2d_DruckerPrager_projection_jacobian(y, eta, J);
     for (int i = 0; i < 3; i++)
       for (int j = 0; j < 3; j++) {
         double sum = 0.0;

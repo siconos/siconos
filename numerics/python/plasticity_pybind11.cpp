@@ -271,6 +271,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .value("PLASTICITY_2D_NSGS", PLASTICITY_2D_NSGS, "Non-smooth Gauss-Seidel")
       .value("PLASTICITY_2D_NSGS_GENERIC", PLASTICITY_2D_NSGS_GENERIC,
              "Non-smooth Gauss-Seidel (generic)")
+      .value("PLASTICITY_2D_NSN", PLASTICITY_2D_NSN, "Global semi-smooth Newton")
       .value("PLASTICITY_2D_ONECONE_NSN", PLASTICITY_2D_ONECONE_NSN, "Non-smooth Newton")
       .value("PLASTICITY_2D_ONECONE_NSN_GP", PLASTICITY_2D_ONECONE_NSN_GP,
              "Non-smooth Newton GP")
@@ -298,6 +299,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   // Also export as module attributes for convenience
   m.attr("PLASTICITY_2D_NSGS") = (int)PLASTICITY_2D_NSGS;
   m.attr("PLASTICITY_2D_NSGS_GENERIC") = (int)PLASTICITY_2D_NSGS_GENERIC;
+  m.attr("PLASTICITY_2D_NSN") = (int)PLASTICITY_2D_NSN;
   m.attr("PLASTICITY_2D_ONECONE_NSN") = (int)PLASTICITY_2D_ONECONE_NSN;
   m.attr("PLASTICITY_2D_ONECONE_NSN_GP") = (int)PLASTICITY_2D_ONECONE_NSN_GP;
   m.attr("PLASTICITY_2D_ONECONE_NSN_GP_HYBRID") = (int)PLASTICITY_2D_ONECONE_NSN_GP_HYBRID;
