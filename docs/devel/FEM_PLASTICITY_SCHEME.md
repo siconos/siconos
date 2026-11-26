@@ -10,12 +10,13 @@ physical solution).
 - Dynamical system: `SolidLinearTIDS` (unknowns `x = [v; σ]`, `real_size() = ndof + nσ`).
 - Relation: `StressLinearTIR`, `y = C σ + e`, input `Cᵀλ`.
 - Laws: `MohrCoulombPlasticityNSL(c, φ, 3)`: `b = c` on the first component of `y`, μ = 0
-  (φ not used yet); `VonMisesPlasticityNSL(σ_y, hypothesis)` (§7).
+  (φ not used yet); `VonMisesPlasticityNSL(σ_y, hypothesis)` (§7);
+  `DruckerPragerPlasticityNSL(η, θ, c')`, `mohrCoulombPlaneStrain(c, φ, ψ)` (§8).
 - Integrators: `fem::integrators::MoreauJeanGOSI` (global, used by the examples) and
   `fem::integrators::MoreauJeanOSI` (non-global; untested with plasticity).
 - One-step problems: `fem::nonsmooth_formulations::GlobalFrictionContact` (box bounds of
-  `MohrCoulombPlasticityNSL`) and `fem::nonsmooth_formulations::Plasticity` (Von Mises,
-  condensation on the stresses and numerics `PlasticityProblem`, §7).
+  `MohrCoulombPlasticityNSL`) and `fem::nonsmooth_formulations::Plasticity` (Von Mises and
+  Drucker–Prager, condensation on the stresses and numerics `PlasticityProblem`, §7, §8).
 
 ---
 
@@ -205,6 +206,13 @@ boundary rows) it is inverted entry-wise and W_red = S + h²θ² B M⁻¹ Bᵀ (
 sparse; otherwise a sparse LU of W_rr is used (the result W_rr⁻¹ W_rc is dense in general).
 For the lumped T3 case, M_p is pytripopfem's W (up to the scaling of the stresses).
 
+W and H are time-invariant (linear elasticity, `StressLinearTIR`): the full assembly
+(`GlobalFrictionContact::preCompute`) and the condensation (selections, W_rr⁻¹ W_rc, M_p,
+H_c⁻¹, the numerics matrix and the model parameters) are done at the first step by
+`Plasticity::assemble` and kept in a `PlasticityCondensation`; `Plasticity::preCompute`
+afterwards only recomputes q and b, and `solve_condensed` q̃, q_p and the solution. The
+condensation is rebuilt when the number of interactions changes.
+
 `Plasticity::setProblemDump(prefix, steps)` writes the numerics problem passed to the driver
 (numerics `.dat` format, with the coordinates and the hypothesis) into `<prefix>_<n>.dat` for
 the chosen calls n of `compute` (time steps). The problems of the strip below (steps 1, 4, 10,
@@ -286,17 +294,76 @@ ipopt's accuracy). Finer meshes of pytripopfem (same data):
 | mesh (T3 elements, stresses) | NSN iterations per plastic step (mean / max) | time | memory | final reaction |
 |---|---|---|---|---|
 | 60, 180 | 8 / 9 | 0.33 s | | 56.51 |
-| 636, 1 908 | 13 / 18 | 24 s | 0.3 GB | 53.33 |
-| 1 446, 4 338 | 19 / 30 | 167 s | 1.6 GB | 52.94 |
+| 636, 1 908 | 13 / 18 | 17 s | 0.25 GB | 53.33 |
+| 1 446, 4 338 | 19 / 30 | 104 s | 1.3 GB | 52.94 |
 
-The reaction converges to the limit load σ_y · 0.25 = 52.5 from above. On the 1446-element
-mesh the kernel takes ~70 s of the 167 s: initialization (~40 s: dense LU of the
-(n_v + n_σ)² iteration matrix of `fem::MoreauJeanOSI::initializeIterationMatrix`,
-`Topology::setProperties`), and at each step `updateIndexSets`, `OSNSMatrix::fillW` (scan of
-the dense iteration matrix) and `fillH` (scan of the dense C of each `StressLinearTIR`). The
-memory comes from these dense matrices.
+The reaction converges to the limit load σ_y · 0.25 = 52.5 from above.
 
-## 8. Open points
+Before 2026-11-26 the 1446-element mesh took 167 s (636: 24 s), ~70 s of them in the kernel:
+- the dense LU (`FullPivLU`) of the (n_v + n_σ)² iteration matrix in
+  `fem::MoreauJeanOSI::initializeIterationMatrix` (~30 s), useless for
+  `fem::MoreauJeanGOSI` (the one-step problem holds W): skipped there
+  (`needsIterationMatrixLU()`);
+- the renumbering of the graphs (`Topology::setProperties` at each step through
+  `Simulation::initialize`, `updateIndexSets` at each Newton iteration): O(V + E), and all
+  the element interactions share the solid, so the interaction graphs have n_el²/2 edges.
+  `SiconosGraph::update_{vertices,edges}_indices` now return at once when the graph has not
+  changed since the last renumbering (flags set by its mutators);
+- `OSNSMatrix::fillW`/`fillH` (scan of the dense W and of the dense C of each
+  `StressLinearTIR`) and the condensation at each step: done once (see above).
+
+The initialization of the 1446-element mesh takes 1 s, and the kernel ~3 % of a step: the
+rest is the numerics NSN, 90 % of it in the sparse LU of the Newton matrix (CSparse `cs_lu`,
+no supernodes). The memory is still quadratic in the number of elements (1.1 GB at
+initialization for 1446 elements, 3.5 GB for 2612): dense iteration matrix (n_v + n_σ)²,
+dense 3 × n_σ C of each `StressLinearTIR`, and the n_el²/2 edges of the interaction graphs.
+
+## 8. Drucker–Prager (Mohr–Coulomb) plasticity: footing
+
+### Law
+
+`DruckerPragerPlasticityNSL(η, θ, c')` (kernel): y = (σxx, σyy, σxy) (tension positive) in the
+cone of the numerics `PlasticityProblem` in Voigt coordinates,
+
+    ‖σ_T‖ ≤ η σ_N + c',   σ_N = −(σxx + σyy)/√2,   σ_T = ((σxx − σyy)/√2, √2 σxy),
+
+i.e. R ≤ −η p + c'/√2 with p = (σxx + σyy)/2 and R = √(((σxx − σyy)/2)² + σxy²) (radius of the
+Mohr circle), and the flow rule −(w + θ ‖w_T‖ e_N) ∈ N_K(y) (θ = 0: associated).
+`mohrCoulombPlaneStrain(c, φ, ψ)` gives the Mohr–Coulomb criterion of the plane (exact in
+plane strain when σzz is the intermediate principal stress), R ≤ −p sin φ + c cos φ:
+
+    η = sin φ,   c' = √2 c cos φ,   θ = sin φ − sin ψ   (ψ: dilatancy angle).
+
+(The dilatancy: on the yield surface the plastic strain rate ε̇_p = −w has
+ε̇_N = (θ − η) ‖ε̇_T‖ = −sin ψ ‖ε̇_T‖.) The condensed problem `fem::nonsmooth_formulations::
+Plasticity` passes the Drucker–Prager model (η, θ, c' per interaction) to the numerics; the
+driver removes the cohesion by a translation and maps the Voigt coordinates to the cone
+coordinates. pytripopfem writes the same criterion c₀ cos φ − (sin φ/2) I − J ≥ 0 (I = σxx + σyy,
+J = R): its η is sin φ / 2 and its dilatancy sin ψ / 2.
+
+### Validation: half footing (pytripopfem `examples/Footing/half_footing.py`)
+
+Soil [0, 2]², 639 T3 (`half_footing_2x2_b02_size01.msh`), plane strain, E = 1e7, ν = 0.3,
+ρ = 1.5e3, lumped mass, c = 2e3, φ = 25°, smooth footing of half-width 0.2 pushed at
+v_y = −0.01, h = 0.05, 40 steps. Reference: pytripopfem native T3 backend, its semi-smooth
+Newton solver (`compute_sigma_RMA_DP_NEW_SCALED`, the NSGS warm start through the old
+`sn.MohrCoulomb2DProblem` API skipped), fenicsx-siconos-0.10 container.
+
+| ψ | max rel. diff. u | σ | footing reaction | reaction at step 40 |
+|---|---|---|---|---|
+| 25° (associated, θ = 0) | 3.9e-12 | 3.3e-11 | 2.1e-13 | −11 897.25 |
+| 10° (θ = 0.249) | 6.9e-12 | 2.8e-11 | 4.3e-13 | −11 562.82 |
+
+Both codes solve the step problems to ~1e-10, hence the round-off agreement; the parameter
+mapping (η, c', θ) is thus validated for associated and non-associated flow. 590 elements are
+on the yield surface at the end (yield function ≤ 1.5e-14 c cos φ); Prandtl's weightless
+bearing capacity (−8 288 for the half footing) is overestimated by the T3 mesh and the small
+domain. Cost: 13 s for 40 steps (NSN 7–13 iterations per step); NSGS reaches an error of 3e-4
+after 2e4 sweeps on one of these problems. Tutorial:
+`siconos-tutorials/examples/mechanics/FEM/Plasticity/Footing`; numerics test data
+`plasticity_2d_druckerprager_footing_fem_40.dat`, `..._psi10_40.dat`.
+
+## 9. Open points
 
 - The non-global `MoreauJeanOSI` path with stress interactions is untested.
 - φ (Mohr–Coulomb cone) is not used.
@@ -309,9 +376,6 @@ memory comes from these dense matrices.
   forbid ω > 1.
 - `StressLinearTIR` takes a dense C of size 3 × nσ per element (memory O(n_el²)); a sparse
   or offset-based relation is needed for large meshes.
-- Drucker–Prager / Mohr–Coulomb with the condensed problem (numerics supports
-  Drucker–Prager with cohesion; a law, the cone coordinates of the elements and the
-  footing example are missing).
 - `MoreauJeanOSI::computeIterationMatrixBoundaryConditions` prints a warning (W not
   symmetric) for every SolidLinearTIDS with boundary conditions; the elimination uses
   columns only and is valid for a non-symmetric W.

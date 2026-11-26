@@ -793,9 +793,15 @@ problem and of a Drucker–Prager problem with cohesion in Mandel coordinates.
     tension (on the plane stress surface, inside the plane strain cylinder);
   * Cartesian Drucker–Prager problems equal to the cone problem mapped back (power
     preserved).
-* `plasticity_2d_nsn_test`: `PLASTICITY_2D_NSN` (tolerance 1e-10, ≤ 100 iterations) on the
-  Drucker–Prager footing problems (θ > 0 and θ = 0), the Von Mises footing and the small
-  examples. Python: NSN = NSGS on a coupled non-symmetric Drucker–Prager problem with
+* `plasticity_2d_nsn_test`: `PLASTICITY_2D_NSN` (tolerance 1e-10) on the Drucker–Prager
+  footing problems (θ > 0 and θ = 0), the Von Mises footing, the small examples and the FEM
+  strip (both globalizations), and on the FEM footing problems
+  `plasticity_2d_druckerprager_footing_fem_40.dat` (associated) and
+  `plasticity_2d_druckerprager_footing_fem_psi10_40.dat` (dilatancy angle 10°, θ = 0.249):
+  siconos-tutorials `mechanics/FEM/Plasticity/Footing`, 639 T3, plane strain Mohr–Coulomb
+  (η = sin 25°, cohesion √2 c cos φ, Voigt coordinates), step 40, written by `setProblemDump`.
+  NSN: 12 and 13 iterations (default globalization; the merit function alone does not
+  converge in 300 iterations; NSGS: error 3e-4 after 2e4 sweeps). Python: NSN = NSGS on a coupled non-symmetric Drucker–Prager problem with
   dilatancy and cohesion, NSN = exact solution of the manufactured plane stress problem.
 * `plasticity_2d_strip_test`: NSGS, generic NSGS (tolerance 1e-8) and NSN (1e-10) on the problems of the
   FEM strip with a circular hole (siconos-tutorials `mechanics/FEM/Plasticity/StripWithHole`,
