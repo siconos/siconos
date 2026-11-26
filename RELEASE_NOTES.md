@@ -216,7 +216,7 @@ The migration tables are in the rc notes; in short:
   build and leak checks done for 2026.rc3.
 - Ubuntu 26.04 x86_64 (GCC 15, OpenBLAS): all ctest tests passed for 2026.rc3, except
   timeouts under emulation.
-- siconos-tutorials 2026-11: the 332 tests (C++ and Python examples) pass on macOS arm64;
+- siconos-tutorials 2026-11: the 340 tests (C++ and Python examples) pass on macOS arm64;
   FEM plasticity examples `Plasticity/StripWithHole` and `Plasticity/Footing` compared with
   pytripopfem.
 

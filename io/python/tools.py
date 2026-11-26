@@ -36,9 +36,14 @@ def arguments():
 
 
 @contextmanager
-def tmpfile(suffix="", prefix="siconos_io", contents=None, debug=False):
+def tmpfile(suffix=".tmp", prefix="siconos_io", contents=None, debug=False):
     """
     A context manager for a named temporary file.
+
+    The default suffix is not empty: the random part of a mkstemp name may end with
+    '_', and vtkXMLPolyDataWriter (VTK 9.4) writes nothing to such a file while
+    Write() reports success (empty VTP shapes stored in the HDF5 file, about one
+    run in 40).
     """
     fd, filename = tempfile.mkstemp(
         suffix=suffix,
