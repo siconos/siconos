@@ -89,10 +89,11 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::addInteractionInIndexSet(
 
   assert(!std::isnan(y));
 
-  if (y <= _activateYPosThreshold)
+  if (y <= _activateYPosThreshold) {
     DEBUG_PRINT(
         "siconos::mechanisms::MBTB_MoreauJeanOSI::addInteractionInIndexSet "
         "ACTIVATE.\n");
+  }
   return (y <= _activateYPosThreshold);
 }
 
@@ -117,10 +118,11 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(
       _deactivateYPosThreshold, _deactivateYVelThreshold);
 
   assert(!std::isnan(y));
-  if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
+  if (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold) {
     DEBUG_PRINT(
         "siconos::mechanisms::MBTB_MoreauJeanOSI::"
         "removeInteractionFromIndexSet DEACTIVATE.\n");
+  }
   return (y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold);
 }
 

@@ -156,7 +156,7 @@ void siconos::mechanisms::MBTB_ContactLoadCADFile(unsigned int contactId,
 }
 
 namespace siconos::mechanisms::mbtb::internal {  // Local use only
-void MBTB_BodyBuildComputeInitPosition(
+static void MBTB_BodyBuildComputeInitPosition(
     unsigned int numDS, double mass, std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,

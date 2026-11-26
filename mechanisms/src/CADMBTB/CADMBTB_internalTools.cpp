@@ -39,7 +39,7 @@ namespace siconos::mechanisms::internal {
 // We should probably regroup/refactorize those functions with
 // those from mechanics doing quite the same thing ...
 
-gp_Pnt _CADMBTB_FacePoint(const TopoDS_Face& face, Standard_Real u, Standard_Real v) {
+static gp_Pnt _CADMBTB_FacePoint(const TopoDS_Face& face, Standard_Real u, Standard_Real v) {
   // get bounds of face
   /* Standard_Real umin, umax, vmin, vmax;
    BRepTools::UVBounds(face, umin, umax, vmin, vmax);          // create surface
@@ -55,7 +55,7 @@ gp_Pnt _CADMBTB_FacePoint(const TopoDS_Face& face, Standard_Real u, Standard_Rea
   return aPaux;
 }
 
-gp_Pnt _CADMBTB_EdgePoint(const TopoDS_Edge& edge, Standard_Real u) {
+static gp_Pnt _CADMBTB_EdgePoint(const TopoDS_Edge& edge, Standard_Real u) {
   // get bounds of face
   // Standard_Real umin, umax, vmin, vmax;
   // BRepTools::UVBounds(face, umin, umax, vmin, vmax);          // create
@@ -70,7 +70,7 @@ gp_Pnt _CADMBTB_EdgePoint(const TopoDS_Edge& edge, Standard_Real u) {
   return aPaux;
 }
 
-gp_Dir _CADMBTB_FaceNormal(const TopoDS_Face& face, Standard_Real u, Standard_Real v) {
+static gp_Dir _CADMBTB_FaceNormal(const TopoDS_Face& face, Standard_Real u, Standard_Real v) {
   // get bounds of face
   //  Standard_Real umin, umax, vmin, vmax;
   //  BRepTools::UVBounds(face, umin, umax, vmin, vmax);
@@ -89,7 +89,7 @@ gp_Dir _CADMBTB_FaceNormal(const TopoDS_Face& face, Standard_Real u, Standard_Re
   return norm;
 }
 
-void _myf_FaceFace(double* x, double* fx, double* gx, const TopoDS_Face& face1,
+static void _myf_FaceFace(double* x, double* fx, double* gx, const TopoDS_Face& face1,
                    const TopoDS_Face& face2) {
   ACE_times[ACE_TIMER_CAD_13].start();
   ACE_times[ACE_TIMER_CAD_15].start();
@@ -119,7 +119,7 @@ void _myf_FaceFace(double* x, double* fx, double* gx, const TopoDS_Face& face1,
   ACE_times[ACE_TIMER_CAD_13].stop();
 }
 
-void _myf_FaceEdge(double* x, double* fx, double* gx, const TopoDS_Face& face1,
+static void _myf_FaceEdge(double* x, double* fx, double* gx, const TopoDS_Face& face1,
                    const TopoDS_Edge& edge2) {
   ACE_times[ACE_TIMER_CAD_13].start();
   ACE_times[ACE_TIMER_CAD_15].start();

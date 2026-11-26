@@ -164,7 +164,7 @@ Standard_Boolean MyDirFunction::Value(const math_Vector& Sol, math_Vector& FF, m
   return Standard_False;
 }
 
-Standard_Boolean MinimizeDirection(const math_Vector& P0, const math_Vector& P1,
+static Standard_Boolean MinimizeDirection(const math_Vector& P0, const math_Vector& P1,
                                    const math_Vector& P2, const Standard_Real F1,
                                    math_Vector& Delta, const math_Vector& Tol,
                                    MyDirFunction& F)
@@ -213,7 +213,7 @@ Standard_Boolean MinimizeDirection(const math_Vector& P0, const math_Vector& P1,
 }
 
 //----------------------------------------------------------------------
-Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
+static Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
                                    const Standard_Real& PValue, const Standard_Real& PDirValue,
                                    const math_Vector& Gradient, const math_Vector& DGradient,
                                    const math_Vector& Tol, MyDirFunction& F)
@@ -314,7 +314,7 @@ Standard_Boolean MinimizeDirection(const math_Vector& P, math_Vector& Dir,
 }
 
 //------------------------------------------------------
-void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
+static void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
                      Standard_Boolean ChangeDirection, const math_Vector& InvLengthMax,
                      math_Vector& Direction, Standard_Real& Dy)
 
@@ -382,7 +382,7 @@ void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Ve
 }
 
 //=====================================================================
-void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
+static void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Vector& FF,
                      const math_IntegerVector& Constraints,
                      //			    const math_Vector& X, // Le point d'init
                      const math_Vector&,  // Le point d'init
@@ -448,7 +448,7 @@ void SearchDirection(const math_Matrix& DF, const math_Vector& GH, const math_Ve
 }  // namespace siconos::mechanisms::internal
 
 //====================================================
-Standard_Boolean Bounds(const math_Vector& InfBound, const math_Vector& SupBound,
+static Standard_Boolean Bounds(const math_Vector& InfBound, const math_Vector& SupBound,
                         const math_Vector& Tol, math_Vector& Sol, const math_Vector& SolSave,
                         math_IntegerVector& Constraints, math_Vector& Delta)
 //
