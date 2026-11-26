@@ -89,6 +89,41 @@ def rotate_point(x, y, alpha):
     return x_new, y_new
 
 
+def _addons_directory():
+    """The directory of the addons of the run (as the siconos command: the one of the
+    script, <script dir>/addons), else the working directory."""
+    script = sys.argv[0] if sys.argv and sys.argv[0] else ""
+    if script.endswith(".py") and os.path.isfile(script):
+        return os.path.dirname(os.path.abspath(script))
+    return os.getcwd()
+
+
+def _addon_module(plugin_name, directory):
+    """The addon addons.<plugin_name> (a pybind11 module built by the siconos command
+    from <directory>/addons/<plugin_name>.cpp), None if it cannot be imported."""
+    import importlib
+
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+    importlib.invalidate_caches()
+    try:
+        return importlib.import_module(f"addons.{plugin_name}")
+    except ImportError:
+        return None
+
+
+def _setter(obj, name):
+    """The method name of obj, or the one of the same name in another case (the C++
+    names in the files: setComputeFExtFunction for setComputeFextFunction)."""
+    method = getattr(obj, name, None)
+    if method is None:
+        lower = name.lower()
+        method = next((getattr(obj, n) for n in dir(obj) if n.lower() == lower), None)
+    if method is None:
+        raise AttributeError(f"{type(obj).__name__} has no method {name}")
+    return method
+
+
 class RunnerConfig:
     """A class to manage the backend and the default classes to be used
 
@@ -3670,6 +3705,45 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         msg += f" precision = {precision:5.3e}"
         self.print_verbose(msg)
 
+    def import_plugins(self):
+        """The plugins of the file are addons: pybind11 modules that the siconos
+        command builds from <script dir>/addons/*.cpp before running the script. The
+        source of a missing addon, stored in the file, is copied to addons/ and the run
+        stops: run the script again with the siconos command, which builds it."""
+        directory = _addons_directory()
+        plugins = self._format_adaptor["plugins"]
+        missing = []
+        for name in plugins:
+            filename = os.path.basename(plugins[name].attrs["filename"])
+            if _addon_module(os.path.splitext(filename)[0], directory) is not None:
+                continue
+            path = os.path.join(directory, "addons", filename)
+            if not os.path.isfile(path):
+                text = plugins[name][()]
+                if getattr(text, "shape", ()) != ():
+                    text = text[0]  # a (1,) dataset (text_data)
+                text = text.decode() if isinstance(text, bytes) else str(text)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w") as f:
+                    f.write(text)
+            missing.append(path)
+        if missing:
+            raise RuntimeError(
+                f"addons not built: {missing}; run the script with the siconos "
+                "command (siconos <script>.py), which builds <script dir>/addons"
+            )
+
+    def _external_function(self, plugin_name, plugin_function_name):
+        """The function plugin_function_name of the addon plugin_name."""
+        module = _addon_module(plugin_name, _addons_directory())
+        if module is None:
+            raise RuntimeError(
+                f"external function {plugin_function_name}: no addon {plugin_name} "
+                f"(addons/{plugin_name}.cpp next to the script, built by the siconos "
+                "command, or a plugin source in the file)"
+            )
+        return getattr(module, plugin_function_name)
+
     def import_external_functions(self):
         topo = self._nsds.topology()
 
@@ -3684,13 +3758,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if "function_name" in ext_fun.attrs:
                 function_name = ext_fun.attrs["function_name"]
 
-                getattr(ds, function_name)(plugin_name, plugin_function_name)
+                _setter(ds, function_name)(
+                    self._external_function(plugin_name, plugin_function_name)
+                )
             else:
                 bc_indices = ext_fun.attrs["bc_indices"]
                 # a boundary condition
                 bc = sm.BoundaryCondition(bc_indices)
                 bc.setComputePrescribedVelocityFunction(
-                    plugin_name, plugin_function_name
+                    self._external_function(plugin_name, plugin_function_name)
                 )
                 ds.setBoundaryConditions(bc)
 
