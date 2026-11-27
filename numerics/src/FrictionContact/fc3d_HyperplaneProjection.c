@@ -18,7 +18,7 @@
 #include "fc3d_Solvers.h"        // for fc3d_HyperplaneProjection, fc3d_...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnCone
+#include "projection_soc.h"  // for soc_projection_3d
 
 // #define VERBOSE_DEBUG
 
@@ -97,7 +97,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction
       reactiontmp[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
       reactiontmp[pos + 1] -= rho * velocitytmp[pos + 1];
       reactiontmp[pos + 2] -= rho * velocitytmp[pos + 2];
-      projectionOnCone(&reactiontmp[pos], mu[contact]);
+      soc_projection_3d(&reactiontmp[pos], mu[contact]);
     }
 
     // Armijo line search
@@ -159,7 +159,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction
     // projection for each contact
     for (contact = 0; contact < nc; ++contact) {
       int pos = contact * nLocal;
-      projectionOnCone(&reaction[pos], mu[contact]);
+      soc_projection_3d(&reaction[pos], mu[contact]);
     }
 
     /* **** Criterium convergence **** */

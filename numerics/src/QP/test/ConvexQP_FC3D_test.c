@@ -16,7 +16,7 @@
 #include "SiconosBlas.h"             // for cblas_dcopy
 #include "SolverOptions.h"           // for SolverOptions, solver_options_de...
 #include "numerics_verbose.h"        // for verbose
-#include "projectionOnCone.h"        // for projectionOnCone
+#include "projection_soc.h"          // for soc_projection_3d
 
 typedef struct {
   ConvexQP* cqp;
@@ -38,7 +38,7 @@ static void PXtest_0(void* cqpIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 
@@ -107,7 +107,7 @@ static void PXtest_1(void* cqpIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 
@@ -195,7 +195,7 @@ static void PXtest_2(void* cqpIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 
@@ -285,7 +285,7 @@ static void PXtest_3(void* cqpIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 

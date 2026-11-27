@@ -15,12 +15,12 @@
 #include "FrictionContact_options.h"
 #include "GlobalFrictionContactProblem.h"
 #include "NumericsMatrix.h"
-#include "SOC_scaling.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
 #include "fc3d_compute_error.h"
 #include "gfc3d_compute_error.h"
-#include "projectionOnCone.h"
+#include "natural_map_error.h"
+#include "projection_soc.h"
 
 static double max_abs(double a, double b) { return a > b ? a : b; }
 
@@ -49,13 +49,17 @@ static double scalar_scale(int norm, int reduction, const double* x, const doubl
     case SICONOS_FRICTION_3D_SCALING_EUCLIDEAN:
       switch (reduction) {
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_euclidean(x, y, m, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                      NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, 3, NULL, 1.0);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_euclidean(x, y, m, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                      NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, 3, NULL, 1.0);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_euclidean(x, y, m, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                      NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, 3, NULL,
+                                      1.0);
           break;
       }
       break;
@@ -63,13 +67,17 @@ static double scalar_scale(int norm, int reduction, const double* x, const doubl
     case SICONOS_FRICTION_3D_SCALING_CONE:
       switch (reduction) {
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_cone(x, y, m, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                      NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, 3, NULL, 1.0);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_cone(x, y, m, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                      NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, 3, NULL, 1.0);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_cone(x, y, m, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                      NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, 3, NULL,
+                                      1.0);
           break;
       }
       break;
@@ -77,13 +85,16 @@ static double scalar_scale(int norm, int reduction, const double* x, const doubl
     case SICONOS_FRICTION_3D_SCALING_CONE_MU:
       switch (reduction) {
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_cone_mu(x, y, m, mu, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                      NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, 3, mu, 1.0);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_cone_mu(x, y, m, mu, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                      NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, 3, mu, 1.0);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_cone_mu(x, y, m, mu, 3);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                      NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, 3, mu, 1.0);
           break;
       }
       break;
@@ -91,13 +102,19 @@ static double scalar_scale(int norm, int reduction, const double* x, const doubl
     case SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED:
       switch (reduction) {
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_cone_weighted(x, y, m, 3, alpha);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                      NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, 3, NULL,
+                                      alpha);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_cone_weighted(x, y, m, 3, alpha);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                      NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, 3, NULL,
+                                      alpha);
           break;
         case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_cone_weighted(x, y, m, 3, alpha);
+          s = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                      NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, 3, NULL,
+                                      alpha);
           break;
       }
       break;
@@ -135,7 +152,7 @@ static double scalar_complementarity_error(int nc, const double* r, const double
     worktmp[0] = r[3 * i] - u_mod[3 * i];
     worktmp[1] = r[3 * i + 1] - u_mod[3 * i + 1];
     worktmp[2] = r[3 * i + 2] - u_mod[3 * i + 2];
-    projectionOnCone(worktmp, mu[i]);
+    soc_projection_3d(worktmp, mu[i]);
     worktmp[0] = r[3 * i] - worktmp[0];
     worktmp[1] = r[3 * i + 1] - worktmp[1];
     worktmp[2] = r[3 * i + 2] - worktmp[2];

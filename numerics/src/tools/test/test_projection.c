@@ -6,7 +6,7 @@
 // of non smooth dynamical systems.
 
 #include <assert.h>                   // for assert
-#include <projectionOnRollingCone.h>  // for display_status_rolling_cone
+#include <projection_rolling_cone.h>  // for rolling_cone_projection_status_display
 #include <stdio.h>                    // for printf
 
 #include "math.h"           // for sqrt
@@ -44,17 +44,17 @@ static int test_projection(double* reaction, double mu, double mur) {
   DEBUG_EXPR(NV_display(reaction, 5););
 
   for (int i = 0; i < 5; i++) reaction_ori[i] = reaction[i];
-  status = projectionOnRollingCone(reaction, mu, mur);
+  status = rolling_cone_projection(reaction, mu, mur);
   DEBUG_EXPR(NV_display(reaction, 5););
-  display_status_rolling_cone(status);
+  rolling_cone_projection_status_display(status);
   ortho = orthogonality(reaction, reaction_ori);
   printf("ortho = %f\n", ortho);
   assert(ortho < 1e-14);
 
   for (int i = 0; i < 5; i++) reaction_again[i] = reaction[i];
-  status_again = projectionOnRollingCone(reaction_again, mu, mur);
+  status_again = rolling_cone_projection(reaction_again, mu, mur);
   DEBUG_EXPR(NV_display(reaction_again, 5););
-  display_status_rolling_cone(status_again);
+  rolling_cone_projection_status_display(status_again);
   diff = compute_diff(reaction, reaction_again);
   printf("diff = %f\n", diff);
   assert(diff < 1e-14);
@@ -74,7 +74,7 @@ int main(void) {
   reaction[4] = 0.0;
 
   status = test_projection(reaction, mu, mur);
-  if (status != PROJRCONE_INSIDE) {
+  if (status != ROLLING_CONE_PROJECTION_INSIDE) {
     info += 1;
   }
   reaction[0] = -1.0;
@@ -83,7 +83,7 @@ int main(void) {
   reaction[3] = 0.5;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
-  if (status != PROJRCONE_DUAL) {
+  if (status != ROLLING_CONE_PROJECTION_POLAR) {
     info += 1;
   }
 
@@ -93,7 +93,7 @@ int main(void) {
   reaction[3] = 0.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
-  if (status != PROJRCONE_BOUNDARY_FRICTION) {
+  if (status != ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION) {
     info += 1;
   }
 
@@ -103,7 +103,7 @@ int main(void) {
   reaction[3] = 2.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
-  if (status != PROJRCONE_BOUNDARY_ROLLING) {
+  if (status != ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING) {
     info += 1;
   }
 
@@ -113,7 +113,7 @@ int main(void) {
   reaction[3] = 2.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
-  if (status != PROJRCONE_BOUNDARY_FRICTION_ROLLING) {
+  if (status != ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING) {
     info += 1;
   }
 
@@ -123,7 +123,7 @@ int main(void) {
   reaction[3] = 2.0;
   reaction[4] = 1.0;
   status = test_projection(reaction, mu, mur);
-  if (status != PROJRCONE_BOUNDARY_FRICTION_ROLLING) {
+  if (status != ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING) {
     info += 1;
   }
 

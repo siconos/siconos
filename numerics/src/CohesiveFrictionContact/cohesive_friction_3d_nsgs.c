@@ -34,8 +34,8 @@
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
 #include "op3x3.h"
-#include "projectionOnCone.h"
-#include "projectionOnDisk.h"
+#include "projection_ball.h"
+#include "projection_soc.h"
 #include "solver_registry.h"
 #include "tolerance_manager.h"
 
@@ -59,10 +59,10 @@ static void project_on_feasible_set(CohesiveFrictionContactProblem* problem,
                                     unsigned int contact, double r[3]) {
   unsigned int nc = (unsigned int)problem->numberOfContacts;
   if (contact < nc) {
-    projectionOnCone(r, problem->mu[contact]);
+    soc_projection_3d(r, problem->mu[contact]);
   } else {
     r[0] = -problem->c_n[contact - nc];
-    projectionOnDisk(&r[1], problem->c_t[contact - nc]);
+    ball_projection(&r[1], 2, problem->c_t[contact - nc]);
   }
 }
 

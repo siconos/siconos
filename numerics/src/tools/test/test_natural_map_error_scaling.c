@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SOC_scaling.h"
+#include "natural_map_error.h"
 
 static double max_abs(double a, double b) { return (fabs(a) > fabs(b)) ? a : b; }
 
@@ -152,14 +152,14 @@ static int test_norms(void) {
 
     double ref, val;
     ref = scalar_norm_euclidean(x, m, dim);
-    val = SOC_norm_euclidean(x, m, dim);
+    val = natural_map_error_norm(NATURAL_MAP_ERROR_NORM_EUCLIDEAN, x, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_norm_euclidean mismatch\n");
       info += 1;
     }
 
     ref = scalar_norm_cone(x, m, dim);
-    val = SOC_norm_cone(x, m, dim);
+    val = natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE, x, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_norm_cone mismatch\n");
       info += 1;
@@ -167,7 +167,7 @@ static int test_norms(void) {
 
     double mu[2] = {0.1 + 0.9 * drand48(), 0.1 + 0.9 * drand48()};
     ref = scalar_norm_cone_mu(x, m, mu, dim);
-    val = SOC_norm_cone_mu(x, m, mu, dim);
+    val = natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE_MU, x, m, dim, mu, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_norm_cone_mu mismatch\n");
       info += 1;
@@ -175,7 +175,7 @@ static int test_norms(void) {
 
     double alpha = 0.1 + 2.0 * drand48();
     ref = scalar_norm_cone_weighted(x, m, dim, alpha);
-    val = SOC_norm_cone_weighted(x, m, dim, alpha);
+    val = natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED, x, m, dim, NULL, alpha);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_norm_cone_weighted mismatch\n");
       info += 1;
@@ -201,14 +201,16 @@ static int test_mixed_scalings(void) {
 
     double ref, val;
     ref = scalar_mixed_scaling_euclidean(x, y, m, dim);
-    val = SOC_mixed_scaling_euclidean(x, y, m, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_mixed_scaling_euclidean mismatch\n");
       info += 1;
     }
 
     ref = scalar_mixed_scaling_cone(x, y, m, dim);
-    val = SOC_mixed_scaling_cone(x, y, m, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_mixed_scaling_cone mismatch\n");
       info += 1;
@@ -216,7 +218,8 @@ static int test_mixed_scalings(void) {
 
     double mu[2] = {0.1 + 0.9 * drand48(), 0.1 + 0.9 * drand48()};
     ref = scalar_mixed_scaling_cone_mu(x, y, m, mu, dim);
-    val = SOC_mixed_scaling_cone_mu(x, y, m, mu, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, mu, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_mixed_scaling_cone_mu mismatch\n");
       info += 1;
@@ -224,7 +227,9 @@ static int test_mixed_scalings(void) {
 
     double alpha = 0.1 + 2.0 * drand48();
     ref = scalar_mixed_scaling_cone_weighted(x, y, m, dim, alpha);
-    val = SOC_mixed_scaling_cone_weighted(x, y, m, dim, alpha);
+    val =
+        natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, NULL, alpha);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_mixed_scaling_cone_weighted mismatch\n");
       info += 1;
@@ -250,14 +255,16 @@ static int test_per_variable_scalings(void) {
 
     double ref, val;
     ref = scalar_scaling_euclidean(x, y, m, dim);
-    val = SOC_scaling_euclidean(x, y, m, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_scaling_euclidean mismatch\n");
       info += 1;
     }
 
     ref = scalar_scaling_cone(x, y, m, dim);
-    val = SOC_scaling_cone(x, y, m, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE, NATURAL_MAP_ERROR_REDUCTION_MAX,
+                                  x, y, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_scaling_cone mismatch\n");
       info += 1;
@@ -265,7 +272,8 @@ static int test_per_variable_scalings(void) {
 
     double mu[2] = {0.1 + 0.9 * drand48(), 0.1 + 0.9 * drand48()};
     ref = scalar_scaling_cone_mu(x, y, m, mu, dim);
-    val = SOC_scaling_cone_mu(x, y, m, mu, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, dim, mu, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_scaling_cone_mu mismatch\n");
       info += 1;
@@ -273,7 +281,8 @@ static int test_per_variable_scalings(void) {
 
     double alpha = 0.1 + 2.0 * drand48();
     ref = scalar_scaling_cone_weighted(x, y, m, dim, alpha);
-    val = SOC_scaling_cone_weighted(x, y, m, dim, alpha);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, dim, NULL, alpha);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_scaling_cone_weighted mismatch\n");
       info += 1;
@@ -299,14 +308,16 @@ static int test_geom_scalings(void) {
 
     double ref, val;
     ref = scalar_geom_scaling_euclidean(x, y, m, dim);
-    val = SOC_geom_scaling_euclidean(x, y, m, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_geom_scaling_euclidean mismatch\n");
       info += 1;
     }
 
     ref = scalar_geom_scaling_cone(x, y, m, dim);
-    val = SOC_geom_scaling_cone(x, y, m, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, NULL, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_geom_scaling_cone mismatch\n");
       info += 1;
@@ -314,7 +325,8 @@ static int test_geom_scalings(void) {
 
     double mu[2] = {0.1 + 0.9 * drand48(), 0.1 + 0.9 * drand48()};
     ref = scalar_geom_scaling_cone_mu(x, y, m, mu, dim);
-    val = SOC_geom_scaling_cone_mu(x, y, m, mu, dim);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, mu, 1.0);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_geom_scaling_cone_mu mismatch\n");
       info += 1;
@@ -322,7 +334,8 @@ static int test_geom_scalings(void) {
 
     double alpha = 0.1 + 2.0 * drand48();
     ref = scalar_geom_scaling_cone_weighted(x, y, m, dim, alpha);
-    val = SOC_geom_scaling_cone_weighted(x, y, m, dim, alpha);
+    val = natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, NULL, alpha);
     if (rel_diff(ref, val) > 1e-14) {
       fprintf(stderr, "SOC_geom_scaling_cone_weighted mismatch\n");
       info += 1;
@@ -365,58 +378,120 @@ static int test_homogeneity(void) {
       ys[k] = lambda * y[k];
     }
 
-    info += check_homogeneity_one("SOC_norm_euclidean", SOC_norm_euclidean(x, m, dim),
-                                  SOC_norm_euclidean(xs, m, dim), lambda);
-    info += check_homogeneity_one("SOC_norm_cone", SOC_norm_cone(x, m, dim),
-                                  SOC_norm_cone(xs, m, dim), lambda);
-    info += check_homogeneity_one("SOC_norm_cone_mu", SOC_norm_cone_mu(x, m, mu, dim),
-                                  SOC_norm_cone_mu(xs, m, mu, dim), lambda);
-    info += check_homogeneity_one("SOC_norm_cone_weighted",
-                                  SOC_norm_cone_weighted(x, m, dim, alpha),
-                                  SOC_norm_cone_weighted(xs, m, dim, alpha), lambda);
+    info += check_homogeneity_one(
+        "SOC_norm_euclidean",
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_EUCLIDEAN, x, m, dim, NULL, 1.0),
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_EUCLIDEAN, xs, m, dim, NULL, 1.0),
+        lambda);
+    info += check_homogeneity_one(
+        "SOC_norm_cone",
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE, x, m, dim, NULL, 1.0),
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE, xs, m, dim, NULL, 1.0), lambda);
+    info += check_homogeneity_one(
+        "SOC_norm_cone_mu",
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE_MU, x, m, dim, mu, 1.0),
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE_MU, xs, m, dim, mu, 1.0), lambda);
+    info += check_homogeneity_one(
+        "SOC_norm_cone_weighted",
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED, x, m, dim, NULL, alpha),
+        natural_map_error_norm(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED, xs, m, dim, NULL, alpha),
+        lambda);
 
-    info += check_homogeneity_one("SOC_mixed_scaling_euclidean",
-                                  SOC_mixed_scaling_euclidean(x, y, m, dim),
-                                  SOC_mixed_scaling_euclidean(xs, ys, m, dim), lambda);
-    info +=
-        check_homogeneity_one("SOC_mixed_scaling_cone", SOC_mixed_scaling_cone(x, y, m, dim),
-                              SOC_mixed_scaling_cone(xs, ys, m, dim), lambda);
-    info += check_homogeneity_one("SOC_mixed_scaling_cone_mu",
-                                  SOC_mixed_scaling_cone_mu(x, y, m, mu, dim),
-                                  SOC_mixed_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
-    info +=
-        check_homogeneity_one("SOC_mixed_scaling_cone_weighted",
-                              SOC_mixed_scaling_cone_weighted(x, y, m, dim, alpha),
-                              SOC_mixed_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
-
-    /* Per-variable scalings are safeguarded (max(1, ·)) and therefore are
-       homogeneous only when the underlying norms are larger than 1. */
+    /* The scales are safeguarded (max(1, ·)) and therefore are homogeneous only when the
+       underlying norms are larger than 1. */
     if (lambda >= 1.0) {
+      info += check_homogeneity_one(
+          "SOC_mixed_scaling_euclidean",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, NULL, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, xs, ys, m, dim, NULL,
+                                  1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_mixed_scaling_cone",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, NULL, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, xs, ys, m, dim, NULL,
+                                  1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_mixed_scaling_cone_mu",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, x, y, m, dim, mu, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MIXED, xs, ys, m, dim, mu, 1.0),
+          lambda);
       info +=
-          check_homogeneity_one("SOC_scaling_euclidean", SOC_scaling_euclidean(x, y, m, dim),
-                                SOC_scaling_euclidean(xs, ys, m, dim), lambda);
-      info += check_homogeneity_one("SOC_scaling_cone", SOC_scaling_cone(x, y, m, dim),
-                                    SOC_scaling_cone(xs, ys, m, dim), lambda);
-      info +=
-          check_homogeneity_one("SOC_scaling_cone_mu", SOC_scaling_cone_mu(x, y, m, mu, dim),
-                                SOC_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
-      info += check_homogeneity_one("SOC_scaling_cone_weighted",
-                                    SOC_scaling_cone_weighted(x, y, m, dim, alpha),
-                                    SOC_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
+          check_homogeneity_one("SOC_mixed_scaling_cone_weighted",
+                                natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                                        NATURAL_MAP_ERROR_REDUCTION_MIXED, x,
+                                                        y, m, dim, NULL, alpha),
+                                natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                                        NATURAL_MAP_ERROR_REDUCTION_MIXED, xs,
+                                                        ys, m, dim, NULL, alpha),
+                                lambda);
 
-      info += check_homogeneity_one("SOC_geom_scaling_euclidean",
-                                    SOC_geom_scaling_euclidean(x, y, m, dim),
-                                    SOC_geom_scaling_euclidean(xs, ys, m, dim), lambda);
-      info +=
-          check_homogeneity_one("SOC_geom_scaling_cone", SOC_geom_scaling_cone(x, y, m, dim),
-                                SOC_geom_scaling_cone(xs, ys, m, dim), lambda);
-      info += check_homogeneity_one("SOC_geom_scaling_cone_mu",
-                                    SOC_geom_scaling_cone_mu(x, y, m, mu, dim),
-                                    SOC_geom_scaling_cone_mu(xs, ys, m, mu, dim), lambda);
-      info +=
-          check_homogeneity_one("SOC_geom_scaling_cone_weighted",
-                                SOC_geom_scaling_cone_weighted(x, y, m, dim, alpha),
-                                SOC_geom_scaling_cone_weighted(xs, ys, m, dim, alpha), lambda);
+      info += check_homogeneity_one(
+          "SOC_scaling_euclidean",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, dim, NULL, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, xs, ys, m, dim, NULL, 1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_scaling_cone",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE, NATURAL_MAP_ERROR_REDUCTION_MAX,
+                                  x, y, m, dim, NULL, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE, NATURAL_MAP_ERROR_REDUCTION_MAX,
+                                  xs, ys, m, dim, NULL, 1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_scaling_cone_mu",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, dim, mu, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, xs, ys, m, dim, mu, 1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_scaling_cone_weighted",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, x, y, m, dim, NULL, alpha),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                  NATURAL_MAP_ERROR_REDUCTION_MAX, xs, ys, m, dim, NULL,
+                                  alpha),
+          lambda);
+
+      info += check_homogeneity_one(
+          "SOC_geom_scaling_euclidean",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, NULL, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, xs, ys, m, dim, NULL, 1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_geom_scaling_cone",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, NULL, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, xs, ys, m, dim, NULL, 1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_geom_scaling_cone_mu",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, mu, 1.0),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, xs, ys, m, dim, mu, 1.0),
+          lambda);
+      info += check_homogeneity_one(
+          "SOC_geom_scaling_cone_weighted",
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, x, y, m, dim, NULL, alpha),
+          natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                  NATURAL_MAP_ERROR_REDUCTION_MEAN, xs, ys, m, dim, NULL,
+                                  alpha),
+          lambda);
     }
   }
 

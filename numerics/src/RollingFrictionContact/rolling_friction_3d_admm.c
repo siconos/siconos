@@ -21,7 +21,7 @@
 #include "SolverOptions.h"  // for SolverOptions, SICONOS_DPARAM_TOL
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnRollingCone.h"            // for projectionOnRollingCone
+#include "projection_rolling_cone.h"            // for rolling_cone_projection
 #include "rolling_fc_Solvers.h"                 // for RollingComputeErrorPtr
 #include "rolling_friction_3d_compute_error.h"  // for rolling_friction_3d_compute_e...
 #include "solver_registry.h"
@@ -292,7 +292,7 @@ static void rolling_friction_3d_admm_symmetric(RollingFrictionContactProblem* re
 
     /* Loop through the contact points */
     for (contact = 0; contact < nc; ++contact) {
-      projectionOnRollingCone(&z[contact * 5], mu[contact], mu_r[contact]);
+      rolling_cone_projection(&z[contact * 5], mu[contact], mu_r[contact]);
     }
     DEBUG_PRINT("After projection :");
     DEBUG_EXPR(NV_display(z, m));
@@ -706,10 +706,10 @@ static void rolling_friction_3d_admm_asymmetric(
 
     /* Loop through the contact points */
     for (contact = 0; contact < nc; ++contact) {
-      projectionOnDualRollingCone(&z[contact * 5], mu[contact], mu_r[contact]);
+      rolling_cone_dual_projection(&z[contact * 5], mu[contact], mu_r[contact]);
     }
     for (contact = 0; contact < nc; ++contact) {
-      projectionOnRollingCone(&z[contact * 5 + m], mu[contact], mu_r[contact]);
+      rolling_cone_projection(&z[contact * 5 + m], mu[contact], mu_r[contact]);
     }
 
     DEBUG_PRINT("After projection :");

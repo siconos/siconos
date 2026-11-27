@@ -44,7 +44,7 @@
 #include "fc3d_compute_error.h"
 #include "hdf5_logger.h"
 #include "op3x3.h"
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
@@ -1046,7 +1046,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
       /* Step 1. project r on the cone */
 
 //      DEBUG_PRINTF("contact %d, before projection: theta_r = %.*e\n", i, DECIMAL_DIG, rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
-      projectionOnCone(&reaction[i3], mu);
+      soc_projection_3d(&reaction[i3], mu);
 //      DEBUG_PRINTF("contact %d, after projection:  theta_r = %.*e\n", i, DECIMAL_DIG, rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
     }
 

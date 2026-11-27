@@ -14,7 +14,7 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy
 #include "VariationalInequality.h"         // for VariationalInequality
 #include "friction_error_toolkit.h"        // for friction_error_toolkit_...
-#include "projectionOnCone.h"              // for projectionOnCone
+#include "projection_soc.h"                // for soc_projection_3d
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "numerics_errors.h"
@@ -80,7 +80,7 @@ void Projection_VI_GFC3D(void* viIn, double* x, double* PX) {
   double* reaction = &PX[n];
 
   for (int contact = 0; contact < gfc3d->numberOfContacts; ++contact) {
-    projectionOnCone(&reaction[contact * nLocal], gfc3d->mu[contact]);
+    soc_projection_3d(&reaction[contact * nLocal], gfc3d->mu[contact]);
   }
   DEBUG_EXPR(NM_vector_display(PX, n + m));
   DEBUG_END("Projection_VI_FC3D(void *viIn, double *x, double *PX)\n");

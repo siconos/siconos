@@ -22,9 +22,9 @@
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnCone
-#include "sanitizer.h"         // for cblas_dcopy_msan
-#include "siconos_debug.h"     // for DEBUG_EXPR, DEBUG_PRINTF
+#include "projection_soc.h"  // for soc_projection_3d
+#include "sanitizer.h"       // for cblas_dcopy_msan
+#include "siconos_debug.h"   // for DEBUG_EXPR, DEBUG_PRINTF
 #include "solver_registry.h"
 
 static void gfc3d_nsgs_local_solver_projection_free(GlobalFrictionContactProblem* problem) {
@@ -135,7 +135,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
         //      reaction[pos] -= an * mu[contact] * normUT;
         reaction[pos + 1] -= an * velocity[pos + 1];
         reaction[pos + 2] -= an * velocity[pos + 2];
-        projectionOnCone(&reaction[pos], mu[contact]);
+        soc_projection_3d(&reaction[pos], mu[contact]);
       }
       DEBUG_EXPR(NM_vector_display(reaction, m););
     }

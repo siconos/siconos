@@ -35,6 +35,7 @@ set(${COMPONENT}_DIRS
   src/io
   src/utils
   src/tools
+  src/tools/convex_sets
   src/tools/InterfaceToPathFerris
   src/tools/internal
   src/AVI
@@ -90,6 +91,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/io
   src/utils
   src/tools
+  src/tools/convex_sets
   src/tools/InterfaceToPathFerris
   src/tools/internal
   src/AVI

@@ -28,6 +28,8 @@
 #ifndef FRICTION_CST_H
 #define FRICTION_CST_H
 
+#include "natural_map_error.h"  // for the NATURAL_MAP_ERROR_* scaling options
+
 /* ===========================================================================
  * Solver IDs (enum FRICTION_SOLVER)
  * ===========================================================================
@@ -239,13 +241,13 @@ enum SICONOS_FRICTION_3D_IPARAM {
   SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
   /** Norm used when computing the FC3D/GFC3D complementarity error
    *  (see SICONOS_FRICTION_3D_SCALING) */
-  SICONOS_FRICTION_3D_SCALING_NORM = 24,
+  SICONOS_FRICTION_3D_SCALING_NORM = NATURAL_MAP_ERROR_IPARAM_NORM,
   /** Scope over which the error scaling is computed:
    *  per cone or over the whole vector (see SICONOS_FRICTION_3D_SCALING_SCOPE) */
-  SICONOS_FRICTION_3D_SCALING_SCOPE = 25,
+  SICONOS_FRICTION_3D_SCALING_SCOPE = NATURAL_MAP_ERROR_IPARAM_SCOPE,
   /** Reduction used to combine the two vector norms in the scaling:
    *  max, geometric mean, or sum (see SICONOS_FRICTION_3D_SCALING_REDUCTION) */
-  SICONOS_FRICTION_3D_SCALING_REDUCTION = 26,
+  SICONOS_FRICTION_3D_SCALING_REDUCTION = NATURAL_MAP_ERROR_IPARAM_REDUCTION,
   /** Sparse storage strategy for friction-contact 3D solvers
    *  (see SICONOS_FRICTION_3D_STORAGE) */
   SICONOS_FRICTION_3D_IPARAM_SPARSE_STORAGE = 27,
@@ -279,33 +281,33 @@ enum SICONOS_FRICTION_3D_STORAGE {
 enum SICONOS_FRICTION_3D_SCALING {
   /** Default norm value.
    *  Zero-initialized options use Euclidean scaling. */
-  SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = 0,
+  SICONOS_FRICTION_3D_SCALING_EUCLIDEAN = NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
   /** No scaling of the complementarity residual. */
-  SICONOS_FRICTION_3D_SCALING_NO = 1,
+  SICONOS_FRICTION_3D_SCALING_NO = NATURAL_MAP_ERROR_NORM_NO,
   /** Second-order cone (spectral) norm */
-  SICONOS_FRICTION_3D_SCALING_CONE = 3,
+  SICONOS_FRICTION_3D_SCALING_CONE = NATURAL_MAP_ERROR_NORM_CONE,
   /** Friction-cone norm weighted by mu */
-  SICONOS_FRICTION_3D_SCALING_CONE_MU = 5,
+  SICONOS_FRICTION_3D_SCALING_CONE_MU = NATURAL_MAP_ERROR_NORM_CONE_MU,
   /** Weighted cone norm (parameter SICONOS_FRICTION_3D_SCALING_ALPHA) */
-  SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED = 6,
+  SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED = NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
 };
 
 /** Scope of the complementarity-error scaling. */
 enum SICONOS_FRICTION_3D_SCALING_SCOPE {
   /** Per-contact (per-cone) scaling. */
-  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE = 0,
+  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE = NATURAL_MAP_ERROR_SCOPE_PER_BLOCK,
   /** Scaling computed over the whole stacked vector. */
-  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR = 1,
+  SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR = NATURAL_MAP_ERROR_SCOPE_PER_VECTOR,
 };
 
 /** Reduction used to combine the two single-vector norms in the scaling. */
 enum SICONOS_FRICTION_3D_SCALING_REDUCTION {
   /** Safeguarded maximum (min of the two safeguarded norms). */
-  SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX = 0,
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX = NATURAL_MAP_ERROR_REDUCTION_MAX,
   /** Safeguarded geometric mean. */
-  SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN = 1,
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN = NATURAL_MAP_ERROR_REDUCTION_MEAN,
   /** Safeguarded sum of the two norms. */
-  SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED = 2,
+  SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED = NATURAL_MAP_ERROR_REDUCTION_MIXED,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -316,47 +318,47 @@ enum SICONOS_FRICTION_3D_SCALING_REDUCTION {
 enum SICONOS_FRICTION_2D_IPARAM {
   /** Norm used when computing the FC2D/GFC2D complementarity error
    *  (see SICONOS_FRICTION_2D_SCALING) */
-  SICONOS_FRICTION_2D_SCALING_NORM = 24,
+  SICONOS_FRICTION_2D_SCALING_NORM = NATURAL_MAP_ERROR_IPARAM_NORM,
   /** Scope over which the error scaling is computed:
    *  per cone or over the whole vector (see SICONOS_FRICTION_2D_SCALING_SCOPE) */
-  SICONOS_FRICTION_2D_SCALING_SCOPE = 25,
+  SICONOS_FRICTION_2D_SCALING_SCOPE = NATURAL_MAP_ERROR_IPARAM_SCOPE,
   /** Reduction used to combine the two vector norms in the scaling:
    *  max, geometric mean, or sum (see SICONOS_FRICTION_2D_SCALING_REDUCTION) */
-  SICONOS_FRICTION_2D_SCALING_REDUCTION = 26,
+  SICONOS_FRICTION_2D_SCALING_REDUCTION = NATURAL_MAP_ERROR_IPARAM_REDUCTION,
 };
 
 /** Norm selection for the FC2D/GFC2D complementarity-error scaling. */
 enum SICONOS_FRICTION_2D_SCALING {
   /** Default norm value.
    *  Zero-initialized options use Euclidean scaling. */
-  SICONOS_FRICTION_2D_SCALING_EUCLIDEAN = 0,
+  SICONOS_FRICTION_2D_SCALING_EUCLIDEAN = NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
   /** No scaling of the complementarity residual (legacy relative scaling
    *  is applied in FC2D/GFC2D error computation). */
-  SICONOS_FRICTION_2D_SCALING_NO = 1,
+  SICONOS_FRICTION_2D_SCALING_NO = NATURAL_MAP_ERROR_NORM_NO,
   /** Second-order cone (spectral) norm */
-  SICONOS_FRICTION_2D_SCALING_CONE = 3,
+  SICONOS_FRICTION_2D_SCALING_CONE = NATURAL_MAP_ERROR_NORM_CONE,
   /** Friction-cone norm weighted by mu */
-  SICONOS_FRICTION_2D_SCALING_CONE_MU = 5,
+  SICONOS_FRICTION_2D_SCALING_CONE_MU = NATURAL_MAP_ERROR_NORM_CONE_MU,
   /** Weighted cone norm (parameter SICONOS_FRICTION_2D_SCALING_ALPHA) */
-  SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED = 6,
+  SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED = NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
 };
 
 /** Scope of the FC2D/GFC2D complementarity-error scaling. */
 enum SICONOS_FRICTION_2D_SCALING_SCOPE {
   /** Per-contact (per-cone) scaling. */
-  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE = 0,
+  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_CONE = NATURAL_MAP_ERROR_SCOPE_PER_BLOCK,
   /** Scaling computed over the whole stacked vector. */
-  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_VECTOR = 1,
+  SICONOS_FRICTION_2D_SCALING_SCOPE_PER_VECTOR = NATURAL_MAP_ERROR_SCOPE_PER_VECTOR,
 };
 
 /** Reduction used to combine the two single-vector norms in the FC2D/GFC2D scaling. */
 enum SICONOS_FRICTION_2D_SCALING_REDUCTION {
   /** Safeguarded maximum (min of the two safeguarded norms). */
-  SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX = 0,
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX = NATURAL_MAP_ERROR_REDUCTION_MAX,
   /** Safeguarded geometric mean. */
-  SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN = 1,
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN = NATURAL_MAP_ERROR_REDUCTION_MEAN,
   /** Safeguarded sum of the two norms. */
-  SICONOS_FRICTION_2D_SCALING_REDUCTION_MIXED = 2,
+  SICONOS_FRICTION_2D_SCALING_REDUCTION_MIXED = NATURAL_MAP_ERROR_REDUCTION_MIXED,
 };
 
 /** Matrix rescaling strategies for friction contact problems */
@@ -530,7 +532,7 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM {
   /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
   SICONOS_FRICTION_3D_NSN_REGUL = 4,
   /** Weight for SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED (default 1.0) */
-  SICONOS_FRICTION_3D_SCALING_ALPHA = 5,
+  SICONOS_FRICTION_3D_SCALING_ALPHA = NATURAL_MAP_ERROR_DPARAM_ALPHA,
   /** Coefficient c of the Levenberg--Marquardt fallback of SICONOS_GLOBAL_FRICTION_3D_NSN_AC:
    *  \f$ \lambda = c \|\Psi\| \f$ (default 1.0, see SICONOS_FRICTION_3D_NSN_LM_FALLBACK) */
   SICONOS_FRICTION_3D_NSN_LM_COEF = 6,
@@ -541,7 +543,7 @@ enum SICONOS_FRICTION_2D_NSN_DPARAM {
   /** Jacobian regularization coefficient (regul * I added to the Jacobian) */
   SICONOS_FRICTION_2D_NSN_REGUL = 4,
   /** Weight for SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED (default 1.0) */
-  SICONOS_FRICTION_2D_SCALING_ALPHA = 5,
+  SICONOS_FRICTION_2D_SCALING_ALPHA = NATURAL_MAP_ERROR_DPARAM_ALPHA,
   /** Coefficient c of the Levenberg--Marquardt fallback of SICONOS_GLOBAL_FRICTION_2D_NSN_AC:
    *  \f$ \lambda = c \|\Psi\| \f$ (default 1.0, see SICONOS_FRICTION_2D_NSN_LM_FALLBACK) */
   SICONOS_FRICTION_2D_NSN_LM_COEF = 6,

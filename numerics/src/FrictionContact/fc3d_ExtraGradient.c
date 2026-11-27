@@ -20,8 +20,8 @@
 #include "fc3d_Solvers.h"        // for fc3d_ExtraGradient, fc3d_ExtraGr...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnCone
-#include "siconos_debug.h"     // for DEBUG_PRINTF, DEBUG_EXPR_WE
+#include "projection_soc.h"  // for soc_projection_3d
+#include "siconos_debug.h"   // for DEBUG_PRINTF, DEBUG_EXPR_WE
 
 /* Solver registration system */
 #include "numerics_errors.h"
@@ -114,7 +114,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
         reactiontmp[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
         reactiontmp[pos + 1] -= rho * velocitytmp[pos + 1];
         reactiontmp[pos + 2] -= rho * velocitytmp[pos + 2];
-        projectionOnCone(&reactiontmp[pos], mu[contact]);
+        soc_projection_3d(&reactiontmp[pos], mu[contact]);
       }
       cblas_dcopy(n, q, 1, velocitytmp, 1);
       NM_gemv(alpha, M, reactiontmp, beta, velocitytmp);
@@ -126,7 +126,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
         reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
         reaction[pos + 1] -= rho * velocitytmp[pos + 1];
         reaction[pos + 2] -= rho * velocitytmp[pos + 2];
-        projectionOnCone(&reaction[pos], mu[contact]);
+        soc_projection_3d(&reaction[pos], mu[contact]);
       }
 
       /* **** Criterium convergence **** */
@@ -183,7 +183,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
           reaction[pos] -= rho_k * (velocity_k[pos] + mu[contact] * normUT);
           reaction[pos + 1] -= rho_k * velocity_k[pos + 1];
           reaction[pos + 2] -= rho_k * velocity_k[pos + 2];
-          projectionOnCone(&reaction[pos], mu[contact]);
+          soc_projection_3d(&reaction[pos], mu[contact]);
         }
 
         /* velocity <- q + M * reaction  */
@@ -256,7 +256,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double* reaction, doubl
          * normUT); */
         /* reaction[pos + 1] = reaction_k[pos+1] - rho_k * velocitytmp[pos + 1]; */
         /* reaction[pos + 2] = reaction_k[pos+2] - rho_k * velocitytmp[pos + 2]; */
-        projectionOnCone(&reaction[pos], mu[contact]);
+        soc_projection_3d(&reaction[pos], mu[contact]);
       }
       DEBUG_EXPR_WE(for (int i = 0; i < 5; i++) {
         printf("reaction[%i]=%12.8e\t", i, reaction[i]);

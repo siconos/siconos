@@ -230,7 +230,7 @@ The method works on the natural map
 with the generalized Jacobian H = I − J_P(y)(I − rho J_v):
 
 * J_v = (I + theta e_N [0, n^T]) M, with n = w_T/||w_T|| (0 if w_T = 0);
-* J_P is the Jacobian of the projection on K, with the same cases as `projectionOnCone`:
+* J_P is the Jacobian of the projection on K, with the same cases as `soc_projection_3d`:
   * 0 in the polar cone;
   * I inside K;
   * on the boundary, with P = alpha (1, eta u), alpha = (y_N + eta ||y_T||)/(1 + eta²) and

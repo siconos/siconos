@@ -14,37 +14,17 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NM_gemv
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
+#include "convex_set.h"                    // for ConvexSet
+#include "natural_map_error.h"             // for natural_map_error
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_error, numerics_p...
 
-/* void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double*
- * restrict error) */
-/* { */
-/*   /\* Checks complementarity *\/ */
-
-/*   *error = 0.; */
-/*   double zi, wi; */
-/*   for (unsigned int i = 0 ; i < n ; i++) */
-/*   { */
-/*     zi = z[i]; */
-/*     wi = w[i]; */
-/*     if (zi < 0.0) */
-/*     { */
-/*       *error += -zi; */
-/*       if (wi < 0.0) *error += zi * wi; */
-/*     } */
-/*     if (wi < 0.0) *error += -wi; */
-/*     if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi; */
-/*   } */
-/* } */
-
 void lcp_compute_error_only(unsigned int n, const double* restrict z, const double* restrict w,
                             double* restrict error) {
-  *error = 0.;
-  for (unsigned int i = 0; i < n; i++) {
-    *error += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
-  }
-  *error = sqrt(*error);
+  /* natural map z - P_{R^n_+}(z - w) = z - max(0, z - w) */
+  ConvexSet K = convex_set(CONVEX_SET_ORTHANT, 1, (int)n, NULL, NULL);
+  const NaturalMapErrorScaling no_scaling = {NATURAL_MAP_ERROR_NORM_NO, 0, 0, 0.0};
+  *error = natural_map_error(&no_scaling, &K, z, w);
 }
 
 int lcp_compute_error(LinearComplementarityProblem* problem, double* z, double* w,

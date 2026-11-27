@@ -25,8 +25,8 @@
 #include "plasticity_2d_local_newton.h"
 #include "plasticity_2d_local_problem_tools.h"  // for plasticity_2d_local_problem_compute_q
 #include "plasticity_2d_solvers.h"
-#include "projectionOnCone.h"  // for projectionOnCone
-#include "quartic.h"           // for BIQUADROOTS
+#include "projection_soc.h"  // for soc_projection_3d
+#include "quartic.h"         // for BIQUADROOTS
 #include "solver_registry.h"
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -215,7 +215,7 @@ int plasticity_2d_projectionOnConeWithLocalIteration_solve(PlasticityProblem* lo
       DEBUG_PRINT("r-rho tilde v before projection")
       DEBUG_EXPR(NV_display(stress_local, 3););
 
-      projectionOnCone(&stress_local[0], eta_i);
+      soc_projection_3d(&stress_local[0], eta_i);
 
       /* strainrate <- q  */
       /* cblas_dcopy(nLocal , qLocal , 1 , strainrate, 1); */
@@ -315,7 +315,7 @@ int plasticity_2d_projectionOnCone_solve(PlasticityProblem* localproblem, double
   stress_local[1] -= an * worktmp[1];
   stress_local[2] -= an * worktmp[2];
 
-  projectionOnCone(stress_local, eta_i);
+  soc_projection_3d(stress_local, eta_i);
   return 0;
 }
 
@@ -393,27 +393,10 @@ static void dp_w(const double M[9], const double q[3], const double s[3], double
 }
 
 /* generalized Jacobian (column-major) of the projection on K at y, same cases as
- * projectionOnCone: polar cone (0), inside (I), boundary */
+ * soc_projection_3d: polar cone (0), inside (I), boundary */
 void plasticity_2d_DruckerPrager_projection_jacobian(const double y[3], double eta,
                                                      double J[9]) {
-  double n = sqrt(y[1] * y[1] + y[2] * y[2]);
-  for (int i = 0; i < 9; i++) J[i] = 0.0;
-  if (eta * n <= -y[0]) return;
-  if (n <= eta * y[0]) {
-    J[0] = J[4] = J[8] = 1.0;
-    return;
-  }
-  /* P = alpha (1, eta u), alpha = (y_N + eta n)/(1 + eta^2), u = y_T/n */
-  double c = 1.0 / (1.0 + eta * eta), alpha = (y[0] + eta * n) * c;
-  double u[2] = {y[1] / n, y[2] / n}, f = eta * alpha / n;
-  J[0] = c;
-  for (int i = 0; i < 2; i++) {
-    J[3 * (i + 1)] = eta * c * u[i]; /* row 0, column i+1 */
-    J[i + 1] = eta * c * u[i];       /* row i+1, column 0 */
-    for (int j = 0; j < 2; j++)
-      J[(i + 1) + 3 * (j + 1)] =
-          eta * eta * c * u[i] * u[j] + f * ((i == j ? 1.0 : 0.0) - u[i] * u[j]);
-  }
+  soc_projection_jacobian_3d(J, y, eta);
 }
 
 /* Phi = sigma - P_K(sigma - rho v), v = w + theta ||w_T|| e_N; returns ||Phi||, and the
@@ -426,7 +409,7 @@ static double dp_natural_map(const double M[9], const double q[3], double eta, d
   double nwT = sqrt(w[1] * w[1] + w[2] * w[2]);
   double y[3] = {s[0] - rho * (w[0] + theta * nwT), s[1] - rho * w[1], s[2] - rho * w[2]};
   double P[3] = {y[0], y[1], y[2]};
-  projectionOnCone(P, eta);
+  soc_projection_3d(P, eta);
   for (int i = 0; i < 3; i++) Phi[i] = s[i] - P[i];
   if (H) {
     double Jv[9], J[9];

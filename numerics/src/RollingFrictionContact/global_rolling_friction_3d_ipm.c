@@ -1813,12 +1813,12 @@ static void print_interes_prob_python_file(int iteration, double* v, double* u, 
                       = |u - Hv - w|                                      otherwise
     + Projection error
       For convex case
-      ++ error_proj   = |r - projectionOnRollingCone(r-u)|/max{|r|, |u|}  if max >= tol
-                      = |r - projectionOnRollingCone(r-u)|                otherwise
+      ++ error_proj   = |r - rolling_cone_projection(r-u)|/max{|r|, |u|}  if max >= tol
+                      = |r - rolling_cone_projection(r-u)|                otherwise
 
       For non-convex case
-      ++ error_proj   = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}  if
-   max >= tol = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|                otherwise
+      ++ error_proj   = |r - rolling_cone_projection(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}  if
+   max >= tol = |r - rolling_cone_projection(r-u-mu*|uT|-mur*||wR)|                otherwise
 */
 static int compute_errors(NumericsMatrix* M, NumericsMatrix* H, const double* w,
                           const double* f, double* r, double* u, double* v,
@@ -1866,9 +1866,9 @@ static int compute_errors(NumericsMatrix* M, NumericsMatrix* H, const double* w,
   *pinfeas = cblas_dnrm2(nd, primalConstraint, 1);  // max_val = 1;
   if (max_val >= tolerance) *pinfeas /= max_val;
 
-  /* --- Projection error = |r - projectionOnRollingCone(r-u)|/max{|r|, |u|} for convex case
+  /* --- Projection error = |r - rolling_cone_projection(r-u)|/max{|r|, |u|} for convex case
    * --- */
-  /* --- Projection error = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}
+  /* --- Projection error = |r - rolling_cone_projection(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}
    * for non-convex case --- */
   *proj_error = 0.;
   for (size_t i = 0; i < n; i++) {

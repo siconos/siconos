@@ -52,7 +52,7 @@
 #include "hdf5_logger.h"
 #include "numerics_verbose.h"
 #include "op3x3.h"
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
@@ -617,7 +617,7 @@ static int fc3d_avi_gams_base(FrictionContactProblem* problem, double* reaction,
 
       //      DEBUG_PRINTF("contact %d, before projection: theta_r = %.*e\n", i, DECIMAL_DIG,
       //      rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
-      unsigned proj_type = projectionOnCone(&reaction[i3], mu);
+      unsigned proj_type = soc_projection_3d(&reaction[i3], mu);
       //      DEBUG_PRINTF("contact %d, after projection:  theta_r = %.*e\n", i, DECIMAL_DIG,
       //      rad2deg(atan2(reaction[i3+2], reaction[i3+1])));
 
@@ -626,10 +626,10 @@ static int fc3d_avi_gams_base(FrictionContactProblem* problem, double* reaction,
         type_contact[i] = TAKEOFF_CASE;
       } else if (type_contact_avi[i] == SLIDING_CASE) {
         type_contact[i] = SLIDING_CASE;
-      } else if (proj_type == PROJCONE_INSIDE) {
+      } else if (proj_type == SOC_PROJECTION_INSIDE) {
         type_contact[i] = STICKING_CASE;
       } else {
-        assert(proj_type == PROJCONE_BOUNDARY);
+        assert(proj_type == SOC_PROJECTION_BOUNDARY);
         type_contact[i] = SLIDING_CASE;
       }
     }

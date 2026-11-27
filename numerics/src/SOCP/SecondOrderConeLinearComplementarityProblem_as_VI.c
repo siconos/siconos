@@ -14,8 +14,8 @@
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"  // for cblas_dcopy
 #include "numerics_errors.h"
-#include "projectionOnCone.h"  // for projectionO...
-#include "siconos_debug.h"     // for DEBUG_PRINT
+#include "projection_soc.h"  // for projectionO...
+#include "siconos_debug.h"   // for DEBUG_PRINT
 
 void Function_VI_SOCLCP(void* self, int n_notused, double* x, double* F) {
   DEBUG_PRINT("Function_VI_FC3D(void * self, double *x, double *F)\n")
@@ -46,6 +46,6 @@ void Projection_VI_SOCLCP(void* viIn, double* x, double* PX) {
   int dim;
   for (cone = 0; cone < soclcp->nc; ++cone) {
     dim = soclcp->coneIndex[cone + 1] - soclcp->coneIndex[cone];
-    projectionOnSecondOrderCone(&PX[soclcp->coneIndex[cone]], soclcp->tau[cone], dim);
+    soc_projection(&PX[soclcp->coneIndex[cone]], soclcp->tau[cone], dim);
   }
 }

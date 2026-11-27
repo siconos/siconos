@@ -10,7 +10,7 @@ import siconos.numerics as sn
 
 def test_projection():
     r = np.array([1.0, 1.0, 1.0])
-    status = sn.projectionOnCone(r, 0.5)
+    status = sn.soc_projection_3d(r, 0.5)
     rr = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-    status_r = sn.projectionOnRollingCone(rr, 0.5, 0.5)
+    status_r = sn.rolling_cone_projection(rr, 0.5, 0.5)
     return status, status_r

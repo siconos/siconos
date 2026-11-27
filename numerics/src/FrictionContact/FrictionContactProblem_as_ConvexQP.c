@@ -14,9 +14,8 @@
 /* #define DEBUG_MESSAGES */
 #include "SiconosBlas.h"  // for cblas_dcopy
 #include "numerics_errors.h"
-#include "projectionOnCylinder.h"  // for projectionOnCylinder
-#include "projectionOnDisk.h"      // for projectionOnDisk
-#include "siconos_debug.h"         // for DEBUG_PRINT
+#include "projection_ball.h"  // for positive_cylinder_projection
+#include "siconos_debug.h"    // for DEBUG_PRINT
 void Projection_ConvexQP_FC3D_Cylinder(void* cqpIn, double* x, double* PX) {
   DEBUG_PRINT("Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)\n")
 
@@ -31,7 +30,7 @@ void Projection_ConvexQP_FC3D_Cylinder(void* cqpIn, double* x, double* PX) {
   int n = fc3d->numberOfContacts * nLocal;
   cblas_dcopy(n, x, 1, PX, 1);
   for (contact = 0; contact < fc3d->numberOfContacts; ++contact) {
-    projectionOnCylinder(&PX[contact * nLocal], options->dWork[contact]);
+    positive_cylinder_projection(&PX[contact * nLocal], 3, options->dWork[contact]);
   }
 }
 
@@ -50,6 +49,6 @@ void Projection_ConvexQP_FC3D_Disk(void* cqpIn, double* x, double* PX) {
   cblas_dcopy(n, x, 1, PX, 1);
 
   for (int contact = 0; contact < fc3d->numberOfContacts; ++contact) {
-    projectionOnDisk(&PX[contact * nLocal], options->dWork[contact]);
+    ball_projection(&PX[contact * nLocal], 2, options->dWork[contact]);
   }
 }

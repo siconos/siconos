@@ -14,8 +14,8 @@
 #include "NumericsMatrix.h"                 // for NM_gemv
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SiconosBlas.h"                    // for cblas_dcopy
+#include "convex_set.h"                     // for ConvexSet, convex_set_natural_map_block
 #include "numerics_errors.h"
-#include "projectionOnRollingCone.h"  // for projectionOnRollingCone
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -27,26 +27,13 @@
 void rolling_friction_2d_unitary_compute_and_add_error(double r[3], double u[3], double mu,
                                                        double mur, double* restrict error,
                                                        double* worktmp) {
-  DEBUG_BEGIN("rolling_friction_2d_unitary_compute_and_add_error(...)\n");
-  DEBUG_EXPR(NV_display(r, 3););
-  DEBUG_EXPR(NV_display(u, 3););
-  DEBUG_PRINTF(" tilde u[0] = %f\n", u[0] + mu * fabs(u[1]) + mur * fabs(u[2]));
-
-  worktmp[0] = r[0] - u[0] - mu * fabs(u[1]) - mur * fabs(u[2]);
-  worktmp[1] = r[1] - u[1];
-  worktmp[2] = r[2] - u[2];
-
-  DEBUG_PRINT("r-rho tilde v  before projection");
-  DEBUG_EXPR(NV_display(worktmp, 3););
-  projectionOn2DRollingCone(worktmp, mu, mur);
-  DEBUG_PRINT("after projection");
-  DEBUG_EXPR(NV_display(worktmp, 3););
-  worktmp[0] = r[0] - worktmp[0];
-  worktmp[1] = r[1] - worktmp[1];
-  worktmp[2] = r[2] - worktmp[2];
-  DEBUG_EXPR(NV_display(worktmp, 3););
-  *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
-  DEBUG_END("rolling_friction_2d_unitary_compute_and_add_error(...)\n");
+  /* natural map r - P_K(r - u_mod), u_mod = u + (mu |u_T| + mur |u_R|) e_N the modified
+     velocity, K the 2D rolling friction cone */
+  worktmp[0] = u[0] + mu * fabs(u[1]) + mur * fabs(u[2]);
+  worktmp[1] = u[1];
+  worktmp[2] = u[2];
+  ConvexSet K = convex_set(CONVEX_SET_ROLLING_CONE, 3, 1, &mu, &mur);
+  *error += convex_set_natural_map_block(&K, 0, r, worktmp, NULL);
 }
 
 int rolling_friction_2d_compute_error(RollingFrictionContactProblem* problem, double* reaction,

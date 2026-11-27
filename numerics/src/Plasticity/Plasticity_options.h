@@ -7,6 +7,8 @@
 
 #ifndef PLASTICITY_CST_H
 #define PLASTICITY_CST_H
+
+#include "natural_map_error.h"  // for the NATURAL_MAP_ERROR_* scaling options
 /** \file PLASTICITY_cst.h */
 /** \enum PLASTICITY_SOLVER encode the list of solvers as integers, to avoid mispelling
  * with const char* const  variables
@@ -69,11 +71,11 @@ enum PLASTICITY_IPARAM {
   PLASTICITY_NUMBER_OF_CONES = 17,
   /** Norm used to scale the error of plasticity_2d_compute_error (see PLASTICITY_SCALING;
       same index and values as SICONOS_FRICTION_3D_SCALING_NORM) */
-  PLASTICITY_SCALING_NORM = 24,
+  PLASTICITY_SCALING_NORM = NATURAL_MAP_ERROR_IPARAM_NORM,
   /** Scope of the scaling: per element or whole vector (see PLASTICITY_SCALING_SCOPE) */
-  PLASTICITY_SCALING_SCOPE = 25,
+  PLASTICITY_SCALING_SCOPE = NATURAL_MAP_ERROR_IPARAM_SCOPE,
   /** Reduction of the two norms in the scaling (see PLASTICITY_SCALING_REDUCTION) */
-  PLASTICITY_SCALING_REDUCTION = 26,
+  PLASTICITY_SCALING_REDUCTION = NATURAL_MAP_ERROR_IPARAM_REDUCTION,
   /** rho of the natural map of the error, balancing the stress and the strain rate (see
       PLASTICITY_SCALING_RHO_ENUM) */
   PLASTICITY_SCALING_RHO = 27,
@@ -96,33 +98,33 @@ enum PLASTICITY_SCALING_RHO_ENUM {
 /** Norm for the scaling of the error (plasticity_2d_compute_error), as in fc3d. */
 enum PLASTICITY_SCALING {
   /** Euclidean norm (default) */
-  PLASTICITY_SCALING_EUCLIDEAN = 0,
+  PLASTICITY_SCALING_EUCLIDEAN = NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
   /** no scaling: absolute error */
-  PLASTICITY_SCALING_NO = 1,
+  PLASTICITY_SCALING_NO = NATURAL_MAP_ERROR_NORM_NO,
   /** cone norm |x_N| + ||x_T|| */
-  PLASTICITY_SCALING_CONE = 3,
+  PLASTICITY_SCALING_CONE = NATURAL_MAP_ERROR_NORM_CONE,
   /** cone norm |x_N| + eta ||x_T|| (Von Mises: eta = 1) */
-  PLASTICITY_SCALING_CONE_ETA = 5,
+  PLASTICITY_SCALING_CONE_ETA = NATURAL_MAP_ERROR_NORM_CONE_MU,
   /** sqrt(x_N^2 + alpha ||x_T||^2), alpha = dparam[PLASTICITY_SCALING_ALPHA] */
-  PLASTICITY_SCALING_CONE_WEIGHTED = 6,
+  PLASTICITY_SCALING_CONE_WEIGHTED = NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
 };
 
 /** Scope of the scaling of the error. */
 enum PLASTICITY_SCALING_SCOPE {
   /** one scale per element (default) */
-  PLASTICITY_SCALING_SCOPE_PER_CONE = 0,
+  PLASTICITY_SCALING_SCOPE_PER_CONE = NATURAL_MAP_ERROR_SCOPE_PER_BLOCK,
   /** one scale for the whole vectors */
-  PLASTICITY_SCALING_SCOPE_PER_VECTOR = 1,
+  PLASTICITY_SCALING_SCOPE_PER_VECTOR = NATURAL_MAP_ERROR_SCOPE_PER_VECTOR,
 };
 
 /** Combination of the (safeguarded) norms of the stress and of the modified strain rate. */
 enum PLASTICITY_SCALING_REDUCTION {
   /** min(max(1, |r|), max(1, |v|)) (named MAX as in fc3d, its default) */
-  PLASTICITY_SCALING_REDUCTION_MAX = 0,
+  PLASTICITY_SCALING_REDUCTION_MAX = NATURAL_MAP_ERROR_REDUCTION_MAX,
   /** geometric mean of max(1, |r|) and max(1, |v|) */
-  PLASTICITY_SCALING_REDUCTION_MEAN = 1,
+  PLASTICITY_SCALING_REDUCTION_MEAN = NATURAL_MAP_ERROR_REDUCTION_MEAN,
   /** |r| + |v| (safeguarded) (default of the Plasticity NSGS) */
-  PLASTICITY_SCALING_REDUCTION_MIXED = 2,
+  PLASTICITY_SCALING_REDUCTION_MIXED = NATURAL_MAP_ERROR_REDUCTION_MIXED,
 };
 
 enum PLASTICITY_INTERNAL_ERROR_STRATEGY {
@@ -149,7 +151,7 @@ enum PLASTICITY_DPARAM {
   PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO = 2,
   /** weight alpha of PLASTICITY_SCALING_CONE_WEIGHTED (same index as
       SICONOS_FRICTION_3D_SCALING_ALPHA) */
-  PLASTICITY_SCALING_ALPHA = 5
+  PLASTICITY_SCALING_ALPHA = NATURAL_MAP_ERROR_DPARAM_ALPHA
 };
 
 enum PLASTICITY_NSGS_IPARAM {

@@ -5,7 +5,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 
-#include "projectionOnRollingCone.h"
+#include "projection_rolling_cone.h"
 
 #include "op5x5.h"  // for SET3, eig_3x3
                     //
@@ -14,7 +14,7 @@
 
 #include "numerics_errors.h"
 
-unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
+unsigned int rolling_cone_projection(double* r, double mu, double mur) {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
   double normMT = sqrt(r[3] * r[3] + r[4] * r[4]);
   /* hypot of libm is sure but really slow */
@@ -27,9 +27,9 @@ unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
     r[2] = 0.0;
     r[3] = 0.0;
     r[4] = 0.0;
-    return PROJRCONE_DUAL;
+    return ROLLING_CONE_PROJECTION_POLAR;
   } else if ((normT <= mu * r[0]) && (normMT <= mur * r[0])) {
-    return PROJRCONE_INSIDE;
+    return ROLLING_CONE_PROJECTION_INSIDE;
   } else {
     double mu2 = mu * mu;
     double mur2 = mur * mur;
@@ -41,7 +41,7 @@ unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
       r[2] = mu * r[0] * r[2] / normT;
       r[3] = mur * r[0] * r[3] / normMT;
       r[4] = mur * r[0] * r[4] / normMT;
-      return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING;
     }
 
     trial_rn = (mu * normT + r[0]) / (mu2 + 1.0);
@@ -51,7 +51,7 @@ unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
       r[2] = mu * r[0] * r[2] / normT;
       // r[3] = r[3] ;
       // r[4] = r[4] ;
-      return PROJRCONE_BOUNDARY_FRICTION;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION;
     }
     trial_rn = (mur * normMT + r[0]) / (mur2 + 1.0);
     if ((normT <= mu * trial_rn) && (normMT > mur * trial_rn)) {
@@ -60,12 +60,12 @@ unsigned int projectionOnRollingCone(double* r, double mu, double mur) {
       // r[2] = r[2] ;
       r[3] = mur * r[0] * r[3] / normMT;
       r[4] = mur * r[0] * r[4] / normMT;
-      return PROJRCONE_BOUNDARY_ROLLING;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING;
     } else
       return 20;
   }
 }
-unsigned int projectionOn2DRollingCone(double* r, double mu, double mur) {
+unsigned int rolling_cone_2d_projection(double* r, double mu, double mur) {
   double normT = fabs(r[1]);
   double normMT = fabs(r[2]);
 
@@ -73,9 +73,9 @@ unsigned int projectionOn2DRollingCone(double* r, double mu, double mur) {
     r[0] = 0.0;
     r[1] = 0.0;
     r[2] = 0.0;
-    return PROJRCONE_DUAL;
+    return ROLLING_CONE_PROJECTION_POLAR;
   } else if ((normT <= mu * r[0]) && (normMT <= mur * r[0])) {
-    return PROJRCONE_INSIDE;
+    return ROLLING_CONE_PROJECTION_INSIDE;
   } else {
     double mu2 = mu * mu;
     double mur2 = mur * mur;
@@ -85,7 +85,7 @@ unsigned int projectionOn2DRollingCone(double* r, double mu, double mur) {
       r[0] = trial_rn;
       r[1] = mu * r[0] * r[1] / normT;
       r[2] = mur * r[0] * r[2] / normMT;
-      return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING;
     }
 
     trial_rn = (mu * normT + r[0]) / (mu2 + 1.0);
@@ -93,45 +93,51 @@ unsigned int projectionOn2DRollingCone(double* r, double mu, double mur) {
       r[0] = trial_rn;
       r[1] = mu * r[0] * r[1] / normT;
       // r[2] = r[2] ;
-      return PROJRCONE_BOUNDARY_FRICTION;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION;
     }
     trial_rn = (mur * normMT + r[0]) / (mur2 + 1.0);
     if ((normT <= mu * trial_rn) && (normMT > mur * trial_rn)) {
       r[0] = trial_rn;
       // r[1] = r[1] ;
       r[2] = mur * r[0] * r[2] / normMT;
-      return PROJRCONE_BOUNDARY_ROLLING;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING;
     } else
       return 20;
   }
 }
-unsigned projectionOnDualRollingCone(double* u, double mu, double mur) { return 0; }
+unsigned rolling_cone_dual_projection(double* u, double mu, double mur) { return 0; }
 
-void display_status_rolling_cone(unsigned int status) {
+void rolling_cone_projection_status_display(unsigned int status) {
   // printf("status = %u\n", status);
-  if (status == PROJRCONE_INSIDE) {
-    printf("PROJRCONE_INSIDE reaction was inside the cone\n");
-  } else if (status == PROJRCONE_DUAL) {
-    printf("PROJRCONE_DUAL reaction was inside the dual cone\n");
-  } else if (status == PROJRCONE_BOUNDARY_FRICTION) {
-    printf("PROJRCONE_BOUNDARY_FRICTION reaction is projected on the friction cone\n");
-  } else if (status == PROJRCONE_BOUNDARY_ROLLING) {
-    printf("PROJRCONE_BOUNDARY_ROLLING reaction is projected on the rolling cone\n");
-  } else if (status == PROJRCONE_BOUNDARY_FRICTION_ROLLING) {
-    printf("PROJRCONE_BOUNDARY_FRICTION_ROLLING reaction is projected on the both cones\n");
+  if (status == ROLLING_CONE_PROJECTION_INSIDE) {
+    printf("ROLLING_CONE_PROJECTION_INSIDE reaction was inside the cone\n");
+  } else if (status == ROLLING_CONE_PROJECTION_POLAR) {
+    printf("ROLLING_CONE_PROJECTION_POLAR reaction was inside the dual cone\n");
+  } else if (status == ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION) {
+    printf(
+        "ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION reaction is projected on the friction "
+        "cone\n");
+  } else if (status == ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING) {
+    printf(
+        "ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING reaction is projected on the rolling "
+        "cone\n");
+  } else if (status == ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING) {
+    printf(
+        "ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING reaction is projected on the both "
+        "cones\n");
   }
 }
-unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu, double mur) {
+unsigned rolling_cone_projection_jacobian(double* H, double* r, double mu, double mur) {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
   double normMT = sqrt(r[3] * r[3] + r[4] * r[4]);
   if (mu * normT + mur * normMT <= -r[0]) {
     // printf("We are in the polar cone\n");
     zero5x5(H);
-    return PROJRCONE_DUAL;
+    return ROLLING_CONE_PROJECTION_POLAR;
   } else if ((normT <= mu * r[0]) && (normMT <= mur * r[0])) {
     eye5x5(H);
     // printf("We are in the cone\n");
-    return PROJRCONE_INSIDE;
+    return ROLLING_CONE_PROJECTION_INSIDE;
   } else {
     double mu2 = mu * mu;
     double mur2 = mur * mur;
@@ -186,7 +192,7 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H41 = *H14;
       *H42 = *H24;
 
-      return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING;
     }
     zero5x5(H00);
     double b_1 = r[0] + mu * normT;
@@ -216,7 +222,7 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H33 = 1.;
       *H44 = 1.;
 
-      return PROJRCONE_BOUNDARY_FRICTION;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION;
     }
 
     double c_1 = mur * normMT + r[0];
@@ -246,7 +252,7 @@ unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu,
       *H11 = 1.;
       *H22 = 1.;
 
-      return PROJRCONE_BOUNDARY_ROLLING;
+      return ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING;
     } else
       return 20;
   }

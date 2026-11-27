@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 
 static double max_abs_diff(const double* a, const double* b, int n) {
   double d = 0.0;
@@ -51,13 +51,13 @@ int main(void) {
 
   /* reference: cone-wise projection */
   for (int i = 0; i < nc; ++i) {
-    projectionOnCone(&r_loop[3 * i], mu[i]);
+    soc_projection_3d(&r_loop[3 * i], mu[i]);
   }
 
   /* vectorized projection with caller-provided workspace */
-  projectionOnConeVector(nc, r_vec, mu, work);
+  soc_projection_3d_stack(nc, r_vec, mu, work);
   double err = max_abs_diff(r_loop, r_vec, n);
-  printf("projectionOnConeVector (with work) max diff = %e\n", err);
+  printf("soc_projection_3d_stack (with work) max diff = %e\n", err);
   if (err > 1e-14) {
     fprintf(stderr, "Vectorized projection differs from cone-wise version!\n");
     info += 1;
@@ -65,9 +65,9 @@ int main(void) {
 
   /* vectorized projection with internal allocation */
   memcpy(r_vec, r_ori, sizeof(r_vec));
-  projectionOnConeVector(nc, r_vec, mu, NULL);
+  soc_projection_3d_stack(nc, r_vec, mu, NULL);
   err = max_abs_diff(r_loop, r_vec, n);
-  printf("projectionOnConeVector (work=NULL) max diff = %e\n", err);
+  printf("soc_projection_3d_stack (work=NULL) max diff = %e\n", err);
   if (err > 1e-14) {
     fprintf(stderr, "Vectorized projection (NULL work) differs from cone-wise version!\n");
     info += 1;

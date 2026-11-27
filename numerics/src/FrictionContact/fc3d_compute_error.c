@@ -21,12 +21,12 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "SOC_scaling.h"  // for SOC_scaling_*
+#include "convex_set.h"         // for ConvexSet, convex_set_natural_map_block
+#include "natural_map_error.h"  // for natural_map_error
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"      // for projectionOnCone, projectionOnConeVector
-#include "projectionOnCylinder.h"  // for projectionOnCylinder
-#include "siconos_debug.h"         // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
+#include "projection_soc.h"  // for soc_dual_projection_3d
+#include "siconos_debug.h"   // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
@@ -34,18 +34,12 @@
 
 void fc3d_unitary_compute_and_add_error(const double r[3], const double u[3], double mu,
                                         double* restrict error, double worktmp[3]) {
-  // double normUT;
-  // double worktmp[3];
-  /* Compute the modified local velocity */
-  /* worktmp[0] = r[0] - u[0] - mu *  hypot(u[1], u[2]); */
-  worktmp[0] = r[0] - u[0] - mu * sqrt(u[1] * u[1] + u[2] * u[2]);
-  worktmp[1] = r[1] - u[1];
-  worktmp[2] = r[2] - u[2];
-  projectionOnCone(worktmp, mu);
-  worktmp[0] = r[0] - worktmp[0];
-  worktmp[1] = r[1] - worktmp[1];
-  worktmp[2] = r[2] - worktmp[2];
-  *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+  /* natural map r - P_K(r - u_mod), u_mod = u + mu ||u_T|| e_N the modified velocity */
+  worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]);
+  worktmp[1] = u[1];
+  worktmp[2] = u[2];
+  ConvexSet K = convex_set(CONVEX_SET_SOC, 3, 1, &mu, NULL);
+  *error += convex_set_natural_map_block(&K, 0, r, worktmp, NULL);
 }
 
 void fc3d_compute_modified_local_velocity(int nc, const double* u, const double* mu,
@@ -74,191 +68,15 @@ void fc3d_compute_modified_local_velocity(int nc, const double* u, const double*
   if (alloc_work) free(work);
 }
 
-static double safeguard_scale(double s) { return (s > 1.0) ? s : 1.0; }
-
-/* Helpers for the single-contact (3D cone) case.  These inline functions
-   reproduce the per-variable scalings implemented in SOC_scaling.c for m=1
-   without the overhead of a function call or BLAS on a 3-vector. */
-static inline double fc3d_unitary_norm(int norm, const double x[3], double mu, double alpha) {
-  const double t = sqrt(x[1] * x[1] + x[2] * x[2]);
-  switch (norm) {
-    case SICONOS_FRICTION_3D_SCALING_EUCLIDEAN:
-      return sqrt(x[0] * x[0] + t * t);
-    case SICONOS_FRICTION_3D_SCALING_CONE:
-      return fabs(x[0]) + t;
-    case SICONOS_FRICTION_3D_SCALING_CONE_MU:
-      return fabs(x[0]) + mu * t;
-    case SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED:
-      if (alpha < 0.0) alpha = 0.0;
-      return sqrt(x[0] * x[0] + alpha * t * t);
-    default:
-      return 1.0;
-  }
-}
-
-static inline double fc3d_unitary_scale(int norm, int reduction, const double r[3],
-                                        const double u_mod[3], double mu, double alpha) {
-  const double nr = fc3d_unitary_norm(norm, r, mu, alpha);
-  const double nu = fc3d_unitary_norm(norm, u_mod, mu, alpha);
-
-  switch (reduction) {
-    case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX: {
-      const double sr = safeguard_scale(nr);
-      const double su = safeguard_scale(nu);
-      return (sr < su) ? sr : su;
-    }
-    case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-      return sqrt(safeguard_scale(nr) * safeguard_scale(nu));
-    case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-      return nr + nu;
-    default:
-      return 1.0;
-  }
-}
-
-/* Compute the scale for a stack of m cones of dimension dim, using the
-   selected norm, scope and reduction.  Safeguarding (max(1, σ)) is applied
-   to the final scale. */
-static double fc3d_compute_vector_scale(int norm, int reduction, const double* x,
-                                        const double* y, int m, int dim, const double* mu,
-                                        double alpha) {
-  double s = 1.0;
-
-  switch (norm) {
-    case SICONOS_FRICTION_3D_SCALING_EUCLIDEAN:
-      switch (reduction) {
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_euclidean(x, y, m, dim);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_euclidean(x, y, m, dim);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_euclidean(x, y, m, dim);
-          break;
-      }
-      break;
-
-    case SICONOS_FRICTION_3D_SCALING_CONE:
-      switch (reduction) {
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_cone(x, y, m, dim);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_cone(x, y, m, dim);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_cone(x, y, m, dim);
-          break;
-      }
-      break;
-
-    case SICONOS_FRICTION_3D_SCALING_CONE_MU:
-      switch (reduction) {
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_cone_mu(x, y, m, mu, dim);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_cone_mu(x, y, m, mu, dim);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_cone_mu(x, y, m, mu, dim);
-          break;
-      }
-      break;
-
-    case SICONOS_FRICTION_3D_SCALING_CONE_WEIGHTED:
-      switch (reduction) {
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX:
-          s = SOC_scaling_cone_weighted(x, y, m, dim, alpha);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MEAN:
-          s = SOC_geom_scaling_cone_weighted(x, y, m, dim, alpha);
-          break;
-        case SICONOS_FRICTION_3D_SCALING_REDUCTION_MIXED:
-          s = SOC_mixed_scaling_cone_weighted(x, y, m, dim, alpha);
-          break;
-      }
-      break;
-
-    default:
-      s = 1.0;
-      break;
-  }
-
-  return safeguard_scale(s);
-}
-
 double fc3d_compute_complementarity_error(int nc, const double* r, const double* u,
                                           const double* mu, int norm, int scope, int reduction,
                                           double alpha, double* work, double* tmp) {
-  const int m = 3 * nc;
-  const int do_scale = (norm != SICONOS_FRICTION_3D_SCALING_NO);
-
-  /* Build the modified local velocity u_mod once in tmp.  It is reused by the
-     whole-vector scaling path and by the per-cone scaling loop below. */
+  /* modified local velocity u_mod in tmp, then the scaled natural-map error on the stack of
+     friction cones (natural_map_error.h) */
   fc3d_compute_modified_local_velocity(nc, u, mu, tmp, work);
-
-  if (!do_scale || scope == SICONOS_FRICTION_3D_SCALING_SCOPE_PER_VECTOR) {
-    /* Whole-vector scaling: a single global scale is enough. */
-    double global_scale = 1.0;
-    if (do_scale) {
-      global_scale = fc3d_compute_vector_scale(norm, reduction, r, tmp, nc, 3, mu, alpha);
-    }
-
-    /* tmp <- r - u_mod, then project to evaluate the unscaled natural map. */
-    for (int i = 0; i < m; ++i) {
-      tmp[i] = r[i] - tmp[i];
-    }
-    projectionOnConeVector(nc, tmp, mu, work);
-
-    /* tmp <- unscaled natural-map residual, then scale the whole vector at once. */
-    for (int i = 0; i < m; ++i) {
-      tmp[i] = r[i] - tmp[i];
-    }
-    cblas_dscal(m, 1.0 / global_scale, tmp, 1);
-  } else {
-    /* Per-contact scaling: compute scale, projection and residual in one pass.
-       The modified local velocity is read from tmp before it is overwritten. */
-    for (int i = 0; i < nc; ++i) {
-      const int pos = 3 * i;
-      const double* r_i = &r[pos];
-      const double* u_mod_i = &tmp[pos];
-
-      const double s =
-          safeguard_scale(fc3d_unitary_scale(norm, reduction, r_i, u_mod_i, mu[i], alpha));
-      const double inv = 1.0 / s;
-
-      /* w = r_i - u_mod_i, projection of w on the cone, residual = r_i - proj. */
-      const double w0 = r_i[0] - u_mod_i[0];
-      const double w1 = r_i[1] - u_mod_i[1];
-      const double w2 = r_i[2] - u_mod_i[2];
-
-      const double normTw = sqrt(w1 * w1 + w2 * w2);
-      double p0, p1, p2;
-      if (mu[i] * normTw <= -w0) {
-        p0 = 0.0;
-        p1 = 0.0;
-        p2 = 0.0;
-      } else if (normTw <= mu[i] * w0) {
-        p0 = w0;
-        p1 = w1;
-        p2 = w2;
-      } else {
-        const double mu2 = mu[i] * mu[i] + 1.0;
-        p0 = (mu[i] * normTw + w0) / mu2;
-        const double scale = mu[i] * p0 / normTw;
-        p1 = scale * w1;
-        p2 = scale * w2;
-      }
-
-      tmp[pos] = (r_i[0] - p0) * inv;
-      tmp[pos + 1] = (r_i[1] - p1) * inv;
-      tmp[pos + 2] = (r_i[2] - p2) * inv;
-    }
-  }
-
-  return cblas_dnrm2(m, tmp, 1);
+  NaturalMapErrorScaling s = {norm, scope, reduction, alpha};
+  ConvexSet K = convex_set(CONVEX_SET_SOC, 3, nc, mu, NULL);
+  return natural_map_error(&s, &K, r, tmp);
 }
 
 void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restrict u, double mu,
@@ -266,7 +84,7 @@ void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restric
   worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) - r[0];
   worktmp[1] = u[1] - r[1];
   worktmp[2] = u[2] - r[2];
-  projectionOnDualCone(worktmp, mu);
+  soc_dual_projection_3d(worktmp, mu);
   worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) - worktmp[0];
   worktmp[1] = u[1] - worktmp[1];
   worktmp[2] = u[2] - worktmp[2];
@@ -296,23 +114,17 @@ int fc3d_compute_error(FrictionContactProblem* problem, double* z, double* w, do
   DEBUG_PRINTF("norm of the reaction %e\n", cblas_dnrm2(n, z, 1));
   DEBUG_PRINTF("norm of the velocity %e\n", cblas_dnrm2(n, w, 1));
 
-  int norm_id = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
-  int scope = SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE;
-  int reduction = SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX;
-  double alpha = 1.0;
-  if (options != NULL) {
-    norm_id = options->iparam[SICONOS_FRICTION_3D_SCALING_NORM];
-    scope = options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE];
-    reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
-    alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
-  }
+  const NaturalMapErrorScaling defaults = {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN,
+                                           SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+                                           SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, 1.0};
+  NaturalMapErrorScaling sc = natural_map_error_scaling(options, defaults);
   double* comp_work = NULL;
   double* comp_tmp = NULL;
   if (error_compute_alloc_pair(nc, n, &comp_work, &comp_tmp)) {
     return numerics_error("fc3d_compute_error", "bad alloc");
   }
-  *error = fc3d_compute_complementarity_error(nc, z, w, mu, norm_id, scope, reduction, alpha,
-                                              comp_work, comp_tmp);
+  *error = fc3d_compute_complementarity_error(nc, z, w, mu, sc.norm, sc.scope, sc.reduction,
+                                              sc.alpha, comp_work, comp_tmp);
   free(comp_work);
   free(comp_tmp);
   DEBUG_PRINTF("scaled error in complementarity = %12.8e\n", *error);
@@ -391,7 +203,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double* z, doub
     worktmp[1] = w[ic * 3 + 1] - rho * z[ic * 3 + 1];
     worktmp[2] = w[ic * 3 + 2] - rho * z[ic * 3 + 2];
     invmu = 1.0 / mu[ic];
-    projectionOnCone(worktmp, invmu);
+    soc_projection_3d(worktmp, invmu);
     normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
     worktmp[0] = w[ic * 3] - (worktmp[0] - mu[ic] * normUT);
     worktmp[1] = w[ic * 3 + 1] - worktmp[1];
@@ -413,15 +225,10 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double* z, doub
 
 void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double R,
                                                double* error, double* worktmp) {
-  /* Compute the modified local velocity */
-  worktmp[0] = z[0] - w[0];
-  worktmp[1] = z[1] - w[1];
-  worktmp[2] = z[2] - w[2];
-  projectionOnCylinder(worktmp, R);
-  worktmp[0] = z[0] - worktmp[0];
-  worktmp[1] = z[1] - worktmp[1];
-  worktmp[2] = z[2] - worktmp[2];
-  *error += worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+  /* natural map z - P_C(z - w), C = R+ x B(0, R) the Tresca cylinder */
+  (void)worktmp;
+  ConvexSet K = convex_set(CONVEX_SET_POSITIVE_CYLINDER, 3, 1, &R, NULL);
+  *error += convex_set_natural_map_block(&K, 0, z, w, NULL);
 }
 int fc3d_Tresca_compute_error(FrictionContactProblem* problem, double* z, double* w,
                               double tolerance, SolverOptions* options, double* error) {

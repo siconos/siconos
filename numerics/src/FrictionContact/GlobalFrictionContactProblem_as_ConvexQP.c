@@ -10,7 +10,7 @@
 #include "ConvexQP.h"                      // for ConvexQP
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "SiconosBlas.h"                   // for cblas_dcopy
-#include "projectionOnCone.h"              // for projectionOnCone
+#include "projection_soc.h"                // for soc_projection_3d
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "numerics_errors.h"
@@ -32,6 +32,6 @@ void Projection_ConvexQP_GFC3D_DualCone(void* cqpIn, double* x, double* PX) {
 
   cblas_dcopy(n, x, 1, PX, 1);
   for (contact = 0; contact < gfc3d->numberOfContacts; ++contact) {
-    projectionOnCone(&PX[contact * nLocal], 1.0 / gfc3d->mu[contact]);
+    soc_projection_3d(&PX[contact * nLocal], 1.0 / gfc3d->mu[contact]);
   }
 }

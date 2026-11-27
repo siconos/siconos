@@ -20,7 +20,7 @@
 #include "cohesive_friction_3d_compute_error.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnDisk.h"
+#include "projection_ball.h"
 #include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
@@ -155,7 +155,7 @@ int cohesive_friction_3d_projection_solve(CohesiveFrictionContactProblem* localp
       reaction[0] = -c_n;
       // reaction[1] = -qLocal[1];
       // reaction[2] = 0;
-      projectionOnDisk(&reaction[1], c_t);
+      ball_projection(&reaction[1], 2, c_t);
 
       DEBUG_PRINT("reaction after projection:  \n");
       DEBUG_EXPR(NV_display(reaction, 3););

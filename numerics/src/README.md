@@ -93,7 +93,7 @@ Framework for problem-agnostic non-smooth solvers.
 - `SiconosBlas.h/.c` - BLAS wrappers
 - `SiconosLapack.h/.c` - LAPACK wrappers
 - `op3x3.h/.c`, `op5x5.h` - Small matrix optimizations
-- `projectionOnCone.h/.c`, etc. - Projections onto cones
+- `projection_soc.h/.c`, etc. - Projections onto cones
 
 #### `optimization/` - Optimization Methods
 **NEW**: Line search and optimization utilities.

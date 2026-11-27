@@ -20,7 +20,7 @@
 #include "friction_error_toolkit.h"  // for friction_error_toolkit_...
 #include "numerics_errors.h"
 #include "numerics_verbose.h"         // for numerics_error, numerics_w...
-#include "projectionOnRollingCone.h"  // for projectionOnRollingCone
+#include "projection_rolling_cone.h"  // for rolling_cone_projection
 #include "sanitizer.h"                // for cblas_dcopy_msan
 #include "siconos_debug.h"            // for DEBUG_EXPR, DEBUG_PRINTF
 
@@ -44,7 +44,7 @@ void global_rolling_friction_3d_unitary_compute_and_add_error(double* r, double*
   worktmp[3] = r[3] - u[3];
   worktmp[4] = r[4] - u[4];
 
-  projectionOnRollingCone(worktmp, mu, mur);
+  rolling_cone_projection(worktmp, mu, mur);
 
   worktmp[0] = r[0] - worktmp[0];
   worktmp[1] = r[1] - worktmp[1];
@@ -130,9 +130,9 @@ int global_rolling_friction_3d_compute_error(GlobalRollingFrictionContactProblem
   free(tmp_nd_1);
   free(tmp_nd_2);
 
-  /* --- Projection error = |r - projectionOnRollingCone(r-u)|/max{|r|, |u|} for convex case
+  /* --- Projection error = |r - rolling_cone_projection(r-u)|/max{|r|, |u|} for convex case
    * --- */
-  /* --- Projection error = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}
+  /* --- Projection error = |r - rolling_cone_projection(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}
    * for non-convex case --- */
   double error_complementarity = 0.0;
   double worktmp[5];

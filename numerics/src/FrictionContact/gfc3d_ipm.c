@@ -29,7 +29,7 @@
 #include "gfc3d_Solvers.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 #include "safe_casts.h"
 
 /* #define DEBUG_MESSAGES */
@@ -347,7 +347,7 @@ double projectionError(const double* velocity, const double* reaction, const siz
     worktmp[0] = reaction[3 * ic] - velocity[3 * ic];
     worktmp[1] = reaction[3 * ic + 1] - velocity[3 * ic + 1];
     worktmp[2] = reaction[3 * ic + 2] - velocity[3 * ic + 2];
-    projectionOnCone(worktmp, 1.0);
+    soc_projection_3d(worktmp, 1.0);
     worktmp[0] = reaction[3 * ic] - worktmp[0];
     worktmp[1] = reaction[3 * ic + 1] - worktmp[1];
     worktmp[2] = reaction[3 * ic + 2] - worktmp[2];
@@ -373,7 +373,7 @@ double projectionError_norm_infinity_conic(const double* velocity, const double*
     worktmp[0] = reaction[3 * ic] - velocity[3 * ic];
     worktmp[1] = reaction[3 * ic + 1] - velocity[3 * ic + 1];
     worktmp[2] = reaction[3 * ic + 2] - velocity[3 * ic + 2];
-    projectionOnCone(worktmp, 1.0);
+    soc_projection_3d(worktmp, 1.0);
     worktmp[0] = reaction[3 * ic] - worktmp[0];
     worktmp[1] = reaction[3 * ic + 1] - worktmp[1];
     worktmp[2] = reaction[3 * ic + 2] - worktmp[2];
@@ -401,7 +401,7 @@ double projectionError_relative_norm_infinity_conic(const double* velocity,
     worktmp[0] = reaction[idx] - velocity[idx];
     worktmp[1] = reaction[idx + 1] - velocity[idx + 1];
     worktmp[2] = reaction[idx + 2] - velocity[idx + 2];
-    projectionOnCone(worktmp, 1.0);
+    soc_projection_3d(worktmp, 1.0);
     worktmp[0] = reaction[idx] - worktmp[0];
     worktmp[1] = reaction[idx + 1] - worktmp[1];
     worktmp[2] = reaction[idx + 2] - worktmp[2];
@@ -424,7 +424,7 @@ double projectionError_dual_norm_infinity_conic(const double* velocity, const do
     worktmp[0] = velocity[3 * ic] - reaction[3 * ic];
     worktmp[1] = velocity[3 * ic + 1] - reaction[3 * ic + 1];
     worktmp[2] = velocity[3 * ic + 2] - reaction[3 * ic + 2];
-    projectionOnDualCone(worktmp, 1.0);
+    soc_dual_projection_3d(worktmp, 1.0);
     worktmp[0] = velocity[3 * ic] - worktmp[0];
     worktmp[1] = velocity[3 * ic + 1] - worktmp[1];
     worktmp[2] = velocity[3 * ic + 2] - worktmp[2];
@@ -1502,7 +1502,6 @@ static void gfc3d_ipm_predictor_3x3_noscal(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-
   switch (0) {
     case 0: {
       // t1 = clock();
@@ -1719,7 +1718,6 @@ static void gfc3d_ipm_predictor_3x3_qp2(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-
   switch (0) {
     case 0: {
       // First linear linear system
@@ -1914,7 +1912,6 @@ static void gfc3d_ipm_predictor_3x3_qph(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -2129,7 +2126,6 @@ static void gfc3d_ipm_predictor_2x2_qp2(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-
   switch (0) {
     case 0: {
       // First linear linear system
@@ -2327,7 +2323,6 @@ static void gfc3d_ipm_predictor_2x2_qph(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -2537,7 +2532,6 @@ static void gfc3d_ipm_predictor_1x1_qph(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -2763,7 +2757,6 @@ static void gfc3d_ipm_corrector_3x3_noscal(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-
   switch (0) {
     case 0: {
       // t1 = clock();
@@ -2957,7 +2950,6 @@ static void gfc3d_ipm_corrector_3x3_qp2(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -3157,7 +3149,6 @@ static void gfc3d_ipm_corrector_3x3_qph(gfc3d_IPM_workspace* ws) {
   char* str = ws->str;
   char* strToken = ws->strToken;
 
-
   switch (0) {
     case 0: {
       // Second linear linear system
@@ -3350,7 +3341,6 @@ static void gfc3d_ipm_corrector_2x2_qp2(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -3554,7 +3544,6 @@ static void gfc3d_ipm_corrector_2x2_qph(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -3774,7 +3763,6 @@ static void gfc3d_ipm_corrector_1x1_qph(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (0) {
     case 0: {
@@ -4878,7 +4866,6 @@ static void gfc3d_ipm_fixed_step(gfc3d_IPM_workspace* ws) {
   char fws = ws->fws;
   char* str = ws->str;
   char* strToken = ws->strToken;
-
 
   switch (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]) {
     case SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_EXTERNAL: {

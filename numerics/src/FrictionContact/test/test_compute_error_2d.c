@@ -10,9 +10,9 @@
 #include <stdlib.h>
 
 #include "FrictionContact_options.h"
-#include "SOC_scaling.h"  // for SOC_scaling_*
 #include "SiconosBlas.h"  // for cblas_dnrm2
 #include "fc2d_compute_error.h"
+#include "natural_map_error.h"  // for SOC_scaling_*
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
@@ -83,31 +83,55 @@ static double scalar_complementarity_error(int nc, const double* r, const double
     switch (norm) {
       case SICONOS_FRICTION_2D_SCALING_EUCLIDEAN:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
-                           ? SOC_scaling_euclidean(r, u_mod, nc, 2)
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MAX, r, u_mod,
+                                                     nc, 2, NULL, 1.0)
                        : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                           ? SOC_geom_scaling_euclidean(r, u_mod, nc, 2)
-                           : SOC_mixed_scaling_euclidean(r, u_mod, nc, 2);
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MEAN, r,
+                                                     u_mod, nc, 2, NULL, 1.0)
+                           : natural_map_error_scale(NATURAL_MAP_ERROR_NORM_EUCLIDEAN,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MIXED, r,
+                                                     u_mod, nc, 2, NULL, 1.0);
         break;
       case SICONOS_FRICTION_2D_SCALING_CONE:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
-                           ? SOC_scaling_cone(r, u_mod, nc, 2)
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MAX, r, u_mod,
+                                                     nc, 2, NULL, 1.0)
                        : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                           ? SOC_geom_scaling_cone(r, u_mod, nc, 2)
-                           : SOC_mixed_scaling_cone(r, u_mod, nc, 2);
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MEAN, r,
+                                                     u_mod, nc, 2, NULL, 1.0)
+                           : natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MIXED, r,
+                                                     u_mod, nc, 2, NULL, 1.0);
         break;
       case SICONOS_FRICTION_2D_SCALING_CONE_MU:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
-                           ? SOC_scaling_cone_mu(r, u_mod, nc, mu, 2)
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MAX, r, u_mod,
+                                                     nc, 2, mu, 1.0)
                        : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                           ? SOC_geom_scaling_cone_mu(r, u_mod, nc, mu, 2)
-                           : SOC_mixed_scaling_cone_mu(r, u_mod, nc, mu, 2);
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MEAN, r,
+                                                     u_mod, nc, 2, mu, 1.0)
+                           : natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_MU,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MIXED, r,
+                                                     u_mod, nc, 2, mu, 1.0);
         break;
       case SICONOS_FRICTION_2D_SCALING_CONE_WEIGHTED:
         global_scale = (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MAX)
-                           ? SOC_scaling_cone_weighted(r, u_mod, nc, 2, alpha)
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MAX, r, u_mod,
+                                                     nc, 2, NULL, alpha)
                        : (reduction == SICONOS_FRICTION_2D_SCALING_REDUCTION_MEAN)
-                           ? SOC_geom_scaling_cone_weighted(r, u_mod, nc, 2, alpha)
-                           : SOC_mixed_scaling_cone_weighted(r, u_mod, nc, 2, alpha);
+                           ? natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MEAN, r,
+                                                     u_mod, nc, 2, NULL, alpha)
+                           : natural_map_error_scale(NATURAL_MAP_ERROR_NORM_CONE_WEIGHTED,
+                                                     NATURAL_MAP_ERROR_REDUCTION_MIXED, r,
+                                                     u_mod, nc, 2, NULL, alpha);
         break;
     }
     global_scale = safeguard_scale(global_scale);

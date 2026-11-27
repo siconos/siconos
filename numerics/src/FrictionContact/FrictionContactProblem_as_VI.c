@@ -14,9 +14,8 @@
 #include "SiconosBlas.h"             // for cblas_dcopy
 #include "SolverOptions.h"           // for SolverOptions
 #include "VariationalInequality.h"   // for VariationalInequality
-#include "projectionOnCone.h"        // for projectionOnCone
-#include "projectionOnCylinder.h"    // for projectionOnCylinder
-#include "projectionOnDisk.h"        // for projectionOnDisk
+#include "projection_ball.h"         // for positive_cylinder_projection
+#include "projection_soc.h"          // for soc_projection_3d
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -57,7 +56,7 @@ void Projection_VI_FC3D(void* viIn, double* x, double* PX) {
   int n = fc3d->numberOfContacts * nLocal;
   cblas_dcopy(n, x, 1, PX, 1);
   for (contact = 0; contact < fc3d->numberOfContacts; ++contact) {
-    projectionOnCone(&PX[contact * nLocal], fc3d->mu[contact]);
+    soc_projection_3d(&PX[contact * nLocal], fc3d->mu[contact]);
   }
 }
 
@@ -88,7 +87,7 @@ void Projection_VI_FC3D_Cylinder(void* viIn, double* x, double* PX) {
   int n = fc3d->numberOfContacts * nLocal;
   cblas_dcopy(n, x, 1, PX, 1);
   for (contact = 0; contact < fc3d->numberOfContacts; ++contact) {
-    projectionOnCylinder(&PX[contact * nLocal], options->dWork[contact]);
+    positive_cylinder_projection(&PX[contact * nLocal], 3, options->dWork[contact]);
   }
 }
 
@@ -122,6 +121,6 @@ void Projection_VI_FC3D_Disk(void* viIn, double* x, double* PX) {
   cblas_dcopy(n, x, 1, PX, 1);
 
   for (int contact = 0; contact < fc3d->numberOfContacts; ++contact) {
-    projectionOnDisk(&PX[contact * nLocal], options->dWork[contact]);
+    ball_projection(&PX[contact * nLocal], 2, options->dWork[contact]);
   }
 }

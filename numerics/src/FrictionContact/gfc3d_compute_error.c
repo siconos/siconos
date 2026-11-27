@@ -21,7 +21,7 @@
 #include "gfc3d_ipm.h"                     // for gfc3d_compute_error_r
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -105,23 +105,18 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* reaction,
   friction_error_toolkit_recompute_local_velocity(H, problem->b, globalVelocity, m, velocity);
   DEBUG_PRINTF("norm of velocity %e\n", cblas_dnrm2(m, velocity, 1));
 
-  int norm = SICONOS_FRICTION_3D_SCALING_EUCLIDEAN;
-  int scope = SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE;
-  int reduction = SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX;
-  double alpha = 1.0;
-  if (options != NULL) {
-    norm = options->iparam[SICONOS_FRICTION_3D_SCALING_NORM];
-    scope = options->iparam[SICONOS_FRICTION_3D_SCALING_SCOPE];
-    reduction = options->iparam[SICONOS_FRICTION_3D_SCALING_REDUCTION];
-    alpha = options->dparam[SICONOS_FRICTION_3D_SCALING_ALPHA];
-  }
+  const NaturalMapErrorScaling defaults = {SICONOS_FRICTION_3D_SCALING_EUCLIDEAN,
+                                           SICONOS_FRICTION_3D_SCALING_SCOPE_PER_CONE,
+                                           SICONOS_FRICTION_3D_SCALING_REDUCTION_MAX, 1.0};
+  NaturalMapErrorScaling sc = natural_map_error_scaling(options, defaults);
   double* comp_work = NULL;
   double* comp_tmp = NULL;
   if (error_compute_alloc_pair(nc, m, &comp_work, &comp_tmp)) {
     return numerics_error("gfc3d_compute_error", "bad alloc");
   }
-  error_complementarity = fc3d_compute_complementarity_error(
-      nc, reaction, velocity, mu, norm, scope, reduction, alpha, comp_work, comp_tmp);
+  error_complementarity =
+      fc3d_compute_complementarity_error(nc, reaction, velocity, mu, sc.norm, sc.scope,
+                                         sc.reduction, sc.alpha, comp_work, comp_tmp);
   free(comp_work);
   free(comp_tmp);
 
@@ -311,7 +306,7 @@ static inline void fc3d_unitary_compute_and_add_error_convex(double* restrict r,
   worktmp[0] = r[0] - u[0];
   worktmp[1] = r[1] - u[1];
   worktmp[2] = r[2] - u[2];
-  projectionOnCone(worktmp, mu);
+  soc_projection_3d(worktmp, mu);
   worktmp[0] = r[0] - worktmp[0];
   worktmp[1] = r[1] - worktmp[1];
   worktmp[2] = r[2] - worktmp[2];

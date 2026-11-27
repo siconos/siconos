@@ -56,7 +56,7 @@
 #include "plasticity_2d_local_newton.h"
 #include "plasticity_2d_solvers.h"
 #include "plasticity_2d_vonmises.h"
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 #include "solver_registry.h"
 
 /* data of the global natural map */
@@ -99,7 +99,7 @@ static double nsn_natural_map(NSNData* d, const double* sigma, double* Phi, doub
       P[0] = y[0];
       P[1] = y[1];
       P[2] = y[2];
-      projectionOnCone(P, eta);
+      soc_projection_3d(P, eta);
       if (JP) plasticity_2d_DruckerPrager_projection_jacobian(y, eta, J);
     } else {
       double sigma_y = problem->model.von_mises->sigma_y[e];
@@ -156,7 +156,7 @@ static void nsn_project(NSNData* d, double* x) {
   for (int e = 0; e < d->nc; e++) {
     double* s = &x[3 * e];
     if (problem->model_type == PLASTICITY_MODEL_DRUCKER_PRAGER)
-      projectionOnCone(s, problem->model.drucker_prager->eta[e]);
+      soc_projection_3d(s, problem->model.drucker_prager->eta[e]);
     else if (d->ball)
       plasticity_2d_projectionOnVonMisesBall(s, problem->model.von_mises->sigma_y[e]);
     else

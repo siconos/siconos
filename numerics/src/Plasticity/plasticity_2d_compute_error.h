@@ -91,20 +91,6 @@ double plasticity_2d_DruckerPrager_local_scaled_error(const double M[9], const d
                                                       double eta, double theta,
                                                       const double r[3]);
 
-/** Scale of the error (see plasticity_2d_compute_error): combination of the norms of r and v
- *  (m elements of dimension 3), each safeguarded by max(1, .).
- *  \param norm_id PLASTICITY_SCALING norm
- *  \param reduction PLASTICITY_SCALING_REDUCTION value
- *  \param r stresses (3 m)
- *  \param v modified strain rates (3 m)
- *  \param m number of elements
- *  \param eta cone coefficients (PLASTICITY_SCALING_CONE_ETA only, size m)
- *  \param alpha weight (PLASTICITY_SCALING_CONE_WEIGHTED only)
- *  \return the scale (>= 1)
- */
-double plasticity_2d_scaling(int norm_id, int reduction, const double* r, const double* v,
-                             int m, const double* eta, double alpha);
-
 /**
     Error computation (using the normal map residual) for one Mohr Coulomb 2D plasticity
 

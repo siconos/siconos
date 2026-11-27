@@ -148,14 +148,6 @@ void dr_nlgs(RelayProblem* problem, double* z, double* w, int* info, SolverOptio
 int relay_compute_error(RelayProblem* problem, const double* restrict z, double* restrict w,
                         double tolerance, double* restrict error);
 
-/** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector \f$z\f$
- * \param[in,out] z a n-vector of doubles which returns the projection
- * \param[in,out] ub a n-vector of doubles which contains the upper bounds
- * \param[in,out] lb a n-vector of doubles which contains the lower bounds
- * \param[in,out] n size of the a n-vector
- */
-void project_on_box(int n, double* restrict z, double* restrict lb, double* restrict ub);
-
 /** This function transform a RelayProblem into a LinearComplementarityProblem
  * \param[in] problem A pointer to a Relay_problem to transform
  * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the

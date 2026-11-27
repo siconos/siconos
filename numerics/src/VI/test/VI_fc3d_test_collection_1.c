@@ -17,7 +17,7 @@
 #include "SolverOptions.h"           // for solver_options_delete, solver_opt...
 #include "VI_cst.h"                  // for SICONOS_VI_EG, SICONOS_VI_FPP
 #include "VariationalInequality.h"   // for VariationalInequality, variation...
-#include "projectionOnCone.h"        // for projectionOnCone
+#include "projection_soc.h"          // for soc_projection_3d
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -62,7 +62,7 @@ static void PXtest_0(void* viIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 
@@ -151,7 +151,7 @@ static void PXtest_1(void* viIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 
@@ -239,7 +239,7 @@ static void PXtest_2(void* viIn, double* x, double* PX) {
 
   for (contact = 0; contact < nc; ++contact) {
     int pos = contact * nLocal;
-    projectionOnCone(&PX[pos], fc3d->mu[contact]);
+    soc_projection_3d(&PX[pos], fc3d->mu[contact]);
   }
 }
 

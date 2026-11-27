@@ -24,7 +24,7 @@
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnCone, projectionOnDu...
+#include "projection_soc.h"  // for soc_projection_3d, projectionOnDu...
 #include "safe_casts.h"
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -284,7 +284,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
     /* Loop through the contact points */
     for (contact = 0; contact < nc; ++contact) {
-      projectionOnCone(&z[contact * 3], mu[contact]);
+      soc_projection_3d(&z[contact * 3], mu[contact]);
     }
     DEBUG_PRINT("After projection :");
     DEBUG_EXPR(NV_display(z, m));
@@ -705,10 +705,10 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
 
     /* Loop through the contact points */
     for (contact = 0; contact < nc; ++contact) {
-      projectionOnDualCone(&z[contact * 3], mu[contact]);
+      soc_dual_projection_3d(&z[contact * 3], mu[contact]);
     }
     for (contact = 0; contact < nc; ++contact) {
-      projectionOnCone(&z[contact * 3 + m], mu[contact]);
+      soc_projection_3d(&z[contact * 3 + m], mu[contact]);
     }
 
     DEBUG_PRINT("After projection :");

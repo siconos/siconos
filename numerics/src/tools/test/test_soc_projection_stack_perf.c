@@ -11,7 +11,7 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include "projectionOnCone.h"
+#include "convex_set.h"
 
 static double now(void) {
   struct timeval tv;
@@ -56,12 +56,12 @@ int main(void) {
   double* F_loop = (double*)malloc(n * sizeof(double));
   double* F_vec = (double*)malloc(n * sizeof(double));
 
-  /* ---------- projectionOnConeVector ---------- */
+  /* ---------- soc_projection_3d_stack ---------- */
   double t0 = now();
   for (int rep = 0; rep < nrep; ++rep) {
     memcpy(r_loop, r, n * sizeof(double));
     for (int i = 0; i < nc; ++i) {
-      projectionOnCone(&r_loop[3 * i], mu[i]);
+      soc_projection_3d(&r_loop[3 * i], mu[i]);
     }
   }
   double t_loop_proj = (now() - t0) / nrep;
@@ -69,42 +69,46 @@ int main(void) {
   t0 = now();
   for (int rep = 0; rep < nrep; ++rep) {
     memcpy(r_vec, r, n * sizeof(double));
-    projectionOnConeVector(nc, r_vec, mu, work);
+    soc_projection_3d_stack(nc, r_vec, mu, work);
   }
   double t_vec_proj = (now() - t0) / nrep;
 
   double err_proj = max_abs_diff(r_loop, r_vec, n);
   printf(
-      "projectionOnConeVector: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  "
+      "soc_projection_3d_stack: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  "
       "err=%e\n",
       nc, t_loop_proj, t_vec_proj, t_loop_proj / fmax(t_vec_proj, 1e-12), err_proj);
   if (err_proj > 1e-12) {
-    fprintf(stderr, "projectionOnConeVector correctness check failed!\n");
+    fprintf(stderr, "soc_projection_3d_stack correctness check failed!\n");
     info += 1;
   }
 
-  /* ---------- naturalMapOnConeVector ---------- */
+  /* ---------- natural map: cone-wise vs stacked ---------- */
+  double* v = (double*)malloc(n * sizeof(double));
+  for (int i = 0; i < n; ++i) v[i] = rho * u[i];
+  ConvexSet K = convex_set(CONVEX_SET_SOC, 3, nc, mu, NULL);
   t0 = now();
   for (int rep = 0; rep < nrep; ++rep) {
     for (int i = 0; i < nc; ++i) {
-      naturalMapOnCone(&r[3 * i], &u[3 * i], rho, mu[i], &F_loop[3 * i]);
+      convex_set_natural_map_block(&K, i, &r[3 * i], &v[3 * i], &F_loop[3 * i]);
     }
   }
   double t_loop_nat = (now() - t0) / nrep;
 
   t0 = now();
   for (int rep = 0; rep < nrep; ++rep) {
-    naturalMapOnConeVector(nc, r, u, rho, mu, F_vec, work);
+    convex_set_natural_map(&K, r, v, F_vec);
   }
   double t_vec_nat = (now() - t0) / nrep;
+  free(v);
 
   double err_nat = max_abs_diff(F_loop, F_vec, n);
   printf(
-      "naturalMapOnConeVector: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  "
+      "convex_set_natural_map: nc=%d  cone-wise=%.6f s  vectorized=%.6f s  speedup=%.2fx  "
       "err=%e\n",
       nc, t_loop_nat, t_vec_nat, t_loop_nat / fmax(t_vec_nat, 1e-12), err_nat);
   if (err_nat > 1e-12) {
-    fprintf(stderr, "naturalMapOnConeVector correctness check failed!\n");
+    fprintf(stderr, "convex_set_natural_map correctness check failed!\n");
     info += 1;
   }
 

@@ -20,7 +20,7 @@
 #include "SiconosLapack.h"  // for DGETRF, DGETRS, LA_NOTRANS
 #include "SolverOptions.h"  // for SolverOptions, solver_...
 #include "numerics_verbose.h"
-#include "projectionOnRollingCone.h"  // for projectionOnRollingCone
+#include "projection_rolling_cone.h"  // for rolling_cone_projection
 #include "rolling_fc_Solvers.h"
 #include "rolling_friction_2d_local_problem_tools.h"  // for rolling_friction_2d_local_pro...
 #include "siconos_debug.h"                            // for DEBUG_PRINTF, DEBUG_END
@@ -107,9 +107,9 @@ int rolling_friction_2d_projectionOnCone_solve(RollingFrictionContactProblem* lo
   reaction[2] -= an * velocity[2];
 
 #ifdef DEBUG_MESSAGES
-  display_status_rolling_cone(projectionOn2DRollingCone(reaction, mu_i, mu_r_i));
+  rolling_cone_projection_status_display(rolling_cone_2d_projection(reaction, mu_i, mu_r_i));
 #else
-  projectionOn2DRollingCone(reaction, mu_i, mu_r_i);
+  rolling_cone_2d_projection(reaction, mu_i, mu_r_i);
 #endif
 
   DEBUG_EXPR(NV_display(reaction, 3););
@@ -371,10 +371,10 @@ int rolling_friction_2d_projectionOnConeWithLocalIteration_solve(
       /* DEBUG_PRINT("r-rho tilde v before projection") */
       /* DEBUG_EXPR(NV_display(reaction,5);); */
       /* #ifdef DEBUG_MESSAGES */
-      /*       display_status_rolling_cone(projectionOnRollingCone(&reaction[0], mu_i,
-       * mu_r_i)); */
+      /*       rolling_cone_projection_status_display(rolling_cone_projection(&reaction[0],
+       * mu_i, mu_r_i)); */
       /* #else */
-      status = projectionOn2DRollingCone(&reaction[0], mu_i, mu_r_i);
+      status = rolling_cone_2d_projection(&reaction[0], mu_i, mu_r_i);
       /* #endif */
       /* DEBUG_EXPR(NV_display(reaction,5);); */
       /* velocity <- q  */

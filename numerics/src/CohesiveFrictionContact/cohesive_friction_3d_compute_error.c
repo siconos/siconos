@@ -18,7 +18,7 @@
 #include "fc3d_compute_error.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnDisk.h"
+#include "projection_ball.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -33,7 +33,7 @@ void cohesive_friction_3d_unitary_compute_and_add_error(double r[3], double u[3]
   worktmp[2] = r[2] - u[2];
 
   /* Project onto the friction cone */
-  projectionOnDisk(&worktmp[1], mu);
+  ball_projection(&worktmp[1], 2, mu);
 
   /* Compute residual: r - P_C(r - u) */
   worktmp[0] = 0.0;

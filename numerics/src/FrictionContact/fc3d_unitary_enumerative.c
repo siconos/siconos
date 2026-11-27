@@ -17,9 +17,9 @@
 #include "NumericsMatrix.h"           // for NumericsMatrix, RawNumericsMatrix
 #include "SolverOptions.h"            // for SolverOptions, solver_options_nu...
 #include "numerics_verbose.h"
-#include "op3x3.h"             // for SET3, print3, print3x3, SET3X3
-#include "projectionOnCone.h"  // for projectionOnCone
-#include "quartic.h"           // for BIQUADROOTS, CUBICROOTS, QUADROOTS
+#include "op3x3.h"           // for SET3, print3, print3x3, SET3X3
+#include "projection_soc.h"  // for soc_projection_3d
+#include "quartic.h"         // for BIQUADROOTS, CUBICROOTS, QUADROOTS
 // #define FC3D_UE_DEBUG
 
 #define FC3D_UE_TEST_NULL(EXPR) (fabs(EXPR) < 1e-15)
@@ -391,7 +391,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
     d = 0;
     p = (-(*Q0) * (*mu)) / (*M00);
     if (p < 0) {
-      projectionOnCone(reaction, *mu);
+      soc_projection_3d(reaction, *mu);
       return -1;
     }
   }
@@ -540,7 +540,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   }
   M = M00;
   Q = Q0;
-  projectionOnCone(reaction, *mu);
+  soc_projection_3d(reaction, *mu);
   return -1;
 }
 

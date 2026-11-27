@@ -11,7 +11,7 @@
 #include <math.h>    // for sqrt
 
 #include "op5x5.h"  // for SET3, eig_3x3
-#include "projectionOnRollingCone.h"
+#include "projection_rolling_cone.h"
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
@@ -46,8 +46,8 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
   DEBUG_PRINTF("mu= %12.8e \n", mu);
   DEBUG_PRINTF("mur= %12.8e \n", mur);
   DEBUG_PRINTF("rho= %12.8e \n", rho);
-  unsigned int where = projectionOnRollingCone(F, mu, mur);
-  // display_status_rolling_cone(where);
+  unsigned int where = rolling_cone_projection(F, mu, mur);
+  // rolling_cone_projection_status_display(where);
   DEBUG_EXPR_WE(printf("projection F\n"); display5(F););
 
   F[0] = *R0 - F[0];
@@ -59,19 +59,19 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
   DEBUG_EXPR_WE(display5(F););
 
   DEBUG_EXPR_WE(
-      if (where == PROJRCONE_DUAL) {
+      if (where == ROLLING_CONE_PROJECTION_POLAR) {
         printf("We are in the polar cone\n");
-      } else if (where == PROJRCONE_INSIDE) {
+      } else if (where == ROLLING_CONE_PROJECTION_INSIDE) {
         printf("We are in the cone\n");
       } else printf("We are outside the cone and its polar\n"););
   if (A && B) {
     SET5X5(A);
     SET5X5(B);
     double s1, s2, s3, s4;
-    if (where == PROJRCONE_DUAL) {
+    if (where == ROLLING_CONE_PROJECTION_POLAR) {
       zero5x5(A00);
       eye5x5(B00);
-    } else if (where == PROJRCONE_INSIDE) {
+    } else if (where == ROLLING_CONE_PROJECTION_INSIDE) {
       if (normVT <= 0.0) {
         s1 = 1.;
         s2 = 0.;
@@ -123,8 +123,8 @@ void rolling_friction_3D_computeNaturalMap(double R[5], double velocity[5], doub
       double H[25];
       /* //zero5x5(H); */
       // unsigned int where2 =
-      subdifferentialProjectionOnRollingCone(H, RV, mu, mur);
-      // printf("where2 ");display_status_rolling_cone(where2);
+      rolling_cone_projection_jacobian(H, RV, mu, mur);
+      // printf("where2 ");rolling_cone_projection_status_display(where2);
       DEBUG_EXPR_WE(printf("H:"); display5x5(H););
 
       // A =  H * rho * (I+D)

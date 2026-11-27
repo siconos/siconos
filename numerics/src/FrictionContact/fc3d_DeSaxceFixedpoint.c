@@ -18,7 +18,7 @@
 #include "fc3d_Solvers.h"        // for fc3d_DeSaxceFixedPoint, fc3d_DeS...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnCone
+#include "projection_soc.h"  // for soc_projection_3d
 
 /* Solver registration system */
 #include "numerics_errors.h"
@@ -87,7 +87,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double* reaction,
       reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
       reaction[pos + 1] -= rho * velocitytmp[pos + 1];
       reaction[pos + 2] -= rho * velocitytmp[pos + 2];
-      projectionOnCone(&reaction[pos], mu[contact]);
+      soc_projection_3d(&reaction[pos], mu[contact]);
     }
 
     /* **** Criterium convergence **** */

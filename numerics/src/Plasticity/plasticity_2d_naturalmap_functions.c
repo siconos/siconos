@@ -11,7 +11,7 @@
 #include <math.h>    // for sqrt
 
 #include "op3x3.h"  // for SET3, eig_3x3
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 
 // extern computeNonsmoothFunction Function;
 
@@ -45,7 +45,7 @@ void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta
   DEBUG_PRINTF("theta= %12.8e \n", theta);
   DEBUG_PRINTF("eta= %12.8e \n", eta);
   DEBUG_PRINTF("rho= %12.8e \n", rho);
-  unsigned int where = projectionOnCone(F, eta);
+  unsigned int where = soc_projection_3d(F, eta);
 
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("projection F[%i]= %12.8e \n", i, F[i]));
 
@@ -55,19 +55,19 @@ void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta
 
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("F[%i]= %12.8e \n", i, F[i]));
 
-  DEBUG_EXPR_WE(if (where == PROJCONE_DUAL) printf("We are in the polar cone\n");
-                if (where == PROJCONE_INSIDE) printf("We are in the cone\n");
-                if (where == PROJCONE_BOUNDARY)
+  DEBUG_EXPR_WE(if (where == SOC_PROJECTION_POLAR) printf("We are in the polar cone\n");
+                if (where == SOC_PROJECTION_INSIDE) printf("We are in the cone\n");
+                if (where == SOC_PROJECTION_BOUNDARY)
                     printf("We are outside the cone and its polar\n"););
 
   if (A && B) {
     SET3X3(A);
     SET3X3(B);
     double s1, s2;
-    if (where == PROJCONE_DUAL) {
+    if (where == SOC_PROJECTION_POLAR) {
       zero3x3(A00);
       eye3x3(B00);
-    } else if (where == PROJCONE_INSIDE) {
+    } else if (where == SOC_PROJECTION_INSIDE) {
       if (normVT <= 0.0) {
         s1 = 1.;
         s2 = 0.;
@@ -89,7 +89,7 @@ void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta
       *A22 = rho;
       zero3x3(B00);
 
-    } else  // where ==  PROJCONE_BOUNDARY
+    } else  // where ==  SOC_PROJECTION_BOUNDARY
     {
       if (normVT <= 0.0) {
         s1 = 1.;
@@ -102,7 +102,7 @@ void plasticity_2d_computeNaturalMap(double R[3], double velocity[3], double eta
       double H[9];
       /* //zero3x3(H); */
       // unsigned int where2 =
-      subdifferentialProjectionOnCone(H, RV, eta);
+      soc_projection_jacobian_3d(H, RV, eta);
       DEBUG_EXPR_WE(printf("H:"); display3x3(H););
 
       // A = rho * (I+D) * H

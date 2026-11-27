@@ -24,7 +24,7 @@
 #include "gfc3d_ipm.h"
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnDualCone
+#include "projection_soc.h"  // for soc_dual_projection_3d
 #include "solver_registry.h"
 
 /* #define DEBUG_NOCOLOR */
@@ -657,7 +657,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
     /* projection. loop through the contact points */
     for (size_t contact = 0; contact < nc; ++contact) {
       int pos = contact * 3;
-      projectionOnDualCone(&u[pos], mu[contact]);
+      soc_dual_projection_3d(&u[pos], mu[contact]);
     }
 
     double norm_u = cblas_dnrm2(m, u, 1);

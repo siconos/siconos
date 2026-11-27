@@ -25,8 +25,8 @@
 #include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"      // for projectionOnCone
-#include "projectionOnCylinder.h"  // for projectionOnCylinder
+#include "projection_ball.h"  // for positive_cylinder_projection
+#include "projection_soc.h"   // for soc_projection_3d
 #include "safe_casts.h"
 #include "solver_registry.h"
 
@@ -442,7 +442,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
       DEBUG_PRINT("r-rho tilde v before projection")
       DEBUG_EXPR(NV_display(reaction, 3););
 
-      projectionOnCone(&reaction[0], mu_i);
+      soc_projection_3d(&reaction[0], mu_i);
 
       /* velocity <- q  */
       /* cblas_dcopy(nLocal , qLocal , 1 , velocity, 1); */
@@ -586,7 +586,7 @@ int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* re
   reaction[1] -= an * worktmp[1];
   reaction[2] -= an * worktmp[2];
 
-  projectionOnCone(reaction, mu_i);
+  soc_projection_3d(reaction, mu_i);
   return 0;
 }
 
@@ -633,7 +633,7 @@ int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem* localproblem,
   velocity[1] -= an * worktmp[1];
   velocity[2] -= an * worktmp[2];
   double invmui = 1.0 / mu_i;
-  projectionOnCone(velocity, invmui);
+  soc_projection_3d(velocity, invmui);
 
   normUT = sqrt(velocity[1] * velocity[1] + velocity[2] * velocity[2]);
   velocity[0] -= mu_i * normUT;
@@ -676,7 +676,7 @@ int fc3d_projectionOnCylinder_solve(FrictionContactProblem* localproblem, double
   reaction[1] -= an * worktmp[1];
   reaction[2] -= an * worktmp[2];
 
-  projectionOnCylinder(reaction, R);
+  positive_cylinder_projection(reaction, 3, R);
   return 0;
 }
 
@@ -809,7 +809,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
       reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
       reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
 
-      projectionOnCylinder(&reaction[0], R);
+      positive_cylinder_projection(&reaction[0], 3, R);
 
       /* /\* velocity <- q  *\/ */
       /* cblas_dcopy(nLocal , qLocal , 1 , velocity, 1); */

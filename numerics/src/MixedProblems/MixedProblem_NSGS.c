@@ -32,7 +32,7 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 #include "fc3d_projection.h"
-#include "projectionOnCone.h"
+#include "projection_soc.h"
 
 /* Include rolling friction contact solvers */
 #include "RollingFrictionContact/rolling_fc_Solvers.h"

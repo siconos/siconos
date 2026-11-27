@@ -27,10 +27,10 @@ if(WITH_TESTING)
 
   new_test(NAME tools_projection SOURCES test_projection.c)
   new_test(NAME tools_natural_map_cone SOURCES test_natural_map_cone.c)
-  new_test(NAME tools_projection_3d_cone_vector SOURCES test_projectionOnCone_vector.c)
-  new_test(NAME tools_projection_3d_cone_perf SOURCES test_projectionOnCone_vector_perf.c)
+  new_test(NAME tools_soc_projection_stack SOURCES test_soc_projection_stack.c)
+  new_test(NAME tools_soc_projection_stack_perf SOURCES test_soc_projection_stack_perf.c)
   new_test(NAME tools_modified_local_velocity SOURCES test_modified_local_velocity.c)
-  new_test(NAME tools_SOC_scaling SOURCES test_SOC_scaling.c)
+  new_test(NAME tools_natural_map_error_scaling SOURCES test_natural_map_error_scaling.c)
 
   new_test(SOURCES NumericsArrays.c)
 

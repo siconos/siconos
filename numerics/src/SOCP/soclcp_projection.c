@@ -19,8 +19,8 @@
 #include "SiconosBlas.h"                                  // for cblas_dgemv
 #include "SolverOptions.h"                                // for SolverOptions
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"      // for projectionO...
-#include "projectionOnCylinder.h"  // for projectionO...
+#include "projection_ball.h"       // for projectionO...
+#include "projection_soc.h"        // for projectionO...
 #include "sanitizer.h"             // for cblas_dcopy...
 #include "soclcp_compute_error.h"  // for soclcp_unit...
 
@@ -66,7 +66,7 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
   for (int i = 0; i < nLocal; i++) {
     reaction[i] -= an * worktmp[i];
   }
-  projectionOnSecondOrderCone(reaction, mu_i, nLocal);
+  soc_projection(reaction, mu_i, nLocal);
   return 0;
 }
 
@@ -233,7 +233,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(
       r[1] = r_k[1] - rho_k * v_k[1];
       r[2] = r_k[2] - rho_k * v_k[2];
 
-      projectionOnSecondOrderCone(&r[0], mu_i, nLocal);
+      soc_projection(&r[0], mu_i, nLocal);
 
       /* v <- q  */
       cblas_dcopy_msan(nLocal, qLocal, 1, v, 1);
@@ -321,7 +321,7 @@ int soclcp_projectionOnCylinder_solve(
 
   free(worktmp);
 
-  projectionOnGeneralCylinder(reaction, mu_i, nLocal);
+  positive_cylinder_projection(reaction, nLocal, mu_i);
   return 0;
 }
 

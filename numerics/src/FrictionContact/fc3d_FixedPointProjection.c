@@ -20,8 +20,8 @@
 #include "fc3d_Solvers.h"        // for fc3d_fixedPointProjection, fc3d_...
 #include "fc3d_compute_error.h"  // for fc3d_compute_error
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionOnCone
-#include "siconos_debug.h"     // for DEBUG_EXPR_WE, DEBUG_PRINTF
+#include "projection_soc.h"  // for soc_projection_3d
+#include "siconos_debug.h"   // for DEBUG_EXPR_WE, DEBUG_PRINTF
 
 /* Solver registration system */
 #include "numerics_errors.h"
@@ -127,7 +127,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double* reaction
           reaction[pos + 1] -= rho_k * velocity_k[pos + 1];
           reaction[pos + 2] -= rho_k * velocity_k[pos + 2];
 
-          projectionOnCone(&reaction[pos], mu[contact]);
+          soc_projection_3d(&reaction[pos], mu[contact]);
         }
 
         /* velocity <- q + M * reaction  */

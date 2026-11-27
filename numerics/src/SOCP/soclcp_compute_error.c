@@ -20,8 +20,8 @@
 #include "SiconosBlas.h"  // for cblas_dcopy
 #include "numerics_errors.h"
 #include "numerics_verbose.h"
-#include "projectionOnCone.h"  // for projectionO...
-#include "siconos_debug.h"     // for DEBUG_PRINTF
+#include "projection_soc.h"  // for projectionO...
+#include "siconos_debug.h"   // for DEBUG_PRINTF
 
 void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int dim,
                                           double mu, double* error, double* worktmp) {
@@ -35,7 +35,7 @@ void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int
   /*   printf("-- worktmp[%i]=%e\t\t\t",i,(worktmp)[i]); */
   /*   printf("z[%i]=%e\n",i,(z)[i]); */
   /* } */
-  projectionOnSecondOrderCone(worktmp, mu, dim);
+  soc_projection(worktmp, mu, dim);
   /* for (int i=0; i < dim; i++ ) */
   /* { */
   /*   printf("-- worktmp[%i]=%e\t\t\n",i,(worktmp)[i]); */
@@ -136,7 +136,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem,
       worktmp[i] = w[nic + i] - rho * z[nic + i];
     }
     invmu = 1.0 / mu[ic];
-    projectionOnSecondOrderCone(worktmp, invmu, dim);
+    soc_projection(worktmp, invmu, dim);
     for (int i = 0; i < dim; i++) {
       worktmp[i] = w[nic + i] - worktmp[i];
       *error += worktmp[i] * worktmp[i];

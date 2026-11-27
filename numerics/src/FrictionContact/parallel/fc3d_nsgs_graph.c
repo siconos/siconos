@@ -37,7 +37,7 @@
 #include "numerics_errors.h"
 #include "numerics_verbose.h"  // for numerics_printf
 #include "op3x3.h"
-// #include "projectionOnCone.h"  // for projectionOnCone
+// #include "projection_soc.h"  // for soc_projection_3d
 #include "siconos_debug.h"  // for DEBUG_EXPR
 #include "solver_registry.h"
 #include "tolerance_manager.h"

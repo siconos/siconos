@@ -5,26 +5,31 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 
-#ifndef ProjectionOnRollingCone_H
-#define ProjectionOnRollingCone_H
+#ifndef projection_rolling_cone_H
+#define projection_rolling_cone_H
 
-/*!\file projectionOnCone.h
- * function to project on rolling cones
- */
+/*!\file projection_rolling_cone.h
+  \brief Euclidean projection on rolling friction cones and its Jacobian.
 
-enum {
-  PROJRCONE_DUAL,
-  PROJRCONE_INSIDE,
-  PROJRCONE_BOUNDARY_FRICTION,
-  PROJRCONE_BOUNDARY_ROLLING,
-  PROJRCONE_BOUNDARY_FRICTION_ROLLING
+  Rolling friction cone in \f$ \mathbb{R}^5 \f$ (3D: normal, 2 tangential, 2 rolling
+  components) or \f$ \mathbb{R}^3 \f$ (2D: normal, tangential, rolling):
+  \f$ K = \{ r \mid \|r_T\| \leq \mu r_N, \|r_R\| \leq \mu_r r_N \} \f$.
+*/
+
+/** Region of the space where the projected point was (return value of the projections) */
+enum ROLLING_CONE_PROJECTION_STATUS {
+  ROLLING_CONE_PROJECTION_POLAR,
+  ROLLING_CONE_PROJECTION_INSIDE,
+  ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION,
+  ROLLING_CONE_PROJECTION_BOUNDARY_ROLLING,
+  ROLLING_CONE_PROJECTION_BOUNDARY_FRICTION_ROLLING
 };
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 /**
-    projectionOnRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
+    rolling_cone_projection Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
    \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \}
    \f$
 
@@ -33,10 +38,10 @@ extern "C" {
     \param[in] mu_r the angle of the cone in moment
     \return the type of projection
 */
-unsigned int projectionOnRollingCone(double* r, double mu, double mur);
+unsigned int rolling_cone_projection(double* r, double mu, double mur);
 
 /**
-   projectionOnRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
+   rolling_cone_projection Projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
    r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \} \f$
 
    \param[in,out] r the vector to be projected
@@ -44,10 +49,10 @@ unsigned int projectionOnRollingCone(double* r, double mu, double mur);
    \param[in] mu_r the angle of the cone in moment
    \return the type of projection
 */
-unsigned int projectionOn2DRollingCone(double* r, double mu, double mur);
+unsigned int rolling_cone_2d_projection(double* r, double mu, double mur);
 
 /**
-   projectionOnDualRollingCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
+   rolling_cone_dual_projection Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
    \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \}
    \f$
 
@@ -56,12 +61,12 @@ unsigned int projectionOn2DRollingCone(double* r, double mu, double mur);
    \param[in] mu_r the angle of the cone in moment
    \return the type of projection
 */
-unsigned projectionOnDualRollingCone(double* u, double mu, double mur);
+unsigned rolling_cone_dual_projection(double* u, double mu, double mur);
 
-void display_status_rolling_cone(unsigned int status);
+void rolling_cone_projection_status_display(unsigned int status);
 
 /**
-   subdifferentialProjectionOnRollingCone.
+   rolling_cone_projection_jacobian.
    Compute an element of the the subdifferential of the
    projection on the second Order Cone in \f$ R^5 \f$, \f$ K \{
    r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1, 0 \sqrt(r_3^2+r_4^2) \geq mu_r r_1  \} \f$
@@ -73,7 +78,7 @@ void display_status_rolling_cone(unsigned int status);
    \return the type of projection
 */
 
-unsigned subdifferentialProjectionOnRollingCone(double* H, double* r, double mu, double mur);
+unsigned rolling_cone_projection_jacobian(double* H, double* r, double mu, double mur);
 
 #if defined(__cplusplus)
 }

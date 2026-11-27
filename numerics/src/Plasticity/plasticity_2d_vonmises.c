@@ -13,6 +13,7 @@
 
 #include "Plasticity_options.h"
 #include "SolverOptions.h"
+#include "convex_set.h"  // for ConvexSet, convex_set_natural_map_block
 #include "naming_conventions.h"
 #include "numerics_errors.h"
 #include "op3x3.h"
@@ -34,40 +35,34 @@ int plasticity_2d_vonMises_check_yield(const double stress[3], double sigma_y) {
 }
 
 int plasticity_2d_projectionOnVonMises(double stress[3], double sigma_y) {
-  double R = plasticity_2d_vonMises_radius(sigma_y);
-  double nT = hypot(stress[1], stress[2]);
-  DEBUG_PRINTF("Von Mises projection: |sigma_T| = %e, R = %e\n", nT, R);
-  if (nT <= R) return 1;
-  /* radial return of the deviatoric part, the hydrostatic part is unchanged */
-  double scale = R / nT;
-  stress[1] *= scale;
-  stress[2] *= scale;
-  return 0;
+  /* radial return of the deviatoric part, the hydrostatic part is unchanged: projection on
+   * the cylinder R x B(0, sqrt(2/3) sigma_y) */
+  return (cylinder_projection(stress, 3, plasticity_2d_vonMises_radius(sigma_y)) ==
+          BALL_PROJECTION_INSIDE)
+             ? 1
+             : 0;
 }
 
 int plasticity_2d_projectionOnVonMisesBall(double stress[3], double sigma_y) {
-  double n = sqrt(stress[0] * stress[0] + stress[1] * stress[1] + stress[2] * stress[2]);
-  if (n <= sigma_y) return 1;
-  double scale = (sigma_y > 0.0) ? sigma_y / n : 0.0;
-  for (int i = 0; i < 3; i++) stress[i] *= scale;
-  return 0;
+  return (ball_projection(stress, 3, sigma_y) == BALL_PROJECTION_INSIDE) ? 1 : 0;
 }
 
 void plasticity_2d_vonmises_ball_unitary_compute_and_add_error(const double r[3],
                                                                const double u[3],
                                                                double sigma_y, double* error,
                                                                double worktmp[3]) {
-  for (int i = 0; i < 3; i++) worktmp[i] = r[i] - u[i];
-  plasticity_2d_projectionOnVonMisesBall(worktmp, sigma_y);
-  for (int i = 0; i < 3; i++) *error += (r[i] - worktmp[i]) * (r[i] - worktmp[i]);
+  (void)worktmp;
+  ConvexSet K = convex_set(CONVEX_SET_BALL, 3, 1, &sigma_y, NULL);
+  *error += convex_set_natural_map_block(&K, 0, r, u, NULL);
 }
 
 void plasticity_2d_vonmises_unitary_compute_and_add_error(const double r[3], const double u[3],
                                                           double sigma_y, double* error,
                                                           double worktmp[3]) {
-  for (int i = 0; i < 3; i++) worktmp[i] = r[i] - u[i];
-  plasticity_2d_projectionOnVonMises(worktmp, sigma_y);
-  for (int i = 0; i < 3; i++) *error += (r[i] - worktmp[i]) * (r[i] - worktmp[i]);
+  (void)worktmp;
+  double R = plasticity_2d_vonMises_radius(sigma_y);
+  ConvexSet K = convex_set(CONVEX_SET_CYLINDER, 3, 1, &R, NULL);
+  *error += convex_set_natural_map_block(&K, 0, r, u, NULL);
 }
 
 /* x = -(S + mu I)^{-1} b for the 2x2 matrix S. Returns 0 if (S + mu I) is invertible. */
@@ -310,32 +305,10 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
 /* generalized Jacobian of the projection on C at y (column-major) */
 void plasticity_2d_vonMises_projection_jacobian(int ball, const double y[3], double sigma_y,
                                                 double J[9]) {
-  if (ball) {
-    double n = vonmises_norm3(y);
-    for (int i = 0; i < 9; i++) J[i] = 0.0;
-    if (n <= sigma_y) {
-      J[0] = J[4] = J[8] = 1.0;
-    } else {
-      /* (r/||y||) (I - u u^T), u = y/||y|| */
-      double f = sigma_y / n;
-      for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-          J[i + 3 * j] = f * ((i == j ? 1.0 : 0.0) - y[i] * y[j] / (n * n));
-    }
-    return;
-  }
-  double R = plasticity_2d_vonMises_radius(sigma_y);
-  double nT = hypot(y[1], y[2]);
-  for (int i = 0; i < 9; i++) J[i] = 0.0;
-  J[0] = 1.0;
-  if (nT <= R) {
-    J[4] = J[8] = 1.0;
-  } else {
-    double f = R / nT, n1 = y[1] / nT, n2 = y[2] / nT;
-    J[4] = f * (1.0 - n1 * n1);
-    J[8] = f * (1.0 - n2 * n2);
-    J[5] = J[7] = -f * n1 * n2;
-  }
+  if (ball)
+    ball_projection_jacobian(J, y, 3, sigma_y);
+  else
+    cylinder_projection_jacobian(J, y, 3, plasticity_2d_vonMises_radius(sigma_y));
 }
 
 /* natural map and generalized Jacobian of the Von Mises problem (shared Newton) */
