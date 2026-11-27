@@ -40,8 +40,8 @@ extern "C" {
    weighted by eta (Von Mises: eta = 1), sqrt(x_N^2 + alpha ||x_T||^2), or no scaling (absolute
    error). Options: options->iparam[PLASTICITY_SCALING_NORM / _SCOPE / _REDUCTION / _RHO],
     options->dparam[PLASTICITY_SCALING_ALPHA], set by plasticity_2d_nsgs_set_default
-    (Euclidean, per cone, MIXED, rho_e); options == NULL: same defaults. Options of other
-    solvers (zero-initialized) give the fc3d scaling (MAX, rho = 1).
+    (Euclidean, per cone, MIXED, rho_e, alpha = 1); options == NULL: same defaults.
+    Options of other solvers (zero-initialized) give the fc3d scaling (MAX, rho = 1).
     w is set to M z + q (in the coordinates of the problem).
 
     \param problem the problem

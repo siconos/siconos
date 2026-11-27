@@ -883,6 +883,7 @@ void plasticity_2d_nsgs_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_SCALING_SCOPE] = PLASTICITY_SCALING_SCOPE_PER_CONE;
   options->iparam[PLASTICITY_SCALING_REDUCTION] = PLASTICITY_SCALING_REDUCTION_MIXED;
   options->iparam[PLASTICITY_SCALING_RHO] = PLASTICITY_SCALING_RHO_ELEMENT;
+  options->dparam[PLASTICITY_SCALING_ALPHA] = 1.0;
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;
