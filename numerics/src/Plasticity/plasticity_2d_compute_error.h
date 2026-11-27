@@ -53,6 +53,10 @@ extern "C" {
     \param[in,out] error value
     \return 0 if error <= tolerance, 1 otherwise
  */
+int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
+                                double tolerance, SolverOptions* options, double norm,
+                                double* error);
+
 /** Error of one Drucker-Prager cone with the default scaling of plasticity_2d_compute_error
  *  (MIXED, rho = 1/||M||_F): ||r - P_K(r - rho v)|| / max(1, ||r|| + rho ||v||),
  *  v = w + theta ||w_T|| e_N, w = M r + q. Used by the local solvers
@@ -82,10 +86,6 @@ double plasticity_2d_DruckerPrager_local_scaled_error(const double M[9], const d
  */
 double plasticity_2d_scaling(int norm_id, int reduction, const double* r, const double* v,
                              int m, const double* eta, double alpha);
-
-int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
-                                double tolerance, SolverOptions* options, double norm,
-                                double* error);
 
 /**
     Error computation (using the normal map residual) for one Mohr Coulomb 2D plasticity
