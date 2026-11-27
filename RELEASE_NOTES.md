@@ -4,7 +4,7 @@
 **Tag:** `2026-11` (version number `2026.11` in the `VERSION` file)
 **Previous Release:** 4.5.0 (March 2024)
 **Release candidates:** 2026.rc1, 2026.rc2, 2026.rc3
-**Commits:** about 2000 since 4.5.0 (about 110 since 2026.rc3)
+**Commits:** about 2000 since 4.5.0 (about 130 since 2026.rc3)
 
 ---
 
@@ -131,6 +131,22 @@ Documentation in `docs/devel/FEM_PLASTICITY_SCHEME.md`.
   closed-form case that is not finite.
 - The short-name macros of the friction solver IDs (`FC3D_NSGS`, `OC_NSN`, ...) were removed:
   use the `SICONOS_FRICTION_*` names.
+- **Projections on convex sets and natural-map error** (`numerics/src/tools/convex_sets`,
+  documentation in `docs/devel/NATURAL_MAP_ERROR.md`): one file per kind of set with its
+  Jacobian (orthant and box, ball, cylinder and positive cylinder, second-order cones in any
+  dimension, rolling cone), a `ConvexSet` description and one scaled error
+  (`natural_map_error.h`, replaces `SOC_scaling.h`; the scaling options iparam 24-26 and
+  dparam 5 are shared by FC2D, FC3D, GFC2D, GFC3D and Plasticity). The errors of LCP, Relay,
+  friction (local, global, rolling, Tresca) and plasticity problems are computed by it and
+  unchanged up to round-off. Fixed on the way: the Tresca projection moved `r_T` to the
+  boundary when `r_N < 0`, `projectionOnGeneralCylinder` (SOCLCP) was an empty stub,
+  `projectionOnSecondOrderCone` exited for a dimension other than 3.
+- Plasticity: the Von Mises hypothesis (plane strain, plane stress, ball) is saved in the
+  `.dat` files (a plane stress problem was read back as plane strain); the local solvers
+  report a relative residual (converged local solutions were discarded by the NSGS filter
+  with large stresses); the error scaling `rho` is computed once per solve; the Python
+  bindings raise `TypeError` for output arrays that would be silently copied.
+- `GFC3D_IPM_SNM_WR` is registered under its own name (lookup by name failed).
 
 ### IO
 - `siconos_filter`: copy of v1 files (scalar datasets, attributes, empty tables, numpy 2),
@@ -138,6 +154,21 @@ Documentation in `docs/devel/FEM_PLASTICITY_SCHEME.md`.
   also removes the joints, permanent interactions, boundary conditions and `cf_info` rows of
   an excluded object.
 - `siconos_svg`: SVG pictures and animations of 2D scenes.
+- `mechanics_run`: plugins given as addons and external functions as Python callables
+  (lost in the pybind11 port); joints referred to by a coupler imported before it; 2D
+  contactor translations completed with `z = 0`; `solver_options_pos` written from its own
+  options; backup only with `output_backup` (a `"w"` file is reopened in `"r+"`).
+- Bullet bodies: the `fext` and `allow_self_collide` attributes are applied (they were
+  read but ignored); `RigidBodyDS.setAllowSelfCollide` binding.
+- `MechanicsHdf5`: shape, object and permanent interaction ids resume from the file in `r+`
+  and append modes; interaction ids reset at scene import (`Interaction.resetCount`), so they
+  do not depend on the simulations run before in the same process.
+- Several simulations in one process: segfault in `SiconosBulletCollisionManager` when a
+  world is destroyed fixed.
+- `MechanicsIO`: `cf_work` and `cf_info` rows zeroed (Eigen leaves them uninitialized) and
+  the work of `NewtonEulerVelocityR` computed; `occ_tools` inertia of a `Volume` on a plain
+  `MechanicsHdf5`; `siconos_filter --exclude` also removes the contacts with an excluded
+  fixed body; temporary files with a default suffix (VTK wrote empty VTP files).
 - `MechanicsIO` (`contactPoints`, `contactInfo`, `contactContactWork`,
   `contactInternalVariables`): the width of the contact rows comes from the contacts. With
   joints and contacts in the same index set, the rows were truncated to 0 columns and the
@@ -171,7 +202,9 @@ The migration tables are in the rc notes; in short:
    compile with deprecation warnings.
 3. Numerics: function and solver renamings (rc2 notes, items 7 and 8; aliases in
    `deprecated_numerics_api.h`), `Plasticity2DProblem` instead of `MohrCoulomb2DProblem`,
-   short-name macros of the friction solver IDs removed.
+   short-name macros of the friction solver IDs removed. Projections renamed without
+   compatibility headers (`projectionOnCone` → `soc_projection_3d`, `SOC_scaling.h` →
+   `natural_map_error.h`, ...; table in `docs/devel/NATURAL_MAP_ERROR.md`).
 4. Python: pybind11 bindings, new module layout (`siconos.modeling`, `siconos.simulation`,
    `siconos.integrators`, `siconos.nonsmooth_formulations`, ...), `copy_t`/`alias_t`
    arguments, matrices in column-major order.

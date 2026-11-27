@@ -83,7 +83,7 @@
     ],
     "codeRepository": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos",
     "dateCreated": "2004-01-01",
-    "dateModified": "2026-11-24",
+    "dateModified": "2026-11-27",
     "description": "Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python",
     "downloadUrl": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/releases",
     "identifier": "swh:1:dir:7d7edd5890f7687663c121abe1c3818a16f1cdb2",

@@ -40,6 +40,15 @@ Main changes since 2026.rc3:
 	* [numerics] friction solvers keep the user options, parallel fc2d fixes,
 	  rfc2d ENUM fast path
 	* [numerics] short-name macros of the friction solver IDs removed
+	* [numerics] projections on convex sets (tools/convex_sets) and one
+	  natural-map error (natural_map_error.h replaces SOC_scaling.h) for
+	  LCP, Relay, friction and plasticity; projectionOn* renamed (table in
+	  docs/devel/NATURAL_MAP_ERROR.md); Tresca projection fixed
+	* [numerics] Plasticity: Von Mises hypothesis saved in .dat files,
+	  relative local residuals; GFC3D_IPM_SNM_WR registered under its name
+	* [io] mechanics_run: plugins as addons, python callables; bullet body
+	  attributes fext and allow_self_collide applied; ids resumed in r+ mode
+	  and reset at scene import; several simulations in one process fixed
 	* [io] siconos_filter for v1 files, siconos_svg (2D scenes)
 	* [io] MechanicsIO: contact rows width from the contacts (joints and
 	  contacts in the same index set gave rows of width 0)
