@@ -242,6 +242,8 @@ int plasticity_printInFile(PlasticityProblem* problem, FILE* file) {
         }
         fprintf(file, "\n");
       }
+      /* yield set (optional in the file: absent in older files, read as plane strain) */
+      fprintf(file, "%d\n", (int)GET_VON_MISES(problem)->hypothesis);
       break;
     }
     default:
@@ -335,6 +337,12 @@ PlasticityProblem* plasticity_newFromFile(FILE* file) {
       for (size_t i = 0; i < nc; i++) {
         check_io(fscanf(file, "%lf ", &(model->sigma_y[i])));
       }
+      /* yield set: optional (older files end after sigma_y), default plane strain */
+      int hypothesis = PLASTICITY_VONMISES_PLANE_STRAIN;
+      if (fscanf(file, "%d", &hypothesis) == 1 &&
+          hypothesis >= PLASTICITY_VONMISES_PLANE_STRAIN &&
+          hypothesis <= PLASTICITY_VONMISES_BALL)
+        model->hypothesis = (PlasticityVonMisesHypothesis)hypothesis;
       problem->model.von_mises = model;
       break;
     }
