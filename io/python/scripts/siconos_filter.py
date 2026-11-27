@@ -73,6 +73,7 @@ class CopyVisitor:
         self.times = None
         self.excluded_objects = None
         self.excluded_names = []
+        self.excluded_interactions = np.empty(0)
         # rows of the input kept in each table that has a step index
         self.kept = {}
 
@@ -107,6 +108,19 @@ class CopyVisitor:
                     inp[name].attrs["id"] for name in self.excluded_names
                 ]
                 print(f"Excluding object IDs {self.excluded_objects}")
+                # the interactions of the excluded objects: cf_info names the
+                # fixed body of a contact (static_body; ds2 = ds1 in cf)
+                info = obj.file["data"].get("cf_info")
+                info = info[()] if info is not None and info.shape[0] else None
+                self.excluded_interactions = (
+                    np.unique(
+                        info[
+                            np.isin(info[:, 2:5], self.excluded_objects).any(axis=1), 1
+                        ]
+                    )
+                    if info is not None and info.shape[1] >= 5
+                    else np.empty(0)
+                )
 
         # If we are copying an excluded object, return early
         if self.excluded_objects is not None and "data/input/" in path:
@@ -166,9 +180,12 @@ class CopyVisitor:
 
             # Filter current indexes
             tables = ["data/cf", "data/dynamic", "data/velocities", "data/static"]
-            # columns of the objects of a row: ds_id, in cf and cf_info: ds1, ds2
+            # columns of the objects of a row: ds_id, in cf: ds1, ds2, in cf_info:
+            # ds1, ds2, static_body; and the column of the interaction of a contact
             objects = {table: slice(1, 2) for table in tables}
-            objects.update({"data/cf": slice(-2, None), "data/cf_info": slice(2, 4)})
+            objects.update({"data/cf": slice(-2, None), "data/cf_info": slice(2, 5)})
+            objects["data/cf_work"] = slice(0, 0)
+            interaction = {"data/cf": 23, "data/cf_info": 1, "data/cf_work": 1}
             if index is not None or path in objects:
                 if self.time_idx is not None:
                     # Get indexes of corresponding times in current dataset
@@ -189,6 +206,10 @@ class CopyVisitor:
                 if self.excluded_objects is not None and path in objects:
                     ids = obj[:, objects[path]]
                     excluded = np.isin(ids, self.excluded_objects).any(axis=1)
+                    if path in interaction and obj.shape[1] > interaction[path]:
+                        excluded |= np.isin(
+                            obj[:, interaction[path]], self.excluded_interactions
+                        )
                     ex_idx = excluded.nonzero()[0]
                     if time_idx is None:
                         time_idx = np.arange(obj.shape[0])

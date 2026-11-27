@@ -89,6 +89,52 @@ def rotate_point(x, y, alpha):
     return x_new, y_new
 
 
+def _relative_translation(translation, center_of_mass):
+    """translation - center_of_mass, a translation of 2 values (2D contactor, kept
+    as given by the writer) completed with z = 0."""
+
+    def pad3(values):
+        v = np.asarray(values, dtype=np.float64).ravel()
+        return np.concatenate([v, np.zeros(3 - v.size)]) if v.size < 3 else v
+
+    return pad3(translation) - pad3(center_of_mass)
+
+
+def _addons_directory():
+    """The directory of the addons of the run (as the siconos command: the one of the
+    script, <script dir>/addons), else the working directory."""
+    script = sys.argv[0] if sys.argv and sys.argv[0] else ""
+    if script.endswith(".py") and os.path.isfile(script):
+        return os.path.dirname(os.path.abspath(script))
+    return os.getcwd()
+
+
+def _addon_module(plugin_name, directory):
+    """The addon addons.<plugin_name> (a pybind11 module built by the siconos command
+    from <directory>/addons/<plugin_name>.cpp), None if it cannot be imported."""
+    import importlib
+
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+    importlib.invalidate_caches()
+    try:
+        return importlib.import_module(f"addons.{plugin_name}")
+    except ImportError:
+        return None
+
+
+def _setter(obj, name):
+    """The method name of obj, or the one of the same name in another case (the C++
+    names in the files: setComputeFExtFunction for setComputeFextFunction)."""
+    method = getattr(obj, name, None)
+    if method is None:
+        lower = name.lower()
+        method = next((getattr(obj, n) for n in dir(obj) if n.lower() == lower), None)
+    if method is None:
+        raise AttributeError(f"{type(obj).__name__} has no method {name}")
+    return method
+
+
 class RunnerConfig:
     """A class to manage the backend and the default classes to be used
 
@@ -816,7 +862,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._collision_margin = collision_margin
         self._output_frequency = 1
         self._output_backup_frequency = 1
-        self._keep = []
         self._scheduled_births = []
         self._scheduled_deaths = []
         self._births = {}
@@ -1625,15 +1670,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     body = body_class(self._q0[-1], self._v0[-1], mass, inertia)
                     body.setUseContactorInertia(True)
 
-                self.fext.append(
-                    self._format_adaptor["input"][name].get("allow_self_collide", None)
-                )
-                if self.fext[-1] is not None:
-                    body.setConstantFext(self.fext[-1], siconos.modeling.alias_t)
-
-                self_collide = self._format_adaptor["input"][name].get(
-                    "allow_self_collide", None
-                )
+                # attributes of the body (not child datasets); the fext is set below,
+                # after _set_external_forces, which would overwrite it
+                body_attrs = self._format_adaptor["input"][name].attrs
+                self.fext.append(body_attrs.get("fext", None))
+                self_collide = body_attrs.get("allow_self_collide", None)
                 if self_collide is not None:
                     body.setAllowSelfCollide(bool(self_collide))
 
@@ -1656,8 +1697,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if number is not None:
                     body.setNumber(int(number))
 
-                # set external forces
+                # set external forces; the fext of the scene replaces them (as
+                # setConstantFext: give the weight in it to keep it)
                 self._set_external_forces(body)
+                if self.fext[-1] is not None:
+                    body.setConstantFext(self.fext[-1], siconos.modeling.alias_t)
 
                 # add the dynamical system to the non smooth
                 # dynamical system
@@ -2124,8 +2168,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         collision_group=ctr.attrs["group"].astype(int),
                         contact_type=ctr.attrs["type"],
                         contact_index=ctr.attrs["contact_index"].astype(int),
-                        relative_translation=np.subtract(
-                            ctr.attrs["translation"].astype(float), center_of_mass
+                        relative_translation=_relative_translation(
+                            ctr.attrs["translation"], center_of_mass
                         ),
                         relative_orientation=ctr.attrs["orientation"].astype(float),
                     )
@@ -2140,8 +2184,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         instance_name=ctr.attrs["instance_name"],
                         shape_name=ctr.attrs["shape_name"],
                         collision_group=ctr.attrs["group"].astype(int),
-                        relative_translation=np.subtract(
-                            ctr.attrs["translation"].astype(float), center_of_mass
+                        relative_translation=_relative_translation(
+                            ctr.attrs["translation"], center_of_mass
                         ),
                         relative_orientation=ctr.attrs["orientation"].astype(float),
                     )
@@ -2154,8 +2198,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     siconos.mechanics.collision.tools.Shape(
                         instance_name=ctr.attrs["instance_name"],
                         shape_name=ctr.attrs["shape_name"],
-                        relative_translation=np.subtract(
-                            ctr.attrs["translation"].astype(float), center_of_mass
+                        relative_translation=_relative_translation(
+                            ctr.attrs["translation"], center_of_mass
                         ),
                         relative_orientation=ctr.attrs["orientation"].astype(float),
                     )
@@ -2419,11 +2463,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
 
         # Ensure we count up from zero for implicit DS numbering
+        # and for the interactions (their number is the contact id of the outputs):
+        # the same numbers whatever was run before in the process
         if self.config.backend != "vnative":
             sm.DynamicalSystem.resetCount(0)
-
-        for _ in self._format_adaptor["ref"]:
-            self._number_of_shapes += 1
+            sm.Interaction.resetCount(0)
 
         # import dynamical systems
         if self._interman is not None and "input" in self._data:
@@ -2569,7 +2613,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # of the object has a time of birth this will fail.
 
             self.print_verbose("import joints ...")
-            for name in self.joints():
+            # the joints that refer to other joints (CouplerJointR) after them
+            joints = self.joints()
+            for name in sorted(joints, key=lambda n: "references" in joints[n].attrs):
                 self.import_joint(name)
 
             self.print_verbose("import permanent interactions ...")
@@ -3557,15 +3603,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         sop = d["solver_options_pos"]
         if sop:
             d["solver_options_pos"] = {}
-            d["solver_options_pos"]["solverId"] = so.solverId
-            d["solver_options_pos"]["solver name"] = so.solverId
-            d["solver_options_pos"]["iparam size"] = so.iSize
-            for i in range(so.iSize):
-                d["solver_options_pos"]["iparam[" + str(i) + "]"] = int(so.iparam[i])
-            for i in range(so.dSize):
-                if so.dparam[i] <= 1e24:
+            d["solver_options_pos"]["solverId"] = sop.solverId
+            d["solver_options_pos"]["solver name"] = sop.solverId
+            d["solver_options_pos"]["iparam size"] = sop.iSize
+            for i in range(sop.iSize):
+                d["solver_options_pos"]["iparam[" + str(i) + "]"] = int(sop.iparam[i])
+            for i in range(sop.dSize):
+                if sop.dparam[i] <= 1e24:
                     d["solver_options_pos"]["dparam[" + str(i) + "]"] = float(
-                        so.dparam[i]
+                        sop.dparam[i]
                     )
             # d['solver_options_pos']['numberOfInternalSolvers']=so.numberOfInternalSolvers
             # fix it
@@ -3670,6 +3716,45 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         msg += f" precision = {precision:5.3e}"
         self.print_verbose(msg)
 
+    def import_plugins(self):
+        """The plugins of the file are addons: pybind11 modules that the siconos
+        command builds from <script dir>/addons/*.cpp before running the script. The
+        source of a missing addon, stored in the file, is copied to addons/ and the run
+        stops: run the script again with the siconos command, which builds it."""
+        directory = _addons_directory()
+        plugins = self._format_adaptor["plugins"]
+        missing = []
+        for name in plugins:
+            filename = os.path.basename(plugins[name].attrs["filename"])
+            if _addon_module(os.path.splitext(filename)[0], directory) is not None:
+                continue
+            path = os.path.join(directory, "addons", filename)
+            if not os.path.isfile(path):
+                text = plugins[name][()]
+                if getattr(text, "shape", ()) != ():
+                    text = text[0]  # a (1,) dataset (text_data)
+                text = text.decode() if isinstance(text, bytes) else str(text)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w") as f:
+                    f.write(text)
+            missing.append(path)
+        if missing:
+            raise RuntimeError(
+                f"addons not built: {missing}; run the script with the siconos "
+                "command (siconos <script>.py), which builds <script dir>/addons"
+            )
+
+    def _external_function(self, plugin_name, plugin_function_name):
+        """The function plugin_function_name of the addon plugin_name."""
+        module = _addon_module(plugin_name, _addons_directory())
+        if module is None:
+            raise RuntimeError(
+                f"external function {plugin_function_name}: no addon {plugin_name} "
+                f"(addons/{plugin_name}.cpp next to the script, built by the siconos "
+                "command, or a plugin source in the file)"
+            )
+        return getattr(module, plugin_function_name)
+
     def import_external_functions(self):
         topo = self._nsds.topology()
 
@@ -3684,13 +3769,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if "function_name" in ext_fun.attrs:
                 function_name = ext_fun.attrs["function_name"]
 
-                getattr(ds, function_name)(plugin_name, plugin_function_name)
+                _setter(ds, function_name)(
+                    self._external_function(plugin_name, plugin_function_name)
+                )
             else:
                 bc_indices = ext_fun.attrs["bc_indices"]
                 # a boundary condition
                 bc = sm.BoundaryCondition(bc_indices)
                 bc.setComputePrescribedVelocityFunction(
-                    plugin_name, plugin_function_name
+                    self._external_function(plugin_name, plugin_function_name)
                 )
                 ds.setBoundaryConditions(bc)
 
@@ -4758,10 +4845,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if self._svg is not None:
                 self.log(self.output_svg, with_timer)(cond or self._k == 1)
 
-            if (
-                self._output_backup
-                and (self._k % self._output_backup_frequency == 0)
-                or (self._k == 1)
+            if self._output_backup and (
+                self._k % self._output_backup_frequency == 0 or self._k == 1
             ):
                 # close io file, hdf5 memory is cleaned
                 self._out.close()
@@ -4769,8 +4854,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     shutil.copyfile(self._io_filename, self._io_filename_backup)
                 except shutil.Error as e:
                     siconos.io.tools.warn(str(e))
-                # open the file again
+                # open the file again: it exists, "w" would truncate it
                 finally:
+                    if self._mode == "w":
+                        self._mode = "r+"
                     self.__enter__()
 
             self.log(self._simulation.clearNSDSChangeLog, with_timer)()
