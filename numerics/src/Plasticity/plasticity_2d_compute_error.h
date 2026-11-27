@@ -57,6 +57,24 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
                                 double tolerance, SolverOptions* options, double norm,
                                 double* error);
 
+/** plasticity_2d_compute_error with the per-element rho precomputed by
+ *  plasticity_2d_compute_error_rho (it depends on M only): used by the solvers to avoid
+ *  extracting the diagonal blocks of M at every evaluation of the error.
+ *  \param rho_element per-element rho (size numberOfCones), NULL: computed here
+ *  (other parameters: see plasticity_2d_compute_error)
+ */
+int plasticity_2d_compute_error_with_rho(PlasticityProblem* problem, double* z, double* w,
+                                         double tolerance, SolverOptions* options, double norm,
+                                         double* error, const double* rho_element);
+
+/** Per-element rho of plasticity_2d_compute_error (PLASTICITY_SCALING_RHO_ELEMENT):
+ *  rho_e = 1/||T^T M_ee T||_F, T the change of variables to the variables of the solvers.
+ *  \param problem the problem
+ *  \param[out] rho per-element rho (size numberOfCones)
+ *  \return 0
+ */
+int plasticity_2d_compute_error_rho(PlasticityProblem* problem, double* rho);
+
 /** Error of one Drucker-Prager cone with the default scaling of plasticity_2d_compute_error
  *  (MIXED, rho = 1/||M||_F): ||r - P_K(r - rho v)|| / max(1, ||r|| + rho ||v||),
  *  v = w + theta ||w_T|| e_N, w = M r + q. Used by the local solvers
