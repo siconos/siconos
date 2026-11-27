@@ -7,6 +7,7 @@
 
 #include "FiniteElementModel.hpp"
 
+#include <cmath>
 #include <iostream>
 #include <memory>
 
@@ -369,8 +370,34 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryMassMatri
   }
 }
 
+siconos::algebra::SiconosMatrix33 siconos::mechanics::fem::elasticityTensor2D(
+    const Material& mat) {
+  double E = mat.elasticYoungModulus();
+  double nu = mat.Poisson_s_ratio();
+  siconos::algebra::SiconosMatrix33 Dmat;
+  Dmat.setZero();
+  if (mat.analysisType2D() == AnalysisType2D::plane_strain) {
+    double coef = E / ((1 + nu) * (1 - 2. * nu));
+    Dmat(0, 0) = coef * (1. - nu);
+    Dmat(0, 1) = coef * nu;
+    Dmat(1, 0) = Dmat(0, 1);
+    Dmat(1, 1) = Dmat(0, 0);
+    Dmat(2, 2) = 0.5 * coef * (1.0 - 2 * nu);
+  } else if (mat.analysisType2D() == AnalysisType2D::plane_stress) {
+    double coef = E / (1 - nu * nu);
+    Dmat(0, 0) = coef;
+    Dmat(0, 1) = coef * nu;
+    Dmat(1, 0) = Dmat(0, 1);
+    Dmat(1, 1) = Dmat(0, 0);
+    Dmat(2, 2) = 0.5 * coef * (1.0 - nu);
+  } else
+    THROW_EXCEPTION("elasticityTensor2D: type of analysis not yet implemented");
+  return Dmat;
+}
+
 void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
-    siconos::algebra::SiconosSparseMatrix& M, const std::map<int, const Material>& mat) {
+    siconos::algebra::SiconosSparseMatrix& M, const std::map<int, const Material>& mat,
+    MassType massType) {
   /* loop over the elements */
   for (auto fe : elements()) {
     // to be optimized if all the element are similar
@@ -381,10 +408,27 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
 
     if (fe->mElement()->type() == FiniteElementType::B2 ||
         fe->mElement()->type() == FiniteElementType::B3) {
+      if (massType == MassType::lumped)
+        THROW_EXCEPTION(
+            "FiniteElementModel::computeMassMatrix: lumped mass not available for beams");
       computeBeamElementaryMassMatrix_direct(Me, *fe, mat);
     } else {
-      double massDensity = mat.at(fe->mElement()->tags(0)).massDensity();
+      const Material& material = mat.at(fe->mElement()->tags(0));
+      double massDensity = material.massDensity();
+      if (mesh_->dim() == 2) massDensity *= material.thickness();
       computeElementaryMassMatrix(Me, *fe, massDensity);
+      if (massType == MassType::lumped) {
+        // row-sum lumping
+        for (siconos::algebra::Index i = 0; i < ndofElement; i++) {
+          double mii = Me.row(i).sum();
+          if (mii <= 0.0)
+            THROW_EXCEPTION(
+                "FiniteElementModel::computeMassMatrix: non-positive lumped mass (element "
+                "type not suited to row-sum lumping)");
+          Me.row(i).setZero();
+          Me(i, i) = mii;
+        }
+      }
     }
     assembleElementaryMatrix(M, Me, *fe);
   }
@@ -918,30 +962,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
       double nu = mat.Poisson_s_ratio();
 
       if (mesh_->dim() == 2) {
-        siconos::algebra::SiconosMatrix33 Dmat;
-        Dmat.setZero();
-
-        if (mat.analysisType2D() == AnalysisType2D::plane_strain) {
-          double coef = E / ((1 + nu) * (1 - 2. * nu));
-          Dmat(0, 0) = coef * (1. - nu);
-          Dmat(0, 1) = coef * nu;
-
-          Dmat(1, 0) = Dmat(0, 1);
-          Dmat(1, 1) = Dmat(0, 0);
-
-          Dmat(2, 2) = 0.5 * coef * (1.0 - 2 * nu);
-        } else if (mat.analysisType2D() == AnalysisType2D::plane_stress) {
-          double coef = E / (1 - nu * nu);
-          Dmat(0, 0) = coef;
-          Dmat(0, 1) = coef * nu;
-
-          Dmat(1, 0) = Dmat(0, 1);
-          Dmat(1, 1) = Dmat(0, 0);
-          Dmat(2, 2) = 0.5 * coef * (1.0 - nu);
-        } else
-          THROW_EXCEPTION(
-              "siconos::mechanics::fem::FiniteElementModel::"
-              "computeStiffnessMatrix. Type of analysis not yet implemented");
+        siconos::algebra::SiconosMatrix33 Dmat = elasticityTensor2D(mat);
         computeElementaryStiffnessMatrix(Ke, *fe, Dmat, mat.thickness());
       } else if (mesh_->dim() == 3) {
         // Compute 3D elastic tensor.
@@ -1099,6 +1120,9 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direc
   B = 1.0 / twoA * B;
   double coeff = sqrt(twoA / 2.0 * thickness);
   B = coeff * B;
+  // Mandel notation for the stress unknowns of SolidLinearTIDS: the strain is
+  // (exx, eyy, sqrt2 exy) = (exx, eyy, gamma_xy / sqrt2)
+  B.row(2) *= M_SQRT1_2;
 }
 
 void siconos::mechanics::fem::FiniteElementModel::
@@ -1196,17 +1220,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeElasticityMatrix(
         assembleElementary_S_Matrix(S, Dinv, *fe, elem_cnt);
 
       } else {  // Other types of 2D elements
-        siconos::algebra::SiconosMatrix33 Dmat;
-        Dmat.setZero();
-        auto nu = mat.Poisson_s_ratio();
-        auto coef = E / ((1 + nu) * (1 - 2. * nu));
-        Dmat(0, 0) = coef * (1. - nu);
-        Dmat(0, 1) = coef * nu;
-        Dmat(1, 0) = Dmat(0, 1);
-        Dmat(1, 1) = Dmat(0, 0);
-        Dmat(2, 2) = 0.5 * coef * (1.0 - 2 * nu);
-
-        Dmat = Dmat.inverse().eval();  // We need the inverse
+        // compliance in Mandel notation: D_M = T D T, T = diag(1, 1, sqrt2) (D in Voigt
+        // notation with the engineering shear strain), i.e. D_M(2, 2) = 2 G
+        const Eigen::Vector3d T{1.0, 1.0, M_SQRT2};
+        siconos::algebra::SiconosMatrix33 Dmat =
+            (T.asDiagonal() * elasticityTensor2D(mat) * T.asDiagonal()).inverse();
         assembleElementary_S_Matrix(S, Dmat, *fe, elem_cnt);
       }
       elem_cnt++;

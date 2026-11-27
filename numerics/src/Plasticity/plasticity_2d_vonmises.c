@@ -302,13 +302,14 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
     DEBUG_PRINTF("Von Mises FP: it %d, rho = %e, residual = %e\n", it, rho, res);
   }
   p->iter_done = it;
-  p->residual = res;
-  return (res > p->tol * (1.0 + vonmises_norm3(stress))) ? 1 : 0;
+  /* relative residual, consistent with the stopping test */
+  p->residual = res / (1.0 + vonmises_norm3(stress));
+  return (p->residual > p->tol) ? 1 : 0;
 }
 
 /* generalized Jacobian of the projection on C at y (column-major) */
-static void vonmises_projection_jacobian(int ball, const double y[3], double sigma_y,
-                                         double J[9]) {
+void plasticity_2d_vonMises_projection_jacobian(int ball, const double y[3], double sigma_y,
+                                                double J[9]) {
   if (ball) {
     double n = vonmises_norm3(y);
     for (int i = 0; i < 9; i++) J[i] = 0.0;
@@ -353,7 +354,7 @@ static double vonmises_newton_map(void* data, double rho, const double s[3], dou
   if (H) {
     /* H = I - J_P(y) (I - rho M) */
     double J[9], A[9];
-    vonmises_projection_jacobian(d->ball, y, d->sigma_y, J);
+    plasticity_2d_vonMises_projection_jacobian(d->ball, y, d->sigma_y, J);
     for (int i = 0; i < 9; i++) A[i] = -rho * d->M[i];
     A[0] += 1.0;
     A[4] += 1.0;

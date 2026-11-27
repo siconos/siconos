@@ -294,9 +294,17 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
           auto ds = DSG.bundle(*dsi);
-          auto W = DSG.properties(*dsi).iterationMatrix.get();
           pos = DSG.properties(*dsi).absolute_position;
-          siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
+          if (auto Ws = DSG.properties(*dsi).iterationMatrixSparse)
+            siconos::algebra::fillTriplet(*Ws, Mtriplet, pos, pos);
+          else {
+            auto W = DSG.properties(*dsi).iterationMatrix.get();
+            if (!W)
+              THROW_EXCEPTION(
+                  "siconos:simulation::OSNSMatrix::fillW: no iteration matrix for a "
+                  "dynamical system");
+            siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
+          }
           DEBUG_PRINTF("pos = %u \n", pos);
         }
         _triplet_nzmax = NM_nnz(&M_NM);
@@ -464,16 +472,15 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
             size_t sizeDS = ds->dimension();
             auto sods = dynamic_cast<siconos::modeling::SecondOrderDS*>(ds.get());
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
-            if (sods && sods->boundaryConditions()) {
+            // The velocity boundary conditions remove the constrained velocity columns of
+            // H; a StressLinearTIR acts on the stresses only and is not concerned (zeroing
+            // its columns at the velocity indices removed unrelated stress components).
+            if (sods && sods->boundaryConditions() &&
+                relationSubType != modeling::RelationSubType::StressLinearTIR) {
               auto bc = sods->boundaryConditions();
 
               siconos::algebra::SiconosDenseMatrix inter_block =
                   inter.getLeftInteractionBlock();
-              if (relationSubType == modeling::RelationSubType::StressLinearTIR) {
-                abs_pos_ds += sizeDS;  // In that case, H applies to stress and is applied
-                                       // after the velocity dimension
-                sizeDS = ds->real_size() - ds->dimension();
-              }
               for (auto idcol : bc->velocityIndices()) {
                 inter_block.col(posBlock + idcol).setZero();
               }

@@ -18,7 +18,18 @@
  * stress relation.
  * - \f$M\dot v + K u +  B^T \sigma = F_{ext}(t,z) + p
  * v = \dot u
- * \dot \sigma = B v + \dot \epsilon_p \f$
+ * S \dot \sigma = B v - \dot \epsilon_p \f$
+ *
+ * with S the compliance (elasticityMatrix()) and B the strain operator (BMatrix()).
+ * For the continuum (T3) elements, the stresses and strains are in Mandel notation,
+ * sigma = (sxx, syy, sqrt2 sxy), epsilon = (exx, eyy, sqrt2 exy) (orthonormal: the
+ * Euclidean product and norm are the tensor ones), and the stress unknowns of element e
+ * are scaled by sqrt(A_e t) (see elementStressSelection()).
+ * Plasticity is enforced by StressLinearTIR interactions: their multipliers give the
+ * plastic deformation rate \f$ \dot\epsilon_p \f$ (plasticRate(), computed by
+ * fem::integrators::MoreauJeanOSI::updateInput, reset at each input update), integrated
+ * into the plastic deformation \f$ \epsilon_p \f$ (plasticDeformation()) in
+ * MoreauJeanOSI::updateState. See docs/devel/FEM_PLASTICITY_SCHEME.md.
  */
 namespace siconos::mechanics::fem {
 class SolidLinearTIDS : public FiniteElementLinearTIDS {
@@ -61,15 +72,18 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
   /** memory of previous coordinates of the system */
   siconos::algebra::SiconosMemory stressMemory_;
   //  siconos::algebra::SiconosMemory stressRateMemory_;
-  // siconos::algebra::SiconosMemory plasticDeformationMemory_;
+  /** memory of the plastic deformation (epsilon_p at the beginning of the step) */
+  siconos::algebra::SiconosMemory plasticDeformationMemory_;
   // siconos::algebra::SiconosMemory plasticRate_Memory_;
 
  public:
   /** @brief Standard constructor from FE mesh and material description
    *  @param[in] mesh the mesh that defined the spatial discretization
    *  @param[in] materials map describing the different material properties
+   *  @param[in] massType consistent (default) or lumped (diagonal) mass matrix
    */
-  SolidLinearTIDS(std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials);
+  SolidLinearTIDS(std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials,
+                  MassType massType = MassType::consistent);
 
   /** destructor */
   ~SolidLinearTIDS() noexcept = default;
@@ -264,6 +278,24 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
 
   inline siconos::algebra::Index stressDimension() const { return dimStress_; }
 
+  /** @brief selection of the physical stress of a 2D continuum element (T3)
+   *
+   *  The stress unknowns are scaled, sigma~_e = sqrt(A_e t) sigma_e (see BMatrix()). The
+   *  returned 3 x stressDimension() matrix C gives C sigma~ = sigma_e, the physical stress
+   *  of the element in Mandel notation (sxx, syy, sqrt2 sxy): the matrix of a
+   *  StressLinearTIR whose output is the
+   *  physical stress.
+   *  @param element index of the element (order of FEModel()->elements())
+   *  @return C (dense)
+   */
+  siconos::algebra::SiconosMatrix elementStressSelection(size_t element) const;
+
+  /** @return sqrt(A_e t), the scaling of the stress unknowns of the 2D continuum element
+   *  (T3) e
+   *  @param element index of the element (order of FEModel()->elements())
+   */
+  double elementStressScaling(size_t element) const;
+
   /** initialize the internal memory buffers
    *
    *  @param size the size of the siconos::algebra::SiconosMemory. must be >= 0
@@ -272,11 +304,24 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS {
 
   inline const siconos::algebra::SiconosMemory& stressMemory() { return stressMemory_; }
 
+  /** @return the memory of the plastic deformation */
+  inline const siconos::algebra::SiconosMemory& plasticDeformationMemory() {
+    return plasticDeformationMemory_;
+  }
+
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
    *  \todo Modify the function swapIn Memory with the new Object Memory
    */
   void swapInMemory() override;
+
+  /** reset the nonsmooth parts p[level] and the plastic deformation rate, which the
+   *  stress interactions fill by accumulation (one contribution per interaction) */
+  void resetAllNonSmoothParts() override;
+
+  /** reset the nonsmooth part p[level] and, for level 1, the plastic deformation rate
+   *  @param level the level */
+  void resetNonSmoothPart(siconos::algebra::blocks::size_type level) override;
 
   modeling::Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };

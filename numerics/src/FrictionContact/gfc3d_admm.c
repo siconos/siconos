@@ -33,11 +33,6 @@
 #include "NumericsVector.h"
 #include "siconos_debug.h"
 
-// Short name for solver ID
-#ifndef SICONOS_GLOBAL_FRICTION_3D_ADMM
-#define SICONOS_GLOBAL_FRICTION_3D_ADMM SICONOS_GLOBAL_FRICTION_3D_ADMM
-#endif
-
 typedef struct {
   double* reaction_hat;
   double* reaction_k;

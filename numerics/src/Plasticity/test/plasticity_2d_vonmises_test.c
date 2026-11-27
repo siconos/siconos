@@ -388,8 +388,48 @@ static void test_not_trivial(void) {
   printf("\n");
 }
 
+/* the yield set (hypothesis) is saved and read back; files without it give plane strain */
+static void test_file_hypothesis(void) {
+  printf("=== Von Mises, hypothesis in data files ===\n");
+  double* M = (double*)calloc(9, sizeof(double));
+  M[0] = M[4] = M[8] = 1.;
+  double* q = (double*)calloc(3, sizeof(double));
+  double* sigma_y = (double*)malloc(sizeof(double));
+  sigma_y[0] = 0.5;
+  PlasticityProblem* problem = plasticityProblem_new();
+  problem->dimension = 3;
+  problem->numberOfCones = 1;
+  problem->M = NM_create_with_data(NM_DENSE, 3, 3, M);
+  problem->q = q;
+  problem->model_type = PLASTICITY_MODEL_VON_MISES;
+  problem->model.von_mises = plasticity_VonMises_model_new(sigma_y);
+  problem->model.von_mises->hypothesis = PLASTICITY_VONMISES_PLANE_STRESS;
+  FILE* file = tmpfile();
+  if (!file) {
+    check(0, "tmpfile", 0.);
+    plasticityProblem_free(problem);
+    return;
+  }
+  plasticity_printInFile(problem, file);
+  rewind(file);
+  PlasticityProblem* read = plasticity_newFromFile(file);
+  fclose(file);
+  check(read && read->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRESS,
+        "plane stress: saved and read back", 0.);
+  check(read && read->model.von_mises->sigma_y[0] == 0.5, "sigma_y read back", 0.);
+  if (read) plasticityProblem_free(read);
+  plasticityProblem_free(problem);
+  PlasticityProblem* old =
+      plasticity_new_from_filename("./data/plasticity_2d_vonmises_example1.dat");
+  check(old && old->model.von_mises->hypothesis == PLASTICITY_VONMISES_PLANE_STRAIN,
+        "file without hypothesis: plane strain", 0.);
+  if (old) plasticityProblem_free(old);
+  printf("\n");
+}
+
 int main(void) {
   test_not_trivial();
+  test_file_hypothesis();
   test_projection();
   test_local_solver();
   test_iterative_local_solvers();

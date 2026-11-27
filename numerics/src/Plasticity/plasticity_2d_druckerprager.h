@@ -110,6 +110,16 @@ double plasticity_2d_DruckerPrager_natural_map_residual(const double M[9], const
                                                         double eta, double theta, double rho,
                                                         const double stress[3]);
 
+/** Generalized Jacobian (3x3, column-major) of the projection on the Drucker-Prager cone
+ *  ||y_T|| <= eta y_N at y (same cases as projectionOnCone: polar cone, inside, boundary).
+ *  Used by the local and global semi-smooth Newton methods.
+ *  \param y the point
+ *  \param eta cone coefficient
+ *  \param[out] J the Jacobian
+ */
+void plasticity_2d_DruckerPrager_projection_jacobian(const double y[3], double eta,
+                                                     double J[9]);
+
 /** Return mapping of one cone: exact solution by enumeration of the cases, for any 3x3 M
  *  (not necessarily symmetric) and any dilatancy theta:
  *  - elastic: w = 0, sigma = -M^{-1} q (if in K);

@@ -30,6 +30,28 @@ typedef void (*FreeSolverPtr)();
 extern "C" {
 #endif
 
+/** Global semi-smooth Newton method on the natural map of the whole problem
+    (PLASTICITY_2D_NSN): sparse LU of the generalized Jacobian H = (I - J_P) + J_P R G M,
+    Armijo line search on 1/2 ||Phi||^2, Levenberg-Marquardt fallback. Cone coordinates,
+    Von Mises cylinder or ball, Drucker-Prager without cohesion (use plasticity_2d_driver
+    for the other problems).
+
+    \param[in] problem the plasticity problem
+    \param[in,out] stress initial guess and solution
+    \param[out] strainrate M stress + q
+    \param[out] info 0 if converged
+    \param[in,out] options: iparam[SICONOS_IPARAM_MAX_ITER], dparam[SICONOS_DPARAM_TOL],
+    iparam[PLASTICITY_NSN_LINESEARCH_MAX_ITER], iparam[PLASTICITY_NSN_LM_FALLBACK],
+    dparam[PLASTICITY_NSN_LM_COEF]; out: iterations, error (plasticity_2d_compute_error)
+*/
+void plasticity_2d_nsn(PlasticityProblem* problem, double* stress, double* strainrate,
+                       int* info, SolverOptions* options);
+
+/** default options of PLASTICITY_2D_NSN
+    \param options the options
+*/
+void plasticity_2d_nsn_set_default(SolverOptions* options);
+
 /**
     Non-Smooth Gauss Seidel solver for Mohr Coulomb 2D problem
 

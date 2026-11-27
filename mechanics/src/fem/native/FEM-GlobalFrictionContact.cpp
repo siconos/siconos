@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "FEM-MoreauJeanGOSI.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "MoreauJeanGOSI.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "Simulation.hpp"
@@ -77,6 +78,9 @@ void siconos::mechanics::fem::nonsmooth_formulations::GlobalFrictionContact::
     if (auto nslaw = std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
             inter->nonSmoothLaw()))
       _mu->push_back(nslaw->mu());
+    else if (std::dynamic_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
+                 inter->nonSmoothLaw()))
+      _mu->push_back(0.0);  // phi not used yet, see GlobalFrictionContact::updateMu
 
     // -- Dynamical systems of the current interaction
     auto ds1 = indexSet.properties(*ui).source;

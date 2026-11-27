@@ -28,6 +28,8 @@ class NormalConeNSL;
 class RelayNSL;
 class FremondImpactFrictionNSL;
 class MohrCoulombPlasticityNSL;
+class VonMisesPlasticityNSL;
+class DruckerPragerPlasticityNSL;
 
 namespace nonsmooth_laws {
 
@@ -102,6 +104,12 @@ struct Visitor {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
   virtual void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) {
+    THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
+  };
+  virtual void visit(const siconos::modeling::VonMisesPlasticityNSL& nslaw) {
+    THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
+  };
+  virtual void visit(const siconos::modeling::DruckerPragerPlasticityNSL& nslaw) {
     THROW_EXCEPTION("you must define a visit function in a derived class of NSLVisitor");
   };
 };

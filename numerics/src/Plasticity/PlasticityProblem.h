@@ -112,8 +112,8 @@ struct Plasticity_VonMises_model {
   /** \f$ {\sigma_y} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of yield stresses
       (\f$ n_c = \f$ numberOfCones) */
   double* sigma_y;
-  /** yield set: plane strain cylinder (default), plane stress ellipsoid or ball. Not saved
-      by plasticity_printInFile. */
+  /** yield set: plane strain cylinder (default), plane stress ellipsoid or ball. Saved by
+      plasticity_printInFile after sigma_y; files without it are read as plane strain. */
   PlasticityVonMisesHypothesis hypothesis;
 };
 

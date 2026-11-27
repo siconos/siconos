@@ -45,6 +45,9 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
    */
   void computeFreeState() override {};
 
+  /** W is solved by the one-step problem (GlobalFrictionContact, Plasticity): no LU */
+  bool needsIterationMatrixLU() const override { return false; }
+
   /** integrate the system, between tinit and tend (->iout=true), with possible
    *  stop at tout (->iout=false)
    *

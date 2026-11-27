@@ -20,7 +20,8 @@
 // #include "siconos_debug.h"
 
 siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
-    std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials)
+    std::shared_ptr<Mesh> mesh, const std::map<int, const Material>& materials,
+    MassType massType)
     : LagrangianSparseLinearTIDS(), mesh_(mesh), materials_(materials) {
   // Warning FP: the DS is built from default empty constructor in an unusual
   // way. Care must be taken to properly set all attributes in DS, SecondOrder,
@@ -54,7 +55,8 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   computemass_ = nullptr;
   hasLUMass_ = false;
   siconos::algebra::visitStorage<siconos::algebra::AccessMode::OwnedOnly>(
-      mass_storage_, [&](auto& matrix) { FEModel_->computeMassMatrix(matrix, materials_); },
+      mass_storage_,
+      [&](auto& matrix) { FEModel_->computeMassMatrix(matrix, materials_, massType); },
       "mass_storage_");
 
   stiffnessMatrix_storage =

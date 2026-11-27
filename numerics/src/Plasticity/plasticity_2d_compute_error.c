@@ -109,9 +109,41 @@ double plasticity_2d_DruckerPrager_local_scaled_error(const double M[9], const d
   return F / fmax(1.0, nr + nv);
 }
 
+int plasticity_2d_compute_error_rho(PlasticityProblem* problem, double* rho) {
+  double T[9], Tinv[9];
+  int change = plasticity_2d_change_of_variables(problem, T, Tinv);
+  for (int ic = 0; ic < problem->numberOfCones; ic++) {
+    double buffer[9], *B = buffer;
+    NM_extract_diag_block3(problem->M, ic, &B);
+    double By[9]; /* column-major T^T B T, T row-major */
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++) {
+        double sum = 0.0;
+        if (change) {
+          for (int k = 0; k < 3; k++)
+            for (int l = 0; l < 3; l++) sum += T[3 * k + i] * B[k + 3 * l] * T[3 * l + j];
+        } else
+          sum = B[i + 3 * j];
+        By[i + 3 * j] = sum;
+      }
+    double nB = 0.0; /* Frobenius norm (as in the local error of the local solvers) */
+    for (int i = 0; i < 9; i++) nB += By[i] * By[i];
+    nB = sqrt(nB);
+    rho[ic] = (nB > 0.0) ? 1.0 / nB : 1.0;
+  }
+  return 0;
+}
+
 int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
                                 double tolerance, SolverOptions* options, double norm,
                                 double* error) {
+  return plasticity_2d_compute_error_with_rho(problem, z, w, tolerance, options, norm, error,
+                                              NULL);
+}
+
+int plasticity_2d_compute_error_with_rho(PlasticityProblem* problem, double* z, double* w,
+                                         double tolerance, SolverOptions* options, double norm,
+                                         double* error, const double* rho_element) {
   DEBUG_BEGIN("plasticity_2d_compute_error(...)\n");
   CHECK_NULL(problem);
   CHECK_NULL(z);
@@ -161,36 +193,22 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
   }
   /* rho of the natural map (balance of the stress and of the strain rate): from the norms of
    * the diagonal blocks T^T M_ee T in the variables of the solvers */
-  double* rho = NULL;
+  const double* rho = NULL; /* per element, NULL: rho = 1 */
+  double* rho_alloc = NULL;
+  double rho_min = INFINITY;
   if (rho_mode != PLASTICITY_SCALING_RHO_ONE) {
-    rho = (double*)malloc((size_t)nc * sizeof(double));
-    if (!rho) return numerics_error("plasticity_2d_compute_error", "bad alloc");
-    double T[9], Tinv[9];
-    int change = plasticity_2d_change_of_variables(problem, T, Tinv);
-    double rho_min = INFINITY;
-    for (int ic = 0; ic < nc; ic++) {
-      double buffer[9], *B = buffer;
-      NM_extract_diag_block3(problem->M, ic, &B);
-      double By[9]; /* column-major T^T B T, T row-major */
-      for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++) {
-          double sum = 0.0;
-          if (change) {
-            for (int k = 0; k < 3; k++)
-              for (int l = 0; l < 3; l++) sum += T[3 * k + i] * B[k + 3 * l] * T[3 * l + j];
-          } else
-            sum = B[i + 3 * j];
-          By[i + 3 * j] = sum;
-        }
-      double nB = 0.0; /* Frobenius norm (as in the local error of the local solvers) */
-      for (int i = 0; i < 9; i++) nB += By[i] * By[i];
-      nB = sqrt(nB);
-      rho[ic] = (nB > 0.0) ? 1.0 / nB : 1.0;
-      rho_min = fmin(rho_min, rho[ic]);
+    if (rho_element)
+      rho = rho_element; /* precomputed once per solve by the caller */
+    else {
+      rho_alloc = (double*)malloc((size_t)nc * sizeof(double));
+      if (!rho_alloc) return numerics_error("plasticity_2d_compute_error", "bad alloc");
+      plasticity_2d_compute_error_rho(problem, rho_alloc);
+      rho = rho_alloc;
     }
     if (rho_mode == PLASTICITY_SCALING_RHO_GLOBAL)
-      for (int ic = 0; ic < nc; ic++) rho[ic] = rho_min;
+      for (int ic = 0; ic < nc; ic++) rho_min = fmin(rho_min, rho[ic]);
   }
+#define RHO_E(ic) ((rho_mode == PLASTICITY_SCALING_RHO_GLOBAL) ? rho_min : rho[ic])
 
   /* Per element, in the variables of the solvers (cone coordinates, cohesion shift, plane
    * stress scaling): r the stress, v the modified strain rate (w + theta ||w_T|| e_N for
@@ -198,7 +216,7 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
    * F = r - P_K(r - rho v). */
   double* rv = (double*)malloc((size_t)(6 * nc + nc) * sizeof(double));
   if (!rv) {
-    free(rho);
+    free(rho_alloc);
     return numerics_error("plasticity_2d_compute_error", "bad alloc");
   }
   double* r_all = rv;          /* 3 nc */
@@ -220,7 +238,7 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
       if (c && c[ic] != 0.0) r[0] += c[ic] / eta;
       v[0] += problem->model.drucker_prager->theta[ic] * sqrt(v[1] * v[1] + v[2] * v[2]);
       if (rho)
-        for (int i = 0; i < 3; i++) v[i] *= rho[ic];
+        for (int i = 0; i < 3; i++) v[i] *= RHO_E(ic);
       for (int i = 0; i < 3; i++) P[i] = r[i] - v[i];
       projectionOnCone(P, eta);
     } else {
@@ -238,7 +256,7 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
         v[2] *= cc;
       }
       if (rho)
-        for (int i = 0; i < 3; i++) v[i] *= rho[ic];
+        for (int i = 0; i < 3; i++) v[i] *= RHO_E(ic);
       for (int i = 0; i < 3; i++) P[i] = r[i] - v[i];
       if (hypothesis == PLASTICITY_VONMISES_PLANE_STRAIN)
         plasticity_2d_projectionOnVonMises(P, sigma_y);
@@ -271,7 +289,8 @@ int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w
     *error = sqrt(*error);
   }
   free(eta_all);
-  free(rho);
+  free(rho_alloc);
+#undef RHO_E
   free(rv);
   DEBUG_PRINTF("scaled error in complementarity = %12.8e\n", *error);
   DEBUG_END("plasticity_2d_compute_error(...)\n");

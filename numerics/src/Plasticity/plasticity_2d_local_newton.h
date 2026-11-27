@@ -38,7 +38,8 @@ typedef struct {
   int ball;        /**< Von Mises yield set: 0 cylinder ||sigma_T|| <= sqrt(2/3) sigma_y (plane
                         strain), 1 ball ||sigma|| <= sigma_y (plane stress, scaled variables) */
   int iter_done;   /**< (out) number of iterations */
-  double residual; /**< (out) natural-map residual, rho = 1 / ||M||_2 */
+  double residual; /**< (out) relative natural-map residual ||Phi|| / (1 + ||sigma||),
+                        rho = 1 / ||M||_2 */
 } Plasticity2DLocalParameters;
 
 /** Natural map of one element: returns ||Phi||, Phi = sigma - P_K(sigma - rho v(sigma)),

@@ -193,6 +193,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
     void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override {};
     void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override {};
     void visit(const siconos::modeling::MohrCoulombPlasticityNSL& nslaw) override;
+    /** Von Mises: no contribution (b = 0, y is the stress) */
+    void visit(const siconos::modeling::VonMisesPlasticityNSL& nslaw) override {};
+    /** Drucker-Prager: no contribution (b = 0; the cohesion is a parameter of the numerics
+     *  problem) */
+    void visit(const siconos::modeling::DruckerPragerPlasticityNSL& nslaw) override {};
     void visit(const siconos::modeling::CohesiveZoneModelNIFNSL& nslaw) override;
   };
 

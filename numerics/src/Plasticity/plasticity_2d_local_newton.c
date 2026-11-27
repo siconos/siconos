@@ -100,6 +100,8 @@ int plasticity_2d_local_semismooth_newton(Plasticity2DNaturalMap natural_map,
       for (int i = 0; i < 3; i++) stress[i] = s[i];
     res = natural_map(data, rho0, stress, Phi, NULL);
   }
-  p->residual = res;
-  return (res > p->tol * (1.0 + norm3(stress))) ? 1 : 0;
+  /* relative residual, consistent with the stopping test (and with the local acceptance
+     filters of the NSGS solvers, which compare it to 1) */
+  p->residual = res / (1.0 + norm3(stress));
+  return (p->residual > p->tol) ? 1 : 0;
 }

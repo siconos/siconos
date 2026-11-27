@@ -72,6 +72,13 @@ inline constexpr int element_order(FiniteElementType type) {
 /** Ids for element families */
 enum class FiniteElementFamily { isoparametric };
 
+/** Mass matrix of a continuum finite element model
+ * - consistent: integral of rho N^T N (default);
+ * - lumped: diagonal, row sums of the consistent elementary mass matrix (positive for the
+ *   linear elements T3, Q4, TH4; not available for beams).
+ */
+enum class MassType { consistent, lumped };
+
 }  // namespace siconos::mechanics::fem
 
 #endif

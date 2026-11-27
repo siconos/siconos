@@ -889,6 +889,8 @@ CS_INT CSparseMatrix_symmetric_entry(CSparseMatrix* T, CS_INT i, CS_INT j, doubl
   return 1;
 }
 
+/* The values are written with 17 significant digits (exact round trip, read back by
+ * CSparseMatrix_new_from_file with %32le); the 1-norm in the header is informative. */
 int CSparseMatrix_print_in_file(const CSparseMatrix* A, int brief, FILE* file) {
   CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai;
   double* Ax;
@@ -912,7 +914,7 @@ int CSparseMatrix_print_in_file(const CSparseMatrix* A, int brief, FILE* file) {
       fprintf(file, "    col %lld : locations %lld to %lld\n", (long long int)j,
               (long long int)Ap[j], (long long int)Ap[j + 1] - 1);
       for (p = Ap[j]; p < Ap[j + 1]; p++) {
-        fprintf(file, "      %lld : %g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
+        fprintf(file, "      %lld : %.17g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
         if (brief && p > 20) {
           fprintf(file, "  ...\n");
           return (1);
@@ -926,7 +928,7 @@ int CSparseMatrix_print_in_file(const CSparseMatrix* A, int brief, FILE* file) {
       fprintf(file, "    row %lld : locations %lld to %lld\n", (long long int)j,
               (long long int)Ap[j], (long long int)Ap[j + 1] - 1);
       for (p = Ap[j]; p < Ap[j + 1]; p++) {
-        fprintf(file, "      %lld : %g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
+        fprintf(file, "      %lld : %.17g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
         if (brief && p > 20) {
           fprintf(file, "  ...\n");
           return (1);
@@ -937,7 +939,7 @@ int CSparseMatrix_print_in_file(const CSparseMatrix* A, int brief, FILE* file) {
     fprintf(file, "triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n", (long long int)m,
             (long long int)n, (long long int)nzmax, (long long int)nz);
     for (p = 0; p < nz; p++) {
-      fprintf(file, "    %lld %lld : %g\n", (long long int)Ai[p], (long long int)Ap[p],
+      fprintf(file, "    %lld %lld : %.17g\n", (long long int)Ai[p], (long long int)Ap[p],
               Ax ? Ax[p] : 1);
       if (brief && p > 20) {
         fprintf(file, "  ...\n");

@@ -126,7 +126,8 @@ The other entry points:
 * `plasticity_2d_problem_to_cone` returns a deep copy in cone coordinates;
   `plasticity_2d_problem_change_of_variables` returns a deep copy of the problem in y (the one
   the driver solves).
-* `plasticity_printInFile` does not save the coordinates.
+* `plasticity_printInFile` saves the coordinates, the Von Mises hypothesis and the cohesion
+  (see "Data file format").
 
 ### Mechanical meaning in Cartesian coordinates
 
@@ -501,6 +502,117 @@ The Frobenius norm is used for rho (local and global errors): it is cheap and wi
 sqrt(3) of ||M||_2. With a power iteration at every evaluation, the old Newton solvers were
 15 times slower.
 
+## Global semi-smooth Newton (`PLASTICITY_2D_NSN`, `plasticity_2d_nsn.c`)
+
+NSGS needs O(cond(M)) sweeps: on the problems of a FEM solid in a quasi-static regime
+(`plasticity_2d_vonmises_strip_*.dat`, cond(M) ≳ 1e4) it takes 5e4–7e4 sweeps, and its
+stresses are only accurate to about cond(M) × tolerance. `PLASTICITY_2D_NSN` solves the whole
+problem by a semi-smooth Newton method. It works on the problem given by
+`plasticity_2d_driver` after the change of variables (cone coordinates; Von Mises cylinder or
+ball; Drucker–Prager without cohesion).
+
+**Natural map.** For each element e, with w = M σ + q,
+
+    Φ_e(σ) = σ_e − P_{K_e}(σ_e − ρ_e v_e(w)),
+
+v_e = w_e (Von Mises), v_e = w_e + θ_e ‖w_eT‖ e_N (Drucker–Prager, dilatancy). An element of
+the generalized Jacobian is
+
+    H = (I − J_P) + J_P R G M,
+
+J_P = blockdiag(J_P,e) the Jacobians of the projections at y_e = σ_e − ρ_e v_e
+(`plasticity_2d_vonMises_projection_jacobian`, `plasticity_2d_DruckerPrager_projection_jacobian`,
+the same as in the one-element Newton solvers), R = blockdiag(ρ_e I), G = blockdiag(∂v_e/∂w_e).
+H has the sparsity of M; the Newton direction H d = −Φ is computed by a sparse LU (`NM_LU_solve`).
+H was checked against finite differences of Φ (relative difference 1e-10).
+
+**Globalization** (`iparam[PLASTICITY_NSN_GLOBALIZATION]`):
+
+* `WATCHDOG` (default): full Newton steps σ ← σ + d. The active set (plastic elements) is
+  corrected for all the elements at once, like a primal-dual active set method; the residual
+  is not monotone. After `PLASTICITY_NSN_WATCHDOG_ITERATIONS` (50) full steps without
+  convergence, a non-finite iterate or a singular system, the iteration restarts from the best
+  iterate with the merit function below.
+* `MERIT`: merit function only, chosen automatically:
+  * *QP objective* when the problem is a convex QP — associated flow (Von Mises, Drucker–Prager
+    with θ = 0) and M symmetric (`‖M − Mᵀ‖∞ ≤ 1e-12 ‖M‖∞`): f(σ) = ½ σᵀMσ + qᵀσ over K, feasible
+    iterates (the initial guess is projected), Armijo search along the projected arc
+    σ(t) = P_K(σ + t d) (f(σ(t)) ≤ f(σ) + 1e-4 wᵀ(σ(t) − σ) + 16 ε |f(σ)|, the last term
+    accepting the decreases below the round-off of f), projected gradient arc P_K(σ − t R w)
+    when the Newton arc gives no decrease (projected Newton, Bertsekas);
+  * *natural map* ½‖Φ‖² otherwise (dilatancy, non-symmetric M): Armijo line search,
+    Levenberg–Marquardt direction `(HᵀH + λI) d = −HᵀΦ`, λ = c‖Φ‖, when the iteration stalls or
+    H is singular (`nonsmooth_newton_levenberg_marquardt.h`).
+* `NONE`: full steps only (returns the best iterate).
+
+**Choice of ρ** (`iparam[PLASTICITY_NSN_RHO_STRATEGY]`, `dparam[PLASTICITY_NSN_RHO_FACTOR]`).
+ρ_e decides which elements a full Newton step treats as plastic (through y_e), so it shapes
+the path of the full steps. Default: ρ_e = c ‖M_ee⁻¹‖₂ = c/λ_min(M_ee) with c = 10 for the
+full steps and c = 1 in the merit phase (`INVERSE_SPECTRAL_NORM`; `SPECTRAL_NORM`:
+ρ_e = c/‖M_ee‖₂). Experiments on the FEM strip problems (60 to 1446 elements) and the footing
+problems, number of full steps from a zero initial guess:
+
+| ρ_e | strip 1446, step 10 | strip 636, step 18 | strip 60, step 100 | footing 100 |
+|---|---|---|---|---|
+| 1/‖M_ee‖₂ | – | 73 | 19 | 11 |
+| ‖M_ee⁻¹‖₂ | 80 | 19 | 11 | 12 |
+| 10 ‖M_ee⁻¹‖₂ (default) | 23 | 12 | 9 | 9 |
+| 30 ‖M_ee⁻¹‖₂ | 18 | 11 | 7 | 12 |
+| 100 ‖M_ee⁻¹‖₂ | 15 | 11 | 7 | diverges |
+| ‖(M⁻¹)_ee‖₂ | 8 | 6 | 4 | diverges |
+
+The full steps converge fastest for ρ in a window (too large: no convergence). The diagonal
+block of M⁻¹ (the effective compliance of the element in the coupled problem, 5e3–2e4 times
+‖M_ee⁻¹‖ on the strip) is at the edge of this window and fails on several problems; c = 10 is
+robust on all the problems tried. With c = 10 the one-cone `footing_1` problem cycles and is
+solved by the watchdog (50 full steps, then 2 merit iterations); the merit phase converges
+faster with c = 1 (strip step 10: 33 iterations, 196 with c = 10).
+
+**Options.** `iparam[SICONOS_IPARAM_MAX_ITER]` (100), `dparam[SICONOS_DPARAM_TOL]` (1e-10,
+`plasticity_2d_compute_error`, the error of the NSGS solvers),
+`iparam[PLASTICITY_NSN_GLOBALIZATION]` (`WATCHDOG`), `iparam[PLASTICITY_NSN_RHO_STRATEGY]`
+(`INVERSE_SPECTRAL_NORM`), `dparam[PLASTICITY_NSN_RHO_FACTOR]` (10),
+`iparam[PLASTICITY_NSN_LINESEARCH_MAX_ITER]` (30), `iparam[PLASTICITY_NSN_LM_FALLBACK]` (1),
+`dparam[PLASTICITY_NSN_LM_COEF]` (1).
+
+**Results** (macOS arm64, zero initial guess; NSGS tolerance 1e-8, NSN 1e-10, default options):
+
+| problem | NSGS sweeps | NSN iterations |
+|---|---|---|
+| strip step 1 (elastic) | 72 894 | 1 |
+| strip step 4 (1 plastic element) | 72 365 | 4 |
+| strip step 10 (18 plastic) | 53 216 | 7 |
+| strip step 100 (23 plastic) | 52 575 | 9 |
+| footing 100, θ > 0 (natural map) | | 9 |
+| footing 100, θ = 0 | | 9 |
+| Von Mises footing 100 | | 5 |
+
+NSN and NSGS stresses differ by 4e-5 relative on the strip: the error of NSGS
+(cond(M) × 1e-8). In the FEM simulation of the strip (100 steps, warm start from the previous
+step, tolerance 1e-10; meshes of pytripopfem):
+
+| mesh (T3 elements, stresses) | NSN iterations per plastic step (mean / max) | time | final reaction |
+|---|---|---|---|
+| 60, 180 | 8 / 9 | 0.33 s | 56.51 |
+| 636, 1 908 | 13 / 18 | 24 s | 53.33 |
+| 1 446, 4 338 | 19 / 30 | 167 s | 52.94 |
+
+(NSGS: about 100 s on the 60-element mesh.) The number of iterations grows slowly with the
+mesh. On the 1446-element mesh, a Newton iteration costs ~54 ms (new sparse LU of H at each
+iteration): ~100 s of the 167 s; the rest is the kernel (dense iteration matrix and its LU at
+the initialization, assembly of W and H at each step, see `FEM_PLASTICITY_SCHEME.md`).
+
+**Behaviour and limits.**
+
+* With the merit function alone, the iteration first identifies the plastic elements with
+  short projected-arc steps (the Newton direction is computed for a wrong active set and
+  overshoots), then converges fast; this first phase grew with the mesh (636 elements: up to
+  470 iterations), hence the full steps by default.
+* The error stagnates at ~1e-13 on the strip problems (round-off amplified by cond(M)):
+  tolerances below ~1e-12 are not reached reliably; 1e-10 is the practical value.
+* Possible improvements: reuse the symbolic factorization of H (same pattern at each
+  iteration), a better ρ (between ‖M_ee⁻¹‖ and ‖(M⁻¹)_ee‖), a theory of the window of ρ.
+
 ## NSGS and local solvers (`plasticity_2d_nsgs.c`, `plasticity_2d_nsgs_generic_adapter.c`)
 
 | internal solver id | Drucker–Prager | Von Mises |
@@ -577,6 +689,26 @@ With the former absolute error (or the fc3d scaling, see "Error and scaling") an
     `plasticity_2d_footing_100_theta0.dat` (theta = 0, eta = 0.1), with a cone kept at the
     apex.
   * It now converges with all local solvers (~2300 iterations, error ~2e-12).
+
+## Data file format (`plasticity_printInFile`, `plasticity_newFromFile`)
+
+    dimension
+    numberOfCones
+    model_type                       (PlasticityModelType)
+    M                                (NM_write_in_file)
+    q                                (dimension * numberOfCones values)
+    eta, then theta (Drucker-Prager) | sigma_y (Von Mises)   (one line each)
+    [stress_coordinates <int>]       (if not PLASTICITY_STRESS_COORDINATES_CONE)
+    [vonmises_hypothesis <int>]      (if not PLASTICITY_VONMISES_PLANE_STRAIN)
+    [cohesion <numberOfCones values>] (Drucker-Prager with cohesion)
+
+The keyword lines (November 2026) are optional and written only when different from the
+defaults: the files of default problems are unchanged, and older files are read as before
+(defaults). Before, these three fields were lost (a plane stress / Voigt problem was read
+back as a plane strain problem in cone coordinates). Sparse matrices are written with 17
+significant digits (`CSparseMatrix_print_in_file`, `%.17g`, was `%g`: 6 digits).
+`plasticity_2d_read_write_test` checks the round trip of a plane stress Voigt Von Mises
+problem and of a Drucker–Prager problem with cohesion in Mandel coordinates.
 
 ## Tests (`numerics/src/Plasticity/test`)
 
@@ -661,14 +793,35 @@ With the former absolute error (or the fc3d scaling, see "Error and scaling") an
     tension (on the plane stress surface, inside the plane strain cylinder);
   * Cartesian Drucker–Prager problems equal to the cone problem mapped back (power
     preserved).
+* `plasticity_2d_nsn_test`: `PLASTICITY_2D_NSN` (tolerance 1e-10) on the Drucker–Prager
+  footing problems (θ > 0 and θ = 0), the Von Mises footing, the small examples and the FEM
+  strip (both globalizations), and on the FEM footing problems
+  `plasticity_2d_druckerprager_footing_fem_40.dat` (associated) and
+  `plasticity_2d_druckerprager_footing_fem_psi10_40.dat` (dilatancy angle 10°, θ = 0.249):
+  siconos-tutorials `mechanics/FEM/Plasticity/Footing`, 639 T3, plane strain Mohr–Coulomb
+  (η = sin 25°, cohesion √2 c cos φ, Voigt coordinates), step 40, written by `setProblemDump`
+  (before the FEM stresses switched to the Mandel notation, 2026-11-26: the problems dumped
+  now declare `stress_coordinates` Mandel; these files keep the Voigt ones).
+  NSN: 12 and 13 iterations (default globalization; the merit function alone does not
+  converge in 300 iterations; NSGS: error 3e-4 after 2e4 sweeps). Python: NSN = NSGS on a coupled non-symmetric Drucker–Prager problem with
+  dilatancy and cohesion, NSN = exact solution of the manufactured plane stress problem.
+* `plasticity_2d_strip_test`: NSGS, generic NSGS (tolerance 1e-8) and NSN (1e-10) on the problems of the
+  FEM strip with a circular hole (siconos-tutorials `mechanics/FEM/Plasticity/StripWithHole`,
+  60 T3 elements, plane stress, Voigt coordinates (dumped before the switch of the FEM to the
+  Mandel notation), yield stress 210),
+  `data/plasticity_2d_vonmises_strip_<n>.dat` for the time steps n = 1 (elastic), 4 (first
+  plastic element), 10 (18 plastic elements) and 100 (plateau, 23 plastic elements), written
+  by `fem::nonsmooth_formulations::Plasticity::setProblemDump`. Checks: convergence, error
+  recomputed by `plasticity_2d_compute_error`, Von Mises stress ≤ yield stress, same stresses
+  for the two NSGS, NSN = NSGS up to 1e-3 (accuracy of NSGS). These problems come from a quasi-static regime where M is
+  ill-conditioned (condition number ≳ 1e4): NSGS needs 1e4–1e5 sweeps; they are the
+  reference problems for global solvers.
 * MixedProblems: `mixed_problem_mohr_coulomb_test` (coupled cones with cohesion, mixed NSGS
   vs Plasticity NSGS).
 
 ## Known problems
 
 * `plasticity_2d_footing_10.dat` is in an old format (no model type line) and cannot be read.
-* Neither the cohesion, the stress coordinates nor the Von Mises hypothesis are saved in the
-  data files.
 * `PLASTICITY_2D_ONECONE_NSN_GP` (damped Newton, Goldstein–Price line search, rho per
   component) and the hybrid solver built on it: on the footing problems, the scaled local
   error does not go below ~1e-12 on some cones, so the local solves run to their iteration

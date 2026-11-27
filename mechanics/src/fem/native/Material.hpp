@@ -32,7 +32,7 @@ class Material {
   /** Analysis type in 2D */
   AnalysisType2D analysisType2D_{AnalysisType2D::plane_strain};
 
-  /** thickness in 2D plane stress analysis */
+  /** out-of-plane thickness in 2D analysis */
   double thickness_{1.0};
 
   /** Shear Modulus **/
@@ -69,6 +69,22 @@ class Material {
         elasticYoungModulus_{E},
         poisson_sRatio_{nu},
         radius_{radius} {}
+
+  /** @brief constructor of a 2D continuum material
+   * @param massDensity mass density (per unit volume)
+   * @param E elastic Young modulus
+   * @param nu Poisson ratio
+   * @param analysisType plane strain (default of the other constructor) or plane stress
+   * @param thickness out-of-plane thickness: the stiffness K, the mass M and the strain
+   *        operator B (scaled by sqrt(area * thickness)) are integrated over it
+   */
+  constexpr Material(double massDensity, double E, double nu, AnalysisType2D analysisType,
+                     double thickness = 1.0)
+      : massDensity_{massDensity},
+        elasticYoungModulus_{E},
+        poisson_sRatio_{nu},
+        analysisType2D_{analysisType},
+        thickness_{thickness} {}
 
   /** destructor */
   ~Material() noexcept = default;

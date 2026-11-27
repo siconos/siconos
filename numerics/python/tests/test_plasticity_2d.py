@@ -172,6 +172,23 @@ def test_invalid_sizes():
         sn.plasticity_2d_driver(problem, np.zeros(2), np.zeros(3))
 
 
+def test_outputs_not_converted():
+    """The arrays written in place must be float64 and C-contiguous: a converted copy would
+    be lost, so other arrays are rejected."""
+    problem = sn.PlasticityProblem_new(3, M1, q1, eta1, theta1)
+    for bad in ([0.0, 0.0, 0.0], np.zeros(3, dtype=int), np.zeros(6)[::2]):
+        with pytest.raises(TypeError):
+            sn.plasticity_2d_driver(problem, bad, np.zeros(3))
+        with pytest.raises(TypeError):
+            sn.plasticity_2d_driver(problem, np.zeros(3), bad)
+        with pytest.raises(TypeError):
+            sn.plasticity_2d_compute_error(problem, np.zeros(3), bad, 1e-12)
+    # stress is only read by compute_error: converted
+    w = np.zeros(3)
+    sn.plasticity_2d_compute_error(problem, [0.0, 0.0, 0.0], w, 1e-12)
+    assert np.allclose(w, q1)
+
+
 def test_matrix_layout():
     """M is used as given (row i of the numpy array = row i of M), C or Fortran order."""
     rng = np.random.default_rng(0)
@@ -406,3 +423,45 @@ def test_cartesian_drucker_prager(coords):
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+# --------------------------------------------------------------------------------------
+# Global semi-smooth Newton (PLASTICITY_2D_NSN)
+# --------------------------------------------------------------------------------------
+def solve_nsn(problem, tol=1e-12, itermax=100):
+    n = 3 * problem.numberOfCones
+    stress, strainrate = np.zeros(n), np.zeros(n)
+    options = sn.SolverOptions(int(IDS.PLASTICITY_2D_NSN))
+    options.dparam[TOL] = tol
+    options.iparam[MAX_ITER] = itermax
+    info = sn.plasticity_2d_driver(problem, stress, strainrate, options)
+    return info, stress
+
+
+def test_nsn_drucker_prager_dilatancy_coupled():
+    """NSN (natural-map merit: non-symmetric, dilatancy and cohesion) = NSGS."""
+    rng = np.random.default_rng(3)
+    nc = 5
+    M = random_coupled_matrix(nc, rng)
+    q = rng.uniform(-1, 1, 3 * nc)
+    eta = 0.3 + 0.05 * np.arange(nc)
+    theta = 0.1 * (np.arange(nc) % 2)
+    c = 0.05 * np.arange(nc)
+    problem = sn.PlasticityProblem_new(3, M, q, eta, theta, cohesion=c)
+    info, stress = solve_nsn(problem)
+    assert info == 0
+    assert error(problem, stress) < 1e-12
+    _, stress_nsgs, _, _ = solve(problem)
+    assert np.allclose(stress, stress_nsgs, rtol=0, atol=1e-10)
+
+
+@pytest.mark.parametrize("coords", [COORDS.CARTESIAN_VOIGT, COORDS.CONE])
+def test_nsn_von_mises_plane_stress(coords):
+    """NSN (QP merit) on the manufactured plane stress problem: exact solution."""
+    problem, s_exact, _, _ = manufactured_plane_stress(
+        coords, np.random.default_rng(11)
+    )
+    info, stress = solve_nsn(problem)
+    assert info == 0
+    assert np.linalg.norm(stress - s_exact) < 1e-11 * np.linalg.norm(s_exact)
+    assert error(problem, stress) < 1e-11

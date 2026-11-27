@@ -16,6 +16,9 @@ enum PLASTICITY_SOLVER {
   PLASTICITY_2D_NSGS = 20000,
   /** 2D Mohr Coulomb solvers using generic NSGS framework */
   PLASTICITY_2D_NSGS_GENERIC = 20001,
+  /** Global semi-smooth Newton method on the natural map of the whole problem (sparse LU of
+      the generalized Jacobian, Armijo line search, Levenberg-Marquardt fallback) */
+  PLASTICITY_2D_NSN = 20002,
 
   /* 2D Mohr Coulomb  solvers for one cone (used mainly inside NSGS solvers) */
 
@@ -237,7 +240,41 @@ enum PLASTICITY_NSN_LINEAR_SOLVER {
 enum PLASTICITY_NSN_DPARAM {
   /** index in dparam to store the rho value for projection formulation */
   PLASTICITY_NSN_RHO = 3,
+  /** PLASTICITY_2D_NSN: coefficient c of the Levenberg-Marquardt damping
+      lambda = c ||Phi|| (default 1) */
+  PLASTICITY_NSN_LM_COEF = 28,
+  /** PLASTICITY_2D_NSN: factor c of rho_e = c ||M_ee^{-1}||_2 (or c/||M_ee||_2, see
+      PLASTICITY_NSN_RHO_STRATEGY) for the full Newton steps, default 10 (the merit phase
+      uses c = 1) */
+  PLASTICITY_NSN_RHO_FACTOR = 29,
 };
+
+/** PLASTICITY_2D_NSN: index in iparam of the Levenberg-Marquardt fallback of the natural-map
+    merit (1: used when the iteration stalls or the Newton system is singular, default;
+    0: never) */
+enum PLASTICITY_NSN_GLOBAL_IPARAM {
+  PLASTICITY_NSN_LM_FALLBACK = 28,
+  /** PLASTICITY_2D_NSN: index in iparam of the globalization strategy
+      (PLASTICITY_NSN_GLOBALIZATION_ENUM) */
+  PLASTICITY_NSN_GLOBALIZATION = 29
+};
+
+/** PLASTICITY_2D_NSN globalization strategies */
+enum PLASTICITY_NSN_GLOBALIZATION_ENUM {
+  /** full Newton steps; after PLASTICITY_NSN_WATCHDOG_ITERATIONS of them without
+      convergence (or a non-finite iterate / singular system), the merit function from the
+      best iterate (default) */
+  PLASTICITY_NSN_GLOBALIZATION_WATCHDOG = 0,
+  /** merit function only: QP objective with projected arc search for convex QP problems,
+      1/2 ||Phi||^2 with Armijo and Levenberg-Marquardt otherwise */
+  PLASTICITY_NSN_GLOBALIZATION_MERIT = 1,
+  /** full Newton steps only (no globalization; returns the best iterate) */
+  PLASTICITY_NSN_GLOBALIZATION_NONE = 2
+};
+
+/** PLASTICITY_2D_NSN: number of full Newton steps before the watchdog switches to the merit
+    function */
+#define PLASTICITY_NSN_WATCHDOG_ITERATIONS 50
 
 enum PLASTICITY_NSN_RHO_STRATEGY_ENUM {
   /** A constant value given in dparam[PLASTICITY_NSN_RHO] is used */
@@ -250,6 +287,9 @@ enum PLASTICITY_NSN_RHO_STRATEGY_ENUM {
   PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM = 3,
   /** An adaptive strategy for rho is used */
   PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE = 4,
+  /** PLASTICITY_2D_NSN: rho_e = ||M_ee^{-1}||_2 = 1/lambda_min(M_ee) for each element
+      (default of PLASTICITY_2D_NSN; SPECTRAL_NORM: rho_e = 1/||M_ee||_2) */
+  PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_INVERSE_SPECTRAL_NORM = 5,
 };
 
 enum PLASTICITY_NSN_FORMULATION_ENUM {

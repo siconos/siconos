@@ -12,6 +12,8 @@
  * by providing appropriate callbacks and initialization.
  */
 
+#include <stdlib.h>  // for malloc, free
+
 #include "NumericsFwd.h"
 #include "NumericsMatrix.h"
 #include "PlasticityProblem.h"
@@ -220,6 +222,13 @@ static void plasticity_2d_nsgs_local_problem_free(PlasticityProblem* localproble
   }
 }
 
+/** Problem given to nsgs_solve: the problem and the per-element rho of its error,
+ *  computed once for the solve (it depends on M only) */
+typedef struct {
+  PlasticityProblem* problem;
+  double* rho_error; /* NULL: rho = 1 (PLASTICITY_SCALING_RHO_ONE) */
+} PlasticityNSGSGenericData;
+
 /** Update local problem wrapper - maps generic NSGS to plasticity_2d */
 
 static int plasticity_2d_nsgs_update_wrapper(unsigned int block, void* problem,
@@ -229,7 +238,7 @@ static int plasticity_2d_nsgs_update_wrapper(unsigned int block, void* problem,
     return numerics_error("plasticity_2d_nsgs_update_wrapper", "Local problem is NULL");
   }
   PROFILE_START();
-  int info = plasticity_2d_nsgs_update(block, (PlasticityProblem*)problem,
+  int info = plasticity_2d_nsgs_update(block, ((PlasticityNSGSGenericData*)problem)->problem,
                                        (PlasticityProblem*)local_problem, var_z, options);
   PROFILE_END(profile_update_time, profile_update_calls);
   return info;
@@ -265,8 +274,10 @@ static double plasticity_2d_nsgs_compute_error_wrapper(void* problem, double* va
                                                        double* var_x, SolverOptions* options) {
   double error = 0.0;
   double norm_q = 0.0;
-  plasticity_2d_compute_error((PlasticityProblem*)problem, var_z, var_x,
-                              options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
+  PlasticityNSGSGenericData* data = (PlasticityNSGSGenericData*)problem;
+  plasticity_2d_compute_error_with_rho(data->problem, var_z, var_x,
+                                       options->dparam[SICONOS_DPARAM_TOL], options, norm_q,
+                                       &error, data->rho_error);
   return error;
 }
 
@@ -274,8 +285,8 @@ static double plasticity_2d_nsgs_compute_error_wrapper(void* problem, double* va
 static void plasticity_2d_nsgs_set_tol_wrapper(void* problem, SolverOptions* options,
                                                SolverOptions* localsolver_options,
                                                double error) {
-  plasticity_2d_set_internalsolver_tolerance((PlasticityProblem*)problem, options,
-                                             localsolver_options, error);
+  plasticity_2d_set_internalsolver_tolerance(((PlasticityNSGSGenericData*)problem)->problem,
+                                             options, localsolver_options, error);
 }
 
 /** Accept local solution wrapper with filtering */
@@ -415,7 +426,13 @@ void plasticity_2d_nsgs_generic(PlasticityProblem* problem, double* stress,
   PROFILE_RESET();
 
   /* Call generic solver */
-  nsgs_solve(problem, stress, plastic_strain_rate, info, options, &toolkit, &problem_data);
+  PlasticityNSGSGenericData data = {problem, NULL};
+  if (options->iparam[PLASTICITY_SCALING_RHO] != PLASTICITY_SCALING_RHO_ONE) {
+    data.rho_error = (double*)malloc((size_t)problem->numberOfCones * sizeof(double));
+    plasticity_2d_compute_error_rho(problem, data.rho_error);
+  }
+  nsgs_solve(&data, stress, plastic_strain_rate, info, options, &toolkit, &problem_data);
+  free(data.rho_error);
 
   /* Print profiling results */
   PROFILE_PRINT();

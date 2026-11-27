@@ -35,10 +35,8 @@ void frictionContact_test_gams_opts(SolverOptions* options) {
   int solverId = options->solverId;
   if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
       solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
+      solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
+      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
       solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
       solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI) {
     assert(options->solverParameters);

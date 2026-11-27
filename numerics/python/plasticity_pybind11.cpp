@@ -197,7 +197,8 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
         if (!options) solver_options_delete(opts);
         return info;
       },
-      py::arg("problem"), py::arg("stress"), py::arg("strainrate"),
+      // noconvert: the outputs are written in place, a converted copy would be lost
+      py::arg("problem"), py::arg("stress").noconvert(), py::arg("strainrate").noconvert(),
       py::arg("options") = nullptr,
       "Solve the problem (default solver: PLASTICITY_2D_NSGS). stress (initial guess) and "
       "strainrate (float64, contiguous, size 3 numberOfCones) are modified in place. "
@@ -218,8 +219,9 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
                                                0.0, &error);
         return py::make_tuple(info, error);
       },
-      py::arg("problem"), py::arg("stress"), py::arg("strainrate"), py::arg("tolerance"),
-      py::arg("options") = nullptr,
+      // noconvert on strainrate: written in place, a converted copy would be lost
+      py::arg("problem"), py::arg("stress"), py::arg("strainrate").noconvert(),
+      py::arg("tolerance"), py::arg("options") = nullptr,
       "Natural-map error of the problem (cohesion, coordinates and Von Mises hypothesis taken "
       "into account), scaled according to options.iparam[params.PLASTICITY_SCALING_*] "
       "(default scaling if options is None); strainrate is set to M stress + q. Returns "
@@ -271,6 +273,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
       .value("PLASTICITY_2D_NSGS", PLASTICITY_2D_NSGS, "Non-smooth Gauss-Seidel")
       .value("PLASTICITY_2D_NSGS_GENERIC", PLASTICITY_2D_NSGS_GENERIC,
              "Non-smooth Gauss-Seidel (generic)")
+      .value("PLASTICITY_2D_NSN", PLASTICITY_2D_NSN, "Global semi-smooth Newton")
       .value("PLASTICITY_2D_ONECONE_NSN", PLASTICITY_2D_ONECONE_NSN, "Non-smooth Newton")
       .value("PLASTICITY_2D_ONECONE_NSN_GP", PLASTICITY_2D_ONECONE_NSN_GP,
              "Non-smooth Newton GP")
@@ -298,6 +301,7 @@ void wrap_plasticity(py::module_& m, py::module_& params, py::module_& solver_id
   // Also export as module attributes for convenience
   m.attr("PLASTICITY_2D_NSGS") = (int)PLASTICITY_2D_NSGS;
   m.attr("PLASTICITY_2D_NSGS_GENERIC") = (int)PLASTICITY_2D_NSGS_GENERIC;
+  m.attr("PLASTICITY_2D_NSN") = (int)PLASTICITY_2D_NSN;
   m.attr("PLASTICITY_2D_ONECONE_NSN") = (int)PLASTICITY_2D_ONECONE_NSN;
   m.attr("PLASTICITY_2D_ONECONE_NSN_GP") = (int)PLASTICITY_2D_ONECONE_NSN_GP;
   m.attr("PLASTICITY_2D_ONECONE_NSN_GP_HYBRID") = (int)PLASTICITY_2D_ONECONE_NSN_GP_HYBRID;

@@ -40,8 +40,8 @@ extern "C" {
    weighted by eta (Von Mises: eta = 1), sqrt(x_N^2 + alpha ||x_T||^2), or no scaling (absolute
    error). Options: options->iparam[PLASTICITY_SCALING_NORM / _SCOPE / _REDUCTION / _RHO],
     options->dparam[PLASTICITY_SCALING_ALPHA], set by plasticity_2d_nsgs_set_default
-    (Euclidean, per cone, MIXED, rho_e); options == NULL: same defaults. Options of other
-    solvers (zero-initialized) give the fc3d scaling (MAX, rho = 1).
+    (Euclidean, per cone, MIXED, rho_e, alpha = 1); options == NULL: same defaults.
+    Options of other solvers (zero-initialized) give the fc3d scaling (MAX, rho = 1).
     w is set to M z + q (in the coordinates of the problem).
 
     \param problem the problem
@@ -53,6 +53,28 @@ extern "C" {
     \param[in,out] error value
     \return 0 if error <= tolerance, 1 otherwise
  */
+int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
+                                double tolerance, SolverOptions* options, double norm,
+                                double* error);
+
+/** plasticity_2d_compute_error with the per-element rho precomputed by
+ *  plasticity_2d_compute_error_rho (it depends on M only): used by the solvers to avoid
+ *  extracting the diagonal blocks of M at every evaluation of the error.
+ *  \param rho_element per-element rho (size numberOfCones), NULL: computed here
+ *  (other parameters: see plasticity_2d_compute_error)
+ */
+int plasticity_2d_compute_error_with_rho(PlasticityProblem* problem, double* z, double* w,
+                                         double tolerance, SolverOptions* options, double norm,
+                                         double* error, const double* rho_element);
+
+/** Per-element rho of plasticity_2d_compute_error (PLASTICITY_SCALING_RHO_ELEMENT):
+ *  rho_e = 1/||T^T M_ee T||_F, T the change of variables to the variables of the solvers.
+ *  \param problem the problem
+ *  \param[out] rho per-element rho (size numberOfCones)
+ *  \return 0
+ */
+int plasticity_2d_compute_error_rho(PlasticityProblem* problem, double* rho);
+
 /** Error of one Drucker-Prager cone with the default scaling of plasticity_2d_compute_error
  *  (MIXED, rho = 1/||M||_F): ||r - P_K(r - rho v)|| / max(1, ||r|| + rho ||v||),
  *  v = w + theta ||w_T|| e_N, w = M r + q. Used by the local solvers
@@ -82,10 +104,6 @@ double plasticity_2d_DruckerPrager_local_scaled_error(const double M[9], const d
  */
 double plasticity_2d_scaling(int norm_id, int reduction, const double* r, const double* v,
                              int m, const double* eta, double alpha);
-
-int plasticity_2d_compute_error(PlasticityProblem* problem, double* z, double* w,
-                                double tolerance, SolverOptions* options, double norm,
-                                double* error);
 
 /**
     Error computation (using the normal map residual) for one Mohr Coulomb 2D plasticity

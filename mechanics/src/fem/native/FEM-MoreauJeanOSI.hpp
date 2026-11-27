@@ -12,6 +12,10 @@
 
 #include "MoreauJeanOSI.hpp"
 
+namespace siconos::mechanics::fem {
+class SolidLinearTIDS;
+}
+
 namespace siconos::mechanics::fem::integrators {
 
 /**
@@ -70,9 +74,34 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
 
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *
+   *  For a SolidLinearTIDS (unknowns \f$ x = [v; \sigma] \f$, compliance S, strain operator B)
+   *  \f[ W = \begin{bmatrix} M & h\theta B^T \\ -h\theta B & S \end{bmatrix} \f]
+   *  whose second row is the discretised constitutive law
+   *  \f$ S\sigma_{k+1} - h\theta Bv_{k+1} = S\sigma_k + h(1-\theta)Bv_k - h\dot\epsilon_p \f$.
+   *  W is not symmetric but its symmetric part diag(M, S) is positive definite, so the
+   *  Delassus operator of the stress interactions is positive (with the symmetric
+   *  indefinite form [M, h theta B^T; h theta B, -S] it is negative and the plasticity
+   *  problem has no physical solution). See docs/devel/FEM_PLASTICITY_SCHEME.md.
+   *
    *  @param time
    *  @param ds a pointer to DynamicalSystem
    */
+  /** \return true if the LU factorization of the iteration matrix is needed (computeFreeState,
+   *  integrate and computeIteration solve with it); false for the global integrator, where
+   *  the one-step problem holds W */
+  virtual bool needsIterationMatrixLU() const { return true; }
+
+  /** W = [M hθBᵀ; −hθB S] assembled sparse into the iterationMatrixSparse property of the
+   *  graph (no dense W, no LU), with the boundary conditions applied (columns of the
+   *  prescribed velocities in iterationMatrixBoundaryConditions); used when
+   *  needsIterationMatrixLU() is false (global integrator)
+   *  \param solid the dynamical system
+   *  \param dsv its descriptor in the graph
+   */
+  void initializeSparseIterationMatrix(
+      const siconos::mechanics::fem::SolidLinearTIDS& solid,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) const;
+
   virtual void initializeIterationMatrix(
       double time, std::shared_ptr<siconos::modeling::SecondOrderDS> ds) const override;
 
@@ -115,6 +144,25 @@ class MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {
    *  @param level the level of interest for the dynamics: not used at the time
    */
   virtual void updateState(const unsigned int level) override;
+
+  /** compute the nonsmooth inputs from the multipliers (see MoreauJeanOSI::updateInput),
+   *  then convert, for each SolidLinearTIDS, the input of the stress interactions
+   *  (\f$ C^T\lambda \f$, accumulated in the plastic rate vector) into the plastic
+   *  deformation rate \f$ \dot\epsilon_p = -C^T\lambda / h \f$.
+   *
+   *  The stress rows of the iteration matrix (see initializeIterationMatrix) read
+   *  \f$ S\sigma_{k+1} - h\theta B v_{k+1} = S\sigma_k + h(1-\theta)Bv_k - h\dot\epsilon_p \f$
+   *  and the multiplier enters them as \f$ Hr = C^T\lambda \f$. With an interaction
+   *  \f$ y = C\sigma + c \geq 0 \f$ (yield function \f$ f = -y \f$), this is the associated
+   *  flow rule \f$ \dot\epsilon_p = \lambda/h\, \partial f/\partial\sigma \f$.
+   *  The simulation resets the plastic rate before each call (see
+   *  SolidLinearTIDS::resetNonSmoothPart).
+   *
+   *  @param time current time
+   *  @param level level of the input
+   */
+  void updateInput(double time, unsigned int level) override;
+  using siconos::integrators::MoreauJeanOSI::updateInput;
 
   /** compute the current iteration
    *

@@ -167,6 +167,17 @@ double plasticity_2d_vonMises_natural_map_residual(const double M[9], const doub
                                                    double sigma_y, double rho,
                                                    const double stress[3]);
 
+/** Generalized Jacobian (3x3, column-major) of the projection on the Von Mises yield set
+ *  at y: the cylinder ||y_T|| <= sqrt(2/3) sigma_y (ball = 0) or the ball ||y|| <= sigma_y
+ *  (ball = 1). Used by the local and global semi-smooth Newton methods.
+ *  \param ball 1 for the ball, 0 for the cylinder
+ *  \param y the point
+ *  \param sigma_y yield stress
+ *  \param[out] J the Jacobian
+ */
+void plasticity_2d_vonMises_projection_jacobian(int ball, const double y[3], double sigma_y,
+                                                double J[9]);
+
 /** Fixed point on the natural map for one element:
  *    sigma <- P_C(sigma - rho (M sigma + q)),
  *  with rho constant (PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_CONSTANT), equal to 1/||M||_2

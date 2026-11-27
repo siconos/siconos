@@ -121,11 +121,8 @@ static void plasticity_2d_nsgs_update(int cone, PlasticityProblem* problem,
 
 static int plasticity_2d_nsgs_initialize_local_solver(
     struct LocalPLASTICITY_2DProblemFunctionToolkit* local_function_toolkit,
-    plasticity_2d_ComputeErrorPtr* computeError, PlasticityProblem* problem,
-    PlasticityProblem* localproblem, SolverOptions* options) {
+    PlasticityProblem* problem, PlasticityProblem* localproblem, SolverOptions* options) {
   SolverOptions* localsolver_options = options->internalSolvers[0];
-
-  *computeError = &plasticity_2d_compute_error;
 
   if (problem->dimension == 3) {
     local_function_toolkit->copy_local_reaction = cpy3;
@@ -357,14 +354,16 @@ static void accept_local_reaction_filtered(PlasticityProblem* localproblem,
            sizeof(double) * localproblem->dimension);
 }
 
-static double calculate_full_error_adaptive_interval(
-    PlasticityProblem* problem, plasticity_2d_ComputeErrorPtr computeError,
-    SolverOptions* options, int iter, double* stress, double* strainrate, double tolerance,
-    double norm_q) {
+static double calculate_full_error_adaptive_interval(PlasticityProblem* problem,
+                                                     const double* rho_error,
+                                                     SolverOptions* options, int iter,
+                                                     double* stress, double* strainrate,
+                                                     double tolerance, double norm_q) {
   double error = 1e+24;
   if (options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] > 0) {
     if (iter % options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0) {
-      (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &error);
+      plasticity_2d_compute_error_with_rho(problem, stress, strainrate, tolerance, options,
+                                           norm_q, &error, rho_error);
       if (error > tolerance && options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
                                    PLASTICITY_NSGS_ERROR_EVALUATION_ADAPTIVE)
         options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
@@ -376,17 +375,18 @@ static double calculate_full_error_adaptive_interval(
         iter, options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY],
         options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION]);
   } else
-    (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &error);
+    plasticity_2d_compute_error_with_rho(problem, stress, strainrate, tolerance, options,
+                                         norm_q, &error, rho_error);
 
   return error;
 }
 
 static double calculate_full_error_final(PlasticityProblem* problem, SolverOptions* options,
-                                         plasticity_2d_ComputeErrorPtr computeError,
-                                         double* stress, double* strainrate, double tolerance,
-                                         double norm_q) {
+                                         const double* rho_error, double* stress,
+                                         double* strainrate, double tolerance, double norm_q) {
   double absolute_error;
-  (*computeError)(problem, stress, strainrate, tolerance, options, norm_q, &absolute_error);
+  plasticity_2d_compute_error_with_rho(problem, stress, strainrate, tolerance, options, norm_q,
+                                       &absolute_error, rho_error);
 
   if (verbose > 0) {
     if (absolute_error > SOLVER_TOL(options)) {
@@ -420,10 +420,9 @@ static int determine_convergence(double error, double tolerance, int iter,
 
 static int determine_convergence_with_full_final(PlasticityProblem* problem,
                                                  SolverOptions* options,
-                                                 plasticity_2d_ComputeErrorPtr computeError,
-                                                 double* stress, double* strainrate,
-                                                 double* tolerance, double norm_q,
-                                                 double error, int iter) {
+                                                 const double* rho_error, double* stress,
+                                                 double* strainrate, double* tolerance,
+                                                 double norm_q, double error, int iter) {
   int hasNotConverged = 1;
   if (error < *tolerance) {
     hasNotConverged = 0;
@@ -431,7 +430,7 @@ static int determine_convergence_with_full_final(PlasticityProblem* problem,
                     *tolerance);
 
     double absolute_error = calculate_full_error_final(
-        problem, options, computeError, stress, strainrate, SOLVER_TOL(options), norm_q);
+        problem, options, rho_error, stress, strainrate, SOLVER_TOL(options), norm_q);
     if (absolute_error > SOLVER_TOL(options)) {
       if (error < DBL_EPSILON) {
         /* in this case, the relative error is very small
@@ -520,7 +519,6 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   }
 
   SolverOptions* localsolver_options = options->internalSolvers[0];
-  plasticity_2d_ComputeErrorPtr computeError = NULL;
 
   struct LocalPLASTICITY_2DProblemFunctionToolkit* localProblemFunctionToolkit =
       localPLASTICITY_2DProblemFunctionToolkit_new();
@@ -551,8 +549,8 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   /*****  Initialize various solver options *****/
   PlasticityProblem* localproblem = plasticity_2d_local_problem_allocate(problem);
 
-  plasticity_2d_nsgs_initialize_local_solver(localProblemFunctionToolkit, &computeError,
-                                             problem, localproblem, options);
+  plasticity_2d_nsgs_initialize_local_solver(localProblemFunctionToolkit, problem,
+                                             localproblem, options);
 
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
   scones = alloc_shuffled_cones(problem, options);
@@ -582,6 +580,13 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
                            "PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT (2) or "
                            "PLASTICITY_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
     return;
+  }
+
+  /* per-element rho of the error (depends on M only): computed once for the solve */
+  double* rho_error = NULL;
+  if (iparam[PLASTICITY_SCALING_RHO] != PLASTICITY_SCALING_RHO_ONE) {
+    rho_error = (double*)malloc((size_t)problem->numberOfCones * sizeof(double));
+    plasticity_2d_compute_error_rho(problem, rho_error);
   }
 
   /*****  NSGS Iterations *****/
@@ -746,9 +751,8 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
       } else if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
                  PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
         error = calculate_light_error(light_error_sum, nc, stress, norm_r);
-        hasNotConverged =
-            determine_convergence_with_full_final(problem, options, computeError, stress,
-                                                  strainrate, &tolerance, norm_q, error, iter);
+        hasNotConverged = determine_convergence_with_full_final(
+            problem, options, rho_error, stress, strainrate, &tolerance, norm_q, error, iter);
 
         if (!(tolerance > 0.0)) {
           numerics_warning("plasticity_2d_nsgs", "tolerance has to be positive!!");
@@ -758,7 +762,7 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
 
       } else if (iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
                  PLASTICITY_NSGS_ERROR_EVALUATION_FULL) {
-        error = calculate_full_error_adaptive_interval(problem, computeError, options, iter,
+        error = calculate_full_error_adaptive_interval(problem, rho_error, options, iter,
                                                        stress, strainrate, tolerance, norm_q);
         hasNotConverged = determine_convergence(error, tolerance, iter, options);
       }
@@ -787,7 +791,7 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
     /* the full error is compared with the required tolerance: tolerance may have been
      * lowered in the loop (incremental precision of the light error) */
-    error = calculate_full_error_final(problem, options, computeError, stress, strainrate,
+    error = calculate_full_error_final(problem, options, rho_error, stress, strainrate,
                                        SOLVER_TOL(options), norm_q);
 
     hasNotConverged = determine_convergence(error, SOLVER_TOL(options), iter, options);
@@ -815,6 +819,7 @@ void plasticity_2d_nsgs(PlasticityProblem* problem, double* stress, double* stra
   free(localProblemFunctionToolkit);
 
   plasticity_2d_local_problem_free(localproblem, problem);
+  free(rho_error);
   if (scones) free(scones);
 }
 
@@ -883,6 +888,7 @@ void plasticity_2d_nsgs_set_default(SolverOptions* options) {
   options->iparam[PLASTICITY_SCALING_SCOPE] = PLASTICITY_SCALING_SCOPE_PER_CONE;
   options->iparam[PLASTICITY_SCALING_REDUCTION] = PLASTICITY_SCALING_REDUCTION_MIXED;
   options->iparam[PLASTICITY_SCALING_RHO] = PLASTICITY_SCALING_RHO_ELEMENT;
+  options->dparam[PLASTICITY_SCALING_ALPHA] = 1.0;
   // Internal solver - allocate if needed
   if (options->numberOfInternalSolvers == 0) {
     options->numberOfInternalSolvers = 1;

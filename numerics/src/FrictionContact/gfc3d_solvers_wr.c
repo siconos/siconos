@@ -480,7 +480,7 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
     *info = 0;
   }
 }
-REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR, "GFC3D_DSFP_WRGFC3D_IPM_SNM_WR",
+REGISTER_SOLVER_3VAR(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR, "GFC3D_IPM_SNM_WR",
                      "Global 3D Friction Contact with reduction", NULL, NULL, NULL,
                      NULL,                     /* error function */
                      fc3d_IPM_SNM_set_default, /* set_default */

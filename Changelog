@@ -20,6 +20,19 @@ Official release of the 2026 series (release candidates 2026.rc1, 2026.rc2,
 version number 2026.11 in the VERSION file. Use siconos-tutorials 2026-11.
 
 Main changes since 2026.rc3:
+	* [kernel, mechanics] FEM plasticity: VonMisesPlasticityNSL (plane stress
+	  and plane strain) and DruckerPragerPlasticityNSL (Mohr-Coulomb in the
+	  plane); fem::nonsmooth_formulations::Plasticity condensed on the
+	  stresses, solved by PLASTICITY_2D_NSN; validated against pytripopfem
+	  (strip with a hole, footing)
+	* [mechanics] FEM: plane stress, thickness and lumped mass in Material;
+	  Mandel notation for the stresses and strains of SolidLinearTIDS;
+	  MoreauJeanGOSI: prescribed velocities fixed, sparse iteration matrix
+	* [kernel] OSNSMatrix::fillH: no velocity BC on stress interactions;
+	  sparse iteration matrix property; SiconosGraph renumbered only after a
+	  structural change
+	* [numerics] Plasticity: global semi-smooth Newton PLASTICITY_2D_NSN,
+	  .dat files keep coordinates, Von Mises hypothesis and cohesion
 	* [numerics] Plasticity: Von Mises (J2, plane stress) and Drucker-Prager
 	  criteria, return mapping and semi-smooth Newton local solvers, relative
 	  local errors; new MixedProblems module (friction and plasticity,
@@ -42,7 +55,7 @@ Known issues:
 	  and the jupyter notebooks (siconos-notebooks, examples/**/*.ipynb) are
 	  not updated to the pybind11 bindings; the C++ control examples run but
 	  some references are old (TwoLinkManipulator)
-	* siconos-tutorials: FEM plasticity examples removed for this release
+	* FEM plasticity: kernel cost on fine meshes (O(n^2) graph edges, dense C)
 	* mechanisms: no python bindings; OCC examples using C plugins by name
 	* EventDriven default tolerance close to round-off
 
