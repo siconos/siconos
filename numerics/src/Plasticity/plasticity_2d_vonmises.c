@@ -302,8 +302,9 @@ int plasticity_2d_vonMises_fixed_point(const double M[9], const double q[3], dou
     DEBUG_PRINTF("Von Mises FP: it %d, rho = %e, residual = %e\n", it, rho, res);
   }
   p->iter_done = it;
-  p->residual = res;
-  return (res > p->tol * (1.0 + vonmises_norm3(stress))) ? 1 : 0;
+  /* relative residual, consistent with the stopping test */
+  p->residual = res / (1.0 + vonmises_norm3(stress));
+  return (p->residual > p->tol) ? 1 : 0;
 }
 
 /* generalized Jacobian of the projection on C at y (column-major) */
