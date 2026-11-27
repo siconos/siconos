@@ -862,7 +862,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._collision_margin = collision_margin
         self._output_frequency = 1
         self._output_backup_frequency = 1
-        self._keep = []
         self._scheduled_births = []
         self._scheduled_deaths = []
         self._births = {}
