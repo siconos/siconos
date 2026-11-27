@@ -172,6 +172,23 @@ def test_invalid_sizes():
         sn.plasticity_2d_driver(problem, np.zeros(2), np.zeros(3))
 
 
+def test_outputs_not_converted():
+    """The arrays written in place must be float64 and C-contiguous: a converted copy would
+    be lost, so other arrays are rejected."""
+    problem = sn.PlasticityProblem_new(3, M1, q1, eta1, theta1)
+    for bad in ([0.0, 0.0, 0.0], np.zeros(3, dtype=int), np.zeros(6)[::2]):
+        with pytest.raises(TypeError):
+            sn.plasticity_2d_driver(problem, bad, np.zeros(3))
+        with pytest.raises(TypeError):
+            sn.plasticity_2d_driver(problem, np.zeros(3), bad)
+        with pytest.raises(TypeError):
+            sn.plasticity_2d_compute_error(problem, np.zeros(3), bad, 1e-12)
+    # stress is only read by compute_error: converted
+    w = np.zeros(3)
+    sn.plasticity_2d_compute_error(problem, [0.0, 0.0, 0.0], w, 1e-12)
+    assert np.allclose(w, q1)
+
+
 def test_matrix_layout():
     """M is used as given (row i of the numpy array = row i of M), C or Fortran order."""
     rng = np.random.default_rng(0)
